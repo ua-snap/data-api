@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 flask = "*"
+aiohttp = "*"
+pyproj = "*"
 
 [dev-packages]
 
