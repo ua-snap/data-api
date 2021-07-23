@@ -4,7 +4,7 @@ from pyproj import Transformer
 from pyproj.crs import CRS
 
 from flask import Flask, request
-from flask import render_template
+from flask import render_template, abort
 
 # hard-coded here for now - will go in a LUT-like thing later
 landcover_names = {
@@ -45,6 +45,12 @@ snow_status = {
 
 
 app = Flask(__name__)
+
+
+# @app.errorhandler(werkzeug.exceptions.BadRequest)
+# def handle_bad_request(e):
+#     return 'bad request!', 400
+
 
 @app.route("/")
 def index():
@@ -136,8 +142,25 @@ def package_landcover(landcover_response):
     return landcover_package
 
 
+def validate_latlon(lat, lon):
+    try:
+        lat_numeric = isinstance(int(float(lat)), int) or isinstance(float(lat), float)
+        lon_numeric = isinstance(int(float(lon)), int) or isinstance(float(lon), float)
+        lat_in_ak_bbox = (51.229 <= float(lat) <= 71.3526)
+        lon_in_ak_bbox = (-179.1506 <= float(lon) <= -129.9795)
+        if lat_in_ak_bbox and lon_in_ak_bbox:
+            valid = True
+        else:
+            valid = False
+    except ValueError:
+        valid = False
+    return valid
+
+
 @app.route("/🔥/<lat>/<lon>")
 def run_fire_api(lat, lon):
+    if not validate_latlon(lat, lon):
+        abort(400)
     # verify that lat/lon are present
     results = asyncio.run(fire_api(lat, lon))
     landcover = package_landcover(results[0])
