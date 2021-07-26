@@ -4,21 +4,24 @@ from flask import Flask, render_template, abort
 
 # hard-coded here for now - will go in a LUT-like thing later
 landcover_names = {
-    1: "Temperate or sub-polar needleleaf forest",
-    2: "Sub-polar taiga or needleleaf forest",
-    5: "Temperate or sub-polar broadleaf deciduous forest",
-    6: "Mixed forest",
-    8: "Temperate or sub-polar shrubland",
-    10: "Temperate or sub-polar grassland",
-    11: "Sub-polar or polar shrubland-lichen-moss",
-    12: "Sub-polar or polar grassland-lichen-moss",
-    13: "Sub-polar or polar barren-lichen-moss",
-    14: "Wetland",
-    15: "Cropland",
-    16: "Barren land",
-    17: "Urban and built-up",
-    18: "Water",
-    19: "Snow and ice",
+    1: {"type": "Temperate or sub-polar needleleaf forest", "color": "#003d00"},
+    2: {"type": "Sub-polar taiga or needleleaf forest", "color": "#949c70"},
+    5: {
+        "type": "Temperate or sub-polar broadleaf deciduous forest",
+        "color": "#148c3d",
+    },
+    6: {"type": "Mixed forest", "color": "#5c752b"},
+    8: {"type": "Temperate or sub-polar shrubland", "color": "#b38a33"},
+    10: {"type": "Temperate or sub-polar grassland", "color": "#e1cf8a"},
+    11: {"type": "Sub-polar or polar shrubland-lichen-moss", "color": "#9c7554"},
+    12: {"type": "Sub-polar or polar grassland-lichen-moss", "color": "#bad48f"},
+    13: {"type": "Sub-polar or polar barren-lichen-moss", "color": "#408a70"},
+    14: {"type": "Wetland", "color": "#6ba38a"},
+    15: {"type": "Cropland", "color": "#e6ae66"},
+    16: {"type": "Barren land", "color": "#a8abae"},
+    17: {"type": "Urban and built-up", "color": "#DD40D6"},
+    18: {"type": "Water", "color": "#4c70a3"},
+    19: {"type": "Snow and ice", "color": "#eee9ee"},
 }
 smokey_bear_names = {
     1: "Low",
@@ -154,10 +157,10 @@ def package_landcover(landcover_response):
             "landcover"
         ] = "There is no landcover information at this location."
     else:
-        landcover_package["code"] = landcover_response["features"][0]["properties"][
-            "PALETTE_INDEX"
-        ]
-        landcover_package["type"] = landcover_names[landcover_package["code"]]
+        code = landcover_response["features"][0]["properties"]["PALETTE_INDEX"]
+        landcover_package["code"] = code
+        landcover_package["type"] = landcover_names[code]["type"]
+        landcover_package["color"] = landcover_names[code]["color"]
     return landcover_package
 
 
