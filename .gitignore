@@ -1,0 +1,3 @@
+# file for setting env vars (export FLASK_APP=application.py for now)
+set_vars
+
