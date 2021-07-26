@@ -168,8 +168,6 @@ def validate_latlon(lat, lon):
     """Validate the lat and lon values,
     return bool for validity"""
     try:
-        lat_numeric = isinstance(int(float(lat)), int) or isinstance(float(lat), float)
-        lon_numeric = isinstance(int(float(lon)), int) or isinstance(float(lon), float)
         lat_in_ak_bbox = 51.229 <= float(lat) <= 71.3526
         lon_in_ak_bbox = -179.1506 <= float(lon) <= -129.9795
         valid = lat_in_ak_bbox and lon_in_ak_bbox
