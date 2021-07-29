@@ -1,6 +1,6 @@
 import asyncio
 from aiohttp import ClientSession
-from flask import abort, Blueprint
+from flask import abort, Blueprint, render_template
 from . import routes
 
 fire_api = Blueprint("fire_api", __name__)
@@ -26,13 +26,7 @@ landcover_names = {
     18: {"type": "Water", "color": "#4c70a3"},
     19: {"type": "Snow and ice", "color": "#eee9ee"},
 }
-smokey_bear_names = {
-    1: "Low",
-    2: "Medium",
-    3: "High",
-    4: "Very High",
-    5: "Extreme",
-}
+smokey_bear_names = {1: "Low", 2: "Medium", 3: "High", 4: "Very High", 5: "Extreme"}
 smokey_bear_styles = {
     1: "#2b83ba",
     2: "#abdda4",
@@ -41,6 +35,7 @@ smokey_bear_styles = {
     5: "#d7191c",
 }
 snow_status = {2: False, 4: True}
+
 
 # not sure how to handle this
 # this function and the one below it are used in both APIs
@@ -70,9 +65,13 @@ async def fetch_fire_data(lat, lon):
     bbox_offset = 0.000000001
     # base urls should work for all queries of same type (WMS, WFS)
 
-    base_wms_url = f"http://gs.mapventure.org:8080/geoserver/alaska_wildfires/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg&TRANSPARENT=true&QUERY_LAYERS=alaska_wildfires%3A{{0}}&STYLES&LAYERS=alaska_wildfires%3A{{0}}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application/json&FEATURE_COUNT=50&X=1&Y=1&SRS=EPSG%3A4326&WIDTH=1&HEIGHT=1&BBOX={lon}%2C{lat}%2C{float(lon) + bbox_offset}%2C{float(lat) + bbox_offset}"
+    base_wms_url = (
+        f"http://gs.mapventure.org:8080/geoserver/alaska_wildfires/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg&TRANSPARENT=true&QUERY_LAYERS=alaska_wildfires%3A{{0}}&STYLES&LAYERS=alaska_wildfires%3A{{0}}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application/json&FEATURE_COUNT=50&X=1&Y=1&SRS=EPSG%3A4326&WIDTH=1&HEIGHT=1&BBOX={lon}%2C{lat}%2C{float(lon) + bbox_offset}%2C{float(lat) + bbox_offset}"
+    )
 
-    base_wfs_url = f"http://gs.mapventure.org:8080/geoserver/alaska_wildfires/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TypeName={{}}&PropertyName={{}}&outputFormat=application/json&srsName=urn:ogc:def:crs:EPSG:4326&BBOX={lat}%2C{lon}%2C{float(lat) + bbox_offset}%2C{float(lon) + bbox_offset}%2Curn:ogc:def:crs:EPSG:4326"
+    base_wfs_url = (
+        f"http://gs.mapventure.org:8080/geoserver/alaska_wildfires/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TypeName={{}}&PropertyName={{}}&outputFormat=application/json&srsName=urn:ogc:def:crs:EPSG:4326&BBOX={lat}%2C{lon}%2C{float(lat) + bbox_offset}%2C{float(lon) + bbox_offset}%2Curn:ogc:def:crs:EPSG:4326"
+    )
 
     urls = []
     # append layer names for URLs
@@ -80,9 +79,7 @@ async def fetch_fire_data(lat, lon):
     urls.append(base_wms_url.format("spruceadj_3338"))
     urls.append(base_wms_url.format("snow_cover_3338"))
     urls.append(
-        base_wms_url.format(
-            "alfresco_relative_flammability_NCAR-CCSM4_rcp85_2000_2099",
-        )
+        base_wms_url.format("alfresco_relative_flammability_NCAR-CCSM4_rcp85_2000_2099")
     )
     urls.append(base_wfs_url.format("historical_fire_perimiters", "NAME,FIREYEAR"))
 
@@ -162,6 +159,13 @@ def package_landcover(landcover_response):
         landcover_package["type"] = landcover_names[code]["type"]
         landcover_package["color"] = landcover_names[code]["color"]
     return landcover_package
+
+
+@routes.route("/🔥")
+@routes.route("/🔥/about")
+def fire():
+    """Render fire page"""
+    return render_template("🔥.html")
 
 
 @routes.route("/🔥/<lat>/<lon>")
