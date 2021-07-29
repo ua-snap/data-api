@@ -1,6 +1,7 @@
 import asyncio
 from aiohttp import ClientSession
 from flask import abort, Blueprint, render_template
+from validate_latlon import validate
 from . import routes
 
 fire_api = Blueprint("fire_api", __name__)
@@ -35,21 +36,6 @@ smokey_bear_styles = {
     5: "#d7191c",
 }
 snow_status = {2: False, 4: True}
-
-
-# not sure how to handle this
-# this function and the one below it are used in both APIs
-# Should they live in a separate script?
-def validate_latlon(lat, lon):
-    """Validate the lat and lon values,
-    return bool for validity"""
-    try:
-        lat_in_ak_bbox = 51.229 <= float(lat) <= 71.3526
-        lon_in_ak_bbox = -179.1506 <= float(lon) <= -129.9795
-        valid = lat_in_ak_bbox and lon_in_ak_bbox
-    except ValueError:
-        valid = False
-    return valid
 
 
 async def fetch_layer_data(url, session):
@@ -171,10 +157,9 @@ def fire():
 @routes.route("/🔥/<lat>/<lon>")
 def run_fetch_fire(lat, lon):
     """Run the ansync requesting and return data
-
     example request: http://localhost:5000/%F0%9F%94%A5/65.0628/-146.1627
     """
-    if not validate_latlon(lat, lon):
+    if not validate(lat, lon):
         abort(400)
     # verify that lat/lon are present
     results = asyncio.run(fetch_fire_data(lat, lon))
