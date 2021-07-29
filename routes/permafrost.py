@@ -143,10 +143,10 @@ def run_fetch_permafrost_data(lat, lon):
     jorgenson = package_jorgenson(results[9])
     obu_pf_extent = package_obu_vector(results[10])
     data = {
-        "GIPL Mean Annual Ground Temperature": gipl_magt,
-        "Obu et al. (2018) Mean Annual Ground Temperature at Top of Permafrost": obu_magt,
+        "GIPL Mean Annual Ground Temperature (deg. C)": gipl_magt,
+        "Obu et al. (2018) Mean Annual Ground Temperature (deg. C) at Top of Permafrost": obu_magt,
         "Obu et al. (2018) Permafrost Extent": obu_pf_extent,
         "GIPL Active Layer Thickness (m)": gipl_alt,
-        "Jorgenson Permafrost Extent and Ground Ice Volume": jorgenson,
+        "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume": jorgenson,
     }
     return data
