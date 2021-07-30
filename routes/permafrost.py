@@ -67,9 +67,9 @@ def package_gipl_magt(gipl_magt_resp):
         if gipl_magt_resp[ix]["features"] == []:
             gipl_magt_resp["GIPL MAGT"] = "No data at this location."
         else:
-            depth = i.split('_')[1] + '_'
-            yr = i.split('_')[-2] + '_'
-            key_str = 'GIPL_' + yr + depth + 'MAGT'
+            depth = i.split("_")[1] + "_"
+            yr = i.split("_")[-2] + "_"
+            key_str = "GIPL_" + yr + depth + "MAGT"
             gipl_magt_pkg[key_str] = round(
                 gipl_magt_resp[ix]["features"][0]["properties"]["GRAY_INDEX"], 3
             )
@@ -84,8 +84,8 @@ def package_gipl_alt(gipl_alt_resp):
         if gipl_alt_resp[ix]["features"] == []:
             gipl_alt_resp["GIPL ALT"] = "No data at this location."
         else:
-            yr = i.split('_')[-2] + '_'
-            key_str = 'GIPL_' + yr + 'ALT'
+            yr = i.split("_")[-2] + "_"
+            key_str = "GIPL_" + yr + "ALT"
             gipl_alt_pkg[key_str] = round(
                 gipl_alt_resp[ix]["features"][0]["properties"]["GRAY_INDEX"], 3
             )
@@ -99,7 +99,7 @@ def package_obu_magt(obu_magt_resp):
     if obu_magt_resp["features"] == []:
         obu_magt_resp["Obu MAGT"] = "No data at this location."
     else:
-        key_str = 'Obu 2000-2016 MAGT (Top of Permafrost)'
+        key_str = "Obu 2000-2016 MAGT (Top of Permafrost)"
         obu_magt_pkg[key_str] = round(
             obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"], 3
         )
@@ -133,10 +133,10 @@ def package_obu_vector(obu_vector_resp):
     return obu_vector_pkg
 
 
-@routes.route("/🧊/<lat>/<lon>")
+@routes.route("/permafrost/<lat>/<lon>")
 def run_fetch_permafrost_data(lat, lon):
     """Run the ansync permafrost data requesting and return data as json
-    example request: http://localhost:5000/%F0%9F%A7%8A/65.0628/-146.1627"""
+    example request: http://localhost:5000/permafrost/65.0628/-146.1627"""
     if not validate(lat, lon):
         abort(400)
     results = asyncio.run(fetch_permafrost_data(lat, lon))
