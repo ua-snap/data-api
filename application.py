@@ -3,10 +3,10 @@ from aiohttp import ClientSession
 from flask import Flask, render_template
 from routes import *
 
-app = Flask(__name__)
+# Elastic Beanstalk wants `application` to be present.
+application = app = Flask(__name__)
 
 app.register_blueprint(routes)
-
 
 @app.route("/")
 def index():
