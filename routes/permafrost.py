@@ -3,6 +3,7 @@ from aiohttp import ClientSession
 from flask import abort, Blueprint
 from validate_latlon import validate
 from . import routes
+from config import GS_BASE_URL
 
 permafrost_api = Blueprint("permafrost_api", __name__)
 
@@ -32,10 +33,12 @@ async def fetch_permafrost_data(lat, lon):
     bbox_offset = 0.000000001
     # base urls should work for all queries of same type (WMS, WFS)
     base_wms_url = (
-        f"http://gs.mapventure.org:8080/geoserver/permafrost_beta/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg&TRANSPARENT=true&QUERY_LAYERS=permafrost_beta%3A{{0}}&STYLES&LAYERS=permafrost_beta%3A{{0}}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application/json&FEATURE_COUNT=50&X=1&Y=1&SRS=EPSG%3A4326&WIDTH=1&HEIGHT=1&BBOX={lon}%2C{lat}%2C{float(lon) + bbox_offset}%2C{float(lat) + bbox_offset}"
+        GS_BASE_URL
+        + f"permafrost_beta/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg&TRANSPARENT=true&QUERY_LAYERS=permafrost_beta%3A{{0}}&STYLES&LAYERS=permafrost_beta%3A{{0}}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application/json&FEATURE_COUNT=50&X=1&Y=1&SRS=EPSG%3A4326&WIDTH=1&HEIGHT=1&BBOX={lon}%2C{lat}%2C{float(lon) + bbox_offset}%2C{float(lat) + bbox_offset}"
     )
     base_wfs_url = (
-        f"http://gs.mapventure.org:8080/geoserver/permafrost_beta/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TypeName={{}}&PropertyName={{}}&outputFormat=application/json&srsName=urn:ogc:def:crs:EPSG:4326&BBOX={lat}%2C{lon}%2C{float(lat) + bbox_offset}%2C{float(lon) + bbox_offset}%2Curn:ogc:def:crs:EPSG:4326"
+        GS_BASE_URL
+        + f"permafrost_beta/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TypeName={{}}&PropertyName={{}}&outputFormat=application/json&srsName=urn:ogc:def:crs:EPSG:4326&BBOX={lat}%2C{lon}%2C{float(lat) + bbox_offset}%2C{float(lon) + bbox_offset}%2Curn:ogc:def:crs:EPSG:4326"
     )
 
     urls = []
