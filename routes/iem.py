@@ -101,16 +101,28 @@ def package_iem(iem_resp):
                                 variable
                             ] = arr.tolist()
 
-                    # elif isinstance(values, list):
-                    #     iem_pkg[period][season][model][scenario] = values
-
     return iem_pkg
 
 
 @routes.route("/iem/")
-@routes.route("/iem/about/")
+@routes.route("/iem/abstract/")
 def about():
-    return render_template("iem.html")
+    return render_template("iem/abstract.html")
+
+
+@routes.route("/iem/point/")
+def about_point():
+    return render_template("iem/point.html")
+
+
+@routes.route("/iem/bbox/")
+def about_bbox():
+    return render_template("iem/bbox.html")
+
+
+@routes.route("/iem/huc/")
+def about_huc():
+    return render_template("iem/huc.html")
 
 
 @routes.route("/iem/point/<lat>/<lon>")
