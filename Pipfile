@@ -8,6 +8,8 @@ flask = "*"
 flask_cors = "*"
 aiohttp = "*"
 pyproj = "*"
+numpy = "*"
+geopandas = "*"
 
 [dev-packages]
 

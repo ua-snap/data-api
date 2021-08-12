@@ -1,11 +1,16 @@
 import asyncio
+import numpy as np
+import geopandas as gpd
 from aiohttp import ClientSession
-from flask import abort, Blueprint
-from validate_latlon import validate, reproject_latlon
+from flask import abort, Blueprint, render_template
+from validate_latlon import validate, validate_bbox, project_latlon
 from . import routes
 from config import RAS_BASE_URL
 
 iem_api = Blueprint("iem_api", __name__)
+
+
+huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp")
 
 
 async def fetch_layer_data(url, session):
@@ -16,12 +21,17 @@ async def fetch_layer_data(url, session):
     return json
 
 
-async def fetch_iem_data(x, y):
+async def fetch_iem_data(x1, y1, x2=None, y2=None):
     """IEM API - gather all async requests for IEM data
 
-    Note - Currently specific to the preprocessed decadal seasonal 
+    Note - Currently specific to the preprocessed decadal seasonal
         summary data (tas, pr)
     """
+    if x2 is None:
+        x, y = x1, y1
+    else:
+        x, y = f"{x1},{x2}", f"{y1},{y2}"
+
     # using list in case further endpoints are added
     urls = []
     urls.append(
@@ -70,24 +80,77 @@ def package_iem(iem_resp):
                 for sci, values in enumerate(sc_li):
                     scenario = dim_encodings["scenario"][sci]
                     iem_pkg[period][season][model][scenario] = {}
-                    for variable, value in zip(variables, values.split(" ")):
-                        iem_pkg[period][season][model][scenario][variable] = value
+
+                    if isinstance(values, str):
+                        # if values is a string, it was a point query
+                        for variable, value in zip(variables, values.split(" ")):
+                            iem_pkg[period][season][model][scenario][variable] = value
+                    elif isinstance(values, list):
+                        # otherwise, bounding box query, create arrays from json
+                        query_arr = np.char.split(np.array(values))
+                        query_shape = query_arr.shape
+                        for variable, i in zip(variables, range(2)):
+                            arr = (
+                                np.array([data[i] for row in query_arr for data in row])
+                                .reshape(query_shape)
+                                .astype(np.float32)
+                            )
+                            iem_pkg[period][season][model][scenario][
+                                variable
+                            ] = arr.tolist()
+
+                    # elif isinstance(values, list):
+                    #     iem_pkg[period][season][model][scenario] = values
 
     return iem_pkg
 
 
-@routes.route("/iem/<lat>/<lon>")
-def run_fetch_iem_data(lat, lon):
-    """Run the ansync IEM data requesting and return data as json
-    
-    example request: http://localhost:5000/iem/65.0628/-146.1627
+@routes.route("/iem/")
+@routes.route("/iem/about/")
+def about():
+    return render_template("iem.html")
+
+
+@routes.route("/iem/point/<lat>/<lon>")
+def run_fetch_iem_point_data(lat, lon):
+    """Run the ansync IEM data requesting for a single point
+    and return data as json
+
+    example request: http://localhost:5000/iem/point/65.0628/-146.1627
     """
     if not validate(lat, lon):
         abort(400)
 
-    x, y = reproject_latlon(lat, lon, 3338)
+    x, y = project_latlon(lat, lon, 3338)
 
     results = asyncio.run(fetch_iem_data(x, y))
     iem = package_iem(results[0])
 
     return iem
+
+
+@routes.route("/iem/bbox/<lat1>/<lon1>/<lat2>/<lon2>")
+def run_fetch_iem_bbox_data(lat1, lon1, lat2, lon2):
+    """Run the ansync IEM data requesting for a bounding box
+    and return data as json
+
+    example request: http://localhost:5000/iem/bbox/65/-145.5/65.5/-145
+    """
+    if not validate_bbox(lat1, lon1, lat2, lon2):
+        abort(400)
+
+    x1, y1, x2, y2 = project_latlon(lat1, lon1, 3338, lat2, lon2)
+
+    results = asyncio.run(fetch_iem_data(x1, y1, x2, y2))
+
+    iem = package_iem(results[0])
+
+    return iem
+
+
+@routes.route("/iem/huc/<huc_id>/<stats>")
+def run_fetch_iem_aggregate_huc(huc_id, stats):
+    """Get data within a huc and aggregate according to 
+    stat methods in <stats>
+    """
+    pass
