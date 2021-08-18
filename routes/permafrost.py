@@ -1,6 +1,6 @@
 import asyncio
 from aiohttp import ClientSession
-from flask import abort, Blueprint
+from flask import abort, Blueprint, render_template
 from validate_latlon import validate
 from . import routes
 from config import GS_BASE_URL
@@ -60,77 +60,93 @@ async def fetch_permafrost_data(lat, lon):
 
 
 def package_gipl_magt(gipl_magt_resp):
-    """Package GIPL MAGT data in dict"""
-    gipl_magt_pkg = {}
+    """Package GIPL Mean Annual Ground Temp data"""
+    gipl_magt = []
 
-    for ix, i in enumerate(wms_targets[0:6]):
-        if gipl_magt_resp[ix]["features"] == []:
-            gipl_magt_resp["GIPL MAGT"] = "No data at this location."
+    for i, j in enumerate(wms_targets[0:6]):
+        if gipl_magt_resp[i]["features"] == []:
+            gipl_magt_resp["Data Status"] = "No data at this location."
         else:
-            depth = i.split("_")[1] + "_"
-            yr = i.split("_")[-2] + "_"
-            key_str = "GIPL_" + yr + depth + "MAGT"
-            gipl_magt_pkg[key_str] = round(
-                gipl_magt_resp[ix]["features"][0]["properties"]["GRAY_INDEX"], 3
+            depth = j.split("_")[1][:-1] + ' m'
+            year = j.split("_")[-2]
+            title = f"GIPL {year} Mean Annual {depth} Ground Temperature (deg. C.)"
+            temp = round(
+                gipl_magt_resp[i]["features"][0]["properties"]["GRAY_INDEX"], 2
             )
-    return gipl_magt_pkg
+            di = {'title': title, 'year': year, 'depth': depth, 'temp': temp}
+            if int(temp) == -9999:
+                di.update({'temp': "No data at this location."})
+            gipl_magt.append(di)
+    return gipl_magt
 
 
 def package_gipl_alt(gipl_alt_resp):
-    """Package GIPL ALT data in dict"""
-    gipl_alt_pkg = {}
+    """Package GIPL Active Layer Thickness data"""
+    gipl_alt_pkg = []
 
-    for ix, i in enumerate(wms_targets[6:8]):
-        if gipl_alt_resp[ix]["features"] == []:
-            gipl_alt_resp["GIPL ALT"] = "No data at this location."
+    for i, j in enumerate(wms_targets[6:8]):
+        if gipl_alt_resp[i]["features"] == []:
+            gipl_alt_resp["Data Status"] = "No data at this location."
         else:
-            yr = i.split("_")[-2] + "_"
-            key_str = "GIPL_" + yr + "ALT"
-            gipl_alt_pkg[key_str] = round(
-                gipl_alt_resp[ix]["features"][0]["properties"]["GRAY_INDEX"], 3
-            )
+            year = j.split("_")[-2]
+            title = f"GIPL {year} Active Layer Thickness (m)"
+            alt = round(gipl_alt_resp[i]["features"][0]["properties"]["GRAY_INDEX"], 2)
+            di = {'title': title, 'year': year, 'thickness': alt}
+            if int(alt) == -9999:
+                di.update({'thickness': "No data at this location."})
+            gipl_alt_pkg.append(di)
     return gipl_alt_pkg
 
 
 def package_obu_magt(obu_magt_resp):
     """Package Obu MAGT data in dict"""
-    obu_magt_pkg = {}
-
+    ds_title = "Obu et al. (2018) Mean Annual Ground Temperature (deg. C)"
     if obu_magt_resp["features"] == []:
-        obu_magt_resp["Obu MAGT"] = "No data at this location."
+        di = {'title': ds_title, "Data Status": "No data at this location."}
     else:
-        key_str = "Obu 2000-2016 MAGT (Top of Permafrost)"
-        obu_magt_pkg[key_str] = round(
-            obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"], 3
+        depth = "Top of Permafrost"
+        year = "2000-2016"
+        title = (
+            f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (deg. C)"
         )
-    return obu_magt_pkg
+
+        temp = round(obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"], 2)
+        di = {'title': title, 'year': year, 'depth': depth, 'temp': temp}
+        if int(temp) == -9999:
+            di.update({'temp': "No data at this location."})
+    return di
 
 
 def package_jorgenson(jorgenson_resp):
-    """Package Jorgenson data in dict"""
-    jorgenson_pkg = {}
+    """Package Jorgenson data"""
+    title = "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume"
+
     if jorgenson_resp["features"] == []:
-        jorgenson_pkg["Jorgenson data"] = "No data at this location."
+        di = {'title': title, "Data Status": "No data at this location."}
     else:
-        jorgenson_pkg["Ground Ice Volume"] = jorgenson_resp["features"][0][
-            "properties"
-        ]["GROUNDICEV"]
-        jorgenson_pkg["Permafrost Extent"] = jorgenson_resp["features"][0][
-            "properties"
-        ]["PERMAFROST"]
-    return jorgenson_pkg
+        ice = jorgenson_resp["features"][0]["properties"]["GROUNDICEV"]
+        pfx = jorgenson_resp["features"][0]["properties"]["PERMAFROST"]
+        di = {'title': title, 'ice': ice, 'pfx': pfx}
+    return di
 
 
 def package_obu_vector(obu_vector_resp):
-    """Package obu_vector data in dict"""
-    obu_vector_pkg = {}
+    """Package Obu Permafrost Extent Data"""
+    title = "Obu et al. (2018) Permafrost Extent"
+
     if obu_vector_resp["features"] == []:
-        obu_vector_pkg["Obu vector data"] = "No data at this location."
+        di = {'title': title, "Data Status": "No data at this location."}
     else:
-        obu_vector_pkg["Permafrost Extent"] = obu_vector_resp["features"][0][
-            "properties"
-        ]["PFEXTENT"]
-    return obu_vector_pkg
+        pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
+        di = {'title': title, 'pfx': pfx}
+    return di
+
+
+@routes.route("/permafrost")
+@routes.route("/permafrost/about")
+def permafrost():
+    """Render permafrost page"""
+    return render_template("permafrost.html")
 
 
 @routes.route("/permafrost/<lat>/<lon>")
@@ -143,13 +159,13 @@ def run_fetch_permafrost_data(lat, lon):
     gipl_magt = package_gipl_magt(results[0:6])
     gipl_alt = package_gipl_alt(results[6:8])
     obu_magt = package_obu_magt(results[8])
-    jorgenson = package_jorgenson(results[9])
-    obu_pf_extent = package_obu_vector(results[10])
+    jorg = package_jorgenson(results[9])
+    obu_pfx = package_obu_vector(results[10])
     data = {
-        "GIPL Mean Annual Ground Temperature (deg. C)": gipl_magt,
-        "Obu et al. (2018) Mean Annual Ground Temperature (deg. C) at Top of Permafrost": obu_magt,
-        "Obu et al. (2018) Permafrost Extent": obu_pf_extent,
-        "GIPL Active Layer Thickness (m)": gipl_alt,
-        "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume": jorgenson,
+        "gipl_magt": gipl_magt,
+        "gipl_alt": gipl_alt,
+        "obu_magt": obu_magt,
+        "obupfx": obu_pfx,
+        "jorg": jorg,
     }
     return data
