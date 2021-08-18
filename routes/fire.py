@@ -9,6 +9,7 @@ fire_api = Blueprint("fire_api", __name__)
 
 # hard-coded here for now - will go in a LUT-like thing later
 landcover_names = {
+    0: {"type": "No Data at this location.", "color": "#ffffff"},
     1: {"type": "Temperate or sub-polar needleleaf forest", "color": "#003d00"},
     2: {"type": "Sub-polar taiga or needleleaf forest", "color": "#949c70"},
     5: {
@@ -28,15 +29,29 @@ landcover_names = {
     18: {"type": "Water", "color": "#4c70a3"},
     19: {"type": "Snow and ice", "color": "#eee9ee"},
 }
-smokey_bear_names = {1: "Low", 2: "Medium", 3: "High", 4: "Very High", 5: "Extreme"}
+smokey_bear_names = {
+    1: "Low",
+    2: "Medium",
+    3: "High",
+    4: "Very High",
+    5: "Extreme",
+    6: "No data at this location.",
+}
 smokey_bear_styles = {
     1: "#2b83ba",
     2: "#abdda4",
     3: "#ffffbf",
     4: "#fdae61",
     5: "#d7191c",
+    6: "#ffffff",
 }
-snow_status = {2: False, 4: True}
+snow_status = {
+    1: "Sea",
+    2: False,
+    3: "Sea ice",
+    4: True,
+    0: "No data at this location.",
+}
 
 
 async def fetch_layer_data(url, session):
@@ -52,9 +67,15 @@ async def fetch_fire_data(lat, lon):
     bbox_offset = 0.000000001
     # base urls should work for all queries of same type (WMS, WFS)
 
-    base_wms_url = GS_BASE_URL + f"alaska_wildfires/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg&TRANSPARENT=true&QUERY_LAYERS=alaska_wildfires%3A{{0}}&STYLES&LAYERS=alaska_wildfires%3A{{0}}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application/json&FEATURE_COUNT=50&X=1&Y=1&SRS=EPSG%3A4326&WIDTH=1&HEIGHT=1&BBOX={lon}%2C{lat}%2C{float(lon) + bbox_offset}%2C{float(lat) + bbox_offset}"
+    base_wms_url = (
+        GS_BASE_URL
+        + f"alaska_wildfires/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg&TRANSPARENT=true&QUERY_LAYERS=alaska_wildfires%3A{{0}}&STYLES&LAYERS=alaska_wildfires%3A{{0}}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application/json&FEATURE_COUNT=50&X=1&Y=1&SRS=EPSG%3A4326&WIDTH=1&HEIGHT=1&BBOX={lon}%2C{lat}%2C{float(lon) + bbox_offset}%2C{float(lat) + bbox_offset}"
+    )
 
-    base_wfs_url = GS_BASE_URL + f"alaska_wildfires/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TypeName={{}}&PropertyName={{}}&outputFormat=application/json&srsName=urn:ogc:def:crs:EPSG:4326&BBOX={lat}%2C{lon}%2C{float(lat) + bbox_offset}%2C{float(lon) + bbox_offset}%2Curn:ogc:def:crs:EPSG:4326"
+    base_wfs_url = (
+        GS_BASE_URL
+        + f"alaska_wildfires/wfs?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TypeName={{}}&PropertyName={{}}&outputFormat=application/json&srsName=urn:ogc:def:crs:EPSG:4326&BBOX={lat}%2C{lon}%2C{float(lat) + bbox_offset}%2C{float(lon) + bbox_offset}%2Curn:ogc:def:crs:EPSG:4326"
+    )
 
     urls = []
     # append layer names for URLs
@@ -72,76 +93,68 @@ async def fetch_fire_data(lat, lon):
     return results
 
 
-def package_fire_history(fire_hist_response):
+def package_fire_history(fihist_resp):
     """Package fire history data in dict"""
-    fire_hist_package = {}
-    if fire_hist_response["features"] == []:
-        fire_hist_package["fire history"] = "There is no fire history at this location."
+    title = "Historical fires"
+    if fihist_resp["features"] == []:
+        di = {'title': title, "Data Status": "No data at this location."}
     else:
-        fire_hist_package["Fire Year"] = fire_hist_response["features"][0][
-            "properties"
-        ]["FIREYEAR"]
-        fire_hist_package["Fire Name"] = fire_hist_response["features"][0][
-            "properties"
-        ]["NAME"]
-    return fire_hist_package
+        di = {}
+        for i in fihist_resp["features"]:
+            fi_name = list(i.values())[-1]['NAME']
+            fi_year = list(i.values())[-1]['FIREYEAR']
+            di.update({fi_name: fi_year})
+    return di
 
 
-def package_flammability(flammability_response):
+def package_flammability(flammability_resp):
     """Package flammability data in dict"""
-    flammability_package = {}
-    if flammability_response["features"] == []:
-        flammability_package[
-            "flammability"
-        ] = "There is no relative flammability projection at this location."
+    title = "Projected relative flammability"
+    if flammability_resp["features"] == []:
+        di = {'title': title, "Data Status": "No data at this location."}
     else:
-        flammability_package["Relative Flammability Index"] = flammability_response[
-            "features"
-        ][0]["properties"]["GRAY_INDEX"]
-    return flammability_package
+        flamm = round(flammability_resp["features"][0]["properties"]["GRAY_INDEX"], 4)
+        di = {'title': title, "flamm": flamm}
+        if int(flamm) == -9999:
+            di.update({'flamm': "No data at this location."})
+    return di
 
 
-def package_snow(snow_response):
-    """Package snow cover data in dict"""
-    snow_package = {}
-    if snow_response["features"] == []:
-        snow_package["is_snow"] = "There is no snow information at this location."
+def package_snow(snow_resp):
+    """Package snow cover data"""
+    title = "Today's Snow Cover"
+    if snow_resp["features"] == []:
+        di = {'title': title, "Data Status": "No data at this location."}
     else:
-        snow_package["is_snow"] = snow_status[
-            snow_response["features"][0]["properties"]["GRAY_INDEX"]
-        ]
-    return snow_package
+        snow = snow_status[snow_resp["features"][0]["properties"]["GRAY_INDEX"]]
+        di = {'title': title, 'is_snow': snow}
+    return di
 
 
-def package_fire_danger(fire_danger_response):
+def package_fire_danger(fire_danger_resp):
     """Package fire danger data in dict"""
-    fire_danger_package = {}
-    if fire_danger_response["features"] == []:
-        fire_danger_package[
-            "fire_danger"
-        ] = "There is no fire danger information at this location."
+    title = "Today's Fire Danger"
+    if fire_danger_resp["features"] == []:
+        di = {'title': title, "Data Status": "No data at this location."}
     else:
-        fire_danger_package["code"] = fire_danger_response["features"][0]["properties"][
-            "GRAY_INDEX"
-        ]
-        fire_danger_package["type"] = smokey_bear_names[fire_danger_package["code"]]
-        fire_danger_package["color"] = smokey_bear_styles[fire_danger_package["code"]]
-    return fire_danger_package
+        code = fire_danger_resp["features"][0]["properties"]["GRAY_INDEX"]
+        fitype = smokey_bear_names[code]
+        color = smokey_bear_styles[code]
+        di = {'title': title, 'code': code, 'type': fitype, 'color': color}
+    return di
 
 
-def package_landcover(landcover_response):
+def package_landcover(landcover_resp):
     """Package landcover data in dict"""
-    landcover_package = {}
-    if landcover_response["features"] == []:
-        landcover_package[
-            "landcover"
-        ] = "There is no landcover information at this location."
+    title = "Land cover types"
+    if landcover_resp["features"] == []:
+        di = {'title': title, "Data Status": "No data at this location."}
     else:
-        code = landcover_response["features"][0]["properties"]["PALETTE_INDEX"]
-        landcover_package["code"] = code
-        landcover_package["type"] = landcover_names[code]["type"]
-        landcover_package["color"] = landcover_names[code]["color"]
-    return landcover_package
+        code = landcover_resp["features"][0]["properties"]["PALETTE_INDEX"]
+        lctype = landcover_names[code]["type"]
+        color = landcover_names[code]["color"]
+        di = {'title': title, 'code': code, 'type': lctype, 'color': color}
+    return di
 
 
 @routes.route("/🔥")
@@ -166,10 +179,10 @@ def run_fetch_fire(lat, lon):
     relflammability = package_flammability(results[3])
     firehist = package_fire_history(results[4])
     data = {
-        "Land cover": landcover,
-        "Snow cover": snow,
-        "Current fire danger": firedanger,
-        "Historical Fires": firehist,
-        "Future Flammability": relflammability,
+        "lc": landcover,
+        "is_snow": snow,
+        "cfd": firedanger,
+        "hist_fire": firehist,
+        "prf": relflammability,
     }
     return data
