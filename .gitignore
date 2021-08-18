@@ -6,3 +6,7 @@ set_vars
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+__pycache__
+routes/api.sublime-project
+routes/api.sublime-workspace
+TODO.md

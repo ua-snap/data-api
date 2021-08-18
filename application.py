@@ -10,6 +10,7 @@ CORS(app)
 
 app.register_blueprint(routes)
 
+
 @app.route("/")
 def index():
     """Render index page"""
