@@ -6,11 +6,13 @@ from flask import abort, Blueprint, render_template
 from validate_latlon import validate, validate_bbox, project_latlon
 from . import routes
 from config import RAS_BASE_URL
+from fiona.errors import DriverError
 
-iem_api = Blueprint("iem_api", __name__)
-
-
-huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp")
+try:
+    huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp")
+    iem_api = Blueprint("iem_api", __name__)
+except DriverError:
+    print("Blueprint object 'iem_api' was not created.")
 
 
 async def fetch_layer_data(url, session):
@@ -51,17 +53,17 @@ async def fetch_iem_data(x1, y1, x2=None, y2=None):
 def package_iem(iem_resp):
     """Package IEM tas and pr data in dict
 
-    Since we are relying on some hardcoded mappings between 
+    Since we are relying on some hardcoded mappings between
     integers and the dataset dimensions, we should consider
     having that mapping tracked somewhere such that it is
-    imported to help prevent breakage. 
+    imported to help prevent breakage.
     """
     # encodings hardcoded for now
     dim_encodings = {
-        "period": {0: "2040_2070", 1: "2070_2100",},
-        "season": {0: "DJF", 1: "MAM", 2: "JJA", 3: "SON",},
-        "model": {0: "CCSM4", 1: "MRI-CGCM3",},
-        "scenario": {0: "rcp45", 1: "rcp85",},
+        "period": {0: "2040_2070", 1: "2070_2100"},
+        "season": {0: "DJF", 1: "MAM", 2: "JJA", 3: "SON"},
+        "model": {0: "CCSM4", 1: "MRI-CGCM3"},
+        "scenario": {0: "rcp45", 1: "rcp85"},
     }
 
     iem_pkg = {}
@@ -150,7 +152,7 @@ def run_fetch_iem_bbox_data(lat1, lon1, lat2, lon2):
 
 @routes.route("/iem/huc/<huc_id>/<stats>")
 def run_fetch_iem_aggregate_huc(huc_id, stats):
-    """Get data within a huc and aggregate according to 
+    """Get data within a huc and aggregate according to
     stat methods in <stats>
     """
     pass
