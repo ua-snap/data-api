@@ -1,0 +1,91 @@
+Identification_Information:
+  Citation:
+    Citation_Information:
+      Originator: USDA/NRCS - National Geospatial Center of Excellence
+      Title:  8 Digit Watershed Boundary Dataset
+  Description:
+    Purpose: This dataset is intended to be used as a tool for water-resource management and planning activities, particularly for site-specific and localized studies requiring a level of detail provided by large-scale map information.
+  Time_Period_of_Content:
+    Time_Period_Information:
+      Single_Date/Time:
+        Calendar_Date: 2013 - Present. See 'LoadDate' attribute field
+  Status:
+    Progress: In Work
+  Spatial_Domain:
+    Bounding_Coordinates:
+      West_Bounding_Coordinate: -180
+      East_Bounding_Coordinate: -129.97951
+      North_Bounding_Coordinate: 71.38961
+      South_Bounding_Coordinate: 51.21526
+  Keywords:
+    Theme:
+      Theme_Keyword_Thesaurus: Standard for Geospatial Dataset File Naming
+      Theme_Keyword: Hydrologic Units, HUC, WBD
+    Place:
+      Place_Keyword_Thesaurus: GNIS
+      Place_Keyword: Alaska
+      Place_Keyword: *
+  Use_Constraints:
+
+    The U.S. Department of Agriculture, Service Center Agencies should be acknowledged as the data source in products derived from these data.
+
+    This data set is not designed for use as a primary regulatory tool in permitting or citing decisions, but may be used as a reference source.  This information may be interpreted by organizations, agencies, units of government, or others based on needs; however, they are responsible for the appropriate application.  Federal, State, or local regulatory bodies are not to reassign to the Service Center Agencies any authority for the decisions that they make.  The Service Center Agencies will not perform any evaluations of these data for purposes related solely to State or local regulatory programs.
+
+    Photographic or digital enlargement of these data to scales greater than at which they were originally mapped can cause misinterpretation of the data.  Digital data files are periodically updated, and users are responsible for obtaining the latest version of the data.
+  Point_of_Contact:
+    Contact_Information:
+      Contact_Organization_Primary:
+        Contact_Organization: Farm Production and Conservation Business Center (FPAC BC) Geospatial Enterprise Operations (GEO) Branch
+      Contact_Address:
+        Address: 501 W. Felix St, Bldg 23
+        City: Fort Worth
+        State_or_Province: Texas
+        Postal_Code: 76115
+Data_Quality_Information:
+  Lineage:
+    Source_Information:
+      Source_Citation:
+        Citation_Information:
+          Originator:
+            NRCS State Offices and USGS
+          Publication_Date: 2013 - Present
+          Title: Watershed Boundary Data - Hydrologic Unit
+      Source_Scale_Denominator: 24,000
+    Process_Step:
+      Process_Description: The dataset from the USGS was loaded  into SDE.
+For a complete description of the attributes and processes used to delineate hydrologic units to 1:24,000 scale accuracy, please refer to document Watershed Boundary Dataset (WBD) User Guide included with each WBD order.
+Archives of HUC 2-12 as national layers can be downloaded 
+from ftp://ftp.ftw.nrcs.usda.gov/wbd/
+      Process_Date: 20200908 
+Spatial_Reference_Information:
+  Horizontal_Coordinate_System_Definition:
+    Geographic:
+      Latitude_Resolution: 0.02
+      Longitude_Resolution: 0.02
+      Geographic_Coordinate_Units: Decimal degrees
+    Geodetic_Model:
+      Horizontal_Datum_Name: World Geodetic System of 1984 (WGS84)
+      Ellipsoid_Name: WGS84
+      Semi-major_Axis: 6378137.0
+      Denominator_of_Flattening_Ratio: 298.257223563
+Entity_and_Attribute_Information:
+  Overview_Description:
+    Entity_and_Attribute_Overview:
+      Hydrologic Unit delineation are closed polygons that encompass all area draining toward the lowest point (called outlet or pour point) 
+in the polygon. Because of varying sizes for the different hydrologic unit levels: 
+some polygons do not include all 
+    Entity_and_Attribute_Detail_Citation: See http://nhd.usgs.gov/userguide.html?url=NHD_User_Guide/Feature_Catalog/NHD_Feature_Catalog.htm for a data dictionary.
+Distribution_Information:
+  Distribution_Liability:
+
+    Although these data have been processed successfully on a computer system at the U.S. Department of Agriculture, no warranty expressed or implied is made by the Service Center Agencies regarding the utility of the data on any other system, nor shall the act of distribution constitute any such warranty.  The U.S. Department of Agriculture will warrant the delivery of this product in computer readable format, and will offer appropriate adjustment of credit when the product is determined unreadable by correctly adjusted computer input peripherals, or when the physical medium is delivered in damaged condition.  Request for adjustment of credit must be made within 90 days from the date of this shipment from the ordering site.
+
+    Neither the U.S. Department of Agriculture, nor any of its agencies are liable for misuse of the data, for damage, for transmission of viruses, or for computer contamination through the distribution of these data sets.  The U.S. Department of Agriculture prohibits discrimination in all its programs and activities on the basis of race, color, national origin, sex, religion, age, disability, political beliefs, sexual orientation, or marital or family status. (Not all prohibited bases apply to all programs.)
+  Standard_Order_Process:
+    Digital_Form:
+      Digital_Transfer_Information:
+        Format_Name: ARC/INFO Shape
+Metadata_Reference_Information:
+  Metadata_Date: 08/12/2021
+  Metadata_Standard_Name: SCI Minimum Compliance Metadata
+  Metadata_Standard_Version: SCI Std 003-02
