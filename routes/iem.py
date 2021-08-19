@@ -119,7 +119,7 @@ def package_point_data(point_data):
                 point_data_pkg[period][season][model] = {}
                 for sci, values in enumerate(sc_li):
                     # Remove this if statement when RCP 6.5 is added
-                    if sci == 2:
+                    if sci == 1:
                         # Since we are missing RCP 6.5 from data in Rasdaman currently,
                         # creating the JSON requires mapping from integers to dimension values.
                         # But the JSON ordering labels the scenario as
@@ -221,8 +221,8 @@ def run_fetch_point_data(lat, lon):
 
     x, y = project_latlon(lat, lon, 3338)
 
-    point_json = asyncio.run(fetch_point_data(x, y))
-    point_pkg = package_point_data(point_json[0])
+    point_data = asyncio.run(fetch_point_data(x, y))
+    point_pkg = package_point_data(point_data)
 
     return point_pkg
 
