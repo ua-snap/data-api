@@ -26,33 +26,49 @@ dim_encodings = {
 }
 
 
-async def fetch_layer_data(url, session):
-    """Make an awaitable GET request to URL, return json"""
-    resp = await session.request(method="GET", url=url)
-    resp.raise_for_status()
-    json = await resp.json()
-    return json
+async def make_request(url, session):
+    """Make an awaitable GET request to URL, 
+    return result based on encoding
 
+    Args:
+        url (str): WCS query with JSON encoding
+        session (aiohttp.ClientSession): the client session instance
 
-async def fetch_iem_data(x1, y1, x2=None, y2=None):
-    """IEM API - gather all async requests for IEM data
-
-    Note - Currently specific to the preprocessed decadal seasonal
-        summary data (tas, pr)
+    Returns:
+        Query result, deocded differently depending on encoding.
     """
-    if x2 is None:
-        x, y = x1, y1
-    else:
-        x, y = f"{x1},{x2}", f"{y1},{y2}"
+    resp = await session.get(url)
+    resp.raise_for_status()
 
-    # using list in case further endpoints are added
-    urls = []
-    urls.append(
-        RAS_BASE_URL
-        + f"ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
-    )
+    encoding = url.split("&FORMAT=")[1]
+    if encoding == "application/json":
+        query_result = await resp.json()
+    elif encoding == "application/netcdf":
+        query_result = await resp.read()
 
-    print(urls)
+    return query_result
+
+
+async def fetch_point_data(x, y):
+    """Make the async request for the data at the specified point
+
+    Args:
+        x (float): lower x-coordinate bound
+        y (float): lower y-coordinate bound
+        x2 (float): upper x-coordinate bound
+        y2 (float): upper y-coordinate bound
+
+    Returns:
+        xarray.DataSet containing results of WCS netCDF query
+    """
+    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
+
+    async with ClientSession() as session:
+        point_data = await asyncio.create_task(make_request(url, session))
+
+    return point_data
+
+
 async def fetch_bbox_netcdf(x1, y1, x2, y2):
     """Make the async request for the data within the specified bbox
 
@@ -74,58 +90,56 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
 
     return ds
 
-def package_iem(iem_resp):
-    """Package IEM tas and pr data in dict
 
-    Since we are relying on some hardcoded mappings between 
-    integers and the dataset dimensions, we should consider
-    having that mapping tracked somewhere such that it is
-    imported to help prevent breakage. 
+def package_point_data(point_data):
+    """Add dim names to JSON response from point query
+    
+    Args:
+        point_data (json)
+    
+    Returns:
+        Dict with dimension name
     """
-    # encodings hardcoded for now
-    dim_encodings = {
-        "period": {0: "2040_2070", 1: "2070_2100",},
-        "season": {0: "DJF", 1: "MAM", 2: "JJA", 3: "SON",},
-        "model": {0: "CCSM4", 1: "MRI-CGCM3",},
-        "scenario": {0: "rcp45", 1: "rcp85",},
-    }
-
-    iem_pkg = {}
+    point_data_pkg = {}
     variables = ["tas", "pr"]
 
     # period, season, model, scenario
-    for pi, s_li in enumerate(iem_resp):  # (season_list)
+    # Since we are relying on some hardcoded mappings between
+    # integers and the dataset dimensions, we should consider
+    # having that mapping tracked somewhere such that it is
+    # imported to help prevent breakage.
+    for pi, s_li in enumerate(point_data):  # (season_list)
         period = dim_encodings["period"][pi]
-        iem_pkg[period] = {}
+        point_data_pkg[period] = {}
         for si, m_li in enumerate(s_li):  # (model list)
             season = dim_encodings["season"][si]
-            iem_pkg[period][season] = {}
+            point_data_pkg[period][season] = {}
             for mi, sc_li in enumerate(m_li):  # (scenario list)
                 model = dim_encodings["model"][mi]
-                iem_pkg[period][season][model] = {}
+                point_data_pkg[period][season][model] = {}
                 for sci, values in enumerate(sc_li):
+                    # Remove this if statement when RCP 6.5 is added
+                    if sci == 2:
+                        # Since we are missing RCP 6.5 from data in Rasdaman currently,
+                        # creating the JSON requires mapping from integers to dimension values.
+                        # But the JSON ordering labels the scenario as
+                        sci = 2
+                    elif sci == 2:
+                        # just a way to make sure this snippet is removed
+                        # error out if the corresponding JSON scenario index value
+                        # ever does equal 2.
+                        exit("RCP 6.5 must have been added - emove this code piece!")
                     scenario = dim_encodings["scenario"][sci]
-                    iem_pkg[period][season][model][scenario] = {}
+                    point_data_pkg[period][season][model][scenario] = {}
 
-                    if isinstance(values, str):
-                        # if values is a string, it was a point query
-                        for variable, value in zip(variables, values.split(" ")):
-                            iem_pkg[period][season][model][scenario][variable] = value
-                    elif isinstance(values, list):
-                        # otherwise, bounding box query, create arrays from json
-                        query_arr = np.char.split(np.array(values))
-                        query_shape = query_arr.shape
-                        for variable, i in zip(variables, range(2)):
-                            arr = (
-                                np.array([data[i] for row in query_arr for data in row])
-                                .reshape(query_shape)
-                                .astype(np.float32)
-                            )
-                            iem_pkg[period][season][model][scenario][
-                                variable
-                            ] = arr.tolist()
+                    for variable, value in zip(variables, values.split(" ")):
+                        point_data_pkg[period][season][model][scenario][
+                            variable
+                        ] = value
 
-    return iem_pkg
+    return point_data_pkg
+
+
 def aggregate_dataarray(da, variables, poly, transform):
     """Perform a spatial agrgegation of a data array within a polygon.
     Only supports mean aggregation for now.
@@ -188,21 +202,29 @@ def about_huc():
 
 
 @routes.route("/iem/point/<lat>/<lon>")
-def run_fetch_iem_point_data(lat, lon):
+def run_fetch_point_data(lat, lon):
     """Run the ansync IEM data requesting for a single point
     and return data as json
 
-    example request: http://localhost:5000/iem/point/65.0628/-146.1627
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON of data at provided latitude and longitude
+    
+    Notes:
+        example request: http://localhost:5000/iem/point/65.0628/-146.1627
     """
     if not validate(lat, lon):
         abort(400)
 
     x, y = project_latlon(lat, lon, 3338)
 
-    results = asyncio.run(fetch_iem_data(x, y))
-    iem = package_iem(results[0])
+    point_json = asyncio.run(fetch_point_data(x, y))
+    point_pkg = package_point_data(point_json[0])
 
-    return iem
+    return point_pkg
 
 
 @routes.route("/iem/huc/<huc_id>")
