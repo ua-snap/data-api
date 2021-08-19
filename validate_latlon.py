@@ -42,10 +42,10 @@ def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):
     Args:
         lat1 (float): latitude (single point) or southern bound (bbox)
         lon1 (float): longitude (single point) or western bound (bbox)
-        lat2 (float): northern bound (bbox)
-        lon2 (float): eastern bound (bbox)
         dst_crs (int): EPSG code for the destination
             coordinate reference system
+        lat2 (float): northern bound (bbox)
+        lon2 (float): eastern bound (bbox)
 
     Returns:
         Reprojected coordinates in order x, y
