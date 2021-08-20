@@ -1,17 +1,14 @@
 <h1>Scenarios Network for Alaska + Arctic Planning</h1>
 <h2>Data API</h2>
 <h3>IEM Data</h3>
-<p>These data are for use in the IEM Webapp</p>
+<p>These data are for use in the IEM Webapp. Currently, only SNAP's 771m downscaled temperature and precip data are available.</p>
 <h4>Service endpoints</h4>
 <ul>
     <li><a href="/iem/point">Point Query</a></li>
-    <li><a href="/iem/bbox">BBOX Query</a></li>
     <li><a href="/iem/huc">Aggregate by HUC</a></li>
 </ul>
 <h4>/iem/point</h4>
-<p>Make a point query</p>
-<h4>/iem/bbox</h4>
-<p>Make a query with a bounding box</p>
+<p>Query 771m temperature and precip data at a single point.</p>
 <h4>/iem/huc</h4>
-<p>not yeat available</p>
+<p>Query 771m temperature and precip data within a HUC-8 polygon, aggregating by mean.</p>
 <footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>
