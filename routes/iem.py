@@ -19,15 +19,29 @@ huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_
 
 # encodings hardcoded for now
 dim_encodings = {
-    "period": {0: "2040_2070", 1: "2070_2100",},
-    "season": {0: "DJF", 1: "MAM", 2: "JJA", 3: "SON",},
-    "model": {0: "CCSM4", 1: "MRI-CGCM3",},
-    "scenario": {0: "rcp45", 2: "rcp85",},
+    "period": {
+        0: "2040_2070",
+        1: "2070_2100",
+    },
+    "season": {
+        0: "DJF",
+        1: "MAM",
+        2: "JJA",
+        3: "SON",
+    },
+    "model": {
+        0: "CCSM4",
+        1: "MRI-CGCM3",
+    },
+    "scenario": {
+        0: "rcp45",
+        2: "rcp85",
+    },
 }
 
 
 async def make_request(url, session):
-    """Make an awaitable GET request to URL, 
+    """Make an awaitable GET request to URL,
     return result based on encoding
 
     Args:
@@ -93,10 +107,10 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
 
 def package_point_data(point_data):
     """Add dim names to JSON response from point query
-    
+
     Args:
         point_data (json)
-    
+
     Returns:
         Dict with dimension name
     """
@@ -135,7 +149,7 @@ def package_point_data(point_data):
                     for variable, value in zip(variables, values.split(" ")):
                         point_data_pkg[period][season][model][scenario][
                             variable
-                        ] = value
+                        ] = round(float(value), 1)
 
     return point_data_pkg
 
@@ -149,7 +163,7 @@ def aggregate_dataarray(da, variables, poly, transform):
         variables (list): string names of variables in DataArray
         poly (shapely.Polygon): polygon from shapefile
         transform (affine.Affine): affine transform raster subset
-    
+
     Returns:
         results of aggregation as a JSON-like dict
     """
@@ -178,9 +192,15 @@ def aggregate_dataarray(da, variables, poly, transform):
                         scenario=scenario_value,
                     ).values
                     aggr_result = zonal_stats(
-                        poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
+                        poly,
+                        arr,
+                        affine=transform,
+                        nodata=np.nan,
+                        stats=["mean"],
                     )[0]
-                    aggr_results[period][season][model][scenario] = aggr_result
+                    aggr_results[period][season][model][scenario] = {
+                        "mean": round(aggr_result["mean"], 1)
+                    }
 
     return aggr_results
 
@@ -212,7 +232,7 @@ def run_fetch_point_data(lat, lon):
 
     Returns:
         JSON of data at provided latitude and longitude
-    
+
     Notes:
         example request: http://localhost:5000/iem/point/65.0628/-146.1627
     """
@@ -238,7 +258,7 @@ def run_aggregate_huc(huc_id):
         Mean summaries of rasters within HUC
 
     Notes:
-        Rasters refers to the individual isntances of the 
+        Rasters refers to the individual isntances of the
           singular dimension combinations
     """
     # could add check here to make sure HUC is in the geodataframe
