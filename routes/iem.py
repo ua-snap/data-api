@@ -63,7 +63,7 @@ async def fetch_point_data(x, y):
         xarray.DataSet containing results of WCS netCDF query
     """
     url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
-    print(url)
+
     async with ClientSession() as session:
         point_data = await asyncio.create_task(make_request(url, session))
 
@@ -82,7 +82,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
     """
     # only see this ever being a single request
     url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
-    print(url)
+
     start_time = time.time()
     async with ClientSession() as session:
         netcdf_bytes = await asyncio.create_task(make_request(url, session))
