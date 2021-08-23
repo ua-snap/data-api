@@ -271,6 +271,7 @@ def run_aggregate_huc(huc_id):
     #   geometry column for zonal_stats
     # reproject is needed for zonal_stats and for initial bbox
     #   bounds for query
+    # TODO What if the huc_id is invalid?
     poly_gdf = huc_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
 
     poly = poly_gdf.iloc[0]["geometry"]
@@ -284,7 +285,13 @@ def run_aggregate_huc(huc_id):
     met_ds.rio.set_spatial_dims("X", "Y")
     transform = met_ds.rio.transform()
     variables = ["period", "season", "model", "scenario"]
+    # TODO It's weird but the actual returned JSON here is, like,
+    # backwards.  PR has TAS values and vice versa.
+    # TODO we want the output structure for the results to match
+    # the structure used in the point query, i.e.
+    # period > season > model > scenario > { pr, tas }
+    # instead of 
+    # { pr, tas } > period > season > model > scenario > { mean }
     aggr_results["tas"] = aggregate_dataarray(met_ds["tas"], variables, poly, transform)
     aggr_results["pr"] = aggregate_dataarray(met_ds["pr"], variables, poly, transform)
-
     return aggr_results
