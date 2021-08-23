@@ -14,6 +14,8 @@ Set the GeoServer/Rasdaman endpoints if needed:
 
 `export API_GS_BASE_URL=http://...`
 
+`export API_RAS_BASE_URL=http://...`
+
 `pipenv run flask run`
 
 Example Permafrost Query:

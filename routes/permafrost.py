@@ -39,14 +39,14 @@ def package_gipl_magt(gipl_magt_resp):
         if gipl_magt_resp[i]["features"] == []:
             gipl_magt_resp["Data Status"] = "No data at this location."
         else:
-            depth = j.split("_")[1][:-1] + ' m'
+            depth = j.split("_")[1][:-1] + " m"
             year = j.split("_")[-2]
             title = f"GIPL {year} Mean Annual {depth} Ground Temperature (deg. C.)"
             temp = round(
                 gipl_magt_resp[i]["features"][0]["properties"]["GRAY_INDEX"], 2
             )
-            di = {'title': title, 'year': year, 'depth': depth, 'temp': temp}
-            check_for_nodata(di, 'temp', temp, -9999)
+            di = {"title": title, "year": year, "depth": depth, "temp": temp}
+            check_for_nodata(di, "temp", temp, -9999)
             gipl_magt.append(di)
     return gipl_magt
 
@@ -62,8 +62,8 @@ def package_gipl_alt(gipl_alt_resp):
             year = j.split("_")[-2]
             title = f"GIPL {year} Active Layer Thickness (m)"
             alt = round(gipl_alt_resp[i]["features"][0]["properties"]["GRAY_INDEX"], 2)
-            di = {'title': title, 'year': year, 'thickness': alt}
-            check_for_nodata(di, 'thickness', alt, -9999)
+            di = {"title": title, "year": year, "thickness": alt}
+            check_for_nodata(di, "thickness", alt, -9999)
             gipl_alt_pkg.append(di)
     return gipl_alt_pkg
 
@@ -72,7 +72,7 @@ def package_obu_magt(obu_magt_resp):
     """Package Obu MAGT data in dict"""
     ds_title = "Obu et al. (2018) Mean Annual Ground Temperature (deg. C)"
     if obu_magt_resp["features"] == []:
-        di = {'title': ds_title, "Data Status": "No data at this location."}
+        di = {"title": ds_title, "Data Status": "No data at this location."}
     else:
         depth = "Top of Permafrost"
         year = "2000-2016"
@@ -81,8 +81,8 @@ def package_obu_magt(obu_magt_resp):
         )
 
         temp = round(obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"], 2)
-        di = {'title': title, 'year': year, 'depth': depth, 'temp': temp}
-        check_for_nodata(di, 'temp', temp, -9999)
+        di = {"title": title, "year": year, "depth": depth, "temp": temp}
+        check_for_nodata(di, "temp", temp, -9999)
     return di
 
 
@@ -91,11 +91,11 @@ def package_jorgenson(jorgenson_resp):
     title = "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume"
 
     if jorgenson_resp["features"] == []:
-        di = {'title': title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": "No data at this location."}
     else:
         ice = jorgenson_resp["features"][0]["properties"]["GROUNDICEV"]
         pfx = jorgenson_resp["features"][0]["properties"]["PERMAFROST"]
-        di = {'title': title, 'ice': ice, 'pfx': pfx}
+        di = {"title": title, "ice": ice, "pfx": pfx}
     return di
 
 
@@ -104,10 +104,10 @@ def package_obu_vector(obu_vector_resp):
     title = "Obu et al. (2018) Permafrost Extent"
 
     if obu_vector_resp["features"] == []:
-        di = {'title': title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": "No data at this location."}
     else:
         pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
-        di = {'title': title, 'pfx': pfx}
+        di = {"title": title, "pfx": pfx}
     return di
 
 

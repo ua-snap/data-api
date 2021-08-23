@@ -28,12 +28,12 @@ def package_fire_history(fihist_resp):
     """Package fire history data in dict"""
     title = "Historical fires"
     if fihist_resp["features"] == []:
-        di = {'title': title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": "No data at this location."}
     else:
         di = {}
         for i in fihist_resp["features"]:
-            fi_name = list(i.values())[-1]['NAME']
-            fi_year = list(i.values())[-1]['FIREYEAR']
+            fi_name = list(i.values())[-1]["NAME"]
+            fi_year = list(i.values())[-1]["FIREYEAR"]
             di.update({fi_name: fi_year})
     return di
 
@@ -42,11 +42,11 @@ def package_flammability(flammability_resp):
     """Package flammability data in dict"""
     title = "Projected relative flammability"
     if flammability_resp["features"] == []:
-        di = {'title': title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": "No data at this location."}
     else:
         flamm = round(flammability_resp["features"][0]["properties"]["GRAY_INDEX"], 4)
-        di = {'title': title, "flamm": flamm}
-        check_for_nodata(di, 'flamm', flamm, -9999)
+        di = {"title": title, "flamm": flamm}
+        check_for_nodata(di, "flamm", flamm, -9999)
     return di
 
 
@@ -54,10 +54,10 @@ def package_snow(snow_resp):
     """Package snow cover data"""
     title = "Today's Snow Cover"
     if snow_resp["features"] == []:
-        di = {'title': title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": "No data at this location."}
     else:
         snow = snow_status[snow_resp["features"][0]["properties"]["GRAY_INDEX"]]
-        di = {'title': title, 'is_snow': snow}
+        di = {"title": title, "is_snow": snow}
     return di
 
 
@@ -65,12 +65,12 @@ def package_fire_danger(fire_danger_resp):
     """Package fire danger data in dict"""
     title = "Today's Fire Danger"
     if fire_danger_resp["features"] == []:
-        di = {'title': title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": "No data at this location."}
     else:
         code = fire_danger_resp["features"][0]["properties"]["GRAY_INDEX"]
         fitype = smokey_bear_names[code]
         color = smokey_bear_styles[code]
-        di = {'title': title, 'code': code, 'type': fitype, 'color': color}
+        di = {"title": title, "code": code, "type": fitype, "color": color}
     return di
 
 
@@ -78,12 +78,12 @@ def package_landcover(landcover_resp):
     """Package landcover data in dict"""
     title = "Land cover types"
     if landcover_resp["features"] == []:
-        di = {'title': title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": "No data at this location."}
     else:
         code = landcover_resp["features"][0]["properties"]["PALETTE_INDEX"]
         lctype = landcover_names[code]["type"]
         color = landcover_names[code]["color"]
-        di = {'title': title, 'code': code, 'type': lctype, 'color': color}
+        di = {"title": title, "code": code, "type": lctype, "color": color}
     return di
 
 
