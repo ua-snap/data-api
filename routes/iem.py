@@ -155,8 +155,8 @@ def aggregate_dataarray(ds, dimensions, poly, transform):
     Only supports mean aggregation for now.
 
     Args:
-        ds (xarray.DataSet): datacube for individual variable
-        dimensions (list): string names of variables in DataArray
+        ds (xarray.DataSet): datacube for all variables
+        dimensions (list): string names of variables in DataSet
         poly (shapely.Polygon): polygon from shapefile
         transform (affine.Affine): affine transform raster subset
 
