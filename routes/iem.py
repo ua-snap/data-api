@@ -1,11 +1,12 @@
 import asyncio
 import io
+import time
 import itertools
 import numpy as np
 import geopandas as gpd
 import xarray as xr
 from aiohttp import ClientSession
-from flask import abort, Blueprint, render_template
+from flask import abort, Blueprint, render_template, current_app as app
 from rasterstats import zonal_stats
 from validate_latlon import validate, validate_bbox, project_latlon
 from . import routes
@@ -96,8 +97,11 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
     # only see this ever being a single request
     url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
 
+    start_time = time.time()
     async with ClientSession() as session:
         netcdf_bytes = await asyncio.create_task(make_request(url, session))
+
+    app.logger.info(f"Fetched BBOX data from Rasdaman, elapsed time {(time.time() - start_time)}s")
 
     # create xarray.DataSet from bytestring
     ds = xr.open_dataset(io.BytesIO(netcdf_bytes))
