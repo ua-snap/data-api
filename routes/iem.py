@@ -77,7 +77,7 @@ async def fetch_point_data(x, y):
         xarray.DataSet containing results of WCS netCDF query
     """
     url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
-
+    print(url)
     async with ClientSession() as session:
         point_data = await asyncio.create_task(make_request(url, session))
 
@@ -96,7 +96,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
     """
     # only see this ever being a single request
     url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
-
+    print(url)
     start_time = time.time()
     async with ClientSession() as session:
         netcdf_bytes = await asyncio.create_task(make_request(url, session))
@@ -105,6 +105,10 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
 
     # create xarray.DataSet from bytestring
     ds = xr.open_dataset(io.BytesIO(netcdf_bytes))
+
+    # TODO: This is a temporary workaround to retitle the bands coming from
+    # Rasdaman. It appears to be a bug with the returned NetCDF output.
+    ds = ds.rename_vars({'tas':'pr','pr':'tas'})
 
     return ds
 
@@ -146,7 +150,7 @@ def package_point_data(point_data):
                         # just a way to make sure this snippet is removed
                         # error out if the corresponding JSON scenario index value
                         # ever does equal 2.
-                        exit("RCP 6.5 must have been added - emove this code piece!")
+                        exit("RCP 6.5 must have been added - remove this code piece!")
                     scenario = dim_encodings["scenario"][sci]
                     point_data_pkg[period][season][model][scenario] = {}
 
@@ -158,53 +162,55 @@ def package_point_data(point_data):
     return point_data_pkg
 
 
-def aggregate_dataarray(da, variables, poly, transform):
+def aggregate_dataarray(ds, dimensions, poly, transform):
     """Perform a spatial agrgegation of a data array within a polygon.
     Only supports mean aggregation for now.
 
     Args:
-        da (xarray.DataArray): datacube for individual variable
-        variables (list): string names of variables in DataArray
+        ds (xarray.DataSet): datacube for individual variable
+        dimensions (list): string names of variables in DataArray
         poly (shapely.Polygon): polygon from shapefile
         transform (affine.Affine): affine transform raster subset
 
     Returns:
         results of aggregation as a JSON-like dict
     """
-    dim_combos = itertools.product(*[da[variable].values for variable in variables])
+
+    dim_combos = itertools.product(*[ds[dimension].values for dimension in dimensions])
     # use nested for loop to construct results dict like json output for single point
     aggr_results = {}
     # build aggregate results dict for JSON output
     # hardcoded assuming same 4 dimensions,
     #   consider revising with more robust approach
-    for period_value in np.int32(da[variables[0]].values):
+
+    for period_value in np.int32(ds[dimensions[0]].values):
         period = dim_encodings["period"][period_value]
         aggr_results[period] = {}
-        for season_value in np.int32(da[variables[1]].values):
+        for season_value in np.int32(ds[dimensions[1]].values):
             season = dim_encodings["season"][season_value]
             aggr_results[period][season] = {}
-            for model_value in np.int32(da[variables[2]].values):
+            for model_value in np.int32(ds[dimensions[2]].values):
                 model = dim_encodings["model"][model_value]
                 aggr_results[period][season][model] = {}
-                for scenario_value in np.int32(da[variables[3]].values):
+                for scenario_value in np.int32(ds[dimensions[3]].values):
                     scenario = dim_encodings["scenario"][scenario_value]
                     # select subset and compute aggregate
-                    arr = da.sel(
-                        period=period_value,
-                        season=season_value,
-                        model=model_value,
-                        scenario=scenario_value,
-                    ).values
-                    aggr_result = zonal_stats(
-                        poly,
-                        arr,
-                        affine=transform,
-                        nodata=np.nan,
-                        stats=["mean"],
-                    )[0]
-                    aggr_results[period][season][model][scenario] = {
-                        "mean": round(aggr_result["mean"], 1)
-                    }
+                    aggr_results[period][season][model][scenario] = {}
+                    for val in ["tas","pr"]:
+                        arr = ds[val].sel(
+                            period=period_value,
+                            season=season_value,
+                            model=model_value,
+                            scenario=scenario_value,
+                        ).values
+                        aggr_result = zonal_stats(
+                            poly,
+                            arr,
+                            affine=transform,
+                            nodata=np.nan,
+                            stats=["mean"],
+                        )[0]
+                        aggr_results[period][season][model][scenario][val] = round(aggr_result["mean"], 1)
 
     return aggr_results
 
@@ -278,20 +284,12 @@ def run_aggregate_huc(huc_id):
 
     # meterological variables as dataset
     met_ds = asyncio.run(fetch_bbox_netcdf(*poly.bounds))
-
+    
     # aggregate the data and return packaged results
     # compute transform with rioxarray
     aggr_results = {}
     met_ds.rio.set_spatial_dims("X", "Y")
     transform = met_ds.rio.transform()
-    variables = ["period", "season", "model", "scenario"]
-    # TODO It's weird but the actual returned JSON here is, like,
-    # backwards.  PR has TAS values and vice versa.
-    # TODO we want the output structure for the results to match
-    # the structure used in the point query, i.e.
-    # period > season > model > scenario > { pr, tas }
-    # instead of 
-    # { pr, tas } > period > season > model > scenario > { mean }
-    aggr_results["tas"] = aggregate_dataarray(met_ds["tas"], variables, poly, transform)
-    aggr_results["pr"] = aggregate_dataarray(met_ds["pr"], variables, poly, transform)
+    dimensions = ["period", "season", "model", "scenario"]
+    aggr_results = aggregate_dataarray(met_ds, dimensions, poly, transform)
     return aggr_results
