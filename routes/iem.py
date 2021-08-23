@@ -20,24 +20,10 @@ huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_
 
 # encodings hardcoded for now
 dim_encodings = {
-    "period": {
-        0: "2040_2070",
-        1: "2070_2100",
-    },
-    "season": {
-        0: "DJF",
-        1: "MAM",
-        2: "JJA",
-        3: "SON",
-    },
-    "model": {
-        0: "CCSM4",
-        1: "MRI-CGCM3",
-    },
-    "scenario": {
-        0: "rcp45",
-        2: "rcp85",
-    },
+    "period": {0: "2040_2070", 1: "2070_2100",},
+    "season": {0: "DJF", 1: "MAM", 2: "JJA", 3: "SON",},
+    "model": {0: "CCSM4", 1: "MRI-CGCM3",},
+    "scenario": {0: "rcp45", 2: "rcp85",},
 }
 
 
@@ -101,14 +87,16 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
     async with ClientSession() as session:
         netcdf_bytes = await asyncio.create_task(make_request(url, session))
 
-    app.logger.info(f"Fetched BBOX data from Rasdaman, elapsed time {(time.time() - start_time)}s")
+    app.logger.info(
+        f"Fetched BBOX data from Rasdaman, elapsed time {(time.time() - start_time)}s"
+    )
 
     # create xarray.DataSet from bytestring
     ds = xr.open_dataset(io.BytesIO(netcdf_bytes))
 
     # TODO: This is a temporary workaround to retitle the bands coming from
     # Rasdaman. It appears to be a bug with the returned NetCDF output.
-    ds = ds.rename_vars({'tas':'pr','pr':'tas'})
+    ds = ds.rename_vars({"tas": "pr", "pr": "tas"})
 
     return ds
 
@@ -196,21 +184,23 @@ def aggregate_dataarray(ds, dimensions, poly, transform):
                     scenario = dim_encodings["scenario"][scenario_value]
                     # select subset and compute aggregate
                     aggr_results[period][season][model][scenario] = {}
-                    for val in ["tas","pr"]:
-                        arr = ds[val].sel(
-                            period=period_value,
-                            season=season_value,
-                            model=model_value,
-                            scenario=scenario_value,
-                        ).values
+                    for val in ["tas", "pr"]:
+                        arr = (
+                            ds[val]
+                            .sel(
+                                period=period_value,
+                                season=season_value,
+                                model=model_value,
+                                scenario=scenario_value,
+                            )
+                            .values
+                        )
                         aggr_result = zonal_stats(
-                            poly,
-                            arr,
-                            affine=transform,
-                            nodata=np.nan,
-                            stats=["mean"],
+                            poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
                         )[0]
-                        aggr_results[period][season][model][scenario][val] = round(aggr_result["mean"], 1)
+                        aggr_results[period][season][model][scenario][val] = round(
+                            aggr_result["mean"], 1
+                        )
 
     return aggr_results
 
@@ -284,7 +274,7 @@ def run_aggregate_huc(huc_id):
 
     # meterological variables as dataset
     met_ds = asyncio.run(fetch_bbox_netcdf(*poly.bounds))
-    
+
     # aggregate the data and return packaged results
     # compute transform with rioxarray
     aggr_results = {}
