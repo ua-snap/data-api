@@ -20,10 +20,24 @@ huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_
 
 # encodings hardcoded for now
 dim_encodings = {
-    "period": {0: "2040_2070", 1: "2070_2100",},
-    "season": {0: "DJF", 1: "MAM", 2: "JJA", 3: "SON",},
-    "model": {0: "CCSM4", 1: "MRI-CGCM3",},
-    "scenario": {0: "rcp45", 2: "rcp85",},
+    "period": {
+        0: "2040_2070",
+        1: "2070_2100",
+    },
+    "season": {
+        0: "DJF",
+        1: "MAM",
+        2: "JJA",
+        3: "SON",
+    },
+    "model": {
+        0: "CCSM4",
+        1: "MRI-CGCM3",
+    },
+    "scenario": {
+        0: "rcp45",
+        2: "rcp85",
+    },
 }
 
 
@@ -196,7 +210,11 @@ def aggregate_dataarray(ds, dimensions, poly, transform):
                             .values
                         )
                         aggr_result = zonal_stats(
-                            poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
+                            poly,
+                            arr,
+                            affine=transform,
+                            nodata=np.nan,
+                            stats=["mean"],
                         )[0]
                         aggr_results[period][season][model][scenario][val] = round(
                             aggr_result["mean"], 1
