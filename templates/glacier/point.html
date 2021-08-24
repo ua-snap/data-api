@@ -1,6 +1,39 @@
 <h1>Scenarios Network for Alaska + Arctic Planning</h1>
 <h2>Data API</h2>
+
 <h3>Glacier Point Query</h3>
 <p>Query the glaciology of Alaska for a single point specified by latitude and longitude.</p>
 <p>Example: <a href="/glacier/point/60.606/-143.345">/glacier/point/60.606/-143.345</a></p>
+
+<h4>What the endpoint returns</h4>
+<p>Results from the query above will look like this:</p>
+<code><pre>
+{
+  "ewisc": true, 
+  "lwsisc": true, 
+  "now": {
+    "glacname": "Steller Glacier", 
+    "modern": true
+  }, 
+  "pmax": true, 
+  "title": "Past and Present Glaciology of Alaska"
+}
+</pre></code>
+<ul>
+	<li><strong><code>ewisc</code></strong>: what's this mean...</li>
+	<li><strong><code>lwsisc</code></strong>: what's this mean...</li>
+	<li><strong><code>now</code></strong>: what's this mean...
+		<ul>
+			<li><strong><code>glacname</code></strong>: what...</li>
+		</ul>
+	</li>
+	<li><strong><code>pmax</code></strong>: what's this mean...</li>
+	<li><strong><code>title</code></strong>: Title of these results</li>
+</ul>
+
+<h4>Source data</h4>
+<ul>
+	<li>...</li>
+</ul>
+
 <footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>
