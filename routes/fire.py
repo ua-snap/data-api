@@ -87,14 +87,18 @@ def package_landcover(landcover_resp):
     return di
 
 
-@routes.route("/🔥")
-@routes.route("/🔥/about")
-def fire():
-    """Render fire page"""
-    return render_template("🔥.html")
+@routes.route("/fire/")
+@routes.route("/fire/abstract/")
+def fire_about():
+    return render_template("fire/abstract.html")
 
 
-@routes.route("/🔥/<lat>/<lon>")
+@routes.route("/fire/point/")
+def fire_about_point():
+    return render_template("fire/point.html")
+
+
+@routes.route("/fire/point/<lat>/<lon>")
 def run_fetch_fire(lat, lon):
     """Run the ansync requesting and return data
     example request: http://localhost:5000/%F0%9F%94%A5/65.0628/-146.1627
