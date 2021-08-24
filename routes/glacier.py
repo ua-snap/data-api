@@ -24,8 +24,8 @@ wfs_targets = {
 
 
 def package_glaclimits(glaclim_resp):
-    """Package fire history data in dict"""
-    keys = ["ewisc", "lwsisc", "pmax", "now"]
+    """Package glacier data in dict"""
+    keys = ["ewisc", "lwisc", "pmax", "now"]
     title = "Past and Present Glaciology of Alaska"
     di = {"title": title}
     for k, resp in zip(keys, glaclim_resp):
@@ -53,7 +53,7 @@ def glac_about_point():
 
 @routes.route("/glacier/point/<lat>/<lon>")
 def run_fetch_glacier(lat, lon):
-    """Run the ansync requesting and return data
+    """Run the async requesting and return data
     example request: http://localhost:5000/glacier/60.606/-143.345
     """
     if not validate(lat, lon):
