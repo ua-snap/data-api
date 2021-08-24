@@ -36,12 +36,13 @@ def package_gipl_magt(gipl_magt_resp):
     gipl_magt = []
 
     for i, j in enumerate(wms_targets[0:6]):
+        depth = j.split("_")[1][:-1] + " m"
+        year = j.split("_")[-2]
+        title = f"GIPL {year} Mean Annual {depth} Ground Temperature (deg. C.)"
         if gipl_magt_resp[i]["features"] == []:
-            gipl_magt_resp["Data Status"] = "No data at this location."
+            di = {"title": title, "Data Status": "No data at this location."}
+            gipl_magt.append(di)
         else:
-            depth = j.split("_")[1][:-1] + " m"
-            year = j.split("_")[-2]
-            title = f"GIPL {year} Mean Annual {depth} Ground Temperature (deg. C.)"
             temp = round(
                 gipl_magt_resp[i]["features"][0]["properties"]["GRAY_INDEX"], 2
             )
@@ -53,19 +54,19 @@ def package_gipl_magt(gipl_magt_resp):
 
 def package_gipl_alt(gipl_alt_resp):
     """Package GIPL Active Layer Thickness data"""
-    gipl_alt_pkg = []
-
+    gipl_alt = []
     for i, j in enumerate(wms_targets[6:8]):
+        year = j.split("_")[-2]
+        title = f"GIPL {year} Active Layer Thickness (m)"
         if gipl_alt_resp[i]["features"] == []:
-            gipl_alt_resp["Data Status"] = "No data at this location."
+            di = {"title": title, "Data Status": "No data at this location."}
+            gipl_alt.append(di)
         else:
-            year = j.split("_")[-2]
-            title = f"GIPL {year} Active Layer Thickness (m)"
             alt = round(gipl_alt_resp[i]["features"][0]["properties"]["GRAY_INDEX"], 2)
             di = {"title": title, "year": year, "thickness": alt}
             check_for_nodata(di, "thickness", alt, -9999)
-            gipl_alt_pkg.append(di)
-    return gipl_alt_pkg
+            gipl_alt.append(di)
+    return gipl_alt
 
 
 def package_obu_magt(obu_magt_resp):
@@ -111,14 +112,18 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-@routes.route("/permafrost")
-@routes.route("/permafrost/about")
-def permafrost():
-    """Render permafrost page"""
-    return render_template("permafrost.html")
+@routes.route("/permafrost/")
+@routes.route("/permafrost/abstract/")
+def pf_about():
+    return render_template("permafrost/abstract.html")
 
 
-@routes.route("/permafrost/<lat>/<lon>")
+@routes.route("/permafrost/point/")
+def pf_about_point():
+    return render_template("permafrost/point.html")
+
+
+@routes.route("/permafrost/point/<lat>/<lon>")
 def run_fetch_permafrost_data(lat, lon):
     """Run the ansync permafrost data requesting and return data as json
     example request: http://localhost:5000/permafrost/65.0628/-146.1627"""
