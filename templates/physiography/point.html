@@ -1,6 +1,36 @@
 <h1>Scenarios Network for Alaska + Arctic Planning</h1>
 <h2>Data API</h2>
 <h3>Physiography Point Query</h3>
-<p>Query the EPA Level III Ecoregions of Alaska.</p>
+<p>Query the EPA Level III Ecoregions of Alaska at a single point specified by latitude and longitude.</p>
 <p>Example: <a href="/physiography/point/65.0628/-146.1627">/physiography/point/65.0628/-146.1627</a></p>
+<h4>Results from the query above will look like this:</h4>
+<code><pre>
+{
+  "name": "Interior Highlands",
+  "title": "EPA Level III Ecoregions of Alaska"
+}
+</pre></code>
+<ul>
+    <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+    <li><strong><code>name</code></strong>: <i>(str)</i>, EPA Level III Ecoregion name.</li>
+</ul>
+<table>
+<thead>
+  <tr>
+    <th>Data Layer</th>
+    <th>Download link</th>
+    <th>Source</th>
+    <th>Notes</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>EPA Level III Ecoregions for Alaska</td>
+    <td><a href="https://gaftp.epa.gov/EPADataCommons/ORD/Ecoregions/ak/ak_eco_l3.zip">Alaska Level III Shapefile (3 MB)</a></td>
+    <td><a href="https://www.epa.gov/eco-research/ecoregion-download-files-state-region-10#pane-01">EPA Ecoregions</a></td>
+    <td>Ecoregions are essentially equivalent to the more archaic "physiographic provinces." Ecoregions do combine landscape and vegetation variables, but have less detail about vegetation when compared to "land cover" or "forest type" datasets. Topography plays a prominent role.</td>
+  </tr>
+</tbody>
+</table>
+
 <footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>
