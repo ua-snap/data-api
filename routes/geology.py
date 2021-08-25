@@ -44,7 +44,7 @@ def geo_about_point():
 
 @routes.route("/geology/point/<lat>/<lon>")
 def run_fetch_geology(lat, lon):
-    """Run the ansync requesting and return data
+    """Run the async requesting and return data
     example request: http://localhost:5000/geology/60.606/-143.345
     """
     if not validate(lat, lon):
