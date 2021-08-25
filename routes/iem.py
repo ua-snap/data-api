@@ -241,7 +241,7 @@ def about_huc():
 
 @routes.route("/iem/point/<lat>/<lon>")
 def run_fetch_point_data(lat, lon):
-    """Run the ansync IEM data requesting for a single point
+    """Run the async IEM data requesting for a single point
     and return data as json
 
     Args:

@@ -43,7 +43,7 @@ def phys_about_point():
 
 @routes.route("/physiography/point/<lat>/<lon>")
 def run_fetch_physiography(lat, lon):
-    """Run the ansync requesting and return data
+    """Run the async requesting and return data
     example request: http://localhost:5000/physiography/60.606/-143.345
     """
     if not validate(lat, lon):

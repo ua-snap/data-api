@@ -125,7 +125,7 @@ def pf_about_point():
 
 @routes.route("/permafrost/point/<lat>/<lon>")
 def run_fetch_permafrost_data(lat, lon):
-    """Run the ansync permafrost data requesting and return data as json
+    """Run the async permafrost data requesting and return data as json
     example request: http://localhost:5000/permafrost/65.0628/-146.1627"""
     if not validate(lat, lon):
         abort(400)
