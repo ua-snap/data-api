@@ -11,6 +11,7 @@ from rasterstats import zonal_stats
 from validate_latlon import validate, validate_bbox, project_latlon
 from . import routes
 from config import RAS_BASE_URL
+from fetch_data import fetch_layer_data
 
 iem_api = Blueprint("iem_api", __name__)
 
@@ -41,12 +42,12 @@ dim_encodings = {
 }
 
 
-async def make_request(url, session):
-    """Make an awaitable GET request to URL,
-    return result based on encoding
+async def make_netcdf_request(url, session):
+    """Make an awaitable GET request to WCS URL with
+    netCDF encoding
 
     Args:
-        url (str): WCS query with JSON encoding
+        url (str): WCS query with ncetCDF encoding
         session (aiohttp.ClientSession): the client session instance
 
     Returns:
@@ -54,12 +55,7 @@ async def make_request(url, session):
     """
     resp = await session.get(url)
     resp.raise_for_status()
-
-    encoding = url.split("&FORMAT=")[1]
-    if encoding == "application/json":
-        query_result = await resp.json()
-    elif encoding == "application/netcdf":
-        query_result = await resp.read()
+    query_result = await resp.read()
 
     return query_result
 
@@ -79,7 +75,7 @@ async def fetch_point_data(x, y):
     url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
 
     async with ClientSession() as session:
-        point_data = await asyncio.create_task(make_request(url, session))
+        point_data = await asyncio.create_task(fetch_layer_data(url, session))
 
     return point_data
 
@@ -99,7 +95,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
 
     start_time = time.time()
     async with ClientSession() as session:
-        netcdf_bytes = await asyncio.create_task(make_request(url, session))
+        netcdf_bytes = await asyncio.create_task(make_netcdf_request(url, session))
 
     app.logger.info(
         f"Fetched BBOX data from Rasdaman, elapsed time {(time.time() - start_time)}s"
