@@ -11,4 +11,114 @@
 <p>Query 771m temperature and precip data at a single point.</p>
 <h4>/iem/huc</h4>
 <p>Query 771m temperature and precip data within a HUC-8 polygon, aggregating by mean.</p>
+
+<h4>Results from the queries above will look like this:</h4>
+<code><pre>
+{
+  "1910-2009": {
+    "DJF":{
+      "CRU-TS31": {
+        "CRU_historical": {
+          "pr": 39.4,
+          "tas": -19.3
+        }
+      }
+    }
+  } 
+  ...
+}
+</pre></code>
+
+The above output is structured as such:
+
+<code><pre>
+{
+  &ltperiod>: {
+    &ltseason>:{
+      &ltmodel>: {
+        &ltscenario>: {
+          "pr": &ltprecip value>,
+          "tas": &lttermperature value>
+        }
+      }
+    }
+  } 
+  ...
+}
+</pre></code>
+
+<strong>Dimensions:</strong>
+<ul>
+    <li><strong><code>period</code></strong>: Sumary period:</li>
+        <ul>
+            <li>1910-2009</li>
+            <li>2040-2070</li>
+            <li>2070-2100</li>
+        </ul>
+    <li><strong><code>season</code></strong>: Summary season:</li>
+        <ul>
+            <li>DJF</li>
+            <li>MMA</li>
+            <li>JJA</li>
+            <li>SON</li>
+        </ul>
+    <li><strong><code>model</code></strong>: AR5 model source, or CRU TS:</li>
+        <ul>
+            <li>NCAR-CCSM4</li>
+            <li>MRI-CGCM3</li>
+            <li>CRU TS v3.1</li>
+        </ul>
+    <li><strong><code>scenario</code></strong>: RCP scenario for AR5, or "CRU_historical" for CRU TS</li>
+        <ul>
+            <li>rcp45</li>
+            <li>rcp60</li>
+            <li>rcp85</li>
+            <li>CRU_historical</li>
+        </ul>
+</ul>
+<strong>Variables:</strong>:
+<ul>
+    <li><strong><code>pr</code></strong>: <i>(float)</i>, Precipitation value.</li>
+    <li><strong><code>tas</code></strong>: <i>(float)</i>, Temperature value.</li>
+</ul>
+
+<h4>Source data</h4>
+<table>
+<thead>
+  <tr>
+    <th>Data Layer</th>
+    <th>Download Link</th>
+    <th>Data Source</th>
+    <th>Data Notes</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><a href="http://ckan.snap.uaf.edu/dataset/historical-monthly-and-derived-temperature-products-771m-cru-ts">Historical Monthly and Derived Temperature Products - 771m CRU TS</a></td>
+    <td><a href="http://data.snap.uaf.edu/data/Base/AK_771m/historical/CRU_TS/Historical_Monthly_and_Derived_Temperature_Products_771m_CRU_TS/tas_decadal_summaries_AK_771m_CRU_TS31_historical.zip">http://data.snap.uaf.edu/data/Base/AK_771m/historical/CRU_TS/Historical_Monthly_and_Derived_Temperature_Products_771m_CRU_TS/tas_decadal_summaries_AK_771m_CRU_TS31_historical.zip</a></td>
+    <td><a href="https://crudata.uea.ac.uk/cru/data/hrg/">CRU TS High-resolution gridded datasets (and derived products)</a></td>
+    <td>Raster</td>
+  </tr>
+  <tr>
+    <td><a href="http://ckan.snap.uaf.edu/dataset/historical-monthly-and-derived-precipitation-products-771m-cru-ts">Historical Monthly and Derived Precipitation Products - 771m CRU TS</a></td>
+    <td><a href="http://data.snap.uaf.edu/data/Base/AK_771m/historical/CRU_TS/Historical_Monthly_and_Derived_Precipitation_Products_771m_CRU_TS/pr_decadal_summaries_AK_771m_CRU_TS31_historical.zip">http://data.snap.uaf.edu/data/Base/AK_771m/historical/CRU_TS/Historical_Monthly_and_Derived_Precipitation_Products_771m_CRU_TS/pr_decadal_summaries_AK_771m_CRU_TS31_historical.zip</a></td>
+    <td><a href="https://crudata.uea.ac.uk/cru/data/hrg/">CRU TS High-resolution gridded datasets (and derived products)</a></td>
+    <td>Raster</td>
+  </tr>
+  <tr>
+    <td><a href="http://ckan.snap.uaf.edu/dataset/projected-monthly-and-derived-temperature-products-771m-cmip5-ar5">Projected Monthly and Derived Temperature Products - 771m CMIP5/AR5</a></td>
+    <td><a href="http://data.snap.uaf.edu/data/Base/AK_771m/projected/AR5_CMIP5_models/Projected_Monthy_and_Derived_Temperature_Products_771m_CMIP5_AR5/derived">http://data.snap.uaf.edu/data/Base/AK_771m/projected/AR5_CMIP5_models/Projected_Monthy_and_Derived_Temperature_Products_771m_CMIP5_AR5/derived</a></td>
+    <td><a href="https://esgf-node.llnl.gov/search/cmip5/">CMIP5</a></td>
+    <td>Raster</td>
+  </tr>
+  <tr>
+    <td><a href="http://ckan.snap.uaf.edu/dataset/projected-monthly-and-derived-precipitation-products-771m-cmip5-ar5">Projected Monthly and Derived Precipitation Products - 771m CMIP5/AR5</a></td>
+    <td><a href="http://data.snap.uaf.edu/data/Base/AK_771m/projected/AR5_CMIP5_models/Projected_Monthy_and_Derived_Precipitation_Products_771m_CMIP5_AR5/derived">http://data.snap.uaf.edu/data/Base/AK_771m/projected/AR5_CMIP5_models/Projected_Monthy_and_Derived_Precipitation_Products_771m_CMIP5_AR5/derived</a></td>
+    <td><a href="https://esgf-node.llnl.gov/search/cmip5/">CMIP5</a></td>
+    <td>Raster</td>
+  </tr>
+</tbody>
+</table>
+
+
 <footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>

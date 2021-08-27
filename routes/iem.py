@@ -11,6 +11,7 @@ from rasterstats import zonal_stats
 from validate_latlon import validate, validate_bbox, project_latlon
 from . import routes
 from config import RAS_BASE_URL
+from fetch_data import fetch_layer_data
 
 iem_api = Blueprint("iem_api", __name__)
 
@@ -19,10 +20,12 @@ huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_
 )
 
 # encodings hardcoded for now
+# fmt: off
 dim_encodings = {
     "period": {
         0: "2040_2070",
         1: "2070_2100",
+        2: "1910-2009",
     },
     "season": {
         0: "DJF",
@@ -33,20 +36,35 @@ dim_encodings = {
     "model": {
         0: "CCSM4",
         1: "MRI-CGCM3",
+        2: "CRU-TS31",
     },
     "scenario": {
         0: "rcp45",
+        1: "rcp60",
         2: "rcp85",
+        3: "CRU_historical",
     },
 }
+# fmt: on
+
+# store global list of invalid dim value combinations, such as
+# model == CRU TS31 and period == 2040-2070, etc.
+invalid_dim_values = list(itertools.product(range(2), range(4), [2], range(4)))
+invalid_dim_values.extend(itertools.product([2], range(4), range(2), range(4)))
+invalid_dim_values.extend(itertools.product(range(3), range(4), range(2), [3]))
+invalid_dim_values.extend(itertools.product(range(3), range(4), [2], range(3)))
+
+# do the same as above for only invalid model / period combinations
+invalid_model_periods = list(itertools.product(range(2), [2]))
+invalid_model_periods.extend(itertools.product([2], range(2)))
 
 
-async def make_request(url, session):
-    """Make an awaitable GET request to URL,
-    return result based on encoding
+async def make_netcdf_request(url, session):
+    """Make an awaitable GET request to WCS URL with
+    netCDF encoding
 
     Args:
-        url (str): WCS query with JSON encoding
+        url (str): WCS query with ncetCDF encoding
         session (aiohttp.ClientSession): the client session instance
 
     Returns:
@@ -54,12 +72,7 @@ async def make_request(url, session):
     """
     resp = await session.get(url)
     resp.raise_for_status()
-
-    encoding = url.split("&FORMAT=")[1]
-    if encoding == "application/json":
-        query_result = await resp.json()
-    elif encoding == "application/netcdf":
-        query_result = await resp.read()
+    query_result = await resp.read()
 
     return query_result
 
@@ -76,10 +89,10 @@ async def fetch_point_data(x, y):
     Returns:
         xarray.DataSet containing results of WCS netCDF query
     """
-    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
+    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_ar5_cruts31_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
 
     async with ClientSession() as session:
-        point_data = await asyncio.create_task(make_request(url, session))
+        point_data = await asyncio.create_task(fetch_layer_data(url, session))
 
     return point_data
 
@@ -95,11 +108,11 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
         xarray.DataSet containing results of WCS netCDF query
     """
     # only see this ever being a single request
-    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_temp_precip_wms&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
+    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_ar5_cruts31_temp_precip_wms&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
 
     start_time = time.time()
     async with ClientSession() as session:
-        netcdf_bytes = await asyncio.create_task(make_request(url, session))
+        netcdf_bytes = await asyncio.create_task(make_netcdf_request(url, session))
 
     app.logger.info(
         f"Fetched BBOX data from Rasdaman, elapsed time {(time.time() - start_time)}s"
@@ -139,27 +152,22 @@ def package_point_data(point_data):
             season = dim_encodings["season"][si]
             point_data_pkg[period][season] = {}
             for mi, sc_li in enumerate(m_li):  # (scenario list)
-                model = dim_encodings["model"][mi]
-                point_data_pkg[period][season][model] = {}
-                for sci, values in enumerate(sc_li):
-                    # Remove this if statement when RCP 6.5 is added
-                    if sci == 1:
-                        # Since we are missing RCP 6.5 from data in Rasdaman currently,
-                        # creating the JSON requires mapping from integers to dimension values.
-                        # But the JSON ordering labels the scenario as
-                        sci = 2
-                    elif sci == 2:
-                        # just a way to make sure this snippet is removed
-                        # error out if the corresponding JSON scenario index value
-                        # ever does equal 2.
-                        exit("RCP 6.5 must have been added - remove this code piece!")
-                    scenario = dim_encodings["scenario"][sci]
-                    point_data_pkg[period][season][model][scenario] = {}
+                # verify that model and period combinations are valid before
+                #   creating placeholder
+                if (pi, mi) not in invalid_model_periods:
+                    model = dim_encodings["model"][mi]
+                    point_data_pkg[period][season][model] = {}
+                    for sci, values in enumerate(sc_li):
+                        scenario = dim_encodings["scenario"][sci]
+                        # verify that all dim value combinations are valid before
+                        #   creating placeholder
+                        if (pi, si, mi, sci) not in invalid_dim_values:
+                            point_data_pkg[period][season][model][scenario] = {}
 
-                    for variable, value in zip(variables, values.split(" ")):
-                        point_data_pkg[period][season][model][scenario][
-                            variable
-                        ] = round(float(value), 1)
+                            for variable, value in zip(variables, values.split(" ")):
+                                point_data_pkg[period][season][model][scenario][
+                                    variable
+                                ] = round(float(value), 1)
 
     return point_data_pkg
 
@@ -185,40 +193,48 @@ def aggregate_dataarray(ds, dimensions, poly, transform):
     # hardcoded assuming same 4 dimensions,
     #   consider revising with more robust approach
 
-    for period_value in np.int32(ds[dimensions[0]].values):
-        period = dim_encodings["period"][period_value]
+    for pi in np.int32(ds[dimensions[0]].values):
+        period = dim_encodings["period"][pi]
         aggr_results[period] = {}
-        for season_value in np.int32(ds[dimensions[1]].values):
-            season = dim_encodings["season"][season_value]
+        for si in np.int32(ds[dimensions[1]].values):
+            season = dim_encodings["season"][si]
             aggr_results[period][season] = {}
-            for model_value in np.int32(ds[dimensions[2]].values):
-                model = dim_encodings["model"][model_value]
-                aggr_results[period][season][model] = {}
-                for scenario_value in np.int32(ds[dimensions[3]].values):
-                    scenario = dim_encodings["scenario"][scenario_value]
-                    # select subset and compute aggregate
-                    aggr_results[period][season][model][scenario] = {}
-                    for val in ["tas", "pr"]:
-                        arr = (
-                            ds[val]
-                            .sel(
-                                period=period_value,
-                                season=season_value,
-                                model=model_value,
-                                scenario=scenario_value,
-                            )
-                            .values
-                        )
-                        aggr_result = zonal_stats(
-                            poly,
-                            arr,
-                            affine=transform,
-                            nodata=np.nan,
-                            stats=["mean"],
-                        )[0]
-                        aggr_results[period][season][model][scenario][val] = round(
-                            aggr_result["mean"], 1
-                        )
+            for mi in np.int32(ds[dimensions[2]].values):
+                # verify that model and period combinations are valid before
+                #   creating placeholder
+                if (pi, mi) not in invalid_model_periods:
+                    model = dim_encodings["model"][mi]
+                    aggr_results[period][season][model] = {}
+                    for sci in np.int32(ds[dimensions[3]].values):
+                        scenario = dim_encodings["scenario"][sci]
+                        # select subset and compute aggregate
+                        # verify that dim value combination is valid before
+                        #   creating placeholder
+                        if (pi, si, mi, sci) not in invalid_dim_values:
+                            aggr_results[period][season][model][scenario] = {}
+                            for val in ["tas", "pr"]:
+                                # fmt: off
+                                arr = (
+                                    ds[val]
+                                    .sel(
+                                        period=pi,
+                                        season=si,
+                                        model=mi,
+                                        scenario=sci,
+                                    )
+                                    .values
+                                )
+                                aggr_result = zonal_stats(
+                                    poly,
+                                    arr,
+                                    affine=transform,
+                                    nodata=np.nan,
+                                    stats=["mean"],
+                                )[0]
+                                # fmt: on
+                                aggr_results[period][season][model][scenario][
+                                    val
+                                ] = round(aggr_result["mean"], 1)
 
     return aggr_results
 
@@ -295,7 +311,6 @@ def run_aggregate_huc(huc_id):
 
     # aggregate the data and return packaged results
     # compute transform with rioxarray
-    aggr_results = {}
     met_ds.rio.set_spatial_dims("X", "Y")
     transform = met_ds.rio.transform()
     dimensions = ["period", "season", "model", "scenario"]
