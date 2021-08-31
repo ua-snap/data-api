@@ -10,3 +10,4 @@ __pycache__
 routes/api.sublime-project
 routes/api.sublime-workspace
 TODO.md
+**/.DS_Store
