@@ -21,7 +21,6 @@ wfs_targets = {}
 
 def package_akvegwetland(akvegwet_resp):
     """Package forest data in dict"""
-    print(akvegwet_resp)
     title = "Alaska Vegetation and Wetland Composite"
     if akvegwet_resp[0]["features"] == []:
         di = {"title": title, "Data Status": "No data at this location."}
