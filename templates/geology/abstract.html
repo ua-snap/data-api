@@ -1,11 +1,9 @@
-<h1>Scenarios Network for Alaska + Arctic Planning</h1>
-<h2>Data API</h2>
+{% extends 'base.html' %}
+{% block content %}
 <h3>Geology Data</h3>
 <p>These data are for use in the Arctic-EDS. Currently, only the USGS detailed rock unit names and ages are available.</p>
 <h4>Service endpoints</h4>
 <ul>
-    <li><a href="/geology/point">Point Query</a></li>
+    <li><a href="/geology/point">Point Query</a>: USGS Geologic Map of Alaska at a single point</li>
 </ul>
-<h4>/geology/point</h4>
-<p>Query USGS Geologic Map of Alaska at a single point.</p>
-<footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>
+{% endblock %}

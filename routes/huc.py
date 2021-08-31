@@ -1,6 +1,5 @@
 import asyncio
 import geopandas as gpd
-from aiohttp import ClientSession
 from flask import abort, Blueprint, render_template, current_app as app
 from . import routes
 
