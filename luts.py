@@ -1,4 +1,5 @@
 """Module for look-up-table like objects"""
+import pickle
 
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
@@ -44,3 +45,6 @@ snow_status = {
     4: True,
     0: "No data at this location.",
 }
+
+with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
+    ak_veg_di = pickle.load(fp)

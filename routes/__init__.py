@@ -9,3 +9,4 @@ from .iem import *
 from .glacier import *
 from .geology import *
 from .physiography import *
+from .forest import *
