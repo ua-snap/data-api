@@ -1,0 +1,43 @@
+<h1>Scenarios Network for Alaska + Arctic Planning</h1>
+<h2>Data API</h2>
+<h3>Forest Point Query</h3>
+<p>Query the Alaska Vegetation and Wetland Composite at a single point specified by latitude and longitude.</p>
+<p>Example: <a href="/forest/point/65.0923/-164.9239">/forest/point/65.0923/-164.9239</a></p>
+<h4>Results from the query above will look like this:</h4>
+<code><pre>
+{
+  "coarselc": "Tall Shrub (Open-Closed)",
+  "code": 371,
+  "finelc": "Alder-Tall Willow (Closed) (Floodplain)",
+  "nwi": "Freshwater Forested/Shrub Wetland",
+  "title": "Alaska Vegetation and Wetland Composite"
+}
+</pre></code>
+<ul>
+
+    <li><strong><code>coarselc</code></strong>: <i>(str)</i>, Coarse (less detail) description of land cover.</li>
+    <li><strong><code>code</code></strong>: <i>(int)</i>, Numeric land cover code.</li>
+    <li><strong><code>finelc</code></strong>: <i>(str)</i>, Fine (more detail) description of land cover.</li>
+    <li><strong><code>nwi</code></strong>: <i>(str)</i>, National Wetland Inventory classification.</li>
+    <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+</ul>
+<table>
+<thead>
+  <tr>
+    <th>Data Layer</th>
+    <th>Download link</th>
+    <th>Source</th>
+    <th>Notes</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Alaska Vegetation and Wetland Composite</td>
+    <td><a href="https://accs.uaa.alaska.edu/files/data/AlaskaVegetationWetlandComposite.zip">https://accs.uaa.alaska.edu/files/data/AlaskaVegetationWetlandComposite.zip</a></td>
+    <td><a href="https://accscatalog.uaa.alaska.edu/dataset/alaska-vegetation-and-wetland-composite">Alaska Center for Conservation and Science</a></td>
+    <td>The Alaska Vegetation and Wetland Composite (AKVWC) represents the best-available data derived from 28 regional land cover maps that have been developed within the last 31 years. The map is attributed with a uniform, two-tiered legend so that land cover classes that are similar in concept, yet different in nomenclature may be reconciled. These hierarchical levels of land cover classes are represented by a coarse-scale class, which is analogous to level III of the Alaska Vegetation Classification and fine-scale classes, which nest within the coarse-scale classes and are analogous to level IV of the Alaska Vegetation Classification (Viereck et al. 1992). As ecologists continue to produce new regional land cover maps, ACCS will update the statewide vegetation map.</td>
+  </tr>
+</tbody>
+</table>
+
+<footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>

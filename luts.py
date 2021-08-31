@@ -1,4 +1,5 @@
 """Module for look-up-table like objects"""
+import pickle
 
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
@@ -44,3 +45,10 @@ snow_status = {
     4: True,
     0: "No data at this location.",
 }
+
+# For the forest endpoint.  This file is just a generated pickle
+# from the `dbf` file that will be downloaded with the .zip that
+# is linked in the documentation page for the point query, including
+# only the columns we need for this lookup.
+with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
+    ak_veg_di = pickle.load(fp)
