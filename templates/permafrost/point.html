@@ -1,11 +1,10 @@
-<h1>Scenarios Network for Alaska + Arctic Planning</h1>
-<h2>Data API</h2>
-<h3>Permafrost Point Query</h3>
+{% extends 'base.html' %}
+{% block content %}
+<h3>Permafrost point query</h3>
 <p>Query permafrost data (e.g. extent, ground temperatures) for a single point specified by latitude and longitude.</p>
 <p>Example: <a href="/permafrost/point/65.0628/-146.1627">/permafrost/point/65.0628/-146.1627</a></p>
-
 <h4>Results from the query above will look like this:</h4>
-<code><pre>
+<pre>
 {
   "gipl_alt": [
     {
@@ -73,75 +72,73 @@
     "title": "Obu et al. (2018) Permafrost Extent"
   }
 }
-</pre></code>
+</pre>
 <ul>
     <li><strong><code>gipl_alt</code></strong>: GIPL 2.0 Active Layer Thickness Model Output
         <ul>
-             <li><strong><code>thickness</code></strong>: <i>(float)</i>, Active layer thickness (m).</li>
-             <li><strong><code>year</code></strong>: <i>(str)</i>, Calendar year of model output.</li>
-             <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-      </ul>
-      <li><strong><code>gipl_magt</code></strong>: GIPL 2.0 Mean Annual Ground Temperature Model Output
+            <li><strong><code>thickness</code></strong>: <i>(float)</i>, Active layer thickness (m).</li>
+            <li><strong><code>year</code></strong>: <i>(str)</i>, Calendar year of model output.</li>
+            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+        </ul>
+    <li><strong><code>gipl_magt</code></strong>: GIPL 2.0 Mean Annual Ground Temperature Model Output
         <ul>
-             <li><strong><code>depth</code></strong>: <i>(str)</i>, Depth below the surface (m) for which the mean annual ground temperature is modeled.</li>
-             <li><strong><code>temp</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
-             <li><strong><code>year</code></strong>: <i>(str)</i>, Calendar year of model output.</li>
-             <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-      </ul>
-     <li><strong><code>jorg</code></strong>: Jorgenson et al. (2008) Permafrost Characteristics of Alaska
+            <li><strong><code>depth</code></strong>: <i>(str)</i>, Depth below the surface (m) for which the mean annual ground temperature is modeled.</li>
+            <li><strong><code>temp</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
+            <li><strong><code>year</code></strong>: <i>(str)</i>, Calendar year of model output.</li>
+            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+        </ul>
+    <li><strong><code>jorg</code></strong>: Jorgenson et al. (2008) Permafrost Characteristics of Alaska
         <ul>
-             <li><strong><code>ice</code></strong>: <i>(str)</i>, Estimated ground ice volume.</li>
-             <li><strong><code>pfx</code></strong>: <i>(str)</i>, Permafrost extent.</li>
-             <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-      </ul>
-      <li><strong><code>obu_magt</code></strong>: Obu et al. (2018) Modeled Mean Annual Ground Temperature at Top of Permafrost
+            <li><strong><code>ice</code></strong>: <i>(str)</i>, Estimated ground ice volume.</li>
+            <li><strong><code>pfx</code></strong>: <i>(str)</i>, Permafrost extent.</li>
+            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+        </ul>
+    <li><strong><code>obu_magt</code></strong>: Obu et al. (2018) Modeled Mean Annual Ground Temperature at Top of Permafrost
         <ul>
-             <li><strong><code>depth</code></strong>: <i>(str)</i>, Top of permafrost (i.e. depth of active layer).</li>
-             <li><strong><code>temp</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
-             <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-             <li><strong><code>year</code></strong>: <i>(str)</i>, Date range of model output.</li>
-      </ul>
-      <li><strong><code>jorg</code></strong>: Obu et al. (2018) Modeled Permafrost Extent
+            <li><strong><code>depth</code></strong>: <i>(str)</i>, Top of permafrost (i.e. depth of active layer).</li>
+            <li><strong><code>temp</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
+            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+            <li><strong><code>year</code></strong>: <i>(str)</i>, Date range of model output.</li>
+        </ul>
+    <li><strong><code>jorg</code></strong>: Obu et al. (2018) Modeled Permafrost Extent
         <ul>
-             <li><strong><code>pfx</code></strong>: <i>(str)</i>, Permafrost extent.</li>
-             <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-      </ul>
+            <li><strong><code>pfx</code></strong>: <i>(str)</i>, Permafrost extent.</li>
+            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+        </ul>
 </ul>
-
 <h4>Source data</h4>
 <table>
-<thead>
-  <tr>
-    <th>Data Layer</th>
-    <th>Variables</th>
-    <th>Download link</th>
-    <th>Source</th>
-    <th>Notes</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>GIPL Model Ouputs</td>
-    <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
-    <td><a href="http://data.snap.uaf.edu/data/IEM/Outputs/GIPL/Gen_1a/v_2.0.0/">http://data.snap.uaf.edu/data/IEM/Outputs/GIPL/Gen_1a/v_2.0.0/</a></td>
-    <td><a href="http://ckan.snap.uaf.edu/dataset/gipl-model-outputs-linear-coupled-annual">http://ckan.snap.uaf.edu/dataset/gipl-model-outputs-linear-coupled-annual</a></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>Jorgenson Permafrost Characteristics</td>
-    <td>Permafrost Extent, Ground Ice Volume</td>
-    <td><a href="https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606">https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606</a></td>
-    <td><a href="https://catalog.northslopescience.org/dataset/1725">https://catalog.northslopescience.org/dataset/1725</a></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td>Obu et al. 2018</td>
-    <td>Mean Annual Ground Temperature, Permafrost Extent</td>
-    <td><a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip</a>, <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip</a></td>
-    <td><a href="https://doi.org/10.1594/PANGAEA.888600">https://doi.org/10.1594/PANGAEA.888600</a></td>
-    <td></td>
-  </tr>
-</tbody>
+    <thead>
+        <tr>
+            <th>Data Layer</th>
+            <th>Variables</th>
+            <th>Download link</th>
+            <th>Source</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>GIPL Model Ouputs</td>
+            <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
+            <td><a href="http://data.snap.uaf.edu/data/IEM/Outputs/GIPL/Gen_1a/v_2.0.0/">http://data.snap.uaf.edu/data/IEM/Outputs/GIPL/Gen_1a/v_2.0.0/</a></td>
+            <td><a href="http://ckan.snap.uaf.edu/dataset/gipl-model-outputs-linear-coupled-annual">http://ckan.snap.uaf.edu/dataset/gipl-model-outputs-linear-coupled-annual</a></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Jorgenson Permafrost Characteristics</td>
+            <td>Permafrost Extent, Ground Ice Volume</td>
+            <td><a href="https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606">https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606</a></td>
+            <td><a href="https://catalog.northslopescience.org/dataset/1725">https://catalog.northslopescience.org/dataset/1725</a></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Obu et al. 2018</td>
+            <td>Mean Annual Ground Temperature, Permafrost Extent</td>
+            <td><a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip</a>, <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip</a></td>
+            <td><a href="https://doi.org/10.1594/PANGAEA.888600">https://doi.org/10.1594/PANGAEA.888600</a></td>
+            <td></td>
+        </tr>
+    </tbody>
 </table>
-
-<footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>
+{% endblock %}

@@ -1,19 +1,15 @@
-<h1>Scenarios Network for Alaska + Arctic Planning</h1>
-<h2>Data API</h2>
-<h3>IEM Data</h3>
-<p>These data are for use in the IEM Webapp. Currently, only SNAP's 771m downscaled temperature and precip data are available.</p>
+{% extends 'base.html' %}
+{% block content %}
+<h3>Integrated Ecosystem Model (IEM) data</h3>
+<p>These data are for use in the IEM webapp. Currently, only SNAP's 771m downscaled temperature and precip data are available.</p>
 <h4>Service endpoints</h4>
 <ul>
-    <li><a href="/iem/point">Point Query</a></li>
-    <li><a href="/iem/huc">Aggregate by HUC</a></li>
+    <li><a href="/iem/point">Point Query</a>: 771m temperature and precip data at a single point</li>
+    <li><a href="/iem/huc">Aggregate by HUC</a>: 771m temperature and precip data within a HUC-8 polygon, aggregating by mean</li>
 </ul>
-<h4>/iem/point</h4>
-<p>Query 771m temperature and precip data at a single point.</p>
-<h4>/iem/huc</h4>
-<p>Query 771m temperature and precip data within a HUC-8 polygon, aggregating by mean.</p>
 
 <h4>Results from the queries above will look like this:</h4>
-<code><pre>
+<pre>
 {
   "1910-2009": {
     "DJF":{
@@ -27,11 +23,11 @@
   } 
   ...
 }
-</pre></code>
+</pre>
 
 The above output is structured as such:
 
-<code><pre>
+<pre>
 {
   &ltperiod>: {
     &ltseason>:{
@@ -45,9 +41,9 @@ The above output is structured as such:
   } 
   ...
 }
-</pre></code>
+</pre>
 
-<strong>Dimensions:</strong>
+<h4>Dimensions:</h4>
 <ul>
     <li><strong><code>period</code></strong>: Sumary period:</li>
         <ul>
@@ -119,6 +115,4 @@ The above output is structured as such:
   </tr>
 </tbody>
 </table>
-
-
-<footer>Copyright &copy; FIXME MAKE DATE DYNAMIC, University of Alaska Fairbanks</footer>
+{% endblock %}

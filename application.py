@@ -1,5 +1,4 @@
-import asyncio
-from aiohttp import ClientSession
+from datetime import datetime
 from flask import Flask, render_template
 from flask_cors import CORS
 from routes import *
@@ -9,6 +8,15 @@ application = app = Flask(__name__)
 CORS(app)
 
 app.register_blueprint(routes)
+
+
+@app.context_processor
+def inject_date():
+    """
+    Inject date so it can be used in the footer easily.
+    """
+    year = datetime.now().year
+    return dict(year=year)
 
 
 @app.route("/")

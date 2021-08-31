@@ -1,0 +1,11 @@
+.headerbanner {
+	padding: .5rem;
+	text-transform: uppercase;
+	text-align:  center;
+	letter-spacing:  .3ex;
+	border-bottom:  1px solid #aaa;
+}
+
+footer.footer {
+	padding-bottom:  6rem;
+}
