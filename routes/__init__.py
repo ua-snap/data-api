@@ -10,3 +10,4 @@ from .glacier import *
 from .geology import *
 from .physiography import *
 from .forest import *
+from .mean_annual_precip import *

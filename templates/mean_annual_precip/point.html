@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Mean Annual Precipitation point query</h3>
+<p>Query mean annual precipitation projections for a single point specified by latitude and longitude.</p>
+<p>Example: <a href="/mean_annual_precip/point/65.0628/-146.1627">/mean_annual_precip/point/65.0628/-146.1627</a></p>
+<h4>Results from the query above will look like this:</h4>
+<pre>
+{
+  "dec_mapr": [
+    {
+      "dec_end": "2059",
+      "dec_start": "2050",
+      "model": "5modelAvg",
+      "pr_mm": 408,
+      "scenario": "rcp60",
+      "title": "Mean Annual Precipitation (mm) Decadal Summary Projection for 2050-2059"
+    },
+    {
+      "dec_end": "2059",
+      "dec_start": "2050",
+      "model": "5modelAvg",
+      "pr_mm": 436,
+      "scenario": "rcp85",
+      "title": "Mean Annual Precipitation (mm) Decadal Summary Projection for 2050-2059"
+    }
+  ]
+}
+</pre>
+<ul>
+    <li><strong><code>dec_mapr</code></strong>: Decadal Summaries of Mean Annual Precipitation Projections
+        <ul>
+            <li><strong><code>dec_end</code></strong>: <i>(str)</i>, End of decade calendar year.</li>
+            <li><strong><code>dec_start</code></strong>: <i>(str)</i>, Start of decade calendar year.</li>
+            <li><strong><code>model</code></strong>: <i>(str)</i>, Climate model used to generate outputs.</li>
+            <li><strong><code>scenario</code></strong>: <i>(str)</i>, RCP used to generate outputs.</li>
+            <li><strong><code>pr_mm</code></strong>: <i>(float)</i>, Mean Annual Precipitation (mm).</li>
+            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+        </ul>
+</ul>
+<h4>Source data</h4>
+<table>
+
+</table>
+{% endblock %}
