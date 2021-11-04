@@ -1,12 +1,20 @@
 import asyncio
 import io
+import csv
 import time
 import itertools
 import numpy as np
 import geopandas as gpd
 import xarray as xr
 from aiohttp import ClientSession
-from flask import abort, Blueprint, render_template, current_app as app
+from flask import (
+    abort,
+    Blueprint,
+    Response,
+    render_template,
+    request,
+    current_app as app,
+)
 from rasterstats import zonal_stats
 from validate_latlon import validate, validate_bbox, project_latlon
 from . import routes
@@ -172,6 +180,85 @@ def package_point_data(point_data):
     return point_data_pkg
 
 
+def create_csv(packaged_data):
+    """
+    Returns a CSV version of the fetched data, as a string.
+
+    Args:
+        packaged_data (json): output from the package_point_data function here
+
+    Returns:
+        string of CSV data
+    """
+    output = io.StringIO()
+
+    fieldnames = ["variable", "date_range", "season", "model", "scenario", "value"]
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+
+    writer.writeheader()
+
+    for period_key, period in dim_encodings["period"].items():
+        for season_key, season in dim_encodings["season"].items():
+
+            if period == "1910-2009":
+                writer.writerow(
+                    {
+                        "variable": "pr",
+                        "date_range": period,
+                        "season": season,
+                        "model": model,
+                        "scenario": "Historical",
+                        "value": packaged_data[period][season][model]["CRU_historical"][
+                            "pr"
+                        ],
+                    }
+                )
+                writer.writerow(
+                    {
+                        "variable": "tas",
+                        "date_range": period,
+                        "season": season,
+                        "model": "CRU-TS31",
+                        "scenario": "Historical",
+                        "value": packaged_data[period][season][model]["CRU_historical"][
+                            "tas"
+                        ],
+                    }
+                )
+            else:
+                for model_key, model in dim_encodings["model"].items():
+                    for scenario_keys, scenario in dim_encodings["scenario"].items():
+                        if (scenario == "CRU_historical") or (model == "CRU-TS31"):
+                            continue
+
+                        writer.writerow(
+                            {
+                                "variable": "pr",
+                                "date_range": period,
+                                "season": season,
+                                "model": model,
+                                "scenario": scenario,
+                                "value": packaged_data[period][season][model][scenario][
+                                    "pr"
+                                ],
+                            }
+                        )
+                        writer.writerow(
+                            {
+                                "variable": "tas",
+                                "date_range": period,
+                                "season": season,
+                                "model": model,
+                                "scenario": scenario,
+                                "value": packaged_data[period][season][model][scenario][
+                                    "tas"
+                                ],
+                            }
+                        )
+
+    return output.getvalue()
+
+
 def aggregate_dataarray(ds, dimensions, poly, transform):
     """Perform a spatial agrgegation of a data array within a polygon.
     Only supports mean aggregation for now.
@@ -278,7 +365,19 @@ def run_fetch_point_data(lat, lon):
     point_data = asyncio.run(fetch_point_data(x, y))
     point_pkg = package_point_data(point_data)
 
-    return point_pkg
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(point_pkg)
+        return Response(
+            csv_data,
+            mimetype="text/csv",
+            headers={
+                "Content-Type": 'text/csv; name="climate.csv"',
+                "Content-Disposition": 'attachment; filename="climate.csv"',
+            },
+        )
+
+    else:
+        return point_pkg
 
 
 @routes.route("/iem/huc/<huc_id>")
