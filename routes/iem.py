@@ -376,8 +376,7 @@ def run_fetch_point_data(lat, lon):
             },
         )
 
-    else:
-        return point_pkg
+    return point_pkg
 
 
 @routes.route("/iem/huc/<huc_id>")
@@ -414,4 +413,16 @@ def run_aggregate_huc(huc_id):
     transform = met_ds.rio.transform()
     dimensions = ["period", "season", "model", "scenario"]
     aggr_results = aggregate_dataarray(met_ds, dimensions, poly, transform)
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(aggr_results)
+        return Response(
+            csv_data,
+            mimetype="text/csv",
+            headers={
+                "Content-Type": 'text/csv; name="climate.csv"',
+                "Content-Disposition": 'attachment; filename="climate.csv"',
+            },
+        )
+
     return aggr_results
