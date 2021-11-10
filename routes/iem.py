@@ -29,29 +29,60 @@ huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_
 
 # encodings hardcoded for now
 # fmt: off
+# lookup tables derived from the IEM rasdaman ingest luts.py
 dim_encodings = {
-    "period": {
-        0: "2040_2070",
-        1: "2070_2100",
-        2: "1910-2009",
+    "varnames": {
+        0: "pr",
+        1: "tas",
     },
-    "season": {
-        0: "DJF",
-        1: "MAM",
-        2: "JJA",
-        3: "SON",
+    "decades": {
+        0: "2010_2019",
+        1: "2020_2029",
+        2: "2030_2039",
+        3: "2040_2049",
+        4: "2050_2059",
+        5: "2060_2069",
+        6: "2070_2079",
+        7: "2080_2089",
+        8: "2090_2099",
     },
-    "model": {
-        0: "CCSM4",
-        1: "MRI-CGCM3",
-        2: "CRU-TS31",
+    "months": {
+        0: "Jan", 
+        1: "Feb",
+        2: "Mar",
+        3: "Apr",
+        4: "May",
+        5: "Jun",
+        6: "Jul",
+        7: "Aug",
+        8: "Sep",
+        9: "Oct",
+        10: "Nov",
+        11: "Dec",
     },
-    "scenario": {
+    "models": {
+        0: "5modelAvg",
+        1: "CCSM4",
+        2: "MRI-CGCM3",
+    },
+    "scenarios": {
         0: "rcp45",
         1: "rcp60",
         2: "rcp85",
-        3: "CRU_historical",
     },
+}
+
+cru_decades = {
+    0: "1910_1919",
+    1: "1920_1929",
+    2: "1930_1939",
+    3: "1940_1949",
+    4: "1950_1959",
+    5: "1960_1969",
+    6: "1970_1979",
+    7: "1980_1989",
+    8: "1990_1999",
+    9: "2000_2009",
 }
 # fmt: on
 
@@ -65,6 +96,25 @@ invalid_dim_values.extend(itertools.product(range(3), range(4), [2], range(3)))
 # do the same as above for only invalid model / period combinations
 invalid_model_periods = list(itertools.product(range(2), [2]))
 invalid_model_periods.extend(itertools.product([2], range(2)))
+
+
+async def fetch_point_data(x, y, cov_id):
+    """Make the async request for the data at the specified point
+
+    Args:
+        x (float): lower x-coordinate bound
+        y (float): lower y-coordinate bound
+        cov_id (str): Rasdaman coverage id
+
+    Returns:
+        nested list containing results of WCS point query
+    """
+    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
+
+    async with ClientSession() as session:
+        point_data = await asyncio.create_task(fetch_layer_data(url, session))
+
+    return point_data
 
 
 async def make_netcdf_request(url, session):
@@ -85,32 +135,14 @@ async def make_netcdf_request(url, session):
     return query_result
 
 
-async def fetch_point_data(x, y):
-    """Make the async request for the data at the specified point
-
-    Args:
-        x (float): lower x-coordinate bound
-        y (float): lower y-coordinate bound
-        x2 (float): upper x-coordinate bound
-        y2 (float): upper y-coordinate bound
-
-    Returns:
-        xarray.DataSet containing results of WCS netCDF query
-    """
-    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_ar5_cruts31_temp_precip_wms&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
-
-    async with ClientSession() as session:
-        point_data = await asyncio.create_task(fetch_layer_data(url, session))
-
-    return point_data
-
-
 async def fetch_bbox_netcdf(x1, y1, x2, y2):
     """Make the async request for the data within the specified bbox
 
     Args:
         x1 (float): lower x-coordinate bound
         y1 (float): lower y-coordinate bound
+        x2 (float): upper x-coordinate bound
+        y2 (float): upper y-coordinate bound
 
     Returns:
         xarray.DataSet containing results of WCS netCDF query
@@ -140,42 +172,57 @@ def package_point_data(point_data):
     """Add dim names to JSON response from point query
 
     Args:
-        point_data (json)
+        point_data (list): nested list containing JSON 
+            results of AR5 or CRU point query
 
     Returns:
         Dict with dimension name
     """
     point_data_pkg = {}
-    variables = ["tas", "pr"]
 
-    # period, season, model, scenario
-    # Since we are relying on some hardcoded mappings between
-    # integers and the dataset dimensions, we should consider
-    # having that mapping tracked somewhere such that it is
-    # imported to help prevent breakage.
-    for pi, s_li in enumerate(point_data):  # (season_list)
-        period = dim_encodings["period"][pi]
-        point_data_pkg[period] = {}
-        for si, m_li in enumerate(s_li):  # (model list)
-            season = dim_encodings["season"][si]
-            point_data_pkg[period][season] = {}
-            for mi, sc_li in enumerate(m_li):  # (scenario list)
-                # verify that model and period combinations are valid before
-                #   creating placeholder
-                if (pi, mi) not in invalid_model_periods:
-                    model = dim_encodings["model"][mi]
-                    point_data_pkg[period][season][model] = {}
-                    for sci, values in enumerate(sc_li):
-                        scenario = dim_encodings["scenario"][sci]
-                        # verify that all dim value combinations are valid before
-                        #   creating placeholder
-                        if (pi, si, mi, sci) not in invalid_dim_values:
-                            point_data_pkg[period][season][model][scenario] = {}
+    # AR5 data has 9 decades, CRU has 10
+    if len(point_data) == 9:
+        # AR5 data:
+        # varname, decade, month, model, scenario
+        #   Since we are relying on some hardcoded mappings between
+        # integers and the dataset dimensions, we should consider
+        # having that mapping tracked somewhere such that it is
+        # imported to help prevent breakage.
 
-                            for variable, value in zip(variables, values.split(" ")):
-                                point_data_pkg[period][season][model][scenario][
-                                    variable
-                                ] = round(float(value), 1)
+        for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
+            decade = dim_encodings["decades"][di]
+            point_data_pkg[decade] = {}
+            for mi, mod_li in enumerate(m_li):  # (nested list with model at dim 0)
+                month = dim_encodings["months"][mi]
+                point_data_pkg[decade][month] = {}
+                for mod_i, s_li in enumerate(
+                    mod_li
+                ):  # (nested list with scenario at dim 0)
+                    model = dim_encodings["models"][mod_i]
+                    point_data_pkg[decade][month][model] = {}
+                    for si, v_li in enumerate(
+                        s_li
+                    ):  # (nested list with varname at dim 0)
+                        scenario = dim_encodings["scenarios"][si]
+                        point_data_pkg[decade][month][model][scenario] = {}
+                        for vi, value in enumerate(v_li):  # (data values)
+                            varname = dim_encodings["varnames"][vi]
+                            point_data_pkg[decade][month][model][scenario][
+                                varname
+                            ] = value
+
+    elif len(point_data) == 10:
+        for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
+            decade = cru_decades[di]
+            point_data_pkg[decade] = {}
+            for mi, v_li in enumerate(m_li):  # (nested list with varname at dim 0)
+                month = dim_encodings["months"][mi]
+                model = "CRU-TS31"
+                scenario = "CRU_historical"
+                point_data_pkg[decade][month] = {model: {scenario: {}}}
+                for vi, value in enumerate(v_li):  # (data values)
+                    varname = dim_encodings["varnames"][vi]
+                    point_data_pkg[decade][month][model][scenario][varname] = value
 
     return point_data_pkg
 
