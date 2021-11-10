@@ -98,25 +98,6 @@ invalid_model_periods = list(itertools.product(range(2), [2]))
 invalid_model_periods.extend(itertools.product([2], range(2)))
 
 
-async def fetch_point_data(x, y, cov_id):
-    """Make the async request for the data at the specified point
-
-    Args:
-        x (float): lower x-coordinate bound
-        y (float): lower y-coordinate bound
-        cov_id (str): Rasdaman coverage id
-
-    Returns:
-        nested list containing results of WCS point query
-    """
-    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
-
-    async with ClientSession() as session:
-        point_data = await asyncio.create_task(fetch_layer_data(url, session))
-
-    return point_data
-
-
 async def make_netcdf_request(url, session):
     """Make an awaitable GET request to WCS URL with
     netCDF encoding
@@ -166,6 +147,25 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2):
     ds = ds.rename_vars({"tas": "pr", "pr": "tas"})
 
     return ds
+
+
+async def fetch_point_data(x, y, cov_id):
+    """Make the async request for the data at the specified point
+
+    Args:
+        x (float): lower x-coordinate bound
+        y (float): lower y-coordinate bound
+        cov_id (str): Rasdaman coverage id
+
+    Returns:
+        nested list containing results of WCS point query
+    """
+    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
+
+    async with ClientSession() as session:
+        point_data = await asyncio.create_task(fetch_layer_data(url, session))
+
+    return point_data
 
 
 def package_point_data(point_data):
@@ -409,8 +409,14 @@ def run_fetch_point_data(lat, lon):
 
     x, y = project_latlon(lat, lon, 3338)
 
-    point_data = asyncio.run(fetch_point_data(x, y))
-    point_pkg = package_point_data(point_data)
+    ar5_point_data = asyncio.run(fetch_point_data(x, y, "iem_ar5_2km_taspr"))
+    ar5_point_pkg = package_point_data(ar5_point_data)
+    cru_point_data = asyncio.run(fetch_point_data(x, y, "iem_cru_2km_taspr"))
+    # use CRU as basis for combined point package for chronolical consistency
+    point_pkg = package_point_data(cru_point_data)
+    # combine the CRU and AR5 packages
+    for decade, summaries in ar5_point_pkg.items():
+        point_pkg[decade] = summaries
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(point_pkg)
