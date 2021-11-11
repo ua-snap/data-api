@@ -47,7 +47,7 @@ dim_encodings = {
         8: "2090_2099",
     },
     "months": {
-        0: "Jan", 
+        0: "Jan",
         1: "Feb",
         2: "Mar",
         3: "Apr",
@@ -73,7 +73,7 @@ dim_encodings = {
     "seasons": {
         0: "DJF",
         1: "JJA",
-        2: "MAM", 
+        2: "MAM",
         3: "SON",
     }
 }
@@ -104,57 +104,6 @@ invalid_model_periods = list(itertools.product(range(2), [2]))
 invalid_model_periods.extend(itertools.product([2], range(2)))
 
 
-async def make_netcdf_request(url, session):
-    """Make an awaitable GET request to WCS URL with
-    netCDF encoding
-
-    Args:
-        url (str): WCS query with ncetCDF encoding
-        session (aiohttp.ClientSession): the client session instance
-
-    Returns:
-        Query result, deocded differently depending on encoding.
-    """
-    resp = await session.get(url)
-    resp.raise_for_status()
-    query_result = await resp.read()
-
-    return query_result
-
-
-async def fetch_bbox_netcdf(x1, y1, x2, y2):
-    """Make the async request for the data within the specified bbox
-
-    Args:
-        x1 (float): lower x-coordinate bound
-        y1 (float): lower y-coordinate bound
-        x2 (float): upper x-coordinate bound
-        y2 (float): upper y-coordinate bound
-
-    Returns:
-        xarray.DataSet containing results of WCS netCDF query
-    """
-    # only see this ever being a single request
-    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID=iem_ar5_cruts31_temp_precip_wms&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
-
-    start_time = time.time()
-    async with ClientSession() as session:
-        netcdf_bytes = await asyncio.create_task(make_netcdf_request(url, session))
-
-    app.logger.info(
-        f"Fetched BBOX data from Rasdaman, elapsed time {(time.time() - start_time)}s"
-    )
-
-    # create xarray.DataSet from bytestring
-    ds = xr.open_dataset(io.BytesIO(netcdf_bytes))
-
-    # TODO: This is a temporary workaround to retitle the bands coming from
-    # Rasdaman. It appears to be a bug with the returned NetCDF output.
-    ds = ds.rename_vars({"tas": "pr", "pr": "tas"})
-
-    return ds
-
-
 async def fetch_point_data(x, y, cov_id):
     """Make the async request for the data at the specified point
 
@@ -174,14 +123,14 @@ async def fetch_point_data(x, y, cov_id):
     return point_data
 
 
-def package_point_data(point_data, aggr_type):
+def package_point_data(point_data, temporal_key):
     """Add dim names to JSON response from point query
 
     Args:
-        point_data (list): nested list containing JSON 
+        point_data (list): nested list containing JSON
             results of AR5 or CRU point query
-        aggr_type (str): the type of summary of source of point_data, 
-            either "months" or "seasons"
+        temporal_key (str): the type of summary of source 
+            of point_data, either "months" or "seasons"
 
     Returns:
         Dict with dimension name
@@ -201,7 +150,7 @@ def package_point_data(point_data, aggr_type):
             decade = dim_encodings["decades"][di]
             point_data_pkg[decade] = {}
             for ai, mod_li in enumerate(m_li):  # (nested list with model at dim 0)
-                aggr_period = dim_encodings[aggr_type][ai]
+                aggr_period = dim_encodings[temporal_key][ai]
                 point_data_pkg[decade][aggr_period] = {}
                 for mod_i, s_li in enumerate(
                     mod_li
@@ -224,7 +173,7 @@ def package_point_data(point_data, aggr_type):
             decade = cru_decades[di]
             point_data_pkg[decade] = {}
             for ai, v_li in enumerate(m_li):  # (nested list with varname at dim 0)
-                aggr_period = dim_encodings[aggr_type][ai]
+                aggr_period = dim_encodings[temporal_key][ai]
                 model = "CRU-TS31"
                 scenario = "CRU_historical"
                 point_data_pkg[decade][aggr_period] = {model: {scenario: {}}}
@@ -237,7 +186,153 @@ def package_point_data(point_data, aggr_type):
     return point_data_pkg
 
 
-def create_csv(packaged_data):
+async def make_netcdf_request(url, session):
+    """Make an awaitable GET request to WCS URL with
+    netCDF encoding
+
+    Args:
+        url (str): WCS query with ncetCDF encoding
+        session (aiohttp.ClientSession): the client session instance
+
+    Returns:
+        Query result, deocded differently depending on encoding.
+    """
+    resp = await session.get(url)
+    resp.raise_for_status()
+    query_result = await resp.read()
+
+    return query_result
+
+
+async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_id):
+    """Make the async request for the data within the specified bbox
+
+    Args:
+        x1 (float): lower x-coordinate bound
+        y1 (float): lower y-coordinate bound
+        x2 (float): upper x-coordinate bound
+        y2 (float): upper y-coordinate bound
+        cov_id (str): Coverage id
+
+    Returns:
+        xarray.DataSet containing results of WCS netCDF query
+    """
+    # only see this ever being a single request
+    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
+
+    start_time = time.time()
+    async with ClientSession() as session:
+        netcdf_bytes = await asyncio.create_task(make_netcdf_request(url, session))
+
+    app.logger.info(
+        f"Fetched BBOX data from Rasdaman, elapsed time {round(time.time() - start_time)}s"
+    )
+
+    # create xarray.DataSet from bytestring
+    ds = xr.open_dataset(io.BytesIO(netcdf_bytes))
+
+    return ds
+
+
+def aggregate_dataarray(ds, poly, transform, temporal_key):
+    """Perform a spatial agrgegation of a data array within a polygon.
+    Only supports mean aggregation for now.
+
+    Args:
+        ds (xarray.DataSet): datacube for all variables
+        dimensions (list): string names of variables in DataSet
+        poly (shapely.Polygon): polygon from shapefile
+        transform (affine.Affine): affine transform raster subset
+        temporal_key (str): Type of queried data, either "seasons" or "months"
+
+    Returns:
+        results of aggregation as a JSON-like dict
+    """
+
+    def run_zonal_stats(ds, ds_sel_di, poly, transform):
+        """Helper to run zonal stats on 
+        selected subset of DataSet"""
+        # default rasdaman band name is "Gray"
+        arr = ds["Gray"].sel(ds_sel_di).values
+        aggr_result = zonal_stats(
+            poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
+        )[0]
+
+        return aggr_result
+
+    # use nested for loop to construct results dict like json output for single point
+    aggr_results = {}
+    # build aggregate results dict for JSON output
+    # hardcoded assuming same 4 dimensions,
+    #   consider revising with more robust approach
+
+    # handle differences in dimensions present between CRU and AR5
+    dimensions = ds["Gray"].dims[:-2]
+    if len(dimensions) == 3:
+        # CRU has 3 dimensions
+        for di in np.int32(ds[dimensions[0]].values):
+            decade = cru_decades[di]
+            aggr_results[decade] = {}
+            for ti in np.int32(ds[dimensions[1]].values):
+                # derived period is the season or month the underlying
+                # "derived" data product was aggregated over
+                derived_period = dim_encodings[temporal_key][ti]
+                aggr_results[decade][derived_period] = {}
+                model = "CRU-TS31"
+                aggr_results[decade][derived_period][model] = {}
+                scenario = "CRU_historical"
+                aggr_results[decade][derived_period][model][scenario] = {}
+                for vi in np.int32(ds[dimensions[2]].values):
+                    varname = dim_encodings["varnames"][vi]
+                    # construct dict for ds.sel based on whether CRU or AR5
+                    ds_sel_di = {
+                        "decade": di,
+                        temporal_key[:-1]: ti,
+                        "varname": vi,
+                    }
+                    aggr_result = run_zonal_stats(ds, ds_sel_di, poly, transform)
+                    aggr_results[decade][derived_period][model][scenario][
+                        varname
+                    ] = round(aggr_result["mean"], 1)
+
+    elif len(dimensions) == 5:
+        # AR5 has 5 dimensions
+        for di in np.int32(ds[dimensions[0]].values):
+            decade = dim_encodings["decades"][di]
+            aggr_results[decade] = {}
+            for ti in np.int32(ds[dimensions[1]].values):
+                # derived period is the season or month the underlying
+                # "derived" data product was aggregated over
+                derived_period = dim_encodings[temporal_key][ti]
+                aggr_results[decade][derived_period] = {}
+                for mi in np.int32(ds[dimensions[2]].values):
+                    model = dim_encodings["models"][mi]
+                    aggr_results[decade][derived_period][model] = {}
+                    for sci in np.int32(ds[dimensions[3]].values):
+                        scenario = dim_encodings["scenarios"][sci]
+                        # select subset and compute aggregate
+                        aggr_results[decade][derived_period][model][scenario] = {}
+                        for vi in np.int32(ds[dimensions[4]].values):
+                            varname = dim_encodings["varnames"][vi]
+                            # construct dict for ds.sel based on whether CRU or AR5
+                            ds_sel_di = {
+                                "decade": di,
+                                temporal_key[:-1]: ti,
+                                "model": mi,
+                                "scenario": sci,
+                                "varname": vi,
+                            }
+                            aggr_result = run_zonal_stats(
+                                ds, ds_sel_di, poly, transform
+                            )
+                            aggr_results[decade][derived_period][model][scenario][
+                                varname
+                            ] = round(aggr_result["mean"], 1)
+
+    return aggr_results
+
+
+def create_csv(packaged_data, temporal_key):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -249,138 +344,82 @@ def create_csv(packaged_data):
     """
     output = io.StringIO()
 
-    fieldnames = ["variable", "date_range", "season", "model", "scenario", "value"]
+    fieldnames = [
+        "variable",
+        "date_range",
+        temporal_key[:-1],
+        "model",
+        "scenario",
+        "value",
+    ]
     writer = csv.DictWriter(output, fieldnames=fieldnames)
 
     writer.writeheader()
 
-    for period_key, period in dim_encodings["period"].items():
-        for season_key, season in dim_encodings["season"].items():
-
-            if period == "1910-2009":
-                writer.writerow(
-                    {
-                        "variable": "pr",
-                        "date_range": period,
-                        "season": season,
-                        "model": model,
-                        "scenario": "Historical",
-                        "value": packaged_data[period][season][model]["CRU_historical"][
-                            "pr"
-                        ],
-                    }
-                )
-                writer.writerow(
-                    {
-                        "variable": "tas",
-                        "date_range": period,
-                        "season": season,
-                        "model": "CRU-TS31",
-                        "scenario": "Historical",
-                        "value": packaged_data[period][season][model]["CRU_historical"][
-                            "tas"
-                        ],
-                    }
-                )
+    for decade in dim_encodings["decades"].values():
+        # naming is a bit of an issue with the various levels of aggregation going on.
+        # derived_period is the season or month the underlying
+        # "derived" data product was aggregated over
+        for derived_period in dim_encodings[temporal_key].values():
+            if decade in list(cru_decades.values()):
+                for varname in ["pr", "tas"]:
+                    writer.writerow(
+                        {
+                            "variable": varname,
+                            "date_range": decade,
+                            # temporal_key is either "seasons" or "months"
+                            temporal_key[:-1]: derived_period,
+                            "model": "CRU-TS31",
+                            "scenario": "Historical",
+                            "value": packaged_data[decade][derived_period]["CRU-TS31"][
+                                "CRU_historical"
+                            ][varname],
+                        }
+                    )
             else:
-                for model_key, model in dim_encodings["model"].items():
-                    for scenario_keys, scenario in dim_encodings["scenario"].items():
-                        if (scenario == "CRU_historical") or (model == "CRU-TS31"):
-                            continue
-
-                        writer.writerow(
-                            {
-                                "variable": "pr",
-                                "date_range": period,
-                                "season": season,
-                                "model": model,
-                                "scenario": scenario,
-                                "value": packaged_data[period][season][model][scenario][
-                                    "pr"
-                                ],
-                            }
-                        )
-                        writer.writerow(
-                            {
-                                "variable": "tas",
-                                "date_range": period,
-                                "season": season,
-                                "model": model,
-                                "scenario": scenario,
-                                "value": packaged_data[period][season][model][scenario][
-                                    "tas"
-                                ],
-                            }
-                        )
+                for model in dim_encodings["models"].values():
+                    for scenario in dim_encodings["scenarios"].values():
+                        for varname in ["pr", "tas"]:
+                            writer.writerow(
+                                {
+                                    "variable": varname,
+                                    "date_range": decade,
+                                    temporal_key[:-1]: derived_period,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "value": packaged_data[decade][derived_period][
+                                        model
+                                    ][scenario][varname],
+                                }
+                            )
 
     return output.getvalue()
 
 
-def aggregate_dataarray(ds, dimensions, poly, transform):
-    """Perform a spatial agrgegation of a data array within a polygon.
-    Only supports mean aggregation for now.
+def get_temporal_type(args):
+    """helper to set some variables based on whether 
+    query is for monthly or seasonal data
 
     Args:
-        ds (xarray.DataSet): datacube for all variables
-        dimensions (list): string names of variables in DataSet
-        poly (shapely.Polygon): polygon from shapefile
-        transform (affine.Affine): affine transform raster subset
+        args (flask.Request.args): dict of contents of query string
 
-    Returns:
-        results of aggregation as a JSON-like dict
+    Returns: 
+        temporal type and key - type is used for building rasdaman 
+        URL, key is used for packaging/manuipulations 
+
+    Notes:
+        currently two options available with these data, 
+        seasonal or monthly, and default is seasonal
     """
+    # if not monthly, defaults to seasonal
+    if args.get("summary") == "monthly":
+        temporal_type = "monthly"
+        temporal_key = "months"
+    else:
+        temporal_type = "seasonal"
+        temporal_key = "seasons"
 
-    dim_combos = itertools.product(*[ds[dimension].values for dimension in dimensions])
-    # use nested for loop to construct results dict like json output for single point
-    aggr_results = {}
-    # build aggregate results dict for JSON output
-    # hardcoded assuming same 4 dimensions,
-    #   consider revising with more robust approach
-
-    for pi in np.int32(ds[dimensions[0]].values):
-        period = dim_encodings["period"][pi]
-        aggr_results[period] = {}
-        for si in np.int32(ds[dimensions[1]].values):
-            season = dim_encodings["season"][si]
-            aggr_results[period][season] = {}
-            for mi in np.int32(ds[dimensions[2]].values):
-                # verify that model and period combinations are valid before
-                #   creating placeholder
-                if (pi, mi) not in invalid_model_periods:
-                    model = dim_encodings["model"][mi]
-                    aggr_results[period][season][model] = {}
-                    for sci in np.int32(ds[dimensions[3]].values):
-                        scenario = dim_encodings["scenario"][sci]
-                        # select subset and compute aggregate
-                        # verify that dim value combination is valid before
-                        #   creating placeholder
-                        if (pi, si, mi, sci) not in invalid_dim_values:
-                            aggr_results[period][season][model][scenario] = {}
-                            for val in ["tas", "pr"]:
-                                # fmt: off
-                                arr = (
-                                    ds[val]
-                                    .sel(
-                                        period=pi,
-                                        season=si,
-                                        model=mi,
-                                        scenario=sci,
-                                    )
-                                    .values
-                                )
-                                aggr_result = zonal_stats(
-                                    poly,
-                                    arr,
-                                    affine=transform,
-                                    nodata=np.nan,
-                                    stats=["mean"],
-                                )[0]
-                                # fmt: on
-                                aggr_results[period][season][model][scenario][
-                                    val
-                                ] = round(aggr_result["mean"], 1)
-
-    return aggr_results
+    return temporal_type, temporal_key
 
 
 @routes.route("/iem/")
@@ -421,23 +460,23 @@ def run_fetch_point_data(lat, lon):
 
     # currently two options available with these data, seasonal or monthly,
     # and default is seasonal
-    summary = "seasonal"
-    aggr_type = "seasons"
-    if request.args.get("summary") == "monthly":
-        summary = "monthly"
-        aggr_type = "months"
+    temporal_type, temporal_key = get_temporal_type(request.args)
 
-    ar5_point_data = asyncio.run(fetch_point_data(x, y, f"iem_ar5_2km_taspr_{summary}"))
-    ar5_point_pkg = package_point_data(ar5_point_data, aggr_type)
-    cru_point_data = asyncio.run(fetch_point_data(x, y, f"iem_cru_2km_taspr_{summary}"))
+    ar5_point_data = asyncio.run(
+        fetch_point_data(x, y, f"iem_ar5_2km_taspr_{temporal_type}")
+    )
+    ar5_point_pkg = package_point_data(ar5_point_data, temporal_key)
+    cru_point_data = asyncio.run(
+        fetch_point_data(x, y, f"iem_cru_2km_taspr_{temporal_type}")
+    )
     # use CRU as basis for combined point package for chronolical consistency
-    point_pkg = package_point_data(cru_point_data, aggr_type)
+    point_pkg = package_point_data(cru_point_data, temporal_key)
     # combine the CRU and AR5 packages
     for decade, summaries in ar5_point_pkg.items():
         point_pkg[decade] = summaries
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg)
+        csv_data = create_csv(point_pkg, temporal_key)
         return Response(
             csv_data,
             mimetype="text/csv",
@@ -475,18 +514,32 @@ def run_aggregate_huc(huc_id):
 
     poly = poly_gdf.iloc[0]["geometry"]
 
+    # currently two options available with these data, seasonal or monthly,
+    # and default is seasonal
+    temporal_type, temporal_key = get_temporal_type(request.args)
+
     # meterological variables as dataset
-    met_ds = asyncio.run(fetch_bbox_netcdf(*poly.bounds))
+    ar5_met_ds = asyncio.run(
+        fetch_bbox_netcdf(*poly.bounds, f"iem_ar5_2km_taspr_{temporal_type}")
+    )
+    cru_met_ds = asyncio.run(
+        fetch_bbox_netcdf(*poly.bounds, f"iem_cru_2km_taspr_{temporal_type}")
+    )
 
     # aggregate the data and return packaged results
     # compute transform with rioxarray
-    met_ds.rio.set_spatial_dims("X", "Y")
-    transform = met_ds.rio.transform()
-    dimensions = ["period", "season", "model", "scenario"]
-    aggr_results = aggregate_dataarray(met_ds, dimensions, poly, transform)
+    ar5_met_ds.rio.set_spatial_dims("X", "Y")
+    transform = ar5_met_ds.rio.transform()
+    # dimensions = ["decade", temporal_key[:-1], "model", "scenario"]
+    ar5_aggr_results = aggregate_dataarray(ar5_met_ds, poly, transform, temporal_key)
+    # use CRU as basis for combined point package for chronolical consistency
+    aggr_results = aggregate_dataarray(cru_met_ds, poly, transform, temporal_key)
+    # combine the CRU and AR5 packages
+    for decade, summaries in ar5_aggr_results.items():
+        aggr_results[decade] = summaries
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(aggr_results)
+        csv_data = create_csv(aggr_results, temporal_key)
         return Response(
             csv_data,
             mimetype="text/csv",
