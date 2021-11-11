@@ -70,6 +70,12 @@ dim_encodings = {
         1: "rcp60",
         2: "rcp85",
     },
+    "seasons": {
+        0: "DJF",
+        1: "JJA",
+        2: "MAM", 
+        3: "SON",
+    }
 }
 
 cru_decades = {
@@ -168,12 +174,14 @@ async def fetch_point_data(x, y, cov_id):
     return point_data
 
 
-def package_point_data(point_data):
+def package_point_data(point_data, aggr_type):
     """Add dim names to JSON response from point query
 
     Args:
         point_data (list): nested list containing JSON 
             results of AR5 or CRU point query
+        aggr_type (str): the type of summary of source of point_data, 
+            either "months" or "seasons"
 
     Returns:
         Dict with dimension name
@@ -192,22 +200,22 @@ def package_point_data(point_data):
         for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
             decade = dim_encodings["decades"][di]
             point_data_pkg[decade] = {}
-            for mi, mod_li in enumerate(m_li):  # (nested list with model at dim 0)
-                month = dim_encodings["months"][mi]
-                point_data_pkg[decade][month] = {}
+            for ai, mod_li in enumerate(m_li):  # (nested list with model at dim 0)
+                aggr_period = dim_encodings[aggr_type][ai]
+                point_data_pkg[decade][aggr_period] = {}
                 for mod_i, s_li in enumerate(
                     mod_li
                 ):  # (nested list with scenario at dim 0)
                     model = dim_encodings["models"][mod_i]
-                    point_data_pkg[decade][month][model] = {}
+                    point_data_pkg[decade][aggr_period][model] = {}
                     for si, v_li in enumerate(
                         s_li
                     ):  # (nested list with varname at dim 0)
                         scenario = dim_encodings["scenarios"][si]
-                        point_data_pkg[decade][month][model][scenario] = {}
+                        point_data_pkg[decade][aggr_period][model][scenario] = {}
                         for vi, value in enumerate(v_li):  # (data values)
                             varname = dim_encodings["varnames"][vi]
-                            point_data_pkg[decade][month][model][scenario][
+                            point_data_pkg[decade][aggr_period][model][scenario][
                                 varname
                             ] = value
 
@@ -215,14 +223,16 @@ def package_point_data(point_data):
         for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
             decade = cru_decades[di]
             point_data_pkg[decade] = {}
-            for mi, v_li in enumerate(m_li):  # (nested list with varname at dim 0)
-                month = dim_encodings["months"][mi]
+            for ai, v_li in enumerate(m_li):  # (nested list with varname at dim 0)
+                aggr_period = dim_encodings[aggr_type][ai]
                 model = "CRU-TS31"
                 scenario = "CRU_historical"
-                point_data_pkg[decade][month] = {model: {scenario: {}}}
+                point_data_pkg[decade][aggr_period] = {model: {scenario: {}}}
                 for vi, value in enumerate(v_li):  # (data values)
                     varname = dim_encodings["varnames"][vi]
-                    point_data_pkg[decade][month][model][scenario][varname] = value
+                    point_data_pkg[decade][aggr_period][model][scenario][
+                        varname
+                    ] = value
 
     return point_data_pkg
 
@@ -409,11 +419,19 @@ def run_fetch_point_data(lat, lon):
 
     x, y = project_latlon(lat, lon, 3338)
 
-    ar5_point_data = asyncio.run(fetch_point_data(x, y, "iem_ar5_2km_taspr"))
-    ar5_point_pkg = package_point_data(ar5_point_data)
-    cru_point_data = asyncio.run(fetch_point_data(x, y, "iem_cru_2km_taspr"))
+    # currently two options available with these data, seasonal or monthly,
+    # and default is seasonal
+    summary = "seasonal"
+    aggr_type = "seasons"
+    if request.args.get("summary") == "monthly":
+        summary = "monthly"
+        aggr_type = "months"
+
+    ar5_point_data = asyncio.run(fetch_point_data(x, y, f"iem_ar5_2km_taspr_{summary}"))
+    ar5_point_pkg = package_point_data(ar5_point_data, aggr_type)
+    cru_point_data = asyncio.run(fetch_point_data(x, y, f"iem_cru_2km_taspr_{summary}"))
     # use CRU as basis for combined point package for chronolical consistency
-    point_pkg = package_point_data(cru_point_data)
+    point_pkg = package_point_data(cru_point_data, aggr_type)
     # combine the CRU and AR5 packages
     for decade, summaries in ar5_point_pkg.items():
         point_pkg[decade] = summaries
