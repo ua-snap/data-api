@@ -75,6 +75,10 @@ dim_encodings = {
         1: "JJA",
         2: "MAM",
         3: "SON",
+    },
+    "statnames": {
+        0: "mean",
+        1: "std",
     }
 }
 
@@ -116,7 +120,7 @@ async def fetch_point_data(x, y, cov_id):
         nested list containing results of WCS point query
     """
     url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
-
+    print(url)
     async with ClientSession() as session:
         point_data = await asyncio.create_task(fetch_layer_data(url, session))
 
@@ -168,19 +172,22 @@ def package_point_data(point_data, temporal_key):
                                 varname
                             ] = value
 
-    elif len(point_data) == 10:
-        for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
-            decade = cru_decades[di]
-            point_data_pkg[decade] = {}
-            for ai, v_li in enumerate(m_li):  # (nested list with varname at dim 0)
-                aggr_period = dim_encodings[temporal_key][ai]
-                model = "CRU-TS31"
-                scenario = "CRU_historical"
-                point_data_pkg[decade][aggr_period] = {model: {scenario: {}}}
-                for vi, value in enumerate(v_li):  # (data values)
-                    varname = dim_encodings["varnames"][vi]
-                    point_data_pkg[decade][aggr_period][model][scenario][
-                        varname
+    elif len(point_data) == 4:
+        # hard-code summary period for CRU
+        period = "1950-2009"
+        point_data_pkg[period] = {}
+        for si, v_li in enumerate(point_data):  # (nested list with varname at dim 0)
+            season = dim_encodings["seasons"][si]
+            model = "CRU-TS31"
+            scenario = "CRU_historical"
+            point_data_pkg[period][season] = {model: {scenario: {}}}
+            for vi, s_li in enumerate(v_li):  # (nested list with statistic at dim 0)
+                varname = dim_encodings["varnames"][vi]
+                point_data_pkg[period][season][model][scenario][varname] = {}
+                for si, value in enumerate(s_li):  # (data values)
+                    statname = dim_encodings["statnames"][si]
+                    point_data_pkg[period][season][model][scenario][varname][
+                        statname
                     ] = value
 
     return point_data_pkg
@@ -467,7 +474,7 @@ def run_fetch_point_data(lat, lon):
     )
     ar5_point_pkg = package_point_data(ar5_point_data, temporal_key)
     cru_point_data = asyncio.run(
-        fetch_point_data(x, y, f"iem_cru_2km_taspr_{temporal_type}")
+        fetch_point_data(x, y, "iem_cru_2km_taspr_seasonal_baseline_stats")
     )
     # use CRU as basis for combined point package for chronolical consistency
     point_pkg = package_point_data(cru_point_data, temporal_key)
