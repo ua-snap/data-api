@@ -30,6 +30,7 @@ huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_
 # encodings hardcoded for now
 # fmt: off
 # lookup tables derived from the IEM rasdaman ingest luts.py
+# pay attention to any changes with ingest and change here as needed
 dim_encodings = {
     "varnames": {
         0: "pr",
@@ -77,9 +78,12 @@ dim_encodings = {
         3: "SON",
     },
     "statnames": {
-        0: "mean",
-        1: "std",
-    }
+        0: "hi_std",
+        1: "lo_std",
+        2: "max",
+        3: "mean",
+        4: "min",
+    },
 }
 
 cru_decades = {
