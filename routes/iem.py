@@ -197,22 +197,34 @@ def package_point_data(point_data, temporal_key):
     return point_data_pkg
 
 
-async def make_netcdf_request(url, session):
-    """Make an awaitable GET request to WCS URL with
-    netCDF encoding
+def package_ar5_point_summary(point_data):
+    """Add dim names to JSON response from point query
+    for the AR5 coverages
 
     Args:
-        url (str): WCS query with ncetCDF encoding
-        session (aiohttp.ClientSession): the client session instance
+        point_data (list): nested list containing JSON
+            results of AR5 or CRU point query
 
     Returns:
-        Query result, deocded differently depending on encoding.
+        Dict of query results
     """
-    resp = await session.get(url)
-    resp.raise_for_status()
-    query_result = await resp.read()
+    point_data_pkg = {}
+    for si, mod_li in enumerate(point_data):  # (nested list with model at dim 0)
+        season = dim_encodings["seasons"][si]
+        point_data_pkg[season] = {}
+        for mod_i, s_li in enumerate(mod_li):  # (nested list with scenario at dim 0)
+            model = dim_encodings["models"][mod_i]
+            point_data_pkg[season][model] = {}
+            for si, v_li in enumerate(s_li):  # (nested list with varname at dim 0)
+                scenario = dim_encodings["scenarios"][si]
+                point_data_pkg[season][model][scenario] = {}
+                for vi, value in enumerate(v_li):  # (data values)
+                    varname = dim_encodings["varnames"][vi]
+                    point_data_pkg[season][model][scenario][varname] = round(
+                        value, rounding[varname]
+                    )
 
-    return query_result
+    return point_data_pkg
 
 
 async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_id):
