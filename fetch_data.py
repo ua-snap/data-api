@@ -36,12 +36,26 @@ def generate_query_urls(wms, wms_base, wfs, wfs_base):
     return urls
 
 
-async def fetch_layer_data(url, session):
-    """Make an awaitable GET request to URL, return json"""
+async def fetch_layer_data(url, session, encoding="json"):
+    """Make an awaitable GET request to URL, return json
+    
+    Args:
+        url (str): WCS query URL
+        session (aiohttp.ClientSession): the client session instance
+        encoding (str): either "json" or "netcdf", specifying the encoding type
+
+    Returns:
+        Query result, deocded differently depending on encoding argument.
+    """
     resp = await session.request(method="GET", url=url)
     resp.raise_for_status()
-    json = await resp.json()
-    return json
+
+    if encoding == "json":
+        query_result = await resp.json()
+    elif encoding == "netcdf":
+        query_result = await resp.read()
+
+    return query_result
 
 
 async def fetch_data_api(backend, workspace, wms_targets, wfs_targets, lat, lon):
