@@ -90,6 +90,12 @@ dim_encodings = {
     },
 }
 
+# lookup for rounding values
+rounding = {
+    "tas": 1,
+    "pr": 0,
+}
+
 cru_decades = {
     0: "1910_1919",
     1: "1920_1929",
@@ -185,68 +191,72 @@ async def fetch_point_data(x, y, cov_id, summary_decades=None):
     return point_data
 
 
-def package_point_data(point_data, temporal_key):
+def package_cru_point_data(point_data):
     """Add dim names to JSON response from point query
+    for the CRU TS historical basline coverage
+
+    Args:
+        point_data (list): nested list containing JSON
+            results of CRU point query
+
+    Returns:
+        Dict of query results
+    """
+    point_data_pkg = {}
+    # hard-code summary period for CRU
+    period = "1950_2009"
+    point_data_pkg[period] = {}
+    for si, v_li in enumerate(point_data):  # (nested list with varname at dim 0)
+        season = dim_encodings["seasons"][si]
+        model = "CRU-TS40"
+        scenario = "CRU_historical"
+        point_data_pkg[period][season] = {model: {scenario: {}}}
+        for vi, s_li in enumerate(v_li):  # (nested list with statistic at dim 0)
+            varname = dim_encodings["varnames"][vi]
+            point_data_pkg[period][season][model][scenario][varname] = {}
+            for si, value in enumerate(s_li):  # (data values)
+                statname = dim_encodings["statnames"][si]
+                point_data_pkg[period][season][model][scenario][varname][
+                    statname
+                ] = round(value, rounding[varname])
+
+    return point_data_pkg
+
+
+def package_ar5_point_data(point_data):
+    """Add dim names to JSON response from AR5 point query
 
     Args:
         point_data (list): nested list containing JSON
             results of AR5 or CRU point query
-        temporal_key (str): the type of summary of source 
-            of point_data, either "months" or "seasons"
 
     Returns:
         Dict with dimension name
     """
     point_data_pkg = {}
-
-    # AR5 data has 9 decades, CRU has 10
-    if len(point_data) == 9:
-        # AR5 data:
-        # varname, decade, month, model, scenario
-        #   Since we are relying on some hardcoded mappings between
-        # integers and the dataset dimensions, we should consider
-        # having that mapping tracked somewhere such that it is
-        # imported to help prevent breakage.
-
-        for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
-            decade = dim_encodings["decades"][di]
-            point_data_pkg[decade] = {}
-            for ai, mod_li in enumerate(m_li):  # (nested list with model at dim 0)
-                aggr_period = dim_encodings[temporal_key][ai]
-                point_data_pkg[decade][aggr_period] = {}
-                for mod_i, s_li in enumerate(
-                    mod_li
-                ):  # (nested list with scenario at dim 0)
-                    model = dim_encodings["models"][mod_i]
-                    point_data_pkg[decade][aggr_period][model] = {}
-                    for si, v_li in enumerate(
-                        s_li
-                    ):  # (nested list with varname at dim 0)
-                        scenario = dim_encodings["scenarios"][si]
-                        point_data_pkg[decade][aggr_period][model][scenario] = {}
-                        for vi, value in enumerate(v_li):  # (data values)
-                            varname = dim_encodings["varnames"][vi]
-                            point_data_pkg[decade][aggr_period][model][scenario][
-                                varname
-                            ] = value
-
-    elif len(point_data) == 4:
-        # hard-code summary period for CRU
-        period = "1950-2009"
-        point_data_pkg[period] = {}
-        for si, v_li in enumerate(point_data):  # (nested list with varname at dim 0)
-            season = dim_encodings["seasons"][si]
-            model = "CRU-TS31"
-            scenario = "CRU_historical"
-            point_data_pkg[period][season] = {model: {scenario: {}}}
-            for vi, s_li in enumerate(v_li):  # (nested list with statistic at dim 0)
-                varname = dim_encodings["varnames"][vi]
-                point_data_pkg[period][season][model][scenario][varname] = {}
-                for si, value in enumerate(s_li):  # (data values)
-                    statname = dim_encodings["statnames"][si]
-                    point_data_pkg[period][season][model][scenario][varname][
-                        statname
-                    ] = value
+    # AR5 data:
+    # varname, decade, month, model, scenario
+    #   Since we are relying on some hardcoded mappings between
+    # integers and the dataset dimensions, we should consider
+    # having that mapping tracked somewhere such that it is
+    # imported to help prevent breakage.
+    for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
+        decade = dim_encodings["decades"][di]
+        point_data_pkg[decade] = {}
+        for ai, mod_li in enumerate(m_li):  # (nested list with model at dim 0)
+            season = dim_encodings["seasons"][ai]
+            point_data_pkg[decade][season] = {}
+            for mod_i, s_li in enumerate(
+                mod_li
+            ):  # (nested list with scenario at dim 0)
+                model = dim_encodings["models"][mod_i]
+                point_data_pkg[decade][season][model] = {}
+                for si, v_li in enumerate(s_li):  # (nested list with varname at dim 0)
+                    scenario = dim_encodings["scenarios"][si]
+                    point_data_pkg[decade][season][model][scenario] = {}
+                    for vi, value in enumerate(v_li):  # (data values)
+                        varname = dim_encodings["varnames"][vi]
+                        point_data_pkg[decade][season][model][scenario][varname] = value
 
     return point_data_pkg
 
