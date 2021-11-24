@@ -16,10 +16,14 @@ from flask import (
     current_app as app,
 )
 from rasterstats import zonal_stats
+from urllib.parse import quote
+
+# local imports
 from validate_latlon import validate, validate_bbox, project_latlon
 from . import routes
 from config import RAS_BASE_URL
 from fetch_data import fetch_layer_data
+
 
 iem_api = Blueprint("iem_api", __name__)
 
@@ -100,31 +104,81 @@ cru_decades = {
 }
 # fmt: on
 
-# store global list of invalid dim value combinations, such as
-# model == CRU TS31 and period == 2040-2070, etc.
-invalid_dim_values = list(itertools.product(range(2), range(4), [2], range(4)))
-invalid_dim_values.extend(itertools.product([2], range(4), range(2), range(4)))
-invalid_dim_values.extend(itertools.product(range(3), range(4), range(2), [3]))
-invalid_dim_values.extend(itertools.product(range(3), range(4), [2], range(3)))
 
-# do the same as above for only invalid model / period combinations
-invalid_model_periods = list(itertools.product(range(2), [2]))
-invalid_model_periods.extend(itertools.product([2], range(2)))
+def make_wcs_url(
+    x1, y1, cov_id, encoding="json", summary_decades=None, x2=None, y2=None
+):
+    """Make a WCS query for one of the IEM rasdaman coverages
+
+    Args:
+        x1 (float): x-coordiante for point query, lower x-coordinate bound if not
+        y1 (float): y-coordinate for point query, lower y-coordinate bound if not
+        cov_id (str): Rasdaman coverage id
+        summary_decades (tuple): 2-tuple of integers mapped to
+            desired range of decades to summarise over,
+            e.g. (6, 8) for 2070-2099. This option constructs
+            a WCS query with a WCPS query inside.
+        x2 (float): upper bound of x axis to query. Assumes point query if not set.
+        y2 (float): upper bound of y axis to query. Requires x be specified or will error.
+
+    Returns:
+        WCS query URL.
+    """
+    # set up x/y for query type
+    if x2 is None:
+        x = x1
+        y = y1
+    else:
+        x = f"{x1},{x2}"
+        y = f"{y1},{y2}"
+
+    # make encoding proper
+    encoding = f"application/{encoding}"
+
+    base_url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST={{}}"
+    if not summary_decades:
+        request_str = f"GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT={encoding}"
+    else:
+        d1, d2 = summary_decades
+        # not sure if this is the proper way
+        # to compute average.
+        n = len(np.arange(d1, d2 + 1))
+
+        # x and y == strings ==> need colon for correct syntax
+        try:
+            y = y.replace(",", ":")
+            x = x.replace(",", ":")
+        except AttributeError:
+            pass
+
+        request_str = quote(
+            (
+                f"ProcessCoverages&query=for $c in ({cov_id}) "
+                f"let $a := (condense + over $t decade({d1}:{d2}) "
+                f"using $c[decade($t),X({x}),Y({y})] ) / {n} "
+                f'return encode( $a , "{encoding}")'
+            )
+        )
+
+    return base_url.format(request_str)
 
 
-async def fetch_point_data(x, y, cov_id):
+async def fetch_point_data(x, y, cov_id, summary_decades=None):
     """Make the async request for the data at the specified point
 
     Args:
         x (float): lower x-coordinate bound
         y (float): lower y-coordinate bound
         cov_id (str): Rasdaman coverage id
+        summary_decades (tuple): 2-tuple of integers mapped to 
+            desired range of decades to summarise over, 
+            e.g. (6, 8) for 2070-2099
 
     Returns:
         nested list containing results of WCS point query
     """
-    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/json"
-    print(url)
+    url = make_wcs_url(x, y, cov_id, summary_decades=summary_decades)
+
     async with ClientSession() as session:
         point_data = await asyncio.create_task(fetch_layer_data(url, session))
 
@@ -227,7 +281,9 @@ def package_ar5_point_summary(point_data):
     return point_data_pkg
 
 
-async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_id):
+async def fetch_bbox_netcdf(
+    x1, y1, x2, y2, cov_id, summary_decades=None,
+):
     """Make the async request for the data within the specified bbox
 
     Args:
@@ -236,16 +292,28 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_id):
         x2 (float): upper x-coordinate bound
         y2 (float): upper y-coordinate bound
         cov_id (str): Coverage id
+        summary_decades (tuple): 2-tuple of integers mapped to 
+            desired range of decades to summarise over, 
+            e.g. (6, 8) for 2070-2099
 
     Returns:
         xarray.DataSet containing results of WCS netCDF query
     """
-    # only see this ever being a single request
-    url = f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x1},{x2}))&SUBSET=Y({y1},{y2})&FORMAT=application/netcdf"
+    url = make_wcs_url(
+        x1,
+        y1,
+        cov_id,
+        encoding="netcdf",
+        summary_decades=summary_decades,
+        x2=x2,
+        y2=y2,
+    )
 
     start_time = time.time()
     async with ClientSession() as session:
-        netcdf_bytes = await asyncio.create_task(make_netcdf_request(url, session))
+        netcdf_bytes = await asyncio.create_task(
+            fetch_layer_data(url, session, encoding="netcdf")
+        )
 
     app.logger.info(
         f"Fetched BBOX data from Rasdaman, elapsed time {round(time.time() - start_time)}s"
