@@ -492,7 +492,7 @@ def create_csv(packaged_data):
     fieldnames = [
         "variable",
         "date_range",
-        temporal_key[:-1],
+        "season",
         "model",
         "scenario",
         "value",
@@ -501,70 +501,66 @@ def create_csv(packaged_data):
 
     writer.writeheader()
 
+    # add CRU data
+    cru_period = "1950_2009"
+    for season in dim_encodings["seasons"].values():
+        for varname in ["pr", "tas"]:
+            for statname in dim_encodings["statnames"].values():
+                writer.writerow(
+                    {
+                        "variable": varname,
+                        "date_range": cru_period,
+                        "season": season,
+                        "model": "CRU-TS40",
+                        "scenario": "Historical",
+                        "value": packaged_data[cru_period][season]["CRU-TS40"][
+                            "CRU_historical"
+                        ][varname][statname],
+                    }
+                )
+
+    # AR5 periods
+    for ar5_period in ["2040_2069", "2070_2099"]:
+        for season in dim_encodings["seasons"].values():
+            for model in dim_encodings["models"].values():
+                for scenario in dim_encodings["scenarios"].values():
+                    for varname in ["pr", "tas"]:
+                        writer.writerow(
+                            {
+                                "variable": varname,
+                                "date_range": ar5_period,
+                                "season": season,
+                                "model": model,
+                                "scenario": scenario,
+                                "value": packaged_data[ar5_period][season][model][
+                                    scenario
+                                ][varname],
+                            }
+                        )
+
     for decade in dim_encodings["decades"].values():
-        # naming is a bit of an issue with the various levels of aggregation going on.
-        # derived_period is the season or month the underlying
-        # "derived" data product was aggregated over
-        for derived_period in dim_encodings[temporal_key].values():
-            if decade in list(cru_decades.values()):
-                for varname in ["pr", "tas"]:
-                    writer.writerow(
-                        {
-                            "variable": varname,
-                            "date_range": decade,
-                            # temporal_key is either "seasons" or "months"
-                            temporal_key[:-1]: derived_period,
-                            "model": "CRU-TS31",
-                            "scenario": "Historical",
-                            "value": packaged_data[decade][derived_period]["CRU-TS31"][
-                                "CRU_historical"
-                            ][varname],
-                        }
-                    )
-            else:
-                for model in dim_encodings["models"].values():
-                    for scenario in dim_encodings["scenarios"].values():
-                        for varname in ["pr", "tas"]:
-                            writer.writerow(
-                                {
-                                    "variable": varname,
-                                    "date_range": decade,
-                                    temporal_key[:-1]: derived_period,
-                                    "model": model,
-                                    "scenario": scenario,
-                                    "value": packaged_data[decade][derived_period][
-                                        model
-                                    ][scenario][varname],
-                                }
-                            )
+        for season in dim_encodings["seasons"].values():
+            # naming is a bit of an issue with the various levels of aggregation going on.
+            # derived_period is the season or month the underlying
+            # "derived" data product was aggregated over
+
+            for model in dim_encodings["models"].values():
+                for scenario in dim_encodings["scenarios"].values():
+                    for varname in ["pr", "tas"]:
+                        writer.writerow(
+                            {
+                                "variable": varname,
+                                "date_range": season,
+                                "season": season,
+                                "model": model,
+                                "scenario": scenario,
+                                "value": packaged_data[decade][season][model][scenario][
+                                    varname
+                                ],
+                            }
+                        )
 
     return output.getvalue()
-
-
-def get_temporal_type(args):
-    """helper to set some variables based on whether 
-    query is for monthly or seasonal data
-
-    Args:
-        args (flask.Request.args): dict of contents of query string
-
-    Returns: 
-        temporal type and key - type is used for building rasdaman 
-        URL, key is used for packaging/manuipulations 
-
-    Notes:
-        currently two options available with these data, 
-        seasonal or monthly, and default is seasonal
-    """
-    # if not monthly, defaults to seasonal
-    if args.get("summary") == "monthly":
-        temporal_type = "monthly"
-        temporal_key = "months"
-    else:
-        temporal_type = "seasonal"
-        temporal_key = "seasons"
-
-    return temporal_type, temporal_key
 
 
 @routes.route("/iem/")
