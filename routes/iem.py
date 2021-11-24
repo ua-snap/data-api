@@ -335,105 +335,149 @@ async def fetch_bbox_netcdf(
     return ds
 
 
-def aggregate_dataarray(ds, poly, transform, temporal_key):
-    """Perform a spatial agrgegation of a data array within a polygon.
-    Only supports mean aggregation for now.
+def run_zonal_stats(arr, poly, transform):
+    """Helper to run zonal stats on 
+        selected subset of DataSet"""
+    # default rasdaman band name is "Gray"
+    aggr_result = zonal_stats(
+        poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
+    )[0]
+
+    return aggr_result
+
+
+def summarize_ar5_within_poly(ds, poly, transform):
+    """Perform a spatial agrgegation (mean) of a data array within a polygon.
+    Hardcoded for AR5 seasonal coverage.
 
     Args:
         ds (xarray.DataSet): datacube for all variables
-        dimensions (list): string names of variables in DataSet
         poly (shapely.Polygon): polygon from shapefile
         transform (affine.Affine): affine transform raster subset
-        temporal_key (str): Type of queried data, either "seasons" or "months"
 
     Returns:
         results of aggregation as a JSON-like dict
     """
-
-    def run_zonal_stats(ds, ds_sel_di, poly, transform):
-        """Helper to run zonal stats on 
-        selected subset of DataSet"""
-        # default rasdaman band name is "Gray"
-        arr = ds["Gray"].sel(ds_sel_di).values
-        aggr_result = zonal_stats(
-            poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
-        )[0]
-
-        return aggr_result
-
     # use nested for loop to construct results dict like json output for single point
     aggr_results = {}
     # build aggregate results dict for JSON output
     # hardcoded assuming same 4 dimensions,
     #   consider revising with more robust approach
-
-    # handle differences in dimensions present between CRU and AR5
-    dimensions = ds["Gray"].dims[:-2]
-    if len(dimensions) == 3:
-        # CRU has 3 dimensions
-        for di in np.int32(ds[dimensions[0]].values):
-            decade = cru_decades[di]
-            aggr_results[decade] = {}
-            for ti in np.int32(ds[dimensions[1]].values):
-                # derived period is the season or month the underlying
-                # "derived" data product was aggregated over
-                derived_period = dim_encodings[temporal_key][ti]
-                aggr_results[decade][derived_period] = {}
-                model = "CRU-TS31"
-                aggr_results[decade][derived_period][model] = {}
-                scenario = "CRU_historical"
-                aggr_results[decade][derived_period][model][scenario] = {}
-                for vi in np.int32(ds[dimensions[2]].values):
-                    varname = dim_encodings["varnames"][vi]
-                    # construct dict for ds.sel based on whether CRU or AR5
-                    ds_sel_di = {
-                        "decade": di,
-                        temporal_key[:-1]: ti,
-                        "varname": vi,
-                    }
-                    aggr_result = run_zonal_stats(ds, ds_sel_di, poly, transform)
-                    aggr_results[decade][derived_period][model][scenario][
-                        varname
-                    ] = round(aggr_result["mean"], 1)
-
-    elif len(dimensions) == 5:
-        # AR5 has 5 dimensions
-        for di in np.int32(ds[dimensions[0]].values):
-            decade = dim_encodings["decades"][di]
-            aggr_results[decade] = {}
-            for ti in np.int32(ds[dimensions[1]].values):
-                # derived period is the season or month the underlying
-                # "derived" data product was aggregated over
-                derived_period = dim_encodings[temporal_key][ti]
-                aggr_results[decade][derived_period] = {}
-                for mi in np.int32(ds[dimensions[2]].values):
-                    model = dim_encodings["models"][mi]
-                    aggr_results[decade][derived_period][model] = {}
-                    for sci in np.int32(ds[dimensions[3]].values):
-                        scenario = dim_encodings["scenarios"][sci]
-                        # select subset and compute aggregate
-                        aggr_results[decade][derived_period][model][scenario] = {}
-                        for vi in np.int32(ds[dimensions[4]].values):
-                            varname = dim_encodings["varnames"][vi]
-                            # construct dict for ds.sel based on whether CRU or AR5
-                            ds_sel_di = {
-                                "decade": di,
-                                temporal_key[:-1]: ti,
-                                "model": mi,
-                                "scenario": sci,
-                                "varname": vi,
-                            }
-                            aggr_result = run_zonal_stats(
-                                ds, ds_sel_di, poly, transform
+    for di in np.int32(ds["decade"].values):
+        decade = dim_encodings["decades"][di]
+        aggr_results[decade] = {}
+        for si in np.int32(ds["season"].values):
+            # derived period is the season or month the underlying
+            # "derived" data product was aggregated over
+            season = dim_encodings["seasons"][si]
+            aggr_results[decade][season] = {}
+            for mi in np.int32(ds["model"].values):
+                model = dim_encodings["models"][mi]
+                aggr_results[decade][season][model] = {}
+                for sci in np.int32(ds["scenario"].values):
+                    scenario = dim_encodings["scenarios"][sci]
+                    # select subset and compute aggregate
+                    aggr_results[decade][season][model][scenario] = {}
+                    for vi in np.int32(ds["varname"].values):
+                        varname = dim_encodings["varnames"][vi]
+                        arr = (
+                            ds["Gray"]
+                            .sel(
+                                {
+                                    "decade": di,
+                                    "season": si,
+                                    "model": mi,
+                                    "scenario": sci,
+                                    "varname": vi,
+                                }
                             )
-                            aggr_results[decade][derived_period][model][scenario][
-                                varname
-                            ] = round(aggr_result["mean"], 1)
+                            .values
+                        )
+                        aggr_result = run_zonal_stats(arr, poly, transform)
+                        aggr_results[decade][season][model][scenario][varname] = round(
+                            aggr_result["mean"], rounding[varname]
+                        )
 
     return aggr_results
 
 
-def create_csv(packaged_data, temporal_key):
+def summarize_ar5_clim_within_poly(ds, poly, transform):
+    """Perform a spatial agrgegation (mean) of a data array within a polygon.
+    Hardcoded for AR5 seasonal coverage.
+
+    Args:
+        ds (xarray.DataSet): datacube for all variables
+        poly (shapely.Polygon): polygon from shapefile
+        transform (affine.Affine): affine transform raster subset
+
+    Returns:
+        results of aggregation as a JSON-like dict
+    """
+    # use nested for loop to construct results dict like json output for single point
+    aggr_results = {}
+    for si in np.int32(ds["season"].values):
+        # derived period is the season or month the underlying
+        # "derived" data product was aggregated over
+        season = dim_encodings["seasons"][si]
+        aggr_results[season] = {}
+        for mi in np.int32(ds["model"].values):
+            model = dim_encodings["models"][mi]
+            aggr_results[season][model] = {}
+            for sci in np.int32(ds["scenario"].values):
+                scenario = dim_encodings["scenarios"][sci]
+                # select subset and compute aggregate
+                aggr_results[season][model][scenario] = {}
+                for vi in np.int32(ds["varname"].values):
+                    varname = dim_encodings["varnames"][vi]
+                    arr = (
+                        ds["Gray"]
+                        .sel(
+                            {"season": si, "model": mi, "scenario": sci, "varname": vi,}
+                        )
+                        .values
+                    )
+                    aggr_result = run_zonal_stats(arr, poly, transform)
+                    aggr_results[season][model][scenario][varname] = round(
+                        aggr_result["mean"], rounding[varname]
+                    )
+
+    return aggr_results
+
+
+def summarize_cru_within_poly(ds, poly, transform):
+    """Perform a spatial agrgegation of a data array within a polygon.
+    Hardcoded for CRU TS seasonal baseline stats coverage.
+
+    Args:
+        ds (xarray.DataSet): datacube for all variables
+        poly (shapely.Polygon): polygon from shapefile
+        transform (affine.Affine): affine transform raster subset
+
+    Returns:
+        results of aggregation as a JSON-like dict
+    """
+    # use nested for loop to construct results dict like json output for single point
+    aggr_results = {}
+    for si in np.int32(ds["season"].values):
+        season = dim_encodings["seasons"][si]
+        model = "CRU-TS40"
+        scenario = "CRU_historical"
+        aggr_results[season] = {model: {scenario: {}}}
+        for vi in np.int32(ds["varname"].values):
+            varname = dim_encodings["varnames"][vi]
+            aggr_results[season][model][scenario][varname] = {}
+            for sti in np.int32(ds["stat"].values):
+                statname = dim_encodings["statnames"][sti]
+                arr = ds["Gray"].sel({"season": si, "varname": vi, "stat": sti,}).values
+                aggr_result = run_zonal_stats(arr, poly, transform)
+                aggr_results[season][model][scenario][varname][statname] = round(
+                    aggr_result["mean"], rounding[varname]
+                )
+
+    return aggr_results
+
+
+def create_csv(packaged_data):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -615,32 +659,34 @@ def run_aggregate_huc(huc_id):
 
     poly = poly_gdf.iloc[0]["geometry"]
 
-    # currently two options available with these data, seasonal or monthly,
-    # and default is seasonal
-    temporal_type, temporal_key = get_temporal_type(request.args)
-
-    # meterological variables as dataset
-    ar5_met_ds = asyncio.run(
-        fetch_bbox_netcdf(*poly.bounds, f"iem_ar5_2km_taspr_{temporal_type}")
+    cru_ds = asyncio.run(
+        fetch_bbox_netcdf(*poly.bounds, f"iem_cru_2km_taspr_seasonal_baseline_stats")
     )
-    cru_met_ds = asyncio.run(
-        fetch_bbox_netcdf(*poly.bounds, f"iem_cru_2km_taspr_{temporal_type}")
-    )
+    # compute transform with rioxarray, used
+    # for zonal_stats
+    cru_ds.rio.set_spatial_dims("X", "Y")
+    transform = cru_ds.rio.transform()
+    # use CRU to begin storing results combined point package
+    aggr_results = {"1950_2009": summarize_cru_within_poly(cru_ds, poly, transform)}
 
-    # aggregate the data and return packaged results
-    # compute transform with rioxarray
-    ar5_met_ds.rio.set_spatial_dims("X", "Y")
-    transform = ar5_met_ds.rio.transform()
-    # dimensions = ["decade", temporal_key[:-1], "model", "scenario"]
-    ar5_aggr_results = aggregate_dataarray(ar5_met_ds, poly, transform, temporal_key)
-    # use CRU as basis for combined point package for chronolical consistency
-    aggr_results = aggregate_dataarray(cru_met_ds, poly, transform, temporal_key)
-    # combine the CRU and AR5 packages
-    for decade, summaries in ar5_aggr_results.items():
+    for ar5_period, decades in zip(["2040_2069", "2070_2099"], [(3, 5), (6, 8)]):
+
+        # need to make two separate WCPS queries, one for each future climatology
+        ar5_clim_ds = asyncio.run(
+            fetch_bbox_netcdf(*poly.bounds, f"iem_ar5_2km_taspr_seasonal", decades)
+        )
+        aggr_results[ar5_period] = summarize_ar5_clim_within_poly(
+            ar5_clim_ds, poly, transform
+        )
+
+    ar5_ds = asyncio.run(fetch_bbox_netcdf(*poly.bounds, f"iem_ar5_2km_taspr_seasonal"))
+    ar5_results = summarize_ar5_within_poly(ar5_ds, poly, transform)
+
+    for decade, summaries in ar5_results.items():
         aggr_results[decade] = summaries
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(aggr_results, temporal_key)
+        csv_data = create_csv(aggr_results)
         return Response(
             csv_data,
             mimetype="text/csv",
