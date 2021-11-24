@@ -603,25 +603,30 @@ def run_fetch_point_data(lat, lon):
 
     x, y = project_latlon(lat, lon, 3338)
 
-    # currently two options available with these data, seasonal or monthly,
-    # and default is seasonal
-    temporal_type, temporal_key = get_temporal_type(request.args)
-
-    ar5_point_data = asyncio.run(
-        fetch_point_data(x, y, f"iem_ar5_2km_taspr_{temporal_type}")
-    )
-    ar5_point_pkg = package_point_data(ar5_point_data, temporal_key)
+    # get and combine the CRU and AR5 packages
+    # use CRU as basis for combined point package for chronolical consistency
+    # order of listing: CRU (1950-2009), AR5 2040-2069 summary,
+    #     AR5 2070-2099 summary, AR5 seasonal data
+    # query CRU baseline summary
     cru_point_data = asyncio.run(
         fetch_point_data(x, y, "iem_cru_2km_taspr_seasonal_baseline_stats")
     )
-    # use CRU as basis for combined point package for chronolical consistency
-    point_pkg = package_point_data(cru_point_data, temporal_key)
-    # combine the CRU and AR5 packages
+    point_pkg = package_cru_point_data(cru_point_data)
+    # query summarized AR5 data for 2040-2070 and 2070-2090
+    for period, decades in zip(["2040_2069", "2070_2099"], [(3, 5), (6, 8)]):
+        summary_data = asyncio.run(
+            fetch_point_data(x, y, "iem_ar5_2km_taspr_seasonal", decades)
+        )
+        point_pkg[period] = package_ar5_point_summary(summary_data)
+    # query AR5 unsummarized data
+    ar5_point_data = asyncio.run(fetch_point_data(x, y, "iem_ar5_2km_taspr_seasonal"))
+    ar5_point_pkg = package_ar5_point_data(ar5_point_data)
+    # include ar5 point data in point_pkg dict
     for decade, summaries in ar5_point_pkg.items():
         point_pkg[decade] = summaries
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg, temporal_key)
+        csv_data = create_csv(point_pkg)
         return Response(
             csv_data,
             mimetype="text/csv",
