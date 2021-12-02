@@ -3,6 +3,8 @@ A module of data gathering and data integrity functions and variables that could
 """
 import asyncio
 from aiohttp import ClientSession
+from config import RAS_BASE_URL
+from datetime import datetime
 
 
 bbox_offset = 0.000000001
@@ -36,8 +38,38 @@ def generate_query_urls(wms, wms_base, wfs, wfs_base):
     return urls
 
 
+def get_wcs_request_str(x, y, cov_id, encoding="json"):
+    """Generic WCS GetCoverage request for fetching a
+    subset of a coverage over X and Y axes
+
+    x (float or str): x-coordinate for point query (float), or string
+        composed as "x1,x2" for bbox query, where x1 and x2 are
+        lower and upper bounds of bbox
+    y (float or str): y-coordinate for point query (float), or string
+        composed as "y1,y2" for bbox query, where y1 and y2 are
+        lower and upper bounds of bbox
+    cov_id (str): Rasdaman coverage ID
+    encoding (str): currently supports either "json" or "netcdf"
+        for point or bbox queries, respectively
+    
+    """
+    return f"GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/{encoding}"
+
+
+def generate_wcs_query_url(request_str):
+    """Make a WCS URL by plugging a request substring
+     into the base WCS URL
+
+    request_srtr (str): either a typical WCS 
+    """
+    # currently hardcoded to Rasdaman URL backend because it's the only one
+    # we make WCS requests to (?)
+    return f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST={request_str}"
+
+
 async def fetch_layer_data(url, session, encoding="json"):
-    """Make an awaitable GET request to URL, return json
+    """Make an awaitable GET request to a URL, return json
+    or netcdf
     
     Args:
         url (str): WCS query URL
@@ -51,15 +83,16 @@ async def fetch_layer_data(url, session, encoding="json"):
     resp.raise_for_status()
 
     if encoding == "json":
-        query_result = await resp.json()
+        data = await resp.json()
     elif encoding == "netcdf":
-        query_result = await resp.read()
+        data = await resp.read()
 
-    return query_result
+    return data
 
 
 async def fetch_data_api(backend, workspace, wms_targets, wfs_targets, lat, lon):
-    """Generic Data API - gather all async requests for specified data layers in a workspace."""
+    """Generic Data API for GeoServer queries - gather all async requests 
+    for specified data layers in a GeoServer workspace."""
     base_wms_url = generate_base_wms_url(backend, workspace, lat, lon)
     base_wfs_url = generate_base_wfs_url(backend, workspace, lat, lon)
     urls = generate_query_urls(wms_targets, base_wms_url, wfs_targets, base_wfs_url)
@@ -74,3 +107,48 @@ def check_for_nodata(di, varname, varval, nodata):
     """Evaluate if a specific "no data" value (e.g. -9999) is returned and replace with explanatory text."""
     if int(varval) == int(nodata):
         di.update({varname: "No data at this location"})
+
+
+async def make_get_request(url, session):
+    """Make an awaitable GET request to a URL, return json
+    or netcdf - duplicate of fetch_layer_data for now
+    
+    Args:
+        url (str): WCS query URL
+        session (aiohttp.ClientSession): the client session instance
+
+    Returns:
+        Query result, deocded differently depending on encoding argument.
+    """
+    resp = await session.request(method="GET", url=url)
+    resp.raise_for_status()
+
+    # way of auto-detecting encoding from URL
+    if "application/json" in url:
+        data = await resp.json()
+    elif "application/netcdf":
+        data = await resp.read()
+
+    return data
+
+
+async def fetch_data(urls):
+    """Wrapper for make_get_request() which gathers and 
+    executes the urls as asyncio tasks
+    
+    Args:
+        urls (list): list of URLs as strings
+
+    Returns:
+        Results of query(ies) as either bytes or json
+    """
+    if len(urls) == 1:
+        async with ClientSession() as session:
+            results = await asyncio.create_task(make_get_request(urls[0], session))
+    else:
+        # not used yet
+        async with ClientSession() as session:
+            tasks = [make_get_request(url, session) for url in urls]
+            results = await asyncio.gather(*tasks)
+
+    return results
