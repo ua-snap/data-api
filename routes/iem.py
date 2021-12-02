@@ -1,8 +1,10 @@
 import asyncio
 import io
 import csv
+import operator
 import time
 import itertools
+from functools import reduce
 from urllib.parse import quote
 import numpy as np
 import geopandas as gpd
@@ -78,7 +80,7 @@ dim_encodings = {
         2: "MAM",
         3: "SON",
     },
-    "statnames": {
+    "stats": {
         0: "hi_std",
         1: "lo_std",
         2: "max",
@@ -180,21 +182,19 @@ def package_cru_point_data(point_data):
     """
     point_data_pkg = {}
     # hard-code summary period for CRU
-    period = "1950_2009"
-    point_data_pkg[period] = {}
     for si, v_li in enumerate(point_data):  # (nested list with varname at dim 0)
         season = dim_encodings["seasons"][si]
         model = "CRU-TS40"
         scenario = "CRU_historical"
-        point_data_pkg[period][season] = {model: {scenario: {}}}
+        point_data_pkg[season] = {model: {scenario: {}}}
         for vi, s_li in enumerate(v_li):  # (nested list with statistic at dim 0)
             varname = dim_encodings["varnames"][vi]
-            point_data_pkg[period][season][model][scenario][varname] = {}
+            point_data_pkg[season][model][scenario][varname] = {}
             for si, value in enumerate(s_li):  # (data values)
-                statname = dim_encodings["statnames"][si]
-                point_data_pkg[period][season][model][scenario][varname][
-                    statname
-                ] = round(value, rounding[varname])
+                stat = dim_encodings["stats"][si]
+                point_data_pkg[season][model][scenario][varname][stat] = round(
+                    value, rounding[varname]
+                )
 
     return point_data_pkg
 
@@ -312,6 +312,28 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_ids, summary_decades):
     return ds_list
 
 
+def generate_nested_dict(dim_combos):
+    """Dynamically generate a nested dict based on the different
+    dimension name combinations
+
+    # thanks https://stackoverflow.com/a/26496899/11417211
+    """
+    from collections import defaultdict
+
+    def default_to_regular(d):
+        if isinstance(d, defaultdict):
+            d = {k: default_to_regular(v) for k, v in d.items()}
+        return d
+
+    nested_dict = lambda: defaultdict(nested_dict)
+    di = nested_dict()
+
+    for map_list in dim_combos:
+        get_from_dict(di, map_list[:-1])[map_list[-1]] = {}
+
+    return default_to_regular(di)
+
+
 def run_zonal_stats(arr, poly, transform):
     """Helper to run zonal stats on 
         selected subset of DataSet"""
@@ -323,133 +345,74 @@ def run_zonal_stats(arr, poly, transform):
     return aggr_result
 
 
-def summarize_ar5_within_poly(ds, poly, transform):
-    """Perform a spatial agrgegation (mean) of a data array within a polygon.
-    Hardcoded for AR5 seasonal coverage.
-
+def summarize_within_poly(ds, poly, transform):
+    """Summarize an xarray.DataSet within a polygon.
+    Return the results as a nested dict.
+    
     Args:
-        ds (xarray.DataSet): datacube for all variables
-        poly (shapely.Polygon): polygon from shapefile
-        transform (affine.Affine): affine transform raster subset
+        ds (xarray.DataSet): DataSet with "Gray" as variable of 
+        interest
 
     Returns:
-        results of aggregation as a JSON-like dict
+        Nested dict of results for all non-X/Y axis combinations,
+        ordered according to the axis ordering of the data variable.
+
+    Notes:
+        This currently only works with coverages having a single band 
+        named "Gray", which is the default name for ingesting into 
+        Rasdaman from GeoTIFFs
     """
-    # use nested for loop to construct results dict like json output for single point
-    aggr_results = {}
-    # build aggregate results dict for JSON output
-    # hardcoded assuming same 4 dimensions,
-    #   consider revising with more robust approach
-    for di in np.int32(ds["decade"].values):
-        decade = dim_encodings["decades"][di]
-        aggr_results[decade] = {}
-        for si in np.int32(ds["season"].values):
-            # derived period is the season or month the underlying
-            # "derived" data product was aggregated over
-            season = dim_encodings["seasons"][si]
-            aggr_results[decade][season] = {}
-            for mi in np.int32(ds["model"].values):
-                model = dim_encodings["models"][mi]
-                aggr_results[decade][season][model] = {}
-                for sci in np.int32(ds["scenario"].values):
-                    scenario = dim_encodings["scenarios"][sci]
-                    # select subset and compute aggregate
-                    aggr_results[decade][season][model][scenario] = {}
-                    for vi in np.int32(ds["varname"].values):
-                        varname = dim_encodings["varnames"][vi]
-                        arr = (
-                            ds["Gray"]
-                            .sel(
-                                {
-                                    "decade": di,
-                                    "season": si,
-                                    "model": mi,
-                                    "scenario": sci,
-                                    "varname": vi,
-                                }
-                            )
-                            .values
-                        )
-                        aggr_result = run_zonal_stats(arr, poly, transform)
-                        aggr_results[decade][season][model][scenario][varname] = round(
-                            aggr_result["mean"], rounding[varname]
-                        )
+    # will actually operate on underlying DataArray
+    da = ds["Gray"]
+    # get axis (dimension) names and gnerate list of all coordinate combinations
+    all_dims = da.dims
+    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
+    iter_coords = list(
+        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
+    )
 
-    return aggr_results
+    # generate all combinations of decoded coordinate values
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[f"{dimname}s"][coord]
+            for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
 
+    #
+    aggr_results = generate_nested_dict(dim_combos)
 
-def summarize_ar5_clim_within_poly(ds, poly, transform):
-    """Perform a spatial agrgegation (mean) of a data array within a polygon.
-    Hardcoded for AR5 seasonal coverage.
+    data_arr = []
+    for coords, map_list in zip(iter_coords, dim_combos):
+        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        data_arr.append(da.sel(sel_di).values)
+    data_arr = np.array(data_arr)
 
-    Args:
-        ds (xarray.DataSet): datacube for all variables
-        poly (shapely.Polygon): polygon from shapefile
-        transform (affine.Affine): affine transform raster subset
+    # need to transpose the 2D spatial slices if X is the "rows" dimension
+    if all_dims.index("X") < all_dims.index("Y"):
+        data_arr = data_arr.transpose(0, 2, 1)
 
-    Returns:
-        results of aggregation as a JSON-like dict
-    """
-    # use nested for loop to construct results dict like json output for single point
-    aggr_results = {}
-    for si in np.int32(ds["season"].values):
-        # derived period is the season or month the underlying
-        # "derived" data product was aggregated over
-        season = dim_encodings["seasons"][si]
-        aggr_results[season] = {}
-        for mi in np.int32(ds["model"].values):
-            model = dim_encodings["models"][mi]
-            aggr_results[season][model] = {}
-            for sci in np.int32(ds["scenario"].values):
-                scenario = dim_encodings["scenarios"][sci]
-                # select subset and compute aggregate
-                aggr_results[season][model][scenario] = {}
-                for vi in np.int32(ds["varname"].values):
-                    varname = dim_encodings["varnames"][vi]
-                    arr = (
-                        ds["Gray"]
-                        .sel(
-                            {"season": si, "model": mi, "scenario": sci, "varname": vi,}
-                        )
-                        .values
-                    )
-                    aggr_result = run_zonal_stats(arr, poly, transform)
-                    aggr_results[season][model][scenario][varname] = round(
-                        aggr_result["mean"], rounding[varname]
-                    )
+    # testing strategy of outputting raster mask and
+    # masking the 3d data array
+    poly_mask_arr = zonal_stats(
+        poly,
+        data_arr[0],
+        affine=transform,
+        nodata=np.nan,
+        stats=["mean"],
+        raster_out=True,
+    )[0]["mini_raster_array"]
 
-    return aggr_results
+    data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
+    data_arr[data_arr_mask] = np.nan
+    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
 
-
-def summarize_cru_within_poly(ds, poly, transform):
-    """Perform a spatial agrgegation of a data array within a polygon.
-    Hardcoded for CRU TS seasonal baseline stats coverage.
-
-    Args:
-        ds (xarray.DataSet): datacube for all variables
-        poly (shapely.Polygon): polygon from shapefile
-        transform (affine.Affine): affine transform raster subset
-
-    Returns:
-        results of aggregation as a JSON-like dict
-    """
-    # use nested for loop to construct results dict like json output for single point
-    aggr_results = {}
-    for si in np.int32(ds["season"].values):
-        season = dim_encodings["seasons"][si]
-        model = "CRU-TS40"
-        scenario = "CRU_historical"
-        aggr_results[season] = {model: {scenario: {}}}
-        for vi in np.int32(ds["varname"].values):
-            varname = dim_encodings["varnames"][vi]
-            aggr_results[season][model][scenario][varname] = {}
-            for sti in np.int32(ds["stat"].values):
-                statname = dim_encodings["statnames"][sti]
-                arr = ds["Gray"].sel({"season": si, "varname": vi, "stat": sti,}).values
-                aggr_result = run_zonal_stats(arr, poly, transform)
-                aggr_results[season][model][scenario][varname][statname] = round(
-                    aggr_result["mean"], rounding[varname]
-                )
+    for map_list, result in zip(dim_combos, results):
+        varname = map_list[dimnames.index("varname")]
+        get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
+            result, rounding[varname]
+        )
 
     return aggr_results
 
@@ -482,7 +445,7 @@ def create_csv(packaged_data):
     cru_period = "1950_2009"
     for season in dim_encodings["seasons"].values():
         for varname in ["pr", "tas"]:
-            for statname in dim_encodings["statnames"].values():
+            for stat in dim_encodings["stats"].values():
                 writer.writerow(
                     {
                         "variable": varname,
@@ -492,7 +455,7 @@ def create_csv(packaged_data):
                         "scenario": "Historical",
                         "value": packaged_data[cru_period][season]["CRU-TS40"][
                             "CRU_historical"
-                        ][varname][statname],
+                        ][varname][stat],
                     }
                 )
 
@@ -646,35 +609,28 @@ def run_aggregate_huc(huc_id):
     #   bounds for query
     # TODO What if the huc_id is invalid?
     poly_gdf = huc_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
-
     poly = poly_gdf.iloc[0]["geometry"]
 
-    cru_ds = asyncio.run(
-        fetch_bbox_netcdf(*poly.bounds, f"iem_cru_2km_taspr_seasonal_baseline_stats")
-    )
-    # compute transform with rioxarray, used
-    # for zonal_stats
-    cru_ds.rio.set_spatial_dims("X", "Y")
-    transform = cru_ds.rio.transform()
-    # use CRU to begin storing results combined point package
-    aggr_results = {"1950_2009": summarize_cru_within_poly(cru_ds, poly, transform)}
-
-    for ar5_period, decades in zip(["2040_2069", "2070_2099"], [(3, 5), (6, 8)]):
-
-        # need to make two separate WCPS queries, one for each future climatology
-        ar5_clim_ds = asyncio.run(
-            fetch_bbox_netcdf(*poly.bounds, f"iem_ar5_2km_taspr_seasonal", decades)
-        )
-        aggr_results[ar5_period] = summarize_ar5_clim_within_poly(
-            ar5_clim_ds, poly, transform
-        )
     # fetch bbox data
     cov_ids, summary_decades, summary_periods = make_fetch_args()
     ds_list = asyncio.run(fetch_bbox_netcdf(*poly.bounds, cov_ids, summary_decades))
+    # get transform from a DataSet
+    ds_list[0].rio.set_spatial_dims("X", "Y")
+    transform = ds_list[0].rio.transform()
+    # aggr_results = {"1950_2009": summarize_cru_within_poly(ds_list[0], poly, transform)}
+    # these three all have the decade/time period dimension averaged out
+    aggr_results = {}
+    summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
+    for ds, period in zip(ds_list[:-1], summary_periods):
+        aggr_results[period] = summarize_within_poly(ds, poly, transform)
 
-    ar5_ds = asyncio.run(fetch_bbox_netcdf(*poly.bounds, f"iem_ar5_2km_taspr_seasonal"))
-    ar5_results = summarize_ar5_within_poly(ar5_ds, poly, transform)
+    # this is just some custom code to add the model and scenario levels for CRU
+    for season in aggr_results[summary_periods[0]]:
+        aggr_results[summary_periods[0]][season] = {
+            "CRU-TS40": {"CRU_historical": aggr_results[summary_periods[0]][season]}
+        }
 
+    ar5_results = summarize_within_poly(ds_list[-1], poly, transform)
     for decade, summaries in ar5_results.items():
         aggr_results[decade] = summaries
 
