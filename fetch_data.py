@@ -38,7 +38,7 @@ def generate_query_urls(wms, wms_base, wfs, wfs_base):
     return urls
 
 
-def get_wcs_request_str(x, y, cov_id, encoding="json"):
+def get_wcs_request_str(x, y, var_coord, cov_id, encoding="json"):
     """Generic WCS GetCoverage request for fetching a
     subset of a coverage over X and Y axes
 
@@ -48,12 +48,18 @@ def get_wcs_request_str(x, y, cov_id, encoding="json"):
     y (float or str): y-coordinate for point query (float), or string
         composed as "y1,y2" for bbox query, where y1 and y2 are
         lower and upper bounds of bbox
+    var_coord (int): coordinate value corresponding to varname to query
     cov_id (str): Rasdaman coverage ID
     encoding (str): currently supports either "json" or "netcdf"
         for point or bbox queries, respectively
-    
+
     """
-    return f"GetCoverage&COVERAGEID={cov_id}&SUBSET=X({x})&SUBSET=Y({y})&FORMAT=application/{encoding}"
+    wcs = (
+        f"GetCoverage&COVERAGEID={cov_id}"
+        f"&SUBSET=X({x})&SUBSET=Y({y}&SUBSET=varname({var_coord}))"
+        f"&FORMAT=application/{encoding}"
+    )
+    return wcs
 
 
 def generate_wcs_query_url(request_str):
