@@ -94,14 +94,35 @@ rounding = {
     "tas": 1,
     "pr": 0,
 }
+
+var_ep_lu = {
+    "temperature": "tas",
+    "precipitation": "pr",
+}
+
 # fmt: on
 
 
-def get_wcps_request_str(x, y, cov_id, summary_decades, encoding="json"):
-    """Generates a WCPS query specific to the 
+def make_fetch_args():
+    """Fixed helper function for ensuring 
+    consistency between point and HUC queries
+    """
+    cov_ids = [
+        "iem_cru_2km_taspr_seasonal_baseline_stats",
+        "iem_ar5_2km_taspr_seasonal",
+        "iem_ar5_2km_taspr_seasonal",
+        "iem_ar5_2km_taspr_seasonal",
+    ]
+    summary_decades = [None, (3, 5), (6, 8), None]
+
+    return cov_ids, summary_decades
+
+
+def get_wcps_request_str(x, y, var_coord, cov_id, summary_decades, encoding="json"):
+    """Generates a WCPS query specific to the
     coverages used in the endpoints herein. The only
     axis we are currently averaging over is "decade", so
-    this function creates a WCPS query from integer 
+    this function creates a WCPS query from integer
     values corresponding to decades to summarize over.
 
     Args:
@@ -111,9 +132,10 @@ def get_wcps_request_str(x, y, cov_id, summary_decades, encoding="json"):
         y (float or str): y-coordinate for point query, or string
             composed as "y1:y2" for bbox query, where y1 and y2 are
             lower and upper bounds of bbox
+        var_coord (int): coordinate value corresponding to varname to query
         cov_id (str): Rasdaman coverage ID
-        summary_decades (tuple): 2-tuple of integers mapped to 
-            desired range of decades to summarise over, 
+        summary_decades (tuple): 2-tuple of integers mapped to
+            desired range of decades to summarise over,
             e.g. (6, 8) for 2070-2099
         encoding (str): currently supports either "json" or "netcdf"
             for point or bbox queries, respectively
@@ -127,7 +149,7 @@ def get_wcps_request_str(x, y, cov_id, summary_decades, encoding="json"):
         (
             f"ProcessCoverages&query=for $c in ({cov_id}) "
             f"let $a := (condense + over $t decade({d1}:{d2}) "
-            f"using $c[decade($t),X({x}),Y({y})] ) / {n} "
+            f"using $c[decade($t),X({x}),Y({y}),varname({var_coord})] ) / {n} "
             f'return encode( $a , "application/{encoding}")'
         )
     )
@@ -139,29 +161,31 @@ def get_from_dict(data_dict, map_list):
     return reduce(operator.getitem, map_list, data_dict)
 
 
-async def fetch_point_data(x, y, cov_ids, summary_decades):
+async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     """Make the async request for the data at the specified point
 
     Args:
         x (float): lower x-coordinate bound
         y (float): lower y-coordinate bound
+        var_coord (str): coordinate value corresponding to varname
+            to query, one of 0 or 1
         cov_ids (list): Rasdaman coverage ids
-        summary_decades (tuple): 2-tuple of integers mapped to 
-            desired range of decades to summarise over, 
+        summary_decades (tuple): 2-tuple of integers mapped to
+            desired range of decades to summarise over,
             e.g. (6, 8) for 2070-2099
 
     Returns:
-        list of data results from each cov_id/summary_decades 
+        list of data results from each cov_id/summary_decades
         pairing
     """
     urls = []
     for cov_id, decade_tpl in zip(cov_ids, summary_decades):
         if decade_tpl:
             # if summary decades are given, create a WCPS request string
-            request_str = get_wcps_request_str(x, y, cov_id, decade_tpl)
+            request_str = get_wcps_request_str(x, y, var_coord, cov_id, decade_tpl)
         else:
             # otheriwse use generic WCS request str
-            request_str = get_wcs_request_str(x, y, cov_id)
+            request_str = get_wcs_request_str(x, y, var_coord, cov_id)
         urls.append(generate_wcs_query_url(request_str))
 
     point_data_list = await fetch_data(urls)
@@ -169,45 +193,45 @@ async def fetch_point_data(x, y, cov_ids, summary_decades):
     return point_data_list
 
 
-def package_cru_point_data(point_data):
+def package_cru_point_data(point_data, varname):
     """Add dim names to JSON response from point query
     for the CRU TS historical basline coverage
 
     Args:
         point_data (list): nested list containing JSON
             results of CRU point query
+        varname (str): variable name to fetch point data
+            for one of "tas" or "pr"
 
     Returns:
-        Dict of query results
+        JSON-like dict of query results
     """
     point_data_pkg = {}
     # hard-code summary period for CRU
-    for si, v_li in enumerate(point_data):  # (nested list with varname at dim 0)
+    for si, s_li in enumerate(point_data):  # (nested list with varname at dim 0)
         season = dim_encodings["seasons"][si]
         model = "CRU-TS40"
         scenario = "CRU_historical"
-        point_data_pkg[season] = {model: {scenario: {}}}
-        for vi, s_li in enumerate(v_li):  # (nested list with statistic at dim 0)
-            varname = dim_encodings["varnames"][vi]
-            point_data_pkg[season][model][scenario][varname] = {}
-            for si, value in enumerate(s_li):  # (data values)
-                stat = dim_encodings["stats"][si]
-                point_data_pkg[season][model][scenario][varname][stat] = round(
-                    value, rounding[varname]
-                )
+        point_data_pkg[season] = {model: {scenario: {varname: {}}}}
+        for si, value in enumerate(s_li):  # (nested list with statistic at dim 0)
+            stat = dim_encodings["stats"][si]
+            point_data_pkg[season][model][scenario][varname][stat] = round(
+                value, rounding[varname]
+            )
 
     return point_data_pkg
 
 
-def package_ar5_point_data(point_data):
+def package_ar5_point_data(point_data, varname):
     """Add dim names to JSON response from AR5 point query
 
     Args:
         point_data (list): nested list containing JSON
             results of AR5 or CRU point query
+        varname (str): name of variable, either "tas" or "pr"
 
     Returns:
-        Dict with dimension name
+        JSON-like dict of query results
     """
     point_data_pkg = {}
     # AR5 data:
@@ -227,26 +251,26 @@ def package_ar5_point_data(point_data):
             ):  # (nested list with scenario at dim 0)
                 model = dim_encodings["models"][mod_i]
                 point_data_pkg[decade][season][model] = {}
-                for si, v_li in enumerate(s_li):  # (nested list with varname at dim 0)
+                for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                     scenario = dim_encodings["scenarios"][si]
-                    point_data_pkg[decade][season][model][scenario] = {}
-                    for vi, value in enumerate(v_li):  # (data values)
-                        varname = dim_encodings["varnames"][vi]
-                        point_data_pkg[decade][season][model][scenario][varname] = value
+                    point_data_pkg[decade][season][model][scenario] = {
+                        varname: round(value, rounding[varname])
+                    }
 
     return point_data_pkg
 
 
-def package_ar5_point_summary(point_data):
+def package_ar5_point_summary(point_data, varname):
     """Add dim names to JSON response from point query
     for the AR5 coverages
 
     Args:
         point_data (list): nested list containing JSON
             results of AR5 or CRU point query
+        varname (str): name of variable, either "tas" or "pr"
 
     Returns:
-        Dict of query results
+        JSON-like dict of query results
     """
     point_data_pkg = {}
     for si, mod_li in enumerate(point_data):  # (nested list with model at dim 0)
@@ -255,19 +279,16 @@ def package_ar5_point_summary(point_data):
         for mod_i, s_li in enumerate(mod_li):  # (nested list with scenario at dim 0)
             model = dim_encodings["models"][mod_i]
             point_data_pkg[season][model] = {}
-            for si, v_li in enumerate(s_li):  # (nested list with varname at dim 0)
+            for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                 scenario = dim_encodings["scenarios"][si]
-                point_data_pkg[season][model][scenario] = {}
-                for vi, value in enumerate(v_li):  # (data values)
-                    varname = dim_encodings["varnames"][vi]
-                    point_data_pkg[season][model][scenario][varname] = round(
-                        value, rounding[varname]
-                    )
+                point_data_pkg[season][model][scenario] = {
+                    varname: round(value, rounding[varname])
+                }
 
     return point_data_pkg
 
 
-async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_ids, summary_decades):
+async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades):
     """Make the async request for the data within the specified bbox
 
     Args:
@@ -275,10 +296,11 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_ids, summary_decades):
         y1 (float): lower y-coordinate bound
         x2 (float): upper x-coordinate bound
         y2 (float): upper y-coordinate bound
+        var_coord (int): coordinate value corresponding to varname to query
         cov_ids (str): list of Coverage ids to fetch the same bbox over
-        summary_decades (list): list of either None or 2-tuples of integers 
-            mapped to desired range of decades to summarise over, 
-            e.g. (6, 8) for 2070-2099. List items need to 
+        summary_decades (list): list of either None or 2-tuples of integers
+            mapped to desired range of decades to summarise over,
+            e.g. (6, 8) for 2070-2099. List items need to
             correspond to items in cov_ids.
 
     Returns:
@@ -292,12 +314,14 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_ids, summary_decades):
             # if summary decades are given, create a WCPS request string
             x = f"{x1}:{x2}"
             y = f"{y1}:{y2}"
-            request_str = get_wcps_request_str(x, y, cov_id, decade_tpl, encoding)
+            request_str = get_wcps_request_str(
+                x, y, var_coord, cov_id, decade_tpl, encoding
+            )
         else:
             # otheriwse use generic WCS request str
             x = f"{x1},{x2}"
             y = f"{y1},{y2}"
-            request_str = get_wcs_request_str(x, y, cov_id, encoding)
+            request_str = get_wcs_request_str(x, y, var_coord, cov_id, encoding)
         urls.append(generate_wcs_query_url(request_str))
 
     start_time = time.time()
@@ -315,6 +339,13 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, cov_ids, summary_decades):
 def generate_nested_dict(dim_combos):
     """Dynamically generate a nested dict based on the different
     dimension name combinations
+
+    Args:
+        dim_combos (list): List of lists of decoded coordinate 
+            values (i.e. season, model, scenario names/values)
+
+    Returns:
+        Nested dict with empty dicts at deepest levels
 
     # thanks https://stackoverflow.com/a/26496899/11417211
     """
@@ -345,17 +376,18 @@ def run_zonal_stats(arr, poly, transform):
     return aggr_result
 
 
-def summarize_within_poly(ds, poly, transform):
+def summarize_within_poly(ds, varname, poly):
     """Summarize an xarray.DataSet within a polygon.
     Return the results as a nested dict.
     
     Args:
         ds (xarray.DataSet): DataSet with "Gray" as variable of 
-        interest
+            interest
+        varname (str): name of variable represented by ds
+        poly (shapely.Polygon): polygon within which to summarize ds
 
     Returns:
         Nested dict of results for all non-X/Y axis combinations,
-        ordered according to the axis ordering of the data variable.
 
     Notes:
         This currently only works with coverages having a single band 
@@ -380,7 +412,6 @@ def summarize_within_poly(ds, poly, transform):
         ]
         dim_combos.append(map_list)
 
-    #
     aggr_results = generate_nested_dict(dim_combos)
 
     data_arr = []
@@ -393,8 +424,9 @@ def summarize_within_poly(ds, poly, transform):
     if all_dims.index("X") < all_dims.index("Y"):
         data_arr = data_arr.transpose(0, 2, 1)
 
-    # testing strategy of outputting raster mask and
-    # masking the 3d data array
+    # get transform from a DataSet
+    ds.rio.set_spatial_dims("X", "Y")
+    transform = ds.rio.transform()
     poly_mask_arr = zonal_stats(
         poly,
         data_arr[0],
@@ -409,7 +441,6 @@ def summarize_within_poly(ds, poly, transform):
     results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
 
     for map_list, result in zip(dim_combos, results):
-        varname = map_list[dimnames.index("varname")]
         get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
             result, rounding[varname]
         )
@@ -422,7 +453,8 @@ def create_csv(packaged_data):
     Returns a CSV version of the fetched data, as a string.
 
     Args:
-        packaged_data (json): output from the package_point_data function here
+        packaged_data (json): JSON-like data pakage output 
+            from the run_fetch_* and run_aggregate_* functions
 
     Returns:
         string of CSV data
@@ -435,6 +467,7 @@ def create_csv(packaged_data):
         "season",
         "model",
         "scenario",
+        "stat",
         "value",
     ]
     writer = csv.DictWriter(output, fieldnames=fieldnames)
@@ -446,18 +479,24 @@ def create_csv(packaged_data):
     for season in dim_encodings["seasons"].values():
         for varname in ["pr", "tas"]:
             for stat in dim_encodings["stats"].values():
-                writer.writerow(
-                    {
-                        "variable": varname,
-                        "date_range": cru_period,
-                        "season": season,
-                        "model": "CRU-TS40",
-                        "scenario": "Historical",
-                        "value": packaged_data[cru_period][season]["CRU-TS40"][
-                            "CRU_historical"
-                        ][varname][stat],
-                    }
-                )
+                try:
+                    writer.writerow(
+                        {
+                            "variable": varname,
+                            "date_range": cru_period,
+                            "season": season,
+                            "model": "CRU-TS40",
+                            "scenario": "Historical",
+                            "stat": stat,
+                            "value": packaged_data[cru_period][season]["CRU-TS40"][
+                                "CRU_historical"
+                            ][varname][stat],
+                        }
+                    )
+                except KeyError:
+                    # if single var query, just ignore attempts to
+                    # write the non-chosen var
+                    pass
 
     # AR5 periods
     for ar5_period in ["2040_2069", "2070_2099"]:
@@ -465,18 +504,24 @@ def create_csv(packaged_data):
             for model in dim_encodings["models"].values():
                 for scenario in dim_encodings["scenarios"].values():
                     for varname in ["pr", "tas"]:
-                        writer.writerow(
-                            {
-                                "variable": varname,
-                                "date_range": ar5_period,
-                                "season": season,
-                                "model": model,
-                                "scenario": scenario,
-                                "value": packaged_data[ar5_period][season][model][
-                                    scenario
-                                ][varname],
-                            }
-                        )
+                        try:
+                            writer.writerow(
+                                {
+                                    "variable": varname,
+                                    "date_range": ar5_period,
+                                    "season": season,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "stat": "mean",
+                                    "value": packaged_data[ar5_period][season][model][
+                                        scenario
+                                    ][varname],
+                                }
+                            )
+                        except KeyError:
+                            # if single var query, just ignore attempts to
+                            # write the non-chosen var
+                            pass
 
     for decade in dim_encodings["decades"].values():
         for season in dim_encodings["seasons"].values():
@@ -487,70 +532,108 @@ def create_csv(packaged_data):
             for model in dim_encodings["models"].values():
                 for scenario in dim_encodings["scenarios"].values():
                     for varname in ["pr", "tas"]:
-                        writer.writerow(
-                            {
-                                "variable": varname,
-                                "date_range": season,
-                                "season": season,
-                                "model": model,
-                                "scenario": scenario,
-                                "value": packaged_data[decade][season][model][scenario][
-                                    varname
-                                ],
-                            }
-                        )
+                        try:
+                            writer.writerow(
+                                {
+                                    "variable": varname,
+                                    "date_range": season,
+                                    "season": season,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "stat": "mean",
+                                    "value": packaged_data[decade][season][model][
+                                        scenario
+                                    ][varname],
+                                }
+                            )
+                        except KeyError:
+                            # if single var query, just ignore attempts to
+                            # write the non-chosen var
+                            pass
 
     return output.getvalue()
 
 
-@routes.route("/iem/")
-@routes.route("/iem/abstract/")
-def about():
-    return render_template("iem/abstract.html")
+def return_csv(csv_data):
+    """Return the CSV data as a download
 
+    Args:
+        csv_data (?): csv data created with create_csv() function
 
-@routes.route("/iem/point/")
-def about_point():
-    return render_template("iem/point.html")
-
-
-@routes.route("/iem/huc/")
-def about_huc():
-    return render_template("iem/huc.html")
-
-
-def make_fetch_args():
-    """Fixed helper function for ensuring 
-    consistency between point and HUC queries
+    Returns:
+        CSV Response
     """
-    cov_ids = [
-        "iem_cru_2km_taspr_seasonal_baseline_stats",
-        "iem_ar5_2km_taspr_seasonal",
-        "iem_ar5_2km_taspr_seasonal",
-        "iem_ar5_2km_taspr_seasonal",
+    response = Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={
+            "Content-Type": 'text/csv; name="climate.csv"',
+            "Content-Disposition": 'attachment; filename="climate.csv"',
+        },
+    )
+
+    return response
+
+
+def combine_pkg_dicts(tas_di, pr_di):
+    """combine and return to packaed data dicts,
+    for combining tas and pr individual endpoint results
+
+    Args:
+        di1 (dict): result dict from point or HUC query for temperature
+        di2 (dict): result dict from point or HUC query for precip
+
+    Returns:
+        Combined dict containing both tas and pr results
+    """
+    # merge pr_di with tas_di
+    # do so by creating all dim combinations up to level of "tas"/"pr"
+    # and pull/place values
+    # start with CRU separateley since we don't have valid combinations
+    # for models/scenarios etc with AR5 data
+    dim_combos = [
+        ("1950_2009", season, "CRU-TS40", "CRU_historical")
+        for season in dim_encodings["seasons"].values()
     ]
-    summary_decades = [None, (3, 5), (6, 8), None]
+    # generate combinations of AR5 coords
+    periods = ["2040_2069", "2070_2099", *dim_encodings["decades"].values()]
+    dim_basis = [periods]
+    dim_basis.extend(
+        [
+            dim_encodings[dimname].values()
+            for dimname in ["seasons", "models", "scenarios"]
+        ]
+    )
+    dim_combos.extend(itertools.product(*dim_basis))
+    for map_list in dim_combos:
+        result_di = get_from_dict(pr_di, map_list)
+        get_from_dict(tas_di, map_list)["pr"] = result_di["pr"]
 
-    return cov_ids, summary_decades
+    return tas_di
 
 
-@routes.route("/iem/point/<lat>/<lon>")
-def run_fetch_point_data(lat, lon):
+def run_fetch_var_point_data(var_ep, lat, lon):
     """Run the async IEM data requesting for a single point
     and return data as json
 
     Args:
+        varname (str): Abbreviation name for variable of interest,
+            either "tas" or "pr"
         lat (float): latitude
         lon (float): longitude
 
     Returns:
-        JSON of data at provided latitude and longitude
-
-    Notes:
-        example request: http://localhost:5000/iem/point/65.0628/-146.1627
+        JSON-like dict of data at provided latitude and longitude
     """
     if not validate(lat, lon):
         abort(400)
+
+    varname = var_ep_lu[var_ep]
+    # get the coordinate value for the specified variable
+    # just a way to lookup reverse of varname
+    var_coord = list(dim_encodings["varnames"].keys())[
+        list(dim_encodings["varnames"].values()).index(varname)
+    ]
 
     x, y = project_latlon(lat, lon, 3338)
 
@@ -560,45 +643,59 @@ def run_fetch_point_data(lat, lon):
     #     AR5 2070-2099 summary, AR5 seasonal data
     # query CRU baseline summary
     cov_ids, summary_decades = make_fetch_args()
-    point_data_list = asyncio.run(fetch_point_data(x, y, cov_ids, summary_decades))
+    point_data_list = asyncio.run(
+        fetch_point_data(x, y, var_coord, cov_ids, summary_decades)
+    )
 
     # package point data with decoded coord values (names)
     # these functions are hard-coded  with coord values for now
     point_pkg = {}
-    point_pkg["1950_2009"] = package_cru_point_data(point_data_list[0])
-    point_pkg["2040_2069"] = package_ar5_point_summary(point_data_list[1])
-    point_pkg["2070_2099"] = package_ar5_point_summary(point_data_list[2])
+    point_pkg["1950_2009"] = package_cru_point_data(point_data_list[0], varname)
+    point_pkg["2040_2069"] = package_ar5_point_summary(point_data_list[1], varname)
+    point_pkg["2070_2099"] = package_ar5_point_summary(point_data_list[2], varname)
     # package AR5 decadal data with decades and fold into data pakage
-    ar5_point_pkg = package_ar5_point_data(point_data_list[3])
+    ar5_point_pkg = package_ar5_point_data(point_data_list[3], varname)
     for decade, summaries in ar5_point_pkg.items():
         point_pkg[decade] = summaries
-
-    if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg)
-        return Response(
-            csv_data,
-            mimetype="text/csv",
-            headers={
-                "Content-Type": 'text/csv; name="climate.csv"',
-                "Content-Disposition": 'attachment; filename="climate.csv"',
-            },
-        )
 
     return point_pkg
 
 
-@routes.route("/iem/huc/<huc_id>")
-def run_aggregate_huc(huc_id):
-    """Get data within a huc and aggregate according by mean
+def run_fetch_point_data(lat, lon):
+    """Fetch and combine point data for both 
+    temperature and precipitation andpoints
+    
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns: 
+        JSON-like dict of data at provided latitude and 
+        longitude
+    """
+    tas_pkg, pr_pkg = [
+        run_fetch_var_point_data(var_ep, lat, lon)
+        for var_ep in ["temperature", "precipitation"]
+    ]
+
+    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
+
+    return combined_pkg
+
+
+def run_aggregate_var_huc(var_ep, huc_id):
+    """Get data for single variable within a huc and aggregate by mean.
 
     Args:
+        var_ep (str): variable endpoint. Either taspr, temperature, 
+            or precipitation
         huc_id (int): 8-digit HUD ID
 
     Returns:
         Mean summaries of rasters within HUC
 
     Notes:
-        Rasters refers to the individual isntances of the
+        Rasters refers to the individual instances of the
           singular dimension combinations
     """
     # could add check here to make sure HUC is in the geodataframe
@@ -611,38 +708,140 @@ def run_aggregate_huc(huc_id):
     poly_gdf = huc_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
     poly = poly_gdf.iloc[0]["geometry"]
 
+    varname = var_ep_lu[var_ep]
+    # get the coordinate value for the specified variable
+    # just a way to lookup reverse of varname
+    var_coord = list(dim_encodings["varnames"].keys())[
+        list(dim_encodings["varnames"].values()).index(varname)
+    ]
+
     # fetch bbox data
-    cov_ids, summary_decades, summary_periods = make_fetch_args()
-    ds_list = asyncio.run(fetch_bbox_netcdf(*poly.bounds, cov_ids, summary_decades))
-    # get transform from a DataSet
-    ds_list[0].rio.set_spatial_dims("X", "Y")
-    transform = ds_list[0].rio.transform()
-    # aggr_results = {"1950_2009": summarize_cru_within_poly(ds_list[0], poly, transform)}
+    cov_ids, summary_decades = make_fetch_args()
+    ds_list = asyncio.run(
+        fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades)
+    )
+
     # these three all have the decade/time period dimension averaged out
     aggr_results = {}
     summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
     for ds, period in zip(ds_list[:-1], summary_periods):
-        aggr_results[period] = summarize_within_poly(ds, poly, transform)
+        aggr_results[period] = summarize_within_poly(ds, varname, poly)
 
-    # this is just some custom code to add the model and scenario levels for CRU
-    for season in aggr_results[summary_periods[0]]:
-        aggr_results[summary_periods[0]][season] = {
-            "CRU-TS40": {"CRU_historical": aggr_results[summary_periods[0]][season]}
-        }
-
-    ar5_results = summarize_within_poly(ds_list[-1], poly, transform)
+    ar5_results = summarize_within_poly(ds_list[-1], varname, poly)
     for decade, summaries in ar5_results.items():
         aggr_results[decade] = summaries
 
-    if request.args.get("format") == "csv":
-        csv_data = create_csv(aggr_results)
-        return Response(
-            csv_data,
-            mimetype="text/csv",
-            headers={
-                "Content-Type": 'text/csv; name="climate.csv"',
-                "Content-Disposition": 'attachment; filename="climate.csv"',
-            },
-        )
+    # next two loops are some garbage to insert the varnames
+    #  add the model, scenario, and varname levels for CRU
+    for season in aggr_results[summary_periods[0]]:
+        aggr_results[summary_periods[0]][season] = {
+            "CRU-TS40": {
+                "CRU_historical": {varname: aggr_results[summary_periods[0]][season]}
+            }
+        }
+    # add the varname for AR5
+    for period in summary_periods[1:] + list(dim_encodings["decades"].values()):
+        for season in aggr_results[period]:
+            for model in aggr_results[period][season]:
+                for scenario in aggr_results[period][season][model]:
+                    aggr_results[period][season][model][scenario] = {
+                        varname: aggr_results[period][season][model][scenario]
+                    }
 
     return aggr_results
+
+
+def run_aggregate_huc(huc_id):
+    """Get data within a huc for both temperature and 
+    precipitation and aggregate according by mean.
+
+    Args:
+        huc_id (int): 8-digit HUD ID
+
+    Returns:
+        JSON-like dict of summaries for both variables of rasters 
+            within HUC 
+    """
+    tas_pkg, pr_pkg = [
+        run_aggregate_var_huc(var_ep, huc_id)
+        for var_ep in ["temperature", "precipitation"]
+    ]
+
+    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
+
+    return combined_pkg
+
+
+@routes.route("/temperature/")
+@routes.route("/temperature/abstract/")
+@routes.route("/precipitation/")
+@routes.route("/precipitation/abstract/")
+@routes.route("/taspr/")
+@routes.route("/taspr/abstract/")
+def about():
+    return render_template("iem/abstract.html")
+
+
+@routes.route("/taspr/point/")
+@routes.route("/temperature/point/")
+@routes.route("/precipitation/point/")
+def about_point():
+    return render_template("iem/point.html")
+
+
+@routes.route("/taspr/huc/")
+@routes.route("/temperature/huc/")
+@routes.route("/precipitation/huc/")
+def about_huc():
+    return render_template("iem/huc.html")
+
+
+@routes.route("/<var_ep>/point/<lat>/<lon>")
+def point_data_endpoint(var_ep, lat, lon):
+    """Point data endpoint. Fetch point data for 
+    specified var/lat/lon and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature, 
+            or precipitation
+        lat (float): latitude
+        lon (float): longitude
+
+    Notes:
+        example request: http://localhost:5000/temperature/point/65.0628/-146.1627
+    """
+    if var_ep in var_ep_lu.keys():
+        point_pkg = run_fetch_var_point_data(var_ep, lat, lon)
+    elif var_ep == "taspr":
+        point_pkg = run_fetch_point_data(lat, lon)
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(point_pkg)
+        return return_csv(csv_data)
+
+    return point_pkg
+
+
+@routes.route("/<var_ep>/huc/<huc_id>")
+def huc_data_endpoint(var_ep, huc_id):
+    """HUC-aggregation data endpoint. Fetch data within HUC 
+    for specified variable and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature, 
+            or precipitation
+        huc_id (int): 8-digit HUD ID
+
+    Notes:
+        example request: http://localhost:5000/temperature/point/65.0628/-146.1627
+    """
+    if var_ep in var_ep_lu.keys():
+        point_pkg = run_aggregate_var_huc(var_ep, huc_id)
+    elif var_ep == "taspr":
+        point_pkg = run_aggregate_huc(huc_id)
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(point_pkg)
+        return return_csv(csv_data)
+
+    return point_pkg

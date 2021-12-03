@@ -1,22 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Integrated Ecosystem Model (IEM) data</h3>
-<p>These data are for use in the IEM webapp. Currently, only SNAP's 2km downscaled temperature and precip data are available.</p>
+<h3>Temperature and Precipitation Data</h3>
+<p>The endpoints here provide access to 2km downscaled temperature and precipitation data for future (AR5/CMIP5) and historical (CRU TS 4.0) scenarios. There are endpoints for either of these variables individually or in combination. These data are for use in the Northern Climate Reports webapp, and have thus been clipped to the working domain of the Integrated Ecosystem Model (IEM) project.</p>
 <h4>Service endpoints</h4>
+<p>There are endpoints for point queries and aggregations (mean summaries) by HUC-8 units.</p>
 <ul>
-    <li><a href="/iem/point">Point Query</a>: 2km temperature and precip data at a single point</li>
-    <li><a href="/iem/huc">Aggregate by HUC</a>: 2km temperature and precip data within a HUC-8 polygon, aggregating by mean</li>
+    <li><a href="/taspr/point">Point Query</a>: 2km temperature and precip data at a single point</li>
+    <li><a href="/taspr/huc">Aggregate by HUC</a>: 2km temperature and precip data within a HUC-8 polygon, aggregating by mean</li>
 </ul>
 
 <h4>Results from the queries above will look like this:</h4>
+
 <pre>
 {
   "1910-2019": {
     "DJF":{
       "CRU-TS40": {
         "CRU_historical": {
-          "pr": 39,
-          "tas": -19.3
+          "tas":{
+            "hi_std": -15.1,
+            "lo_std": -25.4,
+            "max": -9,
+            "mean": -20.3,
+            "min": -34.8
+          }
         }
       }
     }
@@ -33,8 +40,9 @@ The above output is structured as such:
     &ltseason>:{
       &ltmodel>: {
         &ltscenario>: {
-          "pr": &ltprecip value>,
-          "tas": &lttermperature value>
+          &ltvarname>: {
+            &ltstatistic>: &ltstatistic value>
+          }
         }
       }
     }
@@ -42,6 +50,9 @@ The above output is structured as such:
   ...
 }
 </pre>
+
+Note: only the CRU TS 4.0 data has statistics other than "mean", so AR5 data will end at <code>&ltvarname>: &ltmean value ></code>
+<p><br></p>
 
 <h4>Dimensions:</h4>
 <ul>
@@ -79,6 +90,14 @@ The above output is structured as such:
             <li>rcp60</li>
             <li>rcp85</li>
             <li>CRU_historical</li>
+        </ul>
+    <li><strong><code>statistic</code></strong>: Statistic value for CRU TS</li>
+        <ul>
+            <li>hi_std: mean + standard deviation</li>
+            <li>lo_std: mean - standard deviation</li>
+            <li>max</li>
+            <li>mean</li>
+            <li>min</li>
         </ul>
 </ul>
 <strong>Variables:</strong>:
