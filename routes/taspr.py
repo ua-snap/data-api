@@ -779,21 +779,21 @@ def run_aggregate_huc(huc_id):
 @routes.route("/taspr/")
 @routes.route("/taspr/abstract/")
 def about():
-    return render_template("iem/abstract.html")
+    return render_template("taspr/abstract.html")
 
 
 @routes.route("/taspr/point/")
 @routes.route("/temperature/point/")
 @routes.route("/precipitation/point/")
 def about_point():
-    return render_template("iem/point.html")
+    return render_template("taspr/point.html")
 
 
 @routes.route("/taspr/huc/")
 @routes.route("/temperature/huc/")
 @routes.route("/precipitation/huc/")
 def about_huc():
-    return render_template("iem/huc.html")
+    return render_template("taspr/huc.html")
 
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
