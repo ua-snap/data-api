@@ -62,11 +62,34 @@ def get_wcs_request_str(x, y, var_coord, cov_id, encoding="json"):
     return wcs
 
 
+def get_wcs_request_str_allvar(x, y, cov_id, encoding="json"):
+    """Generic WCS GetCoverage request for fetching a
+    subset of a coverage over X and Y axes
+
+    x (float or str): x-coordinate for point query (float), or string
+        composed as "x1,x2" for bbox query, where x1 and x2 are
+        lower and upper bounds of bbox
+    y (float or str): y-coordinate for point query (float), or string
+        composed as "y1,y2" for bbox query, where y1 and y2 are
+        lower and upper bounds of bbox
+    cov_id (str): Rasdaman coverage ID
+    encoding (str): currently supports either "json" or "netcdf"
+        for point or bbox queries, respectively
+
+    """
+    wcs = (
+        f"GetCoverage&COVERAGEID={cov_id}"
+        f"&SUBSET=X({x})&SUBSET=Y({y})"
+        f"&FORMAT=application/{encoding}"
+    )
+    return wcs
+
+
 def generate_wcs_query_url(request_str):
     """Make a WCS URL by plugging a request substring
      into the base WCS URL
 
-    request_srtr (str): either a typical WCS 
+    request_srtr (str): either a typical WCS
     """
     # currently hardcoded to Rasdaman URL backend because it's the only one
     # we make WCS requests to (?)
@@ -76,7 +99,7 @@ def generate_wcs_query_url(request_str):
 async def fetch_layer_data(url, session, encoding="json"):
     """Make an awaitable GET request to a URL, return json
     or netcdf
-    
+
     Args:
         url (str): WCS query URL
         session (aiohttp.ClientSession): the client session instance
@@ -97,7 +120,7 @@ async def fetch_layer_data(url, session, encoding="json"):
 
 
 async def fetch_data_api(backend, workspace, wms_targets, wfs_targets, lat, lon):
-    """Generic Data API for GeoServer queries - gather all async requests 
+    """Generic Data API for GeoServer queries - gather all async requests
     for specified data layers in a GeoServer workspace."""
     base_wms_url = generate_base_wms_url(backend, workspace, lat, lon)
     base_wfs_url = generate_base_wfs_url(backend, workspace, lat, lon)
@@ -118,7 +141,7 @@ def check_for_nodata(di, varname, varval, nodata):
 async def make_get_request(url, session):
     """Make an awaitable GET request to a URL, return json
     or netcdf - duplicate of fetch_layer_data for now
-    
+
     Args:
         url (str): WCS query URL
         session (aiohttp.ClientSession): the client session instance
@@ -139,9 +162,9 @@ async def make_get_request(url, session):
 
 
 async def fetch_data(urls):
-    """Wrapper for make_get_request() which gathers and 
+    """Wrapper for make_get_request() which gathers and
     executes the urls as asyncio tasks
-    
+
     Args:
         urls (list): list of URLs as strings
 
