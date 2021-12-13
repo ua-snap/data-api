@@ -112,7 +112,7 @@ def make_fetch_args():
     consistency between point and HUC queries
     """
     cov_ids = [
-        "iem_cru_2km_taspr_seasonal_baseline_stats_v2",
+        "iem_cru_2km_taspr_seasonal_baseline_stats",
         "iem_ar5_2km_taspr_seasonal",
         "iem_ar5_2km_taspr_seasonal",
         "iem_ar5_2km_taspr_seasonal",
