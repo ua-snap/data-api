@@ -86,7 +86,10 @@ dim_encodings = {
         1: "lo_std",
         2: "max",
         3: "mean",
-        4: "min",
+        4: "median",
+        5: "min",
+        6: "q1",
+        7: "q3",
     },
 }
 
@@ -109,7 +112,7 @@ def make_fetch_args():
     consistency between point and HUC queries
     """
     cov_ids = [
-        "iem_cru_2km_taspr_seasonal_baseline_stats",
+        "iem_cru_2km_taspr_seasonal_baseline_stats_v2",
         "iem_ar5_2km_taspr_seasonal",
         "iem_ar5_2km_taspr_seasonal",
         "iem_ar5_2km_taspr_seasonal",
