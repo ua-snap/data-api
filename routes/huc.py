@@ -3,7 +3,7 @@ import geopandas as gpd
 from flask import abort, Blueprint, render_template, current_app as app
 from . import routes
 
-iem_api = Blueprint("iem_api", __name__)
+huc_api = Blueprint("huc_api", __name__)
 
 huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_index(
     "huc8"

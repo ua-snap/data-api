@@ -4,6 +4,7 @@ import csv
 import operator
 import time
 import itertools
+from collections import defaultdict
 from functools import reduce
 from urllib.parse import quote
 import numpy as np
@@ -24,7 +25,7 @@ from validate_latlon import validate, project_latlon
 from fetch_data import get_wcs_request_str, generate_wcs_query_url, fetch_data
 from . import routes
 
-iem_api = Blueprint("iem_api", __name__)
+taspr_api = Blueprint("taspr_api", __name__)
 
 huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_index(
     "huc8"
@@ -158,6 +159,10 @@ def get_wcps_request_str(x, y, var_coord, cov_id, summary_decades, encoding="jso
 
 
 def get_from_dict(data_dict, map_list):
+    """Use a list to access a nested dict
+
+    Thanks https://stackoverflow.com/a/14692747/11417211
+    """
     return reduce(operator.getitem, map_list, data_dict)
 
 
@@ -347,18 +352,20 @@ def generate_nested_dict(dim_combos):
     Returns:
         Nested dict with empty dicts at deepest levels
 
-    # thanks https://stackoverflow.com/a/26496899/11417211
+    # 
     """
-    from collections import defaultdict
 
     def default_to_regular(d):
+        """Convert a defaultdict to a regular dict
+
+        Thanks https://stackoverflow.com/a/26496899/11417211
+        """
         if isinstance(d, defaultdict):
             d = {k: default_to_regular(v) for k, v in d.items()}
         return d
 
     nested_dict = lambda: defaultdict(nested_dict)
     di = nested_dict()
-
     for map_list in dim_combos:
         get_from_dict(di, map_list[:-1])[map_list[-1]] = {}
 
@@ -613,7 +620,7 @@ def combine_pkg_dicts(tas_di, pr_di):
 
 
 def run_fetch_var_point_data(var_ep, lat, lon):
-    """Run the async IEM data requesting for a single point
+    """Run the async tas/pr data requesting for a single point
     and return data as json
 
     Args:
