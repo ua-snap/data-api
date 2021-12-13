@@ -2,8 +2,6 @@ import asyncio
 import io
 import operator
 import time
-import itertools
-from functools import reduce
 from urllib.parse import quote
 import numpy as np
 import geopandas as gpd
@@ -32,7 +30,8 @@ from . import routes
 
 permafrost_api = Blueprint("permafrost_api", __name__)
 
-# encodings to interpret rasdaman ingest
+# encodings to interpret the rasdaman coverage
+permafrost_coverage_id = "iem_gipl_magt_alt_4km_wms"
 varnames = ["magt", "alt"]
 scenarios = ["historical", "rcp45", "rcp85"]
 models = ["cruts31", "gfdlcm3", "gisse2r", "ipslcm5alr", "mricgcm3", "ncarccsm4"]
@@ -51,7 +50,7 @@ model_encoding = {
 }
 scenario_encoding = {"historical": 0, "rcp45": 1, "rcp85": 2}
 
-permafrost_coverage_id = "iem_gipl_magt_alt_4km_wms"
+# geoserver targets
 wms_targets = [
     "obu_2018_magt",
 ]
@@ -118,7 +117,7 @@ def package_obu_vector(obu_vector_resp):
 
 
 def package_gipl(gipl_resp):
-    """Package GIPL MAGT and ALT Data"""
+    """Package GIPL MAGT and ALT Data. The response here is a nested list object."""
     flattened_resp = sum(sum(gipl_resp, []), [])
 
     # Nested dict output structure
@@ -130,8 +129,6 @@ def package_gipl(gipl_resp):
         for era in eras
     }
 
-    # Mapping the response to the dictionary
-    # This doesn't feel quite right yet.
     i = 0
     for era in di.keys():
         for model in di[era].keys():
@@ -140,8 +137,32 @@ def package_gipl(gipl_resp):
                     flattened_resp[i].split(" ")[0]
                 )
                 di[era][model][scenario]["alt"] = float(flattened_resp[i].split(" ")[1])
-                di[era][model][scenario]["title"] = "GIPL 2.0 Model Output"
+                di[era][model][scenario][
+                    "title"
+                ] = "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature and Active Layer Thickness Model Output"
                 i += 1
+    # For some reason I need to swap MAGT and ALT for the historical baseline
+    # May have to look back at the ingest to see why these are swapped
+    (
+        di["1995"]["cruts31"]["historical"]["magt"],
+        di["1995"]["cruts31"]["historical"]["alt"],
+    ) = (
+        di["1995"]["cruts31"]["historical"]["alt"],
+        di["1995"]["cruts31"]["historical"]["magt"],
+    )
+    # This block drops all the invalid dimensional combinations that are a result of jamming historical and projected data into the same data cube.
+    di["1995"].pop("gfdlcm3", None)
+    di["1995"].pop("gisse2r", None)
+    di["1995"].pop("ipslcm5alr", None)
+    di["1995"].pop("mricgcm3", None)
+    di["1995"].pop("ncarccsm4", None)
+    di["1995"]["cruts31"].pop("rcp45", None)
+    di["1995"]["cruts31"].pop("rcp85", None)
+    for k in ["2025", "2050", "2075", "2095"]:
+        di[k].pop("cruts31", None)
+        for m in di[k].keys():
+            di[k][m].pop("historical", None)
+
     return di
 
 
@@ -157,6 +178,9 @@ def pf_about():
     return render_template("permafrost/abstract.html")
 
 
+@routes.route("/groundtemperature/point/")
+@routes.route("/activelayer/point/")
+@routes.route("/magtalt/point/")
 @routes.route("/permafrost/point/")
 def pf_about_point():
     return render_template("permafrost/point.html")
