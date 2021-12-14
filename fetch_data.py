@@ -4,7 +4,6 @@ A module of data gathering and data integrity functions and variables that could
 import asyncio
 from aiohttp import ClientSession
 from config import RAS_BASE_URL
-from datetime import datetime
 
 
 bbox_offset = 0.000000001
@@ -38,31 +37,7 @@ def generate_query_urls(wms, wms_base, wfs, wfs_base):
     return urls
 
 
-def get_wcs_request_str(x, y, var_coord, cov_id, encoding="json"):
-    """Generic WCS GetCoverage request for fetching a
-    subset of a coverage over X and Y axes
-
-    x (float or str): x-coordinate for point query (float), or string
-        composed as "x1,x2" for bbox query, where x1 and x2 are
-        lower and upper bounds of bbox
-    y (float or str): y-coordinate for point query (float), or string
-        composed as "y1,y2" for bbox query, where y1 and y2 are
-        lower and upper bounds of bbox
-    var_coord (int): coordinate value corresponding to varname to query
-    cov_id (str): Rasdaman coverage ID
-    encoding (str): currently supports either "json" or "netcdf"
-        for point or bbox queries, respectively
-
-    """
-    wcs = (
-        f"GetCoverage&COVERAGEID={cov_id}"
-        f"&SUBSET=X({x})&SUBSET=Y({y}&SUBSET=varname({var_coord}))"
-        f"&FORMAT=application/{encoding}"
-    )
-    return wcs
-
-
-def get_wcs_request_str_allvar(x, y, cov_id, encoding="json"):
+def get_wcs_request_str(x, y, cov_id, var_coord=None, encoding="json"):
     """Generic WCS GetCoverage request for fetching a
     subset of a coverage over X and Y axes
 
@@ -73,13 +48,20 @@ def get_wcs_request_str_allvar(x, y, cov_id, encoding="json"):
         composed as "y1,y2" for bbox query, where y1 and y2 are
         lower and upper bounds of bbox
     cov_id (str): Rasdaman coverage ID
+    var_coord (int): coordinate value corresponding to varname to query,
+        defaults to all vars
     encoding (str): currently supports either "json" or "netcdf"
         for point or bbox queries, respectively
 
     """
+    # if var_coord is specified, subsetting to specific varname value
+    if var_coord is not None:
+        var_subset_str = f"&SUBSET=varname({var_coord})"
+    else:
+        var_subset_str = ""
     wcs = (
         f"GetCoverage&COVERAGEID={cov_id}"
-        f"&SUBSET=X({x})&SUBSET=Y({y})"
+        f"&SUBSET=X({x})&SUBSET=Y({y}){var_subset_str}"
         f"&FORMAT=application/{encoding}"
     )
     return wcs
