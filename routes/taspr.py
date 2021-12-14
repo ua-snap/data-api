@@ -170,7 +170,8 @@ def get_from_dict(data_dict, map_list):
 
 
 async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
-    """Make the async request for the data at the specified point
+    """Make the async request for the data at the specified point for 
+    a specific varname. 
 
     Args:
         x (float): lower x-coordinate bound
@@ -193,9 +194,8 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
             request_str = get_wcps_request_str(x, y, var_coord, cov_id, decade_tpl)
         else:
             # otheriwse use generic WCS request str
-            request_str = get_wcs_request_str(x, y, var_coord, cov_id)
+            request_str = get_wcs_request_str(x, y, cov_id, var_coord)
         urls.append(generate_wcs_query_url(request_str))
-
     point_data_list = await fetch_data(urls)
 
     return point_data_list
@@ -329,7 +329,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
             # otheriwse use generic WCS request str
             x = f"{x1},{x2}"
             y = f"{y1},{y2}"
-            request_str = get_wcs_request_str(x, y, var_coord, cov_id, encoding)
+            request_str = get_wcs_request_str(x, y, cov_id, var_coord, encoding)
         urls.append(generate_wcs_query_url(request_str))
 
     start_time = time.time()

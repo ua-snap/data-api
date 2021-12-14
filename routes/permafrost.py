@@ -20,7 +20,7 @@ from flask import (
 from validate_latlon import validate, project_latlon
 from config import GS_BASE_URL
 from fetch_data import (
-    get_wcs_request_str_allvar,
+    get_wcs_request_str,
     generate_wcs_query_url,
     check_for_nodata,
     fetch_data,
@@ -68,7 +68,7 @@ async def fetch_wcs_permafrost_point_data(x, y):
         y (float): lower y-coordinate bound
     """
     urls = []
-    request_str = get_wcs_request_str_allvar(x, y, permafrost_coverage_id)
+    request_str = get_wcs_request_str(x, y, permafrost_coverage_id)
     url = generate_wcs_query_url(request_str)
     urls.append(url)
     point_data = await fetch_data(urls)
