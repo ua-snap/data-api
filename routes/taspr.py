@@ -108,7 +108,7 @@ var_ep_lu = {
 
 
 def make_fetch_args():
-    """Fixed helper function for ensuring 
+    """Fixed helper function for ensuring
     consistency between point and HUC queries
     """
     cov_ids = [
@@ -170,8 +170,8 @@ def get_from_dict(data_dict, map_list):
 
 
 async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
-    """Make the async request for the data at the specified point for 
-    a specific varname. 
+    """Make the async request for the data at the specified point for
+    a specific varname.
 
     Args:
         x (float): lower x-coordinate bound
@@ -349,13 +349,13 @@ def generate_nested_dict(dim_combos):
     dimension name combinations
 
     Args:
-        dim_combos (list): List of lists of decoded coordinate 
+        dim_combos (list): List of lists of decoded coordinate
             values (i.e. season, model, scenario names/values)
 
     Returns:
         Nested dict with empty dicts at deepest levels
 
-    # 
+    #
     """
 
     def default_to_regular(d):
@@ -376,11 +376,15 @@ def generate_nested_dict(dim_combos):
 
 
 def run_zonal_stats(arr, poly, transform):
-    """Helper to run zonal stats on 
-        selected subset of DataSet"""
+    """Helper to run zonal stats on
+    selected subset of DataSet"""
     # default rasdaman band name is "Gray"
     aggr_result = zonal_stats(
-        poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
+        poly,
+        arr,
+        affine=transform,
+        nodata=np.nan,
+        stats=["mean"],
     )[0]
 
     return aggr_result
@@ -389,9 +393,9 @@ def run_zonal_stats(arr, poly, transform):
 def summarize_within_poly(ds, varname, poly):
     """Summarize an xarray.DataSet within a polygon.
     Return the results as a nested dict.
-    
+
     Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of 
+        ds (xarray.DataSet): DataSet with "Gray" as variable of
             interest
         varname (str): name of variable represented by ds
         poly (shapely.Polygon): polygon within which to summarize ds
@@ -400,8 +404,8 @@ def summarize_within_poly(ds, varname, poly):
         Nested dict of results for all non-X/Y axis combinations,
 
     Notes:
-        This currently only works with coverages having a single band 
-        named "Gray", which is the default name for ingesting into 
+        This currently only works with coverages having a single band
+        named "Gray", which is the default name for ingesting into
         Rasdaman from GeoTIFFs
     """
     # will actually operate on underlying DataArray
@@ -463,7 +467,7 @@ def create_csv(packaged_data):
     Returns a CSV version of the fetched data, as a string.
 
     Args:
-        packaged_data (json): JSON-like data pakage output 
+        packaged_data (json): JSON-like data pakage output
             from the run_fetch_* and run_aggregate_* functions
 
     Returns:
@@ -672,15 +676,15 @@ def run_fetch_var_point_data(var_ep, lat, lon):
 
 
 def run_fetch_point_data(lat, lon):
-    """Fetch and combine point data for both 
+    """Fetch and combine point data for both
     temperature and precipitation andpoints
-    
+
     Args:
         lat (float): latitude
         lon (float): longitude
 
-    Returns: 
-        JSON-like dict of data at provided latitude and 
+    Returns:
+        JSON-like dict of data at provided latitude and
         longitude
     """
     tas_pkg, pr_pkg = [
@@ -697,9 +701,9 @@ def run_aggregate_var_huc(var_ep, huc_id):
     """Get data for single variable within a huc and aggregate by mean.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature, 
+        var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        huc_id (int): 8-digit HUD ID
+        huc_id (int): 8-digit HUC ID
 
     Returns:
         Mean summaries of rasters within HUC
@@ -762,15 +766,15 @@ def run_aggregate_var_huc(var_ep, huc_id):
 
 
 def run_aggregate_huc(huc_id):
-    """Get data within a huc for both temperature and 
+    """Get data within a huc for both temperature and
     precipitation and aggregate according by mean.
 
     Args:
         huc_id (int): 8-digit HUD ID
 
     Returns:
-        JSON-like dict of summaries for both variables of rasters 
-            within HUC 
+        JSON-like dict of summaries for both variables of rasters
+            within HUC
     """
     tas_pkg, pr_pkg = [
         run_aggregate_var_huc(var_ep, huc_id)
@@ -808,11 +812,11 @@ def about_huc():
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
 def point_data_endpoint(var_ep, lat, lon):
-    """Point data endpoint. Fetch point data for 
+    """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature, 
+        var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
         lat (float): latitude
         lon (float): longitude
@@ -834,13 +838,13 @@ def point_data_endpoint(var_ep, lat, lon):
 
 @routes.route("/<var_ep>/huc/<huc_id>")
 def huc_data_endpoint(var_ep, huc_id):
-    """HUC-aggregation data endpoint. Fetch data within HUC 
+    """HUC-aggregation data endpoint. Fetch data within HUC
     for specified variable and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature, 
+        var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        huc_id (int): 8-digit HUD ID
+        huc_id (int): 8-digit HUC ID
 
     Notes:
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627
