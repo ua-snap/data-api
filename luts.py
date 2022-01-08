@@ -1,5 +1,8 @@
 """Module for look-up-table like objects"""
 import pickle
+import geopandas as gpd
+
+bbox_offset = 0.000000001
 
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
@@ -46,9 +49,31 @@ snow_status = {
     0: "No data at this location.",
 }
 
+permafrost_encodings = {
+    "eras": {0: "1995", 1: "2025", 2: "2050", 3: "2075", 4: "2095"},
+    "models": {
+        0: "cruts31",
+        1: "gfdlcm3",
+        2: "gisse2r",
+        3: "ipslcm5alr",
+        4: "mricgcm3",
+        5: "ncarccsm4",
+    },
+    "scenarios": {0: "historical", 1: "rcp45", 2: "rcp85"},
+    "rounding": {"magt": 1, "alt": 1},
+    "gipl_varnames": ["magt", "alt"],
+    "gipl_era_starts": ["1986", "2011", "2036", "2061", "2086"],
+    "gipl_era_ends": ["2005", "2040", "2065", "2090", "2100"],
+    "gipl_units_lu": {"magt": "°C", "alt": "m"},
+}
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including
 # only the columns we need for this lookup.
 with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
+
+# HUC-8 Polygons can be imported by various endpoints
+huc_src = "data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp"
+huc8_gdf = gpd.read_file(huc_src).set_index("huc8")
