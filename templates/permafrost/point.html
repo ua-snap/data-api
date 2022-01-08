@@ -287,11 +287,11 @@
         <ul>
             <li><strong><code>era</code></strong>: <i>(str)</i>, Era name. "1995" refers to the historical baseline. Otherwise these are 30 year eras surrounding the following center dates, except last era is truncated at 2100: "2025" (2011 - 2040), "2050" (2036 - 2065), "2075" (2061 – 2090), "2095" (2086 – 2100).</li>
             <ul>
-                <li><strong><code>model</code></strong>: <i>(str)</i>, Climate model driving the GIPL mdodel output.</li>
+                <li><strong><code>model</code></strong>: <i>(str)</i>, Climate model driving the GIPL model output.</li>
                 <ul>
-                    <li><strong><code>scenario</code></strong>: <i>(str)</i>, RCP Emissions Scenario driving the GIPL mdodel output.</li>
+                    <li><strong><code>scenario</code></strong>: <i>(str)</i>, RCP Emissions Scenario driving the GIPL model output.</li>
                     <ul>
-                        <li><strong><code>magt</code></strong>: <i>(float)</i>, Active Layer Thickness (m).</li>
+                        <li><strong><code>alt</code></strong>: <i>(float)</i>, Active Layer Thickness (m).</li>
                         <li><strong><code>magt</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
                         <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
                     </ul>
@@ -332,7 +332,7 @@
         <tr>
             <td>GIPL Model Ouputs</td>
             <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
-            <td>In Progress</td>
+            <td><a href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh">Shell Download Script</a></td>
             <td><a href="https://doi.org/10.1073/pnas.1611056113">Melvin et al. (2017)</a></td>
             <td>MAGT is modeled for the depth of the active layer.</td>
         </tr>
