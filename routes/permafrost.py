@@ -255,12 +255,10 @@ def run_huc_fetch_all_permafrost(huc_id):
     url = generate_wcs_query_url(request_str)
     ds = asyncio.run(fetch_bbox_netcdf([url]))
 
-    # why are the labels and data mismatched?!?!?!
-    # this is only happening in the huc query - not point.
-    magt_poly_sum_di = summarize_within_poly(
+    alt_poly_sum_di = summarize_within_poly(
         ds, poly, permafrost_encodings, varname="alt"
     )
-    alt_poly_sum_di = summarize_within_poly(
+    magt_poly_sum_di = summarize_within_poly(
         ds, poly, permafrost_encodings, varname="magt"
     )
     magt_huc_pkg = package_gipl_huc(magt_poly_sum_di)
