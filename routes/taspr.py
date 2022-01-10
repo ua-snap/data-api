@@ -4,8 +4,6 @@ import csv
 import operator
 import time
 import itertools
-from collections import defaultdict
-from functools import reduce
 from urllib.parse import quote
 import numpy as np
 import geopandas as gpd
@@ -21,15 +19,19 @@ from flask import (
 from rasterstats import zonal_stats
 
 # local imports
+from generate_requests import generate_wcs_getcov_str
+from generate_urls import generate_wcs_query_url
+from fetch_data import (
+    fetch_data,
+    get_from_dict,
+    generate_nested_dict,
+)
 from validate_latlon import validate, project_latlon
-from fetch_data import get_wcs_request_str, generate_wcs_query_url, fetch_data
 from . import routes
+from luts import huc8_gdf
 
 taspr_api = Blueprint("taspr_api", __name__)
 
-huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_index(
-    "huc8"
-)
 
 # encodings hardcoded for now
 # fmt: off
@@ -104,8 +106,6 @@ var_ep_lu = {
     "precipitation": "pr",
 }
 
-# fmt: on
-
 
 def make_fetch_args():
     """Fixed helper function for ensuring
@@ -161,14 +161,6 @@ def get_wcps_request_str(x, y, var_coord, cov_id, summary_decades, encoding="jso
     return wcps_request_str
 
 
-def get_from_dict(data_dict, map_list):
-    """Use a list to access a nested dict
-
-    Thanks https://stackoverflow.com/a/14692747/11417211
-    """
-    return reduce(operator.getitem, map_list, data_dict)
-
-
 async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     """Make the async request for the data at the specified point for
     a specific varname.
@@ -194,7 +186,7 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
             request_str = get_wcps_request_str(x, y, var_coord, cov_id, decade_tpl)
         else:
             # otheriwse use generic WCS request str
-            request_str = get_wcs_request_str(x, y, cov_id, var_coord)
+            request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord)
         urls.append(generate_wcs_query_url(request_str))
     point_data_list = await fetch_data(urls)
 
@@ -329,7 +321,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
             # otheriwse use generic WCS request str
             x = f"{x1},{x2}"
             y = f"{y1},{y2}"
-            request_str = get_wcs_request_str(x, y, cov_id, var_coord, encoding)
+            request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, encoding)
         urls.append(generate_wcs_query_url(request_str))
 
     start_time = time.time()
@@ -342,37 +334,6 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     ds_list = [xr.open_dataset(io.BytesIO(netcdf_bytes)) for netcdf_bytes in data_list]
 
     return ds_list
-
-
-def generate_nested_dict(dim_combos):
-    """Dynamically generate a nested dict based on the different
-    dimension name combinations
-
-    Args:
-        dim_combos (list): List of lists of decoded coordinate
-            values (i.e. season, model, scenario names/values)
-
-    Returns:
-        Nested dict with empty dicts at deepest levels
-
-    #
-    """
-
-    def default_to_regular(d):
-        """Convert a defaultdict to a regular dict
-
-        Thanks https://stackoverflow.com/a/26496899/11417211
-        """
-        if isinstance(d, defaultdict):
-            d = {k: default_to_regular(v) for k, v in d.items()}
-        return d
-
-    nested_dict = lambda: defaultdict(nested_dict)
-    di = nested_dict()
-    for map_list in dim_combos:
-        get_from_dict(di, map_list[:-1])[map_list[-1]] = {}
-
-    return default_to_regular(di)
 
 
 def run_zonal_stats(arr, poly, transform):
@@ -719,7 +680,7 @@ def run_aggregate_var_huc(var_ep, huc_id):
     # reproject is needed for zonal_stats and for initial bbox
     #   bounds for query
     # TODO What if the huc_id is invalid?
-    poly_gdf = huc_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
+    poly_gdf = huc8_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
     poly = poly_gdf.iloc[0]["geometry"]
 
     varname = var_ep_lu[var_ep]
