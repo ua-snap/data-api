@@ -1,16 +1,19 @@
 import asyncio
-from flask import abort, Blueprint, render_template
-from . import routes
-from validate_latlon import validate
-from fetch_data import (
-    fetch_layer_data,
-    generate_query_urls,
-    generate_base_wms_url,
-    generate_base_wfs_url,
-    fetch_data_api,
-    check_for_nodata,
+from flask import (
+    abort,
+    Blueprint,
+    Response,
+    render_template,
+    request,
+    current_app as app,
 )
+
+# local imports
+from fetch_data import fetch_data, fetch_data_api
+from validate_latlon import validate, project_latlon
+from validate_data import check_for_nodata, nodata_message
 from config import GS_BASE_URL
+from . import routes
 from luts import ak_veg_di
 
 forest_api = Blueprint("forest_api", __name__)
@@ -23,11 +26,11 @@ def package_akvegwetland(akvegwet_resp):
     """Package forest data in dict"""
     title = "Alaska Vegetation and Wetland Composite"
     if akvegwet_resp[0]["features"] == []:
-        di = {"title": title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": nodata_message}
     else:
         veg_wet_code = akvegwet_resp[0]["features"][0]["properties"]["GRAY_INDEX"]
         if veg_wet_code == 65535:
-            di = {"title": title, "Data Status": "No data at this location."}
+            di = {"title": title, "Data Status": nodata_message}
         else:
             finelc = ak_veg_di[veg_wet_code]["Fine_LC"]
             coarselc = ak_veg_di[veg_wet_code]["Coarse_LC"]
@@ -45,16 +48,20 @@ def package_akvegwetland(akvegwet_resp):
 
 
 @routes.route("/forest/")
+@routes.route("/vegetation/")
 @routes.route("/forest/abstract/")
+@routes.route("/vegetation/abstract/")
 def forest_about():
     return render_template("forest/abstract.html")
 
 
+@routes.route("/vegetation/point/")
 @routes.route("/forest/point/")
 def forest_about_point():
     return render_template("forest/point.html")
 
 
+@routes.route("/vegetation/point/<lat>/<lon>")
 @routes.route("/forest/point/<lat>/<lon>")
 def run_fetch_forest(lat, lon):
     """Run the async requesting and return data

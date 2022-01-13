@@ -1,17 +1,20 @@
 import asyncio
-from flask import abort, Blueprint, render_template
-from . import routes
-from validate_latlon import validate
-from fetch_data import (
-    fetch_layer_data,
-    generate_query_urls,
-    generate_base_wms_url,
-    generate_base_wfs_url,
-    fetch_data_api,
-    check_for_nodata,
+from flask import (
+    abort,
+    Blueprint,
+    Response,
+    render_template,
+    request,
+    current_app as app,
 )
-from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status
+
+# local imports
+from fetch_data import fetch_data, fetch_data_api
+from validate_latlon import validate, project_latlon
+from validate_data import check_for_nodata, nodata_message
 from config import GS_BASE_URL
+from . import routes
+from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status
 
 fire_api = Blueprint("fire_api", __name__)
 
@@ -28,7 +31,7 @@ def package_fire_history(fihist_resp):
     """Package fire history data in dict"""
     title = "Historical fires"
     if fihist_resp["features"] == []:
-        di = {"title": title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": nodata_message}
     else:
         di = {}
         for i in fihist_resp["features"]:
@@ -42,7 +45,7 @@ def package_flammability(flammability_resp):
     """Package flammability data in dict"""
     title = "Projected relative flammability"
     if flammability_resp["features"] == []:
-        di = {"title": title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": nodata_message}
     else:
         flamm = round(flammability_resp["features"][0]["properties"]["GRAY_INDEX"], 4)
         di = {"title": title, "flamm": flamm}
@@ -54,7 +57,7 @@ def package_snow(snow_resp):
     """Package snow cover data"""
     title = "Today's Snow Cover"
     if snow_resp["features"] == []:
-        di = {"title": title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": nodata_message}
     else:
         snow = snow_status[snow_resp["features"][0]["properties"]["GRAY_INDEX"]]
         di = {"title": title, "is_snow": snow}
@@ -65,7 +68,7 @@ def package_fire_danger(fire_danger_resp):
     """Package fire danger data in dict"""
     title = "Today's Fire Danger"
     if fire_danger_resp["features"] == []:
-        di = {"title": title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": nodata_message}
     else:
         code = fire_danger_resp["features"][0]["properties"]["GRAY_INDEX"]
         fitype = smokey_bear_names[code]
@@ -78,7 +81,7 @@ def package_landcover(landcover_resp):
     """Package landcover data in dict"""
     title = "Land cover types"
     if landcover_resp["features"] == []:
-        di = {"title": title, "Data Status": "No data at this location."}
+        di = {"title": title, "Data Status": nodata_message}
     else:
         code = landcover_resp["features"][0]["properties"]["PALETTE_INDEX"]
         lctype = landcover_names[code]["type"]
@@ -89,15 +92,19 @@ def package_landcover(landcover_resp):
 
 @routes.route("/fire/")
 @routes.route("/fire/abstract/")
+@routes.route("/wildfire/")
+@routes.route("/wildfire/abstract/")
 def fire_about():
     return render_template("fire/abstract.html")
 
 
+@routes.route("/wildfire/point/")
 @routes.route("/fire/point/")
 def fire_about_point():
     return render_template("fire/point.html")
 
 
+@routes.route("/wildfire/point/<lat>/<lon>")
 @routes.route("/fire/point/<lat>/<lon>")
 def run_fetch_fire(lat, lon):
     """Run the async requesting and return data

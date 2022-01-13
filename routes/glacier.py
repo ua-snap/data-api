@@ -1,16 +1,19 @@
 import asyncio
-from flask import abort, Blueprint, render_template
-from . import routes
-from validate_latlon import validate
-from fetch_data import (
-    fetch_layer_data,
-    generate_query_urls,
-    generate_base_wms_url,
-    generate_base_wfs_url,
-    fetch_data_api,
-    check_for_nodata,
+from flask import (
+    abort,
+    Blueprint,
+    Response,
+    render_template,
+    request,
+    current_app as app,
 )
+
+# local imports
+from fetch_data import fetch_data, fetch_data_api
+from validate_latlon import validate, project_latlon
+from validate_data import check_for_nodata, nodata_message
 from config import GS_BASE_URL
+from . import routes
 
 glacier_api = Blueprint("glacier_api", __name__)
 
@@ -40,13 +43,22 @@ def package_glaclimits(glaclim_resp):
     return di
 
 
+@routes.route("/glaciers/")
+@routes.route("/glaciers/abstract/")
 @routes.route("/glacier/")
 @routes.route("/glacier/abstract/")
+@routes.route("/glaciology/")
+@routes.route("/glaciology/abstract/")
 def glac_about():
     return render_template("glacier/abstract.html")
 
 
+@routes.route("/glaciers/")
+@routes.route("/glaciers/point/")
+@routes.route("/glacier/")
 @routes.route("/glacier/point/")
+@routes.route("/glaciology/")
+@routes.route("/glaciology/point/")
 def glac_about_point():
     return render_template("glacier/point.html")
 

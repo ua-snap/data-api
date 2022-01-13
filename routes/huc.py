@@ -1,13 +1,19 @@
 import asyncio
-import geopandas as gpd
-from flask import abort, Blueprint, render_template, current_app as app
+from flask import (
+    abort,
+    Blueprint,
+    Response,
+    render_template,
+    request,
+    current_app as app,
+)
+
+# local imports
 from . import routes
+from luts import huc8_gdf
+
 
 huc_api = Blueprint("huc_api", __name__)
-
-huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_index(
-    "huc8"
-)
 
 
 @routes.route("/huc/")
@@ -35,7 +41,7 @@ def run_fetch_huc_poly(huc8_id):
     Notes:
         example request: http://localhost:5000/huc/huc8/19070506
     """
-    poly = huc_gdf.loc[[huc8_id]]
+    poly = huc8_gdf.loc[[huc8_id]]
     poly_geojson = poly.to_json()
 
     return poly_geojson

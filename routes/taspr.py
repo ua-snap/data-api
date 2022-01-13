@@ -4,8 +4,6 @@ import csv
 import operator
 import time
 import itertools
-from collections import defaultdict
-from functools import reduce
 from urllib.parse import quote
 import numpy as np
 import geopandas as gpd
@@ -21,15 +19,19 @@ from flask import (
 from rasterstats import zonal_stats
 
 # local imports
+from generate_requests import generate_wcs_getcov_str
+from generate_urls import generate_wcs_query_url
+from fetch_data import (
+    fetch_data,
+    get_from_dict,
+    generate_nested_dict,
+)
 from validate_latlon import validate, project_latlon
-from fetch_data import get_wcs_request_str, generate_wcs_query_url, fetch_data
 from . import routes
+from luts import huc8_gdf
 
 taspr_api = Blueprint("taspr_api", __name__)
 
-huc_gdf = gpd.read_file("data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp").set_index(
-    "huc8"
-)
 
 # encodings hardcoded for now
 # fmt: off
@@ -104,11 +106,9 @@ var_ep_lu = {
     "precipitation": "pr",
 }
 
-# fmt: on
-
 
 def make_fetch_args():
-    """Fixed helper function for ensuring 
+    """Fixed helper function for ensuring
     consistency between point and HUC queries
     """
     cov_ids = [
@@ -161,17 +161,9 @@ def get_wcps_request_str(x, y, var_coord, cov_id, summary_decades, encoding="jso
     return wcps_request_str
 
 
-def get_from_dict(data_dict, map_list):
-    """Use a list to access a nested dict
-
-    Thanks https://stackoverflow.com/a/14692747/11417211
-    """
-    return reduce(operator.getitem, map_list, data_dict)
-
-
 async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
-    """Make the async request for the data at the specified point for 
-    a specific varname. 
+    """Make the async request for the data at the specified point for
+    a specific varname.
 
     Args:
         x (float): lower x-coordinate bound
@@ -194,7 +186,7 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
             request_str = get_wcps_request_str(x, y, var_coord, cov_id, decade_tpl)
         else:
             # otheriwse use generic WCS request str
-            request_str = get_wcs_request_str(x, y, cov_id, var_coord)
+            request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord)
         urls.append(generate_wcs_query_url(request_str))
     point_data_list = await fetch_data(urls)
 
@@ -329,7 +321,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
             # otheriwse use generic WCS request str
             x = f"{x1},{x2}"
             y = f"{y1},{y2}"
-            request_str = get_wcs_request_str(x, y, cov_id, var_coord, encoding)
+            request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, encoding)
         urls.append(generate_wcs_query_url(request_str))
 
     start_time = time.time()
@@ -344,43 +336,16 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     return ds_list
 
 
-def generate_nested_dict(dim_combos):
-    """Dynamically generate a nested dict based on the different
-    dimension name combinations
-
-    Args:
-        dim_combos (list): List of lists of decoded coordinate 
-            values (i.e. season, model, scenario names/values)
-
-    Returns:
-        Nested dict with empty dicts at deepest levels
-
-    # 
-    """
-
-    def default_to_regular(d):
-        """Convert a defaultdict to a regular dict
-
-        Thanks https://stackoverflow.com/a/26496899/11417211
-        """
-        if isinstance(d, defaultdict):
-            d = {k: default_to_regular(v) for k, v in d.items()}
-        return d
-
-    nested_dict = lambda: defaultdict(nested_dict)
-    di = nested_dict()
-    for map_list in dim_combos:
-        get_from_dict(di, map_list[:-1])[map_list[-1]] = {}
-
-    return default_to_regular(di)
-
-
 def run_zonal_stats(arr, poly, transform):
-    """Helper to run zonal stats on 
-        selected subset of DataSet"""
+    """Helper to run zonal stats on
+    selected subset of DataSet"""
     # default rasdaman band name is "Gray"
     aggr_result = zonal_stats(
-        poly, arr, affine=transform, nodata=np.nan, stats=["mean"],
+        poly,
+        arr,
+        affine=transform,
+        nodata=np.nan,
+        stats=["mean"],
     )[0]
 
     return aggr_result
@@ -389,9 +354,9 @@ def run_zonal_stats(arr, poly, transform):
 def summarize_within_poly(ds, varname, poly):
     """Summarize an xarray.DataSet within a polygon.
     Return the results as a nested dict.
-    
+
     Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of 
+        ds (xarray.DataSet): DataSet with "Gray" as variable of
             interest
         varname (str): name of variable represented by ds
         poly (shapely.Polygon): polygon within which to summarize ds
@@ -400,8 +365,8 @@ def summarize_within_poly(ds, varname, poly):
         Nested dict of results for all non-X/Y axis combinations,
 
     Notes:
-        This currently only works with coverages having a single band 
-        named "Gray", which is the default name for ingesting into 
+        This currently only works with coverages having a single band
+        named "Gray", which is the default name for ingesting into
         Rasdaman from GeoTIFFs
     """
     # will actually operate on underlying DataArray
@@ -463,7 +428,7 @@ def create_csv(packaged_data):
     Returns a CSV version of the fetched data, as a string.
 
     Args:
-        packaged_data (json): JSON-like data pakage output 
+        packaged_data (json): JSON-like data pakage output
             from the run_fetch_* and run_aggregate_* functions
 
     Returns:
@@ -672,15 +637,15 @@ def run_fetch_var_point_data(var_ep, lat, lon):
 
 
 def run_fetch_point_data(lat, lon):
-    """Fetch and combine point data for both 
+    """Fetch and combine point data for both
     temperature and precipitation andpoints
-    
+
     Args:
         lat (float): latitude
         lon (float): longitude
 
-    Returns: 
-        JSON-like dict of data at provided latitude and 
+    Returns:
+        JSON-like dict of data at provided latitude and
         longitude
     """
     tas_pkg, pr_pkg = [
@@ -697,9 +662,9 @@ def run_aggregate_var_huc(var_ep, huc_id):
     """Get data for single variable within a huc and aggregate by mean.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature, 
+        var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        huc_id (int): 8-digit HUD ID
+        huc_id (int): 8-digit HUC ID
 
     Returns:
         Mean summaries of rasters within HUC
@@ -715,7 +680,7 @@ def run_aggregate_var_huc(var_ep, huc_id):
     # reproject is needed for zonal_stats and for initial bbox
     #   bounds for query
     # TODO What if the huc_id is invalid?
-    poly_gdf = huc_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
+    poly_gdf = huc8_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
     poly = poly_gdf.iloc[0]["geometry"]
 
     varname = var_ep_lu[var_ep]
@@ -762,15 +727,15 @@ def run_aggregate_var_huc(var_ep, huc_id):
 
 
 def run_aggregate_huc(huc_id):
-    """Get data within a huc for both temperature and 
+    """Get data within a huc for both temperature and
     precipitation and aggregate according by mean.
 
     Args:
         huc_id (int): 8-digit HUD ID
 
     Returns:
-        JSON-like dict of summaries for both variables of rasters 
-            within HUC 
+        JSON-like dict of summaries for both variables of rasters
+            within HUC
     """
     tas_pkg, pr_pkg = [
         run_aggregate_var_huc(var_ep, huc_id)
@@ -808,11 +773,11 @@ def about_huc():
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
 def point_data_endpoint(var_ep, lat, lon):
-    """Point data endpoint. Fetch point data for 
+    """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature, 
+        var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
         lat (float): latitude
         lon (float): longitude
@@ -834,13 +799,13 @@ def point_data_endpoint(var_ep, lat, lon):
 
 @routes.route("/<var_ep>/huc/<huc_id>")
 def huc_data_endpoint(var_ep, huc_id):
-    """HUC-aggregation data endpoint. Fetch data within HUC 
+    """HUC-aggregation data endpoint. Fetch data within HUC
     for specified variable and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature, 
+        var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        huc_id (int): 8-digit HUD ID
+        huc_id (int): 8-digit HUC ID
 
     Notes:
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627

@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Permafrost HUC Aggregation</h3>
+<p>Query 4 km resolution GIPL 2.0 model output data for a specific HUC and aggregate by mean.</p>
+<p>A query will fetch both mean annual ground temperature and active layer thickness data for a single HUC.
+<p>Example: <a href="/permafrost/huc/19010208">/permafrost/huc/19010208</a></p>
+<hr/>
+<p>8-digit HUC shapefiles accessed at <a href="https://datagateway.nrcs.usda.gov/">https://datagateway.nrcs.usda.gov/</a></p>
+<h4>Results from the query above will look like this:</h4>
+<pre>
+{
+  "1995": {
+    "cruts31": {
+      "historical": {
+        "alt": 0.4,
+        "magt": 3.6,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    }
+  },
+  "2025": {
+    "gfdlcm3": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.5,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 5.7,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "gisse2r": {
+      "rcp45": {
+        "alt": 0.3,
+        "magt": 5.1,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.3,
+        "magt": 4.8,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ipslcm5alr": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 6.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "mricgcm3": {
+      "rcp45": {
+        "alt": 0.3,
+        "magt": 4.5,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 5.1,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ncarccsm4": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.6,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 5.8,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    }
+  },
+  "2050": {
+    "gfdlcm3": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 6.6,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 7.0,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "gisse2r": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 5.9,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ipslcm5alr": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 6.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 7.1,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "mricgcm3": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.2,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 5.5,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ncarccsm4": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 6.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 6.7,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    }
+  },
+  "2075": {
+    "gfdlcm3": {
+      "rcp45": {
+        "alt": 0.1,
+        "magt": 6.9,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 8.1,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "gisse2r": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.7,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 6.2,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ipslcm5alr": {
+      "rcp45": {
+        "alt": 0.1,
+        "magt": 7.0,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 8.8,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "mricgcm3": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 6.2,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ncarccsm4": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 6.7,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 7.6,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    }
+  },
+  "2095": {
+    "gfdlcm3": {
+      "rcp45": {
+        "alt": 0.1,
+        "magt": 7.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 9.2,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "gisse2r": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.4,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.2,
+        "magt": 6.6,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ipslcm5alr": {
+      "rcp45": {
+        "alt": 0.1,
+        "magt": 7.1,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 10.5,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "mricgcm3": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 5.7,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 7.0,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    },
+    "ncarccsm4": {
+      "rcp45": {
+        "alt": 0.2,
+        "magt": 6.9,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      },
+      "rcp85": {
+        "alt": 0.1,
+        "magt": 9.6,
+        "statistic": "Zonal Mean",
+        "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+      }
+    }
+  }
+}
+</pre>
+<ul>
+    <li><strong><code>gipl</code></strong>: GIPL 2.0 Model Outputs
+        <ul>
+            <li><strong><code>era</code></strong>: <i>(str)</i>, Era name. "1995" refers to the historical baseline. Otherwise these are 30 year eras surrounding the following center dates, except last era is truncated at 2100: "2025" (2011 - 2040), "2050" (2036 - 2065), "2075" (2061 – 2090), "2095" (2086 – 2100).</li>
+            <ul>
+                <li><strong><code>model</code></strong>: <i>(str)</i>, Climate model driving the GIPL model output.</li>
+                <ul>
+                    <li><strong><code>scenario</code></strong>: <i>(str)</i>, RCP Emissions Scenario driving the GIPL model output.</li>
+                    <ul>
+                        <li><strong><code>alt</code></strong>: <i>(float)</i>, Active Layer Thickness (m).</li>
+                        <li><strong><code>magt</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
+                        <li><strong><code>statistic</code></strong>: <i>(str)</i>, Statistic used to summarize the results.</li>
+                        <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+    </li>
+</ul>
+<h4>Source data</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Data Layer</th>
+            <th>Variables</th>
+            <th>Download link</th>
+            <th>Source</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>GIPL Model Ouputs</td>
+            <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
+            <td><a href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh">Shell Download Script</a></td>
+            <td><a href="https://doi.org/10.1073/pnas.1611056113">Melvin et al. (2017)</a></td>
+            <td>MAGT is modeled for the depth of the active layer.</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
