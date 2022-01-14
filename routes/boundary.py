@@ -44,8 +44,7 @@ def huc8_about():
 @routes.route("/boundary/huc/huc8/<huc8_id>")
 @routes.route("/boundary/watershed/huc8/<huc8_id>")
 def run_fetch_huc_poly(huc8_id):
-    """Run the async IEM data requesting for a single point
-    and return data as json
+    """Run the async requesting for a HUC polygon and return the GeoJSON.
 
     Args:
         huc8_id (int): HUC-8 ID
@@ -63,8 +62,7 @@ def run_fetch_huc_poly(huc8_id):
 
 @routes.route("/boundary/protectedarea/<akpa_id>")
 def run_fetch_akprotectedarea_poly(akpa_id):
-    """Run the async IEM data requesting for a single point
-    and return data as json
+    """Run the async requesting for a protected area polygon and return the GeoJSON.
 
     Args:
         pa_id (str): ID for polygon, e.g. `NPS12` or `FWS7`
