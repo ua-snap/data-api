@@ -76,4 +76,8 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
 
 # HUC-8 Polygons can be imported by various endpoints
 huc_src = "data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp"
-huc8_gdf = gpd.read_file(huc_src).set_index("huc8")
+huc8_gdf = gpd.read_file(huc_src).set_index("huc8").to_crs(3338)
+
+# AK Protected Area Polygons can be imported by various endpoints
+akpa_src = "data/shapefiles/ak_protected_areas.shp"
+akpa_gdf = gpd.read_file(akpa_src).set_index("id").to_crs(3338)
