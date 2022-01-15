@@ -500,10 +500,6 @@ def create_csv(packaged_data):
 
     for decade in dim_encodings["decades"].values():
         for season in dim_encodings["seasons"].values():
-            # naming is a bit of an issue with the various levels of aggregation going on.
-            # derived_period is the season or month the underlying
-            # "derived" data product was aggregated over
-
             for model in dim_encodings["models"].values():
                 for scenario in dim_encodings["scenarios"].values():
                     for varname in ["pr", "tas"]:
@@ -511,7 +507,7 @@ def create_csv(packaged_data):
                             writer.writerow(
                                 {
                                     "variable": varname,
-                                    "date_range": season,
+                                    "date_range": decade,
                                     "season": season,
                                     "model": model,
                                     "scenario": scenario,
