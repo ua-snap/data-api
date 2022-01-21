@@ -28,7 +28,7 @@ from fetch_data import (
 )
 from validate_latlon import validate, project_latlon
 from . import routes
-from luts import huc8_gdf
+from luts import huc8_gdf, akpa_gdf
 
 taspr_api = Blueprint("taspr_api", __name__)
 
@@ -727,7 +727,7 @@ def run_aggregate_huc(huc_id):
     precipitation and aggregate according by mean.
 
     Args:
-        huc_id (int): 8-digit HUD ID
+        huc_id (int): 8-digit HUC ID
 
     Returns:
         JSON-like dict of summaries for both variables of rasters
@@ -742,6 +742,90 @@ def run_aggregate_huc(huc_id):
 
     return combined_pkg
 
+def run_aggregate_pa(akpa_id):
+    """Get data within a Protected Area for both temperature and
+    precipitation and aggregate by mean.
+
+    Args:
+        akpa_id (str): Protected Area ID (e.g. "NPS7")
+
+    Returns:
+        combined_pkg (JSON-like dict): summaries for both variables.
+    """
+    tas_pkg, pr_pkg = [
+        run_aggregate_var_pa(var_ep, akpa_id)
+        for var_ep in ["temperature", "precipitation"]
+    ]
+    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
+    return combined_pkg
+
+
+def run_aggregate_var_pa(var_ep, akpa_id):
+    """Get data for single variable within a Protected Area and aggregate by mean.
+
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        akpa_id (str): Protected Area ID (e.g. "NPS7")
+
+    Returns:
+        Mean summaries of rasters within HUC
+
+    Notes:
+        Rasters refers to the individual instances of the
+          singular dimension combinations
+    """
+    # could add check here to make sure HUC is in the geodataframe
+
+    # get the HUC as a single row single column dataframe with
+    #   geometry column for zonal_stats
+    # reproject is needed for zonal_stats and for initial bbox
+    #   bounds for query
+    # TODO What if the huc_id is invalid?
+    poly_gdf = akpa_gdf.loc[[akpa_id]][["geometry"]].to_crs(3338)
+    poly = poly_gdf.iloc[0]["geometry"]
+
+    varname = var_ep_lu[var_ep]
+    # get the coordinate value for the specified variable
+    # just a way to lookup reverse of varname
+    var_coord = list(dim_encodings["varnames"].keys())[
+        list(dim_encodings["varnames"].values()).index(varname)
+    ]
+
+    # fetch bbox data
+    cov_ids, summary_decades = make_fetch_args()
+    ds_list = asyncio.run(
+        fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades)
+    )
+
+    # these three all have the decade/time period dimension averaged out
+    aggr_results = {}
+    summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
+    for ds, period in zip(ds_list[:-1], summary_periods):
+        aggr_results[period] = summarize_within_poly(ds, varname, poly)
+
+    ar5_results = summarize_within_poly(ds_list[-1], varname, poly)
+    for decade, summaries in ar5_results.items():
+        aggr_results[decade] = summaries
+
+    # next two loops are some garbage to insert the varnames
+    #  add the model, scenario, and varname levels for CRU
+    for season in aggr_results[summary_periods[0]]:
+        aggr_results[summary_periods[0]][season] = {
+            "CRU-TS40": {
+                "CRU_historical": {varname: aggr_results[summary_periods[0]][season]}
+            }
+        }
+    # add the varname for AR5
+    for period in summary_periods[1:] + list(dim_encodings["decades"].values()):
+        for season in aggr_results[period]:
+            for model in aggr_results[period][season]:
+                for scenario in aggr_results[period][season][model]:
+                    aggr_results[period][season][model][scenario] = {
+                        varname: aggr_results[period][season][model][scenario]
+                    }
+
+    return aggr_results
 
 @routes.route("/temperature/")
 @routes.route("/temperature/abstract/")
@@ -765,6 +849,12 @@ def about_point():
 @routes.route("/precipitation/huc/")
 def about_huc():
     return render_template("taspr/huc.html")
+
+@routes.route("/taspr/protectedarea/")
+@routes.route("/temperature/protectedarea/")
+@routes.route("/precipitation/protectedarea/")
+def taspr_about_protectedarea():
+    return render_template("taspr/protectedarea.html")
 
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
@@ -810,6 +900,31 @@ def huc_data_endpoint(var_ep, huc_id):
         point_pkg = run_aggregate_var_huc(var_ep, huc_id)
     elif var_ep == "taspr":
         point_pkg = run_aggregate_huc(huc_id)
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(point_pkg)
+        return return_csv(csv_data)
+
+    return point_pkg
+
+
+@routes.route("/<var_ep>/protectedarea/<akpa_id>")
+def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
+    """Protected Area-aggregation data endpoint. Fetch data within ProtectedArea
+    for specified variable and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        akpa_id (str): Protected Area ID (e.g. "NPS7")
+
+    Notes:
+        example request: http://localhost:5000/temperature/point/65.0628/-146.1627
+    """
+    if var_ep in var_ep_lu.keys():
+        point_pkg = run_aggregate_var_pa(var_ep, akpa_id)
+    elif var_ep == "taspr":
+        point_pkg = run_aggregate_pa(akpa_id)
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(point_pkg)
