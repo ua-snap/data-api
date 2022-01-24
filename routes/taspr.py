@@ -6,7 +6,6 @@ import time
 import itertools
 from urllib.parse import quote
 import numpy as np
-import geopandas as gpd
 import xarray as xr
 from flask import (
     abort,
@@ -27,6 +26,7 @@ from fetch_data import (
     generate_nested_dict,
 )
 from validate_latlon import validate, project_latlon
+from validate_data import get_poly_3338_bbox
 from . import routes
 from luts import huc8_gdf, akpa_gdf
 
@@ -654,55 +654,42 @@ def run_fetch_point_data(lat, lon):
     return combined_pkg
 
 
-def run_aggregate_var_huc(var_ep, huc_id):
-    """Get data for single variable within a huc and aggregate by mean.
+def run_aggregate_allvar_polygon(poly_gdf, poly_id):
+    """Get data summary (e.g. zonal mean) within a Polygon for all variables."""
+    tas_pkg, pr_pkg = [run_aggregate_var_polygon(var_ep, poly_gdf, poly_id) for var_ep in ["temperature", "precipitation"]]
+    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
+    return combined_pkg
+
+def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
+    """Get data summary (e.g. zonal mean) of single variable in polygon.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        huc_id (int): 8-digit HUC ID
+        var_ep (str): Data variable. One of 'taspr', 'temperature', or 'precipitation'.
+        poly_gdf (GeoDataFrame): the object from which to fetch the polygon, e.g. the HUC 8 geodataframe for watershed polygons
+        poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
 
     Returns:
-        Mean summaries of rasters within HUC
+        aggr_results (dict): data representing zonal means within the polygon.
 
     Notes:
-        Rasters refers to the individual instances of the
-          singular dimension combinations
+        Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    # could add check here to make sure HUC is in the geodataframe
-
-    # get the HUC as a single row single column dataframe with
-    #   geometry column for zonal_stats
-    # reproject is needed for zonal_stats and for initial bbox
-    #   bounds for query
-    # TODO What if the huc_id is invalid?
-    poly_gdf = huc8_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
-    poly = poly_gdf.iloc[0]["geometry"]
-
+    poly = get_poly_3338_bbox(poly_gdf, poly_id)
+    bounds = poly.bounds
+    # mapping between coordinate values (ints) and variable names (strs)
     varname = var_ep_lu[var_ep]
-    # get the coordinate value for the specified variable
-    # just a way to lookup reverse of varname
-    var_coord = list(dim_encodings["varnames"].keys())[
-        list(dim_encodings["varnames"].values()).index(varname)
-    ]
-
-    # fetch bbox data
+    var_coord = list(dim_encodings["varnames"].keys())[list(dim_encodings["varnames"].values()).index(varname)]
+    # fetch data within the Polygon bounding box
     cov_ids, summary_decades = make_fetch_args()
-    ds_list = asyncio.run(
-        fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades)
-    )
-
-    # these three all have the decade/time period dimension averaged out
+    ds_list = asyncio.run(fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades))
+    # average over the following decades / time periods
     aggr_results = {}
     summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
     for ds, period in zip(ds_list[:-1], summary_periods):
         aggr_results[period] = summarize_within_poly(ds, varname, poly)
-
     ar5_results = summarize_within_poly(ds_list[-1], varname, poly)
     for decade, summaries in ar5_results.items():
         aggr_results[decade] = summaries
-
-    # next two loops are some garbage to insert the varnames
     #  add the model, scenario, and varname levels for CRU
     for season in aggr_results[summary_periods[0]]:
         aggr_results[summary_periods[0]][season] = {
@@ -710,7 +697,7 @@ def run_aggregate_var_huc(var_ep, huc_id):
                 "CRU_historical": {varname: aggr_results[summary_periods[0]][season]}
             }
         }
-    # add the varname for AR5
+    # add the varnames for AR5
     for period in summary_periods[1:] + list(dim_encodings["decades"].values()):
         for season in aggr_results[period]:
             for model in aggr_results[period][season]:
@@ -718,114 +705,8 @@ def run_aggregate_var_huc(var_ep, huc_id):
                     aggr_results[period][season][model][scenario] = {
                         varname: aggr_results[period][season][model][scenario]
                     }
-
     return aggr_results
 
-
-def run_aggregate_huc(huc_id):
-    """Get data within a huc for both temperature and
-    precipitation and aggregate according by mean.
-
-    Args:
-        huc_id (int): 8-digit HUC ID
-
-    Returns:
-        JSON-like dict of summaries for both variables of rasters
-            within HUC
-    """
-    tas_pkg, pr_pkg = [
-        run_aggregate_var_huc(var_ep, huc_id)
-        for var_ep in ["temperature", "precipitation"]
-    ]
-
-    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
-
-    return combined_pkg
-
-def run_aggregate_pa(akpa_id):
-    """Get data within a Protected Area for both temperature and
-    precipitation and aggregate by mean.
-
-    Args:
-        akpa_id (str): Protected Area ID (e.g. "NPS7")
-
-    Returns:
-        combined_pkg (JSON-like dict): summaries for both variables.
-    """
-    tas_pkg, pr_pkg = [
-        run_aggregate_var_pa(var_ep, akpa_id)
-        for var_ep in ["temperature", "precipitation"]
-    ]
-    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
-    return combined_pkg
-
-
-def run_aggregate_var_pa(var_ep, akpa_id):
-    """Get data for single variable within a Protected Area and aggregate by mean.
-
-    Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        akpa_id (str): Protected Area ID (e.g. "NPS7")
-
-    Returns:
-        Mean summaries of rasters within HUC
-
-    Notes:
-        Rasters refers to the individual instances of the
-          singular dimension combinations
-    """
-    # could add check here to make sure HUC is in the geodataframe
-
-    # get the HUC as a single row single column dataframe with
-    #   geometry column for zonal_stats
-    # reproject is needed for zonal_stats and for initial bbox
-    #   bounds for query
-    # TODO What if the huc_id is invalid?
-    poly_gdf = akpa_gdf.loc[[akpa_id]][["geometry"]].to_crs(3338)
-    poly = poly_gdf.iloc[0]["geometry"]
-
-    varname = var_ep_lu[var_ep]
-    # get the coordinate value for the specified variable
-    # just a way to lookup reverse of varname
-    var_coord = list(dim_encodings["varnames"].keys())[
-        list(dim_encodings["varnames"].values()).index(varname)
-    ]
-
-    # fetch bbox data
-    cov_ids, summary_decades = make_fetch_args()
-    ds_list = asyncio.run(
-        fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades)
-    )
-
-    # these three all have the decade/time period dimension averaged out
-    aggr_results = {}
-    summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
-    for ds, period in zip(ds_list[:-1], summary_periods):
-        aggr_results[period] = summarize_within_poly(ds, varname, poly)
-
-    ar5_results = summarize_within_poly(ds_list[-1], varname, poly)
-    for decade, summaries in ar5_results.items():
-        aggr_results[decade] = summaries
-
-    # next two loops are some garbage to insert the varnames
-    #  add the model, scenario, and varname levels for CRU
-    for season in aggr_results[summary_periods[0]]:
-        aggr_results[summary_periods[0]][season] = {
-            "CRU-TS40": {
-                "CRU_historical": {varname: aggr_results[summary_periods[0]][season]}
-            }
-        }
-    # add the varname for AR5
-    for period in summary_periods[1:] + list(dim_encodings["decades"].values()):
-        for season in aggr_results[period]:
-            for model in aggr_results[period][season]:
-                for scenario in aggr_results[period][season][model]:
-                    aggr_results[period][season][model][scenario] = {
-                        varname: aggr_results[period][season][model][scenario]
-                    }
-
-    return aggr_results
 
 @routes.route("/temperature/")
 @routes.route("/temperature/abstract/")
@@ -892,42 +773,41 @@ def huc_data_endpoint(var_ep, huc_id):
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
         huc_id (int): 8-digit HUC ID
+    Returns:
+        huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
-    Notes:
-        example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
     if var_ep in var_ep_lu.keys():
-        point_pkg = run_aggregate_var_huc(var_ep, huc_id)
+        huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
     elif var_ep == "taspr":
-        point_pkg = run_aggregate_huc(huc_id)
+        huc_pkg = run_aggregate_allvar_polygon(huc8_gdf, huc_id)
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg)
+        csv_data = create_csv(huc_pkg)
         return return_csv(csv_data)
 
-    return point_pkg
+    return huc_pkg
 
 
 @routes.route("/<var_ep>/protectedarea/<akpa_id>")
 def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
-    """Protected Area-aggregation data endpoint. Fetch data within ProtectedArea
-    for specified variable and return JSON-like dict.
+    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified variable and return JSON-like dict.
 
     Args:
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
         akpa_id (str): Protected Area ID (e.g. "NPS7")
 
-    Notes:
-        example request: http://localhost:5000/temperature/point/65.0628/-146.1627
+    Returns:
+        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
     """
     if var_ep in var_ep_lu.keys():
-        point_pkg = run_aggregate_var_pa(var_ep, akpa_id)
+        pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
     elif var_ep == "taspr":
-        point_pkg = run_aggregate_pa(akpa_id)
+        pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg)
+        csv_data = create_csv(pa_pkg)
         return return_csv(csv_data)
 
-    return point_pkg
+    return pa_pkg
