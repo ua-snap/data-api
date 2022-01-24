@@ -24,6 +24,7 @@ from fetch_data import (
     fetch_data,
     get_from_dict,
     generate_nested_dict,
+    summarize_within_poly,
 )
 from validate_latlon import validate, project_latlon
 from validate_data import get_poly_3338_bbox
@@ -93,13 +94,12 @@ dim_encodings = {
         6: "q1",
         7: "q3",
     },
+    "rounding": {
+        "tas": 1,
+        "pr": 0,
+    },
 }
 
-# lookup for rounding values
-rounding = {
-    "tas": 1,
-    "pr": 0,
-}
 
 var_ep_lu = {
     "temperature": "tas",
@@ -216,7 +216,7 @@ def package_cru_point_data(point_data, varname):
         for si, value in enumerate(s_li):  # (nested list with statistic at dim 0)
             stat = dim_encodings["stats"][si]
             point_data_pkg[season][model][scenario][varname][stat] = round(
-                value, rounding[varname]
+                value, dim_encodings["rounding"][varname]
             )
 
     return point_data_pkg
@@ -254,7 +254,7 @@ def package_ar5_point_data(point_data, varname):
                 for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                     scenario = dim_encodings["scenarios"][si]
                     point_data_pkg[decade][season][model][scenario] = {
-                        varname: round(value, rounding[varname])
+                        varname: round(value, dim_encodings["rounding"][varname])
                     }
 
     return point_data_pkg
@@ -282,7 +282,7 @@ def package_ar5_point_summary(point_data, varname):
             for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                 scenario = dim_encodings["scenarios"][si]
                 point_data_pkg[season][model][scenario] = {
-                    varname: round(value, rounding[varname])
+                    varname: round(value, dim_encodings["rounding"][varname])
                 }
 
     return point_data_pkg
@@ -334,93 +334,6 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     ds_list = [xr.open_dataset(io.BytesIO(netcdf_bytes)) for netcdf_bytes in data_list]
 
     return ds_list
-
-
-def run_zonal_stats(arr, poly, transform):
-    """Helper to run zonal stats on
-    selected subset of DataSet"""
-    # default rasdaman band name is "Gray"
-    aggr_result = zonal_stats(
-        poly,
-        arr,
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-    )[0]
-
-    return aggr_result
-
-
-def summarize_within_poly(ds, varname, poly):
-    """Summarize an xarray.DataSet within a polygon.
-    Return the results as a nested dict.
-
-    Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of
-            interest
-        varname (str): name of variable represented by ds
-        poly (shapely.Polygon): polygon within which to summarize ds
-
-    Returns:
-        Nested dict of results for all non-X/Y axis combinations,
-
-    Notes:
-        This currently only works with coverages having a single band
-        named "Gray", which is the default name for ingesting into
-        Rasdaman from GeoTIFFs
-    """
-    # will actually operate on underlying DataArray
-    da = ds["Gray"]
-    # get axis (dimension) names and gnerate list of all coordinate combinations
-    all_dims = da.dims
-    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-    iter_coords = list(
-        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-    )
-
-    # generate all combinations of decoded coordinate values
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[f"{dimname}s"][coord]
-            for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
-
-    aggr_results = generate_nested_dict(dim_combos)
-
-    data_arr = []
-    for coords, map_list in zip(iter_coords, dim_combos):
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        data_arr.append(da.sel(sel_di).values)
-    data_arr = np.array(data_arr)
-
-    # need to transpose the 2D spatial slices if X is the "rows" dimension
-    if all_dims.index("X") < all_dims.index("Y"):
-        data_arr = data_arr.transpose(0, 2, 1)
-
-    # get transform from a DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr[0],
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-
-    data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
-    data_arr[data_arr_mask] = np.nan
-    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-
-    for map_list, result in zip(dim_combos, results):
-        get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
-            result, rounding[varname]
-        )
-
-    return aggr_results
 
 
 def create_csv(packaged_data):
@@ -686,8 +599,8 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     aggr_results = {}
     summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
     for ds, period in zip(ds_list[:-1], summary_periods):
-        aggr_results[period] = summarize_within_poly(ds, varname, poly)
-    ar5_results = summarize_within_poly(ds_list[-1], varname, poly)
+        aggr_results[period] = summarize_within_poly(ds, poly, dim_encodings, "Gray", varname)
+    ar5_results = summarize_within_poly(ds_list[-1], poly, dim_encodings, "Gray", varname)
     for decade, summaries in ar5_results.items():
         aggr_results[decade] = summaries
     #  add the model, scenario, and varname levels for CRU
