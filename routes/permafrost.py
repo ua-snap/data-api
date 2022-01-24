@@ -270,10 +270,10 @@ def run_huc_fetch_all_permafrost(huc_id):
     ds = asyncio.run(fetch_bbox_netcdf([url]))
 
     alt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="magt"
+        ds, poly, permafrost_encodings, varname="magt", roundkey="magt"
     )
     magt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="alt"
+        ds, poly, permafrost_encodings, varname="alt", roundkey="alt"
     )
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
@@ -300,10 +300,10 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     ds = asyncio.run(fetch_bbox_netcdf([url]))
 
     alt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="magt"
+        ds, poly, permafrost_encodings, varname="magt", roundkey="magt"
     )
     magt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="alt"
+        ds, poly, permafrost_encodings, varname="alt", roundkey="alt"
     )
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
