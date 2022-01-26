@@ -142,15 +142,17 @@ async def fetch_bbox_netcdf(url):
     return ds
 
 
-def summarize_within_poly(ds, poly, dim_encodings, varname="Gray"):
+def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gray"):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
     Return the results as a nested dict.
 
     Args:
         ds (xarray.DataSet): DataSet with "Gray" as variable of
             interest
+        poly (shapely.Polygon): polygon within which to summarize
+        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the data and map integer data coordinates to models, scenarios, variables, etc.
         varname (str): name of variable represented by ds
-        poly (shapely.Polygon): polygon within which to summarize ds
+        roundkey (str): variable key that will fetch an integer that determines rounding precision (e.g. 1 for a single decimal place)
 
     Returns:
         Nested dict of results for all non-X/Y axis combinations,
@@ -208,7 +210,7 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray"):
 
     for map_list, result in zip(dim_combos, results):
         get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
-            result, dim_encodings["rounding"][varname]
+            result, dim_encodings["rounding"][roundkey]
         )
     return aggr_results
 
