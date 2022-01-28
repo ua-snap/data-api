@@ -177,7 +177,7 @@ def postprocess(data, huc=False):
                 pruned_data[key]["title"] = credits[key]
     else:
         return render_template("404/no_data.html"), 404
-    return pruned_data
+    return nullified_data
 
 
 @routes.route("/permafrost/")

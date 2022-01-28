@@ -752,9 +752,10 @@ def postprocess(data):
     """Filter nodata values, prune empty branches, return 404 if appropriate"""
     nullified_data = nullify_nodata(data, "taspr")
     pruned_data = prune_nodata(nullified_data)
+    print(pruned_data)
     if pruned_data in [None, 0]:
         return render_template("404/no_data.html"), 404
-    return pruned_data
+    return nullified_data
 
 
 @routes.route("/temperature/")

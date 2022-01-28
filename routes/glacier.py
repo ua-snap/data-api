@@ -49,7 +49,7 @@ def postprocess(data):
     pruned_data = prune_nodata(nullified_data)
     if pruned_data in [None, 0]:
         return render_template("404/no_data.html"), 404
-    return pruned_data
+    return nullified_data
 
 
 @routes.route("/glaciers/")
