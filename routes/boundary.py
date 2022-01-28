@@ -55,7 +55,10 @@ def run_fetch_huc_poly(huc8_id):
     Notes:
         example: http://localhost:5000/boundary/huc/huc8/19070506
     """
-    poly = huc8_gdf.loc[[huc8_id]].to_crs(4326)
+    try:
+        poly = huc8_gdf.loc[[huc8_id]].to_crs(4326)
+    except:
+        return render_template("404/invalid_huc.html"), 404
     poly_geojson = poly.to_json()
     return poly_geojson
 
@@ -73,6 +76,9 @@ def run_fetch_akprotectedarea_poly(akpa_id):
     Notes:
         example: http://localhost:5000/boundary/protectedarea/NPS12
     """
-    poly = akpa_gdf.loc[[akpa_id]].to_crs(4326)
+    try:
+        poly = akpa_gdf.loc[[akpa_id]].to_crs(4326)
+    except:
+        return render_template("404/invalid_protected_area.html"), 404
     poly_geojson = poly.to_json()
     return poly_geojson
