@@ -11,8 +11,8 @@ from flask import (
 # local imports
 from fetch_data import fetch_data, fetch_data_api
 from validate_latlon import validate, project_latlon
-from validate_data import check_for_nodata, nodata_message
-from config import GS_BASE_URL
+from validate_data import nullify_nodata, prune_nodata
+from config import GS_BASE_URL, VALID_BBOX
 from . import routes
 
 glacier_api = Blueprint("glacier_api", __name__)
@@ -43,6 +43,15 @@ def package_glaclimits(glaclim_resp):
     return di
 
 
+def postprocess(data):
+    """Filter nodata values, prune empty branches, return 404 if appropriate"""
+    nullified_data = nullify_nodata(data, "glacier")
+    pruned_data = prune_nodata(nullified_data)
+    if pruned_data in [None, 0]:
+        return render_template("404/no_data.html"), 404
+    return pruned_data
+
+
 @routes.route("/glaciers/")
 @routes.route("/glaciers/abstract/")
 @routes.route("/glacier/")
@@ -69,10 +78,15 @@ def run_fetch_glacier(lat, lon):
     example request: http://localhost:5000/glacier/60.606/-143.345
     """
     if not validate(lat, lon):
-        abort(400)
+        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
     # verify that lat/lon are present
-    results = asyncio.run(
-        fetch_data_api(GS_BASE_URL, "glacier", wms_targets, wfs_targets, lat, lon)
-    )
+    try:
+        results = asyncio.run(
+            fetch_data_api(GS_BASE_URL, "glacier", wms_targets, wfs_targets, lat, lon)
+        )
+    except Exception as e:
+        if e.status == 404:
+            return render_template("404/no_data.html"), 404
+        raise
     data = package_glaclimits(results)
-    return data
+    return postprocess(data)

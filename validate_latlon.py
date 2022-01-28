@@ -5,6 +5,7 @@ other functions that could be used across multiple endpoints.
 
 from pyproj import Transformer
 import numpy as np
+from config import VALID_BBOX
 
 
 def validate(lat, lon):
@@ -12,8 +13,8 @@ def validate(lat, lon):
     return bool for validity
     """
     try:
-        lat_in_ak_bbox = 51.229 <= float(lat) <= 71.3526
-        lon_in_ak_bbox = -179.1506 <= float(lon) <= -129.9795
+        lat_in_ak_bbox = VALID_BBOX[1] <= float(lat) <= VALID_BBOX[3]
+        lon_in_ak_bbox = VALID_BBOX[0] <= float(lon) <= VALID_BBOX[2]
         valid = lat_in_ak_bbox and lon_in_ak_bbox
     except ValueError:
         valid = False

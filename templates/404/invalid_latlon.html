@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Invalid coordinates</h3>
+<p>
+  The coordinates you provided are outside of the valid range. Coordinates must
+  be between these values:
+</p>
+<p>
+  <strong>Latitude:</strong> <span class="courier">{{ bbox[1] }}</span> to <span class="courier">{{ bbox[3] }}</span>
+</p>
+<p>
+  <strong>Longitude:</strong> <span class="courier">{{ bbox[0] }}</span> to <span class="courier">{{ bbox[2] }}</span>
+</p>
+{% endblock %}

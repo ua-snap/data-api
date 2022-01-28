@@ -11,8 +11,8 @@ from flask import (
 # local imports
 from fetch_data import fetch_data, fetch_data_api
 from validate_latlon import validate, project_latlon
-from validate_data import check_for_nodata, nodata_message
-from config import GS_BASE_URL
+from validate_data import nullify_nodata, prune_nodata
+from config import GS_BASE_URL, VALID_BBOX
 from . import routes
 from luts import ak_veg_di
 
@@ -26,25 +26,32 @@ def package_akvegwetland(akvegwet_resp):
     """Package forest data in dict"""
     title = "Alaska Vegetation and Wetland Composite"
     if akvegwet_resp[0]["features"] == []:
-        di = {"title": title, "Data Status": nodata_message}
+        return None
     else:
         veg_wet_code = akvegwet_resp[0]["features"][0]["properties"]["GRAY_INDEX"]
-        if veg_wet_code == 65535:
-            di = {"title": title, "Data Status": nodata_message}
-        else:
-            finelc = ak_veg_di[veg_wet_code]["Fine_LC"]
-            coarselc = ak_veg_di[veg_wet_code]["Coarse_LC"]
-            nwi = ak_veg_di[veg_wet_code]["NWI_Gen"]
-            di = {
-                "title": title,
-                "code": veg_wet_code,
-                "finelc": finelc,
-                "coarselc": coarselc,
-                "nwi": nwi,
-            }
-            for k in di.keys():
-                check_for_nodata(di, k, veg_wet_code, 65535)
+        veg_wet_code = nullify_nodata(veg_wet_code, "forest")
+        if veg_wet_code == None:
+            return None
+        finelc = ak_veg_di[veg_wet_code]["Fine_LC"]
+        coarselc = ak_veg_di[veg_wet_code]["Coarse_LC"]
+        nwi = ak_veg_di[veg_wet_code]["NWI_Gen"]
+        di = {
+            "title": title,
+            "code": veg_wet_code,
+            "finelc": finelc,
+            "coarselc": coarselc,
+            "nwi": nwi,
+        }
     return di
+
+
+def postprocess(data):
+    """Filter nodata values, prune empty branches, return 404 if appropriate"""
+    nullified_data = nullify_nodata(data, "forest")
+    pruned_data = prune_nodata(nullified_data)
+    if pruned_data in [None, 0]:
+        return render_template("404/no_data.html"), 404
+    return pruned_data
 
 
 @routes.route("/forest/")
@@ -68,10 +75,15 @@ def run_fetch_forest(lat, lon):
     example request: http://localhost:5000/forest/60.606/-143.345
     """
     if not validate(lat, lon):
-        abort(400)
+        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
     # verify that lat/lon are present
-    results = asyncio.run(
-        fetch_data_api(GS_BASE_URL, "forest", wms_targets, wfs_targets, lat, lon)
-    )
-    forest_data = package_akvegwetland(results)
-    return forest_data
+    try:
+        results = asyncio.run(
+            fetch_data_api(GS_BASE_URL, "forest", wms_targets, wfs_targets, lat, lon)
+        )
+    except Exception as e:
+        if e.status == 404:
+            return render_template("404/no_data.html"), 404
+        raise
+    data = package_akvegwetland(results)
+    return postprocess(data)

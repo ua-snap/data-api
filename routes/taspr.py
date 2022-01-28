@@ -27,8 +27,10 @@ from fetch_data import (
     generate_nested_dict,
 )
 from validate_latlon import validate, project_latlon
+from validate_data import nullify_nodata, prune_nodata
 from . import routes
 from luts import huc8_gdf
+from config import VALID_BBOX
 
 taspr_api = Blueprint("taspr_api", __name__)
 
@@ -215,9 +217,12 @@ def package_cru_point_data(point_data, varname):
         point_data_pkg[season] = {model: {scenario: {varname: {}}}}
         for si, value in enumerate(s_li):  # (nested list with statistic at dim 0)
             stat = dim_encodings["stats"][si]
-            point_data_pkg[season][model][scenario][varname][stat] = round(
-                value, rounding[varname]
-            )
+            if value == None:
+                point_data_pkg[season][model][scenario][varname][stat] = None
+            else:
+                point_data_pkg[season][model][scenario][varname][stat] = round(
+                    value, rounding[varname]
+                )
 
     return point_data_pkg
 
@@ -254,7 +259,7 @@ def package_ar5_point_data(point_data, varname):
                 for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                     scenario = dim_encodings["scenarios"][si]
                     point_data_pkg[decade][season][model][scenario] = {
-                        varname: round(value, rounding[varname])
+                        varname: None if value is None else round(value, rounding[varname])
                     }
 
     return point_data_pkg
@@ -282,7 +287,7 @@ def package_ar5_point_summary(point_data, varname):
             for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                 scenario = dim_encodings["scenarios"][si]
                 point_data_pkg[season][model][scenario] = {
-                    varname: round(value, rounding[varname])
+                    varname: None if value is None else round(value, rounding[varname])
                 }
 
     return point_data_pkg
@@ -597,7 +602,7 @@ def run_fetch_var_point_data(var_ep, lat, lon):
         JSON-like dict of data at provided latitude and longitude
     """
     if not validate(lat, lon):
-        abort(400)
+        return None
 
     varname = var_ep_lu[var_ep]
     # get the coordinate value for the specified variable
@@ -743,6 +748,15 @@ def run_aggregate_huc(huc_id):
     return combined_pkg
 
 
+def postprocess(data):
+    """Filter nodata values, prune empty branches, return 404 if appropriate"""
+    nullified_data = nullify_nodata(data, "taspr")
+    pruned_data = prune_nodata(nullified_data)
+    if pruned_data in [None, 0]:
+        return render_template("404/no_data.html"), 404
+    return pruned_data
+
+
 @routes.route("/temperature/")
 @routes.route("/temperature/abstract/")
 @routes.route("/precipitation/")
@@ -781,16 +795,25 @@ def point_data_endpoint(var_ep, lat, lon):
     Notes:
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
+
+    if not validate(lat, lon):
+        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
+
     if var_ep in var_ep_lu.keys():
         point_pkg = run_fetch_var_point_data(var_ep, lat, lon)
     elif var_ep == "taspr":
-        point_pkg = run_fetch_point_data(lat, lon)
+        try:
+            point_pkg = run_fetch_point_data(lat, lon)
+        except Exception as e:
+            if e.status == 404:
+                return render_template("404/no_data.html"), 404
+            raise
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(point_pkg)
         return return_csv(csv_data)
 
-    return point_pkg
+    return postprocess(point_pkg)
 
 
 @routes.route("/<var_ep>/huc/<huc_id>")
@@ -815,4 +838,4 @@ def huc_data_endpoint(var_ep, huc_id):
         csv_data = create_csv(point_pkg)
         return return_csv(csv_data)
 
-    return point_pkg
+    return postprocess(point_pkg)

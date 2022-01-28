@@ -11,8 +11,8 @@ from flask import (
 # local imports
 from fetch_data import fetch_data, fetch_data_api
 from validate_latlon import validate, project_latlon
-from validate_data import check_for_nodata, nodata_message
-from config import GS_BASE_URL
+from validate_data import nullify_nodata, prune_nodata
+from config import GS_BASE_URL, VALID_BBOX
 from . import routes
 
 mean_annual_precip_api = Blueprint("mean_annual_precip_api", __name__)
@@ -35,10 +35,7 @@ def package_decadal_mapr(decadal_mapr_resp):
         dec_start = j.split("_")[-2]
         dec_end = j.split("_")[-1]
         title = f"Mean Annual Precipitation (mm) Decadal Summary Projection for {dec_start}-{dec_end}"
-        if decadal_mapr_resp[i]["features"] == []:
-            di = {"title": title, "Data Status": nodata_message}
-            dec_mapr.append(di)
-        else:
+        if not decadal_mapr_resp[i]["features"] == []:
             pr_mm = decadal_mapr_resp[i]["features"][0]["properties"]["GRAY_INDEX"]
             di = {
                 "title": title,
@@ -48,9 +45,17 @@ def package_decadal_mapr(decadal_mapr_resp):
                 "scenario": scenario,
                 "pr_mm": pr_mm,
             }
-            check_for_nodata(di, "pr_mm", pr_mm, -9999)
             dec_mapr.append(di)
     return dec_mapr
+
+
+def postprocess(data):
+    """Filter nodata values, prune empty branches, return 404 if appropriate"""
+    nullified_data = nullify_nodata(data, "mean_annual_precip")
+    pruned_data = prune_nodata(nullified_data)
+    if pruned_data in [None, 0]:
+        return render_template("404/no_data.html"), 404
+    return pruned_data
 
 
 @routes.route("/mean_annual_precip/")
@@ -69,14 +74,21 @@ def run_fetch_mapr_data(lat, lon):
     """Run the async mean annual precipitation data requesting and return data as json
     example request: http://localhost:5000/mean_annual_precipitation/65.0628/-146.1627"""
     if not validate(lat, lon):
-        abort(400)
-    results = asyncio.run(
-        fetch_data_api(
-            GS_BASE_URL, "mean_annual_precip", wms_targets, wfs_targets, lat, lon
+        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
+
+    try:
+        results = asyncio.run(
+            fetch_data_api(
+                GS_BASE_URL, "mean_annual_precip", wms_targets, wfs_targets, lat, lon
+            )
         )
-    )
-    dec_mapr = package_decadal_mapr(results[0:2])
+    except Exception as e:
+        if e.status == 404:
+            return render_template("404/no_data.html"), 404
+        raise
+
     data = {
-        "dec_mapr": dec_mapr,
+        "dec_mapr": package_decadal_mapr(results[0:2]),
     }
-    return data
+
+    return postprocess(data)
