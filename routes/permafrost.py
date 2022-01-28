@@ -169,14 +169,13 @@ def postprocess(data, huc=False):
     appropriate"""
     nullified_data = nullify_nodata(data, "permafrost")
     pruned_data = prune_nodata(nullified_data)
-    if pruned_data is not None and len(pruned_data) > 0:
-        if huc:
-            pruned_data["title"] = credits["gipl"]
-        else:
-            for key, value in pruned_data.items():
-                pruned_data[key]["title"] = credits[key]
-    else:
+    if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
+    if huc:
+        pruned_data["title"] = credits["gipl"]
+    else:
+        for key, value in pruned_data.items():
+            pruned_data[key]["title"] = credits[key]
     return nullified_data
 
 
