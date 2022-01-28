@@ -41,7 +41,10 @@ def run_fetch_huc_poly(huc8_id):
     Notes:
         example request: http://localhost:5000/huc/huc8/19070506
     """
-    poly = huc8_gdf.loc[[huc8_id]]
+    try:
+        poly = huc8_gdf.loc[[huc8_id]]
+    except:
+        return render_template("404/invalid_huc.html"), 404
     poly_geojson = poly.to_json()
 
     return poly_geojson

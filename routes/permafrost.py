@@ -264,7 +264,10 @@ def run_huc_fetch_all_permafrost(huc_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated permafrost data over the HUC.
     """
-    poly = get_huc_3338_bbox(huc_id)
+    try:
+        poly = get_huc_3338_bbox(huc_id)
+    except:
+        return render_template("404/invalid_huc.html"), 404
     bounds = poly.bounds
 
     request_str = generate_netcdf_wcs_getcov_str(

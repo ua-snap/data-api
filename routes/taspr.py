@@ -680,7 +680,6 @@ def run_aggregate_var_huc(var_ep, huc_id):
     #   geometry column for zonal_stats
     # reproject is needed for zonal_stats and for initial bbox
     #   bounds for query
-    # TODO What if the huc_id is invalid?
     poly_gdf = huc8_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
     poly = poly_gdf.iloc[0]["geometry"]
 
@@ -830,10 +829,13 @@ def huc_data_endpoint(var_ep, huc_id):
     Notes:
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
-    if var_ep in var_ep_lu.keys():
-        point_pkg = run_aggregate_var_huc(var_ep, huc_id)
-    elif var_ep == "taspr":
-        point_pkg = run_aggregate_huc(huc_id)
+    try:
+        if var_ep in var_ep_lu.keys():
+            point_pkg = run_aggregate_var_huc(var_ep, huc_id)
+        elif var_ep == "taspr":
+            point_pkg = run_aggregate_huc(huc_id)
+    except:
+        return render_template("404/invalid_huc.html"), 404
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(point_pkg)
