@@ -164,15 +164,15 @@ def combine_gipl_poly_var_pkgs(magt_di, alt_di):
     return combined_gipl_di
 
 
-def postprocess(data, huc=False):
+def postprocess(data, gipl_only=False):
     """Filter nodata values, prune empty branches, add credits, or return 404 if
     appropriate"""
     nullified_data = nullify_nodata(data, "permafrost")
     pruned_data = prune_nodata(nullified_data)
     if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
-    if huc:
-        pruned_data["title"] = credits["gipl"]
+    if gipl_only:
+        nullified_data["title"] = credits["gipl"]
     else:
         for key, value in pruned_data.items():
             nullified_data[key]["title"] = credits[key]
@@ -296,7 +296,7 @@ def run_huc_fetch_all_permafrost(huc_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return combined_pkg
+    return postprocess(combined_pkg, gipl_only=True)
 
 
 @routes.route("/permafrost/protectedarea/<akpa_id>")
@@ -329,4 +329,4 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return postprocess(combined_pkg, huc=True)
+    return postprocess(combined_pkg, gipl_only=True)
