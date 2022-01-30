@@ -48,6 +48,9 @@ def package_flammability(flammability_resp):
         return None
     else:
         flamm = round(flammability_resp["features"][0]["properties"]["GRAY_INDEX"], 4)
+        flamm = nullify_nodata(flamm, "fire")
+        if flamm is None:
+            return None
         di = {"title": title, "flamm": flamm}
     return di
 
