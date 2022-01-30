@@ -175,7 +175,7 @@ def postprocess(data, huc=False):
         pruned_data["title"] = credits["gipl"]
     else:
         for key, value in pruned_data.items():
-            pruned_data[key]["title"] = credits[key]
+            nullified_data[key]["title"] = credits[key]
     return nullified_data
 
 
