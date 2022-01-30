@@ -1,5 +1,5 @@
-"""A module to validate and clean fetched data values."""
-from luts import huc8_gdf
+"""A module to validate fetched data values."""
+from luts import huc8_gdf, akpa_gdf
 
 nodata_values = {
     "fire": [-9999],
@@ -103,16 +103,17 @@ def prune_nodata(data):
 
     return data
 
-def get_huc_3338_bbox(huc_id):
-    """Get the Polygon Object corresponding to the HUC ID.
+def get_poly_3338_bbox(gdf, poly_id):
+    """Get the Polygon Object corresponding to the the ID for a GeoDataFrame
 
     Args:
-        huc_id (int): 8-digit HUC ID
+        gdf (geopandas.GeoDataFrame object): polygon features
+        polyid (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
         poly (shapely.Polygon): Polygon object used to summarize data within.
         Inlcudes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
         polygon. Format is (xmin, ymin, xmax, ymax).
     """
-    poly_gdf = huc8_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
+    poly_gdf = gdf.loc[[poly_id]][["geometry"]].to_crs(3338)
     poly = poly_gdf.iloc[0]["geometry"]
     return poly
