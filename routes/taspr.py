@@ -1,21 +1,18 @@
 import asyncio
 import io
 import csv
-import operator
 import time
 import itertools
 from urllib.parse import quote
 import numpy as np
 import xarray as xr
 from flask import (
-    abort,
     Blueprint,
     Response,
     render_template,
     request,
     current_app as app,
 )
-from rasterstats import zonal_stats
 
 # local imports
 from generate_requests import generate_wcs_getcov_str
@@ -23,14 +20,13 @@ from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_data,
     get_from_dict,
-    generate_nested_dict,
     summarize_within_poly,
 )
 from validate_latlon import validate, project_latlon
-from validate_data import get_poly_3338_bbox, nullify_nodata, prune_nodata, postprocess
-from . import routes
-from luts import huc8_gdf, akpa_gdf
+from validate_data import get_poly_3338_bbox, postprocess
+from luts import huc8_gdf
 from config import VALID_BBOX
+from . import routes
 
 taspr_api = Blueprint("taspr_api", __name__)
 
@@ -592,7 +588,6 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
     poly = get_poly_3338_bbox(poly_gdf, poly_id)
-    bounds = poly.bounds
     # mapping between coordinate values (ints) and variable names (strs)
     varname = var_ep_lu[var_ep]
     var_coord = list(dim_encodings["varnames"].keys())[list(dim_encodings["varnames"].values()).index(varname)]
@@ -623,27 +618,6 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
                         varname: aggr_results[period][season][model][scenario]
                     }
     return aggr_results
-
-
-def run_aggregate_huc(huc_id):
-    """Get data within a huc for both temperature and
-    precipitation and aggregate according by mean.
-
-    Args:
-        huc_id (int): 8-digit HUD ID
-
-    Returns:
-        JSON-like dict of summaries for both variables of rasters
-            within HUC
-    """
-    tas_pkg, pr_pkg = [
-        run_aggregate_var_huc(var_ep, huc_id)
-        for var_ep in ["temperature", "precipitation"]
-    ]
-
-    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
-
-    return combined_pkg
 
 
 @routes.route("/temperature/")
@@ -699,8 +673,8 @@ def point_data_endpoint(var_ep, lat, lon):
     elif var_ep == "taspr":
         try:
             point_pkg = run_fetch_point_data(lat, lon)
-        except Exception as e:
-            if e.status == 404:
+        except Exception as exc:
+            if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
             raise
 

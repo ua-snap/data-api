@@ -1,6 +1,5 @@
 """A module to validate fetched data values."""
 from flask import render_template
-from luts import huc8_gdf, akpa_gdf
 
 nodata_values = {
     "fire": [-9999],
@@ -12,6 +11,7 @@ nodata_values = {
     "physiography": [],
     "taspr": [-9999, -9.223372e+18, -9.223372036854776e+18],
 }
+
 
 def nullify_nodata_value(value, endpoint):
     """Return None if a nodata value is detected, otherwise return the original value.
@@ -106,19 +106,19 @@ def prune_nodata(data):
     return data
 
 
-def postprocess(data, endpoint, credits=None):
-    """Filter nodata values, prune empty branches, add credits, and return 404
+def postprocess(data, endpoint, titles=None):
+    """Filter nodata values, prune empty branches, add titles, and return 404
     if appropriate"""
     nullified_data = nullify_nodata(data, endpoint)
     pruned_data = prune_nodata(nullified_data)
     if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
-    if credits is not None:
-        if isinstance(credits, str):
-            nullified_data["title"] = credits
+    if titles is not None:
+        if isinstance(titles, str):
+            nullified_data["title"] = titles
         else:
-            for key, value in credits.items():
-                nullified_data[key]["title"] = credits[key]
+            for key in titles.keys():
+                nullified_data[key]["title"] = titles[key]
     return nullified_data
 
 

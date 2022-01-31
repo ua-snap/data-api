@@ -1,20 +1,16 @@
 import asyncio
 from flask import (
-    abort,
     Blueprint,
-    Response,
     render_template,
-    request,
-    current_app as app,
 )
 
 # local imports
-from fetch_data import fetch_data, fetch_data_api
-from validate_latlon import validate, project_latlon
-from validate_data import nullify_nodata, prune_nodata, postprocess
+from fetch_data import fetch_data_api
+from validate_latlon import validate
+from validate_data import nullify_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
-from . import routes
 from luts import ak_veg_di
+from . import routes
 
 forest_api = Blueprint("forest_api", __name__)
 
@@ -27,21 +23,20 @@ def package_akvegwetland(akvegwet_resp):
     title = "Alaska Vegetation and Wetland Composite"
     if akvegwet_resp[0]["features"] == []:
         return None
-    else:
-        veg_wet_code = akvegwet_resp[0]["features"][0]["properties"]["GRAY_INDEX"]
-        veg_wet_code = nullify_nodata(veg_wet_code, "forest")
-        if veg_wet_code == None:
-            return None
-        finelc = ak_veg_di[veg_wet_code]["Fine_LC"]
-        coarselc = ak_veg_di[veg_wet_code]["Coarse_LC"]
-        nwi = ak_veg_di[veg_wet_code]["NWI_Gen"]
-        di = {
-            "title": title,
-            "code": veg_wet_code,
-            "finelc": finelc,
-            "coarselc": coarselc,
-            "nwi": nwi,
-        }
+    veg_wet_code = akvegwet_resp[0]["features"][0]["properties"]["GRAY_INDEX"]
+    veg_wet_code = nullify_nodata(veg_wet_code, "forest")
+    if veg_wet_code is None:
+        return None
+    finelc = ak_veg_di[veg_wet_code]["Fine_LC"]
+    coarselc = ak_veg_di[veg_wet_code]["Coarse_LC"]
+    nwi = ak_veg_di[veg_wet_code]["NWI_Gen"]
+    di = {
+        "title": title,
+        "code": veg_wet_code,
+        "finelc": finelc,
+        "coarselc": coarselc,
+        "nwi": nwi,
+    }
     return di
 
 
@@ -72,8 +67,8 @@ def run_fetch_forest(lat, lon):
         results = asyncio.run(
             fetch_data_api(GS_BASE_URL, "forest", wms_targets, wfs_targets, lat, lon)
         )
-    except Exception as e:
-        if e.status == 404:
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         raise
     data = package_akvegwetland(results)

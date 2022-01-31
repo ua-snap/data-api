@@ -1,20 +1,16 @@
 import asyncio
 from flask import (
-    abort,
     Blueprint,
-    Response,
     render_template,
-    request,
-    current_app as app,
 )
 
 # local imports
-from fetch_data import fetch_data, fetch_data_api
-from validate_latlon import validate, project_latlon
-from validate_data import nullify_nodata, prune_nodata, postprocess
+from fetch_data import fetch_data_api
+from validate_latlon import validate
+from validate_data import nullify_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
-from . import routes
 from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status
+from . import routes
 
 fire_api = Blueprint("fire_api", __name__)
 
@@ -29,15 +25,13 @@ wfs_targets = {"historical_fire_perimiters": "NAME,FIREYEAR"}
 
 def package_fire_history(fihist_resp):
     """Package fire history data in dict"""
-    title = "Historical fires"
     if fihist_resp["features"] == []:
         return None
-    else:
-        di = {}
-        for i in fihist_resp["features"]:
-            fi_name = list(i.values())[-1]["NAME"]
-            fi_year = list(i.values())[-1]["FIREYEAR"]
-            di.update({fi_name: fi_year})
+    di = {}
+    for i in fihist_resp["features"]:
+        fi_name = list(i.values())[-1]["NAME"]
+        fi_year = list(i.values())[-1]["FIREYEAR"]
+        di.update({fi_name: fi_year})
     return di
 
 
@@ -46,12 +40,11 @@ def package_flammability(flammability_resp):
     title = "Projected relative flammability"
     if flammability_resp["features"] == []:
         return None
-    else:
-        flamm = round(flammability_resp["features"][0]["properties"]["GRAY_INDEX"], 4)
-        flamm = nullify_nodata(flamm, "fire")
-        if flamm is None:
-            return None
-        di = {"title": title, "flamm": flamm}
+    flamm = round(flammability_resp["features"][0]["properties"]["GRAY_INDEX"], 4)
+    flamm = nullify_nodata(flamm, "fire")
+    if flamm is None:
+        return None
+    di = {"title": title, "flamm": flamm}
     return di
 
 
@@ -60,12 +53,11 @@ def package_snow(snow_resp):
     title = "Today's Snow Cover"
     if snow_resp["features"] == []:
         return None
-    else:
-        snow_index = snow_resp["features"][0]["properties"]["GRAY_INDEX"]
-        if snow_index == 0:
-            return None
-        snow = snow_status[snow_index]
-        di = {"title": title, "is_snow": snow}
+    snow_index = snow_resp["features"][0]["properties"]["GRAY_INDEX"]
+    if snow_index == 0:
+        return None
+    snow = snow_status[snow_index]
+    di = {"title": title, "is_snow": snow}
     return di
 
 
@@ -74,13 +66,12 @@ def package_fire_danger(fire_danger_resp):
     title = "Today's Fire Danger"
     if fire_danger_resp["features"] == []:
         return None
-    else:
-        code = fire_danger_resp["features"][0]["properties"]["GRAY_INDEX"]
-        if code == 6:
-            return None
-        fitype = smokey_bear_names[code]
-        color = smokey_bear_styles[code]
-        di = {"title": title, "code": code, "type": fitype, "color": color}
+    code = fire_danger_resp["features"][0]["properties"]["GRAY_INDEX"]
+    if code == 6:
+        return None
+    fitype = smokey_bear_names[code]
+    color = smokey_bear_styles[code]
+    di = {"title": title, "code": code, "type": fitype, "color": color}
     return di
 
 
@@ -89,13 +80,12 @@ def package_landcover(landcover_resp):
     title = "Land cover types"
     if landcover_resp["features"] == []:
         return None
-    else:
-        code = landcover_resp["features"][0]["properties"]["PALETTE_INDEX"]
-        lctype = landcover_names[code]["type"]
-        if code == 0:
-            return None
-        color = landcover_names[code]["color"]
-        di = {"title": title, "code": code, "type": lctype, "color": color}
+    code = landcover_resp["features"][0]["properties"]["PALETTE_INDEX"]
+    lctype = landcover_names[code]["type"]
+    if code == 0:
+        return None
+    color = landcover_names[code]["color"]
+    di = {"title": title, "code": code, "type": lctype, "color": color}
     return di
 
 
@@ -128,8 +118,8 @@ def run_fetch_fire(lat, lon):
                 GS_BASE_URL, "alaska_wildfires", wms_targets, wfs_targets, lat, lon
             )
         )
-    except Exception as e:
-        if e.status == 404:
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         raise
 

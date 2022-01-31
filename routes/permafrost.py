@@ -1,25 +1,20 @@
 import asyncio
 from flask import (
-    abort,
     Blueprint,
-    Response,
     render_template,
-    request,
-    current_app as app,
 )
 
 # local imports
 from fetch_data import (
-    fetch_data,
     fetch_data_api,
     fetch_wcs_point_data,
     fetch_bbox_netcdf,
     summarize_within_poly,
 )
-from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
+from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from validate_latlon import validate, project_latlon
-from validate_data import get_poly_3338_bbox, nullify_nodata, prune_nodata, postprocess
+from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from luts import huc8_gdf, permafrost_encodings, akpa_gdf
 from . import routes
@@ -38,7 +33,7 @@ wfs_targets = {
     "obu_pf_extent": "PFEXTENT",
 }
 
-credits = {
+titles = {
     "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output",
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
@@ -49,29 +44,27 @@ def package_obu_magt(obu_magt_resp):
     """Package Obu MAGT raster data."""
     if obu_magt_resp["features"] == []:
         return None
-    else:
-        depth = "Top of Permafrost"
-        year = "2000-2016"
-        credits["obu_magt"] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
-        temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
-        temp = round(temp, 1)
+    depth = "Top of Permafrost"
+    year = "2000-2016"
+    titles["obu_magt"] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
+    temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
+    temp = round(temp, 1)
 
-        nullified_data = nullify_nodata(temp, "permafrost")
-        if nullified_data != None:
-            di = {"year": year, "depth": depth, "temp": temp}
-            return di
+    nullified_data = nullify_nodata(temp, "permafrost")
+    if nullified_data is not None:
+        di = {"year": year, "depth": depth, "temp": temp}
+        return di
 
-        return None
+    return None
 
 
 def package_jorgenson(jorgenson_resp):
     """Package Jorgenson vector data."""
     if jorgenson_resp["features"] == []:
         return None
-    else:
-        ice = jorgenson_resp["features"][0]["properties"]["GROUNDICEV"]
-        pfx = jorgenson_resp["features"][0]["properties"]["PERMAFROST"]
-        di = {"ice": ice, "pfx": pfx}
+    ice = jorgenson_resp["features"][0]["properties"]["GROUNDICEV"]
+    pfx = jorgenson_resp["features"][0]["properties"]["PERMAFROST"]
+    di = {"ice": ice, "pfx": pfx}
     return di
 
 
@@ -79,9 +72,8 @@ def package_obu_vector(obu_vector_resp):
     """Package Obu permafrost extent vector data."""
     if obu_vector_resp["features"] == []:
         return None
-    else:
-        pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
-        di = {"pfx": pfx}
+    pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
+    di = {"pfx": pfx}
     return di
 
 
@@ -235,8 +227,8 @@ def run_point_fetch_all_permafrost(lat, lon):
 
     try:
         rasdaman_results = asyncio.run(fetch_wcs_point_data(x, y, permafrost_coverage_id))
-    except Exception as e:
-        if e.status == 404:
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         raise
 
@@ -247,7 +239,7 @@ def run_point_fetch_all_permafrost(lat, lon):
         "obupfx": package_obu_vector(gs_results[2]),
     }
 
-    return postprocess(data, "permafrost", credits)
+    return postprocess(data, "permafrost", titles)
 
 
 @routes.route("/permafrost/huc/<huc_id>")
@@ -281,7 +273,7 @@ def run_huc_fetch_all_permafrost(huc_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return postprocess(combined_pkg, "permafrost", credits["gipl"])
+    return postprocess(combined_pkg, "permafrost", titles["gipl"])
 
 
 @routes.route("/permafrost/protectedarea/<akpa_id>")
@@ -314,4 +306,4 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return postprocess(combined_pkg, "permafrost", credits["gipl"])
+    return postprocess(combined_pkg, "permafrost", titles["gipl"])

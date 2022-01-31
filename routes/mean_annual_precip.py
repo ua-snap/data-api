@@ -1,17 +1,13 @@
 import asyncio
 from flask import (
-    abort,
     Blueprint,
-    Response,
     render_template,
-    request,
-    current_app as app,
 )
 
 # local imports
-from fetch_data import fetch_data, fetch_data_api
-from validate_latlon import validate, project_latlon
-from validate_data import nullify_nodata, prune_nodata, postprocess
+from fetch_data import fetch_data_api
+from validate_latlon import validate
+from validate_data import postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from . import routes
 
@@ -73,8 +69,8 @@ def run_fetch_mapr_data(lat, lon):
                 GS_BASE_URL, "mean_annual_precip", wms_targets, wfs_targets, lat, lon
             )
         )
-    except Exception as e:
-        if e.status == 404:
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         raise
 
