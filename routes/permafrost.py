@@ -19,7 +19,7 @@ from fetch_data import (
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from validate_latlon import validate, project_latlon
-from validate_data import get_poly_3338_bbox, nullify_nodata, prune_nodata
+from validate_data import get_poly_3338_bbox, nullify_nodata, prune_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from luts import huc8_gdf, permafrost_encodings, akpa_gdf
 from . import routes
@@ -164,21 +164,6 @@ def combine_gipl_poly_var_pkgs(magt_di, alt_di):
     return combined_gipl_di
 
 
-def postprocess(data, gipl_only=False):
-    """Filter nodata values, prune empty branches, add credits, or return 404 if
-    appropriate"""
-    nullified_data = nullify_nodata(data, "permafrost")
-    pruned_data = prune_nodata(nullified_data)
-    if pruned_data in [{}, None, 0]:
-        return render_template("404/no_data.html"), 404
-    if gipl_only:
-        nullified_data["title"] = credits["gipl"]
-    else:
-        for key, value in pruned_data.items():
-            nullified_data[key]["title"] = credits[key]
-    return nullified_data
-
-
 @routes.route("/permafrost/")
 @routes.route("/permafrost/abstract/")
 @routes.route("/groundtemperature/")
@@ -262,7 +247,7 @@ def run_point_fetch_all_permafrost(lat, lon):
         "obupfx": package_obu_vector(gs_results[2]),
     }
 
-    return postprocess(data)
+    return postprocess(data, "permafrost", credits)
 
 
 @routes.route("/permafrost/huc/<huc_id>")
@@ -296,7 +281,7 @@ def run_huc_fetch_all_permafrost(huc_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return postprocess(combined_pkg, gipl_only=True)
+    return postprocess(combined_pkg, "permafrost", credits["gipl"])
 
 
 @routes.route("/permafrost/protectedarea/<akpa_id>")
@@ -329,4 +314,4 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return postprocess(combined_pkg, gipl_only=True)
+    return postprocess(combined_pkg, "permafrost", credits["gipl"])

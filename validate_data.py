@@ -1,4 +1,5 @@
 """A module to validate fetched data values."""
+from flask import render_template
 from luts import huc8_gdf, akpa_gdf
 
 nodata_values = {
@@ -87,6 +88,7 @@ def prune_nodata_list(data):
                 pruned.append(value)
     return pruned
 
+
 def prune_nodata(data):
     """Traverse data structure recursively and prune empty or None branches.
 
@@ -102,6 +104,23 @@ def prune_nodata(data):
         return prune_nodata_list(data)
 
     return data
+
+
+def postprocess(data, endpoint, credits=None):
+    """Filter nodata values, prune empty branches, add credits, and return 404
+    if appropriate"""
+    nullified_data = nullify_nodata(data, endpoint)
+    pruned_data = prune_nodata(nullified_data)
+    if pruned_data in [{}, None, 0]:
+        return render_template("404/no_data.html"), 404
+    if credits is not None:
+        if isinstance(credits, str):
+            nullified_data["title"] = credits
+        else:
+            for key, value in credits.items():
+                nullified_data[key]["title"] = credits[key]
+    return nullified_data
+
 
 def get_poly_3338_bbox(gdf, poly_id):
     """Get the Polygon Object corresponding to the the ID for a GeoDataFrame

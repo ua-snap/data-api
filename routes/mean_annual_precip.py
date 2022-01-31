@@ -11,7 +11,7 @@ from flask import (
 # local imports
 from fetch_data import fetch_data, fetch_data_api
 from validate_latlon import validate, project_latlon
-from validate_data import nullify_nodata, prune_nodata
+from validate_data import nullify_nodata, prune_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from . import routes
 
@@ -49,15 +49,6 @@ def package_decadal_mapr(decadal_mapr_resp):
     return dec_mapr
 
 
-def postprocess(data):
-    """Filter nodata values, prune empty branches, return 404 if appropriate"""
-    nullified_data = nullify_nodata(data, "mean_annual_precip")
-    pruned_data = prune_nodata(nullified_data)
-    if pruned_data in [{}, None, 0]:
-        return render_template("404/no_data.html"), 404
-    return nullified_data
-
-
 @routes.route("/mean_annual_precip/")
 @routes.route("/mean_annual_precip/abstract/")
 def mapr_about():
@@ -91,4 +82,4 @@ def run_fetch_mapr_data(lat, lon):
         "dec_mapr": package_decadal_mapr(results[0:2]),
     }
 
-    return postprocess(data)
+    return postprocess(data, "mean_annual_precip")

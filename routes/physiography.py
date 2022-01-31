@@ -11,7 +11,7 @@ from flask import (
 # local imports
 from fetch_data import fetch_data, fetch_data_api
 from validate_latlon import validate, project_latlon
-from validate_data import nullify_nodata, prune_nodata
+from validate_data import nullify_nodata, prune_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from . import routes
 
@@ -30,15 +30,6 @@ def package_epaecoreg(eco_resp):
     ecoreg = eco_resp[0]["features"][0]["properties"]["ECOREGION"]
     di.update({"title": title, "name": ecoreg})
     return di
-
-
-def postprocess(data):
-    """Filter nodata values, prune empty branches, return 404 if appropriate"""
-    nullified_data = nullify_nodata(data, "physiography")
-    pruned_data = prune_nodata(nullified_data)
-    if pruned_data in [{}, None, 0]:
-        return render_template("404/no_data.html"), 404
-    return nullified_data
 
 
 @routes.route("/physiography/")
@@ -69,4 +60,4 @@ def run_fetch_physiography(lat, lon):
             return render_template("404/no_data.html"), 404
         raise
     physio = package_epaecoreg(results)
-    return postprocess(physio)
+    return postprocess(physio, "physiography")

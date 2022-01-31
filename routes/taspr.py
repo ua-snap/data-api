@@ -27,7 +27,7 @@ from fetch_data import (
     summarize_within_poly,
 )
 from validate_latlon import validate, project_latlon
-from validate_data import get_poly_3338_bbox, nullify_nodata, prune_nodata
+from validate_data import get_poly_3338_bbox, nullify_nodata, prune_nodata, postprocess
 from . import routes
 from luts import huc8_gdf, akpa_gdf
 from config import VALID_BBOX
@@ -646,16 +646,6 @@ def run_aggregate_huc(huc_id):
     return combined_pkg
 
 
-def postprocess(data):
-    """Filter nodata values, prune empty branches, return 404 if appropriate"""
-    nullified_data = nullify_nodata(data, "taspr")
-    pruned_data = prune_nodata(nullified_data)
-    print(pruned_data)
-    if pruned_data in [{}, None, 0]:
-        return render_template("404/no_data.html"), 404
-    return nullified_data
-
-
 @routes.route("/temperature/")
 @routes.route("/temperature/abstract/")
 @routes.route("/precipitation/")
@@ -718,7 +708,7 @@ def point_data_endpoint(var_ep, lat, lon):
         csv_data = create_csv(point_pkg)
         return return_csv(csv_data)
 
-    return postprocess(point_pkg)
+    return postprocess(point_pkg, "taspr")
 
 
 @routes.route("/<var_ep>/huc/<huc_id>")
@@ -747,4 +737,4 @@ def huc_data_endpoint(var_ep, huc_id):
         csv_data = create_csv(huc_pkg)
         return return_csv(csv_data)
 
-    return postprocess(huc_pkg)
+    return postprocess(huc_pkg, "taspr")

@@ -11,7 +11,7 @@ from flask import (
 # local imports
 from fetch_data import fetch_data, fetch_data_api
 from validate_latlon import validate, project_latlon
-from validate_data import nullify_nodata, prune_nodata
+from validate_data import nullify_nodata, prune_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from . import routes
 
@@ -32,16 +32,6 @@ def package_usgsgeol(geol_resp):
         age = geol_resp[0]["features"][0]["properties"]["AGE_RANGE"]
         di.update({"title": title, "name": gunit, "age": age})
     return di
-
-
-def postprocess(data):
-    """Filter nodata values, prune empty branches, return 404 if appropriate"""
-    nullified_data = nullify_nodata(data, "geology")
-    pruned_data = prune_nodata(nullified_data)
-    if pruned_data in [{}, None, 0]:
-        return render_template("404/no_data.html"), 404
-    return nullified_data
-
 
 @routes.route("/geology/")
 @routes.route("/geology/abstract/")
@@ -71,4 +61,4 @@ def run_fetch_geology(lat, lon):
             return render_template("404/no_data.html"), 404
         raise
     data = package_usgsgeol(results)
-    return postprocess(data)
+    return postprocess(data, "geology")
