@@ -1,0 +1,1364 @@
+[
+  {
+    "id": "USFS1",
+    "name": "Admiralty Island National Monument",
+    "area_type": "National Monument (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR1",
+    "name": "Afognak Island State Park",
+    "area_type": "State Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS1",
+    "name": "Alagnak Wild River",
+    "area_type": "National River & Wild & Scenic Riverway (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR2",
+    "name": "Alaska Chilkat Bald Eagle Preserve",
+    "area_type": "State Nature Preserve",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS1",
+    "name": "Alaska Maritime National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS2",
+    "name": "Alaska Maritime National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS3",
+    "name": "Alaska Peninsula National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR3",
+    "name": "Alexander Creek Recreation River",
+    "area_type": "State Recreation River",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR4",
+    "name": "Anchor River And Fritz Creek Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR5",
+    "name": "Anchorage Coastal Wildlife Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS2",
+    "name": "Aniakchak National Monument And Preserve",
+    "area_type": "National Preserve (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS4",
+    "name": "Arctic National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS5",
+    "name": "Arctic National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM1",
+    "name": "Arms Lake Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM2",
+    "name": "Beaver Creek Wild And Scenic River",
+    "area_type": "Wild, Scenic & Recreation River (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS6",
+    "name": "Becharof National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS7",
+    "name": "Becharof National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS3",
+    "name": "Bering Land Bridge National Preserve",
+    "area_type": "National Preserve (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR8",
+    "name": "Big Bear Baby Bear State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR9",
+    "name": "Bogoslof Island Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR10",
+    "name": "Boswell Bay Beaches State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM3",
+    "name": "Box River Treeline Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR11",
+    "name": "Bristol Bay Fisheries Reserve",
+    "area_type": "State Restricted Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR12",
+    "name": "Caines Head State Recreation Area",
+    "area_type": "State Recreation Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR13",
+    "name": "Canoe Passage State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS4",
+    "name": "Cape Krusenstern National Monument",
+    "area_type": "National Monument (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR14",
+    "name": "Captain Cook State Recreation Area",
+    "area_type": "State Recreation Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR15",
+    "name": "Chamisso Island Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR16",
+    "name": "Chena River State Recreation Area",
+    "area_type": "State Recreation Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR17",
+    "name": "Chilkat Islands State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR19",
+    "name": "Chilkat State Park",
+    "area_type": "State Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS2",
+    "name": "Chugach Backcountry Prescription",
+    "area_type": "Backcountry Prescription (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS3",
+    "name": "Chugach National Forest",
+    "area_type": "National Forest (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS4",
+    "name": "Chugach National Forest Alaska National Interest Lands Conservation Act 501(b)-1",
+    "area_type": "ANILCA: Alaska National Interest Lands Conservation Act",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS5",
+    "name": "Chugach National Forest Alaska National Interest Lands Conservation Act 501(b)-2 Prescription",
+    "area_type": "ANILCA: Alaska National Interest Lands Conservation Act",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS6",
+    "name": "Chugach National Forest Alaska National Interest Lands Conservation Act 501(b)-3 Prescription",
+    "area_type": "ANILCA: Alaska National Interest Lands Conservation Act",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS7",
+    "name": "Chugach National Forest Brown Bear Core Area",
+    "area_type": "Brown Bear Core Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS8",
+    "name": "Chugach National Forest Exxon Valdez Oil Spill Fee",
+    "area_type": "Exxon Valdez Oil Spill Fee (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS9",
+    "name": "Chugach National Forest Fish And Wildlife Conservation Area",
+    "area_type": "Fish and Wildlife Conservation Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS10",
+    "name": "Chugach National Forest Fish, Wildlife And Recreation Prescription",
+    "area_type": "Fish and Wildlife Conservation Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS11",
+    "name": "Chugach National Forest Forest Restoration",
+    "area_type": "Forest Restoration (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS13",
+    "name": "Chugach National Forest Primitive Prescription",
+    "area_type": "National Primitive Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS14",
+    "name": "Chugach National Forest Proposed Research Natural Area",
+    "area_type": "Proposed Research Natural Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS15",
+    "name": "Chugach National Forest Recommended Wilderness",
+    "area_type": "Wilderness Study Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS16",
+    "name": "Chugach National Forest Recreation River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS17",
+    "name": "Chugach National Forest Scenic River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS18",
+    "name": "Chugach National Forest Wild River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS19",
+    "name": "Chugach Research Natural Area",
+    "area_type": "Research Natural Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR20",
+    "name": "Chugach State Park",
+    "area_type": "State Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR21",
+    "name": "Cinder River Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR22",
+    "name": "Clam Gulch Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR23",
+    "name": "Clarence Rhodes National Wildlife Range",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR24",
+    "name": "Copper River Delta Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR27",
+    "name": "Delta Junction Bison Range Area",
+    "area_type": "State Range Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM4",
+    "name": "Delta Wild And Scenic River",
+    "area_type": "Wild, Scenic & Recreation River (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS5",
+    "name": "Denali National Park And Preserve",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS6",
+    "name": "Denali National Park Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR28",
+    "name": "Denali State Park",
+    "area_type": "State Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR29",
+    "name": "Driftwood Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR30",
+    "name": "Dude Creek Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM5",
+    "name": "Dulbi-Kaiyuh Mountains Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR31",
+    "name": "Egegik Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR32",
+    "name": "Entry Cove State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR34",
+    "name": "Forrester Island Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM6",
+    "name": "Fortymile Wild And Scenic River",
+    "area_type": "Wild, Scenic & Recreation River (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR35",
+    "name": "Fox River Flats Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM7",
+    "name": "Galbraith Lake Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM8",
+    "name": "Galena Mountain Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS7",
+    "name": "Gates Of The Arctic National Park And Preserve",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS8",
+    "name": "Gates Of The Arctic National Park Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM9",
+    "name": "George River Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM10",
+    "name": "Gisasa River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS9",
+    "name": "Glacier Bay National Park And Preserve",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS10",
+    "name": "Glacier Bay National Park Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS11",
+    "name": "Glacier Bay National Park Wilderness - Water",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR38",
+    "name": "Goose Bay State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR39",
+    "name": "Granite Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM11",
+    "name": "Gulkana Wild And Scenic River",
+    "area_type": "Wild, Scenic & Recreation River (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR40",
+    "name": "Haines State Forest",
+    "area_type": "State Forest",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR41",
+    "name": "Haines State Forest Resource Management Area",
+    "area_type": "State Forest",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR42",
+    "name": "Hatcher Pass Public Use Area",
+    "area_type": "State Public Use Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR43",
+    "name": "Hazen Bay Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR44",
+    "name": "Hazy Islands Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM12",
+    "name": "Hogatza Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR45",
+    "name": "Horseshoe Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM13",
+    "name": "Indian River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM14",
+    "name": "Inglutalik River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS8",
+    "name": "Innoko National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS9",
+    "name": "Innoko National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM15",
+    "name": "Ishtalitna Creek Hot Springs Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS10",
+    "name": "Izembek National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS11",
+    "name": "Izembek National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR46",
+    "name": "Izembek Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR47",
+    "name": "Jack Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR48",
+    "name": "James Dalton Highway Corridor",
+    "area_type": "State Restricted Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM16",
+    "name": "Jim River Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR50",
+    "name": "Kachemak Bay Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR51",
+    "name": "Kachemak Bay Oil And Gas Closure",
+    "area_type": "State Restricted Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR52",
+    "name": "Kachemak Bay State Park",
+    "area_type": "State Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR53",
+    "name": "Kachemak Bay State Wilderness Park",
+    "area_type": "State Wilderness Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR54",
+    "name": "Kalgin Island Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS12",
+    "name": "Kanuti National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM18",
+    "name": "Kateel River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS12",
+    "name": "Katmai National Park And Preserve",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS13",
+    "name": "Katmai National Park Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS14",
+    "name": "Katmai National Preserve Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR55",
+    "name": "Kayak Island State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS15",
+    "name": "Kenai Fjords National Park",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS13",
+    "name": "Kenai National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS14",
+    "name": "Kenai National Wildlife Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR56",
+    "name": "Kenai River Special Management Area",
+    "area_type": "Special State Management Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS16",
+    "name": "Klondike Gold Rush National Historical Park",
+    "area_type": "National Historical Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS17",
+    "name": "Kobuk Valley National Park",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS18",
+    "name": "Kobuk Valley National Park Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS15",
+    "name": "Kodiak National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS16",
+    "name": "Koyukuk National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS17",
+    "name": "Koyukuk National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR57",
+    "name": "Kroto And Moose Creek Recreation River",
+    "area_type": "State Recreation River",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS19",
+    "name": "Lake Clark National Park And Preserve",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS20",
+    "name": "Lake Clark National Park Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS21",
+    "name": "Lake Clark National Preserve Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR58",
+    "name": "Lake Creek Recreation River",
+    "area_type": "State Recreation River",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR59",
+    "name": "Little Susitna Recreation River",
+    "area_type": "State Recreation River",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR60",
+    "name": "Magoun Islands State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "DODDOE1",
+    "name": "Major Military",
+    "area_type": "Military Reservation (DOD)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR61",
+    "name": "Matanuska Valley Moose Range",
+    "area_type": "State Range Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR62",
+    "name": "Mcneil River State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR63",
+    "name": "Mcneil River State Game Sanctuary",
+    "area_type": "State Game or Wildlife Sanctuary",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM20",
+    "name": "Mcquesten Creek Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR64",
+    "name": "Mendenhall Wetlands State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR65",
+    "name": "Minto Flats State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS20",
+    "name": "Misty Fjords National Monument",
+    "area_type": "National Monument (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR66",
+    "name": "Nancy Lake State Recreation Area",
+    "area_type": "State Recreation Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM21",
+    "name": "National Petroleum Reserve - Alaska",
+    "area_type": "National Petroleum Reserve",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR67",
+    "name": "Nelchina Public Use Area",
+    "area_type": "State Public Use Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM22",
+    "name": "Nigu-Iteriak Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS22",
+    "name": "Noatak National Preserve",
+    "area_type": "National Preserve (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS23",
+    "name": "Noatak National Preserve Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM23",
+    "name": "North River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS18",
+    "name": "Nowitna National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM24",
+    "name": "Nugget Creek Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM25",
+    "name": "Nulato Hills Threatened And Endangered Area",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR68",
+    "name": "Nunivak Island Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM26",
+    "name": "Oskawalik River Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR70",
+    "name": "Palmer Hay Flats State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR71",
+    "name": "Pilot Point Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR72",
+    "name": "Point Bridget State Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR73",
+    "name": "Port Heiden Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR74",
+    "name": "Port Moller Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM27",
+    "name": "Poss Mountain Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM28",
+    "name": "Redlands Lake Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR75",
+    "name": "Redoubt Bay Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR77",
+    "name": "Saint James Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR79",
+    "name": "Sawmill Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR80",
+    "name": "Security Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS19",
+    "name": "Selawik National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS20",
+    "name": "Selawik National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM29",
+    "name": "Serpentine Slide Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM30",
+    "name": "Shaktoolik River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR81",
+    "name": "Shelter Island State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR82",
+    "name": "Shoup Bay State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR83",
+    "name": "Shuyak Island State Park",
+    "area_type": "State Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM31",
+    "name": "Snowden Mountain Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR84",
+    "name": "South Esther Island State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM33",
+    "name": "Spooky Valley Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM34",
+    "name": "Steese National Conservation Area",
+    "area_type": "National Conservation Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM35",
+    "name": "Sukakpak Mountain Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR86",
+    "name": "Sullivan Island State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM36",
+    "name": "Sulukna River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR88",
+    "name": "Surprise Cove State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR89",
+    "name": "Susitna Flats State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR91",
+    "name": "Talachulitna Recreation River",
+    "area_type": "State Recreation River",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR92",
+    "name": "Talkeetna Recreation River",
+    "area_type": "State Recreation River",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR93",
+    "name": "Tanana Valley State Forest",
+    "area_type": "State Forest",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS21",
+    "name": "Tetlin National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR94",
+    "name": "Thoms Place State Marine Park",
+    "area_type": "State Marine Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS22",
+    "name": "Togiak National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS23",
+    "name": "Togiak National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS21",
+    "name": "Tongass National Forest",
+    "area_type": "National Forest (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS22",
+    "name": "Tongass National Forest Enacted Municipal Watershed",
+    "area_type": "Municipal Watershed (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS23",
+    "name": "Tongass National Forest Experimental Forest",
+    "area_type": "National Forest (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS24",
+    "name": "Tongass National Forest Land Use Designation Ii",
+    "area_type": "LUD: Land Use Designation II (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS25",
+    "name": "Tongass National Forest Land Use Designation Ii Research Natural Area",
+    "area_type": "Research Natural Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS26",
+    "name": "Tongass National Forest Land Use Designation Ii Wild River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS27",
+    "name": "Tongass National Forest Modified Landscape",
+    "area_type": "National Forest (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS28",
+    "name": "Tongass National Forest National Scenic River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS29",
+    "name": "Tongass National Forest Non-wilderness Monument",
+    "area_type": "Non-Wilderness Monument (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS30",
+    "name": "Tongass National Forest Old Growth Habitat",
+    "area_type": "Old Growth Habitat (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS31",
+    "name": "Tongass National Forest Recreation River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS32",
+    "name": "Tongass National Forest Remote Recreation",
+    "area_type": "Remote or Semi-Remote Recreation (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS33",
+    "name": "Tongass National Forest Research Natural Area",
+    "area_type": "Research Natural Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS34",
+    "name": "Tongass National Forest Scenic Viewshed",
+    "area_type": "National Forest (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS35",
+    "name": "Tongass National Forest Semi-remote Recreation",
+    "area_type": "Remote or Semi-Remote Recreation (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS36",
+    "name": "Tongass National Forest Special Interest Area",
+    "area_type": "Special Interest Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS37",
+    "name": "Tongass National Forest Timber Production",
+    "area_type": "National Forest (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS38",
+    "name": "Tongass National Forest Wild River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS39",
+    "name": "Tongass National Forest Wilderness Area",
+    "area_type": "Wilderness Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS40",
+    "name": "Tongass National Forest Wilderness Monument",
+    "area_type": "National Monument (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS41",
+    "name": "Tongass National Forest Wilderness Monument Research Natural Area",
+    "area_type": "National Monument (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS42",
+    "name": "Tongass National Forest Wilderness Monument Special Area",
+    "area_type": "National Monument (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS43",
+    "name": "Tongass National Forest Wilderness Monument Wild River",
+    "area_type": "Wild, Scenic & Recreation River (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "USFS44",
+    "name": "Tongass National Forest Wilderness Special Area",
+    "area_type": "Wilderness Area (USFS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM37",
+    "name": "Toolik Lake Research Natural Area",
+    "area_type": "Research Natural Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM38",
+    "name": "Tozitna River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM39",
+    "name": "Tozitna Subunit North - Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM40",
+    "name": "Tozitna Subunit South Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR96",
+    "name": "Trading Bay State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR97",
+    "name": "Tugidak Island Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR98",
+    "name": "Tuxedni Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM41",
+    "name": "Unalakleet River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM42",
+    "name": "Unalakleet Wild And Scenic River",
+    "area_type": "Wild, Scenic & Recreation River (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM43",
+    "name": "Ungalik River Watershed Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR99",
+    "name": "Walrus Islands State Game Sanctuary",
+    "area_type": "State Game or Wildlife Sanctuary",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM44",
+    "name": "West Fork Atigun Area Of Critical Environmental Concern",
+    "area_type": "Area of Critical Environmental Concern (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM45",
+    "name": "White Mountains National Recreation Area",
+    "area_type": "National Recreation Area (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "BLM46",
+    "name": "Wild And Scenic Rivers",
+    "area_type": "Wild, Scenic & Recreation River (BLM)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR100",
+    "name": "Willow Creek State Recreation Area",
+    "area_type": "State Recreation Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR101",
+    "name": "Willow Mountain Critical Habitat Area",
+    "area_type": "State Habitat Area",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR102",
+    "name": "Wood-Tikchik State Park",
+    "area_type": "State Park",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS24",
+    "name": "Wrangell-St. Elias National Park And Preserve",
+    "area_type": "National Park (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS25",
+    "name": "Wrangell-St. Elias Park Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS26",
+    "name": "Wrangell-St. Elias Preserve Wilderness",
+    "area_type": "Wilderness Area (NPS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "AKDNR103",
+    "name": "Yakataga State Game Refuge",
+    "area_type": "State Refuges",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS24",
+    "name": "Yukon Delta National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS25",
+    "name": "Yukon Delta National Wildlife Refuge Wilderness Area",
+    "area_type": "Wilderness Area (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "FWS26",
+    "name": "Yukon Flats National Wildlife Refuge",
+    "area_type": "National Wildlife Refuge (FWS)",
+    "type": "protected_area"
+  },
+  {
+    "id": "NPS27",
+    "name": "Yukon-Charley Rivers National Preserve",
+    "area_type": "National Preserve (NPS)",
+    "type": "protected_area"
+  }
+]
