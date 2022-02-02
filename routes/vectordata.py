@@ -17,7 +17,7 @@ from luts import json_types
 
 data_api = Blueprint("data_api", __name__)
 
-@routes.route("/json/<type>")
+@routes.route("/places/<type>")
 def get_json_for_type(type):
     jsonpath = f'data/jsons/{json_types[type]}'
     print(json_types[type])
