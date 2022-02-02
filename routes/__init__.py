@@ -11,4 +11,4 @@ from .physiography import *
 from .forest import *
 from .mean_annual_precip import *
 from .boundary import *
-from .dataupdate import *
+from .vectordata import *

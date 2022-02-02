@@ -67,6 +67,12 @@ permafrost_encodings = {
     "gipl_units_lu": {"magt": "°C", "alt": "m"},
 }
 
+json_types = {
+    'communities': 'ak_communities.json',
+    'hucs': 'ak_hucs.json',
+    'protected_areas': 'ak_protected_areas.json'
+}
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including
