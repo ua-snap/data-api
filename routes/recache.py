@@ -29,39 +29,79 @@ def recache():
         if (route.find('point') != -1) and (route.find('lat') != -1):
             strip_route = route.replace("<lat>/<lon>", "")
             for community in communities:
-                curr_url = path + strip_route + str(community['latitude']) + '/' + str(community['longitude'])
-                print(curr_url)
-                status = requests.get(curr_url)
-                if (status.status_code != 200):
-                    log.write(str(status.status_code) + ": " + curr_url + '\n')
-                print(status)
+                if route.find('var_ep') != -1:
+                    for var in ['temperature', 'precipitation', 'taspr']:
+                        var_ep_route = strip_route.replace('<var_ep>', var)
+                        curr_url = path + var_ep_route + str(community['latitude']) + '/' + str(community['longitude'])
+                        print(curr_url)
+                        status = requests.get(curr_url)
+                        if (status.status_code != 200):
+                            log.write(str(status.status_code) + ": " + curr_url + '\n')
+                        print(status)
+                else:
+                    curr_url = path + strip_route + str(community['latitude']) + '/' + str(community['longitude'])
+                    print(curr_url)
+                    status = requests.get(curr_url)
+                    if (status.status_code != 200):
+                        log.write(str(status.status_code) + ": " + curr_url + '\n')
+                    print(status)
         if (route.find('huc8_id') != -1):
             strip_route = route.replace("<huc8_id>", "")
             for huc in hucs:
-                curr_url = path + strip_route + str(huc['id'])
-                print(curr_url)
-                status = requests.get(curr_url)
-                if (status.status_code != 200):
-                     log.write(str(status.status_code) + ": " + curr_url + '\n')
-                print(status)
+                if route.find('var_ep') != -1:
+                    for var in ['temperature', 'precipitation', 'taspr']:
+                        var_ep_route = strip_route.replace('<var_ep>', var)
+                        curr_url = path + var_ep_route + str(huc['id'])
+                        print(curr_url)
+                        status = requests.get(curr_url)
+                        if (status.status_code != 200):
+                            log.write(str(status.status_code) + ": " + curr_url + '\n')
+                        print(status)
+                else:
+                    curr_url = path + strip_route + str(huc['id'])
+                    print(curr_url)
+                    status = requests.get(curr_url)
+                    if (status.status_code != 200):
+                         log.write(str(status.status_code) + ": " + curr_url + '\n')
+                    print(status)
         if (route.find('huc_id') != -1):
             strip_route = route.replace("<huc_id>", "")
             for huc in hucs:
-                curr_url = path + strip_route + str(huc['id'])
-                print(curr_url)
-                status = requests.get(curr_url)
-                if (status.status_code != 200):
-                    log.write(str(status.status_code) + ": " + curr_url + '\n')
-                print(status)
+                if route.find('var_ep') != -1:
+                    for var in ['temperature', 'precipitation', 'taspr']:
+                        var_ep_route = strip_route.replace('<var_ep>', var)
+                        curr_url = path + var_ep_route + str(huc['id'])
+                        print(curr_url)
+                        status = requests.get(curr_url)
+                        if (status.status_code != 200):
+                            log.write(str(status.status_code) + ": " + curr_url + '\n')
+                        print(status)
+                else:
+                    curr_url = path + strip_route + str(huc['id'])
+                    print(curr_url)
+                    status = requests.get(curr_url)
+                    if (status.status_code != 200):
+                        log.write(str(status.status_code) + ": " + curr_url + '\n')
+                    print(status)
         if (route.find('akpa_id') != -1):
             strip_route = route.replace("<akpa_id>", "")
             for pa in protected_areas:
-                curr_url = path + strip_route + str(pa['id'])
-                print(curr_url)
-                status = requests.get(curr_url)
-                if (status.status_code != 200):
-                         log.write(str(status.status_code) + ": " + curr_url + '\n')
-                print(status)
+                if route.find('var_ep') != -1:
+                    for var in ['temperature', 'precipitation', 'taspr']:
+                        var_ep_route = strip_route.replace('<var_ep>', var)
+                        curr_url = path + var_ep_route + str(pa['id'])
+                        print(curr_url)
+                        status = requests.get(curr_url)
+                        if (status.status_code != 200):
+                            log.write(str(status.status_code) + ": " + curr_url + '\n')
+                        print(status)
+                else:
+                    curr_url = path + strip_route + str(pa['id'])
+                    print(curr_url)
+                    status = requests.get(curr_url)
+                    if (status.status_code != 200):
+                             log.write(str(status.status_code) + ": " + curr_url + '\n')
+                    print(status)
     cf.close()
     hf.close()
     paf.close()
