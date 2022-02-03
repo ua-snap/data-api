@@ -3,14 +3,15 @@ A module to validate latitude and longitude, contains
 other functions that could be used across multiple endpoints.
 """
 
+import re
 from pyproj import Transformer
 import numpy as np
 from config import VALID_BBOX
 
 
 def validate_latlon(lat, lon):
-    """Validate the lat and lon values. Return True if valid or HTTP status code
-    if validation failed
+    """Validate the lat and lon values.
+    Return True if valid or HTTP status code if validation failed
     """
     try:
         lat_float = float(lat)
@@ -49,6 +50,24 @@ def validate_bbox(lat1, lon1, lat2, lon2):
     valid = np.all(validations)
 
     return valid
+
+
+def validate_huc8(huc8_id):
+    """Validate HUC-8 ID
+    Return True if valid or HTTP status code if validation failed
+    """
+    if re.search('[^A-Za-z0-9]', huc8_id):
+        return 400
+    return True
+
+
+def validate_akpa(akpa_id):
+    """Validate protected area ID
+    Return True if valid or HTTP status code if validation failed
+    """
+    if re.search('[^A-Za-z0-9]', akpa_id):
+        return 400
+    return True
 
 
 def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):

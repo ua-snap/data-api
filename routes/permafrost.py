@@ -1,5 +1,4 @@
 import asyncio
-import re
 from flask import (
     Blueprint,
     render_template,
@@ -14,7 +13,7 @@ from fetch_data import (
 )
 from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
-from validate_request import validate_latlon, project_latlon
+from validate_request import validate_latlon, validate_huc8, validate_akpa, project_latlon
 from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from luts import huc8_gdf, permafrost_encodings, akpa_gdf
@@ -255,8 +254,8 @@ def run_huc_fetch_all_permafrost(huc_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
-    # Allow only letters and numbers
-    if re.search('[^A-Za-z0-9]', huc_id):
+    validation = validate_huc8(huc_id)
+    if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
         poly = get_poly_3338_bbox(huc8_gdf, huc_id)
@@ -292,8 +291,8 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
-    # Allow only letters and numbers
-    if re.search('[^A-Za-z0-9]', akpa_id):
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
         poly = get_poly_3338_bbox(akpa_gdf, akpa_id)

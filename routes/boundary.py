@@ -1,4 +1,3 @@
-import re
 from flask import (
     Blueprint,
     render_template,
@@ -6,6 +5,7 @@ from flask import (
 
 # local imports
 from luts import huc8_gdf, akpa_gdf
+from validate_request import validate_huc8, validate_akpa
 from . import routes
 
 boundary_api = Blueprint("boundary_api", __name__)
@@ -51,8 +51,8 @@ def run_fetch_huc_poly(huc8_id):
     Notes:
         example: http://localhost:5000/boundary/huc/huc8/19070506
     """
-    # Allow only letters and numbers
-    if re.search('[^A-Za-z0-9]', huc8_id):
+    validation = validate_huc8(huc8_id)
+    if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
         poly = huc8_gdf.loc[[huc8_id]].to_crs(4326)
@@ -75,8 +75,8 @@ def run_fetch_akprotectedarea_poly(akpa_id):
     Notes:
         example: http://localhost:5000/boundary/protectedarea/NPS12
     """
-    # Allow only letters and numbers
-    if re.search('[^A-Za-z0-9]', akpa_id):
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
         poly = akpa_gdf.loc[[akpa_id]].to_crs(4326)

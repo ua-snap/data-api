@@ -4,7 +4,6 @@ import csv
 import time
 import itertools
 from urllib.parse import quote
-import re
 import numpy as np
 import xarray as xr
 from flask import (
@@ -23,7 +22,7 @@ from fetch_data import (
     get_from_dict,
     summarize_within_poly,
 )
-from validate_request import validate_latlon, project_latlon
+from validate_request import validate_latlon, validate_huc8, validate_akpa, project_latlon
 from validate_data import get_poly_3338_bbox, postprocess
 from luts import huc8_gdf, akpa_gdf
 from config import VALID_BBOX
@@ -702,8 +701,8 @@ def huc_data_endpoint(var_ep, huc_id):
         huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
     """
-    # Allow only letters and numbers
-    if re.search('[^A-Za-z0-9]', huc_id):
+    validation = validate_huc8(huc_id)
+    if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
         if var_ep in var_ep_lu.keys():
@@ -730,8 +729,8 @@ def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
     Returns:
         pa_pkg (dict): zonal mean of variable(s) for protected area polygon
     """
-    # Allow only letters and numbers
-    if re.search('[^A-Za-z0-9]', akpa_id):
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
         if var_ep in var_ep_lu.keys():
