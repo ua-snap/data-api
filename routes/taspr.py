@@ -4,6 +4,7 @@ import csv
 import time
 import itertools
 from urllib.parse import quote
+import re
 import numpy as np
 import xarray as xr
 from flask import (
@@ -22,7 +23,7 @@ from fetch_data import (
     get_from_dict,
     summarize_within_poly,
 )
-from validate_latlon import validate, project_latlon
+from validate_request import validate_latlon, project_latlon
 from validate_data import get_poly_3338_bbox, postprocess
 from luts import huc8_gdf
 from config import VALID_BBOX
@@ -212,7 +213,7 @@ def package_cru_point_data(point_data, varname):
         point_data_pkg[season] = {model: {scenario: {varname: {}}}}
         for si, value in enumerate(s_li):  # (nested list with statistic at dim 0)
             stat = dim_encodings["stats"][si]
-            if value == None:
+            if value is None:
                 point_data_pkg[season][model][scenario][varname][stat] = None
             else:
                 point_data_pkg[season][model][scenario][varname][stat] = round(
@@ -509,7 +510,7 @@ def run_fetch_var_point_data(var_ep, lat, lon):
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
-    if not validate(lat, lon):
+    if validate_latlon(lat, lon) is not True:
         return None
 
     varname = var_ep_lu[var_ep]
@@ -665,8 +666,11 @@ def point_data_endpoint(var_ep, lat, lon):
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
 
-    if not validate(lat, lon):
-        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html", bbox=VALID_BBOX), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", bbox=VALID_BBOX), 422
 
     if var_ep in var_ep_lu.keys():
         point_pkg = run_fetch_var_point_data(var_ep, lat, lon)
@@ -676,7 +680,7 @@ def point_data_endpoint(var_ep, lat, lon):
         except Exception as exc:
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
-            raise
+            return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(point_pkg)
@@ -698,14 +702,16 @@ def huc_data_endpoint(var_ep, huc_id):
         huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
     """
-
+    # Allow only letters and numbers
+    if re.search('[^A-Za-z0-9]', huc_id):
+        return render_template("400/bad_request.html"), 400
     try:
         if var_ep in var_ep_lu.keys():
             huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
         elif var_ep == "taspr":
             huc_pkg = run_aggregate_allvar_polygon(huc8_gdf, huc_id)
     except:
-        return render_template("404/invalid_huc.html"), 404
+        return render_template("422/invalid_huc.html"), 422
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(huc_pkg)

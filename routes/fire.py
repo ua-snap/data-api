@@ -6,7 +6,7 @@ from flask import (
 
 # local imports
 from fetch_data import fetch_data_api
-from validate_latlon import validate
+from validate_request import validate_latlon
 from validate_data import nullify_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status
@@ -109,8 +109,11 @@ def run_fetch_fire(lat, lon):
     """Run the async requesting and return data
     example request: http://localhost:5000/%F0%9F%94%A5/65.0628/-146.1627
     """
-    if not validate(lat, lon):
-        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html", bbox=VALID_BBOX), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", bbox=VALID_BBOX), 422
     # verify that lat/lon are present
     try:
         results = asyncio.run(
@@ -121,7 +124,7 @@ def run_fetch_fire(lat, lon):
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
-        raise
+        return render_template("500/server_error.html"), 500
 
     landcover = package_landcover(results[0])
     firedanger = package_fire_danger(results[1])

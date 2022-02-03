@@ -8,17 +8,24 @@ import numpy as np
 from config import VALID_BBOX
 
 
-def validate(lat, lon):
-    """Validate the lat and lon values,
-    return bool for validity
+def validate_latlon(lat, lon):
+    """Validate the lat and lon values. Return True if valid or HTTP status code
+    if validation failed
     """
     try:
-        lat_in_ak_bbox = VALID_BBOX[1] <= float(lat) <= VALID_BBOX[3]
-        lon_in_ak_bbox = VALID_BBOX[0] <= float(lon) <= VALID_BBOX[2]
-        valid = lat_in_ak_bbox and lon_in_ak_bbox
-    except ValueError:
-        valid = False
-    return valid
+        lat_float = float(lat)
+        lon_float = float(lon)
+    except:
+        return 400 # HTTP status code
+    lat_in_world = -90 <= lat_float <= 90
+    lon_in_world = -180 <= lon_float <= 180
+    if not lat_in_world or not lon_in_world:
+        return 400 # HTTP status code
+    lat_in_ak_bbox = VALID_BBOX[1] <= lat_float <= VALID_BBOX[3]
+    lon_in_ak_bbox = VALID_BBOX[0] <= lon_float <= VALID_BBOX[2]
+    if not lat_in_ak_bbox or not lon_in_ak_bbox:
+        return 422 # HTTP status code
+    return True
 
 
 def validate_bbox(lat1, lon1, lat2, lon2):
@@ -26,13 +33,20 @@ def validate_bbox(lat1, lon1, lat2, lon2):
     LL: (lat1, lon), UR: (lat2, lon2)
     """
     lat_valid = lat1 < lat2
-    # validate all four corners
-    ll = validate(lat1, lon1)
-    lr = validate(lat1, lon2)
-    ul = validate(lat2, lon1)
-    ur = validate(lat2, lon2)
+    validations = [lat_valid]
 
-    valid = np.all([lat_valid, ll, lr, ul, ur])
+    # validate all four corners
+    for lat in [lat1, lat2]:
+        for lon in [lon1, lon2]:
+            validations.append(validate_latlon(lat, lon))
+
+    # Prioritize HTTP 400 errors over HTTP 422 errors
+    if 400 in validations:
+        return 400
+    if 422 in validations:
+        return 422
+
+    valid = np.all(validations)
 
     return valid
 

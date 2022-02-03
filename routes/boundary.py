@@ -1,16 +1,12 @@
-import asyncio
+import re
 from flask import (
-    abort,
     Blueprint,
-    Response,
     render_template,
-    request,
-    current_app as app,
 )
 
 # local imports
-from . import routes
 from luts import huc8_gdf, akpa_gdf
+from . import routes
 
 boundary_api = Blueprint("boundary_api", __name__)
 
@@ -55,10 +51,13 @@ def run_fetch_huc_poly(huc8_id):
     Notes:
         example: http://localhost:5000/boundary/huc/huc8/19070506
     """
+    # Allow only letters and numbers
+    if re.search('[^A-Za-z0-9]', huc8_id):
+        return render_template("400/bad_request.html"), 400
     try:
         poly = huc8_gdf.loc[[huc8_id]].to_crs(4326)
     except:
-        return render_template("404/invalid_huc.html"), 404
+        return render_template("422/invalid_huc.html"), 422
     poly_geojson = poly.to_json()
     return poly_geojson
 
@@ -76,9 +75,12 @@ def run_fetch_akprotectedarea_poly(akpa_id):
     Notes:
         example: http://localhost:5000/boundary/protectedarea/NPS12
     """
+    # Allow only letters and numbers
+    if re.search('[^A-Za-z0-9]', akpa_id):
+        return render_template("400/bad_request.html"), 400
     try:
         poly = akpa_gdf.loc[[akpa_id]].to_crs(4326)
     except:
-        return render_template("404/invalid_protected_area.html"), 404
+        return render_template("422/invalid_protected_area.html"), 422
     poly_geojson = poly.to_json()
     return poly_geojson

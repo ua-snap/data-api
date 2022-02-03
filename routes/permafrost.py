@@ -1,4 +1,5 @@
 import asyncio
+import re
 from flask import (
     Blueprint,
     render_template,
@@ -13,7 +14,7 @@ from fetch_data import (
 )
 from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
-from validate_latlon import validate, project_latlon
+from validate_request import validate_latlon, project_latlon
 from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from luts import huc8_gdf, permafrost_encodings, akpa_gdf
@@ -214,8 +215,11 @@ def run_point_fetch_all_permafrost(lat, lon):
     Returns:
         JSON-like dict of permafrost data
     """
-    if not validate(lat, lon):
-        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html", bbox=VALID_BBOX), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", bbox=VALID_BBOX), 422
 
     gs_results = asyncio.run(
         fetch_data_api(
@@ -230,7 +234,7 @@ def run_point_fetch_all_permafrost(lat, lon):
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
-        raise
+        return render_template("500/server_error.html"), 500
 
     data = {
         "gipl": package_gipl(rasdaman_results),
@@ -251,10 +255,13 @@ def run_huc_fetch_all_permafrost(huc_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
+    # Allow only letters and numbers
+    if re.search('[^A-Za-z0-9]', huc_id):
+        return render_template("400/bad_request.html"), 400
     try:
         poly = get_poly_3338_bbox(huc8_gdf, huc_id)
     except:
-        return render_template("404/invalid_huc.html"), 404
+        return render_template("422/invalid_huc.html"), 422
 
     bounds = poly.bounds
 
@@ -285,10 +292,13 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
+    # Allow only letters and numbers
+    if re.search('[^A-Za-z0-9]', akpa_id):
+        return render_template("400/bad_request.html"), 400
     try:
         poly = get_poly_3338_bbox(akpa_gdf, akpa_id)
     except:
-        return render_template("404/invalid_protected_area.html"), 404
+        return render_template("422/invalid_protected_area.html"), 422
     bounds = poly.bounds
 
     request_str = generate_netcdf_wcs_getcov_str(

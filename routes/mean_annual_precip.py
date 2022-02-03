@@ -6,7 +6,7 @@ from flask import (
 
 # local imports
 from fetch_data import fetch_data_api
-from validate_latlon import validate
+from validate_request import validate_latlon
 from validate_data import postprocess
 from config import GS_BASE_URL, VALID_BBOX
 from . import routes
@@ -60,8 +60,11 @@ def mapr_about_point():
 def run_fetch_mapr_data(lat, lon):
     """Run the async mean annual precipitation data requesting and return data as json
     example request: http://localhost:5000/mean_annual_precipitation/65.0628/-146.1627"""
-    if not validate(lat, lon):
-        return render_template("404/invalid_latlon.html", bbox=VALID_BBOX), 404
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html", bbox=VALID_BBOX), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", bbox=VALID_BBOX), 422
 
     try:
         results = asyncio.run(
@@ -72,7 +75,7 @@ def run_fetch_mapr_data(lat, lon):
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
-        raise
+        return render_template("500/server_error.html"), 500
 
     data = {
         "dec_mapr": package_decadal_mapr(results[0:2]),
