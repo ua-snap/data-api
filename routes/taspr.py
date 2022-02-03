@@ -25,7 +25,7 @@ from fetch_data import (
 )
 from validate_request import validate_latlon, project_latlon
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc8_gdf
+from luts import huc8_gdf, akpa_gdf
 from config import VALID_BBOX
 from . import routes
 
@@ -718,3 +718,31 @@ def huc_data_endpoint(var_ep, huc_id):
         return return_csv(csv_data)
 
     return postprocess(huc_pkg, "taspr")
+
+
+@routes.route("/<var_ep>/protectedarea/<akpa_id>")
+def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
+    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified variable and return JSON-like dict.
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        akpa_id (str): Protected Area ID (e.g. "NPS7")
+    Returns:
+        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
+    """
+    # Allow only letters and numbers
+    if re.search('[^A-Za-z0-9]', akpa_id):
+        return render_template("400/bad_request.html"), 400
+    try:
+        if var_ep in var_ep_lu.keys():
+            pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
+        elif var_ep == "taspr":
+            pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(pa_pkg)
+        return return_csv(csv_data)
+
+    return pa_pkg
