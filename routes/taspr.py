@@ -25,7 +25,7 @@ from fetch_data import (
 from validate_request import validate_latlon, validate_huc8, validate_akpa, project_latlon
 from validate_data import get_poly_3338_bbox, postprocess
 from luts import huc8_gdf, akpa_gdf
-from config import VALID_BBOX
+from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
 taspr_api = Blueprint("taspr_api", __name__)
@@ -667,9 +667,9 @@ def point_data_endpoint(var_ep, lat, lon):
 
     validation = validate_latlon(lat, lon)
     if validation == 400:
-        return render_template("400/bad_request.html", bbox=VALID_BBOX), 400
+        return render_template("400/bad_request.html"), 400
     if validation == 422:
-        return render_template("422/invalid_latlon.html", bbox=VALID_BBOX), 422
+        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
 
     if var_ep in var_ep_lu.keys():
         point_pkg = run_fetch_var_point_data(var_ep, lat, lon)

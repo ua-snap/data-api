@@ -8,7 +8,7 @@ from flask import (
 from fetch_data import fetch_data_api
 from validate_request import validate_latlon
 from validate_data import postprocess
-from config import GS_BASE_URL, VALID_BBOX
+from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from . import routes
 
 geology_api = Blueprint("geology_api", __name__)
@@ -46,9 +46,9 @@ def run_fetch_geology(lat, lon):
     """
     validation = validate_latlon(lat, lon)
     if validation == 400:
-        return render_template("400/bad_request.html", bbox=VALID_BBOX), 400
+        return render_template("400/bad_request.html"), 400
     if validation == 422:
-        return render_template("422/invalid_latlon.html", bbox=VALID_BBOX), 422
+        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
     # verify that lat/lon are present
     try:
         results = asyncio.run(
