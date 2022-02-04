@@ -6,7 +6,7 @@ other functions that could be used across multiple endpoints.
 import re
 from pyproj import Transformer
 import numpy as np
-from config import WEST_BBOX, WEST_BBOX
+from config import WEST_BBOX, EAST_BBOX
 
 
 def validate_latlon(lat, lon):
@@ -24,13 +24,13 @@ def validate_latlon(lat, lon):
         return 400 # HTTP status code
 
     # Validate against two different BBOXes to deal with antimeridian issues
-    for bbox in [WEST_BBOX, WEST_BBOX]:
-        if not bbox[1] <= lat_float <= bbox[3]:
-            return 422
-        if not bbox[0] <= lon_float <= bbox[2]:
-            return 422
+    for bbox in [WEST_BBOX, EAST_BBOX]:
+        valid_lat = bbox[1] <= lat_float <= bbox[3]
+        valid_lon = bbox[0] <= lon_float <= bbox[2]
+        if valid_lat and valid_lon:
+            return True
 
-    return True
+    return 422
 
 
 def validate_bbox(lat1, lon1, lat2, lon2):
