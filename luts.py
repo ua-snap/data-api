@@ -1,6 +1,10 @@
 """Module for look-up-table like objects"""
+import os
 import pickle
 import geopandas as gpd
+
+# TODO: Change this to https://earthmaps.io as default after development
+host = os.environ.get('API_HOSTNAME') or 'http://cache.earthmaps.io'
 
 bbox_offset = 0.000000001
 
