@@ -118,7 +118,8 @@ def postprocess(data, endpoint, titles=None):
             nullified_data["title"] = titles
         else:
             for key in titles.keys():
-                nullified_data[key]["title"] = titles[key]
+                if nullified_data[key] is not None:
+                    nullified_data[key]["title"] = titles[key]
     return nullified_data
 
 
