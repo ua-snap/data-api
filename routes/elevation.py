@@ -10,9 +10,9 @@ from flask import (
 
 # local imports
 from fetch_data import fetch_data, fetch_data_api
-from validate_latlon import validate, project_latlon
-from validate_data import check_for_nodata, nodata_message
-from config import GS_BASE_URL
+from validate_request import validate_latlon
+from validate_data import nullify_nodata, postprocess
+from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from . import routes
 
 elevation_api = Blueprint("elevation_api", __name__)
