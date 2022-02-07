@@ -48,7 +48,6 @@ def package_obu_magt(obu_magt_resp):
     year = "2000-2016"
     titles["obu_magt"] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
     temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
-    print(type(temp))
     if temp is None:
         return None
     temp = round(temp, 1)
