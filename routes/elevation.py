@@ -9,11 +9,18 @@ from flask import (
 )
 
 # local imports
+from generate_requests import generate_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from fetch_data import fetch_data, fetch_data_api
-from validate_request import validate_latlon
-from validate_data import nullify_nodata, postprocess
+from validate_request import (
+    validate_latlon,
+    validate_huc8,
+    validate_akpa,
+    project_latlon,
+)
+from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
+from luts import huc8_gdf, akpa_gdf
 from . import routes
 
 elevation_api = Blueprint("elevation_api", __name__)
@@ -49,6 +56,16 @@ def elevation_about_point():
     return render_template("elevation/point.html")
 
 
+@routes.route("/elevation/huc/")
+def z_about_huc():
+    return render_template("elevation/huc.html")
+
+
+@routes.route("/elevation/protectedarea/")
+def z_about_protectedarea():
+    return render_template("elevation/protectedarea.html")
+
+
 @routes.route("/elevation/point/<lat>/<lon>")
 def run_fetch_elevation(lat, lon):
     """Run the async requesting and return data
@@ -77,11 +94,32 @@ def run_fetch_elevation(lat, lon):
     return elevation
 
 
-@routes.route("/elevation/huc/")
-def z_about_huc():
-    return render_template("elevation/huc.html")
+@routes.route("/elevation/huc/<huc_id>")
+def run_huc_fetch_all_elevation(huc_id):
+    """Endpoint to fetch elevation data within a HUC.
 
+    Args: huc_id (int): 8-digit HUC ID.
 
-@routes.route("/elevation/protectedarea/")
-def z_about_protectedarea():
-    return render_template("elevation/protectedarea.html")
+    Returns:
+        huc_pkg (dict): JSON-like object containing aggregated data.
+    """
+    # validation = validate_huc8(huc_id)
+    # if validation == 400:
+    #     return render_template("400/bad_request.html"), 400
+    # try:
+    poly = get_poly_3338_bbox(huc8_gdf, huc_id)
+    # except:
+    #    return render_template("422/invalid_huc.html"), 422
+
+    bounds = poly.bounds
+    (x1, y1, x2, y2) = bounds
+    x = f"{x1},{x2}"
+    y = f"{y1},{y2}"
+    request_str = generate_wcs_getcov_str(
+        x, y, "astergdem_min_max_avg", var_coord=None, encoding="GeoTIFF"
+    )
+
+    url = generate_wcs_query_url(request_str, GS_BASE_URL)
+    # print(request_str)
+    print(url)
+    return url
