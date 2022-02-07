@@ -1,22 +1,18 @@
 import asyncio
 import io
 import csv
-import operator
 import time
 import itertools
 from urllib.parse import quote
 import numpy as np
-import geopandas as gpd
 import xarray as xr
 from flask import (
-    abort,
     Blueprint,
     Response,
     render_template,
     request,
     current_app as app,
 )
-from rasterstats import zonal_stats
 
 # local imports
 from generate_requests import generate_wcs_getcov_str
@@ -24,11 +20,13 @@ from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_data,
     get_from_dict,
-    generate_nested_dict,
+    summarize_within_poly,
 )
-from validate_latlon import validate, project_latlon
+from validate_request import validate_latlon, validate_huc8, validate_akpa, project_latlon
+from validate_data import get_poly_3338_bbox, postprocess
+from luts import huc8_gdf, akpa_gdf
+from config import WEST_BBOX, EAST_BBOX
 from . import routes
-from luts import huc8_gdf
 
 taspr_api = Blueprint("taspr_api", __name__)
 
@@ -93,13 +91,12 @@ dim_encodings = {
         6: "q1",
         7: "q3",
     },
+    "rounding": {
+        "tas": 1,
+        "pr": 0,
+    },
 }
 
-# lookup for rounding values
-rounding = {
-    "tas": 1,
-    "pr": 0,
-}
 
 var_ep_lu = {
     "temperature": "tas",
@@ -215,9 +212,12 @@ def package_cru_point_data(point_data, varname):
         point_data_pkg[season] = {model: {scenario: {varname: {}}}}
         for si, value in enumerate(s_li):  # (nested list with statistic at dim 0)
             stat = dim_encodings["stats"][si]
-            point_data_pkg[season][model][scenario][varname][stat] = round(
-                value, rounding[varname]
-            )
+            if value is None:
+                point_data_pkg[season][model][scenario][varname][stat] = None
+            else:
+                point_data_pkg[season][model][scenario][varname][stat] = round(
+                    value, dim_encodings["rounding"][varname]
+                )
 
     return point_data_pkg
 
@@ -254,7 +254,7 @@ def package_ar5_point_data(point_data, varname):
                 for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                     scenario = dim_encodings["scenarios"][si]
                     point_data_pkg[decade][season][model][scenario] = {
-                        varname: round(value, rounding[varname])
+                        varname: None if value is None else round(value, dim_encodings["rounding"][varname])
                     }
 
     return point_data_pkg
@@ -282,7 +282,7 @@ def package_ar5_point_summary(point_data, varname):
             for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                 scenario = dim_encodings["scenarios"][si]
                 point_data_pkg[season][model][scenario] = {
-                    varname: round(value, rounding[varname])
+                    varname: None if value is None else round(value, dim_encodings["rounding"][varname])
                 }
 
     return point_data_pkg
@@ -334,93 +334,6 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     ds_list = [xr.open_dataset(io.BytesIO(netcdf_bytes)) for netcdf_bytes in data_list]
 
     return ds_list
-
-
-def run_zonal_stats(arr, poly, transform):
-    """Helper to run zonal stats on
-    selected subset of DataSet"""
-    # default rasdaman band name is "Gray"
-    aggr_result = zonal_stats(
-        poly,
-        arr,
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-    )[0]
-
-    return aggr_result
-
-
-def summarize_within_poly(ds, varname, poly):
-    """Summarize an xarray.DataSet within a polygon.
-    Return the results as a nested dict.
-
-    Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of
-            interest
-        varname (str): name of variable represented by ds
-        poly (shapely.Polygon): polygon within which to summarize ds
-
-    Returns:
-        Nested dict of results for all non-X/Y axis combinations,
-
-    Notes:
-        This currently only works with coverages having a single band
-        named "Gray", which is the default name for ingesting into
-        Rasdaman from GeoTIFFs
-    """
-    # will actually operate on underlying DataArray
-    da = ds["Gray"]
-    # get axis (dimension) names and gnerate list of all coordinate combinations
-    all_dims = da.dims
-    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-    iter_coords = list(
-        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-    )
-
-    # generate all combinations of decoded coordinate values
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[f"{dimname}s"][coord]
-            for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
-
-    aggr_results = generate_nested_dict(dim_combos)
-
-    data_arr = []
-    for coords, map_list in zip(iter_coords, dim_combos):
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        data_arr.append(da.sel(sel_di).values)
-    data_arr = np.array(data_arr)
-
-    # need to transpose the 2D spatial slices if X is the "rows" dimension
-    if all_dims.index("X") < all_dims.index("Y"):
-        data_arr = data_arr.transpose(0, 2, 1)
-
-    # get transform from a DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr[0],
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-
-    data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
-    data_arr[data_arr_mask] = np.nan
-    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-
-    for map_list, result in zip(dim_combos, results):
-        get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
-            result, rounding[varname]
-        )
-
-    return aggr_results
 
 
 def create_csv(packaged_data):
@@ -596,8 +509,8 @@ def run_fetch_var_point_data(var_ep, lat, lon):
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
-    if not validate(lat, lon):
-        abort(400)
+    if validate_latlon(lat, lon) is not True:
+        return None
 
     varname = var_ep_lu[var_ep]
     # get the coordinate value for the specified variable
@@ -654,55 +567,41 @@ def run_fetch_point_data(lat, lon):
     return combined_pkg
 
 
-def run_aggregate_var_huc(var_ep, huc_id):
-    """Get data for single variable within a huc and aggregate by mean.
+def run_aggregate_allvar_polygon(poly_gdf, poly_id):
+    """Get data summary (e.g. zonal mean) within a Polygon for all variables."""
+    tas_pkg, pr_pkg = [run_aggregate_var_polygon(var_ep, poly_gdf, poly_id) for var_ep in ["temperature", "precipitation"]]
+    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
+    return combined_pkg
+
+def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
+    """Get data summary (e.g. zonal mean) of single variable in polygon.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        huc_id (int): 8-digit HUC ID
+        var_ep (str): Data variable. One of 'taspr', 'temperature', or 'precipitation'.
+        poly_gdf (GeoDataFrame): the object from which to fetch the polygon, e.g. the HUC 8 geodataframe for watershed polygons
+        poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
 
     Returns:
-        Mean summaries of rasters within HUC
+        aggr_results (dict): data representing zonal means within the polygon.
 
     Notes:
-        Rasters refers to the individual instances of the
-          singular dimension combinations
+        Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    # could add check here to make sure HUC is in the geodataframe
-
-    # get the HUC as a single row single column dataframe with
-    #   geometry column for zonal_stats
-    # reproject is needed for zonal_stats and for initial bbox
-    #   bounds for query
-    # TODO What if the huc_id is invalid?
-    poly_gdf = huc8_gdf.loc[[huc_id]][["geometry"]].to_crs(3338)
-    poly = poly_gdf.iloc[0]["geometry"]
-
+    poly = get_poly_3338_bbox(poly_gdf, poly_id)
+    # mapping between coordinate values (ints) and variable names (strs)
     varname = var_ep_lu[var_ep]
-    # get the coordinate value for the specified variable
-    # just a way to lookup reverse of varname
-    var_coord = list(dim_encodings["varnames"].keys())[
-        list(dim_encodings["varnames"].values()).index(varname)
-    ]
-
-    # fetch bbox data
+    var_coord = list(dim_encodings["varnames"].keys())[list(dim_encodings["varnames"].values()).index(varname)]
+    # fetch data within the Polygon bounding box
     cov_ids, summary_decades = make_fetch_args()
-    ds_list = asyncio.run(
-        fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades)
-    )
-
-    # these three all have the decade/time period dimension averaged out
+    ds_list = asyncio.run(fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades))
+    # average over the following decades / time periods
     aggr_results = {}
     summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
     for ds, period in zip(ds_list[:-1], summary_periods):
-        aggr_results[period] = summarize_within_poly(ds, varname, poly)
-
-    ar5_results = summarize_within_poly(ds_list[-1], varname, poly)
+        aggr_results[period] = summarize_within_poly(ds, poly, dim_encodings, "Gray", varname)
+    ar5_results = summarize_within_poly(ds_list[-1], poly, dim_encodings, "Gray", varname)
     for decade, summaries in ar5_results.items():
         aggr_results[decade] = summaries
-
-    # next two loops are some garbage to insert the varnames
     #  add the model, scenario, and varname levels for CRU
     for season in aggr_results[summary_periods[0]]:
         aggr_results[summary_periods[0]][season] = {
@@ -710,7 +609,7 @@ def run_aggregate_var_huc(var_ep, huc_id):
                 "CRU_historical": {varname: aggr_results[summary_periods[0]][season]}
             }
         }
-    # add the varname for AR5
+    # add the varnames for AR5
     for period in summary_periods[1:] + list(dim_encodings["decades"].values()):
         for season in aggr_results[period]:
             for model in aggr_results[period][season]:
@@ -718,29 +617,7 @@ def run_aggregate_var_huc(var_ep, huc_id):
                     aggr_results[period][season][model][scenario] = {
                         varname: aggr_results[period][season][model][scenario]
                     }
-
     return aggr_results
-
-
-def run_aggregate_huc(huc_id):
-    """Get data within a huc for both temperature and
-    precipitation and aggregate according by mean.
-
-    Args:
-        huc_id (int): 8-digit HUD ID
-
-    Returns:
-        JSON-like dict of summaries for both variables of rasters
-            within HUC
-    """
-    tas_pkg, pr_pkg = [
-        run_aggregate_var_huc(var_ep, huc_id)
-        for var_ep in ["temperature", "precipitation"]
-    ]
-
-    combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
-
-    return combined_pkg
 
 
 @routes.route("/temperature/")
@@ -766,6 +643,12 @@ def about_point():
 def about_huc():
     return render_template("taspr/huc.html")
 
+@routes.route("/taspr/protectedarea/")
+@routes.route("/temperature/protectedarea/")
+@routes.route("/precipitation/protectedarea/")
+def taspr_about_protectedarea():
+    return render_template("taspr/protectedarea.html")
+
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
 def point_data_endpoint(var_ep, lat, lon):
@@ -781,16 +664,28 @@ def point_data_endpoint(var_ep, lat, lon):
     Notes:
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
+
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
+
     if var_ep in var_ep_lu.keys():
         point_pkg = run_fetch_var_point_data(var_ep, lat, lon)
     elif var_ep == "taspr":
-        point_pkg = run_fetch_point_data(lat, lon)
+        try:
+            point_pkg = run_fetch_point_data(lat, lon)
+        except Exception as exc:
+            if hasattr(exc, "status") and exc.status == 404:
+                return render_template("404/no_data.html"), 404
+            return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(point_pkg)
         return return_csv(csv_data)
 
-    return point_pkg
+    return postprocess(point_pkg, "taspr")
 
 
 @routes.route("/<var_ep>/huc/<huc_id>")
@@ -802,17 +697,51 @@ def huc_data_endpoint(var_ep, huc_id):
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
         huc_id (int): 8-digit HUC ID
+    Returns:
+        huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
-    Notes:
-        example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
-    if var_ep in var_ep_lu.keys():
-        point_pkg = run_aggregate_var_huc(var_ep, huc_id)
-    elif var_ep == "taspr":
-        point_pkg = run_aggregate_huc(huc_id)
+    validation = validate_huc8(huc_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        if var_ep in var_ep_lu.keys():
+            huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
+        elif var_ep == "taspr":
+            huc_pkg = run_aggregate_allvar_polygon(huc8_gdf, huc_id)
+    except:
+        return render_template("422/invalid_huc.html"), 422
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg)
+        csv_data = create_csv(huc_pkg)
         return return_csv(csv_data)
 
-    return point_pkg
+    return postprocess(huc_pkg, "taspr")
+
+
+@routes.route("/<var_ep>/protectedarea/<akpa_id>")
+def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
+    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified variable and return JSON-like dict.
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        akpa_id (str): Protected Area ID (e.g. "NPS7")
+    Returns:
+        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
+    """
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        if var_ep in var_ep_lu.keys():
+            pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
+        elif var_ep == "taspr":
+            pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(pa_pkg)
+        return return_csv(csv_data)
+
+    return pa_pkg
