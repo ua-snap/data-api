@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Elevation HUC Aggregation</h3>
+<p>Query 1 km interpolations of the 30 m resolution ASTER GDEM data for a specific HUC and aggregate by mean.</p>
+<p>A query will fetch the minimum, mean, and maximum elevations found within a single HUC.
+<p>Example: <a href="/elevation/huc/19010208">/elevation/huc/19010208</a></p>
+<hr/>
+<h4>Results from the query above will look like this:</h4>
+<pre>
+</pre>
+<ul>
+    <li><strong><code>gipl</code></strong>: GIPL 2.0 Model Outputs
+        <ul>
+            <li><strong><code>era</code></strong>: <i>(str)</i>, Era name. "1995" refers to the historical baseline. Otherwise these are 30 year eras surrounding the following center dates, except last era is truncated at 2100: "2025" (2011 - 2040), "2050" (2036 - 2065), "2075" (2061 – 2090), "2095" (2086 – 2100).</li>
+            <ul>
+                <li><strong><code>model</code></strong>: <i>(str)</i>, Climate model driving the GIPL model output.</li>
+                <ul>
+                    <li><strong><code>scenario</code></strong>: <i>(str)</i>, RCP Emissions Scenario driving the GIPL model output.</li>
+                    <ul>
+                        <li><strong><code>alt</code></strong>: <i>(float)</i>, Active Layer Thickness (m).</li>
+                        <li><strong><code>magt</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
+                        <li><strong><code>statistic</code></strong>: <i>(str)</i>, Statistic used to summarize the results.</li>
+                        <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+                    </ul>
+                </ul>
+            </ul>
+        </ul>
+    </li>
+</ul>
+<h4>Source data</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Data Layer</th>
+            <th>Variables</th>
+            <th>Download link</th>
+            <th>Source</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>GIPL Model Ouputs</td>
+            <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
+            <td><a href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh">Shell Download Script</a></td>
+            <td><a href="https://doi.org/10.1073/pnas.1611056113">Melvin et al. (2017)</a></td>
+            <td>MAGT is modeled for the depth of the active layer.</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

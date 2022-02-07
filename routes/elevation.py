@@ -9,6 +9,7 @@ from flask import (
 )
 
 # local imports
+from generate_urls import generate_wcs_query_url
 from fetch_data import fetch_data, fetch_data_api
 from validate_request import validate_latlon
 from validate_data import nullify_nodata, postprocess
@@ -74,3 +75,13 @@ def run_fetch_elevation(lat, lon):
 
     elevation = package_astergdem(results)
     return elevation
+
+
+@routes.route("/elevation/huc/")
+def z_about_huc():
+    return render_template("elevation/huc.html")
+
+
+@routes.route("/elevation/protectedarea/")
+def z_about_protectedarea():
+    return render_template("elevation/protectedarea.html")
