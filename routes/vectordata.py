@@ -28,7 +28,7 @@ def get_json_for_type(type):
             example: http://localhost:5000/places/communities
     """
     # Generates path to JSON
-    jsonpath = f"data/jsons/{json_types[type]}"
+    jsonpath = json_types[type]
 
     # If the JSON doesn't exist, it needs be generated.
     if not os.path.exists(jsonpath):
@@ -95,7 +95,7 @@ def update_data():
         df = pd.read_csv(f"{path}ak_communities.csv")
 
         # Dump data frame to JSON file
-        df.to_json(f"{jsonpath}ak_communities.json", orient="records")
+        df.to_json(json_types["communities"], orient="records")
 
         ### HUCs ###
 
@@ -159,7 +159,7 @@ def update_data():
             output.append(hucs_json[key])
 
         # Dump output list into local JSON file
-        with open(f"{jsonpath}ak_hucs.json", "w") as outfile:
+        with open(json_types["hucs"], "w") as outfile:
             json.dump(output, outfile)
 
         ### Alaska Protected Areas ###
@@ -202,7 +202,7 @@ def update_data():
             output.append(pa_json[key])
 
         # Dump JSON object to local JSON file
-        with open(f"{jsonpath}ak_protected_areas.json", "w") as outfile:
+        with open(json_types["protected_areas"], "w") as outfile:
             json.dump(output, outfile)
 
         # If we have made it this far without issue, we return True

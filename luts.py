@@ -72,9 +72,9 @@ permafrost_encodings = {
 }
 
 json_types = {
-    'communities': 'ak_communities.json',
-    'hucs': 'ak_hucs.json',
-    'protected_areas': 'ak_protected_areas.json'
+    'communities': 'data/jsons/ak_communities.json',
+    'hucs': 'data/jsons/ak_hucs.json',
+    'protected_areas': 'data/jsons/ak_protected_areas.json'
 }
 
 # For the forest endpoint.  This file is just a generated pickle
