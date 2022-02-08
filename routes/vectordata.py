@@ -56,10 +56,8 @@ def update_json_data():
         Notes:
             example: http://localhost:5000/update
     """
-    if update_data():
-        return render_template("vectordata/updated.html")
-    else:
-        return render_template("vectordata/failed_update.html")
+    update_data()
+    return Response(response="{ 'success': True }", status=200, mimetype="application/json")
 
 
 def update_data():
@@ -73,141 +71,133 @@ def update_data():
             The underlying code updates all the communities, HUCs, and
             protected areas in Alaska.
     """
-    try:
-        ### Community Locations ###
+    ### Community Locations ###
 
-        # Ensure the path to store CSVs is created
-        path = "data/csvs/"
-        if not os.path.exists(path):
-            os.makedirs(path)
+    # Ensure the path to store CSVs is created
+    path = "data/csvs/"
+    if not os.path.exists(path):
+        os.makedirs(path)
 
-        # Ensure the path to store JSONs is created
-        jsonpath = "data/jsons/"
-        if not os.path.exists(jsonpath):
-            os.makedirs(jsonpath)
+    # Ensure the path to store JSONs is created
+    jsonpath = "data/jsons/"
+    if not os.path.exists(jsonpath):
+        os.makedirs(jsonpath)
 
-        # Download CSV for all Alaskan communities and write to local CSV file.
-        url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
+    # Download CSV for all Alaskan communities and write to local CSV file.
+    url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
+    r = requests.get(url, allow_redirects=True)
+    open(f"{path}ak_communities.csv", "wb").write(r.content)
+
+    # Open CSV file into Pandas data frame
+    df = pd.read_csv(f"{path}ak_communities.csv")
+
+    # Dump data frame to JSON file
+    df.to_json(json_types["communities"], orient="records")
+
+    ### HUCs ###
+
+    # Ensure the path to store shapefiles is created
+    path = "data/shapefiles/"
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # For each required file of the shapefile, download and store locally.
+    for filetype in ["dbf", "prj", "sbn", "sbx", "shp", "shx"]:
+        url = (
+            f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon"
+            f"/boundaries/alaska_hucs/hydrologic_units_wbdhu8_a_ak.{filetype}?raw=true "
+        )
         r = requests.get(url, allow_redirects=True)
-        open(f"{path}ak_communities.csv", "wb").write(r.content)
+        open(f"{path}hydrologic_units_wbdhu8_a_ak.{filetype}", "wb").write(
+            r.content
+        )
 
-        # Open CSV file into Pandas data frame
-        df = pd.read_csv(f"{path}ak_communities.csv")
+    # Read shapefile into Geopandas data frame
+    df = gpd.read_file(f"{path}hydrologic_units_wbdhu8_a_ak.shp")
 
-        # Dump data frame to JSON file
-        df.to_json(json_types["communities"], orient="records")
+    # Create a copy of the original data frame
+    x = df.copy()
 
-        ### HUCs ###
+    # Remove all the fields that we don't want in our final JSON.
+    for remove_field in [
+        "geometry",
+        "tnmid",
+        "metasource",
+        "sourcedata",
+        "sourceorig",
+        "sourcefeat",
+        "loaddate",
+        "areasqkm",
+        "areaacres",
+        "referenceg",
+    ]:
+        del x[remove_field]
 
-        # Ensure the path to store shapefiles is created
-        path = "data/shapefiles/"
-        if not os.path.exists(path):
-            os.makedirs(path)
+    # Create a new Pandas data frame from modified data.
+    z = pd.DataFrame(x)
 
-        # For each required file of the shapefile, download and store locally.
-        for filetype in ["dbf", "prj", "sbn", "sbx", "shp", "shx"]:
-            url = (
-                f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon"
-                f"/boundaries/alaska_hucs/hydrologic_units_wbdhu8_a_ak.{filetype}?raw=true "
-            )
-            r = requests.get(url, allow_redirects=True)
-            open(f"{path}hydrologic_units_wbdhu8_a_ak.{filetype}", "wb").write(
-                r.content
-            )
+    # Create JSON data from Pandas data frame.
+    hucs_json = json.loads(z.T.to_json(orient="columns"))
 
-        # Read shapefile into Geopandas data frame
-        df = gpd.read_file(f"{path}hydrologic_units_wbdhu8_a_ak.shp")
+    # Create a blank output list for appending JSON fields.
+    output = []
 
-        # Create a copy of the original data frame
-        x = df.copy()
+    # For each HUC in the JSON, we want to clean up the fields to match
+    # the IEM project's JSON and append it to the output list.
+    for key in hucs_json:
+        # Changes HUC key 'huc8' to 'id'
+        hucs_json[key]["id"] = hucs_json[key]["huc8"]
+        del hucs_json[key]["huc8"]
 
-        # Remove all the fields that we don't want in our final JSON.
-        for remove_field in [
-            "geometry",
-            "tnmid",
-            "metasource",
-            "sourcedata",
-            "sourceorig",
-            "sourcefeat",
-            "loaddate",
-            "areasqkm",
-            "areaacres",
-            "referenceg",
-        ]:
-            del x[remove_field]
+        # Adds type to JSON of 'huc'
+        hucs_json[key]["type"] = "huc"
 
-        # Create a new Pandas data frame from modified data.
-        z = pd.DataFrame(x)
+        # Append the JSON object to end of list.
+        output.append(hucs_json[key])
 
-        # Create JSON data from Pandas data frame.
-        hucs_json = json.loads(z.T.to_json(orient="columns"))
+    # Dump output list into local JSON file
+    with open(json_types["hucs"], "w") as outfile:
+        json.dump(output, outfile)
 
-        # Create a blank output list for appending JSON fields.
-        output = []
+    ### Alaska Protected Areas ###
 
-        # For each HUC in the JSON, we want to clean up the fields to match
-        # the IEM project's JSON and append it to the output list.
-        for key in hucs_json:
-            # Changes HUC key 'huc8' to 'id'
-            hucs_json[key]["id"] = hucs_json[key]["huc8"]
-            del hucs_json[key]["huc8"]
+    # For each required file of the shapefile, download and store locally.
+    for filetype in ["cpg", "dbf", "prj", "shp", "shx"]:
+        url = (
+            f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon/boundaries"
+            f"/protected_areas/ak_protected_areas/ak_protected_areas.{filetype}?raw=true "
+        )
+        r = requests.get(url, allow_redirects=True)
+        open(f"{path}ak_protected_areas.{filetype}", "wb").write(r.content)
 
-            # Adds type to JSON of 'huc'
-            hucs_json[key]["type"] = "huc"
+    # Read shapefile into Geopandas data frame
+    df = gpd.read_file(f"{path}ak_protected_areas.shp")
 
-            # Append the JSON object to end of list.
-            output.append(hucs_json[key])
+    # Create a copy of the original data frame
+    x = df.copy()
 
-        # Dump output list into local JSON file
-        with open(json_types["hucs"], "w") as outfile:
-            json.dump(output, outfile)
+    # Remove all the fields that we don't want in our final JSON.
+    for remove_field in ["geometry", "country", "region"]:
+        del x[remove_field]
 
-        ### Alaska Protected Areas ###
+    # Create a new Pandas data frame from modified data.
+    z = pd.DataFrame(x)
 
-        # For each required file of the shapefile, download and store locally.
-        for filetype in ["cpg", "dbf", "prj", "shp", "shx"]:
-            url = (
-                f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon/boundaries"
-                f"/protected_areas/ak_protected_areas/ak_protected_areas.{filetype}?raw=true "
-            )
-            r = requests.get(url, allow_redirects=True)
-            open(f"{path}ak_protected_areas.{filetype}", "wb").write(r.content)
+    # Create JSON data from Pandas data frame.
+    pa_json = json.loads(z.T.to_json(orient="columns"))
 
-        # Read shapefile into Geopandas data frame
-        df = gpd.read_file(f"{path}ak_protected_areas.shp")
+    # Create a blank output list for appending JSON fields.
+    output = []
 
-        # Create a copy of the original data frame
-        x = df.copy()
+    # For each protected area in the PA JSON, add the type protected_area
+    # and append it to the output list.
+    for key in pa_json:
+        # Adds key 'type' and value 'protected_area'
+        pa_json[key]["type"] = "protected_area"
 
-        # Remove all the fields that we don't want in our final JSON.
-        for remove_field in ["geometry", "country", "region"]:
-            del x[remove_field]
+        # Append JSON to output list.
+        output.append(pa_json[key])
 
-        # Create a new Pandas data frame from modified data.
-        z = pd.DataFrame(x)
-
-        # Create JSON data from Pandas data frame.
-        pa_json = json.loads(z.T.to_json(orient="columns"))
-
-        # Create a blank output list for appending JSON fields.
-        output = []
-
-        # For each protected area in the PA JSON, add the type protected_area
-        # and append it to the output list.
-        for key in pa_json:
-            # Adds key 'type' and value 'protected_area'
-            pa_json[key]["type"] = "protected_area"
-
-            # Append JSON to output list.
-            output.append(pa_json[key])
-
-        # Dump JSON object to local JSON file
-        with open(json_types["protected_areas"], "w") as outfile:
-            json.dump(output, outfile)
-
-        # If we have made it this far without issue, we return True
-        return True
-    except:
-        # If anything goes wrong during execution, return False
-        # TODO: Collect error and ensure team is alerted to issue.
-        return False
+    # Dump JSON object to local JSON file
+    with open(json_types["protected_areas"], "w") as outfile:
+        json.dump(output, outfile)
