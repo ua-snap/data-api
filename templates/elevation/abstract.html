@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 <h3>Elevation Data</h3>
-<p>These data are for use in the Northern Climate Reports tool.</p>
+<p>These data are for use in the Northern Climate Reports tool. Currently the service endpoints query ASTER GDEM elevation data for Alaska and Western Canada. Each query fetches three values: minimum, maximum, and mean elevations derived from corresponding interpolations used to resample the source data from 30 m spatial resolution to 1 km. This technique is used to assure elevation fidelity between the original and downsampled data.</p>
 <h4>Service Endpoints</h4>
 <ul>
-    <li><a href="/elevation/point">Point Query</a>: Elevation data for Alaska and Western Canada</li>
-    <li><a href="/elevation/huc">HUC Polygon Query</a></li>
-    <li><a href="/elevation/protectedarea">Protected Area Polygon Query</a></li>
+    <li><a href="/elevation/point">Point Query</a>: Fetch values for a single geographic point.</li>
+    <li><a href="/elevation/huc">HUC Polygon Query</a>: Fetch zonal statistic values for a single HUC (watershed).</li>
+    <li><a href="/elevation/protectedarea">Protected Area Polygon Query</a>: Fetch zonal statistic values for a single protected area (park, refuge, wildnerness, etc.).</li>
 </ul>
 {% endblock %}
