@@ -14,30 +14,54 @@ data_api = Blueprint("data_api", __name__)
 
 
 @routes.route("/places/<type>")
-def get_json_for_type(type):
+def get_json_for_type(type, recurse=False):
     """GET function to pull JSON files
         Args:
-            type (string): One of three types:
-                [communities, hucs, protected_areas]
+            type (string): One of four types:
+                [communities, hucs, protected_areas, all]
+            recurse (boolean): Defaults to False. Being True
+                causes the function to be recursive to allow for
+                the same function to collect all the possible JSONs.
 
         Returns:
             JSON-formatted output of all communities, HUCs,
-            or protected areas.
+            and / or protected areas.
 
         Notes:
             example: http://localhost:5000/places/communities
     """
-    # Generates path to JSON
-    jsonpath = json_types[type]
+    if type == "all":
+        json_list = []
 
-    # If the JSON doesn't exist, it needs be generated.
-    if not os.path.exists(jsonpath):
-        update_data()
+        # Runs through each of the JSON files
+        for curr_type in ['communities', 'hucs', 'protected_areas']:
 
-    # Open JSON file and return to requestor
-    df = pd.read_json(jsonpath)
+            # Sends a recursive call to this function
+            curr_js = get_json_for_type(curr_type, recurse=True)
+
+            # Combines the JSON returned into Python list
+            json_list.extend(json.loads(curr_js))
+
+        # Dumps the combined Python list into a single JSON object
+        js = json.dumps(json_list)
+    else:
+        # Generates path to JSON
+        jsonpath = json_types[type]
+
+        # If the JSON doesn't exist, it needs be generated.
+        if not os.path.exists(jsonpath):
+            update_data()
+
+        # Open JSON file and return to requestor
+        with open(jsonpath, 'r') as infile:
+            js = json.dumps(json.load(infile))
+
+    if recurse:
+        return js
+
+    # Returns Flask JSON Response
     return Response(
-        response=df.to_json(orient="records"), status=200, mimetype="application/json"
+        response=js, status=200, mimetype="application/json"
     )
 
 
@@ -50,7 +74,7 @@ def update_json_data():
             None.
 
         Returns:
-            Web page response indicating if a successful update of the data
+            JSON response indicating if a successful update of the data
             took place.
 
         Notes:
@@ -92,6 +116,9 @@ def update_data():
 
     # Open CSV file into Pandas data frame
     df = pd.read_csv(f"{path}ak_communities.csv")
+
+    # Add type of community to each community
+    df['type'] = 'community'
 
     # Dump data frame to JSON file
     df.to_json(json_types["communities"], orient="records")
