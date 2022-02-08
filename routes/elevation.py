@@ -10,7 +10,7 @@ from flask import (
 import rasterio as rio
 
 # local imports
-from generate_requests import generate_wcs_getcov_str
+from generate_requests import generate_wcs_getcov_str, get_wcs_xy_str_from_bbox_bounds
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_data,
@@ -138,12 +138,14 @@ def run_huc_fetch_all_elevation(huc_id):
     except:
         return render_template("422/invalid_huc.html"), 422
 
-    bounds = poly.bounds
-    (x1, y1, x2, y2) = bounds
-    x = f"{x1},{x2}"
-    y = f"{y1},{y2}"
+    wcsxy = get_wcs_xy_str_from_bbox_bounds(poly)
+
     request_str = generate_wcs_getcov_str(
-        x, y, "astergdem_min_max_avg", var_coord=None, encoding="GeoTIFF"
+        wcsxy.xstr,
+        wcsxy.ystr,
+        "astergdem_min_max_avg",
+        var_coord=None,
+        encoding="GeoTIFF",
     )
 
     url = generate_wcs_query_url(request_str, GS_BASE_URL)
@@ -171,12 +173,14 @@ def run_protectedarea_fetch_all_elevation(akpa_id):
     except:
         return render_template("422/invalid_protected_area.html"), 422
 
-    bounds = poly.bounds
-    (x1, y1, x2, y2) = bounds
-    x = f"{x1},{x2}"
-    y = f"{y1},{y2}"
+    wcsxy = get_wcs_xy_str_from_bbox_bounds(poly)
+
     request_str = generate_wcs_getcov_str(
-        x, y, "astergdem_min_max_avg", var_coord=None, encoding="GeoTIFF"
+        wcsxy.xstr,
+        wcsxy.ystr,
+        "astergdem_min_max_avg",
+        var_coord=None,
+        encoding="GeoTIFF",
     )
 
     url = generate_wcs_query_url(request_str, GS_BASE_URL)
