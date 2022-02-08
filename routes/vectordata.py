@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, Response
 
 import geopandas as gpd
 import json
@@ -36,7 +36,9 @@ def get_json_for_type(type):
 
     # Open JSON file and return to requestor
     df = pd.read_json(jsonpath)
-    return df.to_json(orient="records")
+    return Response(
+        response=df.to_json(orient="records"), status=200, mimetype="application/json"
+    )
 
 
 @routes.route("/update/")

@@ -1,7 +1,4 @@
-from flask import (
-    Blueprint,
-    current_app as app,
-)
+from flask import Blueprint, current_app as app, Response
 from luts import host
 import json
 import requests
@@ -129,4 +126,6 @@ def recache():
             get_all_route_endpoints(route, "huc")
         elif route.find("akpa_id") != -1:
             get_all_route_endpoints(route, "pa")
-    return json.dumps(routes)
+    return Response(
+        response=json.dumps(routes), status=200, mimetype="application/json"
+    )
