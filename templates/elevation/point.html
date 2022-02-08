@@ -6,17 +6,22 @@
 <h4>Results from the query above will look like this:</h4>
 <pre>
 {
+  "max": 2961.0,
+  "mean": 822,
+  "min": 0.0,
   "res": "1 kilometer",
-  "title": "ASTER Global Digital Elevation Model",
-  "units": "meters difference from sea level",
-  "z": 304
+  "title": "ASTER Global Digital Elevation Model Zonal Statistics",
+  "units": "meters difference from sea level"
 }
+
 </pre>
 <ul>
     <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
     <li><strong><code>res</code></strong>: <i>(str)</i>, Spatial resolution (pixel size) of the DEM.</li>
     <li><strong><code>units</code></strong>: <i>(str)</i>, Units for elevation `z` value.</li>
-    <li><strong><code>z</code></strong>: <i>(int)</i>, Elevation value.</li>
+    <li><strong><code>max</code></strong>: <i>(float)</i>, Zonal Maximum Elevation value derived from `max` DEM interpolation.</li>
+    <li><strong><code>mean</code></strong>: <i>(int)</i>, Zonal Mean Elevation value derived from `average` DEM interpolation.</li>
+    <li><strong><code>min</code></strong>: <i>(float)</i>, Zonal Minimum Elevation value derived from `min` DEM interpolation.</li>
 </ul>
 <h4>Source data</h4>
 <table>

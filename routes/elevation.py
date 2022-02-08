@@ -138,7 +138,12 @@ def run_huc_fetch_all_elevation(huc_id):
         zonal_min = geotiff_zonal_stats(poly, min_band, transform, ["min"])
         zonal_max = geotiff_zonal_stats(poly, max_band, transform, ["max"])
 
-    di = dict(zonal_min[0])
+    di = {
+        "title": "ASTER Global Digital Elevation Model Zonal Statistics",
+        "units": "meters difference from sea level",
+        "res": "1 kilometer",
+    }
+    di.update(zonal_min[0])
     di.update(zonal_max[0])
     di.update(zonal_mu[0])
 
