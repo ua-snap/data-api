@@ -7,11 +7,18 @@ from flask import (
     request,
     current_app as app,
 )
+import numpy as np
+import rasterio as rio
 
 # local imports
 from generate_requests import generate_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
-from fetch_data import fetch_data, fetch_data_api
+from fetch_data import (
+    fetch_data,
+    fetch_data_api,
+    fetch_bbox_geotiff_from_gs,
+    geotiff_zonal_stats,
+)
 from validate_request import (
     validate_latlon,
     validate_huc8,
@@ -103,13 +110,13 @@ def run_huc_fetch_all_elevation(huc_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated data.
     """
-    # validation = validate_huc8(huc_id)
-    # if validation == 400:
-    #     return render_template("400/bad_request.html"), 400
-    # try:
-    poly = get_poly_3338_bbox(huc8_gdf, huc_id)
-    # except:
-    #    return render_template("422/invalid_huc.html"), 422
+    validation = validate_huc8(huc_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = get_poly_3338_bbox(huc8_gdf, huc_id)
+    except:
+        return render_template("422/invalid_huc.html"), 422
 
     bounds = poly.bounds
     (x1, y1, x2, y2) = bounds
@@ -120,6 +127,19 @@ def run_huc_fetch_all_elevation(huc_id):
     )
 
     url = generate_wcs_query_url(request_str, GS_BASE_URL)
-    # print(request_str)
-    print(url)
-    return url
+    with rio.open(asyncio.run(fetch_bbox_geotiff_from_gs([url]))) as src:
+
+        transform = src.transform
+        min_band = src.read(1)
+        max_band = src.read(2)
+        mean_band = src.read(3)
+        zonal_mu = geotiff_zonal_stats(poly, mean_band, transform, ["mean"])
+        zonal_mu[0]["mean"] = int(zonal_mu[0]["mean"])
+        zonal_min = geotiff_zonal_stats(poly, min_band, transform, ["min"])
+        zonal_max = geotiff_zonal_stats(poly, max_band, transform, ["max"])
+
+    di = dict(zonal_min[0])
+    di.update(zonal_max[0])
+    di.update(zonal_mu[0])
+
+    return di
