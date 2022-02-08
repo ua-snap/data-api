@@ -57,7 +57,9 @@ def update_json_data():
             example: http://localhost:5000/update
     """
     update_data()
-    return Response(response="{ 'success': True }", status=200, mimetype="application/json")
+    return Response(
+        response="{ 'success': True }", status=200, mimetype="application/json"
+    )
 
 
 def update_data():
@@ -108,9 +110,7 @@ def update_data():
             f"/boundaries/alaska_hucs/hydrologic_units_wbdhu8_a_ak.{filetype}?raw=true "
         )
         r = requests.get(url, allow_redirects=True)
-        open(f"{path}hydrologic_units_wbdhu8_a_ak.{filetype}", "wb").write(
-            r.content
-        )
+        open(f"{path}hydrologic_units_wbdhu8_a_ak.{filetype}", "wb").write(r.content)
 
     # Read shapefile into Geopandas data frame
     df = gpd.read_file(f"{path}hydrologic_units_wbdhu8_a_ak.shp")
