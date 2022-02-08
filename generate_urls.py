@@ -30,6 +30,7 @@ def generate_wcs_query_url(request_str, backend=RAS_BASE_URL):
     The default backend is Rasdaman because that is typically the target for WCS requests. GS usage is expected to be less frequent. However, the GS service doesn't accept the "&FORMAT=application/" syntax so we'll strip that and default it to a "&FORMAT=GeoTIFF" URL suffix which returns a GeoTIFF.
     Args:
         request_str (str): a typical WCS string
+        backend (str): URL for geospatial data server, typically imported from config.py
     Returns:
         URL for a WCS request
     """

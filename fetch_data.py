@@ -123,7 +123,7 @@ async def fetch_bbox_geotiff_from_gs(url):
     Args:
         url (str): URL for a WCS query to GeoServer
     Returns:
-        src containing results of WCS GeoTIFF query
+        geotiff: result of WCS GeoTIFF query
     """
     start_time = time.time()
     geotiff_bytes = await fetch_data(url)
@@ -131,10 +131,9 @@ async def fetch_bbox_geotiff_from_gs(url):
         f"Fetched BBOX data from GeoServer, elapsed time {round(time.time() - start_time)}s"
     )
 
-    # create rasterio source from bytestring
-    return io.BytesIO(geotiff_bytes)
-    # with rio.open as src:
-    #    return src
+    # create geotiff source from bytestring
+    geotiff = io.BytesIO(geotiff_bytes)
+    return geotiff
 
 
 async def fetch_bbox_netcdf(url):
