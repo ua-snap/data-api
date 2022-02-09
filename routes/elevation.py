@@ -1,19 +1,11 @@
 import asyncio
-from flask import (
-    abort,
-    Blueprint,
-    Response,
-    render_template,
-    request,
-    current_app as app,
-)
+from flask import Blueprint, render_template
 import rasterio as rio
 
 # local imports
 from generate_requests import generate_wcs_getcov_str, get_wcs_xy_str_from_bbox_bounds
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
-    fetch_data,
     fetch_data_api,
     fetch_bbox_geotiff_from_gs,
     geotiff_zonal_stats,
@@ -22,9 +14,8 @@ from validate_request import (
     validate_latlon,
     validate_huc8,
     validate_akpa,
-    project_latlon,
 )
-from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
+from validate_data import get_poly_3338_bbox
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc8_gdf, akpa_gdf
 from . import routes
@@ -44,10 +35,12 @@ def package_astergdem(astergdem_resp):
 
     di = {
         "title": title,
-        "z": elevation_m,
         "units": "meters difference from sea level",
         "res": "1 kilometer",
     }
+    di.update({"max": elevation_m["elevation_max"]})
+    di.update({"mean": elevation_m["elevation_avg"]})
+    di.update({"min": elevation_m["elevation_min"]})
     return di
 
 
