@@ -7,6 +7,7 @@ import operator
 import time
 import asyncio
 import numpy as np
+import rasterio as rio
 import xarray as xr
 from collections import defaultdict
 from functools import reduce
@@ -116,6 +117,25 @@ async def fetch_data(urls):
     return results
 
 
+async def fetch_bbox_geotiff_from_gs(url):
+    """Make the async request for GeoTIFF data within the specified bbox
+
+    Args:
+        url (str): URL for a WCS query to GeoServer
+    Returns:
+        geotiff: result of WCS GeoTIFF query
+    """
+    start_time = time.time()
+    geotiff_bytes = await fetch_data(url)
+    app.logger.info(
+        f"Fetched BBOX data from GeoServer, elapsed time {round(time.time() - start_time)}s"
+    )
+
+    # create geotiff source from bytestring
+    geotiff = io.BytesIO(geotiff_bytes)
+    return geotiff
+
+
 async def fetch_bbox_netcdf(url):
     """Make the async request for the data within the specified bbox
 
@@ -213,6 +233,17 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
             result, dim_encodings["rounding"][roundkey]
         )
     return aggr_results
+
+
+def geotiff_zonal_stats(poly, arr, transform, stat_list):
+    poly_mask_arr = zonal_stats(
+        poly,
+        arr,
+        affine=transform,
+        nodata=np.nan,
+        stats=stat_list,
+    )
+    return poly_mask_arr
 
 
 def generate_nested_dict(dim_combos):

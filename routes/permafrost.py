@@ -13,7 +13,12 @@ from fetch_data import (
 )
 from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
-from validate_request import validate_latlon, validate_huc8, validate_akpa, project_latlon
+from validate_request import (
+    validate_latlon,
+    validate_huc8,
+    validate_akpa,
+    project_latlon,
+)
 from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc8_gdf, permafrost_encodings, akpa_gdf
@@ -46,7 +51,9 @@ def package_obu_magt(obu_magt_resp):
         return None
     depth = "Top of Permafrost"
     year = "2000-2016"
-    titles["obu_magt"] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
+    titles[
+        "obu_magt"
+    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
     temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
     if temp is None:
         return None
@@ -220,7 +227,12 @@ def run_point_fetch_all_permafrost(lat, lon):
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
-        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
 
     gs_results = asyncio.run(
         fetch_data_api(
@@ -231,7 +243,9 @@ def run_point_fetch_all_permafrost(lat, lon):
     x, y = project_latlon(lat, lon, 3338)
 
     try:
-        rasdaman_results = asyncio.run(fetch_wcs_point_data(x, y, permafrost_coverage_id))
+        rasdaman_results = asyncio.run(
+            fetch_wcs_point_data(x, y, permafrost_coverage_id)
+        )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
@@ -291,7 +305,7 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     Args: akpa_id (str): ID of protected area, e.g. "NPS7"
 
     Returns:
-        huc_pkg (dict): JSON-like object containing aggregated permafrost data.
+        combined_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
     validation = validate_akpa(akpa_id)
     if validation == 400:
@@ -314,7 +328,7 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     magt_poly_sum_di = summarize_within_poly(
         ds, poly, permafrost_encodings, varname="alt", roundkey="alt"
     )
-    magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
-    alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
-    combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
+    magt_pa_pkg = package_gipl_polygon(magt_poly_sum_di)
+    alt_pa_pkg = package_gipl_polygon(alt_poly_sum_di)
+    combined_pkg = combine_gipl_poly_var_pkgs(magt_pa_pkg, alt_pa_pkg)
     return postprocess(combined_pkg, "permafrost", titles["gipl"])

@@ -2,7 +2,7 @@
 
 import asyncio
 from aiohttp import ClientSession
-from config import RAS_BASE_URL
+from config import RAS_BASE_URL, GS_BASE_URL
 from luts import bbox_offset
 
 
@@ -24,15 +24,19 @@ def generate_base_wfs_url(backend, workspace, lat, lon):
     return wfs_base
 
 
-def generate_wcs_query_url(request_str):
-    """Make a WCS URL by plugging a request substring
-     into the base WCS URL
+def generate_wcs_query_url(request_str, backend=RAS_BASE_URL):
+    """Make a WCS URL by plugging a request substring into a base WCS URL.
 
-    request_srtr (str): either a typical WCS
+    The default backend is Rasdaman because that is typically the target for WCS requests. GS usage is expected to be less frequent. However, the GS service doesn't accept the "&FORMAT=application/" syntax so we'll strip that and default it to a "&FORMAT=GeoTIFF" URL suffix which returns a GeoTIFF.
+    Args:
+        request_str (str): a typical WCS string
+        backend (str): URL for geospatial data server, typically imported from config.py
+    Returns:
+        URL for a WCS request
     """
-    # currently hardcoded to Rasdaman URL backend because it's the only one
-    # we make WCS requests to (?)
-    return f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST={request_str}"
+    if backend == GS_BASE_URL:
+        request_str = request_str.split("application/")[0] + "GeoTIFF"
+    return f"{backend}/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST={request_str}"
 
 
 def generate_wms_and_wfs_query_urls(wms, wms_base, wfs, wfs_base):

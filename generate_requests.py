@@ -1,4 +1,19 @@
 """A module to generate specific request strings."""
+from collections import namedtuple
+
+
+def get_wcs_xy_str_from_bbox_bounds(poly):
+    """Helper function to get WCS-formatted XY strings from Polygon.
+    Args:
+        poly (object): shapely.Polygon with 4-tuple bounding box (xmin, ymin, xmax, ymax).
+    Returns:
+        xy (tuple): 2-tuple of coordinate strings formatted for WCS requests. Instantiated as a namedtuple for access convenience and self-documentation when used in service endpoints."""
+    WCS_xy = namedtuple("WCS_xy", "xstr ystr")
+    (x1, y1, x2, y2) = poly.bounds
+    x = f"{x1},{x2}"
+    y = f"{y1},{y2}"
+    xy = WCS_xy(x, y)
+    return xy
 
 
 def generate_wcs_getcov_str(x, y, cov_id, var_coord=None, encoding="json"):
