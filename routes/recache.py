@@ -3,6 +3,7 @@ from luts import host
 import json
 import requests
 from . import routes
+from luts import json_types
 
 recache_api = Blueprint("recache_api", __name__)
 
@@ -75,14 +76,14 @@ def get_all_route_endpoints(curr_route, curr_type):
     # Opens the JSON file for the current type and replaces the "variable" portions
     # of the route to allow for the JSON items to fill in those fields.
     if curr_type == "community":
-        f = open("data/jsons/ak_communities.json", "r")
+        f = open(json_types["communities"], "r")
         curr_route = curr_route.replace("<lat>/<lon>", "")
     elif curr_type == "huc":
-        f = open("data/jsons/ak_hucs.json", "r")
+        f = open(json_types["hucs"], "r")
         curr_route = curr_route.replace("<huc8_id>", "")
         curr_route = curr_route.replace("<huc_id>", "")
     else:
-        f = open("data/jsons/ak_protected_areas.json", "r")
+        f = open(json_types["protected_areas"], "r")
         curr_route = curr_route.replace("<akpa_id>", "")
 
     # Creates a JSON object from opened file
