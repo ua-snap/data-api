@@ -34,7 +34,7 @@ def get_json_for_type(type, recurse=False):
         json_list = []
 
         # Runs through each of the JSON files
-        for curr_type in ['communities', 'hucs', 'protected_areas']:
+        for curr_type in ["communities", "hucs", "protected_areas"]:
 
             # Sends a recursive call to this function
             curr_js = get_json_for_type(curr_type, recurse=True)
@@ -53,16 +53,14 @@ def get_json_for_type(type, recurse=False):
             update_data()
 
         # Open JSON file and return to requestor
-        with open(jsonpath, 'r') as infile:
+        with open(jsonpath, "r") as infile:
             js = json.dumps(json.load(infile))
 
     if recurse:
         return js
 
     # Returns Flask JSON Response
-    return Response(
-        response=js, status=200, mimetype="application/json"
-    )
+    return Response(response=js, status=200, mimetype="application/json")
 
 
 @routes.route("/update/")
@@ -118,7 +116,7 @@ def update_data():
     df = pd.read_csv(f"{path}ak_communities.csv")
 
     # Add type of community to each community
-    df['type'] = 'community'
+    df["type"] = "community"
 
     # Dump data frame to JSON file
     df.to_json(json_types["communities"], orient="records")

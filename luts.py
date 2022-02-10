@@ -4,7 +4,7 @@ import pickle
 import geopandas as gpd
 
 # TODO: Change this to https://earthmaps.io as default after development
-host = os.environ.get('API_HOSTNAME') or 'http://cache.earthmaps.io'
+host = os.environ.get("API_HOSTNAME") or "http://cache.earthmaps.io"
 
 bbox_offset = 0.000000001
 
@@ -72,9 +72,9 @@ permafrost_encodings = {
 }
 
 json_types = {
-    'communities': 'data/jsons/ak_communities.json',
-    'hucs': 'data/jsons/ak_hucs.json',
-    'protected_areas': 'data/jsons/ak_protected_areas.json'
+    "communities": "data/jsons/ak_communities.json",
+    "hucs": "data/jsons/ak_hucs.json",
+    "protected_areas": "data/jsons/ak_protected_areas.json",
 }
 
 # For the forest endpoint.  This file is just a generated pickle
