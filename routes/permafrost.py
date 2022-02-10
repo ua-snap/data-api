@@ -1,30 +1,26 @@
 import asyncio
 from flask import (
-    abort,
     Blueprint,
-    Response,
     render_template,
-    request,
-    current_app as app,
 )
 
 # local imports
 from fetch_data import (
-    fetch_data,
     fetch_data_api,
     fetch_wcs_point_data,
     fetch_bbox_netcdf,
     summarize_within_poly,
 )
-from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
+from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
-from validate_latlon import validate, project_latlon
-from validate_data import (
-    check_for_nodata,
-    get_poly_3338_bbox,
-    nodata_message,
+from validate_request import (
+    validate_latlon,
+    validate_huc8,
+    validate_akpa,
+    project_latlon,
 )
-from config import GS_BASE_URL
+from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
+from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc8_gdf, permafrost_encodings, akpa_gdf
 from . import routes
 
@@ -42,44 +38,51 @@ wfs_targets = {
     "obu_pf_extent": "PFEXTENT",
 }
 
+titles = {
+    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output",
+    "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
+    "obupfx": "Obu et al. (2018) Permafrost Extent",
+}
+
 # packaging functions unique to each query
 def package_obu_magt(obu_magt_resp):
     """Package Obu MAGT raster data."""
-    ds_title = "Obu et al. (2018) Mean Annual Ground Temperature (°C)"
     if obu_magt_resp["features"] == []:
-        di = {"title": ds_title, "Data Status": nodata_message}
-    else:
-        depth = "Top of Permafrost"
-        year = "2000-2016"
-        title = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
-        temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
-        temp = round(temp, 1)
+        return None
+    depth = "Top of Permafrost"
+    year = "2000-2016"
+    titles[
+        "obu_magt"
+    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
+    temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
+    if temp is None:
+        return None
+    temp = round(temp, 1)
 
-        di = {"title": title, "year": year, "depth": depth, "temp": temp}
-        check_for_nodata(di, "temp", temp, -9999)
-    return di
+    nullified_data = nullify_nodata(temp, "permafrost")
+    if nullified_data is not None:
+        di = {"year": year, "depth": depth, "temp": temp}
+        return di
+
+    return None
 
 
 def package_jorgenson(jorgenson_resp):
     """Package Jorgenson vector data."""
-    title = "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume"
     if jorgenson_resp["features"] == []:
-        di = {"title": title, "Data Status": nodata_message}
-    else:
-        ice = jorgenson_resp["features"][0]["properties"]["GROUNDICEV"]
-        pfx = jorgenson_resp["features"][0]["properties"]["PERMAFROST"]
-        di = {"title": title, "ice": ice, "pfx": pfx}
+        return None
+    ice = jorgenson_resp["features"][0]["properties"]["GROUNDICEV"]
+    pfx = jorgenson_resp["features"][0]["properties"]["PERMAFROST"]
+    di = {"ice": ice, "pfx": pfx}
     return di
 
 
 def package_obu_vector(obu_vector_resp):
     """Package Obu permafrost extent vector data."""
-    title = "Obu et al. (2018) Permafrost Extent"
     if obu_vector_resp["features"] == []:
-        di = {"title": title, "Data Status": nodata_message}
-    else:
-        pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
-        di = {"title": title, "pfx": pfx}
+        return None
+    pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
+    di = {"pfx": pfx}
     return di
 
 
@@ -111,9 +114,6 @@ def package_gipl(gipl_resp):
                     flattened_resp[i].split(" ")[0]
                 )
                 di[era][model][scenario]["alt"] = float(flattened_resp[i].split(" ")[1])
-                di[era][model][scenario][
-                    "title"
-                ] = "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output"
                 i += 1
     # This block drops all the invalid dimensional combinations that are a result of jamming historical and projected data into the same data cube. These are no data values (-9999) that should be culled.
     models.remove("cruts31")
@@ -161,9 +161,6 @@ def combine_gipl_poly_var_pkgs(magt_di, alt_di):
                 combined_gipl_di[era][model][scenario]["alt"] = alt_di[era][model][
                     scenario
                 ]
-                combined_gipl_di[era][model][scenario][
-                    "title"
-                ] = "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output"
                 combined_gipl_di[era][model][scenario]["statistic"] = "Zonal Mean"
     return combined_gipl_di
 
@@ -226,8 +223,16 @@ def run_point_fetch_all_permafrost(lat, lon):
     Returns:
         JSON-like dict of permafrost data
     """
-    if not validate(lat, lon):
-        abort(400)
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
 
     gs_results = asyncio.run(
         fetch_data_api(
@@ -236,19 +241,24 @@ def run_point_fetch_all_permafrost(lat, lon):
     )
 
     x, y = project_latlon(lat, lon, 3338)
-    rasdaman_results = asyncio.run(fetch_wcs_point_data(x, y, permafrost_coverage_id))
 
-    gipl = package_gipl(rasdaman_results)
-    obu_magt = package_obu_magt(gs_results[0])
-    jorg = package_jorgenson(gs_results[1])
-    obu_pfx = package_obu_vector(gs_results[2])
+    try:
+        rasdaman_results = asyncio.run(
+            fetch_wcs_point_data(x, y, permafrost_coverage_id)
+        )
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
     data = {
-        "gipl": gipl,
-        "obu_magt": obu_magt,
-        "obupfx": obu_pfx,
-        "jorg": jorg,
+        "gipl": package_gipl(rasdaman_results),
+        "obu_magt": package_obu_magt(gs_results[0]),
+        "jorg": package_jorgenson(gs_results[1]),
+        "obupfx": package_obu_vector(gs_results[2]),
     }
-    return data
+
+    return postprocess(data, "permafrost", titles)
 
 
 @routes.route("/permafrost/huc/<huc_id>")
@@ -260,7 +270,14 @@ def run_huc_fetch_all_permafrost(huc_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
-    poly = get_poly_3338_bbox(huc8_gdf, huc_id)
+    validation = validate_huc8(huc_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = get_poly_3338_bbox(huc8_gdf, huc_id)
+    except:
+        return render_template("422/invalid_huc.html"), 422
+
     bounds = poly.bounds
 
     request_str = generate_netcdf_wcs_getcov_str(
@@ -278,7 +295,7 @@ def run_huc_fetch_all_permafrost(huc_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return combined_pkg
+    return postprocess(combined_pkg, "permafrost", titles["gipl"])
 
 
 @routes.route("/permafrost/protectedarea/<akpa_id>")
@@ -288,9 +305,15 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     Args: akpa_id (str): ID of protected area, e.g. "NPS7"
 
     Returns:
-        huc_pkg (dict): JSON-like object containing aggregated permafrost data.
+        combined_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
-    poly = get_poly_3338_bbox(akpa_gdf, akpa_id)
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = get_poly_3338_bbox(akpa_gdf, akpa_id)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
     bounds = poly.bounds
 
     request_str = generate_netcdf_wcs_getcov_str(
@@ -305,7 +328,7 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     magt_poly_sum_di = summarize_within_poly(
         ds, poly, permafrost_encodings, varname="alt", roundkey="alt"
     )
-    magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
-    alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
-    combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return combined_pkg
+    magt_pa_pkg = package_gipl_polygon(magt_poly_sum_di)
+    alt_pa_pkg = package_gipl_polygon(alt_poly_sum_di)
+    combined_pkg = combine_gipl_poly_var_pkgs(magt_pa_pkg, alt_pa_pkg)
+    return postprocess(combined_pkg, "permafrost", titles["gipl"])

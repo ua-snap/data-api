@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Elevation Protected Area Aggregation</h3>
+<p>Query zonal statistics for 1 km interpolations of the 30 m resolution ASTER GDEM data for a specific Protected Area.</p>
+<p>A query will fetch the minimum, mean, and maximum elevations found within a single Protected Area.
+<p>Example: <a href="/elevation/protectedarea/NPS7">/elevation/protectedarea/NPS7</a></p>
+<hr/>
+<h4>Results from the query above will look like this:</h4>
+<pre>
+{
+  "res": "1 kilometer",
+  "title": "ASTER Global Digital Elevation Model",
+  "units": "meters difference from sea level",
+  "max": 2961.0,
+  "mean": 822,
+  "min": 0.0
+}
+</pre>
+<ul>
+    <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
+    <li><strong><code>res</code></strong>: <i>(str)</i>, Spatial resolution (pixel size) of the DEM.</li>
+    <li><strong><code>units</code></strong>: <i>(str)</i>, Units for elevation values.</li>
+    <li><strong><code>max</code></strong>: <i>(float)</i>, Zonal Maximum Elevation value derived from `max` DEM interpolation.</li>
+    <li><strong><code>mean</code></strong>: <i>(float)</i>, Zonal Mean Elevation value derived from `average` DEM interpolation.</li>
+    <li><strong><code>min</code></strong>: <i>(float)</i>, Zonal Minimum Elevation value derived from `min` DEM interpolation.</li>
+</ul>
+<h4>Source data</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Data Layer</th>
+            <th>Download Link</th>
+            <th>Data Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href="https://lpdaac.usgs.gov/products/astgtmv003/">The Terra Advanced Spaceborne Thermal Emission and Reflection Radiometer (ASTER) Global Digital Elevation Model (GDEM) Version 3 (ASTGTM)</a></td>
+            <td><a href="https://github.com/ua-snap/gs-ingest/blob/main/astergdem/download.sh">Download Tiles</a></td>
+            <td><strong><code>0</code></strong> indicates sea level. Negative values are expected and indicate depressions below sea level.</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

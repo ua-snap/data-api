@@ -13,3 +13,4 @@ from .mean_annual_precip import *
 from .boundary import *
 from .vectordata import *
 from .recache import *
+from .elevation import *

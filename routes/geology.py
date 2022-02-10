@@ -1,18 +1,14 @@
 import asyncio
 from flask import (
-    abort,
     Blueprint,
-    Response,
     render_template,
-    request,
-    current_app as app,
 )
 
 # local imports
-from fetch_data import fetch_data, fetch_data_api
-from validate_latlon import validate, project_latlon
-from validate_data import check_for_nodata, nodata_message
-from config import GS_BASE_URL
+from fetch_data import fetch_data_api
+from validate_request import validate_latlon
+from validate_data import postprocess
+from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from . import routes
 
 geology_api = Blueprint("geology_api", __name__)
@@ -25,14 +21,12 @@ def package_usgsgeol(geol_resp):
     """Package geology data in dict"""
     title = "USGS Geologic Map of Alaska"
     if geol_resp[0]["features"] == []:
-        di = {"title": title, "Data Status": nodata_message}
-    else:
-        di = {}
-        gunit = geol_resp[0]["features"][0]["properties"]["STATE_UNIT"]
-        age = geol_resp[0]["features"][0]["properties"]["AGE_RANGE"]
-        di.update({"title": title, "name": gunit, "age": age})
+        return None
+    di = {}
+    gunit = geol_resp[0]["features"][0]["properties"]["STATE_UNIT"]
+    age = geol_resp[0]["features"][0]["properties"]["AGE_RANGE"]
+    di.update({"title": title, "name": gunit, "age": age})
     return di
-
 
 @routes.route("/geology/")
 @routes.route("/geology/abstract/")
@@ -50,11 +44,19 @@ def run_fetch_geology(lat, lon):
     """Run the async requesting and return data
     example request: http://localhost:5000/geology/60.606/-143.345
     """
-    if not validate(lat, lon):
-        abort(400)
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
     # verify that lat/lon are present
-    results = asyncio.run(
-        fetch_data_api(GS_BASE_URL, "geology", wms_targets, wfs_targets, lat, lon)
-    )
+    try:
+        results = asyncio.run(
+            fetch_data_api(GS_BASE_URL, "geology", wms_targets, wfs_targets, lat, lon)
+        )
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
     data = package_usgsgeol(results)
-    return data
+    return postprocess(data, "geology")

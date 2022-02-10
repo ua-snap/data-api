@@ -1,21 +1,18 @@
 import asyncio
 import io
 import csv
-import operator
 import time
 import itertools
 from urllib.parse import quote
 import numpy as np
 import xarray as xr
 from flask import (
-    abort,
     Blueprint,
     Response,
     render_template,
     request,
     current_app as app,
 )
-from rasterstats import zonal_stats
 
 # local imports
 from generate_requests import generate_wcs_getcov_str
@@ -23,13 +20,13 @@ from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_data,
     get_from_dict,
-    generate_nested_dict,
     summarize_within_poly,
 )
-from validate_latlon import validate, project_latlon
-from validate_data import get_poly_3338_bbox
-from . import routes
+from validate_request import validate_latlon, validate_huc8, validate_akpa, project_latlon
+from validate_data import get_poly_3338_bbox, postprocess
 from luts import huc8_gdf, akpa_gdf
+from config import WEST_BBOX, EAST_BBOX
+from . import routes
 
 taspr_api = Blueprint("taspr_api", __name__)
 
@@ -215,9 +212,12 @@ def package_cru_point_data(point_data, varname):
         point_data_pkg[season] = {model: {scenario: {varname: {}}}}
         for si, value in enumerate(s_li):  # (nested list with statistic at dim 0)
             stat = dim_encodings["stats"][si]
-            point_data_pkg[season][model][scenario][varname][stat] = round(
-                value, dim_encodings["rounding"][varname]
-            )
+            if value is None:
+                point_data_pkg[season][model][scenario][varname][stat] = None
+            else:
+                point_data_pkg[season][model][scenario][varname][stat] = round(
+                    value, dim_encodings["rounding"][varname]
+                )
 
     return point_data_pkg
 
@@ -254,7 +254,7 @@ def package_ar5_point_data(point_data, varname):
                 for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                     scenario = dim_encodings["scenarios"][si]
                     point_data_pkg[decade][season][model][scenario] = {
-                        varname: round(value, dim_encodings["rounding"][varname])
+                        varname: None if value is None else round(value, dim_encodings["rounding"][varname])
                     }
 
     return point_data_pkg
@@ -282,7 +282,7 @@ def package_ar5_point_summary(point_data, varname):
             for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                 scenario = dim_encodings["scenarios"][si]
                 point_data_pkg[season][model][scenario] = {
-                    varname: round(value, dim_encodings["rounding"][varname])
+                    varname: None if value is None else round(value, dim_encodings["rounding"][varname])
                 }
 
     return point_data_pkg
@@ -509,8 +509,8 @@ def run_fetch_var_point_data(var_ep, lat, lon):
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
-    if not validate(lat, lon):
-        abort(400)
+    if validate_latlon(lat, lon) is not True:
+        return None
 
     varname = var_ep_lu[var_ep]
     # get the coordinate value for the specified variable
@@ -588,7 +588,6 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
     poly = get_poly_3338_bbox(poly_gdf, poly_id)
-    bounds = poly.bounds
     # mapping between coordinate values (ints) and variable names (strs)
     varname = var_ep_lu[var_ep]
     var_coord = list(dim_encodings["varnames"].keys())[list(dim_encodings["varnames"].values()).index(varname)]
@@ -665,16 +664,28 @@ def point_data_endpoint(var_ep, lat, lon):
     Notes:
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
+
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
+
     if var_ep in var_ep_lu.keys():
         point_pkg = run_fetch_var_point_data(var_ep, lat, lon)
     elif var_ep == "taspr":
-        point_pkg = run_fetch_point_data(lat, lon)
+        try:
+            point_pkg = run_fetch_point_data(lat, lon)
+        except Exception as exc:
+            if hasattr(exc, "status") and exc.status == 404:
+                return render_template("404/no_data.html"), 404
+            return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(point_pkg)
         return return_csv(csv_data)
 
-    return point_pkg
+    return postprocess(point_pkg, "taspr")
 
 
 @routes.route("/<var_ep>/huc/<huc_id>")
@@ -690,34 +701,44 @@ def huc_data_endpoint(var_ep, huc_id):
         huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
     """
-    if var_ep in var_ep_lu.keys():
-        huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
-    elif var_ep == "taspr":
-        huc_pkg = run_aggregate_allvar_polygon(huc8_gdf, huc_id)
+    validation = validate_huc8(huc_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        if var_ep in var_ep_lu.keys():
+            huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
+        elif var_ep == "taspr":
+            huc_pkg = run_aggregate_allvar_polygon(huc8_gdf, huc_id)
+    except:
+        return render_template("422/invalid_huc.html"), 422
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(huc_pkg)
         return return_csv(csv_data)
 
-    return huc_pkg
+    return postprocess(huc_pkg, "taspr")
 
 
 @routes.route("/<var_ep>/protectedarea/<akpa_id>")
 def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
     """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified variable and return JSON-like dict.
-
     Args:
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
         akpa_id (str): Protected Area ID (e.g. "NPS7")
-
     Returns:
         pa_pkg (dict): zonal mean of variable(s) for protected area polygon
     """
-    if var_ep in var_ep_lu.keys():
-        pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-    elif var_ep == "taspr":
-        pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        if var_ep in var_ep_lu.keys():
+            pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
+        elif var_ep == "taspr":
+            pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(pa_pkg)
