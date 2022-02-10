@@ -6,6 +6,7 @@ import itertools
 import operator
 import time
 import asyncio
+import xml.etree.ElementTree as ET
 import numpy as np
 import rasterio as rio
 import xarray as xr
@@ -28,6 +29,21 @@ async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
     """
     urls = []
     request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord)
+    url = generate_wcs_query_url(request_str)
+    urls.append(url)
+    point_data = await fetch_data(urls)
+    return point_data
+
+
+async def fetch_wcps_point_data(x, y, cov_id, axis_name, axis_coords):
+    """Create the async request for data at the specified point.
+
+    Args:
+        x (float): lower x-coordinate bound
+        y (float): lower y-coordinate bound
+    """
+    urls = []
+    request_str = generate_average_wcps_str(x, y, cov_id, axis_name, axis_coords)
     url = generate_wcs_query_url(request_str)
     urls.append(url)
     point_data = await fetch_data(urls)
@@ -89,8 +105,11 @@ async def make_get_request(url, session):
     # way of auto-detecting encoding from URL
     if "application/json" in url:
         data = await resp.json()
-    elif "application/netcdf":
+    elif "application/netcdf" in url:
         data = await resp.read()
+    elif "DescribeCoverage" in url:
+        # DescribeCoverage in URL ==> XML coming back
+        data = await resp.text()
 
     return data
 
@@ -283,3 +302,52 @@ def get_from_dict(data_dict, map_list):
     Thanks https://stackoverflow.com/a/14692747/11417211
     """
     return reduce(operator.getitem, map_list, data_dict)
+
+
+def parse_meta_xml_str(meta_xml_str):
+    """Parse the DescribeCoverage request to get the XML and
+    restructure to dict
+    
+    Args:
+        meta_xml_str (str): decoded text XML response from
+            DescribeCoverage WCS query
+    """
+    meta_xml = ET.ElementTree(ET.fromstring(meta_xml_str))
+    # wow xml
+    dim_encodings = eval(
+        list(
+            list(
+                list(
+                    list(
+                        meta_xml.getroot()[0].iter(
+                            "{http://www.opengis.net/gmlcov/1.0}metadata"
+                        )
+                    )[0].iter("{http://www.opengis.net/gmlcov/1.0}Extension")
+                )[0].iter("{http://www.rasdaman.org}covMetadata")
+            )[0].iter("Encoding")
+        )[0].text
+    )
+    # make the coordinate value keys integers
+    for axis, encoding_di in dim_encodings.items():
+        dim_encodings[axis] = {int(k): v for k, v in encoding_di.items()}
+
+    return dim_encodings
+
+
+async def get_dim_encodings(cov_id):
+    """Get the dimension encodings from a rasdaman 
+    coverage that has the encodings stored in an 
+    "encodings" attribute
+    
+    Args:
+        cov_id (str): ID of the rasdaman coverage
+        
+    Rreturns:
+        dict of encodings, with axis name as keys holding 
+        dicts of integer-keyed categories
+    """
+    meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
+    meta_xml_str = await fetch_data([meta_url])
+    dim_encodings = parse_meta_xml_str(meta_xml_str)
+
+    return dim_encodings

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Post-processed ALFRESCO Data</h3>
+<p>The endpoints here provide access to summaries of outputs from ALFRESCO simulations done using future (AR5/CMIP5) scenarios and historical data completed for the Integrated Ecosystem Model (IEM) project. There are currently endpoints for relative flammability, derived from the fire scar outputs, and relative vegetation change, derived from year-to-year transitions of the vegetation classes, the principal phenomena being modeled by ALFRESCO.</p>
+<h4>Service endpoints</h4>
+<p>Here are the existing endpoints for these data</p>
+<ul>
+    <li><a href="/alfresco/flammability/point">Relative flammability point query</a></li>
+    <li><a href="/alfresco/veg_change/point">Relative vegetation change point query</a></li>
+</ul>
+{% endblock %}

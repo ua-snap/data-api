@@ -14,3 +14,4 @@ from .boundary import *
 from .vectordata import *
 from .recache import *
 from .elevation import *
+from .alfresco import *

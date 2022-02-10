@@ -15,6 +15,8 @@ def get_wcs_xy_str_from_bbox_bounds(poly):
     xy = WCS_xy(x, y)
     return xy
 
+from urllib.parse import quote
+
 
 def generate_wcs_getcov_str(x, y, cov_id, var_coord=None, encoding="json"):
     """Generate a WCS GetCoverage request for fetching a
@@ -64,3 +66,48 @@ def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None):
     y = f"{y1},{y2}"
     netcdf_wcs_getcov_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, "netcdf")
     return netcdf_wcs_getcov_str
+
+
+def generate_average_wcps_str(
+    x, y, cov_id, axis_name, axis_coords, slice_di=None, encoding="json"
+):
+    """Generates a WCPS request string for computing
+    the average over specified axes.
+
+    Args:
+        x (float or str): x-coordinate for point query, or string
+            composed as "x1:x2" for bbox query, where x1 and x2 are
+            lower and upper bounds of bbox
+        y (float or str): y-coordinate for point query, or string
+            composed as "y1:y2" for bbox query, where y1 and y2 are
+            lower and upper bounds of bbox
+        cov_id (str): Rasdaman coverage ID
+        axis_name (str): name of the axis to take average over
+        axis_coords (tuple): 2-tuple of coordinates to average over
+            of the form (start, stop)
+        slice_di (dict): dict with axis names for keys and
+            coordinates for the values to be used in further 
+            subsetting in WCPS query. E.g., {"varname": 0}
+        encoding (str): currently supports either "json" or "netcdf"
+            for point or bbox queries, respectively
+
+    Returns:
+        WCPS query to be included in generate_wcs_url()
+    """
+    if slice_di is not None:
+        subset_str = "".join([f",{k}({v})" for k, v in slice_di.items()])
+    else:
+        subset_str = ""
+    c1, c2 = axis_coords
+    summary_str = f"{axis_name}({c1}:{c2})"
+    n = len(range(c1, c2 + 1))
+    wcps_request_str = quote(
+        (
+            f"ProcessCoverages&query=for $c in ({cov_id}) "
+            f"let $a := (condense + over $t {summary_str} "
+            f"using $c[{axis_name}($t),X({x}),Y({y}){subset_str}] ) / {n} "
+            f'return encode( $a , "application/{encoding}")'
+        )
+    )
+
+    return wcps_request_str
