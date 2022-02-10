@@ -1,6 +1,10 @@
 """Module for look-up-table like objects"""
+import os
 import pickle
 import geopandas as gpd
+
+# TODO: Change this to https://earthmaps.io as default after development
+host = os.environ.get("API_HOSTNAME") or "http://cache.earthmaps.io"
 
 bbox_offset = 0.000000001
 
@@ -67,6 +71,12 @@ permafrost_encodings = {
     "gipl_units_lu": {"magt": "°C", "alt": "m"},
 }
 
+json_types = {
+    "communities": "data/jsons/ak_communities.json",
+    "hucs": "data/jsons/ak_hucs.json",
+    "protected_areas": "data/jsons/ak_protected_areas.json",
+}
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including
@@ -75,7 +85,7 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
 
 # HUC-8 Polygons can be imported by various endpoints
-huc_src = "data/shapefiles/hydrologic_units\wbdhu8_a_ak.shp"
+huc_src = "data/shapefiles/hydrologic_units_wbdhu8_a_ak.shp"
 huc8_gdf = gpd.read_file(huc_src).set_index("huc8").to_crs(3338)
 
 # AK Protected Area Polygons can be imported by various endpoints
