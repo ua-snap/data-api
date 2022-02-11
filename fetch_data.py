@@ -159,13 +159,7 @@ async def fetch_bbox_netcdf(url):
     """Make the async request for the data within the specified bbox
 
     Args:
-        y2 (float): upper y-coordinate bound
-        var_coord (int): coordinate value corresponding to varname to query
-        cov_ids (str): list of Coverage ids to fetch the same bbox over
-        summary_decades (list): list of either None or 2-tuples of integers
-            mapped to desired range of decades to summarise over,
-            e.g. (6, 8) for 2070-2099. List items need to
-            correspond to items in cov_ids.
+        url (str): URL containing WCS request for bbox in netcdf format
 
     Returns:
         xarray.DataSet containing results of WCS netCDF query
@@ -175,10 +169,28 @@ async def fetch_bbox_netcdf(url):
     app.logger.info(
         f"Fetched BBOX data from Rasdaman, elapsed time {round(time.time() - start_time)}s"
     )
-
     # create xarray.DataSet from bytestring
     ds = xr.open_dataset(io.BytesIO(netcdf_bytes))
     return ds
+
+
+async def fetch_bbox_netcdf_list(urls):
+    """Make the async request for the data within the specified bbox
+
+    Args:
+        urls (list): list of URL containing WCS request for bbox in netcdf format
+
+    Returns:
+        xarray.DataSet containing results of WCS netCDF query
+    """
+    start_time = time.time()
+    netcdf_bytes_list = await fetch_data(urls)
+    app.logger.info(
+        f"Fetched BBOX data from Rasdaman, elapsed time {round(time.time() - start_time)}s"
+    )
+    # create xarray.DataSets from bytestring list
+    ds_list = [xr.open_dataset(io.BytesIO(bytestr)) for bytestr in netcdf_bytes_list]
+    return ds_list
 
 
 def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gray"):
@@ -256,11 +268,7 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
 
 def geotiff_zonal_stats(poly, arr, transform, stat_list):
     poly_mask_arr = zonal_stats(
-        poly,
-        arr,
-        affine=transform,
-        nodata=np.nan,
-        stats=stat_list,
+        poly, arr, affine=transform, nodata=np.nan, stats=stat_list,
     )
     return poly_mask_arr
 
@@ -275,8 +283,6 @@ def generate_nested_dict(dim_combos):
 
     Returns:
         Nested dict with empty dicts at deepest levels
-
-    #
     """
 
     def default_to_regular(d):

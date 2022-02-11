@@ -14,14 +14,9 @@ from flask import (
 )
 
 # local imports
-from generate_requests import generate_wcs_getcov_str, generate_average_wcps_str
+from generate_requests import *
 from generate_urls import generate_wcs_query_url
-from fetch_data import (
-    fetch_data,
-    get_from_dict,
-    summarize_within_poly,
-    get_dim_encodings,
-)
+from fetch_data import *
 from validate_request import (
     validate_latlon,
     validate_huc8,
@@ -63,14 +58,41 @@ var_ep_lu = {
 #     return cov_ids, summary_decades
 
 
-async def fetch_alf_point_data(x, y, var_ep):
+async def fetch_alf_point_data(x, y, cov_id_str):
     """Make the async request for the data at the specified point for
     a specific varname.
 
     Args:
         x (float): lower x-coordinate bound
         y (float): lower y-coordinate bound
-        var_ep (str): alfresco endpoint name (flammability or veg_change)
+        cov_id_str (str): shared portion of coverage_ids to query
+
+    Returns:
+        list of data results from each of historical and future coverages
+    """
+    # set up WCS request strings
+    request_strs = []
+    # historical data request string
+    request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}_historical"))
+    # generate both future average requests (averages over decades)
+    for coords in [(3, 5), (6, 8)]:
+        request_strs.append(
+            generate_average_wcps_str(x, y, f"{cov_id_str}_future", "era", coords)
+        )
+    # future non-average request str
+    request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}_future"))
+    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
+    point_data_list = await fetch_data(urls)
+    return point_data_list
+
+
+async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
+    """Make the async request for the data at the specified point for
+    a specific varname.
+
+    Args:
+        bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
+        cov_id_str (str): shared portion of coverage_ids to query
 
     Returns:
         list of data results from each of historical and future coverages
@@ -79,21 +101,25 @@ async def fetch_alf_point_data(x, y, var_ep):
     request_strs = []
     # historical data request string
     request_strs.append(
-        generate_wcs_getcov_str(x, y, f"{var_ep_lu[var_ep]['cov_id_str']}_historical")
+        generate_netcdf_wcs_getcov_str(bbox_bounds, f"{cov_id_str}_historical")
     )
     # generate both future average requests (averages over decades)
-    cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     for coords in [(3, 5), (6, 8)]:
-        request_strs.append(
-            generate_average_wcps_str(x, y, f"{cov_id_str}_future", "era", coords)
-        )
+        # kwargs to pass to function in generate_netcdf_average_wcps_str
+        kwargs = {
+            "cov_id": f"{cov_id_str}_future",
+            "axis_name": "era",
+            "axis_coords": coords,
+            "encoding": "netcdf",
+        }
+        request_strs.append(generate_netcdf_average_wcps_str(bbox_bounds, kwargs))
     # future non-average request str
-    request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}_future"))
-
+    request_strs.append(
+        generate_netcdf_wcs_getcov_str(bbox_bounds, f"{cov_id_str}_future")
+    )
     urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
-    point_data_list = await fetch_data(urls)
-
-    return point_data_list
+    bbox_ds_list = await fetch_bbox_netcdf_list(urls)
+    return bbox_ds_list
 
 
 def package_historical_alf_point_data(point_data, varname):
@@ -113,7 +139,6 @@ def package_historical_alf_point_data(point_data, varname):
     for ei, value in enumerate(point_data):  # (nested list with value at dim 0)
         era = historical_dim_encodings["era"][ei]
         point_data_pkg[era] = {"CRU-TS40": {"CRU_historical": {varname: value}}}
-
     return point_data_pkg
 
 
@@ -140,7 +165,6 @@ def package_ar5_alf_point_data(point_data, varname):
             for si, value in enumerate(s_li):
                 scenario = future_dim_encodings["scenario"][si]
                 point_data_pkg[era][model][scenario] = {varname: value}
-
     return point_data_pkg
 
 
@@ -165,7 +189,6 @@ def package_ar5_alf_averaged_point_data(point_data, varname):
         for si, value in enumerate(s_li):
             scenario = future_dim_encodings["scenario"][si]
             point_data_pkg[model][scenario] = {varname: round(value, 4)}
-
     return point_data_pkg
 
 
@@ -368,51 +391,128 @@ def package_ar5_alf_averaged_point_data(point_data, varname):
 #     combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
 #     return combined_pkg
 
-# def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
-#     """Get data summary (e.g. zonal mean) of single variable in polygon.
 
-#     Args:
-#         var_ep (str): Data variable. One of 'taspr', 'temperature', or 'precipitation'.
-#         poly_gdf (GeoDataFrame): the object from which to fetch the polygon, e.g. the HUC 8 geodataframe for watershed polygons
-#         poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
+def summarize_within_poly_alf(ds, poly, dim_encodings, bandname="Gray", varname="Gray"):
+    """Summarize a single Data Variable of a xarray.DataSet within a polygon.
+    Return the results as a nested dict.
 
-#     Returns:
-#         aggr_results (dict): data representing zonal means within the polygon.
+    NOTE - This is a candidate for de-duplication! Only defining here because some 
+    things are out-of-sync with existing ways of doing things (e.g., key names 
+    in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
 
-#     Notes:
-#         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
-#     """
-#     poly = get_poly_3338_bbox(poly_gdf, poly_id)
-#     # mapping between coordinate values (ints) and variable names (strs)
-#     varname = var_ep_lu[var_ep]
-#     var_coord = list(dim_encodings["varnames"].keys())[list(dim_encodings["varnames"].values()).index(varname)]
-#     # fetch data within the Polygon bounding box
-#     cov_ids, summary_decades = make_fetch_args()
-#     ds_list = asyncio.run(fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades))
-#     # average over the following decades / time periods
-#     aggr_results = {}
-#     summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
-#     for ds, period in zip(ds_list[:-1], summary_periods):
-#         aggr_results[period] = summarize_within_poly(ds, poly, dim_encodings, "Gray", varname)
-#     ar5_results = summarize_within_poly(ds_list[-1], poly, dim_encodings, "Gray", varname)
-#     for decade, summaries in ar5_results.items():
-#         aggr_results[decade] = summaries
-#     #  add the model, scenario, and varname levels for CRU
-#     for season in aggr_results[summary_periods[0]]:
-#         aggr_results[summary_periods[0]][season] = {
-#             "CRU-TS40": {
-#                 "CRU_historical": {varname: aggr_results[summary_periods[0]][season]}
-#             }
-#         }
-#     # add the varnames for AR5
-#     for period in summary_periods[1:] + list(dim_encodings["decades"].values()):
-#         for season in aggr_results[period]:
-#             for model in aggr_results[period][season]:
-#                 for scenario in aggr_results[period][season][model]:
-#                     aggr_results[period][season][model][scenario] = {
-#                         varname: aggr_results[period][season][model][scenario]
-#                     }
-#     return aggr_results
+    Args:
+        ds (xarray.DataSet): DataSet with "Gray" as variable of
+            interest
+        poly (shapely.Polygon): polygon within which to summarize
+        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the 
+            data and map integer data coordinates to models, scenarios, variables, etc.
+        bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
+            the name is not given at ingest
+        varname (str): standard variable name used for storing results
+
+    Returns:
+        Nested dict of results for all non-X/Y axis combinations,
+    """
+    # will actually operate on underlying DataArray
+
+    da = ds[bandname]
+    # get axis (dimension) names and make list of all coordinate combinations
+    all_dims = da.dims
+    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
+    iter_coords = list(
+        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
+    )
+
+    # generate all combinations of decoded coordinate values
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
+
+    aggr_results = generate_nested_dict(dim_combos)
+
+    data_arr = []
+    for coords in iter_coords:
+        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        data_arr.append(da.sel(sel_di).values)
+    data_arr = np.array(data_arr)
+
+    # need to transpose the 2D spatial slices if X is the "rows" dimension
+    if all_dims.index("X") < all_dims.index("Y"):
+        data_arr = data_arr.transpose(0, 2, 1)
+
+    # get transform from a DataSet
+    ds.rio.set_spatial_dims("X", "Y")
+    transform = ds.rio.transform()
+    poly_mask_arr = zonal_stats(
+        poly,
+        data_arr[0],
+        affine=transform,
+        nodata=np.nan,
+        stats=["mean"],
+        raster_out=True,
+    )[0]["mini_raster_array"]
+
+    data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
+    data_arr[data_arr_mask] = np.nan
+    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
+
+    for map_list, result in zip(dim_combos, results):
+        if len(map_list) > 1:
+            get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = {
+                varname: round(result, 4)
+            }
+        else:
+            aggr_results[map_list[0]] = round(result, 4)
+    return aggr_results
+
+
+def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
+    """Get data summary (e.g. zonal mean) of single variable in polygon.
+
+    Args:
+        var_ep (str): variable endpoint. Either flammability or veg_change
+            poly_gdf (GeoDataFrame): the object from which to fetch the polygon,
+            e.g. the HUC 8 geodataframe for watershed polygons
+        poly_id (str or int): the unique `id` used to identify the Polygon
+            for which to compute the zonal mean.
+
+    Returns:
+        aggr_results (dict): data representing zonal means within the polygon.
+
+    Notes:
+        Fetches data on the individual instances of the singular dimension combinations. Consider 
+            validating polygon IDs in `validate_data` or `lat_lon` module.
+    """
+    poly = get_poly_3338_bbox(poly_gdf, poly_id)
+    # mapping between coordinate values (ints) and variable names (strs)
+    varname = var_ep_lu[var_ep]["varname"]
+    cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
+    ds_list = asyncio.run(fetch_alf_bbox_data(poly.bounds, cov_id_str))
+
+    # average over the following decades / time periods
+    aggr_results = {}
+    summary_eras = ["2040_2069", "2070_2099"]
+    for ds, era in zip(ds_list[1:3], summary_eras):
+        aggr_results[era] = summarize_within_poly_alf(
+            ds, poly, future_dim_encodings, "Gray", varname
+        )
+    historical_results = summarize_within_poly_alf(
+        ds_list[0], poly, historical_dim_encodings, "Gray", varname
+    )
+    ar5_results = summarize_within_poly_alf(
+        ds_list[-1], poly, future_dim_encodings, "Gray", varname
+    )
+    for era, summaries in ar5_results.items():
+        aggr_results[era] = summaries
+    #  add the model, scenario, and varname levels for CRU
+    for era in historical_results:
+        aggr_results[era] = {
+            "CRU-TS40": {"CRU_historical": {varname: historical_results[era]}}
+        }
+    return aggr_results
 
 
 @routes.route("/alfresco/")
@@ -422,13 +522,17 @@ def alfresco_about():
 
 
 @routes.route("/alfresco/flammability/point/")
-def rel_flam_about_point():
-    return render_template("alfresco/flam_point.html")
-
-
 @routes.route("/alfresco/veg_change/point/")
-def rel_veg_change_about_point():
-    return render_template("alfresco/veg_point.html")
+@routes.route("/alfresco/point/")
+def alfresco_about_point():
+    return render_template("alfresco/point.html")
+
+
+@routes.route("/alfresco/flammability/huc/")
+@routes.route("/alfresco/veg_change/huc/")
+@routes.route("/alfresco/huc/")
+def alfresco_about_huc():
+    return render_template("alfresco/huc.html")
 
 
 # @routes.route("/taspr/huc/")
@@ -475,8 +579,9 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     x, y = project_latlon(lat, lon, 3338)
 
     if var_ep in var_ep_lu.keys():
+        cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
         try:
-            point_data_list = asyncio.run(fetch_alf_point_data(x, y, var_ep))
+            point_data_list = asyncio.run(fetch_alf_point_data(x, y, cov_id_str))
         except Exception as exc:
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
@@ -504,35 +609,33 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     return postprocess(point_pkg, "alfresco")
 
 
-# @routes.route("/<var_ep>/huc/<huc_id>")
-# def huc_data_endpoint(var_ep, huc_id):
-#     """HUC-aggregation data endpoint. Fetch data within HUC
-#     for specified variable and return JSON-like dict.
+@routes.route("/alfresco/<var_ep>/huc/<huc_id>")
+def run_fetch_alf_huc_data(var_ep, huc_id):
+    """HUC-aggregation data endpoint. Fetch data within HUC
+    for specified variable and return JSON-like dict.
 
-#     Args:
-#         var_ep (str): variable endpoint. Either taspr, temperature,
-#             or precipitation
-#         huc_id (int): 8-digit HUC ID
-#     Returns:
-#         huc_pkg (dict): zonal mean of variable(s) for HUC polygon
+    Args:
+        var_ep (str): variable endpoint. Either veg_change or flammability
+        huc_id (int): 8-digit HUC ID
+    Returns:
+        huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
-#     """
-#     validation = validate_huc8(huc_id)
-#     if validation == 400:
-#         return render_template("400/bad_request.html"), 400
-#     try:
-#         if var_ep in var_ep_lu.keys():
-#             huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
-#         elif var_ep == "taspr":
-#             huc_pkg = run_aggregate_allvar_polygon(huc8_gdf, huc_id)
-#     except:
-#         return render_template("422/invalid_huc.html"), 422
+    """
+    validation = validate_huc8(huc_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
+    except:
+        return render_template("422/invalid_huc.html"), 422
 
-#     if request.args.get("format") == "csv":
-#         csv_data = create_csv(huc_pkg)
-#         return return_csv(csv_data)
+    huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
 
-#     return postprocess(huc_pkg, "taspr")
+    # if request.args.get("format") == "csv":
+    #     csv_data = create_csv(huc_pkg)
+    #     return return_csv(csv_data)
+
+    return postprocess(huc_pkg, "alfresco")
 
 
 # @routes.route("/<var_ep>/protectedarea/<akpa_id>")
