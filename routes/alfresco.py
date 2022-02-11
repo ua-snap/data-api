@@ -392,18 +392,52 @@ def package_ar5_alf_averaged_point_data(point_data, varname):
 #     return combined_pkg
 
 
-def summarize_within_poly_alf(ds, poly, dim_encodings, bandname="Gray", varname="Gray"):
+def get_poly_mask_arr(ds, poly, bandname):
+    """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid 
+    zonal summary across results from multiple WCS requests for the same bbox. Wrapper for
+    rasterstats zonal_stats().
+
+    Args:
+        ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+        poly (shapely.Polygon): polygon to create mask from
+        bandname (str): name of the DataArray containing the data
+    
+    Returns:
+        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting 
+            the polygon of interest
+    """
+    # need a data layer of same x/y shape just for running a zonal stats
+    xy_shape = ds[bandname].values.shape[-2:]
+    data_arr = np.zeros(xy_shape)
+    # get affine transform from the xarray.DataSet
+    ds.rio.set_spatial_dims("X", "Y")
+    transform = ds.rio.transform()
+    poly_mask_arr = zonal_stats(
+        poly,
+        data_arr,
+        affine=transform,
+        nodata=np.nan,
+        stats=["mean"],
+        raster_out=True,
+    )[0]["mini_raster_array"]
+    return poly_mask_arr
+
+
+def summarize_within_poly_marr(
+    ds, poly_mask_arr, dim_encodings, bandname="Gray", varname="Gray"
+):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
     Return the results as a nested dict.
 
-    NOTE - This is a candidate for de-duplication! Only defining here because some 
+    NOTE - This is a candidate for de-duplication! Only defining here because some
     things are out-of-sync with existing ways of doing things (e.g., key names 
     in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
 
     Args:
         ds (xarray.DataSet): DataSet with "Gray" as variable of
             interest
-        poly (shapely.Polygon): polygon within which to summarize
+        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting 
+            the polygon of interest
         dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the 
             data and map integer data coordinates to models, scenarios, variables, etc.
         bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
@@ -430,7 +464,6 @@ def summarize_within_poly_alf(ds, poly, dim_encodings, bandname="Gray", varname=
             dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
         ]
         dim_combos.append(map_list)
-
     aggr_results = generate_nested_dict(dim_combos)
 
     data_arr = []
@@ -442,18 +475,6 @@ def summarize_within_poly_alf(ds, poly, dim_encodings, bandname="Gray", varname=
     # need to transpose the 2D spatial slices if X is the "rows" dimension
     if all_dims.index("X") < all_dims.index("Y"):
         data_arr = data_arr.transpose(0, 2, 1)
-
-    # get transform from a DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr[0],
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
 
     data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
     data_arr[data_arr_mask] = np.nan
@@ -492,18 +513,22 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     ds_list = asyncio.run(fetch_alf_bbox_data(poly.bounds, cov_id_str))
 
+    # get the polygon mask array for rapidly aggregating within the polygon
+    #  for all data layers (avoids computing spatial transform for each layer)
+    bandname = "Gray"
+    poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
     # average over the following decades / time periods
     aggr_results = {}
     summary_eras = ["2040_2069", "2070_2099"]
     for ds, era in zip(ds_list[1:3], summary_eras):
-        aggr_results[era] = summarize_within_poly_alf(
-            ds, poly, future_dim_encodings, "Gray", varname
+        aggr_results[era] = summarize_within_poly_marr(
+            ds, poly_mask_arr, future_dim_encodings, bandname, varname
         )
-    historical_results = summarize_within_poly_alf(
-        ds_list[0], poly, historical_dim_encodings, "Gray", varname
+    historical_results = summarize_within_poly_marr(
+        ds_list[0], poly_mask_arr, historical_dim_encodings, bandname, varname
     )
-    ar5_results = summarize_within_poly_alf(
-        ds_list[-1], poly, future_dim_encodings, "Gray", varname
+    ar5_results = summarize_within_poly_marr(
+        ds_list[-1], poly_mask_arr, future_dim_encodings, bandname, varname
     )
     for era, summaries in ar5_results.items():
         aggr_results[era] = summaries
