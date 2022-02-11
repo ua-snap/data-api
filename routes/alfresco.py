@@ -41,6 +41,9 @@ var_ep_lu = {
     "veg_change": {"cov_id_str": "relative_vegetation_change", "varname": "rvc",},
 }
 
+# CSV field names
+alf_fieldnames = ["variable", "date_range", "model", "scenario", "stat", "value"]
+
 
 # def make_fetch_args():
 #     """Fixed helper function for ensuring
@@ -518,24 +521,27 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
     # average over the following decades / time periods
     aggr_results = {}
-    summary_eras = ["2040_2069", "2070_2099"]
-    for ds, era in zip(ds_list[1:3], summary_eras):
-        aggr_results[era] = summarize_within_poly_marr(
-            ds, poly_mask_arr, future_dim_encodings, bandname, varname
-        )
     historical_results = summarize_within_poly_marr(
         ds_list[0], poly_mask_arr, historical_dim_encodings, bandname, varname
     )
-    ar5_results = summarize_within_poly_marr(
-        ds_list[-1], poly_mask_arr, future_dim_encodings, bandname, varname
-    )
-    for era, summaries in ar5_results.items():
-        aggr_results[era] = summaries
     #  add the model, scenario, and varname levels for CRU
     for era in historical_results:
         aggr_results[era] = {
             "CRU-TS40": {"CRU_historical": {varname: historical_results[era]}}
         }
+    # run regular future
+    ar5_results = summarize_within_poly_marr(
+        ds_list[-1], poly_mask_arr, future_dim_encodings, bandname, varname
+    )
+    for era, summaries in ar5_results.items():
+        aggr_results[era] = summaries
+    # run summary eras for future
+    summary_eras = ["2040_2069", "2070_2099"]
+    for ds, era in zip(ds_list[1:3], summary_eras):
+        aggr_results[era] = summarize_within_poly_marr(
+            ds, poly_mask_arr, future_dim_encodings, bandname, varname
+        )
+
     return aggr_results
 
 
@@ -611,20 +617,21 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
 
     varname = var_ep_lu[var_ep]["varname"]
     point_pkg = package_historical_alf_point_data(point_data_list[0], varname)
+    # package AR5 data and fold into data pakage
+    ar5_point_pkg = package_ar5_alf_point_data(point_data_list[3], varname)
+    for era, summaries in ar5_point_pkg.items():
+        point_pkg[era] = summaries
+    # package summary future eras in
     point_pkg["2040-2069"] = package_ar5_alf_averaged_point_data(
         point_data_list[1], varname
     )
     point_pkg["2070-2099"] = package_ar5_alf_averaged_point_data(
         point_data_list[2], varname
     )
-    # package AR5 data and fold into data pakage
-    ar5_point_pkg = package_ar5_alf_point_data(point_data_list[3], varname)
-    for era, summaries in ar5_point_pkg.items():
-        point_pkg[era] = summaries
 
-    # if request.args.get("format") == "csv":
-    #     csv_data = create_csv(point_pkg)
-    #     return return_csv(csv_data)
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(point_pkg, alf_fieldnames, varname=varname, stat="mean")
+        return return_csv(csv_data)
 
     return postprocess(point_pkg, "alfresco")
 
@@ -649,9 +656,10 @@ def run_fetch_alf_huc_data(var_ep, huc_id):
     except:
         return render_template("422/invalid_huc.html"), 422
 
-    # if request.args.get("format") == "csv":
-    #     csv_data = create_csv(huc_pkg)
-    #     return return_csv(csv_data)
+    if request.args.get("format") == "csv":
+        varname = var_ep_lu[var_ep]["varname"]
+        csv_data = create_csv(huc_pkg, alf_fieldnames, varname=varname, stat="mean")
+        return return_csv(csv_data)
 
     return postprocess(huc_pkg, "alfresco")
 
@@ -677,8 +685,9 @@ def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
     except:
         return render_template("422/invalid_protected_area.html"), 422
 
-    # if request.args.get("format") == "csv":
-    #     csv_data = create_csv(pa_pkg)
-    #     return return_csv(csv_data)
+    if request.args.get("format") == "csv":
+        varname = var_ep_lu[var_ep]["varname"]
+        csv_data = create_csv(pa_pkg, alf_fieldnames, varname=varname, stat="mean")
+        return return_csv(csv_data)
 
     return postprocess(pa_pkg, "alfresco")
