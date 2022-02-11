@@ -654,8 +654,6 @@ def run_fetch_alf_huc_data(var_ep, huc_id):
     except:
         return render_template("422/invalid_huc.html"), 422
 
-    huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
-
     # if request.args.get("format") == "csv":
     #     csv_data = create_csv(huc_pkg)
     #     return return_csv(csv_data)
@@ -663,29 +661,29 @@ def run_fetch_alf_huc_data(var_ep, huc_id):
     return postprocess(huc_pkg, "alfresco")
 
 
-# @routes.route("/<var_ep>/protectedarea/<akpa_id>")
-# def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
-#     """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified variable and return JSON-like dict.
-#     Args:
-#         var_ep (str): variable endpoint. Either taspr, temperature,
-#             or precipitation
-#         akpa_id (str): Protected Area ID (e.g. "NPS7")
-#     Returns:
-#         pa_pkg (dict): zonal mean of variable(s) for protected area polygon
-#     """
-#     validation = validate_akpa(akpa_id)
-#     if validation == 400:
-#         return render_template("400/bad_request.html"), 400
-#     try:
-#         if var_ep in var_ep_lu.keys():
-#             pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-#         elif var_ep == "taspr":
-#             pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
-#     except:
-#         return render_template("422/invalid_protected_area.html"), 422
+@routes.route("/alfresco/<var_ep>/protectedarea/<akpa_id>")
+def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
+    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified
+    variable and return JSON-like dict.
 
-#     if request.args.get("format") == "csv":
-#         csv_data = create_csv(pa_pkg)
-#         return return_csv(csv_data)
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        akpa_id (str): Protected Area ID (e.g. "NPS7")
+    Returns:
+        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
+    """
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    # pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
+    try:
+        pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
 
-#     return pa_pkg
+    # if request.args.get("format") == "csv":
+    #     csv_data = create_csv(pa_pkg)
+    #     return return_csv(csv_data)
+
+    return postprocess(pa_pkg, "alfresco")
