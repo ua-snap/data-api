@@ -1,6 +1,8 @@
 """
 A module of data gathering functions for use across multiple endpoints.
 """
+import csv
+import copy
 import io
 import itertools
 import operator
@@ -13,7 +15,7 @@ import xarray as xr
 from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
-from flask import current_app as app
+from flask import current_app as app, Response
 from rasterstats import zonal_stats
 from config import RAS_BASE_URL
 from generate_requests import *
@@ -336,7 +338,6 @@ def parse_meta_xml_str(meta_xml_str):
     # make the coordinate value keys integers
     for axis, encoding_di in dim_encodings.items():
         dim_encodings[axis] = {int(k): v for k, v in encoding_di.items()}
-
     return dim_encodings
 
 
@@ -355,5 +356,88 @@ async def get_dim_encodings(cov_id):
     meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
     meta_xml_str = await fetch_data([meta_url])
     dim_encodings = parse_meta_xml_str(meta_xml_str)
-
     return dim_encodings
+
+
+def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
+    """Extract keys of nested dictionary to list of tuples
+
+    Args:
+        dict_ (dict): nested dictionary to extract keys from
+        result_list (list): leave as None
+        in_line_list (list): leave as None
+
+    Notes:
+        Thanks to https://stackoverflow.com/a/62928173/11417211
+    """
+    is_return_list = True if result_list is None else False
+    if is_return_list:
+        result_list = []
+    is_create_new = True if in_line_list is None else False
+    for k, v in dict_.items():
+        if is_create_new:
+            in_line_list = []
+        out_line_list = copy.deepcopy(in_line_list)
+        out_line_list.append(k)
+        if not isinstance(v, dict) or len(v) == 0:
+            result_list.append(out_line_list)
+        else:
+            extract_nested_dict_keys(dict_[k], result_list, out_line_list)
+    if is_return_list:
+        return result_list
+
+
+def create_csv(packaged_data, fieldnames, varname=None, stat=None):
+    """
+    Returns a CSV version of the fetched data, as a string.
+
+    Args:
+        packaged_data (json): JSON-like data pakage output
+            from the run_fetch_* and run_aggregate_* functions
+        fieldnames (list): list of string values for CSV column names
+        varname (str): str value used for variable name. Appended 
+        stat (str): str value used for stat name. Appended
+            after fields and before value.
+
+    Returns:
+        string of CSV data
+    """
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+    # extract the coordinate values stored in keys. assumes uniform structure
+    # across entire data package (i.e. n levels deep where n == len(fieldnames))
+    data_package_coord_combos = extract_nested_dict_keys(packaged_data)
+    for coords in data_package_coord_combos:
+        row_di = {}
+        # need more general way of handling fields to be inserted before or after
+        # what are actually available in packaged dicts
+        if varname:
+            row_di["variable"] = varname
+        for field, coord in zip(fieldnames, coords):
+            row_di[field] = coord
+        if stat:
+            row_di["stat"] = stat
+        row_di["value"] = get_from_dict(packaged_data, coords)
+        writer.writerow(row_di)
+    return output.getvalue()
+
+
+def return_csv(csv_data):
+    """Return the CSV data as a download
+
+    Args:
+        csv_data (?): csv data created with create_csv() function
+
+    Returns:
+        CSV Response
+    """
+    response = Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={
+            "Content-Type": 'text/csv; name="climate.csv"',
+            "Content-Disposition": 'attachment; filename="climate.csv"',
+        },
+    )
+    return response

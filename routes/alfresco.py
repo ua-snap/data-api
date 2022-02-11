@@ -7,7 +7,6 @@ import numpy as np
 import xarray as xr
 from flask import (
     Blueprint,
-    Response,
     render_template,
     request,
     current_app as app,
