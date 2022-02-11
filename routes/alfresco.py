@@ -542,6 +542,8 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
 
 @routes.route("/alfresco/")
 @routes.route("/alfresco/abstract/")
+@routes.route("/alfresco/flammability/")
+@routes.route("/alfresco/veg_change/")
 def alfresco_about():
     return render_template("alfresco/abstract.html")
 
@@ -560,17 +562,11 @@ def alfresco_about_huc():
     return render_template("alfresco/huc.html")
 
 
-# @routes.route("/taspr/huc/")
-# @routes.route("/temperature/huc/")
-# @routes.route("/precipitation/huc/")
-# def about_huc():
-#     return render_template("taspr/huc.html")
-
-# @routes.route("/taspr/protectedarea/")
-# @routes.route("/temperature/protectedarea/")
-# @routes.route("/precipitation/protectedarea/")
-# def taspr_about_protectedarea():
-#     return render_template("taspr/protectedarea.html")
+@routes.route("/alfresco/flammability/protectedarea/")
+@routes.route("/alfresco/veg_change/protectedarea/")
+@routes.route("/alfresco/protectedarea/")
+def alfresco_about_protectedarea():
+    return render_template("alfresco/protectedarea.html")
 
 
 @routes.route("/alfresco/<var_ep>/point/<lat>/<lon>")

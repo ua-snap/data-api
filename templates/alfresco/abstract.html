@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Post-processed ALFRESCO Data</h3>
+<h3>Post-processed 1km ALFRESCO Data</h3>
 <p>The endpoints here provide access to data products derived from outputs from ALFRESCO simulations done using future (AR5/CMIP5) scenarios and historical (CRU TS 4.0) data completed for the Integrated Ecosystem Model (IEM) project. The current endpoints are described in the "Service Endpoints" section below, and are available for the following datasets:</p>
 
 <h4>Datasets</h4>
@@ -18,13 +18,13 @@
     <td>flammability</td>
     <td>rf</td>
     <td>Relative Flammability</td>
-    <td>These data are derived from the fire scar outputs and are computed as the average number of times a pixel burned across all reps for all years of the summary year span.</td>
+    <td>These data are derived from the fire scar outputs and are computed as the average number of times a pixel burned across all reps for all years of the summary year span. Pixels are 1km x 1km.</td>
   </tr>
   <tr>
     <td>veg_change</td>
     <td>rvc</td>
     <td>Relative Vegetation Change</td>
-    <td>These data are derived from the vegetation class data, the principal phenomena being modeled by ALFRESCO. They are computed as the average number of year-to-year transitions of any vegetation class for a pixel, across all reps for all years of the summary year span.</td>
+    <td>These data are derived from the vegetation class data, the principal phenomena being modeled by ALFRESCO. They are computed as the average number of year-to-year transitions of any vegetation class for a pixel, across all reps for all years of the summary year span. Pixels are 1km x 1km.</td>
   </tr>
 </tbody>
 </table>
@@ -34,6 +34,7 @@
 <ul>
     <li><a href="/alfresco/point">Point query</a>: </li>
     <li><a href="/alfresco/huc">Aggregate by HUC</a>: </li>
+    <li><a href="/alfresco/protectedarea">Aggregate by protected area</a>: </li>
 </ul>
 
 <h4>Results from queries to the above endpoints will look like this:</h4>
@@ -122,7 +123,7 @@ The above output is structured as such:
 
 <h4>Source data</h4>
 
-These data are derived from ALFRESCO model outputs created for the IEM project. For access to the source data used here, please contact uaf-snap-data-tool@alaska.edu and ask about accessing these data.
+These data are derived from ALFRESCO model outputs created for the IEM project at a resolution of 1km. For access to the source data used here, please contact uaf-snap-data-tool@alaska.edu and ask about accessing these data.
 
 SNAP also has some similar datasets available for download at longer year spans and for fewer models and scenarios than available here:
 
