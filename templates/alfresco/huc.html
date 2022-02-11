@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>ALFRESCO HUC aggregation</h3>
+<p>Query data derived from ALFRESCO outputs for a specific HUC and aggregate by mean.</p>
+<p>Examples for the currently available datasets:</p>
+<ul>
+    <li>Relative flammability: <a href="/alfresco/flammability/huc/19080309">/alfresco/flammability/huc/19080309</a></li>
+    <li>Relative vegetation change: <a href="/alfresco/veg_change/huc/19080309">/alfresco/veg_change/huc/19080309</a></li>
+</ul>
+<h4>CSV Export</h4>
+<p>To export the aggregated HUC data in a CSV file, append <code>?format=csv</code>.</p>
+<p>Example: <a href="/alfresco/flammability/huc/19080309?format=csv">/alfresco/flammability/huc/19080309?format=csv</a></p>
+<hr/>
+<p>8-digit HUC shapefiles accessed at <a href="https://datagateway.nrcs.usda.gov/">https://datagateway.nrcs.usda.gov/</a></p>
+{% endblock %}
