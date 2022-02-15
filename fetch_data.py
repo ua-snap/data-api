@@ -378,7 +378,7 @@ def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
         return result_list
 
 
-def create_csv(packaged_data, fieldnames, varname=None, stat=None):
+def create_csv(packaged_data, fieldnames, package_coords, fill_di=None):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -386,6 +386,12 @@ def create_csv(packaged_data, fieldnames, varname=None, stat=None):
         packaged_data (json): JSON-like data pakage output
             from the run_fetch_* and run_aggregate_* functions
         fieldnames (list): list of string values for CSV column names
+            in desired column order
+        package_coord (list): list of string values corresponding to 
+            levels of the packaged_data dict. Should be a subset of fieldnames arg.
+        fill_di (dict): dict to fill in columns with fixed values. 
+            Keys should specify the field name and value should be the 
+            value to fill
         varname (str): str value used for variable name. Appended 
         stat (str): str value used for stat name. Appended
             after fields and before value.
@@ -403,12 +409,13 @@ def create_csv(packaged_data, fieldnames, varname=None, stat=None):
         row_di = {}
         # need more general way of handling fields to be inserted before or after
         # what are actually available in packaged dicts
-        if varname:
-            row_di["variable"] = varname
-        for field, coord in zip(fieldnames, coords):
+        for field, coord in zip(package_coords, coords):
             row_di[field] = coord
-        if stat:
-            row_di["stat"] = stat
+        # fill in columns with fixed values if specified
+        if fill_di:
+            for fieldname, value in fill_di.items():
+                row_di[fieldname] = value
+        # write the actual value
         row_di["value"] = get_from_dict(packaged_data, coords)
         writer.writerow(row_di)
     return output.getvalue()

@@ -43,6 +43,8 @@ var_ep_lu = {
 
 # CSV field names
 alf_fieldnames = ["variable", "date_range", "model", "scenario", "stat", "value"]
+# package coordinate names that corresponding to each level of the nested data package dicts
+package_coords = ["date_range", "model", "scenario", "variable"]
 
 
 async def fetch_alf_point_data(x, y, cov_id_str):
@@ -415,7 +417,12 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     )
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg, alf_fieldnames, varname=varname, stat="mean")
+        csv_data = create_csv(
+            point_pkg,
+            alf_fieldnames,
+            package_coords,
+            {"variable": varname, "stat": "mean"},
+        )
         return return_csv(csv_data)
 
     return postprocess(point_pkg, "alfresco")
@@ -443,7 +450,12 @@ def run_fetch_alf_huc_data(var_ep, huc_id):
 
     if request.args.get("format") == "csv":
         varname = var_ep_lu[var_ep]["varname"]
-        csv_data = create_csv(huc_pkg, alf_fieldnames, varname=varname, stat="mean")
+        csv_data = create_csv(
+            huc_pkg,
+            alf_fieldnames,
+            package_coords,
+            {"variable": varname, "stat": "mean"},
+        )
         return return_csv(csv_data)
 
     return postprocess(huc_pkg, "alfresco")
@@ -472,7 +484,12 @@ def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
 
     if request.args.get("format") == "csv":
         varname = var_ep_lu[var_ep]["varname"]
-        csv_data = create_csv(pa_pkg, alf_fieldnames, varname=varname, stat="mean")
+        csv_data = create_csv(
+            pa_pkg,
+            alf_fieldnames,
+            package_coords,
+            {"variable": varname, "stat": "mean"},
+        )
         return return_csv(csv_data)
 
     return postprocess(pa_pkg, "alfresco")
