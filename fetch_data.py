@@ -28,24 +28,15 @@ async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
     Args:
         x (float): lower x-coordinate bound
         y (float): lower y-coordinate bound
+        cov_id (str): Rasdaman coverage ID
+        var_coord (int): coordinate value corresponding to variable name to query,
+            default=None will include all variables
+
+    Returns:
+        Data results from fetch_data()
     """
     urls = []
     request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord)
-    url = generate_wcs_query_url(request_str)
-    urls.append(url)
-    point_data = await fetch_data(urls)
-    return point_data
-
-
-async def fetch_wcps_point_data(x, y, cov_id, axis_name, axis_coords):
-    """Create the async request for data at the specified point.
-
-    Args:
-        x (float): lower x-coordinate bound
-        y (float): lower y-coordinate bound
-    """
-    urls = []
-    request_str = generate_average_wcps_str(x, y, cov_id, axis_name, axis_coords)
     url = generate_wcs_query_url(request_str)
     urls.append(url)
     point_data = await fetch_data(urls)
