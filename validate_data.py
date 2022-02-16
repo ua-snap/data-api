@@ -45,7 +45,7 @@ def nullify_nodata(data, endpoint):
     return nullified
 
 
-def prune_nodata_dict(data):
+def prune_nodata_dict(data, prune_depth, depth):
     """Traverse dict recursively and prune empty or None branches.
 
     Args:
@@ -55,8 +55,18 @@ def prune_nodata_dict(data):
     """
     pruned = {}
     for key, value in data.items():
+        if prune_depth is not None and depth == prune_depth:
+            value = prune_nodata(value)
+            if type(value) in [list, dict, tuple]:
+                if len(value) > 0:
+                    pruned[key] = value
+                else:
+                    pruned[key] = None
+                continue
+            pruned[key] = value
+            continue
         if type(value) in [list, dict, tuple]:
-            pruned_value = prune_nodata(value)
+            pruned_value = prune_nodata(value, prune_depth, depth)
             if pruned_value is not None and len(pruned_value) > 0:
                 pruned[key] = pruned_value
         else:
@@ -67,7 +77,7 @@ def prune_nodata_dict(data):
     return pruned
 
 
-def prune_nodata_list(data):
+def prune_nodata_list(data, prune_depth, depth):
     """Traverse list recursively and prune empty or None branches.
 
     Args:
@@ -77,8 +87,18 @@ def prune_nodata_list(data):
     """
     pruned = []
     for value in data:
+        if prune_depth is not None and depth == prune_depth:
+            value = prune_nodata(value)
+            if type(value) in [list, dict, tuple]:
+                if len(value) > 0:
+                    pruned.append(value)
+                else:
+                    pruned.append(None)
+                continue
+            pruned.append(value)
+            continue
         if type(value) in [list, dict, tuple]:
-            pruned_value = prune_nodata(value)
+            pruned_value = prune_nodata(value, prune_depth, depth)
             if pruned_value is not None and len(pruned_value) > 0:
                 pruned.append(pruned_value)
         else:
@@ -89,7 +109,7 @@ def prune_nodata_list(data):
     return pruned
 
 
-def prune_nodata(data):
+def prune_nodata(data, prune_depth=None, depth=1):
     """Traverse data structure recursively and prune empty or None branches.
 
     Args:
@@ -98,29 +118,37 @@ def prune_nodata(data):
         (dict): The same data with empty and None branches pruned
     """
     if isinstance(data, dict):
-        return prune_nodata_dict(data)
+        return prune_nodata_dict(data, prune_depth, depth + 1)
 
     if isinstance(data, list):
-        return prune_nodata_list(data)
+        return prune_nodata_list(data, prune_depth, depth + 1)
 
     return data
 
 
-def postprocess(data, endpoint, titles=None):
+def postprocess(data, endpoint, titles=None, prune_depth=None):
     """Filter nodata values, prune empty branches, add titles, and return 404
     if appropriate"""
     nullified_data = nullify_nodata(data, endpoint)
-    pruned_data = prune_nodata(nullified_data)
-    if pruned_data in [{}, None, 0]:
+
+    # See if anything remains if the entire data object is pruned.
+    completely_pruned_data = prune_nodata(nullified_data)
+
+    # Prune data object at the specified prune depth for response.
+    partially_pruned_data = prune_nodata(nullified_data, prune_depth)
+
+    if completely_pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
     if titles is not None:
         if isinstance(titles, str):
             nullified_data["title"] = titles
         else:
             for key in titles.keys():
-                if nullified_data[key] is not None:
-                    nullified_data[key]["title"] = titles[key]
-    return nullified_data
+                if key in completely_pruned_data:
+                    if completely_pruned_data[key] is not None:
+                        partially_pruned_data[key]["title"] = titles[key]
+
+    return partially_pruned_data
 
 
 def get_poly_3338_bbox(gdf, poly_id):
