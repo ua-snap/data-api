@@ -9,7 +9,7 @@ nodata_values = {
     "mean_annual_precip": [-9999],
     "permafrost": [-9999, -9999.0],
     "physiography": [],
-    "taspr": [-9999, -9.223372e+18, -9.223372036854776e+18],
+    "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
 }
 
 
