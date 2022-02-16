@@ -30,6 +30,12 @@ from . import routes
 alfresco_api = Blueprint("alfresco_api", __name__)
 
 
+# These are the encoded coordinate values for the "era" axis of the
+# rasdaman coverages being queried here. Each tuple contains the first
+# and last coordinate for creating WCPS query to average over them.
+# E.g., (3,5) computes average across 2040-2049, 2050-2059, and 2060-2069.
+summary_era_coords = [(3, 5), (6, 8)]
+
 # create encodings for coverages (currently all coverages share encodings)
 future_dim_encodings = asyncio.run(get_dim_encodings("relative_flammability_future"))
 historical_dim_encodings = asyncio.run(
@@ -64,7 +70,7 @@ async def fetch_alf_point_data(x, y, cov_id_str):
     # historical data request string
     request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}_historical"))
     # generate both future average requests (averages over decades)
-    for coords in [(3, 5), (6, 8)]:
+    for coords in summary_era_coords:
         request_strs.append(
             generate_average_wcps_str(x, y, f"{cov_id_str}_future", "era", coords)
         )
@@ -93,7 +99,7 @@ async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
         generate_netcdf_wcs_getcov_str(bbox_bounds, f"{cov_id_str}_historical")
     )
     # generate both future average requests (averages over decades)
-    for coords in [(3, 5), (6, 8)]:
+    for coords in summary_era_coords:
         # kwargs to pass to function in generate_netcdf_average_wcps_str
         kwargs = {
             "cov_id": f"{cov_id_str}_future",
