@@ -473,8 +473,7 @@ def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
     variable and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
+        var_ep (str): variable endpoint. Either veg_change or flammability
         akpa_id (str): Protected Area ID (e.g. "NPS7")
     Returns:
         pa_pkg (dict): zonal mean of variable(s) for protected area polygon
