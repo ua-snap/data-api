@@ -22,7 +22,12 @@ from fetch_data import (
     get_from_dict,
     summarize_within_poly,
 )
-from validate_request import validate_latlon, validate_huc8, validate_akpa, project_latlon
+from validate_request import (
+    validate_latlon,
+    validate_huc8,
+    validate_akpa,
+    project_latlon,
+)
 from validate_data import get_poly_3338_bbox, postprocess
 from luts import huc8_gdf, akpa_gdf
 from config import WEST_BBOX, EAST_BBOX
@@ -569,9 +574,13 @@ def run_fetch_point_data(lat, lon):
 
 def run_aggregate_allvar_polygon(poly_gdf, poly_id):
     """Get data summary (e.g. zonal mean) within a Polygon for all variables."""
-    tas_pkg, pr_pkg = [run_aggregate_var_polygon(var_ep, poly_gdf, poly_id) for var_ep in ["temperature", "precipitation"]]
+    tas_pkg, pr_pkg = [
+        run_aggregate_var_polygon(var_ep, poly_gdf, poly_id)
+        for var_ep in ["temperature", "precipitation"]
+    ]
     combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
     return combined_pkg
+
 
 def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     """Get data summary (e.g. zonal mean) of single variable in polygon.
