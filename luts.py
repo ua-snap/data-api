@@ -102,7 +102,7 @@ akco_src = "data/shapefiles/ak_native_corporations.shp"
 akco_gdf = gpd.read_file(akco_src).set_index("id").to_crs(3338)
 
 # AK Climate Divisions
-akclim_src = "data/shapefiles/ak_climate_divisons.shp"
+akclim_src = "data/shapefiles/ak_climate_divisions.shp"
 akclim_gdf = gpd.read_file(akclim_src).set_index("id").to_crs(3338)
 
 # Ethnolinguistic Divisions
