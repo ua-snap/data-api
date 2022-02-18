@@ -4,8 +4,8 @@ from flask import (
 )
 
 # local imports
-from luts import huc8_gdf, akpa_gdf
-from validate_request import validate_huc8, validate_akpa
+from luts import huc8_gdf, akpa_gdf, akco_gdf, aketh_gdf, akclim_gdf, akfire_gdf
+from validate_request import validate_polyid
 from . import routes
 
 boundary_api = Blueprint("boundary_api", __name__)
@@ -17,6 +17,30 @@ def boundary_about():
     return render_template("boundary/abstract.html")
 
 
+@routes.route("/boundary/climatedivision/")
+@routes.route("/boundary/climatedivision/abstract/")
+def climatedivision_about():
+    return render_template("boundary/climatedivision.html")
+
+
+@routes.route("/boundary/corporation/")
+@routes.route("/boundary/corporation/abstract/")
+def corporation_about():
+    return render_template("boundary/corporation.html")
+
+
+@routes.route("/boundary/ethnolinguistic/")
+@routes.route("/boundary/ethnolinguistic/abstract/")
+def ethnolinguistic_about():
+    return render_template("boundary/ethnolinguistic.html")
+
+
+@routes.route("/boundary/firemanagement/")
+@routes.route("/boundary/firemanagement/abstract/")
+def firemanagement_about():
+    return render_template("boundary/firemanagement.html")
+
+
 @routes.route("/boundary/protectedarea/")
 @routes.route("/boundary/protectedarea/abstract/")
 def protectedarea_about():
@@ -25,20 +49,108 @@ def protectedarea_about():
 
 @routes.route("/boundary/huc/")
 @routes.route("/boundary/huc/abstract/")
-@routes.route("/boundary/watershed/")
-@routes.route("/boundary/watershed/abstract/")
 def huc_about():
     return render_template("boundary/huc/abstract.html")
 
 
-@routes.route("/boundary/watershed/huc8/")
 @routes.route("/boundary/huc/huc8/")
 def huc8_about():
     return render_template("boundary/huc/huc8.html")
 
 
+@routes.route("/boundary/climatedivision/<cd_id>")
+def run_fetch_climatedivision_poly(cd_id):
+    """Run async requesting for a climate division polygon.
+
+    Args:
+        cd_id (str): ID for polygon, e.g. `CD2`
+
+    Returns:
+        GeoJSON of the polygon
+
+    example: http://localhost:5000/boundary/climatedivisision/CD2
+    """
+    validation = validate_polyid(cd_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = akclim_gdf.loc[[cd_id]].to_crs(4326)
+    except:
+        return render_template("422/invalid_climatedivision.html"), 422
+    poly_geojson = poly.to_json()
+    return poly_geojson
+
+
+@routes.route("/boundary/corporation/<co_id>")
+def run_fetch_corporation_poly(co_id):
+    """Run async requesting for a corporation polygon.
+
+    Args:
+        co_id (str): ID for polygon, e.g. `NC3`
+
+    Returns:
+        GeoJSON of the polygon
+
+    example: http://localhost:5000/boundary/corporation/NC3
+    """
+    validation = validate_polyid(co_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = akco_gdf.loc[[co_id]].to_crs(4326)
+    except:
+        return render_template("422/invalid_corporation.html"), 422
+    poly_geojson = poly.to_json()
+    return poly_geojson
+
+
+@routes.route("/boundary/ethnolinguistic/<el_id>")
+def run_fetch_ethnolinguistic_poly(el_id):
+    """Run async requesting for a ethnolinguistic polygon.
+
+    Args:
+        el_id (str): ID for polygon, e.g. `EL4`
+
+    Returns:
+        GeoJSON of the polygon
+
+    example: http://localhost:5000/boundary/ethnolinguistic/EL4
+    """
+    validation = validate_polyid(el_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = aketh_gdf.loc[[el_id]].to_crs(4326)
+    except:
+        return render_template("422/invalid_ethnolinguistic.html"), 422
+    poly_geojson = poly.to_json()
+    return poly_geojson
+
+
+@routes.route("/boundary/firemanagement/<fire_id>")
+def run_fetch_firemanagement_poly(fire_id):
+    """Run async requesting for a firemanagement polygon.
+
+    Args:
+        el_id (str): ID for polygon, e.g. `FIRE7`
+
+    Returns:
+        GeoJSON of the polygon
+
+    example: http://localhost:5000/boundary/firemanagement/FIRE7
+    """
+    validation = validate_polyid(fire_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = akfire_gdf.loc[[fire_id]].to_crs(4326)
+    except:
+        return render_template("422/invalid_firemanagement.html"), 422
+    poly_geojson = poly.to_json()
+    return poly_geojson
+
+
 @routes.route("/boundary/huc/huc8/<huc8_id>")
-@routes.route("/boundary/watershed/huc8/<huc8_id>")
 def run_fetch_huc_poly(huc8_id):
     """Run the async requesting for a HUC polygon and return the GeoJSON.
 
@@ -51,7 +163,7 @@ def run_fetch_huc_poly(huc8_id):
     Notes:
         example: http://localhost:5000/boundary/huc/huc8/19070506
     """
-    validation = validate_huc8(huc8_id)
+    validation = validate_polyid(huc8_id)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
@@ -75,7 +187,7 @@ def run_fetch_akprotectedarea_poly(akpa_id):
     Notes:
         example: http://localhost:5000/boundary/protectedarea/NPS12
     """
-    validation = validate_akpa(akpa_id)
+    validation = validate_polyid(akpa_id)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:

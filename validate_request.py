@@ -17,11 +17,11 @@ def validate_latlon(lat, lon):
         lat_float = float(lat)
         lon_float = float(lon)
     except:
-        return 400 # HTTP status code
+        return 400  # HTTP status code
     lat_in_world = -90 <= lat_float <= 90
     lon_in_world = -180 <= lon_float <= 180
     if not lat_in_world or not lon_in_world:
-        return 400 # HTTP status code
+        return 400  # HTTP status code
 
     # Validate against two different BBOXes to deal with antimeridian issues
     for bbox in [WEST_BBOX, EAST_BBOX]:
@@ -60,7 +60,7 @@ def validate_huc8(huc8_id):
     """Validate HUC-8 ID
     Return True if valid or HTTP status code if validation failed
     """
-    if re.search('[^A-Za-z0-9]', huc8_id):
+    if re.search("[^A-Za-z0-9]", huc8_id):
         return 400
     return True
 
@@ -69,7 +69,16 @@ def validate_akpa(akpa_id):
     """Validate protected area ID
     Return True if valid or HTTP status code if validation failed
     """
-    if re.search('[^A-Za-z0-9]', akpa_id):
+    if re.search("[^A-Za-z0-9]", akpa_id):
+        return 400
+    return True
+
+
+def validate_polyid(poly_id):
+    """Validate ID key for a generic polygon feature. The key may only contain alphanumeric characters.
+    Return True if valid or HTTP 400 status code if validation failed to indicate the request was poorly formed.
+    """
+    if re.search("[^A-Za-z0-9]", poly_id):
         return 400
     return True
 
