@@ -25,20 +25,16 @@ def protectedarea_about():
 
 @routes.route("/boundary/huc/")
 @routes.route("/boundary/huc/abstract/")
-@routes.route("/boundary/watershed/")
-@routes.route("/boundary/watershed/abstract/")
 def huc_about():
     return render_template("boundary/huc/abstract.html")
 
 
-@routes.route("/boundary/watershed/huc8/")
 @routes.route("/boundary/huc/huc8/")
 def huc8_about():
     return render_template("boundary/huc/huc8.html")
 
 
 @routes.route("/boundary/huc/huc8/<huc8_id>")
-@routes.route("/boundary/watershed/huc8/<huc8_id>")
 def run_fetch_huc_poly(huc8_id):
     """Run the async requesting for a HUC polygon and return the GeoJSON.
 
