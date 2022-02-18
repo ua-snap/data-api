@@ -4,7 +4,7 @@ from flask import (
 )
 
 # local imports
-from luts import huc8_gdf, akpa_gdf
+from luts import huc8_gdf, akpa_gdf, akco_gdf, aketh_gdf, akclim_gdf, akfire_gdf
 from validate_request import validate_huc8, validate_akpa
 from . import routes
 
@@ -54,6 +54,78 @@ def run_fetch_huc_poly(huc8_id):
         poly = huc8_gdf.loc[[huc8_id]].to_crs(4326)
     except:
         return render_template("422/invalid_huc.html"), 422
+    poly_geojson = poly.to_json()
+    return poly_geojson
+
+
+@routes.route("/boundary/protectedarea/<akpa_id>")
+def run_fetch_akprotectedarea_poly(akpa_id):
+    """Run the async requesting for a protected area polygon and return the GeoJSON.
+
+    Args:
+        pa_id (str): ID for polygon, e.g. `NPS12` or `FWS7`
+
+    Returns:
+        GeoJSON of the protected area polygon
+
+    Notes:
+        example: http://localhost:5000/boundary/protectedarea/NPS12
+    """
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = akpa_gdf.loc[[akpa_id]].to_crs(4326)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
+    poly_geojson = poly.to_json()
+    return poly_geojson
+
+
+@routes.route("/boundary/protectedarea/<akpa_id>")
+def run_fetch_akprotectedarea_poly(akpa_id):
+    """Run the async requesting for a protected area polygon and return the GeoJSON.
+
+    Args:
+        pa_id (str): ID for polygon, e.g. `NPS12` or `FWS7`
+
+    Returns:
+        GeoJSON of the protected area polygon
+
+    Notes:
+        example: http://localhost:5000/boundary/protectedarea/NPS12
+    """
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = akpa_gdf.loc[[akpa_id]].to_crs(4326)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
+    poly_geojson = poly.to_json()
+    return poly_geojson
+
+
+@routes.route("/boundary/protectedarea/<akpa_id>")
+def run_fetch_akprotectedarea_poly(akpa_id):
+    """Run the async requesting for a protected area polygon and return the GeoJSON.
+
+    Args:
+        pa_id (str): ID for polygon, e.g. `NPS12` or `FWS7`
+
+    Returns:
+        GeoJSON of the protected area polygon
+
+    Notes:
+        example: http://localhost:5000/boundary/protectedarea/NPS12
+    """
+    validation = validate_akpa(akpa_id)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    try:
+        poly = akpa_gdf.loc[[akpa_id]].to_crs(4326)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
     poly_geojson = poly.to_json()
     return poly_geojson
 

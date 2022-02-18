@@ -84,10 +84,27 @@ json_types = {
 with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
 
-# HUC-8 Polygons can be imported by various endpoints
+# Below Polygons can be imported by various endpoints
+# HUC-8
 huc_src = "data/shapefiles/hydrologic_units_wbdhu8_a_ak.shp"
 huc8_gdf = gpd.read_file(huc_src).set_index("huc8").to_crs(3338)
 
-# AK Protected Area Polygons can be imported by various endpoints
+# AK Protected Areas
 akpa_src = "data/shapefiles/ak_protected_areas.shp"
 akpa_gdf = gpd.read_file(akpa_src).set_index("id").to_crs(3338)
+
+# AK Fire Management Zones
+akfire_src = "data/shapefiles/ak_fire_management.shp"
+akfire_gdf = gpd.read_file(akfire_src).set_index("id").to_crs(3338)
+
+# AK Corporations
+akco_src = "data/shapefiles/ak_native_corporations.shp"
+akco_gdf = gpd.read_file(akco_src).set_index("id").to_crs(3338)
+
+# AK Climate Divisions
+akclim_src = "data/shapefiles/ak_climate_divisons.shp"
+akclim_gdf = gpd.read_file(akclim_src).set_index("id").to_crs(3338)
+
+# Ethnolinguistic Divisions
+aketh_src = "data/shapefiles/ethnolinguistic_regions.shp"
+aketh_gdf = gpd.read_file(aketh_src).set_index("id").to_crs(3338)
