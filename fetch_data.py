@@ -100,6 +100,8 @@ async def make_get_request(url, session):
         data = await resp.json()
     elif "application/netcdf" in url:
         data = await resp.read()
+    elif "GeoTIFF" in url:
+        data = await resp.read()
     elif "DescribeCoverage" in url:
         # DescribeCoverage in URL ==> XML coming back
         data = await resp.text()
