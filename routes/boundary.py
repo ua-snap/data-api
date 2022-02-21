@@ -50,12 +50,7 @@ def protectedarea_about():
 @routes.route("/boundary/huc/")
 @routes.route("/boundary/huc/abstract/")
 def huc_about():
-    return render_template("boundary/huc/abstract.html")
-
-
-@routes.route("/boundary/huc/huc8/")
-def huc8_about():
-    return render_template("boundary/huc/huc8.html")
+    return render_template("boundary/huc.html")
 
 
 @routes.route("/boundary/climatedivision/<cd_id>")
@@ -150,24 +145,24 @@ def run_fetch_firemanagement_poly(fire_id):
     return poly_geojson
 
 
-@routes.route("/boundary/huc/huc8/<huc8_id>")
-def run_fetch_huc_poly(huc8_id):
+@routes.route("/boundary/huc/<huc_id>")
+def run_fetch_huc_poly(huc_id):
     """Run the async requesting for a HUC polygon and return the GeoJSON.
 
     Args:
-        huc8_id (int): HUC-8 ID
+        huc_id (int): The HUC ID, only HUC-8 ID supported for now
 
     Returns:
-        GeoJSON of the HUC-8 polygon
+        GeoJSON of the HUC polygon
 
     Notes:
-        example: http://localhost:5000/boundary/huc/huc8/19070506
+        example: http://localhost:5000/boundary/huc/19070506
     """
-    validation = validate_polyid(huc8_id)
+    validation = validate_polyid(huc_id)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     try:
-        poly = huc8_gdf.loc[[huc8_id]].to_crs(4326)
+        poly = huc8_gdf.loc[[huc_id]].to_crs(4326)
     except:
         return render_template("422/invalid_huc.html"), 422
     poly_geojson = poly.to_json()
