@@ -2,6 +2,7 @@
 import os
 import pickle
 import geopandas as gpd
+import pandas as pd
 
 # TODO: Change this to https://earthmaps.io as default after development
 host = os.environ.get("API_HOSTNAME") or "http://earthmaps.io"
@@ -96,8 +97,17 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
 
 # Below Polygons can be imported by various endpoints
 # HUC-8 # note these are native WGS84 in the #geo-vector repo
-huc_src = "data/shapefiles/ak_huc8s.shp"
-huc8_gdf = gpd.read_file(huc_src).set_index("id").to_crs(3338)
+huc8_src = "data/shapefiles/ak_huc8s.shp"
+huc8_gdf = gpd.read_file(huc8_src).set_index("id").to_crs(3338)
+
+# HUC-12
+huc12_src = "data/shapefiles/ak_huc12s.shp"
+huc12_gdf = gpd.read_file(huc12_src).set_index("id").to_crs(3338)
+
+# join HUCs into same GeoDataFrame for easier lookup
+huc_gdf = pd.concat([huc8_gdf, huc12_gdf], ignore_index=True)
+
+valid_huc_ids = huc_gdf.index.values
 
 # AK Protected Areas
 akpa_src = "data/shapefiles/ak_protected_areas.shp"
