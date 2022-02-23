@@ -159,6 +159,46 @@ def update_json_data():
     )
 
 
+def jsonify_huc(huc_src):
+    """Create JSON data from a HUC shapefile
+
+    Args:
+        huc_src (str): relative path to HUC shapefile (.shp)
+
+    Returns:
+        No return value, writes the JSON-ified HUC info to disk.
+    """
+    # Read shapefile into Geopandas data frame
+    gdf = gpd.read_file(huc_src)
+
+    # the HUC shapefiles have a unique "huc<class>" field name depending
+    # corresponding to the size class of the HUC. E.g. "huc8" and "huc12"
+    # Rename that field to just "id"
+    huc_field = [field for field in gdf.columns if field[:3] == "huc"][0]
+    gdf = gdf.rename(columns={huc_field: "id"})
+    # keep fields of interest
+    keep_gdf = gdf[["id", "name", "states"]]
+
+    # Create JSON data from Pandas data frame.
+    hucs_json = json.loads(keep_gdf.T.to_json(orient="columns"))
+
+    # Create a blank output list for appending JSON fields.
+    output = []
+
+    # For each HUC in the JSON, we want to clean up the fields to match
+    # the IEM project's JSON and append it to the output list.
+    for key in hucs_json:
+        # Adds type to JSON of 'huc'
+        hucs_json[key]["type"] = "huc"
+
+        # Append the JSON object to end of list.
+        output.append(hucs_json[key])
+
+    # Dump output list into local JSON file
+    with open(json_types[huc_field], "w") as outfile:
+        json.dump(output, outfile)
+
+
 def update_data():
     """Downloads AOI CSV and shapefiles and converts to JSON format
 

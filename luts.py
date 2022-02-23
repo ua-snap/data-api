@@ -80,7 +80,8 @@ permafrost_encodings = {
 
 json_types = {
     "communities": "data/jsons/ak_communities.json",
-    "hucs": "data/jsons/ak_hucs.json",
+    "huc8": "data/jsons/ak_huc8.json",
+    "huc12": "data/jsons/ak_huc12.json",
     "protected_areas": "data/jsons/ak_protected_areas.json",
     "fire_zones": "data/jsons/ak_fire_mgmt_zones.json",
     "corporations": "data/jsons/ak_native_corporations.json",

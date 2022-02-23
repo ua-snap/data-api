@@ -70,7 +70,7 @@ def get_all_route_endpoints(curr_route, curr_type):
 
         Args:
             curr_route - Current route ex. https://earthmaps.io/taspr/huc/
-            curr_type - One of three types: community, huc, or pa
+            curr_type - One of four types: community, huc, pa, or local
 
         Returns:
             Nothing.
@@ -123,6 +123,8 @@ def recache():
             and route.find("abstract") == -1
         ):
             get_all_route_endpoints(route, "pa")
+        elif route.find("local") != -1:
+            get_all_route_endpoints(route, "local")
     return Response(
         response=json.dumps(routes), status=200, mimetype="application/json"
     )
