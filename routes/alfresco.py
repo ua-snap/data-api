@@ -369,6 +369,13 @@ def alfresco_about_protectedarea():
     return render_template("alfresco/protectedarea.html")
 
 
+@routes.route("/alfresco/flammability/local/")
+@routes.route("/alfresco/veg_change/local/")
+@routes.route("/alfresco/local/")
+def alfresco_about_local():
+    return render_template("alfresco/local.html")
+
+
 @routes.route("/alfresco/<var_ep>/point/<lat>/<lon>")
 def run_fetch_alf_point_data(var_ep, lat, lon):
     """Point data endpoint. Fetch point data for
@@ -500,3 +507,65 @@ def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
         return return_csv(csv_data)
 
     return postprocess(pa_pkg, "alfresco")
+
+
+@routes.route("/alfresco/<var_ep>/local/<lat>/<lon>")
+def run_fetch_alf_local_data(var_ep, lat, lon):
+    """"Local" endpoint for ALFRESCO data - finds the HUC-12 that intersects
+    the request lat/lon and returns a summary of data within that HUC
+
+    Args:
+        var_ep (str): variable endpoint. Either flammability or veg_change
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of requested ALFRESCO data
+    """
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+
+    # create Point object from coordinates
+    x, y = project_latlon(lat, lon, 3338)
+    # intersct the point with the HUC-12 polygons
+    point = Point(x, y)
+    intersect = huc12_gdf["geometry"].intersection(point)
+    # algorithm below to find the most qualified HUC, since we cannot
+    # rely on a simply intersection because simplified HUC-12s are not mutually
+    # exclusive and exhaustive over AK
+    # (because the simplifying algorithm does not preserve topology of the orginal shapefile)
+    idx_arr = np.where(~np.array([poly.is_empty for poly in intersect]))[0]
+    if len(idx_arr) == 1:
+        # ideal case (and probably most common) - point intersects a single HUC
+        huc_id = huc12_gdf.iloc[idx_arr[0]]["huc12"]
+    elif len(idx_arr) > 1:
+        # case where multiple polygons intersect the point
+        overlap_gs = gpd.GeoSeries([huc12_gdf["geometry"][idx] for idx in idx_arr])
+        distance = np.array(
+            [gpd.GeoSeries(point).distance(geom.boundary) for geom in overlap_gs]
+        )
+        # whichever polygon has the largest distance to the point is
+        # actually overlapping it the most, so select that one
+        huc_idx = idx_arr[np.argmax(distance)]
+        huc_id = huc12_gdf.iloc[huc_idx]["huc12"]
+    else:
+        # no intersection, see if a HUC poly is near, within 100m
+        distance = huc12_gdf["geometry"].distance(point)
+        idx_arr = np.where(distance < 100)[0]
+        near_distances = [distance[idx] for idx in idx_arr]
+        if len(idx_arr) == 0:
+            # if still no luck, assume miss
+            return render_template("422/invalid_huc.html"), 422
+        else:
+            # otherwise take nearest HUC within 100m
+            huc_id = huc12_gdf.iloc[idx_arr[np.argmin(near_distances)]]["huc12"]
+
+    return run_fetch_alf_huc_data(var_ep, huc_id)
