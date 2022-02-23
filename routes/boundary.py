@@ -6,7 +6,7 @@ import json
 
 # local imports
 from luts import huc_gdf, akpa_gdf, akco_gdf, aketh_gdf, akclim_gdf, akfire_gdf
-from validate_request import validate_polyid
+from validate_request import validate_polyid, validate_huc
 from validate_data import recursive_rounding
 from . import routes
 
