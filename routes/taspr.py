@@ -24,12 +24,12 @@ from fetch_data import (
 )
 from validate_request import (
     validate_latlon,
-    validate_huc8,
+    validate_huc,
     validate_akpa,
     project_latlon,
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc8_gdf, akpa_gdf
+from luts import huc_gdf, akpa_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -705,19 +705,20 @@ def huc_data_endpoint(var_ep, huc_id):
     Args:
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        huc_id (int): 8-digit HUC ID
+        huc_id (int): HUC-8 or HUC-12 id.
     Returns:
         huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
     """
-    validation = validate_huc8(huc_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
+    validation = validate_huc(huc_id)
+    if validation is not True:
+        return validation
+
     try:
         if var_ep in var_ep_lu.keys():
-            huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
+            huc_pkg = run_aggregate_var_polygon(var_ep, huc_gdf, huc_id)
         elif var_ep == "taspr":
-            huc_pkg = run_aggregate_allvar_polygon(huc8_gdf, huc_id)
+            huc_pkg = run_aggregate_allvar_polygon(huc_gdf, huc_id)
     except:
         return render_template("422/invalid_huc.html"), 422
 

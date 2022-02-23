@@ -5,7 +5,7 @@ from flask import (
 import json
 
 # local imports
-from luts import huc8_gdf, akpa_gdf, akco_gdf, aketh_gdf, akclim_gdf, akfire_gdf
+from luts import huc_gdf, akpa_gdf, akco_gdf, aketh_gdf, akclim_gdf, akfire_gdf
 from validate_request import validate_polyid
 from validate_data import recursive_rounding
 from . import routes
@@ -156,7 +156,7 @@ def run_fetch_huc_poly(huc_id):
     """Run the async requesting for a HUC polygon and return the GeoJSON.
 
     Args:
-        huc_id (int): The HUC ID, only HUC-8 ID supported for now
+        huc_id (int): THUC-8 or HUC-12 code.
 
     Returns:
         GeoJSON of the HUC polygon
@@ -164,11 +164,12 @@ def run_fetch_huc_poly(huc_id):
     Notes:
         example: http://localhost:5000/boundary/huc/19070506
     """
-    validation = validate_polyid(huc_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
+    validation = validate_huc(huc_id)
+    if validation is not True:
+        return validation
+
     try:
-        poly = huc8_gdf.loc[[huc_id]].to_crs(4326)
+        poly = huc_gdf.loc[[huc_id]].to_crs(4326)
     except:
         return render_template("422/invalid_huc.html"), 422
     poly_geojson = poly.to_json()

@@ -3,6 +3,7 @@ import io
 import csv
 import time
 import itertools
+import geopandas as gpd
 import numpy as np
 import xarray as xr
 from flask import (
@@ -11,6 +12,7 @@ from flask import (
     request,
     current_app as app,
 )
+from shapely.geometry import Point
 
 # local imports
 from generate_requests import *
@@ -18,12 +20,12 @@ from generate_urls import generate_wcs_query_url
 from fetch_data import *
 from validate_request import (
     validate_latlon,
-    validate_huc8,
+    validate_huc,
     validate_akpa,
     project_latlon,
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc8_gdf, akpa_gdf
+from luts import huc_gdf, huc12_gdf, akpa_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -376,10 +378,9 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
         var_ep (str): variable endpoint. Either flammability or veg_change
         lat (float): latitude
         lon (float): longitude
-        
+
     Returns:
-        JSON-like dict of relative flammability data
-        from IEM ALFRESCO outputs
+        JSON-like dict of requested ALFRESCO data
 
     Notes:
         example request: http://localhost:5000/flammability/point/65.0628/-146.1627
@@ -441,16 +442,17 @@ def run_fetch_alf_huc_data(var_ep, huc_id):
 
     Args:
         var_ep (str): variable endpoint. Either veg_change or flammability
-        huc_id (int): 8-digit HUC ID
+        huc_id (int): HUC-8 or HUC-12 id.
     Returns:
         huc_pkg (dict): zonal mean of variable(s) for HUC polygon
 
     """
-    validation = validate_huc8(huc_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
+    validation = validate_huc(huc_id)
+    if validation is not True:
+        return validation
+
     try:
-        huc_pkg = run_aggregate_var_polygon(var_ep, huc8_gdf, huc_id)
+        huc_pkg = run_aggregate_var_polygon(var_ep, huc_gdf, huc_id)
     except:
         return render_template("422/invalid_huc.html"), 422
 
