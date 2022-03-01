@@ -166,3 +166,8 @@ def get_poly_3338_bbox(gdf, poly_id):
     poly_gdf = gdf.loc[[poly_id]][["geometry"]].to_crs(3338)
     poly = poly_gdf.iloc[0]["geometry"]
     return poly
+
+
+def is_di_empty(di):
+    if len(di) == 0:
+        return 204  # http status code
