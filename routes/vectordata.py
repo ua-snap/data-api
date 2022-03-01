@@ -5,30 +5,82 @@ import json
 import os
 import pandas as pd
 import requests
+from shapely.geometry import Point
 
 # local imports
 from . import routes
-from luts import json_types
+from luts import (
+    json_types,
+    huc8_gdf,
+    akpa_gdf,
+    akco_gdf,
+    aketh_gdf,
+    akclim_gdf,
+    akfire_gdf,
+    proximity_search_radius_m,
+)
+from config import EAST_BBOX, WEST_BBOX
+from validate_request import validate_latlon
+from validate_data import is_di_empty
 
 data_api = Blueprint("data_api", __name__)
+
+
+@routes.route("/places/search/<lat>/<lon>")
+def find_containing_polygons(lat, lon):
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+    p = create_point_gdf(float(lat), float(lon))
+    p_buff = create_buffered_point_gdf(p)
+
+    geo_suggestions = {}
+
+    within_di = {}
+    huc_di = fetch_huc_containing_point(p)
+    akpa_di = fetch_akpa_containing_point(p)
+    within_di.update(huc_di)
+    within_di.update(akpa_di)
+
+    proximal_di = {}
+    near_huc_di = fetch_huc_near_point(p_buff)
+    near_akpa_di = fetch_akpa_near_point(p_buff)
+    proximal_di.update(near_huc_di)
+    proximal_di.update(near_akpa_di)
+
+    geo_suggestions.update(within_di)
+    geo_suggestions.update(proximal_di)
+
+    empty_di_validation = is_di_empty(geo_suggestions)
+    if empty_di_validation == 204:
+        return geo_suggestions, 204
+
+    return geo_suggestions
 
 
 @routes.route("/places/<type>")
 def get_json_for_type(type, recurse=False):
     """GET function to pull JSON files
-        Args:
-            type (string): One of four types:
-                [communities, hucs, protected_areas, all]
-            recurse (boolean): Defaults to False. Being True
-                causes the function to be recursive to allow for
-                the same function to collect all the possible JSONs.
+    Args:
+        type (string): One of four types:
+            [communities, hucs, protected_areas, all]
+        recurse (boolean): Defaults to False. Being True
+            causes the function to be recursive to allow for
+            the same function to collect all the possible JSONs.
 
-        Returns:
-            JSON-formatted output of all communities, HUCs,
-            and / or protected areas.
+    Returns:
+        JSON-formatted output of all communities, HUCs,
+        and / or protected areas.
 
-        Notes:
-            example: http://localhost:5000/places/communities
+    Notes:
+        example: http://localhost:5000/places/communities
     """
     if type == "all":
         json_list = []
@@ -66,17 +118,17 @@ def get_json_for_type(type, recurse=False):
 @routes.route("/update/")
 def update_json_data():
     """GET function for updating underlying CSVs and shapefiles. Creates
-       JSON file from CSVs and shapefiles.
+    JSON file from CSVs and shapefiles.
 
-        Args:
-            None.
+     Args:
+         None.
 
-        Returns:
-            JSON response indicating if a successful update of the data
-            took place.
+     Returns:
+         JSON response indicating if a successful update of the data
+         took place.
 
-        Notes:
-            example: http://localhost:5000/update
+     Notes:
+         example: http://localhost:5000/update
     """
     update_data()
     return Response(
@@ -87,13 +139,13 @@ def update_json_data():
 def update_data():
     """Downloads AOI CSV and shapefiles and converts to JSON format
 
-        Args:
-            None.
+    Args:
+        None.
 
-        Returns:
-            Boolean value indicating success or failure to update datasets.
-            The underlying code updates all the communities, HUCs, and
-            protected areas in Alaska.
+    Returns:
+        Boolean value indicating success or failure to update datasets.
+        The underlying code updates all the communities, HUCs, and
+        protected areas in Alaska.
     """
     ### Community Locations ###
 
@@ -226,3 +278,95 @@ def update_data():
     # Dump JSON object to local JSON file
     with open(json_types["protected_areas"], "w") as outfile:
         json.dump(output, outfile)
+
+
+def create_point_gdf(lat, lon):
+    p = Point(lon, lat)
+    p_gdf = gpd.GeoDataFrame({"geometry": [p]}, crs=4326)
+    return p_gdf
+
+
+def create_buffered_point_gdf(pt):
+    p_buff = pt.to_crs(3338)
+    p_buff.geometry = p_buff.buffer(proximity_search_radius_m)
+    return p_buff
+
+
+def execute_spatial_join(left, right, predicate):
+    joined = gpd.sjoin(left, right, how="left", predicate=predicate)
+    return joined
+
+
+def fetch_huc_near_point(pt):
+
+    join = execute_spatial_join(pt, huc8_gdf.reset_index(), "intersects")
+
+    di = {}
+    di["hucs_near"] = {}
+    for k in range(len(join)):
+        di["hucs_near"][k] = {}
+        di["hucs_near"][k]["name"] = join.name.values[k]
+        di["hucs_near"][k]["type"] = "huc8"
+        huc_code = join.huc8.values[k]
+        di["hucs_near"][k]["geojson"] = gpd.GeoSeries(
+            huc8_gdf.loc[huc_code].geometry
+        ).to_json()
+        di["hucs_near"][k]["id"] = huc_code
+
+    return di
+
+
+def fetch_akpa_near_point(pt):
+
+    join = execute_spatial_join(pt, akpa_gdf.reset_index(), "intersects")
+
+    di = {}
+    di["protected_areas_near"] = {}
+    for k in range(len(join)):
+        di["protected_areas_near"][k] = {}
+        di["protected_areas_near"][k]["name"] = join.name.values[k]
+        di["protected_areas_near"][k]["type"] = "protected area"
+        di["protected_areas_near"][k]["area_type"] = join.area_type.values[k]
+        akpa_id = join.id.values[k]
+        di["protected_areas_near"][k]["geojson"] = gpd.GeoSeries(
+            akpa_gdf.loc[akpa_id].geometry
+        ).to_json()
+        di["protected_areas_near"][k]["id"] = akpa_id
+    return di
+
+
+def fetch_huc_containing_point(pt):
+
+    join = execute_spatial_join(pt, huc8_gdf.reset_index().to_crs(4326), "within")
+
+    di = {}
+    di["hucs"] = {}
+    for k in range(len(join)):
+        di["hucs"][k] = {}
+        di["hucs"][k]["name"] = join.name.values[k]
+        di["hucs"][k]["type"] = "huc8"
+        huc_code = join.huc8.values[k]
+        di["hucs"][k]["geojson"] = gpd.GeoSeries(
+            huc8_gdf.to_crs(4326).loc[huc_code].geometry
+        ).to_json()
+        di["hucs"][k]["id"] = huc_code
+    return di
+
+
+def fetch_akpa_containing_point(pt):
+
+    join = execute_spatial_join(pt, akpa_gdf.reset_index().to_crs(4326), "within")
+
+    di = {}
+    di["protected_areas"] = {}
+    for k in range(len(join)):
+        di["protected_areas"][k] = {}
+        di["protected_areas"][k]["name"] = join.name.values[k]
+        di["protected_areas"][k]["type"] = "protected area"
+        di["protected_areas"][k]["area_type"] = join.area_type.values[k]
+        akpa_id = join.id.values[k]
+        di["protected_areas"][k]["geojson"] = gpd.GeoSeries(
+            akpa_gdf.to_crs(4326).loc[akpa_id].geometry
+        ).to_json()
+        di["protected_areas"][k]["id"] = akpa_id
+    return di
