@@ -37,3 +37,12 @@ Example Geology Query
 
 Example Physiography Query
  - http://localhost:5000/physiography/64.606/-147.345
+
+## Updating Production API + Varnish Cache
+
+Due to the configuration of our services, we need to both update
+our API instance + restart our Varnish cache when necessary.
+
+Instructions for this can be found here:
+
+ - [SNAP Data API Instructions](https://docs.google.com/document/d/1Z31-mkDE0skITOuOOMBQwuO2I8jUDuApm7VX-A9v1LA/edit?usp=sharing)
