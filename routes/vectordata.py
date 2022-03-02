@@ -44,11 +44,11 @@ def find_containing_polygons(lat, lon):
 
     geo_suggestions = {}
 
-    within_di = {}
-    huc_di = fetch_huc_containing_point(p)
-    akpa_di = fetch_akpa_containing_point(p)
-    within_di.update(huc_di)
-    within_di.update(akpa_di)
+    # within_di = {}
+    # huc_di = fetch_huc_containing_point(p)
+    # akpa_di = fetch_akpa_containing_point(p)
+    # within_di.update(huc_di)
+    # within_di.update(akpa_di)
 
     proximal_di = {}
     near_huc_di, huc_tb = fetch_huc_near_point(p_buff)
@@ -60,7 +60,7 @@ def find_containing_polygons(lat, lon):
     proximal_di.update(near_huc_di)
     proximal_di.update(near_akpa_di)
 
-    geo_suggestions.update(within_di)
+    # geo_suggestions.update(within_di)
     geo_suggestions.update(proximal_di)
 
     empty_di_validation = is_di_empty(geo_suggestions)
@@ -322,7 +322,7 @@ def package_polys(poly_key, join, poly_type, gdf, to_wgs=False):
                 geojson = gpd.GeoSeries(gdf.to_crs(4326).loc[f_id].geometry).to_json()
             else:
                 geojson = gpd.GeoSeries(gdf.loc[f_id].geometry).to_json()
-            di[poly_key][k]["geojson"] = geojson
+            di[poly_key][k]["geojson"] = json.loads(geojson)["features"][0]
             di[poly_key][k]["id"] = f_id
     return di
 
