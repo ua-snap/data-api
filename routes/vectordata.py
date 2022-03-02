@@ -313,6 +313,7 @@ def package_polys(poly_key, join, poly_type, gdf, to_wgs=False):
     if join.isna().any().any():
         return di
     else:
+        f_ids = []
         for k in range(len(join)):
             di[poly_key][k] = {}
             di[poly_key][k]["name"] = join.name.values[k]
@@ -322,22 +323,25 @@ def package_polys(poly_key, join, poly_type, gdf, to_wgs=False):
                 geojson = gpd.GeoSeries(gdf.to_crs(4326).loc[f_id].geometry).to_json()
             else:
                 geojson = gpd.GeoSeries(gdf.loc[f_id].geometry).to_json()
-            di[poly_key][k]["geojson"] = json.loads(geojson)["features"][0]
+            di[poly_key][k]["geojson"] = json.loads(geojson)["features"][0]["geometry"]
             di[poly_key][k]["id"] = f_id
-    return di
+            f_ids.append(f_id)
+        new_gdf = gdf.loc[gdf.index.isin(f_ids)]
+        tb = new_gdf.to_crs(4326).total_bounds.round(4)
+    return di, tb
 
 
 def fetch_huc_near_point(pt):
     join = execute_spatial_join(pt, huc8_search_gdf.reset_index(), "intersects")
-    tb = join.to_crs(4326).total_bounds.round(4)
-    di = package_polys("hucs_near", join, "huc", huc8_search_gdf, to_wgs=True)
+    # tb = join.to_crs(4326).total_bounds.round(4)
+    di, tb = package_polys("hucs_near", join, "huc", huc8_search_gdf, to_wgs=True)
     return di, tb
 
 
 def fetch_akpa_near_point(pt):
     join = execute_spatial_join(pt, akpa_gdf.reset_index(), "intersects")
-    tb = join.to_crs(4326).total_bounds.round(4)
-    di = package_polys(
+    # tb = join.to_crs(4326).total_bounds.round(4)
+    di, tb = package_polys(
         "protected_areas_near", join, "protected_area", akpa_gdf, to_wgs=True
     )
     return di, tb
