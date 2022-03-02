@@ -51,7 +51,9 @@ def get_endpoint(curr_route, curr_type, place):
     """
     # Build the URL to query based on type
     if curr_type == "community":
-        url = cache + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
+        url = (
+            cache + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
+        )
     else:
         url = cache + curr_route + str(place["id"])
 
@@ -109,9 +111,17 @@ def recache():
     for route in routes:
         if (route.find("point") != -1) and (route.find("lat") == -1):
             get_all_route_endpoints(route, "community")
-        elif route.find("huc") != -1 and route.find("huc_id") == -1 and route.find("abstract") == -1:
+        elif (
+            route.find("huc") != -1
+            and route.find("huc_id") == -1
+            and route.find("abstract") == -1
+        ):
             get_all_route_endpoints(route, "huc")
-        elif route.find("protectedarea") != -1 and route.find("akpa_id") == -1 and route.find("abstract") == -1:
+        elif (
+            route.find("protectedarea") != -1
+            and route.find("akpa_id") == -1
+            and route.find("abstract") == -1
+        ):
             get_all_route_endpoints(route, "pa")
     return Response(
         response=json.dumps(routes), status=200, mimetype="application/json"
