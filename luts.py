@@ -90,9 +90,9 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
 # HUC-8
 huc_src = "data/shapefiles/hydrologic_units_wbdhu8_a_ak.shp"
 huc8_gdf = gpd.read_file(huc_src).set_index("huc8").to_crs(3338)
-huc8_gdf = huc8_gdf[["name", "states", "geometry"]]
-huc8_gdf.index.rename("id", inplace=True)
-huc8_gdf.geometry = huc8_gdf.simplify(1000)
+huc8_search_gdf = huc8_gdf[["name", "states", "geometry"]]
+huc8_search_gdf.index.rename("id", inplace=True)
+huc8_search_gdf.geometry = huc8_gdf.simplify(1000)
 
 # AK Protected Areas
 akpa_src = "data/shapefiles/ak_protected_areas.shp"
