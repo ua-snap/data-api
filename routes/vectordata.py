@@ -5,7 +5,7 @@ import json
 import os
 import pandas as pd
 import requests
-from shapely.geometry import Point
+from shapely.geometry import Point, box
 
 # local imports
 from . import routes
@@ -50,8 +50,12 @@ def find_containing_polygons(lat, lon):
     within_di.update(akpa_di)
 
     proximal_di = {}
-    near_huc_di = fetch_huc_near_point(p_buff)
-    near_akpa_di = fetch_akpa_near_point(p_buff)
+    near_huc_di, huc_tb = fetch_huc_near_point(p_buff)
+    near_akpa_di, pa_tb = fetch_akpa_near_point(p_buff)
+    bbox_ids = ["xmin", "ymin", "xmax", "ymax"]
+    huc_bb = box(*huc_tb)
+    pa_bb = box(*pa_tb)
+
     proximal_di.update(near_huc_di)
     proximal_di.update(near_akpa_di)
 
@@ -62,6 +66,10 @@ def find_containing_polygons(lat, lon):
     if empty_di_validation == 204:
         return geo_suggestions, 204
 
+    if huc_bb.area >= pa_bb.area:
+        geo_suggestions["total_bounds"] = dict(zip(bbox_ids, list(huc_tb)))
+    else:
+        geo_suggestions["total_bounds"] = dict(zip(bbox_ids, list(pa_tb)))
     return geo_suggestions
 
 
@@ -298,8 +306,8 @@ def execute_spatial_join(left, right, predicate):
 
 
 def fetch_huc_near_point(pt):
-
     join = execute_spatial_join(pt, huc8_gdf.reset_index(), "intersects")
+    tb = join.total_bounds
 
     di = {}
     di["hucs_near"] = {}
@@ -313,12 +321,12 @@ def fetch_huc_near_point(pt):
         ).to_json()
         di["hucs_near"][k]["id"] = huc_code
 
-    return di
+    return di, tb
 
 
 def fetch_akpa_near_point(pt):
-
     join = execute_spatial_join(pt, akpa_gdf.reset_index(), "intersects")
+    tb = join.total_bounds
 
     di = {}
     di["protected_areas_near"] = {}
@@ -332,13 +340,12 @@ def fetch_akpa_near_point(pt):
             akpa_gdf.loc[akpa_id].geometry
         ).to_json()
         di["protected_areas_near"][k]["id"] = akpa_id
-    return di
+    return di, tb
 
 
 def fetch_huc_containing_point(pt):
 
     join = execute_spatial_join(pt, huc8_gdf.reset_index().to_crs(4326), "within")
-
     di = {}
     di["hucs"] = {}
     for k in range(len(join)):
