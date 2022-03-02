@@ -1,5 +1,5 @@
 from flask import Blueprint, current_app as app, Response
-from luts import host
+from luts import cache
 import json
 import requests
 from . import routes
@@ -51,9 +51,9 @@ def get_endpoint(curr_route, curr_type, place):
     """
     # Build the URL to query based on type
     if curr_type == "community":
-        url = host + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
+        url = cache + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
     else:
-        url = host + curr_route + str(place["id"])
+        url = cache + curr_route + str(place["id"])
 
     # Collects returned status from GET request
     status = requests.get(url)
@@ -77,14 +77,10 @@ def get_all_route_endpoints(curr_route, curr_type):
     # of the route to allow for the JSON items to fill in those fields.
     if curr_type == "community":
         f = open(json_types["communities"], "r")
-        curr_route = curr_route.replace("<lat>/<lon>", "")
     elif curr_type == "huc":
         f = open(json_types["hucs"], "r")
-        curr_route = curr_route.replace("<huc8_id>", "")
-        curr_route = curr_route.replace("<huc_id>", "")
     else:
         f = open(json_types["protected_areas"], "r")
-        curr_route = curr_route.replace("<akpa_id>", "")
 
     # Creates a JSON object from opened file
     places = json.load(f)
@@ -94,17 +90,7 @@ def get_all_route_endpoints(curr_route, curr_type):
 
     # For each JSON item in the JSON object array
     for place in places:
-        # For any URL route that has <var_ep>, we must replace that
-        # variable with temperature, precipitation, and taspr to cache
-        # all possible values.
-        if curr_route.find("var_ep") != -1:
-            for var in ["temperature", "precipitation", "taspr"]:
-                var_ep_route = curr_route.replace("<var_ep>", var)
-                get_endpoint(var_ep_route, curr_type, place)
-        else:
-            # If the URL doesn't have the <var_ep> value, we simply
-            # ask for the endpoint to be requested via GET.
-            get_endpoint(curr_route, curr_type, place)
+        get_endpoint(curr_route, curr_type, place)
 
 
 @routes.route("/cache/")
@@ -121,11 +107,11 @@ def recache():
     """
     routes = all_routes()
     for route in routes:
-        if (route.find("point") != -1) and (route.find("lat") != -1):
+        if (route.find("point") != -1) and (route.find("lat") == -1):
             get_all_route_endpoints(route, "community")
-        elif route.find("huc8_id") != -1 or route.find("huc_id") != -1:
+        elif route.find("huc") != -1 and route.find("huc_id") == -1 and route.find("abstract") == -1:
             get_all_route_endpoints(route, "huc")
-        elif route.find("akpa_id") != -1:
+        elif route.find("protectedarea") != -1 and route.find("akpa_id") == -1 and route.find("abstract") == -1:
             get_all_route_endpoints(route, "pa")
     return Response(
         response=json.dumps(routes), status=200, mimetype="application/json"
