@@ -22,7 +22,7 @@ from luts import (
 )
 from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
-from validate_data import is_di_empty
+from validate_data import is_di_empty, recursive_rounding
 
 data_api = Blueprint("data_api", __name__)
 
@@ -44,34 +44,32 @@ def find_containing_polygons(lat, lon):
 
     geo_suggestions = {}
 
-    # within_di = {}
-    # huc_di = fetch_huc_containing_point(p)
-    # akpa_di = fetch_akpa_containing_point(p)
-    # within_di.update(huc_di)
-    # within_di.update(akpa_di)
-
     proximal_di = {}
-    near_huc_di, huc_tb = fetch_huc_near_point(p_buff)
-    near_akpa_di, pa_tb = fetch_akpa_near_point(p_buff)
-    bbox_ids = ["xmin", "ymin", "xmax", "ymax"]
-    huc_bb = box(*huc_tb)
-    pa_bb = box(*pa_tb)
+    try:
+        near_huc_di, huc_tb = fetch_huc_near_point(p_buff)
+        huc_bb = box(*huc_tb)
+    except ValueError:
+        near_huc_di, huc_bb = {}, box(*[1, 1, 1, 1])
+    try:
+        near_akpa_di, pa_tb = fetch_akpa_near_point(p_buff)
+        pa_bb = box(*pa_tb)
+    except ValueError:
+        near_akpa_di, pa_bb = {}, box(*[1, 1, 1, 1])
 
     proximal_di.update(near_huc_di)
     proximal_di.update(near_akpa_di)
-
-    # geo_suggestions.update(within_di)
     geo_suggestions.update(proximal_di)
 
     empty_di_validation = is_di_empty(geo_suggestions)
-    if empty_di_validation == 204:
-        return geo_suggestions, 204
+    if empty_di_validation == 404:
+        return geo_suggestions, 404
 
+    bbox_ids = ["xmin", "ymin", "xmax", "ymax"]
     if huc_bb.area >= pa_bb.area:
         geo_suggestions["total_bounds"] = dict(zip(bbox_ids, list(huc_tb)))
     else:
         geo_suggestions["total_bounds"] = dict(zip(bbox_ids, list(pa_tb)))
-    return geo_suggestions
+    return recursive_rounding(geo_suggestions.keys(), geo_suggestions.values())
 
 
 @routes.route("/places/<type>")
@@ -333,29 +331,13 @@ def package_polys(poly_key, join, poly_type, gdf, to_wgs=False):
 
 def fetch_huc_near_point(pt):
     join = execute_spatial_join(pt, huc8_search_gdf.reset_index(), "intersects")
-    # tb = join.to_crs(4326).total_bounds.round(4)
     di, tb = package_polys("hucs_near", join, "huc", huc8_search_gdf, to_wgs=True)
     return di, tb
 
 
 def fetch_akpa_near_point(pt):
     join = execute_spatial_join(pt, akpa_gdf.reset_index(), "intersects")
-    # tb = join.to_crs(4326).total_bounds.round(4)
     di, tb = package_polys(
         "protected_areas_near", join, "protected_area", akpa_gdf, to_wgs=True
     )
     return di, tb
-
-
-def fetch_huc_containing_point(pt):
-    join = execute_spatial_join(
-        pt, huc8_search_gdf.reset_index().to_crs(4326), "within"
-    )
-    di = package_polys("hucs", join, "huc", huc8_search_gdf, to_wgs=True)
-    return di
-
-
-def fetch_akpa_containing_point(pt):
-    join = execute_spatial_join(pt, akpa_gdf.reset_index().to_crs(4326), "within")
-    di = package_polys("protected_areas", join, "protected_area", akpa_gdf, to_wgs=True)
-    return di
