@@ -14,11 +14,12 @@ from luts import (
     huc8_gdf,
     huc8_search_gdf,
     akpa_gdf,
-    akco_gdf,
-    aketh_gdf,
-    akclim_gdf,
-    akfire_gdf,
+    # akco_gdf,
+    # aketh_gdf,
+    # akclim_gdf,
+    # akfire_gdf,
     proximity_search_radius_m,
+    community_search_radius_m,
 )
 from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
@@ -40,7 +41,8 @@ def find_containing_polygons(lat, lon):
             422,
         )
     p = create_point_gdf(float(lat), float(lon))
-    p_buff = create_buffered_point_gdf(p)
+    p_buff = create_buffered_point_gdf(p, proximity_search_radius_m)
+    p_buff_community = create_buffered_point_gdf(p, community_search_radius_m)
 
     geo_suggestions = {}
 
@@ -56,8 +58,15 @@ def find_containing_polygons(lat, lon):
     except ValueError:
         near_akpa_di, pa_bb = {}, box(*[1, 1, 1, 1])
 
+    df = csv_to4326_gdf("data/csvs/ak_communities.csv")
+    nearby_points_di = package_nearby_points(
+        find_nearest_communities(p_buff_community, df).fillna("None")
+    )
+
     proximal_di.update(near_huc_di)
     proximal_di.update(near_akpa_di)
+    proximal_di.update(nearby_points_di)
+
     geo_suggestions.update(proximal_di)
 
     empty_di_validation = is_di_empty(geo_suggestions)
@@ -293,9 +302,9 @@ def create_point_gdf(lat, lon):
     return p_gdf
 
 
-def create_buffered_point_gdf(pt):
+def create_buffered_point_gdf(pt, radius):
     p_buff = pt.to_crs(3338)
-    p_buff.geometry = p_buff.buffer(proximity_search_radius_m)
+    p_buff.geometry = p_buff.buffer(radius)
     return p_buff
 
 
@@ -329,6 +338,19 @@ def package_polys(poly_key, join, poly_type, gdf, to_wgs=False):
     return di, tb
 
 
+def package_nearby_points(nearby):
+    di = {}
+    di["communities"] = {}
+    if nearby.isna().all(axis=1).all():
+        return di
+    else:
+        for k in range(len(nearby)):
+            comm_di = nearby.iloc[k].to_dict()
+            comm_di["type"] = "community"
+            di["communities"][k] = comm_di
+    return di
+
+
 def fetch_huc_near_point(pt):
     join = execute_spatial_join(pt, huc8_search_gdf.reset_index(), "intersects")
     di, tb = package_polys("hucs_near", join, "huc", huc8_search_gdf, to_wgs=True)
@@ -341,3 +363,40 @@ def fetch_akpa_near_point(pt):
         "protected_areas_near", join, "protected_area", akpa_gdf, to_wgs=True
     )
     return di, tb
+
+
+def read_tabular(raw_file, header_row="infer"):
+    """Read data (*. xls, *.dat, *.csv, etc.) to DataFrame"""
+    if raw_file.split(".")[-1][:2] == "xl":
+        raw_df = pd.read_excel(raw_file, header=header_row)
+    else:
+        raw_df = pd.read_csv(raw_file, header=header_row)
+    return raw_df
+
+
+def create_geometry(df):
+    """Add Geometry column to specify that these are spatial coordinates for
+    point vector data"""
+    df["geometry"] = df.apply(
+        lambda x: Point((float(x["longitude"]), float(x["latitude"]))), axis=1
+    )
+    return df
+
+
+def create_geodataframe(df):
+    """Create GeoDataFrame with WGS 84 Spatial Reference"""
+    gdf = gpd.GeoDataFrame(df, geometry="geometry")
+    gdf.crs = "epsg:4326"
+    return gdf
+
+
+def csv_to4326_gdf(fp):
+    df = create_geodataframe(create_geometry(read_tabular(fp)))
+    return df
+
+
+def find_nearest_communities(pt, df):
+    nearby = gpd.sjoin_nearest(
+        pt.to_crs(3338), df.to_crs(3338), how="inner", max_distance=50000
+    )
+    return nearby[["name", "alt_name", "id", "latitude", "longitude"]]
