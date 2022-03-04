@@ -19,6 +19,7 @@ rasterstats = "*"
 shapely = "*"
 geos = "*"
 rtree = "*"
+pygeos = "*"
 
 [dev-packages]
 
