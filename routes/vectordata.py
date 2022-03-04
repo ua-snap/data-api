@@ -382,11 +382,8 @@ def read_tabular(raw_file, header_row="infer"):
 
 
 def create_geometry(df):
-    """Add Geometry column to specify that these are spatial coordinates for
-    point vector data"""
-    df["geometry"] = df.apply(
-        lambda x: Point((float(x["longitude"]), float(x["latitude"]))), axis=1
-    )
+    """Add `geometry` to specify spatial coordinates for point vector data"""
+    df["geometry"] = [Point(xy) for xy in zip(df.longitude, df.latitude)]
     return df
 
 
