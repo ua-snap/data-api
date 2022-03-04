@@ -9,6 +9,7 @@ host = os.environ.get("API_HOSTNAME") or "http://cache.earthmaps.io"
 bbox_offset = 0.000000001
 
 proximity_search_radius_m = (10 ** 5) / 2
+community_search_radius_m = 50000
 
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
