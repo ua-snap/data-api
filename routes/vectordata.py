@@ -21,6 +21,7 @@ from luts import (
     # akfire_gdf,
     proximity_search_radius_m,
     community_search_radius_m,
+    total_bounds_buffer,
 )
 from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
@@ -51,11 +52,15 @@ def find_containing_polygons(lat, lon):
     try:
         near_huc_di, huc_tb = fetch_huc_near_point(p_buff)
         huc_bb = box(*huc_tb)
+        hub_bb = huc_bb.buffer(box(*huc_tb).area * total_bounds_buffer)
+        huc_tb = huc_bb.bounds
     except ValueError:
         near_huc_di, huc_bb = {}, box(*[1, 1, 1, 1])
     try:
         near_akpa_di, pa_tb = fetch_akpa_near_point(p_buff)
         pa_bb = box(*pa_tb)
+        pa_bb = pa_bb.buffer(box(*pa_tb).area * total_bounds_buffer)
+        pa_tb = pa_bb.bounds
     except ValueError:
         near_akpa_di, pa_bb = {}, box(*[1, 1, 1, 1])
 

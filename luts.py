@@ -10,6 +10,7 @@ bbox_offset = 0.000000001
 
 proximity_search_radius_m = (10 ** 5) / 2
 community_search_radius_m = 50000
+total_bounds_buffer = 0.05
 
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
