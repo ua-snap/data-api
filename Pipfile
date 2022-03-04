@@ -16,6 +16,10 @@ h5netcdf = "*"
 rioxarray = "*"
 requests = "*"
 rasterstats = "*"
+shapely = "*"
+geos = "*"
+rtree = "*"
+pygeos = "*"
 
 [dev-packages]
 

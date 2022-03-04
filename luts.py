@@ -8,6 +8,10 @@ host = os.environ.get("API_HOSTNAME") or "http://cache.earthmaps.io"
 
 bbox_offset = 0.000000001
 
+proximity_search_radius_m = (10 ** 5) / 2
+community_search_radius_m = 50000
+total_bounds_buffer = 0.05
+
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
     1: {"type": "Temperate or sub-polar needleleaf forest", "color": "#003d00"},
@@ -88,10 +92,15 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
 # HUC-8
 huc_src = "data/shapefiles/hydrologic_units_wbdhu8_a_ak.shp"
 huc8_gdf = gpd.read_file(huc_src).set_index("huc8").to_crs(3338)
+huc8_search_gdf = huc8_gdf[["name", "states", "geometry"]].copy()
+huc8_search_gdf.index.rename("id", inplace=True)
+huc8_search_gdf.geometry = huc8_gdf.simplify(1000)
 
 # AK Protected Areas
 akpa_src = "data/shapefiles/ak_protected_areas.shp"
 akpa_gdf = gpd.read_file(akpa_src).set_index("id").to_crs(3338)
+akpa_gdf.geometry = akpa_gdf.simplify(1000)
+
 
 # AK Fire Management Zones
 akfire_src = "data/shapefiles/ak_fire_management.shp"

@@ -152,6 +152,27 @@ def postprocess(data, endpoint, titles=None, prune_depth=None):
     return partially_pruned_data
 
 
+def recursive_rounding(keys, values):
+    to_return = {}
+    for key, value in zip(keys, values):
+        if isinstance(value, dict):
+            rounded_value = recursive_rounding(value.keys(), value.values())
+        elif isinstance(value, (tuple, list)):
+            rounded_value = [round_by_type(x) for x in value]
+        else:
+            rounded_value = round_by_type(value)
+        to_return[round_by_type(key)] = rounded_value
+    return to_return
+
+
+def round_by_type(to_round, round_amount=7):
+    if isinstance(to_round, (int, float)):
+        return round(to_round, round_amount)
+    elif isinstance(to_round, (list, tuple)):
+        return [round_by_type(x) for x in to_round]
+    return to_round
+
+
 def get_poly_3338_bbox(gdf, poly_id):
     """Get the Polygon Object corresponding to the the ID for a GeoDataFrame
 
@@ -166,3 +187,8 @@ def get_poly_3338_bbox(gdf, poly_id):
     poly_gdf = gdf.loc[[poly_id]][["geometry"]].to_crs(3338)
     poly = poly_gdf.iloc[0]["geometry"]
     return poly
+
+
+def is_di_empty(di):
+    if len(di) == 0:
+        return 404  # http status code
