@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, Response
 import geopandas as gpd
 import json
 import os
+import numpy as np
 import pandas as pd
 import requests
 from shapely.geometry import Point, box
@@ -60,7 +61,7 @@ def find_containing_polygons(lat, lon):
 
     df = csv_to4326_gdf("data/csvs/ak_communities.csv")
     nearby_points_di = package_nearby_points(
-        find_nearest_communities(p_buff_community, df).fillna("None")
+        find_nearest_communities(p_buff_community, df)
     )
 
     proximal_di.update(near_huc_di)
@@ -344,6 +345,7 @@ def package_nearby_points(nearby):
     if nearby.isna().all(axis=1).all():
         return di
     else:
+        nearby = nearby.replace({np.nan: None})
         for k in range(len(nearby)):
             comm_di = nearby.iloc[k].to_dict()
             comm_di["type"] = "community"
@@ -397,6 +399,6 @@ def csv_to4326_gdf(fp):
 
 def find_nearest_communities(pt, df):
     nearby = gpd.sjoin_nearest(
-        pt.to_crs(3338), df.to_crs(3338), how="inner", max_distance=50000
+        pt.to_crs(3338), df.to_crs(3338), how="inner", max_distance=1
     )
     return nearby[["name", "alt_name", "id", "latitude", "longitude"]]
