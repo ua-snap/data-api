@@ -2,10 +2,12 @@ from flask import (
     Blueprint,
     render_template,
 )
+import json
 
 # local imports
 from luts import huc8_gdf, akpa_gdf, akco_gdf, aketh_gdf, akclim_gdf, akfire_gdf
 from validate_request import validate_polyid
+from validate_data import recursive_rounding
 from . import routes
 
 boundary_api = Blueprint("boundary_api", __name__)
@@ -73,7 +75,8 @@ def run_fetch_climatedivision_poly(cd_id):
     except:
         return render_template("422/invalid_climatedivision.html"), 422
     poly_geojson = poly.to_json()
-    return poly_geojson
+    poly_geojson = json.loads(poly_geojson)["features"][0]
+    return recursive_rounding(poly_geojson.keys(), poly_geojson.values())
 
 
 @routes.route("/boundary/corporation/<co_id>")
@@ -96,7 +99,8 @@ def run_fetch_corporation_poly(co_id):
     except:
         return render_template("422/invalid_corporation.html"), 422
     poly_geojson = poly.to_json()
-    return poly_geojson
+    poly_geojson = json.loads(poly_geojson)["features"][0]
+    return recursive_rounding(poly_geojson.keys(), poly_geojson.values())
 
 
 @routes.route("/boundary/ethnolinguistic/<el_id>")
@@ -119,7 +123,8 @@ def run_fetch_ethnolinguistic_poly(el_id):
     except:
         return render_template("422/invalid_ethnolinguistic.html"), 422
     poly_geojson = poly.to_json()
-    return poly_geojson
+    poly_geojson = json.loads(poly_geojson)["features"][0]
+    return recursive_rounding(poly_geojson.keys(), poly_geojson.values())
 
 
 @routes.route("/boundary/firemanagement/<fire_id>")
@@ -142,7 +147,8 @@ def run_fetch_firemanagement_poly(fire_id):
     except:
         return render_template("422/invalid_firemanagement.html"), 422
     poly_geojson = poly.to_json()
-    return poly_geojson
+    poly_geojson = json.loads(poly_geojson)["features"][0]
+    return recursive_rounding(poly_geojson.keys(), poly_geojson.values())
 
 
 @routes.route("/boundary/huc/<huc_id>")
@@ -166,7 +172,8 @@ def run_fetch_huc_poly(huc_id):
     except:
         return render_template("422/invalid_huc.html"), 422
     poly_geojson = poly.to_json()
-    return poly_geojson
+    poly_geojson = json.loads(poly_geojson)["features"][0]
+    return recursive_rounding(poly_geojson.keys(), poly_geojson.values())
 
 
 @routes.route("/boundary/protectedarea/<akpa_id>")
@@ -190,4 +197,5 @@ def run_fetch_akprotectedarea_poly(akpa_id):
     except:
         return render_template("422/invalid_protected_area.html"), 422
     poly_geojson = poly.to_json()
-    return poly_geojson
+    poly_geojson = json.loads(poly_geojson)["features"][0]
+    return recursive_rounding(poly_geojson.keys(), poly_geojson.values())

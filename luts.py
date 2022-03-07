@@ -8,6 +8,7 @@ host = os.environ.get("API_HOSTNAME") or "http://cache.earthmaps.io"
 
 bbox_offset = 0.000000001
 
+# constants used in vectordata.py to search for named locations
 proximity_search_radius_m = (10 ** 5) / 2
 community_search_radius_m = 50000
 total_bounds_buffer = 0.05
@@ -79,6 +80,10 @@ json_types = {
     "communities": "data/jsons/ak_communities.json",
     "hucs": "data/jsons/ak_hucs.json",
     "protected_areas": "data/jsons/ak_protected_areas.json",
+    "fire_zones": "data/jsons/ak_fire_mgmt_zones.json",
+    "corporations": "data/jsons/ak_native_corporations.json",
+    "climate_divisions": "data/jsons/ak_climate_divisions.json",
+    "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
 }
 
 # For the forest endpoint.  This file is just a generated pickle
@@ -89,18 +94,13 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
 
 # Below Polygons can be imported by various endpoints
-# HUC-8
-huc_src = "data/shapefiles/hydrologic_units_wbdhu8_a_ak.shp"
-huc8_gdf = gpd.read_file(huc_src).set_index("huc8").to_crs(3338)
-huc8_search_gdf = huc8_gdf[["name", "states", "geometry"]].copy()
-huc8_search_gdf.index.rename("id", inplace=True)
-huc8_search_gdf.geometry = huc8_gdf.simplify(1000)
+# HUC-8 # note these are native WGS84 in the #geo-vector repo
+huc_src = "data/shapefiles/ak_huc8s.shp"
+huc8_gdf = gpd.read_file(huc_src).set_index("id").to_crs(3338)
 
 # AK Protected Areas
 akpa_src = "data/shapefiles/ak_protected_areas.shp"
 akpa_gdf = gpd.read_file(akpa_src).set_index("id").to_crs(3338)
-akpa_gdf.geometry = akpa_gdf.simplify(1000)
-
 
 # AK Fire Management Zones
 akfire_src = "data/shapefiles/ak_fire_management.shp"
@@ -114,6 +114,45 @@ akco_gdf = gpd.read_file(akco_src).set_index("id").to_crs(3338)
 akclim_src = "data/shapefiles/ak_climate_divisions.shp"
 akclim_gdf = gpd.read_file(akclim_src).set_index("id").to_crs(3338)
 
-# Ethnolinguistic Divisions
+# Ethnolinguistic Regions
 aketh_src = "data/shapefiles/ethnolinguistic_regions.shp"
 aketh_gdf = gpd.read_file(aketh_src).set_index("id").to_crs(3338)
+
+# look-up for updating place names and data via geo-vector GitHub repo
+shp_di = {}
+shp_di["akhucs"] = {
+    "src_dir": "alaska_hucs",
+    "prefix": "ak_huc8s",
+    "poly_type": "huc",
+    "retain": ["states"],
+}
+shp_di["ak_pa"] = {
+    "src_dir": "protected_areas/ak_protected_areas",
+    "prefix": "ak_protected_areas",
+    "poly_type": "protected_area",
+    "retain": ["area_type"],
+}
+shp_di["akfire"] = {
+    "src_dir": "fire",
+    "prefix": "ak_fire_management",
+    "poly_type": "fire_zone",
+    "retain": ["agency"],
+}
+shp_di["akcorps"] = {
+    "src_dir": "corporation",
+    "prefix": "ak_native_corporations",
+    "poly_type": "corporation",
+    "retain": [],
+}
+shp_di["akethno"] = {
+    "src_dir": "ethnolinguistic",
+    "prefix": "ethnolinguistic_regions",
+    "poly_type": "ethnolinguistic_region",
+    "retain": ["alt_name"],
+}
+shp_di["akclimdivs"] = {
+    "src_dir": "climate_divisions",
+    "prefix": "ak_climate_divisions",
+    "poly_type": "climate_division",
+    "retain": [],
+}

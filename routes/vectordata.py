@@ -13,8 +13,8 @@ from . import routes
 from luts import (
     json_types,
     huc8_gdf,
-    huc8_search_gdf,
     akpa_gdf,
+    # these are commented out because we **may** add them to the proximity search at a later time
     # akco_gdf,
     # aketh_gdf,
     # akclim_gdf,
@@ -22,6 +22,7 @@ from luts import (
     proximity_search_radius_m,
     community_search_radius_m,
     total_bounds_buffer,
+    shp_di,
 )
 from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
@@ -195,110 +196,56 @@ def update_data():
     # Dump data frame to JSON file
     df.to_json(json_types["communities"], orient="records")
 
-    ### HUCs ###
+    for k in shp_di.keys():
+        download_shapefiles_from_repo(shp_di[k]["src_dir"], shp_di[k]["prefix"])
+        generate_minimal_json_from_shapefile(
+            shp_di[k]["prefix"], shp_di[k]["poly_type"], shp_di[k]["retain"]
+        )
 
+
+def download_shapefiles_from_repo(target_dir, file_prefix):
     # Ensure the path to store shapefiles is created
     path = "data/shapefiles/"
     if not os.path.exists(path):
         os.makedirs(path)
-
     # For each required file of the shapefile, download and store locally.
     for filetype in ["dbf", "prj", "sbn", "sbx", "shp", "shx"]:
-        url = (
-            f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon"
-            f"/boundaries/alaska_hucs/hydrologic_units_wbdhu8_a_ak.{filetype}?raw=true "
-        )
-        r = requests.get(url, allow_redirects=True)
-        open(f"{path}hydrologic_units_wbdhu8_a_ak.{filetype}", "wb").write(r.content)
+        try:
+            url = f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon/boundaries/{target_dir}/{file_prefix}.{filetype}?raw=true"
+            r = requests.get(url, allow_redirects=True)
+            open(f"{path}{file_prefix}.{filetype}", "wb").write(r.content)
+        except:
+            return 404
 
+
+def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained):
+    path = "data/shapefiles/"
+    if not os.path.exists(path):
+        os.makedirs(path)
     # Read shapefile into Geopandas data frame
-    df = gpd.read_file(f"{path}hydrologic_units_wbdhu8_a_ak.shp")
+    df = gpd.read_file(f"{path}{file_prefix}.shp")
 
     # Create a copy of the original data frame
-    x = df.copy()
+    to_retain = ["id", "name"] + fields_retained
 
-    # Remove all the fields that we don't want in our final JSON.
-    for remove_field in [
-        "geometry",
-        "tnmid",
-        "metasource",
-        "sourcedata",
-        "sourceorig",
-        "sourcefeat",
-        "loaddate",
-        "areasqkm",
-        "areaacres",
-        "referenceg",
-    ]:
-        del x[remove_field]
+    x = df[to_retain].copy()
 
     # Create a new Pandas data frame from modified data.
     z = pd.DataFrame(x)
 
     # Create JSON data from Pandas data frame.
-    hucs_json = json.loads(z.T.to_json(orient="columns"))
+    shp_json = json.loads(z.T.to_json(orient="columns"))
 
     # Create a blank output list for appending JSON fields.
     output = []
 
-    # For each HUC in the JSON, we want to clean up the fields to match
-    # the IEM project's JSON and append it to the output list.
-    for key in hucs_json:
-        # Changes HUC key 'huc8' to 'id'
-        hucs_json[key]["id"] = hucs_json[key]["huc8"]
-        del hucs_json[key]["huc8"]
-
-        # Adds type to JSON of 'huc'
-        hucs_json[key]["type"] = "huc"
-
-        # Append the JSON object to end of list.
-        output.append(hucs_json[key])
-
-    # Dump output list into local JSON file
-    with open(json_types["hucs"], "w") as outfile:
-        json.dump(output, outfile)
-
-    ### Alaska Protected Areas ###
-
-    # For each required file of the shapefile, download and store locally.
-    for filetype in ["cpg", "dbf", "prj", "shp", "shx"]:
-        url = (
-            f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon/boundaries"
-            f"/protected_areas/ak_protected_areas/ak_protected_areas.{filetype}?raw=true "
-        )
-        r = requests.get(url, allow_redirects=True)
-        open(f"{path}ak_protected_areas.{filetype}", "wb").write(r.content)
-
-    # Read shapefile into Geopandas data frame
-    df = gpd.read_file(f"{path}ak_protected_areas.shp")
-
-    # Create a copy of the original data frame
-    x = df.copy()
-
-    # Remove all the fields that we don't want in our final JSON.
-    for remove_field in ["geometry", "country", "region"]:
-        del x[remove_field]
-
-    # Create a new Pandas data frame from modified data.
-    z = pd.DataFrame(x)
-
-    # Create JSON data from Pandas data frame.
-    pa_json = json.loads(z.T.to_json(orient="columns"))
-
-    # Create a blank output list for appending JSON fields.
-    output = []
-
-    # For each protected area in the PA JSON, add the type protected_area
-    # and append it to the output list.
-    for key in pa_json:
-        # Adds key 'type' and value 'protected_area'
-        pa_json[key]["type"] = "protected_area"
-
-        # Append JSON to output list.
-        output.append(pa_json[key])
+    # For each feature in the JSON, add the "type" of the feature e.g. protected_area and append it to the output list.
+    for key in shp_json:
+        shp_json[key]["type"] = poly_type
+        output.append(shp_json[key])
 
     # Dump JSON object to local JSON file
-    with open(json_types["protected_areas"], "w") as outfile:
+    with open(json_types[poly_type + "s"], "w") as outfile:
         json.dump(output, outfile)
 
 
@@ -359,8 +306,8 @@ def package_nearby_points(nearby):
 
 
 def fetch_huc_near_point(pt):
-    join = execute_spatial_join(pt, huc8_search_gdf.reset_index(), "intersects")
-    di, tb = package_polys("hucs_near", join, "huc", huc8_search_gdf, to_wgs=True)
+    join = execute_spatial_join(pt, huc8_gdf.reset_index(), "intersects")
+    di, tb = package_polys("hucs_near", join, "huc", huc8_gdf, to_wgs=True)
     return di, tb
 
 
