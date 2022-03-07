@@ -4,7 +4,8 @@ import pickle
 import geopandas as gpd
 
 # TODO: Change this to https://earthmaps.io as default after development
-host = os.environ.get("API_HOSTNAME") or "http://cache.earthmaps.io"
+host = os.environ.get("API_HOSTNAME") or "http://earthmaps.io"
+cache = "http://earthmaps.io:6081"
 
 bbox_offset = 0.000000001
 
