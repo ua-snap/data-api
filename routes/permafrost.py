@@ -258,7 +258,7 @@ def run_point_fetch_all_permafrost(lat, lon):
         "obupfx": package_obu_vector(gs_results[2]),
     }
 
-    return postprocess(data, "permafrost", titles, 2)
+    return postprocess(data, "permafrost", titles)
 
 
 @routes.route("/permafrost/huc/<huc_id>")
