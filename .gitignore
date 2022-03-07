@@ -17,3 +17,5 @@ TODO.md
 
 # JSON data files
 data/jsons/
+data/csvs/
+data/shapefiles/
