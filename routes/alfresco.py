@@ -329,7 +329,7 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     for era, summaries in ar5_results.items():
         aggr_results[era] = summaries
     # run summary eras for future
-    summary_eras = ["2040_2069", "2070_2099"]
+    summary_eras = ["2040-2069", "2070-2099"]
     for ds, era in zip(ds_list[1:3], summary_eras):
         aggr_results[era] = summarize_within_poly_marr(
             ds, poly_mask_arr, future_dim_encodings, bandname, varname
