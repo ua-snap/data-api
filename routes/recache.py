@@ -37,7 +37,8 @@ def log_error(url, status):
 
 
 def get_all_huc_jsons():
-    """For all HUC types defined in the LUTs, load the JSON files into a
+    """*** Unused for now ***
+       For all HUC types defined in the LUTs, load the JSON files into a
        list for querying API end points with all HUC IDs.
 
        Args:
@@ -97,19 +98,15 @@ def get_all_route_endpoints(curr_route, curr_type):
     if curr_type == "community":
         f = open(json_types["communities"], "r")
     elif curr_type == "huc":
-        f = get_all_huc_jsons()
+        f = open(json_types["huc8s"], "r")
     elif curr_type == "pa":
         f = open(json_types["protected_areas"], "r")
 
-    # This conditional only happens for HUCs
-    if type(f) == list:
-        places = f
-    else:
-        # Creates a JSON object from opened file
-        places = json.load(f)
+    # Creates a JSON object from opened file
+    places = json.load(f)
 
-        # Closes open file handle
-        f.close()
+    # Closes open file handle
+    f.close()
 
     # For each JSON item in the JSON object array
     for place in places:

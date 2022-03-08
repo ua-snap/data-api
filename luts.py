@@ -91,6 +91,8 @@ json_types = {
     "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
 }
 
+# Unused variable for now. Can be used by re-caching function to pre-cache
+# all HUC types listed below.
 huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 
 # For the forest endpoint.  This file is just a generated pickle
