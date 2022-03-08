@@ -97,6 +97,9 @@ def get_all_route_endpoints(curr_route, curr_type):
         get_endpoint(curr_route, curr_type, place)
 
 
+@routes.route("/recache")
+@routes.route("/recache/")
+@routes.route("/cache")
 @routes.route("/cache/")
 def recache():
     """Runs through all endpoints that we expect for our web applications.

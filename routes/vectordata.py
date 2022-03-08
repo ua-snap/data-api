@@ -138,6 +138,7 @@ def get_json_for_type(type, recurse=False):
     return Response(response=js, status=200, mimetype="application/json")
 
 
+@routes.route("/update")
 @routes.route("/update/")
 def update_json_data():
     """GET function for updating underlying CSVs and shapefiles. Creates
@@ -155,7 +156,7 @@ def update_json_data():
     """
     update_data()
     return Response(
-        response="{ 'success': True }", status=200, mimetype="application/json"
+        response='{ "success": "True" }', status=200, mimetype="application/json"
     )
 
 
