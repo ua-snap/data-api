@@ -545,7 +545,7 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     idx_arr = np.where(~np.array([poly.is_empty for poly in intersect]))[0]
     if len(idx_arr) == 1:
         # ideal case (and probably most common) - point intersects a single HUC
-        huc_id = huc12_gdf.iloc[idx_arr[0]]["huc12"]
+        huc_id = huc12_gdf.iloc[idx_arr[0]].name
     elif len(idx_arr) > 1:
         # case where multiple polygons intersect the point
         overlap_gs = gpd.GeoSeries([huc12_gdf["geometry"][idx] for idx in idx_arr])
@@ -555,7 +555,7 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
         # whichever polygon has the largest distance to the point is
         # actually overlapping it the most, so select that one
         huc_idx = idx_arr[np.argmax(distance)]
-        huc_id = huc12_gdf.iloc[huc_idx]["huc12"]
+        huc_id = huc12_gdf.iloc[huc_idx].name
     else:
         # no intersection, see if a HUC poly is near, within 100m
         distance = huc12_gdf["geometry"].distance(point)
@@ -566,6 +566,6 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
             return render_template("422/invalid_huc.html"), 422
         else:
             # otherwise take nearest HUC within 100m
-            huc_id = huc12_gdf.iloc[idx_arr[np.argmin(near_distances)]]["huc12"]
+            huc_id = huc12_gdf.iloc[idx_arr[np.argmin(near_distances)]].name
 
     return run_fetch_alf_huc_data(var_ep, huc_id)
