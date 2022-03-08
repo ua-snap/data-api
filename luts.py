@@ -81,7 +81,8 @@ permafrost_encodings = {
 
 json_types = {
     "communities": "data/jsons/ak_communities.json",
-    "hucs": "data/jsons/ak_huc.json",
+    "huc8s": "data/jsons/ak_huc8.json",
+    "huc12s": "data/jsons/ak_huc12.json",
     "protected_areas": "data/jsons/ak_protected_areas.json",
     "fire_zones": "data/jsons/ak_fire_mgmt_zones.json",
     "corporations": "data/jsons/ak_native_corporations.json",
@@ -133,7 +134,6 @@ try:
     valid_huc_ids = huc_gdf.index.values
     update_needed = False
 except fiona.errors.DriverError:
-    print("failed")
     # if this fails, give placeholders until all data can
     # be updated from vectordata.py
     update_needed = True
@@ -154,13 +154,13 @@ shp_di = {}
 shp_di["akhuc8s"] = {
     "src_dir": "alaska_hucs",
     "prefix": "ak_huc8s",
-    "poly_type": "huc",
+    "poly_type": "huc8",
     "retain": ["states"],
 }
 shp_di["akhuc12s"] = {
     "src_dir": "alaska_hucs",
     "prefix": "ak_huc12s",
-    "poly_type": "huc",
+    "poly_type": "huc12",
     "retain": ["states"],
 }
 shp_di["ak_pa"] = {

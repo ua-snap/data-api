@@ -80,9 +80,11 @@ def get_all_route_endpoints(curr_route, curr_type):
     if curr_type == "community":
         f = open(json_types["communities"], "r")
     elif curr_type == "huc":
-        f = open(json_types["hucs"], "r")
-    else:
+        f = open(json_types["huc8s"], "r")
+    elif curr_type == "pa":
         f = open(json_types["protected_areas"], "r")
+    elif curr_type == "local":
+        f = open(json_types["huc12s"], "r")
 
     # Creates a JSON object from opened file
     places = json.load(f)

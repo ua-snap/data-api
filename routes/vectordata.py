@@ -285,7 +285,7 @@ def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained
         output.append(shp_json[key])
 
     # Dump JSON object to local JSON file, append to the file if it exists
-    with open(json_types[poly_type + "s"], "a") as outfile:
+    with open(json_types[poly_type + "s"], "w") as outfile:
         json.dump(output, outfile)
 
 
