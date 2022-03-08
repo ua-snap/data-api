@@ -4,9 +4,11 @@ other functions that could be used across multiple endpoints.
 """
 
 import re
+from flask import render_template
 from pyproj import Transformer
 import numpy as np
 from config import WEST_BBOX, EAST_BBOX
+from luts import valid_huc_ids
 
 
 def validate_latlon(lat, lon):
@@ -56,12 +58,15 @@ def validate_bbox(lat1, lon1, lat2, lon2):
     return valid
 
 
-def validate_huc8(huc8_id):
+def validate_huc(huc_id):
     """Validate HUC-8 ID
     Return True if valid or HTTP status code if validation failed
     """
-    if re.search("[^A-Za-z0-9]", huc8_id):
-        return 400
+    # assumes HUCs are strictly numeric
+    if re.search("[^0-9]", huc_id):
+        return render_template("400/bad_request.html"), 400
+    elif huc_id not in valid_huc_ids:
+        return render_template("422/invalid_huc.html"), 422
     return True
 
 

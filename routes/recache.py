@@ -3,7 +3,7 @@ from luts import cache
 import json
 import requests
 from . import routes
-from luts import json_types
+from luts import json_types, huc_jsons
 
 recache_api = Blueprint("recache_api", __name__)
 
@@ -32,8 +32,26 @@ def log_error(url, status):
     """
     # Stores log in data directory for now
     log = open("data/error-log.txt", "a")
-    log.write(str(status.status_code) + ": " + url + "\n")
+    log.write(str(status) + ": " + url + "\n")
     log.close()
+
+
+def get_all_huc_jsons():
+    """*** Unused for now ***
+       For all HUC types defined in the LUTs, load the JSON files into a
+       list for querying API end points with all HUC IDs.
+
+       Args:
+           None.
+
+       Returns:
+           A Python list of all HUCs across multiple JSON files.
+    """
+    huc_list = list()
+    for f in huc_jsons:
+        with open(f, "r") as fp:
+            huc_list.extend(json.load(fp))
+    return huc_list
 
 
 def get_endpoint(curr_route, curr_type, place):
@@ -62,7 +80,7 @@ def get_endpoint(curr_route, curr_type, place):
 
     # Logs the status and URL if the HTTP status code != 200
     if status.status_code != 200:
-        log_error(url, status)
+        log_error(url, status.status_code)
 
 
 def get_all_route_endpoints(curr_route, curr_type):
@@ -70,7 +88,7 @@ def get_all_route_endpoints(curr_route, curr_type):
 
         Args:
             curr_route - Current route ex. https://earthmaps.io/taspr/huc/
-            curr_type - One of three types: community, huc, or pa
+            curr_type - One of four types: community, huc, pa, or local
 
         Returns:
             Nothing.
@@ -80,8 +98,8 @@ def get_all_route_endpoints(curr_route, curr_type):
     if curr_type == "community":
         f = open(json_types["communities"], "r")
     elif curr_type == "huc":
-        f = open(json_types["hucs"], "r")
-    else:
+        f = open(json_types["huc8s"], "r")
+    elif curr_type == "pa":
         f = open(json_types["protected_areas"], "r")
 
     # Creates a JSON object from opened file
@@ -95,6 +113,9 @@ def get_all_route_endpoints(curr_route, curr_type):
         get_endpoint(curr_route, curr_type, place)
 
 
+@routes.route("/recache")
+@routes.route("/recache/")
+@routes.route("/cache")
 @routes.route("/cache/")
 def recache():
     """Runs through all endpoints that we expect for our web applications.
@@ -109,7 +130,9 @@ def recache():
     """
     routes = all_routes()
     for route in routes:
-        if (route.find("point") != -1) and (route.find("lat") == -1):
+        if (route.find("point") != -1 or route.find("local") != -1) and (
+            route.find("lat") == -1
+        ):
             get_all_route_endpoints(route, "community")
         elif (
             route.find("huc") != -1
@@ -123,6 +146,7 @@ def recache():
             and route.find("abstract") == -1
         ):
             get_all_route_endpoints(route, "pa")
+
     return Response(
         response=json.dumps(routes), status=200, mimetype="application/json"
     )

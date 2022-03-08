@@ -12,12 +12,12 @@ from fetch_data import (
 )
 from validate_request import (
     validate_latlon,
-    validate_huc8,
+    validate_huc,
     validate_akpa,
 )
 from validate_data import get_poly_3338_bbox
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import huc8_gdf, akpa_gdf
+from luts import huc_gdf, akpa_gdf
 from . import routes
 
 elevation_api = Blueprint("elevation_api", __name__)
@@ -123,11 +123,11 @@ def run_huc_fetch_all_elevation(huc_id):
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated data.
     """
-    validation = validate_huc8(huc_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
+    validation = validate_huc(huc_id)
+    if validation is not True:
+        return validation
     try:
-        poly = get_poly_3338_bbox(huc8_gdf, huc_id)
+        poly = get_poly_3338_bbox(huc_gdf, huc_id)
     except:
         return render_template("422/invalid_huc.html"), 422
 

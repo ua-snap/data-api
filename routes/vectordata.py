@@ -138,6 +138,7 @@ def get_json_for_type(type, recurse=False):
     return Response(response=js, status=200, mimetype="application/json")
 
 
+@routes.route("/update")
 @routes.route("/update/")
 def update_json_data():
     """GET function for updating underlying CSVs and shapefiles. Creates
@@ -155,7 +156,7 @@ def update_json_data():
     """
     update_data()
     return Response(
-        response="{ 'success': True }", status=200, mimetype="application/json"
+        response='{ "success": "True" }', status=200, mimetype="application/json"
     )
 
 
@@ -244,7 +245,7 @@ def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained
         shp_json[key]["type"] = poly_type
         output.append(shp_json[key])
 
-    # Dump JSON object to local JSON file
+    # Dump JSON object to local JSON file, append to the file if it exists
     with open(json_types[poly_type + "s"], "w") as outfile:
         json.dump(output, outfile)
 

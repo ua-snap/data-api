@@ -15,13 +15,13 @@ from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from validate_request import (
     validate_latlon,
-    validate_huc8,
+    validate_huc,
     validate_akpa,
     project_latlon,
 )
 from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import huc8_gdf, permafrost_encodings, akpa_gdf
+from luts import huc_gdf, permafrost_encodings, akpa_gdf
 from . import routes
 
 permafrost_api = Blueprint("permafrost_api", __name__)
@@ -265,16 +265,17 @@ def run_point_fetch_all_permafrost(lat, lon):
 def run_huc_fetch_all_permafrost(huc_id):
     """Endpoint to fetch GIPL data within a HUC.
 
-    Args: huc_id (int): 8-digit HUC ID.
+    Args: huc_id (int): HUC-8 or HUC-12 id.
 
     Returns:
         huc_pkg (dict): JSON-like object containing aggregated permafrost data.
     """
-    validation = validate_huc8(huc_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
+    validation = validate_huc(huc_id)
+    if validation is not True:
+        return validation
+
     try:
-        poly = get_poly_3338_bbox(huc8_gdf, huc_id)
+        poly = get_poly_3338_bbox(huc_gdf, huc_id)
     except:
         return render_template("422/invalid_huc.html"), 422
 

@@ -1,7 +1,9 @@
 """Module for look-up-table like objects"""
 import os
 import pickle
+import fiona
 import geopandas as gpd
+import pandas as pd
 
 # TODO: Change this to https://earthmaps.io as default after development
 host = os.environ.get("API_HOSTNAME") or "http://earthmaps.io"
@@ -79,13 +81,19 @@ permafrost_encodings = {
 
 json_types = {
     "communities": "data/jsons/ak_communities.json",
-    "hucs": "data/jsons/ak_hucs.json",
+    "hucs": "data/jsons/ak_huc8.json",
+    "huc8s": "data/jsons/ak_huc8.json",
+    "huc12s": "data/jsons/ak_huc12.json",
     "protected_areas": "data/jsons/ak_protected_areas.json",
     "fire_zones": "data/jsons/ak_fire_mgmt_zones.json",
     "corporations": "data/jsons/ak_native_corporations.json",
     "climate_divisions": "data/jsons/ak_climate_divisions.json",
     "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
 }
+
+# Unused variable for now. Can be used by re-caching function to pre-cache
+# all HUC types listed below.
+huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
@@ -94,37 +102,70 @@ json_types = {
 with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
 
-# Below Polygons can be imported by various endpoints
-# HUC-8 # note these are native WGS84 in the #geo-vector repo
-huc_src = "data/shapefiles/ak_huc8s.shp"
-huc8_gdf = gpd.read_file(huc_src).set_index("id").to_crs(3338)
+try:
+    # Below Polygons can be imported by various endpoints
+    # HUC-8 # note these are native WGS84 in the #geo-vector repo
+    huc8_src = "data/shapefiles/ak_huc8s.shp"
+    huc8_gdf = gpd.read_file(huc8_src).set_index("id").to_crs(3338)
 
-# AK Protected Areas
-akpa_src = "data/shapefiles/ak_protected_areas.shp"
-akpa_gdf = gpd.read_file(akpa_src).set_index("id").to_crs(3338)
+    # HUC-12
+    huc12_src = "data/shapefiles/ak_huc12s.shp"
+    huc12_gdf = gpd.read_file(huc12_src).set_index("id").to_crs(3338)
 
-# AK Fire Management Zones
-akfire_src = "data/shapefiles/ak_fire_management.shp"
-akfire_gdf = gpd.read_file(akfire_src).set_index("id").to_crs(3338)
+    # AK Protected Areas
+    akpa_src = "data/shapefiles/ak_protected_areas.shp"
+    akpa_gdf = gpd.read_file(akpa_src).set_index("id").to_crs(3338)
 
-# AK Corporations
-akco_src = "data/shapefiles/ak_native_corporations.shp"
-akco_gdf = gpd.read_file(akco_src).set_index("id").to_crs(3338)
+    # AK Fire Management Zones
+    akfire_src = "data/shapefiles/ak_fire_management.shp"
+    akfire_gdf = gpd.read_file(akfire_src).set_index("id").to_crs(3338)
 
-# AK Climate Divisions
-akclim_src = "data/shapefiles/ak_climate_divisions.shp"
-akclim_gdf = gpd.read_file(akclim_src).set_index("id").to_crs(3338)
+    # AK Corporations
+    akco_src = "data/shapefiles/ak_native_corporations.shp"
+    akco_gdf = gpd.read_file(akco_src).set_index("id").to_crs(3338)
 
-# Ethnolinguistic Regions
-aketh_src = "data/shapefiles/ethnolinguistic_regions.shp"
-aketh_gdf = gpd.read_file(aketh_src).set_index("id").to_crs(3338)
+    # AK Climate Divisions
+    akclim_src = "data/shapefiles/ak_climate_divisions.shp"
+    akclim_gdf = gpd.read_file(akclim_src).set_index("id").to_crs(3338)
+
+    # Ethnolinguistic Regions
+    aketh_src = "data/shapefiles/ethnolinguistic_regions.shp"
+    aketh_gdf = gpd.read_file(aketh_src).set_index("id").to_crs(3338)
+
+    # join HUCs into same GeoDataFrame for easier lookup
+    huc_gdf = pd.concat(
+        [huc8_gdf.reset_index(), huc12_gdf.reset_index()], ignore_index=True
+    ).set_index("id")
+    valid_huc_ids = huc_gdf.index.values
+    update_needed = False
+except fiona.errors.DriverError:
+    # if this fails, give placeholders until all data can
+    # be updated from vectordata.py
+    update_needed = True
+    (
+        huc8_gdf,
+        huc12_gdf,
+        akpa_gdf,
+        akfire_gdf,
+        akco_gdf,
+        akclim_gdf,
+        aketh_gdf,
+        huc_gdf,
+        valid_huc_ids,
+    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0)
 
 # look-up for updating place names and data via geo-vector GitHub repo
 shp_di = {}
-shp_di["akhucs"] = {
+shp_di["akhuc8s"] = {
     "src_dir": "alaska_hucs",
     "prefix": "ak_huc8s",
-    "poly_type": "huc",
+    "poly_type": "huc8",
+    "retain": ["states"],
+}
+shp_di["akhuc12s"] = {
+    "src_dir": "alaska_hucs",
+    "prefix": "ak_huc12s",
+    "poly_type": "huc12",
     "retain": ["states"],
 }
 shp_di["ak_pa"] = {

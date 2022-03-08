@@ -1,6 +1,13 @@
 from datetime import datetime
 from flask import Flask, render_template
 from flask_cors import CORS
+from luts import update_needed
+
+if update_needed:
+    from routes.vectordata import update_data
+
+    update_data()
+
 from routes import *
 
 # Elastic Beanstalk wants `application` to be present.
