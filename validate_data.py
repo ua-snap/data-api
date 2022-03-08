@@ -2,6 +2,8 @@
 from flask import render_template
 
 nodata_values = {
+    "alfresco": [-9999],
+    "elevation": [-9999],
     "fire": [-9999],
     "forest": [65535],
     "geology": [],
@@ -10,7 +12,6 @@ nodata_values = {
     "permafrost": [-9999, -9999.0],
     "physiography": [],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
-    "alfresco": [-9999],
 }
 
 
