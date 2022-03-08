@@ -91,6 +91,8 @@ json_types = {
     "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
 }
 
+huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including
