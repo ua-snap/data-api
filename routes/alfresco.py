@@ -3,6 +3,7 @@ import io
 import csv
 import time
 import itertools
+import requests
 import geopandas as gpd
 import numpy as np
 import xarray as xr
@@ -25,7 +26,7 @@ from validate_request import (
     project_latlon,
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc_gdf, huc12_gdf, akpa_gdf
+from luts import huc_gdf, huc12_gdf, akpa_gdf, host
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -568,7 +569,8 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
             # otherwise take nearest HUC within 100m
             huc_id = huc12_gdf.iloc[idx_arr[np.argmin(near_distances)]].name
 
-    huc12_pkg = run_fetch_alf_huc_data(var_ep, huc_id)
+    resp = requests.get(f"{host}/alfresco/{var_ep}/huc/{huc_id}")
+    huc12_pkg = resp.json()
     huc12_pkg["huc_id"] = huc_id
     huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/huc/{huc_id}"
 
