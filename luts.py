@@ -95,6 +95,19 @@ json_types = {
 # all HUC types listed below.
 huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 
+cached_urls = [
+    "/permafrost/protectedarea/",
+    "/permafrost/huc/",
+    "/alfresco/flammability/protectedarea/",
+    "/alfresco/flammability/huc/",
+    "/alfresco/veg_change/protectedarea/",
+    "/alfresco/veg_change/huc/",
+    "/elevation/protectedarea/",
+    "/elevation/huc/",
+    "/taspr/protectedarea/",
+    "/taspr/huc/",
+]
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including

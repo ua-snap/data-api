@@ -3,7 +3,7 @@ from luts import cache
 import json
 import requests
 from . import routes
-from luts import json_types, huc_jsons
+from luts import json_types, huc_jsons, cached_urls
 
 recache_api = Blueprint("recache_api", __name__)
 
@@ -33,6 +33,7 @@ def log_error(url, status):
     # Stores log in data directory for now
     log = open("data/error-log.txt", "a")
     log.write(str(status) + ": " + url + "\n")
+    app.logger.error(f"HTTP Code: {status} - Fetched URL {url}")
     log.close()
 
 
@@ -78,6 +79,10 @@ def get_endpoint(curr_route, curr_type, place):
     # Collects returned status from GET request
     status = requests.get(url)
 
+    app.logger.info(
+        f"HTTP Code: {status.status_code} - Fetched URL {url}"
+    )
+
     # Logs the status and URL if the HTTP status code != 200
     if status.status_code != 200:
         log_error(url, status.status_code)
@@ -113,11 +118,9 @@ def get_all_route_endpoints(curr_route, curr_type):
         get_endpoint(curr_route, curr_type, place)
 
 
-@routes.route("/recache")
-@routes.route("/recache/")
-@routes.route("/cache")
-@routes.route("/cache/")
-def recache():
+@routes.route("/recache/<limit>")
+@routes.route("/cache/<limit>")
+def recache(limit):
     """Runs through all endpoints that we expect for our web applications.
        This function can be used to pre-populate our API cache.
 
@@ -128,7 +131,11 @@ def recache():
             JSON dump of all the endpoints in the API.
 
     """
-    routes = all_routes()
+    routes = list()
+    if (limit):
+        routes = cached_urls
+    else:
+        routes = all_routes()
     for route in routes:
         if (route.find("point") != -1 or route.find("local") != -1) and (
             route.find("lat") == -1
