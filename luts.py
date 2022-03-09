@@ -159,7 +159,7 @@ shp_di = {}
 shp_di["akhuc8s"] = {
     "src_dir": "alaska_hucs",
     "prefix": "ak_huc8s",
-    "poly_type": "huc8",
+    "poly_type": "huc",
     "retain": ["states"],
 }
 shp_di["akhuc12s"] = {
