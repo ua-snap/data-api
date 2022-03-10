@@ -6,8 +6,7 @@ import geopandas as gpd
 import pandas as pd
 
 # TODO: Change this to https://earthmaps.io as default after development
-host = os.environ.get("API_HOSTNAME") or "http://earthmaps.io"
-cache = "http://earthmaps.io:6081"
+host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
 bbox_offset = 0.000000001
 

@@ -1,9 +1,8 @@
 from flask import Blueprint, current_app as app, Response
-from luts import cache
 import json
 import requests
 from . import routes
-from luts import json_types, huc_jsons, cached_urls
+from luts import json_types, huc_jsons, cached_urls, host
 
 recache_api = Blueprint("recache_api", __name__)
 
@@ -71,10 +70,10 @@ def get_endpoint(curr_route, curr_type, place):
     # Build the URL to query based on type
     if curr_type == "community":
         url = (
-            cache + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
+            host + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
         )
     else:
-        url = cache + curr_route + str(place["id"])
+        url = host + curr_route + str(place["id"])
 
     # Collects returned status from GET request
     status = requests.get(url)
