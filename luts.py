@@ -95,8 +95,6 @@ json_types = {
 huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 
 cached_urls = [
-    "/permafrost/protectedarea/",
-    "/permafrost/huc/",
     "/alfresco/flammability/protectedarea/",
     "/alfresco/flammability/huc/",
     "/alfresco/veg_change/protectedarea/",
