@@ -1,6 +1,10 @@
 """A module to validate fetched data values."""
 from flask import render_template
 
+from fetch_data import (
+    add_titles
+)
+
 nodata_values = {
     "fire": [-9999],
     "forest": [65535],
@@ -99,22 +103,22 @@ def prune_nodata(data):
     return data
 
 
-def postprocess(data, endpoint, titles=None):
-    """Filter nodata values, prune empty branches, add titles, and return 404
-    if appropriate"""
+def nullify_and_prune(data, endpoint):
+    """Filter nodata values, prune empty branches, and return data"""
     nullified_data = nullify_nodata(data, endpoint)
     pruned_data = prune_nodata(nullified_data)
+    return pruned_data
+
+
+def postprocess(data, endpoint, titles=None):
+    """Nullify and prune data, add titles, and return 404 if appropriate"""
+    pruned_data = nullify_and_prune(data, endpoint)
 
     if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
+
     if titles is not None:
-        if isinstance(titles, str):
-            nullified_data["title"] = titles
-        else:
-            for key in titles.keys():
-                if key in pruned_data:
-                    if pruned_data[key] is not None:
-                        pruned_data[key]["title"] = titles[key]
+        pruned_data = add_titles(pruned_data, titles)
 
     return pruned_data
 

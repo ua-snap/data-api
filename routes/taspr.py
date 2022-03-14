@@ -21,6 +21,8 @@ from fetch_data import (
     fetch_data,
     get_from_dict,
     summarize_within_poly,
+    place_name,
+    csv_metadata,
 )
 from validate_request import (
     validate_latlon,
@@ -28,7 +30,7 @@ from validate_request import (
     validate_akpa,
     project_latlon,
 )
-from validate_data import get_poly_3338_bbox, postprocess
+from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess
 from luts import huc_gdf, akpa_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
@@ -106,6 +108,13 @@ dim_encodings = {
 var_ep_lu = {
     "temperature": "tas",
     "precipitation": "pr",
+}
+
+
+var_label_lu = {
+    "temperature": "Temperature",
+    "precipitation": "Precipitation",
+    "taspr": "Temperature & Precipitation",
 }
 
 
@@ -341,7 +350,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     return ds_list
 
 
-def create_csv(packaged_data):
+def create_csv(packaged_data, place, place_id, place_type, lat=None, lon=None):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -353,6 +362,11 @@ def create_csv(packaged_data):
         string of CSV data
     """
     output = io.StringIO()
+
+    metadata = csv_metadata(place, place_id, place_type, lat, lon)
+
+    if metadata is not None:
+        output.write(metadata)
 
     fieldnames = [
         "variable",
@@ -443,7 +457,7 @@ def create_csv(packaged_data):
     return output.getvalue()
 
 
-def return_csv(csv_data):
+def return_csv(csv_data, var_ep, place, lat=None, lon=None):
     """Return the CSV data as a download
 
     Args:
@@ -452,12 +466,17 @@ def return_csv(csv_data):
     Returns:
         CSV Response
     """
+    if place is not None:
+        filename = var_label_lu[var_ep] + " (" + place + ").csv"
+    else:
+        filename = var_label_lu[var_ep] + " (" + lat + ", " + lon + ").csv"
+
     response = Response(
         csv_data,
         mimetype="text/csv",
         headers={
-            "Content-Type": 'text/csv; name="climate.csv"',
-            "Content-Disposition": 'attachment; filename="climate.csv"',
+            "Content-Type": 'text/csv; name="' + filename + '"',
+            "Content-Disposition": 'attachment; filename="' + filename + '"',
         },
     )
 
@@ -691,8 +710,13 @@ def point_data_endpoint(var_ep, lat, lon):
             return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg)
-        return return_csv(csv_data)
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        community_id = request.args.get('community')
+        place = place_name("point", community_id)
+        csv_data = create_csv(point_pkg, place, community_id, "point", lat, lon)
+        return return_csv(csv_data, var_ep, place, lat, lon)
 
     return postprocess(point_pkg, "taspr")
 
@@ -723,8 +747,12 @@ def huc_data_endpoint(var_ep, huc_id):
         return render_template("422/invalid_huc.html"), 422
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(huc_pkg)
-        return return_csv(csv_data)
+        huc_pkg = nullify_and_prune(huc_pkg, "taspr")
+        if huc_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        place = place_name("huc", huc_id)
+        csv_data = create_csv(huc_pkg, place, huc_id, "huc")
+        return return_csv(csv_data, var_ep, place)
 
     return postprocess(huc_pkg, "taspr")
 
@@ -751,7 +779,11 @@ def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
         return render_template("422/invalid_protected_area.html"), 422
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(pa_pkg)
-        return return_csv(csv_data)
+        akpa_id = nullify_and_prune(akpa_id, "taspr")
+        if akpa_id in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        place = place_name("pa", akpa_id)
+        csv_data = create_csv(pa_pkg, place, akpa_id, "pa")
+        return return_csv(csv_data, var_ep, place)
 
     return pa_pkg

@@ -25,7 +25,7 @@ from validate_request import (
     validate_akpa,
     project_latlon,
 )
-from validate_data import get_poly_3338_bbox, postprocess
+from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess
 from luts import huc_gdf, huc12_gdf, akpa_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
@@ -46,14 +46,23 @@ historical_dim_encodings = asyncio.run(
 )
 
 var_ep_lu = {
-    "flammability": {"cov_id_str": "relative_flammability", "varname": "rf",},
-    "veg_change": {"cov_id_str": "relative_vegetation_change", "varname": "rvc",},
+    "flammability": {
+        "cov_id_str": "relative_flammability",
+        "varname": "rf",
+    },
+    "veg_change": {
+        "cov_id_str": "relative_vegetation_change",
+        "varname": "rvc",
+    },
+}
+
+var_label_lu = {
+    "flammability": "Flammability",
+    "veg_change": "Vegetation Change",
 }
 
 # CSV field names
-alf_fieldnames = ["variable", "date_range", "model", "scenario", "stat", "value"]
-# package coordinate names that corresponding to each level of the nested data package dicts
-package_coords = ["date_range", "model", "scenario", "variable"]
+alf_fieldnames = ["date_range", "model", "scenario", "variable", "stat", "value"]
 
 
 async def fetch_alf_point_data(x, y, cov_id_str):
@@ -191,7 +200,7 @@ def package_ar5_alf_averaged_point_data(point_data, varname):
 
 
 def get_poly_mask_arr(ds, poly, bandname):
-    """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid 
+    """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid
     zonal summary across results from multiple WCS requests for the same bbox. Wrapper for
     rasterstats zonal_stats().
 
@@ -199,9 +208,9 @@ def get_poly_mask_arr(ds, poly, bandname):
         ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
         poly (shapely.Polygon): polygon to create mask from
         bandname (str): name of the DataArray containing the data
-    
+
     Returns:
-        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting 
+        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
             the polygon of interest
     """
     # need a data layer of same x/y shape just for running a zonal stats
@@ -228,15 +237,15 @@ def summarize_within_poly_marr(
     Return the results as a nested dict.
 
     NOTE - This is a candidate for de-duplication! Only defining here because some
-    things are out-of-sync with existing ways of doing things (e.g., key names 
+    things are out-of-sync with existing ways of doing things (e.g., key names
     in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
 
     Args:
         ds (xarray.DataSet): DataSet with "Gray" as variable of
             interest
-        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting 
+        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
             the polygon of interest
-        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the 
+        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the
             data and map integer data coordinates to models, scenarios, variables, etc.
         bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
             the name is not given at ingest
@@ -302,7 +311,7 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
         aggr_results (dict): data representing zonal means within the polygon.
 
     Notes:
-        Fetches data on the individual instances of the singular dimension combinations. Consider 
+        Fetches data on the individual instances of the singular dimension combinations. Consider
             validating polygon IDs in `validate_data` or `lat_lon` module.
     """
     poly = get_poly_3338_bbox(poly_gdf, poly_id)
@@ -432,15 +441,44 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     )
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(
-            point_pkg,
-            alf_fieldnames,
-            package_coords,
-            {"variable": varname, "stat": "mean"},
-        )
-        return return_csv(csv_data)
+        point_pkg = nullify_and_prune(point_pkg, "alfresco")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        community_id = request.args.get("community")
+        return create_csv(point_pkg, var_ep, "point", community_id, lat=lat, lon=lon)
 
     return postprocess(point_pkg, "alfresco")
+
+
+def create_csv(data_pkg, var_ep, place_type, place_id, lat=None, lon=None):
+    """Create CSV file with metadata string and location based filename.
+
+    Args:
+        data_pkg (dict): JSON-like object of data
+        var_ep (str): flammability or veg_change
+        place_type: point, huc, or pa
+        place_id: place identifier (e.g., AK124)
+        lat: latitude for points or None for polygons
+        lon: longitude for points or None for polygons
+    Returns:
+        CSV response object
+    """
+    varname = var_ep_lu[var_ep]["varname"]
+    csv_dicts = build_csv_dicts(
+        data_pkg,
+        alf_fieldnames,
+        {"variable": varname, "stat": "mean"},
+    )
+
+    place = place_name(place_type, place_id)
+    metadata = csv_metadata(place, place_id, place_type, lat, lon)
+
+    if place is not None:
+        filename = var_label_lu[var_ep] + " (" + place + ").csv"
+    else:
+        filename = var_label_lu[var_ep] + " (" + lat + ", " + lon + ").csv"
+
+    return write_csv(csv_dicts, alf_fieldnames, filename, metadata)
 
 
 @routes.route("/alfresco/<var_ep>/huc/<huc_id>")
@@ -465,14 +503,10 @@ def run_fetch_alf_huc_data(var_ep, huc_id):
         return render_template("422/invalid_huc.html"), 422
 
     if request.args.get("format") == "csv":
-        varname = var_ep_lu[var_ep]["varname"]
-        csv_data = create_csv(
-            huc_pkg,
-            alf_fieldnames,
-            package_coords,
-            {"variable": varname, "stat": "mean"},
-        )
-        return return_csv(csv_data)
+        huc_pkg = nullify_and_prune(huc_pkg, "alfresco")
+        if huc_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        return create_csv(huc_pkg, var_ep, "huc", huc_id)
 
     return postprocess(huc_pkg, "alfresco")
 
@@ -498,21 +532,17 @@ def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
         return render_template("422/invalid_protected_area.html"), 422
 
     if request.args.get("format") == "csv":
-        varname = var_ep_lu[var_ep]["varname"]
-        csv_data = create_csv(
-            pa_pkg,
-            alf_fieldnames,
-            package_coords,
-            {"variable": varname, "stat": "mean"},
-        )
-        return return_csv(csv_data)
+        pa_pkg = nullify_and_prune(pa_pkg, "alfresco")
+        if pa_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        return create_csv(pa_pkg, var_ep, "pa", akpa_id)
 
     return postprocess(pa_pkg, "alfresco")
 
 
 @routes.route("/alfresco/<var_ep>/local/<lat>/<lon>")
 def run_fetch_alf_local_data(var_ep, lat, lon):
-    """"Local" endpoint for ALFRESCO data - finds the HUC-12 that intersects
+    """ "Local" endpoint for ALFRESCO data - finds the HUC-12 that intersects
     the request lat/lon and returns a summary of data within that HUC
 
     Args:

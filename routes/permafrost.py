@@ -1,7 +1,12 @@
 import asyncio
+import io
+import csv
+import copy
 from flask import (
     Blueprint,
+    Response,
     render_template,
+    request,
 )
 
 # local imports
@@ -10,7 +15,13 @@ from fetch_data import (
     fetch_wcs_point_data,
     fetch_bbox_netcdf,
     summarize_within_poly,
+    build_csv_dicts,
+    write_csv,
+    add_titles,
+    place_name,
+    csv_metadata,
 )
+
 from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from validate_request import (
@@ -19,7 +30,12 @@ from validate_request import (
     validate_akpa,
     project_latlon,
 )
-from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
+from validate_data import (
+    get_poly_3338_bbox,
+    nullify_nodata,
+    nullify_and_prune,
+    postprocess,
+)
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc_gdf, permafrost_encodings, akpa_gdf
 from . import routes
@@ -258,6 +274,55 @@ def run_point_fetch_all_permafrost(lat, lon):
         "obupfx": package_obu_vector(gs_results[2]),
     }
 
+    csv_dicts = []
+    if request.args.get("format") == "csv":
+        data = nullify_and_prune(data, "permafrost")
+        if data in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+
+        fieldnames = [
+            "source",
+            "era",
+            "model",
+            "scenario",
+            "variable",
+            "value",
+        ]
+
+        gipl_data = {"gipl": data["gipl"]}
+        csv_dicts += build_csv_dicts(
+            gipl_data,
+            fieldnames[0:-1],
+        )
+
+        # Non-GIPL values have a simpler nesting structure and need to be
+        # handled separately.
+        non_gipl_fields = [
+            "source",
+            "variable",
+            "value",
+        ]
+        for source in ["jorg", "obu_magt", "obupfx"]:
+            subset = {source: data[source]}
+            csv_dicts += build_csv_dicts(
+                subset,
+                non_gipl_fields,
+            )
+
+        place_id = request.args.get("community")
+        place = place_name("point", place_id)
+
+        metadata = csv_metadata(place, place_id, "point", lat, lon)
+        for source in ["gipl", "jorg", "obu_magt", "obupfx"]:
+            metadata += "# " + titles[source] + "\n"
+
+        if place is not None:
+            filename = "Permafrost (" + place + ").csv"
+        else:
+            filename = "Permafrost (" + lat + ", " + lon + ").csv"
+
+        return write_csv(csv_dicts, fieldnames, filename, metadata)
+
     return postprocess(data, "permafrost", titles)
 
 
@@ -296,6 +361,26 @@ def run_huc_fetch_all_permafrost(huc_id):
     magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
+
+    fieldnames = [
+        "era",
+        "model",
+        "scenario",
+        "statistic",
+        "variable",
+        "value",
+    ]
+
+    if request.args.get("format") == "csv":
+        combined_pkg = nullify_and_prune(combined_pkg, "permafrost")
+        if combined_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        csv_dicts = build_csv_dicts(
+            combined_pkg,
+            fieldnames,
+        )
+        return write_csv(csv_dicts, fieldnames, "Permafrost.csv")
+
     return postprocess(combined_pkg, "permafrost", titles["gipl"])
 
 
@@ -332,4 +417,24 @@ def run_protectedarea_fetch_all_permafrost(akpa_id):
     magt_pa_pkg = package_gipl_polygon(magt_poly_sum_di)
     alt_pa_pkg = package_gipl_polygon(alt_poly_sum_di)
     combined_pkg = combine_gipl_poly_var_pkgs(magt_pa_pkg, alt_pa_pkg)
+
+    fieldnames = [
+        "era",
+        "model",
+        "scenario",
+        "statistic",
+        "variable",
+        "value",
+    ]
+
+    if request.args.get("format") == "csv":
+        combined_pkg = nullify_and_prune(combined_pkg, "permafrost")
+        if combined_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        csv_dicts = build_csv_dicts(
+            combined_pkg,
+            fieldnames,
+        )
+        return write_csv(csv_dicts, fieldnames, "Permafrost.csv")
+
     return postprocess(combined_pkg, "permafrost", titles["gipl"])
