@@ -27,9 +27,10 @@ from validate_request import (
     validate_huc,
     validate_akpa,
     project_latlon,
+    validate_polyid,
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc_gdf, akpa_gdf
+from luts import huc_gdf, akpa_gdf, akco_gdf, akclim_gdf, aketh_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -755,3 +756,101 @@ def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
         return return_csv(csv_data)
 
     return pa_pkg
+
+
+@routes.route("/<var_ep>/corporation/<co_id>")
+def corp_data_endpoint(var_ep, co_id):
+    """Native corporation aggregation data endpoint. Fetch data within
+    corporation for specified variable and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        co_id (str): Native Corporation ID (e.g NC1).
+    Returns:
+        co_pkg (dict): zonal mean of variable(s) for native corp. polygon
+
+    """
+    validation = validate_polyid(co_id)
+    if validation is not True:
+        return validation
+
+    try:
+        if var_ep in var_ep_lu.keys():
+            co_pkg = run_aggregate_var_polygon(var_ep, akco_gdf, co_id)
+        elif var_ep == "taspr":
+            co_pkg = run_aggregate_allvar_polygon(akco_gdf, co_id)
+    except:
+        return render_template("422/invalid_corporation.html"), 422
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(co_pkg)
+        return return_csv(csv_data)
+
+    return postprocess(co_pkg, "taspr")
+
+
+@routes.route("/<var_ep>/climate_divisions/<cd_id>")
+def climdiv_data_endpoint(var_ep, cd_id):
+    """Climate division aggregation data endpoint. Fetch data within
+    climate division for specified variable and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        cd_id (str): Climate division ID (e.g. CD1).
+    Returns:
+        cd_pkg (dict): zonal mean of variable(s) for climate division polygon
+
+    """
+    validation = validate_polyid(cd_id)
+    if validation is not True:
+        return validation
+
+    try:
+        if var_ep in var_ep_lu.keys():
+            cd_pkg = run_aggregate_var_polygon(var_ep, akclim_gdf, cd_id)
+        elif var_ep == "taspr":
+            cd_pkg = run_aggregate_allvar_polygon(akclim_gdf, cd_id)
+    except:
+        return render_template("422/invalid_climatedivision.html"), 422
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(cd_pkg)
+        return return_csv(csv_data)
+
+    return postprocess(cd_pkg, "taspr")
+
+
+@routes.route("/<var_ep>/ethnolinguistic/<el_id>")
+def ethno_data_endpoint(var_ep, el_id):
+    """Ethnolinguistic region aggregation data endpoint.
+    Fetch data within ethnolinguistic region for specified
+    variable and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either taspr, temperature,
+            or precipitation
+        el_id (int): Ethnolinguistic region ID (e.g. EL1).
+    Returns:
+        huc_pkg (dict): zonal mean of variable(s) for ethnolinguistic
+        region polygon
+
+    """
+    validation = validate_polyid(el_id)
+    if validation is not True:
+        return validation
+
+    try:
+        if var_ep in var_ep_lu.keys():
+            el_pkg = run_aggregate_var_polygon(var_ep, aketh_gdf, el_id)
+        elif var_ep == "taspr":
+            el_pkg = run_aggregate_allvar_polygon(aketh_gdf, el_id)
+    except:
+        return render_template("422/invalid_ethnolinguistic.html"), 422
+
+    if request.args.get("format") == "csv":
+        csv_data = create_csv(el_pkg)
+        return return_csv(csv_data)
+
+    return postprocess(el_pkg, "taspr")
