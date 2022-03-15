@@ -109,7 +109,14 @@ def get_json_for_type(type, recurse=False):
         json_list = []
 
         # Runs through each of the JSON files
-        for curr_type in ["communities", "hucs", "protected_areas"]:
+        for curr_type in [
+            "communities",
+            "hucs",
+            "protected_areas",
+            "corporations",
+            "climate_divisions",
+            "ethnolinguistic_regions",
+        ]:
 
             # Sends a recursive call to this function
             curr_js = get_json_for_type(curr_type, recurse=True)
