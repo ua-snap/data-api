@@ -25,12 +25,12 @@ from fetch_data import (
 from validate_request import (
     validate_latlon,
     validate_huc,
-    validate_akpa,
     project_latlon,
     validate_polyid,
+    validate_poly_ep,
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc_gdf, akpa_gdf, akco_gdf, akclim_gdf, aketh_gdf
+from luts import poly_ep_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -698,159 +698,42 @@ def point_data_endpoint(var_ep, lat, lon):
     return postprocess(point_pkg, "taspr")
 
 
-@routes.route("/<var_ep>/huc/<huc_id>")
-def huc_data_endpoint(var_ep, huc_id):
-    """HUC-aggregation data endpoint. Fetch data within HUC
+@routes.route("/<var_ep>/<poly_ep>/<var_id>")
+def var_data_endpoint(var_ep, poly_ep, var_id):
+    """Aggregation data endpoint. Fetch data within polygon area
     for specified variable and return JSON-like dict.
 
     Args:
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        huc_id (int): HUC-8 or HUC-12 id.
+        poly_ep (str): Polygon endpoint. Can be any of these:
+            huc, protectedarea, corporation, climate_division, or ethnolinguistic
+        var_id (str): ID for given polygon from polygon endpoint.
     Returns:
-        huc_pkg (dict): zonal mean of variable(s) for HUC polygon
+        poly_pkg (dict): zonal mean of variable(s) for AOI polygon
 
     """
-    validation = validate_huc(huc_id)
-    if validation is not True:
-        return validation
-
-    try:
-        if var_ep in var_ep_lu.keys():
-            huc_pkg = run_aggregate_var_polygon(var_ep, huc_gdf, huc_id)
-        elif var_ep == "taspr":
-            huc_pkg = run_aggregate_allvar_polygon(huc_gdf, huc_id)
-    except:
-        return render_template("422/invalid_huc.html"), 422
-
-    if request.args.get("format") == "csv":
-        csv_data = create_csv(huc_pkg)
-        return return_csv(csv_data)
-
-    return postprocess(huc_pkg, "taspr")
-
-
-@routes.route("/<var_ep>/protectedarea/<akpa_id>")
-def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
-    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified variable and return JSON-like dict.
-    Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        akpa_id (str): Protected Area ID (e.g. "NPS7")
-    Returns:
-        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
-    """
-    validation = validate_akpa(akpa_id)
-    if validation == 400:
+    if validate_poly_ep(poly_ep) is not True:
         return render_template("400/bad_request.html"), 400
-    try:
-        if var_ep in var_ep_lu.keys():
-            pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-        elif var_ep == "taspr":
-            pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
-    except:
-        return render_template("422/invalid_protected_area.html"), 422
 
-    if request.args.get("format") == "csv":
-        csv_data = create_csv(pa_pkg)
-        return return_csv(csv_data)
+    if poly_ep == 'huc':
+        validation = validate_huc(var_id)
+    else:
+        validation = validate_polyid(var_id)
 
-    return pa_pkg
-
-
-@routes.route("/<var_ep>/corporation/<co_id>")
-def corp_data_endpoint(var_ep, co_id):
-    """Native corporation aggregation data endpoint. Fetch data within
-    corporation for specified variable and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        co_id (str): Native Corporation ID (e.g NC1).
-    Returns:
-        co_pkg (dict): zonal mean of variable(s) for native corp. polygon
-
-    """
-    validation = validate_polyid(co_id)
     if validation is not True:
         return validation
 
     try:
         if var_ep in var_ep_lu.keys():
-            co_pkg = run_aggregate_var_polygon(var_ep, akco_gdf, co_id)
+            poly_pkg = run_aggregate_var_polygon(var_ep, poly_ep_di[poly_ep]['gdf'], var_id)
         elif var_ep == "taspr":
-            co_pkg = run_aggregate_allvar_polygon(akco_gdf, co_id)
+            poly_pkg = run_aggregate_allvar_polygon(poly_ep_di[poly_ep]['gdf'], var_id)
     except:
-        return render_template("422/invalid_corporation.html"), 422
+        return render_template(poly_ep_di[poly_ep]['422_error']), 422
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(co_pkg)
+        csv_data = create_csv(poly_pkg)
         return return_csv(csv_data)
 
-    return postprocess(co_pkg, "taspr")
-
-
-@routes.route("/<var_ep>/climate_divisions/<cd_id>")
-def climdiv_data_endpoint(var_ep, cd_id):
-    """Climate division aggregation data endpoint. Fetch data within
-    climate division for specified variable and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        cd_id (str): Climate division ID (e.g. CD1).
-    Returns:
-        cd_pkg (dict): zonal mean of variable(s) for climate division polygon
-
-    """
-    validation = validate_polyid(cd_id)
-    if validation is not True:
-        return validation
-
-    try:
-        if var_ep in var_ep_lu.keys():
-            cd_pkg = run_aggregate_var_polygon(var_ep, akclim_gdf, cd_id)
-        elif var_ep == "taspr":
-            cd_pkg = run_aggregate_allvar_polygon(akclim_gdf, cd_id)
-    except:
-        return render_template("422/invalid_climatedivision.html"), 422
-
-    if request.args.get("format") == "csv":
-        csv_data = create_csv(cd_pkg)
-        return return_csv(csv_data)
-
-    return postprocess(cd_pkg, "taspr")
-
-
-@routes.route("/<var_ep>/ethnolinguistic/<el_id>")
-def ethno_data_endpoint(var_ep, el_id):
-    """Ethnolinguistic region aggregation data endpoint.
-    Fetch data within ethnolinguistic region for specified
-    variable and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        el_id (int): Ethnolinguistic region ID (e.g. EL1).
-    Returns:
-        huc_pkg (dict): zonal mean of variable(s) for ethnolinguistic
-        region polygon
-
-    """
-    validation = validate_polyid(el_id)
-    if validation is not True:
-        return validation
-
-    try:
-        if var_ep in var_ep_lu.keys():
-            el_pkg = run_aggregate_var_polygon(var_ep, aketh_gdf, el_id)
-        elif var_ep == "taspr":
-            el_pkg = run_aggregate_allvar_polygon(aketh_gdf, el_id)
-    except:
-        return render_template("422/invalid_ethnolinguistic.html"), 422
-
-    if request.args.get("format") == "csv":
-        csv_data = create_csv(el_pkg)
-        return return_csv(csv_data)
-
-    return postprocess(el_pkg, "taspr")
+    return postprocess(poly_pkg, "taspr")

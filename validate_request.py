@@ -58,6 +58,19 @@ def validate_bbox(lat1, lon1, lat2, lon2):
     return valid
 
 
+def validate_poly_ep(poly_ep):
+    if (
+        poly_ep != "huc"
+        and poly_ep != "protectedarea"
+        and poly_ep != "corporation"
+        and poly_ep != "climate_divisions"
+        and poly_ep != "ethnolinguistic"
+    ):
+        return False
+    else:
+        return True
+
+
 def validate_huc(huc_id):
     """Validate HUC-8 ID
     Return True if valid or HTTP status code if validation failed
