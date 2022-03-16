@@ -170,6 +170,7 @@ except fiona.errors.DriverError:
         huc_gdf,
         valid_huc_ids,
     ) = (0, 0, 0, 0, 0, 0, 0, 0, 0)
+    type_di = dict()
 
 # look-up for updating place names and data via geo-vector GitHub repo
 shp_di = {}
