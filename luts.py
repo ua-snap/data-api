@@ -138,12 +138,12 @@ try:
     ).set_index("id")
     valid_huc_ids = huc_gdf.index.values
 
-    poly_ep_di = dict()
-    poly_ep_di['huc'] = {'gdf': huc_gdf, '422_error': "422/invalid_huc.html"}
-    poly_ep_di['protectedarea'] = {'gdf': akpa_gdf, '422_error': "422/invalid_protected_area.html"}
-    poly_ep_di['corporation'] = {'gdf': akco_gdf, '422_error': "422/invalid_corporation.html"}
-    poly_ep_di['climate_divisions'] = {'gdf': akclim_gdf, '422_error': "422/invalid_climatedivision.html"}
-    poly_ep_di['ethnolinguistic'] = {'gdf': aketh_gdf, '422_error': "422/invalid_ethnolinguistic.html"}
+    type_di = dict()
+    type_di['huc'] = huc_gdf
+    type_di['protected_area'] = akpa_gdf
+    type_di['corporation'] = akco_gdf
+    type_di['climate_divisions'] = akclim_gdf
+    type_di['ethnolinguistic_region'] = aketh_gdf
 
     update_needed = False
 except fiona.errors.DriverError:

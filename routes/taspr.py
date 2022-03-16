@@ -24,13 +24,11 @@ from fetch_data import (
 )
 from validate_request import (
     validate_latlon,
-    validate_huc,
     project_latlon,
-    validate_polyid,
-    validate_poly_ep,
+    validate_var_id,
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import poly_ep_di
+from luts import type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -698,39 +696,31 @@ def point_data_endpoint(var_ep, lat, lon):
     return postprocess(point_pkg, "taspr")
 
 
-@routes.route("/<var_ep>/<poly_ep>/<var_id>")
-def var_data_endpoint(var_ep, poly_ep, var_id):
+@routes.route("/<var_ep>/area/<var_id>")
+def taspr_data_endpoint(var_ep, var_id):
     """Aggregation data endpoint. Fetch data within polygon area
     for specified variable and return JSON-like dict.
 
     Args:
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        poly_ep (str): Polygon endpoint. Can be any of these:
-            huc, protectedarea, corporation, climate_division, or ethnolinguistic
         var_id (str): ID for given polygon from polygon endpoint.
     Returns:
         poly_pkg (dict): zonal mean of variable(s) for AOI polygon
 
     """
-    if validate_poly_ep(poly_ep) is not True:
-        return render_template("400/bad_request.html"), 400
 
-    if poly_ep == 'huc':
-        validation = validate_huc(var_id)
-    else:
-        validation = validate_polyid(var_id)
-
-    if validation is not True:
-        return validation
+    poly_type = validate_var_id(var_id)
+    if type(poly_type) is tuple:
+        return poly_type
 
     try:
         if var_ep in var_ep_lu.keys():
-            poly_pkg = run_aggregate_var_polygon(var_ep, poly_ep_di[poly_ep]['gdf'], var_id)
+            poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
         elif var_ep == "taspr":
-            poly_pkg = run_aggregate_allvar_polygon(poly_ep_di[poly_ep]['gdf'], var_id)
+            poly_pkg = run_aggregate_allvar_polygon(type_di[poly_type], var_id)
     except:
-        return render_template(poly_ep_di[poly_ep]['422_error']), 422
+        return render_template("422/invalid_area.html"), 422
 
     if request.args.get("format") == "csv":
         csv_data = create_csv(poly_pkg)

@@ -3,7 +3,9 @@ A module to validate latitude and longitude, contains
 other functions that could be used across multiple endpoints.
 """
 
+import os
 import re
+import json
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
@@ -70,6 +72,16 @@ def validate_poly_ep(poly_ep):
     else:
         return True
 
+
+def validate_var_id(var_id):
+    if re.search("[^A-Za-z0-9]", var_id):
+        return render_template("400/bad_request.html"), 400
+    for filename in os.listdir("data/jsons/"):
+        with open(os.path.join("data/jsons/", filename), 'r') as f:
+            for jsonline in json.loads(f.read()):
+                if var_id == jsonline['id']:
+                    return jsonline['type']
+    return render_template("422/invalid_area.html"), 400
 
 def validate_huc(huc_id):
     """Validate HUC-8 ID
