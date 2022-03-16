@@ -5,9 +5,7 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 
-# TODO: Change this to https://earthmaps.io as default after development
-host = os.environ.get("API_HOSTNAME") or "http://earthmaps.io"
-cache = "http://earthmaps.io:6081"
+host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
 bbox_offset = 0.000000001
 
@@ -94,6 +92,17 @@ json_types = {
 # Unused variable for now. Can be used by re-caching function to pre-cache
 # all HUC types listed below.
 huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
+
+cached_urls = [
+    "/alfresco/flammability/area/",
+    "/alfresco/flammability/point/",
+    "/alfresco/veg_change/area/",
+    "/alfresco/veg_change/point/",
+    "/elevation/area/",
+    "/elevation/point/",
+    "/taspr/area/",
+    "/taspr/point/"
+]
 
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
