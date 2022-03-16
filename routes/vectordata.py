@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, Response
 import geopandas as gpd
 import json
 import os
+import shutil
 import numpy as np
 import pandas as pd
 import requests
@@ -211,11 +212,25 @@ def update_data():
     path = "data/csvs/"
     if not os.path.exists(path):
         os.makedirs(path)
+    else:
+        shutil.rmtree(path)
+        os.makedirs(path)
 
     # Ensure the path to store JSONs is created
     jsonpath = "data/jsons/"
     if not os.path.exists(jsonpath):
         os.makedirs(jsonpath)
+    else:
+        shutil.rmtree(jsonpath)
+        os.makedirs(jsonpath)
+
+    # Ensure the path to store shapefiles is created
+    shppath = "data/shapefiles/"
+    if not os.path.exists(shppath):
+        os.makedirs(shppath)
+    else:
+        shutil.rmtree(shppath)
+        os.makedirs(shppath)
 
     # Download CSV for all Alaskan communities and write to local CSV file.
     url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
@@ -239,10 +254,7 @@ def update_data():
 
 
 def download_shapefiles_from_repo(target_dir, file_prefix):
-    # Ensure the path to store shapefiles is created
     path = "data/shapefiles/"
-    if not os.path.exists(path):
-        os.makedirs(path)
     # For each required file of the shapefile, download and store locally.
     for filetype in ["dbf", "prj", "sbn", "sbx", "shp", "shx"]:
         try:
@@ -255,8 +267,6 @@ def download_shapefiles_from_repo(target_dir, file_prefix):
 
 def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained):
     path = "data/shapefiles/"
-    if not os.path.exists(path):
-        os.makedirs(path)
     # Read shapefile into Geopandas data frame
     df = gpd.read_file(f"{path}{file_prefix}.shp")
 
