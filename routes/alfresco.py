@@ -501,9 +501,9 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
             # otherwise take nearest HUC within 100m
             huc_id = huc12_gdf.iloc[idx_arr[np.argmin(near_distances)]].name
 
-    huc12_pkg = run_fetch_alf_huc_data(var_ep, huc_id)
+    huc12_pkg = run_fetch_alf_area_data(var_ep, huc_id)
     huc12_pkg["huc_id"] = huc_id
-    huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/huc/{huc_id}"
+    huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/area/{huc_id}"
 
     return huc12_pkg
 

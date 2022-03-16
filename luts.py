@@ -148,7 +148,8 @@ try:
     valid_huc_ids = huc_gdf.index.values
 
     type_di = dict()
-    type_di["huc"] = huc_gdf
+    type_di["huc"] = huc8_gdf
+    type_di["huc12"] = huc12_gdf
     type_di["protected_area"] = akpa_gdf
     type_di["corporation"] = akco_gdf
     type_di["climate_division"] = akclim_gdf
