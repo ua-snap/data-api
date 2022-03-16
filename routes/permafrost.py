@@ -15,8 +15,6 @@ from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from validate_request import (
     validate_latlon,
-    validate_huc,
-    validate_akpa,
     project_latlon,
 )
 from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
@@ -193,26 +191,6 @@ def pf_about_point():
     return render_template("permafrost/point.html")
 
 
-@routes.route("/permafrost/huc/")
-@routes.route("/groundtemperature/huc/")
-@routes.route("/activelayer/huc/")
-@routes.route("/magtalt/huc/")
-@routes.route("/alt/huc/")
-@routes.route("/magt/huc/")
-def pf_about_huc():
-    return render_template("permafrost/huc.html")
-
-
-@routes.route("/permafrost/protectedarea/")
-@routes.route("/groundtemperature/protectedarea/")
-@routes.route("/activelayer/protectedarea/")
-@routes.route("/magtalt/protectedarea/")
-@routes.route("/alt/protectedarea/")
-@routes.route("/magt/protectedarea/")
-def pf_about_protectedarea():
-    return render_template("permafrost/protectedarea.html")
-
-
 @routes.route("/permafrost/point/<lat>/<lon>")
 def run_point_fetch_all_permafrost(lat, lon):
     """Run the async request for permafrost data at a single point.
@@ -259,77 +237,3 @@ def run_point_fetch_all_permafrost(lat, lon):
     }
 
     return postprocess(data, "permafrost", titles)
-
-
-@routes.route("/permafrost/huc/<huc_id>")
-def run_huc_fetch_all_permafrost(huc_id):
-    """Endpoint to fetch GIPL data within a HUC.
-
-    Args: huc_id (int): HUC-8 or HUC-12 id.
-
-    Returns:
-        huc_pkg (dict): JSON-like object containing aggregated permafrost data.
-    """
-    validation = validate_huc(huc_id)
-    if validation is not True:
-        return validation
-
-    try:
-        poly = get_poly_3338_bbox(huc_gdf, huc_id)
-    except:
-        return render_template("422/invalid_huc.html"), 422
-
-    bounds = poly.bounds
-
-    request_str = generate_netcdf_wcs_getcov_str(
-        bounds, permafrost_coverage_id, var_coord=None
-    )
-    url = generate_wcs_query_url(request_str)
-    ds = asyncio.run(fetch_bbox_netcdf([url]))
-
-    alt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="magt", roundkey="magt"
-    )
-    magt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="alt", roundkey="alt"
-    )
-    magt_huc_pkg = package_gipl_polygon(magt_poly_sum_di)
-    alt_huc_pkg = package_gipl_polygon(alt_poly_sum_di)
-    combined_pkg = combine_gipl_poly_var_pkgs(magt_huc_pkg, alt_huc_pkg)
-    return postprocess(combined_pkg, "permafrost", titles["gipl"])
-
-
-@routes.route("/permafrost/protectedarea/<akpa_id>")
-def run_protectedarea_fetch_all_permafrost(akpa_id):
-    """Endpoint to fetch GIPL data within a protected area.
-
-    Args: akpa_id (str): ID of protected area, e.g. "NPS7"
-
-    Returns:
-        combined_pkg (dict): JSON-like object containing aggregated permafrost data.
-    """
-    validation = validate_akpa(akpa_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    try:
-        poly = get_poly_3338_bbox(akpa_gdf, akpa_id)
-    except:
-        return render_template("422/invalid_protected_area.html"), 422
-    bounds = poly.bounds
-
-    request_str = generate_netcdf_wcs_getcov_str(
-        bounds, permafrost_coverage_id, var_coord=None
-    )
-    url = generate_wcs_query_url(request_str)
-    ds = asyncio.run(fetch_bbox_netcdf([url]))
-
-    alt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="magt", roundkey="magt"
-    )
-    magt_poly_sum_di = summarize_within_poly(
-        ds, poly, permafrost_encodings, varname="alt", roundkey="alt"
-    )
-    magt_pa_pkg = package_gipl_polygon(magt_poly_sum_di)
-    alt_pa_pkg = package_gipl_polygon(alt_poly_sum_di)
-    combined_pkg = combine_gipl_poly_var_pkgs(magt_pa_pkg, alt_pa_pkg)
-    return postprocess(combined_pkg, "permafrost", titles["gipl"])
