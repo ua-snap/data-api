@@ -54,6 +54,11 @@ def protectedarea_about():
 def huc_about():
     return render_template("boundary/huc.html")
 
+@routes.route("/boundary/area/")
+@routes.route("/boundary/area/abstract/")
+def area_about():
+    return render_template("boundary/area.html")
+
 
 @routes.route("/boundary/area/<var_id>")
 def run_fetch_area_poly(var_id):

@@ -355,18 +355,11 @@ def alfresco_about_point():
     return render_template("alfresco/point.html")
 
 
-@routes.route("/alfresco/flammability/huc/")
-@routes.route("/alfresco/veg_change/huc/")
-@routes.route("/alfresco/huc/")
+@routes.route("/alfresco/flammability/area/")
+@routes.route("/alfresco/veg_change/area/")
+@routes.route("/alfresco/area/")
 def alfresco_about_huc():
-    return render_template("alfresco/huc.html")
-
-
-@routes.route("/alfresco/flammability/protectedarea/")
-@routes.route("/alfresco/veg_change/protectedarea/")
-@routes.route("/alfresco/protectedarea/")
-def alfresco_about_protectedarea():
-    return render_template("alfresco/protectedarea.html")
+    return render_template("alfresco/area.html")
 
 
 @routes.route("/alfresco/flammability/local/")

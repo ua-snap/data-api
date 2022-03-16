@@ -645,17 +645,11 @@ def about_point():
     return render_template("taspr/point.html")
 
 
-@routes.route("/taspr/huc/")
-@routes.route("/temperature/huc/")
-@routes.route("/precipitation/huc/")
+@routes.route("/taspr/area/")
+@routes.route("/temperature/area/")
+@routes.route("/precipitation/area/")
 def about_huc():
-    return render_template("taspr/huc.html")
-
-@routes.route("/taspr/protectedarea/")
-@routes.route("/temperature/protectedarea/")
-@routes.route("/precipitation/protectedarea/")
-def taspr_about_protectedarea():
-    return render_template("taspr/protectedarea.html")
+    return render_template("taspr/area.html")
 
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
