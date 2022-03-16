@@ -101,7 +101,7 @@ cached_urls = [
     "/elevation/area/",
     "/elevation/point/",
     "/taspr/area/",
-    "/taspr/point/"
+    "/taspr/point/",
 ]
 
 # For the forest endpoint.  This file is just a generated pickle
@@ -148,11 +148,11 @@ try:
     valid_huc_ids = huc_gdf.index.values
 
     type_di = dict()
-    type_di['huc'] = huc_gdf
-    type_di['protected_area'] = akpa_gdf
-    type_di['corporation'] = akco_gdf
-    type_di['climate_divisions'] = akclim_gdf
-    type_di['ethnolinguistic_region'] = aketh_gdf
+    type_di["huc"] = huc_gdf
+    type_di["protected_area"] = akpa_gdf
+    type_di["corporation"] = akco_gdf
+    type_di["climate_divisions"] = akclim_gdf
+    type_di["ethnolinguistic_region"] = aketh_gdf
 
     update_needed = False
 except fiona.errors.DriverError:

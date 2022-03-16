@@ -51,7 +51,7 @@ def get_all_jsons():
     for filename in os.listdir("data/jsons/"):
         if filename == "ak_huc12.json":
             continue
-        with open(os.path.join("data/jsons/", filename), 'r') as f:
+        with open(os.path.join("data/jsons/", filename), "r") as f:
             json_list.extend(json.load(f))
     return json_list
 
@@ -71,9 +71,7 @@ def get_endpoint(curr_route, curr_type, place):
     """
     # Build the URL to query based on type
     if curr_type == "community":
-        url = (
-            host + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
-        )
+        url = host + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
     else:
         url = host + curr_route + str(place["id"])
 
@@ -124,8 +122,7 @@ def recache(limit):
         Returns:
             JSON dump of all the endpoints in the API.
     """
-    routes = list()
-    if (limit):
+    if limit:
         routes = cached_urls
     else:
         routes = all_routes()
@@ -134,10 +131,7 @@ def recache(limit):
             route.find("lat") == -1
         ):
             get_all_route_endpoints(route, "community")
-        elif (
-            route.find("area") != -1
-            and route.find("var_id") == -1
-        ):
+        elif route.find("area") != -1 and route.find("var_id") == -1:
             get_all_route_endpoints(route, "area")
 
     return Response(

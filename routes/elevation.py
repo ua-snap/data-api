@@ -12,13 +12,11 @@ from fetch_data import (
 )
 from validate_request import (
     validate_latlon,
-    validate_huc,
-    validate_akpa,
     validate_var_id,
 )
 from validate_data import get_poly_3338_bbox
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import type_di, huc_gdf, akpa_gdf
+from luts import type_di
 from . import routes
 
 elevation_api = Blueprint("elevation_api", __name__)

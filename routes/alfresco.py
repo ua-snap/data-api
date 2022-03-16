@@ -21,13 +21,11 @@ from generate_urls import generate_wcs_query_url
 from fetch_data import *
 from validate_request import (
     validate_latlon,
-    validate_huc,
-    validate_akpa,
     project_latlon,
-    validate_var_id
+    validate_var_id,
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc_gdf, huc12_gdf, type_di
+from luts import huc12_gdf, type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
