@@ -15,11 +15,10 @@ from luts import (
     json_types,
     huc8_gdf,
     akpa_gdf,
-    # these are commented out because we **may** add them to the proximity search at a later time
     akco_gdf,
     aketh_gdf,
     akclim_gdf,
-    # akfire_gdf,
+    akfire_gdf,
     proximity_search_radius_m,
     community_search_radius_m,
     total_bounds_buffer,
@@ -90,6 +89,14 @@ def find_containing_polygons(lat, lon):
     except ValueError:
         near_aketh_di, el_bb = {}, box(*[1, 1, 1, 1])
 
+    try:
+        near_akfire_di, fm_tb = fetch_akfire_near_point(p_buff)
+        fm_bb = box(*fm_tb)
+        fm_bb = fm_bb.buffer(box(*fm_tb).area * total_bounds_buffer)
+        fm_tb = fm_bb.bounds
+    except ValueError:
+        near_akfire_di, fm_bb = {}, box(*[1, 1, 1, 1])
+
     df = csv_to4326_gdf("data/csvs/ak_communities.csv")
     nearby_points_di = package_nearby_points(
         find_nearest_communities(p_buff_community, df)
@@ -100,6 +107,7 @@ def find_containing_polygons(lat, lon):
     proximal_di.update(near_akco_di)
     proximal_di.update(near_akclim_di)
     proximal_di.update(near_aketh_di)
+    proximal_di.update(near_akfire_di)
     proximal_di.update(nearby_points_di)
 
     geo_suggestions.update(proximal_di)
@@ -144,6 +152,7 @@ def get_json_for_type(type, recurse=False):
             "corporations",
             "climate_divisions",
             "ethnolinguistic_regions",
+            "fire_zones"
         ]:
 
             # Sends a recursive call to this function
@@ -384,6 +393,14 @@ def fetch_aketh_near_point(pt):
     join = execute_spatial_join(pt, aketh_gdf.reset_index(), "intersects")
     di, tb = package_polys(
         "ethnolinguistic_regions_near", join, "ethnolinguistic_region", aketh_gdf, to_wgs=True
+    )
+    return di, tb
+
+
+def fetch_akfire_near_point(pt):
+    join = execute_spatial_join(pt, akfire_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "fire_management_units_near", join, "fire_zone", akfire_gdf, to_wgs=True
     )
     return di, tb
 
