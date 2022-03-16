@@ -154,6 +154,7 @@ try:
     type_di["corporation"] = akco_gdf
     type_di["climate_division"] = akclim_gdf
     type_di["ethnolinguistic_region"] = aketh_gdf
+    type_di["fire_zone"] = akfire_gdf
 
     update_needed = False
 except fiona.errors.DriverError:
