@@ -54,6 +54,7 @@ def protectedarea_about():
 def huc_about():
     return render_template("boundary/huc.html")
 
+
 @routes.route("/boundary/area/")
 @routes.route("/boundary/area/abstract/")
 def area_about():

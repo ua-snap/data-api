@@ -152,7 +152,7 @@ def get_json_for_type(type, recurse=False):
             "corporations",
             "climate_divisions",
             "ethnolinguistic_regions",
-            "fire_zones"
+            "fire_zones",
         ]:
 
             # Sends a recursive call to this function
@@ -392,7 +392,11 @@ def fetch_akclim_near_point(pt):
 def fetch_aketh_near_point(pt):
     join = execute_spatial_join(pt, aketh_gdf.reset_index(), "intersects")
     di, tb = package_polys(
-        "ethnolinguistic_regions_near", join, "ethnolinguistic_region", aketh_gdf, to_wgs=True
+        "ethnolinguistic_regions_near",
+        join,
+        "ethnolinguistic_region",
+        aketh_gdf,
+        to_wgs=True,
     )
     return di, tb
 
