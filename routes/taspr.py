@@ -697,7 +697,7 @@ def point_data_endpoint(var_ep, lat, lon):
 
 
 @routes.route("/<var_ep>/area/<var_id>")
-def taspr_data_endpoint(var_ep, var_id):
+def taspr_area_data_endpoint(var_ep, var_id):
     """Aggregation data endpoint. Fetch data within polygon area
     for specified variable and return JSON-like dict.
 
@@ -711,6 +711,8 @@ def taspr_data_endpoint(var_ep, var_id):
     """
 
     poly_type = validate_var_id(var_id)
+
+    # This is only ever true when it is returning an error template
     if type(poly_type) is tuple:
         return poly_type
 

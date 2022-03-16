@@ -14,10 +14,11 @@ from validate_request import (
     validate_latlon,
     validate_huc,
     validate_akpa,
+    validate_var_id,
 )
 from validate_data import get_poly_3338_bbox
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import huc_gdf, akpa_gdf
+from luts import type_di, huc_gdf, akpa_gdf
 from . import routes
 
 elevation_api = Blueprint("elevation_api", __name__)
@@ -114,57 +115,26 @@ def run_fetch_elevation(lat, lon):
     return elevation
 
 
-@routes.route("/elevation/huc/<huc_id>")
-def run_huc_fetch_all_elevation(huc_id):
-    """Endpoint to fetch elevation data within a HUC.
-
-    Args: huc_id (int): 8-digit HUC ID.
-
-    Returns:
-        huc_pkg (dict): JSON-like object containing aggregated data.
-    """
-    validation = validate_huc(huc_id)
-    if validation is not True:
-        return validation
-    try:
-        poly = get_poly_3338_bbox(huc_gdf, huc_id)
-    except:
-        return render_template("422/invalid_huc.html"), 422
-
-    wcsxy = get_wcs_xy_str_from_bbox_bounds(poly)
-
-    request_str = generate_wcs_getcov_str(
-        wcsxy.xstr,
-        wcsxy.ystr,
-        "astergdem_min_max_avg",
-        var_coord=None,
-        encoding="GeoTIFF",
-    )
-
-    url = generate_wcs_query_url(request_str, GS_BASE_URL)
-    with rio.open(asyncio.run(fetch_bbox_geotiff_from_gs([url]))) as src:
-        huc_pkg = package_zonal_stats(src, poly)
-
-    return huc_pkg
-
-
-@routes.route("/elevation/protectedarea/<akpa_id>")
-def run_protectedarea_fetch_all_elevation(akpa_id):
-    """Endpoint to fetch elevation data within a protected area.
+@routes.route("/elevation/area/<var_id>")
+def run_area_fetch_all_elevation(var_id):
+    """Endpoint to fetch elevation data within an AOI polygon area.
 
     Args:
-        akpa_id (str): ID of protected area, e.g. "NPS7"
+        var_id (str): ID of AOI polygon area, e.g. "NPS7"
 
     Returns:
-        pa_pkg (dict): JSON-like object of aggregated elevation data.
+        poly_pkg (dict): JSON-like object of aggregated elevation data.
     """
-    validation = validate_akpa(akpa_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
+    poly_type = validate_var_id(var_id)
+
+    # This is only ever true when it is returning an error template
+    if type(poly_type) is tuple:
+        return poly_type
+
     try:
-        poly = get_poly_3338_bbox(akpa_gdf, akpa_id)
+        poly = get_poly_3338_bbox(type_di[poly_type], var_id)
     except:
-        return render_template("422/invalid_protected_area.html"), 422
+        return render_template("422/invalid_area.html"), 422
 
     wcsxy = get_wcs_xy_str_from_bbox_bounds(poly)
 
@@ -178,6 +148,6 @@ def run_protectedarea_fetch_all_elevation(akpa_id):
 
     url = generate_wcs_query_url(request_str, GS_BASE_URL)
     with rio.open(asyncio.run(fetch_bbox_geotiff_from_gs([url]))) as src:
-        pa_pkg = package_zonal_stats(src, poly)
+        poly_pkg = package_zonal_stats(src, poly)
 
-    return pa_pkg
+    return poly_pkg

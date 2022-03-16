@@ -24,9 +24,10 @@ from validate_request import (
     validate_huc,
     validate_akpa,
     project_latlon,
+    validate_var_id
 )
 from validate_data import get_poly_3338_bbox, postprocess
-from luts import huc_gdf, huc12_gdf, akpa_gdf
+from luts import huc_gdf, huc12_gdf, type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -443,73 +444,6 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     return postprocess(point_pkg, "alfresco")
 
 
-@routes.route("/alfresco/<var_ep>/huc/<huc_id>")
-def run_fetch_alf_huc_data(var_ep, huc_id):
-    """HUC-aggregation data endpoint. Fetch data within HUC
-    for specified variable and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Either veg_change or flammability
-        huc_id (int): HUC-8 or HUC-12 id.
-    Returns:
-        huc_pkg (dict): zonal mean of variable(s) for HUC polygon
-
-    """
-    validation = validate_huc(huc_id)
-    if validation is not True:
-        return validation
-
-    try:
-        huc_pkg = run_aggregate_var_polygon(var_ep, huc_gdf, huc_id)
-    except:
-        return render_template("422/invalid_huc.html"), 422
-
-    if request.args.get("format") == "csv":
-        varname = var_ep_lu[var_ep]["varname"]
-        csv_data = create_csv(
-            huc_pkg,
-            alf_fieldnames,
-            package_coords,
-            {"variable": varname, "stat": "mean"},
-        )
-        return return_csv(csv_data)
-
-    return postprocess(huc_pkg, "alfresco")
-
-
-@routes.route("/alfresco/<var_ep>/protectedarea/<akpa_id>")
-def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
-    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified
-    variable and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Either veg_change or flammability
-        akpa_id (str): Protected Area ID (e.g. "NPS7")
-    Returns:
-        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
-    """
-    validation = validate_akpa(akpa_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    # pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-    try:
-        pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-    except:
-        return render_template("422/invalid_protected_area.html"), 422
-
-    if request.args.get("format") == "csv":
-        varname = var_ep_lu[var_ep]["varname"]
-        csv_data = create_csv(
-            pa_pkg,
-            alf_fieldnames,
-            package_coords,
-            {"variable": varname, "stat": "mean"},
-        )
-        return return_csv(csv_data)
-
-    return postprocess(pa_pkg, "alfresco")
-
-
 @routes.route("/alfresco/<var_ep>/local/<lat>/<lon>")
 def run_fetch_alf_local_data(var_ep, lat, lon):
     """"Local" endpoint for ALFRESCO data - finds the HUC-12 that intersects
@@ -574,3 +508,38 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/huc/{huc_id}"
 
     return huc12_pkg
+
+
+@routes.route("/alfresco/<var_ep>/area/<var_id>")
+def run_fetch_alf_area_data(var_ep, var_id):
+    """ALFRESCO aggregation data endpoint. Fetch data within AOI polygon for specified
+    variable and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either veg_change or flammability
+        var_id (str): ID for any AOI polygon
+    Returns:
+        poly_pkg (dict): zonal mean of variable(s) for AOI polygon
+    """
+    poly_type = validate_var_id(var_id)
+
+    # This is only ever true when it is returning an error template
+    if type(poly_type) is tuple:
+        return poly_type
+
+    try:
+        poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
+
+    if request.args.get("format") == "csv":
+        varname = var_ep_lu[var_ep]["varname"]
+        csv_data = create_csv(
+            poly_pkg,
+            alf_fieldnames,
+            package_coords,
+            {"variable": varname, "stat": "mean"},
+        )
+        return return_csv(csv_data)
+
+    return postprocess(poly_pkg, "alfresco")
