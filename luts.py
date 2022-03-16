@@ -151,7 +151,7 @@ try:
     type_di["huc"] = huc_gdf
     type_di["protected_area"] = akpa_gdf
     type_di["corporation"] = akco_gdf
-    type_di["climate_divisions"] = akclim_gdf
+    type_di["climate_division"] = akclim_gdf
     type_di["ethnolinguistic_region"] = aketh_gdf
 
     update_needed = False
