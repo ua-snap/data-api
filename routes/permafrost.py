@@ -2,6 +2,7 @@ import asyncio
 import io
 import csv
 import copy
+from urllib.parse import quote
 from flask import (
     Blueprint,
     Response,
@@ -317,10 +318,11 @@ def run_point_fetch_all_permafrost(lat, lon):
             metadata += "# " + titles[source] + "\n"
 
         if place is not None:
-            filename = "Permafrost (" + place + ").csv"
+            filename = "Permafrost for " + quote(place) + ".csv"
         else:
-            filename = "Permafrost (" + lat + ", " + lon + ").csv"
+            filename = "Permafrost for " + lat + ", " + lon + ".csv"
 
+        print(filename)
         return write_csv(csv_dicts, fieldnames, filename, metadata)
 
     return postprocess(data, "permafrost", titles)

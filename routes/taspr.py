@@ -467,16 +467,16 @@ def return_csv(csv_data, var_ep, place, lat=None, lon=None):
         CSV Response
     """
     if place is not None:
-        filename = var_label_lu[var_ep] + " (" + place + ").csv"
+        filename = var_label_lu[var_ep] + " for " + quote(place) + ".csv"
     else:
-        filename = var_label_lu[var_ep] + " (" + lat + ", " + lon + ").csv"
+        filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
     response = Response(
         csv_data,
         mimetype="text/csv",
         headers={
-            "Content-Type": 'text/csv; name="' + filename + '"',
-            "Content-Disposition": 'attachment; filename="' + filename + '"',
+            "Content-Type": 'text/csv; charset=utf-8',
+            "Content-Disposition": 'attachment; filename="' + filename + '"; filename*=utf-8\'\'"' + filename + '"'
         },
     )
 

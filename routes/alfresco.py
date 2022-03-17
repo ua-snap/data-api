@@ -474,9 +474,9 @@ def create_csv(data_pkg, var_ep, place_type, place_id, lat=None, lon=None):
     metadata = csv_metadata(place, place_id, place_type, lat, lon)
 
     if place is not None:
-        filename = var_label_lu[var_ep] + " (" + place + ").csv"
+        filename = var_label_lu[var_ep] + " for " + quote(place) + ".csv"
     else:
-        filename = var_label_lu[var_ep] + " (" + lat + ", " + lon + ").csv"
+        filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
     return write_csv(csv_dicts, alf_fieldnames, filename, metadata)
 

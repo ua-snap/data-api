@@ -465,8 +465,8 @@ def write_csv(csv_dicts, fieldnames, filename, metadata=None):
         output.getvalue(),
         mimetype="text/csv",
         headers={
-            "Content-Type": 'text/csv; name="' + filename + '"',
-            "Content-Disposition": 'attachment; filename="' + filename + '"',
+            "Content-Type": 'text/csv; charset=utf-8',
+            "Content-Disposition": 'attachment; filename="' + filename + '"; filename*=utf-8\'\'"' + filename + '"'
         },
     )
     return response
@@ -497,7 +497,10 @@ def place_name(place_type, place_id):
 
     for place in places:
         if place_id == place["id"]:
-            return place["name"]
+            full_place = place["name"]
+            if "alt_name" in place and place["alt_name"] is not None:
+                full_place += " (" + place["alt_name"] + ")"
+            return full_place
 
     return None
 
@@ -519,15 +522,12 @@ def csv_metadata(place, place_id, place_type, lat=None, lon=None):
     metadata = "# Location: "
     if place is not None:
         metadata += place + " "
-
-    if place is None:
+    else:
         metadata += lat + " " + lon
-    elif place_type == "point":
-        metadata += "(" + place_id + ") " + lat + " " + lon
-    elif place_type == "huc":
+
+    if place_type == "huc":
         metadata += "(HUC " + place_id + ")"
-    elif place_type == "pa":
-        metadata += "(" + place_id + ")"
+
     metadata += "\n"
 
     if place_type == "pa":
