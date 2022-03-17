@@ -15,7 +15,7 @@ from validate_request import (
     validate_huc,
     validate_akpa,
 )
-from validate_data import get_poly_3338_bbox
+from validate_data import get_poly_3338_bbox, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc_gdf, akpa_gdf
 from . import routes
@@ -111,7 +111,7 @@ def run_fetch_elevation(lat, lon):
         return render_template("500/server_error.html"), 500
 
     elevation = package_astergdem(results)
-    return elevation
+    return postprocess(elevation, "elevation")
 
 
 @routes.route("/elevation/huc/<huc_id>")
@@ -145,7 +145,7 @@ def run_huc_fetch_all_elevation(huc_id):
     with rio.open(asyncio.run(fetch_bbox_geotiff_from_gs([url]))) as src:
         huc_pkg = package_zonal_stats(src, poly)
 
-    return huc_pkg
+    return postprocess(huc_pkg, "elevation")
 
 
 @routes.route("/elevation/protectedarea/<akpa_id>")
@@ -180,4 +180,4 @@ def run_protectedarea_fetch_all_elevation(akpa_id):
     with rio.open(asyncio.run(fetch_bbox_geotiff_from_gs([url]))) as src:
         pa_pkg = package_zonal_stats(src, poly)
 
-    return pa_pkg
+    return postprocess(pa_pkg, "elevation")
