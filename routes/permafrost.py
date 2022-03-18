@@ -19,7 +19,6 @@ from fetch_data import (
     build_csv_dicts,
     write_csv,
     add_titles,
-    place_name,
     csv_metadata,
 )
 
@@ -36,6 +35,7 @@ from validate_data import (
     nullify_nodata,
     nullify_and_prune,
     postprocess,
+    place_name,
 )
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc_gdf, permafrost_encodings, akpa_gdf

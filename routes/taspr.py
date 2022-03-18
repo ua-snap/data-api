@@ -21,7 +21,6 @@ from fetch_data import (
     fetch_data,
     get_from_dict,
     summarize_within_poly,
-    place_name,
     csv_metadata,
 )
 from validate_request import (
@@ -30,7 +29,12 @@ from validate_request import (
     validate_akpa,
     project_latlon,
 )
-from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess
+from validate_data import (
+    get_poly_3338_bbox,
+    nullify_and_prune,
+    postprocess,
+    place_name,
+)
 from luts import huc_gdf, akpa_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes

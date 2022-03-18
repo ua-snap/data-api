@@ -5,7 +5,6 @@ import csv
 import copy
 import io
 import itertools
-import json
 import operator
 import time
 import asyncio
@@ -21,7 +20,6 @@ from rasterstats import zonal_stats
 from config import RAS_BASE_URL, WEB_APP_URL
 from generate_requests import *
 from generate_urls import *
-from luts import json_types
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
@@ -470,39 +468,6 @@ def write_csv(csv_dicts, fieldnames, filename, metadata=None):
         },
     )
     return response
-
-
-def place_name(place_type, place_id):
-    """
-    Determine if provided place_id corresponds to a known place.
-
-    Args:
-        place_type (str): point, huc, or pa
-        place_id (str): place identifier (e.g., AK124)
-
-    Returns:
-        Name of the place if it exists, otherwise None
-    """
-    if place_type == "point":
-        f = open(json_types["communities"], "r")
-    elif place_type == "huc":
-        f = open(json_types["huc8s"], "r")
-    elif place_type == "pa":
-        f = open(json_types["protected_areas"], "r")
-    else:
-        return None
-
-    places = json.load(f)
-    f.close()
-
-    for place in places:
-        if place_id == place["id"]:
-            full_place = place["name"]
-            if "alt_name" in place and place["alt_name"] is not None:
-                full_place += " (" + place["alt_name"] + ")"
-            return full_place
-
-    return None
 
 
 def csv_metadata(place, place_id, place_type, lat=None, lon=None):
