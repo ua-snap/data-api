@@ -14,7 +14,7 @@ from validate_request import (
     validate_latlon,
     validate_var_id,
 )
-from validate_data import get_poly_3338_bbox
+from validate_data import get_poly_3338_bbox, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import type_di
 from . import routes
@@ -110,7 +110,7 @@ def run_fetch_elevation(lat, lon):
         return render_template("500/server_error.html"), 500
 
     elevation = package_astergdem(results)
-    return elevation
+    return postprocess(elevation, "elevation")
 
 
 @routes.route("/elevation/area/<var_id>")
@@ -148,4 +148,4 @@ def run_area_fetch_all_elevation(var_id):
     with rio.open(asyncio.run(fetch_bbox_geotiff_from_gs([url]))) as src:
         poly_pkg = package_zonal_stats(src, poly)
 
-    return poly_pkg
+    return postprocess(poly_pkg, "elevation")
