@@ -463,8 +463,12 @@ def write_csv(csv_dicts, fieldnames, filename, metadata=None):
         output.getvalue(),
         mimetype="text/csv",
         headers={
-            "Content-Type": 'text/csv; charset=utf-8',
-            "Content-Disposition": 'attachment; filename="' + filename + '"; filename*=utf-8\'\'"' + filename + '"'
+            "Content-Type": "text/csv; charset=utf-8",
+            "Content-Disposition": 'attachment; filename="'
+            + filename
+            + "\"; filename*=utf-8''\""
+            + filename
+            + '"',
         },
     )
     return response

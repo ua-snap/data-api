@@ -25,12 +25,7 @@ from validate_request import (
     validate_akpa,
     project_latlon,
 )
-from validate_data import (
-    get_poly_3338_bbox,
-    nullify_and_prune,
-    postprocess,
-    place_name
-)
+from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess, place_name
 from luts import huc_gdf, huc12_gdf, akpa_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes

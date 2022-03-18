@@ -3,9 +3,7 @@ import json
 from flask import render_template
 from luts import json_types
 
-from fetch_data import (
-    add_titles
-)
+from fetch_data import add_titles
 
 nodata_values = {
     "fire": [-9999],
@@ -165,6 +163,7 @@ def get_poly_3338_bbox(gdf, poly_id):
 def is_di_empty(di):
     if len(di) == 0:
         return 404  # http status code
+
 
 def place_name(place_type, place_id):
     """
