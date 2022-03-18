@@ -322,7 +322,6 @@ def run_point_fetch_all_permafrost(lat, lon):
         else:
             filename = "Permafrost for " + lat + ", " + lon + ".csv"
 
-        print(filename)
         return write_csv(csv_dicts, fieldnames, filename, metadata)
 
     return postprocess(data, "permafrost", titles)
