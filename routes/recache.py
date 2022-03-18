@@ -37,18 +37,21 @@ def log_error(url, status):
 
 
 def get_all_jsons():
-    """*** Unused for now ***
-       For all HUC types defined in the LUTs, load the JSON files into a
-       list for querying API end points with all HUC IDs.
+    """
+       Load all of the JSON files in data/jsons except ak_huc12.json
+       into a list for querying API end points with all IDs.
 
        Args:
            None.
 
        Returns:
-           A Python list of all HUCs across multiple JSON files.
+           A Python list of all JSON file data except HUC12s.
     """
     json_list = list()
     for filename in os.listdir("data/jsons/"):
+        # We do not want to expose the entire list of HUC12 IDs for
+        # re-caching because there are too many and are not used in
+        # our current web applications.
         if filename == "ak_huc12.json":
             continue
         with open(os.path.join("data/jsons/", filename), "r") as f:
