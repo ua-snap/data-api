@@ -3,7 +3,9 @@ A module to validate latitude and longitude, contains
 other functions that could be used across multiple endpoints.
 """
 
+import os
 import re
+import json
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
@@ -58,34 +60,15 @@ def validate_bbox(lat1, lon1, lat2, lon2):
     return valid
 
 
-def validate_huc(huc_id):
-    """Validate HUC-8 ID
-    Return True if valid or HTTP status code if validation failed
-    """
-    # assumes HUCs are strictly numeric
-    if re.search("[^0-9]", huc_id):
+def validate_var_id(var_id):
+    if re.search("[^A-Za-z0-9]", var_id):
         return render_template("400/bad_request.html"), 400
-    elif huc_id not in valid_huc_ids:
-        return render_template("422/invalid_huc.html"), 422
-    return True
-
-
-def validate_akpa(akpa_id):
-    """Validate protected area ID
-    Return True if valid or HTTP status code if validation failed
-    """
-    if re.search("[^A-Za-z0-9]", akpa_id):
-        return 400
-    return True
-
-
-def validate_polyid(poly_id):
-    """Validate ID key for a generic polygon feature. The key may only contain alphanumeric characters.
-    Return True if valid or HTTP 400 status code if validation failed to indicate the request was poorly formed.
-    """
-    if re.search("[^A-Za-z0-9]", poly_id):
-        return 400
-    return True
+    for filename in os.listdir("data/jsons/"):
+        with open(os.path.join("data/jsons/", filename), "r") as f:
+            for jsonline in json.loads(f.read()):
+                if var_id == jsonline["id"]:
+                    return jsonline["type"]
+    return render_template("422/invalid_area.html"), 400
 
 
 def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):

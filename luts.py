@@ -5,9 +5,7 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 
-# TODO: Change this to https://earthmaps.io as default after development
-host = os.environ.get("API_HOSTNAME") or "http://earthmaps.io"
-cache = "http://earthmaps.io:6081"
+host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
 bbox_offset = 0.000000001
 
@@ -95,6 +93,17 @@ json_types = {
 # all HUC types listed below.
 huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 
+cached_urls = [
+    "/alfresco/flammability/area/",
+    "/alfresco/flammability/point/",
+    "/alfresco/veg_change/area/",
+    "/alfresco/veg_change/point/",
+    "/elevation/area/",
+    "/elevation/point/",
+    "/taspr/area/",
+    "/taspr/point/",
+]
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including
@@ -137,6 +146,16 @@ try:
         [huc8_gdf.reset_index(), huc12_gdf.reset_index()], ignore_index=True
     ).set_index("id")
     valid_huc_ids = huc_gdf.index.values
+
+    type_di = dict()
+    type_di["huc"] = huc8_gdf
+    type_di["huc12"] = huc12_gdf
+    type_di["protected_area"] = akpa_gdf
+    type_di["corporation"] = akco_gdf
+    type_di["climate_division"] = akclim_gdf
+    type_di["ethnolinguistic_region"] = aketh_gdf
+    type_di["fire_zone"] = akfire_gdf
+
     update_needed = False
 except fiona.errors.DriverError:
     # if this fails, give placeholders until all data can
@@ -153,6 +172,7 @@ except fiona.errors.DriverError:
         huc_gdf,
         valid_huc_ids,
     ) = (0, 0, 0, 0, 0, 0, 0, 0, 0)
+    type_di = dict()
 
 # look-up for updating place names and data via geo-vector GitHub repo
 shp_di = {}

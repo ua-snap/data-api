@@ -2,13 +2,24 @@
 {% block content %}
 <h3>Boundary data</h3>
 <p>These data are intended for exposing the polygon boundaries used across SNAP tools and data. Each query for a polygon will return the representative GeoJSON.</p>
-<h4>Service Endpoints</h4>
-<ul>
-    <li><a href="/boundary/climatedivision/">Climate Divisions</a>: Alaska Climate Divisions</li>
-    <li><a href="/boundary/corporation/">Corporations</a>: Alaska Native Corporations</li>
-    <li><a href="/boundary/ethnolinguistic/">Ethnolinguistic Regions</a>: Ethnolinguistic Regions of Alaska and parts of Canada.</li>
-    <li><a href="/boundary/firemanagement/">Fire Management</a>: Wildfire Management Zones for Alaska</li>
-    <li><a href="/boundary/huc/">Hydrologic Units (HUCs)</a>: HUCs of Alaska</li>
-    <li><a href="/boundary/protectedarea/">Protected Area</a>: Protected areas (parks, refuges, reserves, etc.) of Alaska, Yukon, and British Columbia.</li>
-</ul>
+<h4>Service Endpoint</h4>
+<p>The endpoint is <code>boundary/area/&lt;area_id&gt;</code> for all <a href="/places/all">available area&ndash;of&ndash;interest ID codes</a>.</p>
+<h4>HUC 8 Polygon Query</h4>
+<p>Query HUC-8 of Alaska and return a GeoJSON string of the polygon.</p>
+<p>Example HUC-8 query: <a href="/boundary/area/19070506">/boundary/area/19070506</a></p>
+<h4>Protected Area Polygons Query</h4>
+<p>Query the protected area polygons of Alaska, British Columbia, and Yukon and return a GeoJSON string of the polygon.</p>
+<p>Example: <a href="/boundary/area/NPS12">/boundary/area/NPS12</a></p>
+<h4>Alaska Native Corporation Polygon Query</h4>
+<p>Query Alaska Native corporation regions and return a GeoJSON string of the polygon.</p>
+<p>Example: <a href="/boundary/area/NC8">/boundary/area/NC8</a></p>
+<h4>Climate Division Polygon Query</h4>
+<p>Query the climate divisions of Alaska and return a GeoJSON string of the polygon.</p>
+<p>Example: <a href="/boundary/area/CD3">/boundary/area/CD3</a></p>
+<h4>Fire Management Polygon Query</h4>
+<p>Query the fire management zones of Alaska and return a GeoJSON string of the polygon.</p>
+<p>Example: <a href="/boundary/area/FIRE2">/boundary/area/FIRE2</a></p>
+<h4>Ethnolinguistic Region Polygon Query</h4>
+<p>Query ethnolinguistic regions of Alaska and parts of Canada and return a GeoJSON string of the polygon.</p>
+<p>Example: <a href="/boundary/area/EL4">/boundary/area/EL4</a></p>
 {% endblock %}
