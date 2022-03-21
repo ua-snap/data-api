@@ -314,6 +314,15 @@ def run_point_fetch_all_permafrost(lat, lon):
         place = place_name("point", place_id)
 
         metadata = csv_metadata(place, place_id, "point", lat, lon)
+        metadata += "# alt is the active layer thickness\n"
+        metadata += "# magt is the mean annual ground temperature\n"
+        metadata += "# ice is the estimated ground ice volume\n"
+        metadata += "# pfx is the permafrost extent\n"
+        metadata += "# 2025 represents 2011 - 2040\n"
+        metadata += "# 2050 represents 2036 - 2065\n"
+        metadata += "# 2075 represents 2061 – 2090\n"
+        metadata += "# 2095 represents 2086 – 2100\n"
+
         for source in ["gipl", "jorg", "obu_magt", "obupfx"]:
             metadata += "# " + titles[source] + "\n"
 

@@ -368,9 +368,15 @@ def create_csv(packaged_data, place, place_id, place_type, lat=None, lon=None):
     output = io.StringIO()
 
     metadata = csv_metadata(place, place_id, place_type, lat, lon)
-
-    if metadata is not None:
-        output.write(metadata)
+    metadata += "# mean is the mean of of annual means\n"
+    metadata += "# median is the median of of annual means\n"
+    metadata += "# max is the maximum annual mean\n"
+    metadata += "# min is the minimum annual mean\n"
+    metadata += "# q1 is the first quartile of the annual means\n"
+    metadata += "# q3 is the third quartile of the annual means\n"
+    metadata += "# hi_std is the mean + standard deviation of annual means\n"
+    metadata += "# lo_std is the mean - standard deviation of annual means\n"
+    output.write(metadata)
 
     fieldnames = [
         "variable",

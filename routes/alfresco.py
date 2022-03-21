@@ -472,6 +472,7 @@ def create_csv(data_pkg, var_ep, place_type, place_id, lat=None, lon=None):
 
     place = place_name(place_type, place_id)
     metadata = csv_metadata(place, place_id, place_type, lat, lon)
+    metadata += "# mean is the mean of of annual means\n"
 
     if place is not None:
         filename = var_label_lu[var_ep] + " for " + quote(place) + ".csv"
