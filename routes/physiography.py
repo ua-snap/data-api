@@ -48,11 +48,18 @@ def run_fetch_physiography(lat, lon):
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
-        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
     # verify that lat/lon are present
     try:
         results = asyncio.run(
-            fetch_data_api(GS_BASE_URL, "physiography", wms_targets, wfs_targets, lat, lon)
+            fetch_data_api(
+                GS_BASE_URL, "physiography", wms_targets, wfs_targets, lat, lon
+            )
         )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:

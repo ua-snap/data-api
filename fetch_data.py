@@ -481,7 +481,7 @@ def csv_metadata(place, place_id, place_type, lat=None, lon=None):
     Args:
         place (str): Name of the place, None of just lat/lon
         place_id (str): place identifier (e.g., AK124)
-        place_type (str): point, huc, or pa
+        place_type (str): point or area
         lat: latitude for points or None for polygons
         lon: longitude for points or None for polygons
 
@@ -490,18 +490,11 @@ def csv_metadata(place, place_id, place_type, lat=None, lon=None):
     """
     metadata = "# Location: "
     if place is not None:
-        metadata += place + " "
+        metadata += place + "\n"
     else:
-        metadata += lat + " " + lon
+        metadata += lat + " " + lon + "\n"
 
-    if place_type == "huc":
-        metadata += "(HUC " + place_id + ")"
-
-    metadata += "\n"
-
-    if place_type == "pa":
-        place_path = "protected_area"
-    elif place_type == "point" and place is not None:
+    if place_type == "point" and place is not None:
         place_path = "community"
     else:
         place_path = place_type

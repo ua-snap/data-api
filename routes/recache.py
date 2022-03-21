@@ -1,9 +1,9 @@
 from flask import Blueprint, current_app as app, Response
-from luts import cache
+import os
 import json
 import requests
 from . import routes
-from luts import json_types, huc_jsons
+from luts import json_types, host, cached_urls
 
 recache_api = Blueprint("recache_api", __name__)
 
@@ -36,22 +36,27 @@ def log_error(url, status):
     log.close()
 
 
-def get_all_huc_jsons():
-    """*** Unused for now ***
-       For all HUC types defined in the LUTs, load the JSON files into a
-       list for querying API end points with all HUC IDs.
+def get_all_jsons():
+    """
+       Load all of the JSON files in data/jsons except ak_huc12.json
+       into a list for querying API end points with all IDs.
 
        Args:
            None.
 
        Returns:
-           A Python list of all HUCs across multiple JSON files.
+           A Python list of all JSON file data except HUC12s.
     """
-    huc_list = list()
-    for f in huc_jsons:
-        with open(f, "r") as fp:
-            huc_list.extend(json.load(fp))
-    return huc_list
+    json_list = list()
+    for filename in os.listdir("data/jsons/"):
+        # We do not want to expose the entire list of HUC12 IDs for
+        # re-caching because there are too many and are not used in
+        # our current web applications.
+        if filename == "ak_huc12.json":
+            continue
+        with open(os.path.join("data/jsons/", filename), "r") as f:
+            json_list.extend(json.load(f))
+    return json_list
 
 
 def get_endpoint(curr_route, curr_type, place):
@@ -69,11 +74,9 @@ def get_endpoint(curr_route, curr_type, place):
     """
     # Build the URL to query based on type
     if curr_type == "community":
-        url = (
-            cache + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
-        )
+        url = host + curr_route + str(place["latitude"]) + "/" + str(place["longitude"])
     else:
-        url = cache + curr_route + str(place["id"])
+        url = host + curr_route + str(place["id"])
 
     # Collects returned status from GET request
     status = requests.get(url)
@@ -97,55 +100,42 @@ def get_all_route_endpoints(curr_route, curr_type):
     # of the route to allow for the JSON items to fill in those fields.
     if curr_type == "community":
         f = open(json_types["communities"], "r")
-    elif curr_type == "huc":
-        f = open(json_types["huc8s"], "r")
-    elif curr_type == "pa":
-        f = open(json_types["protected_areas"], "r")
 
-    # Creates a JSON object from opened file
-    places = json.load(f)
+        # Creates a JSON object from opened file
+        places = json.load(f)
 
-    # Closes open file handle
-    f.close()
+        # Closes open file handle
+        f.close()
+    elif curr_type == "area":
+        places = get_all_jsons()
 
     # For each JSON item in the JSON object array
     for place in places:
         get_endpoint(curr_route, curr_type, place)
 
 
-@routes.route("/recache")
-@routes.route("/recache/")
-@routes.route("/cache")
-@routes.route("/cache/")
-def recache():
+@routes.route("/recache/<limit>")
+@routes.route("/cache/<limit>")
+def recache(limit):
     """Runs through all endpoints that we expect for our web applications.
        This function can be used to pre-populate our API cache.
-
         Args:
-            None.
-
+            limit (str) - Any text will cause the function to limit the recache
+            to what is in luts.cached_urls.
         Returns:
             JSON dump of all the endpoints in the API.
-
     """
-    routes = all_routes()
+    if limit:
+        routes = cached_urls
+    else:
+        routes = all_routes()
     for route in routes:
         if (route.find("point") != -1 or route.find("local") != -1) and (
             route.find("lat") == -1
         ):
             get_all_route_endpoints(route, "community")
-        elif (
-            route.find("huc") != -1
-            and route.find("huc_id") == -1
-            and route.find("abstract") == -1
-        ):
-            get_all_route_endpoints(route, "huc")
-        elif (
-            route.find("protectedarea") != -1
-            and route.find("akpa_id") == -1
-            and route.find("abstract") == -1
-        ):
-            get_all_route_endpoints(route, "pa")
+        elif route.find("area") != -1 and route.find("var_id") == -1:
+            get_all_route_endpoints(route, "area")
 
     return Response(
         response=json.dumps(routes), status=200, mimetype="application/json"

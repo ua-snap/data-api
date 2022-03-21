@@ -21,12 +21,11 @@ from generate_urls import generate_wcs_query_url
 from fetch_data import *
 from validate_request import (
     validate_latlon,
-    validate_huc,
-    validate_akpa,
     project_latlon,
+    validate_var_id,
 )
 from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess, place_name
-from luts import huc_gdf, huc12_gdf, akpa_gdf
+from luts import huc12_gdf, type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -350,6 +349,37 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     return aggr_results
 
 
+def create_csv(data_pkg, var_ep, place_id, place_type, lat=None, lon=None):
+    """Create CSV file with metadata string and location based filename.
+    Args:
+        data_pkg (dict): JSON-like object of data
+        var_ep (str): flammability or veg_change
+        place_type: point or area
+        place_id: place identifier (e.g., AK124)
+        lat: latitude for points or None for polygons
+        lon: longitude for points or None for polygons
+    Returns:
+        CSV response object
+    """
+    varname = var_ep_lu[var_ep]["varname"]
+    csv_dicts = build_csv_dicts(
+        data_pkg,
+        alf_fieldnames,
+        {"variable": varname, "stat": "mean"},
+    )
+
+    place = place_name(place_type, place_id)
+    metadata = csv_metadata(place, place_id, place_type, lat, lon)
+    metadata += "# mean is the mean of of annual means\n"
+
+    if place is not None:
+        filename = var_label_lu[var_ep] + " for " + quote(place) + ".csv"
+    else:
+        filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
+
+    return write_csv(csv_dicts, alf_fieldnames, filename, metadata)
+
+
 @routes.route("/alfresco/")
 @routes.route("/alfresco/abstract/")
 @routes.route("/alfresco/flammability/")
@@ -365,18 +395,11 @@ def alfresco_about_point():
     return render_template("alfresco/point.html")
 
 
-@routes.route("/alfresco/flammability/huc/")
-@routes.route("/alfresco/veg_change/huc/")
-@routes.route("/alfresco/huc/")
+@routes.route("/alfresco/flammability/area/")
+@routes.route("/alfresco/veg_change/area/")
+@routes.route("/alfresco/area/")
 def alfresco_about_huc():
-    return render_template("alfresco/huc.html")
-
-
-@routes.route("/alfresco/flammability/protectedarea/")
-@routes.route("/alfresco/veg_change/protectedarea/")
-@routes.route("/alfresco/protectedarea/")
-def alfresco_about_protectedarea():
-    return render_template("alfresco/protectedarea.html")
+    return render_template("alfresco/area.html")
 
 
 @routes.route("/alfresco/flammability/local/")
@@ -445,100 +468,9 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         community_id = request.args.get("community")
-        return create_csv(point_pkg, var_ep, "point", community_id, lat=lat, lon=lon)
+        return create_csv(point_pkg, var_ep, community_id, "point", lat=lat, lon=lon)
 
     return postprocess(point_pkg, "alfresco")
-
-
-def create_csv(data_pkg, var_ep, place_type, place_id, lat=None, lon=None):
-    """Create CSV file with metadata string and location based filename.
-
-    Args:
-        data_pkg (dict): JSON-like object of data
-        var_ep (str): flammability or veg_change
-        place_type: point, huc, or pa
-        place_id: place identifier (e.g., AK124)
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-    varname = var_ep_lu[var_ep]["varname"]
-    csv_dicts = build_csv_dicts(
-        data_pkg,
-        alf_fieldnames,
-        {"variable": varname, "stat": "mean"},
-    )
-
-    place = place_name(place_type, place_id)
-    metadata = csv_metadata(place, place_id, place_type, lat, lon)
-    metadata += "# mean is the mean of of annual means\n"
-
-    if place is not None:
-        filename = var_label_lu[var_ep] + " for " + quote(place) + ".csv"
-    else:
-        filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
-
-    return write_csv(csv_dicts, alf_fieldnames, filename, metadata)
-
-
-@routes.route("/alfresco/<var_ep>/huc/<huc_id>")
-def run_fetch_alf_huc_data(var_ep, huc_id):
-    """HUC-aggregation data endpoint. Fetch data within HUC
-    for specified variable and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Either veg_change or flammability
-        huc_id (int): HUC-8 or HUC-12 id.
-    Returns:
-        huc_pkg (dict): zonal mean of variable(s) for HUC polygon
-
-    """
-    validation = validate_huc(huc_id)
-    if validation is not True:
-        return validation
-
-    try:
-        huc_pkg = run_aggregate_var_polygon(var_ep, huc_gdf, huc_id)
-    except:
-        return render_template("422/invalid_huc.html"), 422
-
-    if request.args.get("format") == "csv":
-        huc_pkg = nullify_and_prune(huc_pkg, "alfresco")
-        if huc_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-        return create_csv(huc_pkg, var_ep, "huc", huc_id)
-
-    return postprocess(huc_pkg, "alfresco")
-
-
-@routes.route("/alfresco/<var_ep>/protectedarea/<akpa_id>")
-def run_fetch_alf_protectedarea_data(var_ep, akpa_id):
-    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified
-    variable and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Either veg_change or flammability
-        akpa_id (str): Protected Area ID (e.g. "NPS7")
-    Returns:
-        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
-    """
-    validation = validate_akpa(akpa_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    # pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-    try:
-        pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-    except:
-        return render_template("422/invalid_protected_area.html"), 422
-
-    if request.args.get("format") == "csv":
-        pa_pkg = nullify_and_prune(pa_pkg, "alfresco")
-        if pa_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-        return create_csv(pa_pkg, var_ep, "pa", akpa_id)
-
-    return postprocess(pa_pkg, "alfresco")
 
 
 @routes.route("/alfresco/<var_ep>/local/<lat>/<lon>")
@@ -600,8 +532,39 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
             # otherwise take nearest HUC within 100m
             huc_id = huc12_gdf.iloc[idx_arr[np.argmin(near_distances)]].name
 
-    huc12_pkg = run_fetch_alf_huc_data(var_ep, huc_id)
+    huc12_pkg = run_fetch_alf_area_data(var_ep, huc_id)
     huc12_pkg["huc_id"] = huc_id
-    huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/huc/{huc_id}"
+    huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/area/{huc_id}"
 
     return huc12_pkg
+
+
+@routes.route("/alfresco/<var_ep>/area/<var_id>")
+def run_fetch_alf_area_data(var_ep, var_id):
+    """ALFRESCO aggregation data endpoint. Fetch data within AOI polygon for specified
+    variable and return JSON-like dict.
+
+    Args:
+        var_ep (str): variable endpoint. Either veg_change or flammability
+        var_id (str): ID for any AOI polygon
+    Returns:
+        poly_pkg (dict): zonal mean of variable(s) for AOI polygon
+    """
+    poly_type = validate_var_id(var_id)
+
+    # This is only ever true when it is returning an error template
+    if type(poly_type) is tuple:
+        return poly_type
+
+    try:
+        poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
+    except:
+        return render_template("422/invalid_protected_area.html"), 422
+
+    if request.args.get("format") == "csv":
+        poly_pkg = nullify_and_prune(poly_pkg, "alfresco")
+        if poly_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        return create_csv(poly_pkg, var_ep, var_id, "area")
+
+    return postprocess(poly_pkg, "alfresco")

@@ -6,6 +6,8 @@ from luts import json_types
 from fetch_data import add_titles
 
 nodata_values = {
+    "alfresco": [-9999],
+    "elevation": [-9999],
     "fire": [-9999],
     "forest": [65535],
     "geology": [],
@@ -14,7 +16,6 @@ nodata_values = {
     "permafrost": [-9999, -9999.0],
     "physiography": [],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
-    "alfresco": [-9999],
 }
 
 
@@ -170,23 +171,24 @@ def place_name(place_type, place_id):
     Determine if provided place_id corresponds to a known place.
 
     Args:
-        place_type (str): point, huc, or pa
+        place_type (str): point or area
         place_id (str): place identifier (e.g., AK124)
 
     Returns:
         Name of the place if it exists, otherwise None
     """
+    places = []
     if place_type == "point":
         f = open(json_types["communities"], "r")
-    elif place_type == "huc":
-        f = open(json_types["huc8s"], "r")
-    elif place_type == "pa":
-        f = open(json_types["protected_areas"], "r")
+        places += json.load(f)
+        f.close()
+    elif place_type == "area":
+        for json_type in ["huc8s", "protected_areas"]:
+            f = open(json_types[json_type], "r")
+            places += json.load(f)
+            f.close()
     else:
         return None
-
-    places = json.load(f)
-    f.close()
 
     for place in places:
         if place_id == place["id"]:

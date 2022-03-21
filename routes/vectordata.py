@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, Response
 import geopandas as gpd
 import json
 import os
+import shutil
 import numpy as np
 import pandas as pd
 import requests
@@ -14,11 +15,10 @@ from luts import (
     json_types,
     huc8_gdf,
     akpa_gdf,
-    # these are commented out because we **may** add them to the proximity search at a later time
-    # akco_gdf,
-    # aketh_gdf,
-    # akclim_gdf,
-    # akfire_gdf,
+    akco_gdf,
+    aketh_gdf,
+    akclim_gdf,
+    akfire_gdf,
     proximity_search_radius_m,
     community_search_radius_m,
     total_bounds_buffer,
@@ -65,6 +65,38 @@ def find_containing_polygons(lat, lon):
     except ValueError:
         near_akpa_di, pa_bb = {}, box(*[1, 1, 1, 1])
 
+    try:
+        near_akco_di, co_tb = fetch_akco_near_point(p_buff)
+        co_bb = box(*co_tb)
+        co_bb = co_bb.buffer(box(*co_tb).area * total_bounds_buffer)
+        co_tb = co_bb.bounds
+    except ValueError:
+        near_akco_di, co_bb = {}, box(*[1, 1, 1, 1])
+
+    try:
+        near_akclim_di, cd_tb = fetch_akclim_near_point(p_buff)
+        cd_bb = box(*cd_tb)
+        cd_bb = cd_bb.buffer(box(*cd_tb).area * total_bounds_buffer)
+        cd_tb = cd_bb.bounds
+    except ValueError:
+        near_akclim_di, cd_bb = {}, box(*[1, 1, 1, 1])
+
+    try:
+        near_aketh_di, el_tb = fetch_aketh_near_point(p_buff)
+        el_bb = box(*el_tb)
+        el_bb = el_bb.buffer(box(*el_tb).area * total_bounds_buffer)
+        el_tb = el_bb.bounds
+    except ValueError:
+        near_aketh_di, el_bb = {}, box(*[1, 1, 1, 1])
+
+    try:
+        near_akfire_di, fm_tb = fetch_akfire_near_point(p_buff)
+        fm_bb = box(*fm_tb)
+        fm_bb = fm_bb.buffer(box(*fm_tb).area * total_bounds_buffer)
+        fm_tb = fm_bb.bounds
+    except ValueError:
+        near_akfire_di, fm_bb = {}, box(*[1, 1, 1, 1])
+
     df = csv_to4326_gdf("data/csvs/ak_communities.csv")
     nearby_points_di = package_nearby_points(
         find_nearest_communities(p_buff_community, df)
@@ -72,6 +104,10 @@ def find_containing_polygons(lat, lon):
 
     proximal_di.update(near_huc_di)
     proximal_di.update(near_akpa_di)
+    proximal_di.update(near_akco_di)
+    proximal_di.update(near_akclim_di)
+    proximal_di.update(near_aketh_di)
+    proximal_di.update(near_akfire_di)
     proximal_di.update(nearby_points_di)
 
     geo_suggestions.update(proximal_di)
@@ -109,7 +145,15 @@ def get_json_for_type(type, recurse=False):
         json_list = []
 
         # Runs through each of the JSON files
-        for curr_type in ["communities", "hucs", "protected_areas"]:
+        for curr_type in [
+            "communities",
+            "hucs",
+            "protected_areas",
+            "corporations",
+            "climate_divisions",
+            "ethnolinguistic_regions",
+            "fire_zones",
+        ]:
 
             # Sends a recursive call to this function
             curr_js = get_json_for_type(curr_type, recurse=True)
@@ -177,11 +221,25 @@ def update_data():
     path = "data/csvs/"
     if not os.path.exists(path):
         os.makedirs(path)
+    else:
+        shutil.rmtree(path)
+        os.makedirs(path)
 
     # Ensure the path to store JSONs is created
     jsonpath = "data/jsons/"
     if not os.path.exists(jsonpath):
         os.makedirs(jsonpath)
+    else:
+        shutil.rmtree(jsonpath)
+        os.makedirs(jsonpath)
+
+    # Ensure the path to store shapefiles is created
+    shppath = "data/shapefiles/"
+    if not os.path.exists(shppath):
+        os.makedirs(shppath)
+    else:
+        shutil.rmtree(shppath)
+        os.makedirs(shppath)
 
     # Download CSV for all Alaskan communities and write to local CSV file.
     url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
@@ -205,10 +263,7 @@ def update_data():
 
 
 def download_shapefiles_from_repo(target_dir, file_prefix):
-    # Ensure the path to store shapefiles is created
     path = "data/shapefiles/"
-    if not os.path.exists(path):
-        os.makedirs(path)
     # For each required file of the shapefile, download and store locally.
     for filetype in ["dbf", "prj", "sbn", "sbx", "shp", "shx"]:
         try:
@@ -221,8 +276,6 @@ def download_shapefiles_from_repo(target_dir, file_prefix):
 
 def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained):
     path = "data/shapefiles/"
-    if not os.path.exists(path):
-        os.makedirs(path)
     # Read shapefile into Geopandas data frame
     df = gpd.read_file(f"{path}{file_prefix}.shp")
 
@@ -316,6 +369,42 @@ def fetch_akpa_near_point(pt):
     join = execute_spatial_join(pt, akpa_gdf.reset_index(), "intersects")
     di, tb = package_polys(
         "protected_areas_near", join, "protected_area", akpa_gdf, to_wgs=True
+    )
+    return di, tb
+
+
+def fetch_akco_near_point(pt):
+    join = execute_spatial_join(pt, akco_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "corporations_near", join, "corporation", akco_gdf, to_wgs=True
+    )
+    return di, tb
+
+
+def fetch_akclim_near_point(pt):
+    join = execute_spatial_join(pt, akclim_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "climate_divisions_near", join, "climate_division", akclim_gdf, to_wgs=True
+    )
+    return di, tb
+
+
+def fetch_aketh_near_point(pt):
+    join = execute_spatial_join(pt, aketh_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "ethnolinguistic_regions_near",
+        join,
+        "ethnolinguistic_region",
+        aketh_gdf,
+        to_wgs=True,
+    )
+    return di, tb
+
+
+def fetch_akfire_near_point(pt):
+    join = execute_spatial_join(pt, akfire_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "fire_management_units_near", join, "fire_zone", akfire_gdf, to_wgs=True
     )
     return di, tb
 

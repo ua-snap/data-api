@@ -25,9 +25,8 @@ from fetch_data import (
 )
 from validate_request import (
     validate_latlon,
-    validate_huc,
-    validate_akpa,
     project_latlon,
+    validate_var_id,
 )
 from validate_data import (
     get_poly_3338_bbox,
@@ -35,7 +34,7 @@ from validate_data import (
     postprocess,
     place_name,
 )
-from luts import huc_gdf, akpa_gdf
+from luts import type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -675,17 +674,11 @@ def about_point():
     return render_template("taspr/point.html")
 
 
-@routes.route("/taspr/huc/")
-@routes.route("/temperature/huc/")
-@routes.route("/precipitation/huc/")
+@routes.route("/taspr/area/")
+@routes.route("/temperature/area/")
+@routes.route("/precipitation/area/")
 def about_huc():
-    return render_template("taspr/huc.html")
-
-@routes.route("/taspr/protectedarea/")
-@routes.route("/temperature/protectedarea/")
-@routes.route("/precipitation/protectedarea/")
-def taspr_about_protectedarea():
-    return render_template("taspr/protectedarea.html")
+    return render_template("taspr/area.html")
 
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
@@ -731,69 +724,39 @@ def point_data_endpoint(var_ep, lat, lon):
     return postprocess(point_pkg, "taspr")
 
 
-@routes.route("/<var_ep>/huc/<huc_id>")
-def huc_data_endpoint(var_ep, huc_id):
-    """HUC-aggregation data endpoint. Fetch data within HUC
+@routes.route("/<var_ep>/area/<var_id>")
+def taspr_area_data_endpoint(var_ep, var_id):
+    """Aggregation data endpoint. Fetch data within polygon area
     for specified variable and return JSON-like dict.
 
     Args:
         var_ep (str): variable endpoint. Either taspr, temperature,
             or precipitation
-        huc_id (int): HUC-8 or HUC-12 id.
+        var_id (str): ID for given polygon from polygon endpoint.
     Returns:
-        huc_pkg (dict): zonal mean of variable(s) for HUC polygon
+        poly_pkg (dict): zonal mean of variable(s) for AOI polygon
 
     """
-    validation = validate_huc(huc_id)
-    if validation is not True:
-        return validation
+
+    poly_type = validate_var_id(var_id)
+
+    # This is only ever true when it is returning an error template
+    if type(poly_type) is tuple:
+        return poly_type
 
     try:
         if var_ep in var_ep_lu.keys():
-            huc_pkg = run_aggregate_var_polygon(var_ep, huc_gdf, huc_id)
+            poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
         elif var_ep == "taspr":
-            huc_pkg = run_aggregate_allvar_polygon(huc_gdf, huc_id)
+            poly_pkg = run_aggregate_allvar_polygon(type_di[poly_type], var_id)
     except:
-        return render_template("422/invalid_huc.html"), 422
+        return render_template("422/invalid_area.html"), 422
 
     if request.args.get("format") == "csv":
-        huc_pkg = nullify_and_prune(huc_pkg, "taspr")
-        if huc_pkg in [{}, None, 0]:
+        poly_pkg = nullify_and_prune(poly_pkg, "taspr")
+        if poly_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        place = place_name("huc", huc_id)
-        csv_data = create_csv(huc_pkg, place, huc_id, "huc")
+        place = place_name("area", var_id)
+        csv_data = create_csv(poly_pkg, place, var_id, "area")
         return return_csv(csv_data, var_ep, place)
-
-    return postprocess(huc_pkg, "taspr")
-
-
-@routes.route("/<var_ep>/protectedarea/<akpa_id>")
-def taspr_protectedarea_data_endpoint(var_ep, akpa_id):
-    """Protected Area-aggregation data endpoint. Fetch data within Protected Area for specified variable and return JSON-like dict.
-    Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
-        akpa_id (str): Protected Area ID (e.g. "NPS7")
-    Returns:
-        pa_pkg (dict): zonal mean of variable(s) for protected area polygon
-    """
-    validation = validate_akpa(akpa_id)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    try:
-        if var_ep in var_ep_lu.keys():
-            pa_pkg = run_aggregate_var_polygon(var_ep, akpa_gdf, akpa_id)
-        elif var_ep == "taspr":
-            pa_pkg = run_aggregate_allvar_polygon(akpa_gdf, akpa_id)
-    except:
-        return render_template("422/invalid_protected_area.html"), 422
-
-    if request.args.get("format") == "csv":
-        akpa_id = nullify_and_prune(akpa_id, "taspr")
-        if akpa_id in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-        place = place_name("pa", akpa_id)
-        csv_data = create_csv(pa_pkg, place, akpa_id, "pa")
-        return return_csv(csv_data, var_ep, place)
-
-    return pa_pkg
+    return postprocess(poly_pkg, "taspr")

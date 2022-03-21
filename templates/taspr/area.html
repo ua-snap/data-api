@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Temperature and Precipitation Geospatial Polygon Aggregation</h3>
+<p>Query SNAP's 2km downscaled temperature or precipitation data for a specific <a href="/places/all">area of interest polygon ID</a> and aggregate by mean.</p>
+<p>Example: <a href="/temperature/area/19010208">/temperature/area/19010208</a></p>
+<p>Example: <a href="/precipitation/area/19010208">/precipitation/area/19010208</a></p>
+<p>Query both temperature and precipitation data for an example HUC ID: <a href="/taspr/area/19010208">/taspr/area/19010208</a></p>
+<h4>CSV Export</h4>
+<p>To export the aggregated data in a CSV file, append <code>?format=csv</code>.</p>
+<p>Example: <a href="/temperature/area/19010208?format=csv">/temperature/area/19010208?format=csv</a></p>
+<p>Example: <a href="/taspr/area/19010208?format=csv">/taspr/area/19010208?format=csv</a></p>
+<hr/>
+<p>8-digit HUC shapefiles accessed at <a href="https://datagateway.nrcs.usda.gov/">https://datagateway.nrcs.usda.gov/</a></p>
+{% endblock %}
