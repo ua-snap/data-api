@@ -32,7 +32,7 @@ from validate_data import (
     get_poly_3338_bbox,
     nullify_and_prune,
     postprocess,
-    place_name,
+    place_name_and_type,
 )
 from luts import type_di
 from config import WEST_BBOX, EAST_BBOX
@@ -353,7 +353,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     return ds_list
 
 
-def create_csv(packaged_data, var_ep, place, place_id, place_type, lat=None, lon=None):
+def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -372,7 +372,9 @@ def create_csv(packaged_data, var_ep, place, place_id, place_type, lat=None, lon
     """
     output = io.StringIO()
 
-    metadata = csv_metadata(place, place_id, place_type, lat, lon)
+    place_name, place_type = place_name_and_type(place_id)
+
+    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
 
     if var_ep in ["temperature", "taspr"]:
         metadata += "# tas is the temperature at surface in degrees Celsius\n"
@@ -482,7 +484,7 @@ def create_csv(packaged_data, var_ep, place, place_id, place_type, lat=None, lon
     return output.getvalue()
 
 
-def return_csv(csv_data, var_ep, place, lat=None, lon=None):
+def return_csv(csv_data, var_ep, place_id, lat=None, lon=None):
     """Return the CSV data as a download
 
     Args:
@@ -495,8 +497,11 @@ def return_csv(csv_data, var_ep, place, lat=None, lon=None):
     Returns:
         CSV Response
     """
-    if place is not None:
-        filename = var_label_lu[var_ep] + " for " + quote(place) + ".csv"
+
+    place_name, place_type = place_name_and_type(place_id)
+
+    if place_name is not None:
+        filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
     else:
         filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
@@ -736,10 +741,10 @@ def point_data_endpoint(var_ep, lat, lon):
         point_pkg = nullify_and_prune(point_pkg, "taspr")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        community_id = request.args.get('community')
-        place = place_name("point", community_id)
-        csv_data = create_csv(point_pkg, var_ep, place, community_id, "point", lat, lon)
-        return return_csv(csv_data, var_ep, place, lat, lon)
+
+        place_id = request.args.get('community')
+        csv_data = create_csv(point_pkg, var_ep, place_id, lat, lon)
+        return return_csv(csv_data, var_ep, place_id, lat, lon)
 
     return postprocess(point_pkg, "taspr")
 
@@ -776,7 +781,7 @@ def taspr_area_data_endpoint(var_ep, var_id):
         poly_pkg = nullify_and_prune(poly_pkg, "taspr")
         if poly_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        place = place_name("area", var_id)
-        csv_data = create_csv(poly_pkg, var_ep, place, var_id, "area")
-        return return_csv(csv_data, var_ep, place)
+
+        csv_data = create_csv(poly_pkg, var_ep, var_id)
+        return return_csv(csv_data, var_ep, var_id)
     return postprocess(poly_pkg, "taspr")

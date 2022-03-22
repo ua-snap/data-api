@@ -33,7 +33,7 @@ from validate_data import (
     nullify_nodata,
     nullify_and_prune,
     postprocess,
-    place_name,
+    place_name_and_type,
 )
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc_gdf, permafrost_encodings, akpa_gdf
@@ -289,9 +289,9 @@ def run_point_fetch_all_permafrost(lat, lon):
             )
 
         place_id = request.args.get("community")
-        place = place_name("point", place_id)
+        place_name, place_type = place_name_and_type(place_id)
 
-        metadata = csv_metadata(place, place_id, "point", lat, lon)
+        metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
         metadata += "# alt is the active layer thickness in meters\n"
         metadata += "# magt is the mean annual ground temperature in degrees Celsius\n"
         metadata += "# ice is the estimated ground ice volume\n"
@@ -305,8 +305,8 @@ def run_point_fetch_all_permafrost(lat, lon):
         for source in ["gipl", "jorg", "obu_magt", "obupfx"]:
             metadata += "# " + titles[source] + "\n"
 
-        if place is not None:
-            filename = "Permafrost for " + quote(place) + ".csv"
+        if place_name is not None:
+            filename = "Permafrost for " + quote(place_name) + ".csv"
         else:
             filename = "Permafrost for " + lat + ", " + lon + ".csv"
 

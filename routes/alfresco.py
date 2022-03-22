@@ -24,7 +24,7 @@ from validate_request import (
     project_latlon,
     validate_var_id,
 )
-from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess, place_name
+from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess, place_name_and_type
 from luts import huc12_gdf, type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
@@ -349,12 +349,11 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     return aggr_results
 
 
-def create_csv(data_pkg, var_ep, place_id, place_type, lat=None, lon=None):
+def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     """Create CSV file with metadata string and location based filename.
     Args:
         data_pkg (dict): JSON-like object of data
         var_ep (str): flammability or veg_change
-        place_type: point or area
         place_id: place identifier (e.g., AK124)
         lat: latitude for points or None for polygons
         lon: longitude for points or None for polygons
@@ -368,8 +367,9 @@ def create_csv(data_pkg, var_ep, place_id, place_type, lat=None, lon=None):
         {"variable": varname, "stat": "mean"},
     )
 
-    place = place_name(place_type, place_id)
-    metadata = csv_metadata(place, place_id, place_type, lat, lon)
+    place_name, place_type = place_name_and_type(place_id)
+
+    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
 
     if var_ep == "rf":
         metadata += "# rf is relative flammability in number of pixels burned\n"
@@ -378,8 +378,8 @@ def create_csv(data_pkg, var_ep, place_id, place_type, lat=None, lon=None):
 
     metadata += "# mean is the mean of of annual means\n"
 
-    if place is not None:
-        filename = var_label_lu[var_ep] + " for " + quote(place) + ".csv"
+    if place_name is not None:
+        filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
     else:
         filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 

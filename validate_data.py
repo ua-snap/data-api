@@ -166,35 +166,34 @@ def is_di_empty(di):
         return 404  # http status code
 
 
-def place_name(place_type, place_id):
+def place_name_and_type(place_id):
     """
     Determine if provided place_id corresponds to a known place.
 
     Args:
-        place_type (str): point or area
         place_id (str): place identifier (e.g., AK124)
 
     Returns:
-        Name of the place if it exists, otherwise None
+        Name and type of the place if it was found, otherwise None and None
     """
-    places = []
-    if place_type == "point":
-        f = open(json_types["communities"], "r")
-        places += json.load(f)
+
+    if place_id is None:
+        return None, None
+
+    place_types = list(json_types.keys())
+    place_types.remove("hucs")
+    place_types.remove("huc12s")
+
+    for place_type in place_types:
+        f = open(json_types[place_type], "r")
+        places = json.load(f)
         f.close()
-    elif place_type == "area":
-        for json_type in ["huc8s", "protected_areas"]:
-            f = open(json_types[json_type], "r")
-            places += json.load(f)
-            f.close()
-    else:
-        return None
 
-    for place in places:
-        if place_id == place["id"]:
-            full_place = place["name"]
-            if "alt_name" in place and place["alt_name"] is not None:
-                full_place += " (" + place["alt_name"] + ")"
-            return full_place
+        for place in places:
+            if place_id == place["id"]:
+                full_place = place["name"]
+                if "alt_name" in place and place["alt_name"] is not None:
+                    full_place += " (" + place["alt_name"] + ")"
+                return full_place, place_type
 
-    return None
+    return None, None

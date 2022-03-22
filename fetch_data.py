@@ -20,6 +20,7 @@ from rasterstats import zonal_stats
 from config import RAS_BASE_URL, WEB_APP_URL
 from generate_requests import *
 from generate_urls import *
+from luts import place_type_labels
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
@@ -474,12 +475,12 @@ def write_csv(csv_dicts, fieldnames, filename, metadata=None):
     return response
 
 
-def csv_metadata(place, place_id, place_type, lat=None, lon=None):
+def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
     """
     Creates metadata string to add to beginning of CSV file.
 
     Args:
-        place (str): Name of the place, None of just lat/lon
+        place_name (str): Name of the place, None of just lat/lon
         place_id (str): place identifier (e.g., AK124)
         place_type (str): point or area
         lat: latitude for points or None for polygons
@@ -489,21 +490,20 @@ def csv_metadata(place, place_id, place_type, lat=None, lon=None):
         Multiline metadata string
     """
     metadata = "# Location: "
-    if place is not None:
-        metadata += place + "\n"
-    else:
+    if place_name is None:
         metadata += lat + " " + lon + "\n"
-
-    if place_type == "point" and place is not None:
-        place_path = "community"
+    elif place_type == "communities":
+        metadata += place_name + "\n"
     else:
-        place_path = place_type
+        metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
 
     report_url = WEB_APP_URL + "report/"
-    if place is None:
+    if place_type is None:
         report_url += lat + "/" + lon
+    elif place_type == "communities":
+        report_url += "community/" + place_id
     else:
-        report_url += place_path + "/" + place_id
+        report_url += "area/" + place_id
     metadata += "# View a report for this location at " + report_url + "\n"
 
     return metadata
