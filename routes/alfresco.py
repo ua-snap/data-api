@@ -473,8 +473,8 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
         point_pkg = nullify_and_prune(point_pkg, "alfresco")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        community_id = request.args.get("community")
-        return create_csv(point_pkg, var_ep, community_id, "point", lat=lat, lon=lon)
+        place_id = request.args.get("community")
+        return create_csv(point_pkg, var_ep, place_id, lat=lat, lon=lon)
 
     return postprocess(point_pkg, "alfresco")
 
@@ -571,6 +571,6 @@ def run_fetch_alf_area_data(var_ep, var_id):
         poly_pkg = nullify_and_prune(poly_pkg, "alfresco")
         if poly_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(poly_pkg, var_ep, var_id, "area")
+        return create_csv(poly_pkg, var_ep, var_id)
 
     return postprocess(poly_pkg, "alfresco")
