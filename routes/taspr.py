@@ -353,13 +353,19 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     return ds_list
 
 
-def create_csv(packaged_data, place, place_id, place_type, lat=None, lon=None):
+def create_csv(packaged_data, var_ep, place, place_id, place_type, lat=None, lon=None):
     """
     Returns a CSV version of the fetched data, as a string.
 
     Args:
         packaged_data (json): JSON-like data pakage output
             from the run_fetch_* and run_aggregate_* functions
+        var_ep (str): tas, pr, or taspr
+        place (str): place name unless just a lat/lon value
+        place_id (str): community or area ID unless just a lat/lon value
+        place_type (str): point or area
+        lat: latitude unless an area
+        lon: longitude unless an area
 
     Returns:
         string of CSV data
@@ -367,6 +373,12 @@ def create_csv(packaged_data, place, place_id, place_type, lat=None, lon=None):
     output = io.StringIO()
 
     metadata = csv_metadata(place, place_id, place_type, lat, lon)
+
+    if var_ep in ["temperature", "taspr"]:
+        metadata += "# tas is the temperature at surface in degrees Celsius\n"
+    if var_ep in ["precipitation", "taspr"]:
+        metadata += "# pr is precipitation in millimeters\n"
+
     metadata += "# mean is the mean of of annual means\n"
     metadata += "# median is the median of of annual means\n"
     metadata += "# max is the maximum annual mean\n"
@@ -375,6 +387,10 @@ def create_csv(packaged_data, place, place_id, place_type, lat=None, lon=None):
     metadata += "# q3 is the third quartile of the annual means\n"
     metadata += "# hi_std is the mean + standard deviation of annual means\n"
     metadata += "# lo_std is the mean - standard deviation of annual means\n"
+    metadata += "# DJF is December - February\n"
+    metadata += "# MAM is March - May\n"
+    metadata += "# JJA is June - August\n"
+    metadata += "# SON is September - November\n"
     output.write(metadata)
 
     fieldnames = [
@@ -471,6 +487,10 @@ def return_csv(csv_data, var_ep, place, lat=None, lon=None):
 
     Args:
         csv_data (?): csv data created with create_csv() function
+        var_ep (str): tas, pr, or taspr
+        place (str): place name unless just a lat/lon value
+        lat: latitude unless an area
+        lon: longitude unless an area
 
     Returns:
         CSV Response
@@ -718,7 +738,7 @@ def point_data_endpoint(var_ep, lat, lon):
             return render_template("404/no_data.html"), 404
         community_id = request.args.get('community')
         place = place_name("point", community_id)
-        csv_data = create_csv(point_pkg, place, community_id, "point", lat, lon)
+        csv_data = create_csv(point_pkg, var_ep, place, community_id, "point", lat, lon)
         return return_csv(csv_data, var_ep, place, lat, lon)
 
     return postprocess(point_pkg, "taspr")
@@ -757,6 +777,6 @@ def taspr_area_data_endpoint(var_ep, var_id):
         if poly_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         place = place_name("area", var_id)
-        csv_data = create_csv(poly_pkg, place, var_id, "area")
+        csv_data = create_csv(poly_pkg, var_ep, place, var_id, "area")
         return return_csv(csv_data, var_ep, place)
     return postprocess(poly_pkg, "taspr")
