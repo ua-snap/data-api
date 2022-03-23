@@ -1,5 +1,9 @@
 """A module to validate fetched data values."""
+import json
 from flask import render_template
+from luts import json_types
+
+from fetch_data import add_titles
 
 nodata_values = {
     "alfresco": [-9999],
@@ -100,22 +104,22 @@ def prune_nodata(data):
     return data
 
 
-def postprocess(data, endpoint, titles=None):
-    """Filter nodata values, prune empty branches, add titles, and return 404
-    if appropriate"""
+def nullify_and_prune(data, endpoint):
+    """Filter nodata values, prune empty branches, and return data"""
     nullified_data = nullify_nodata(data, endpoint)
     pruned_data = prune_nodata(nullified_data)
+    return pruned_data
+
+
+def postprocess(data, endpoint, titles=None):
+    """Nullify and prune data, add titles, and return 404 if appropriate"""
+    pruned_data = nullify_and_prune(data, endpoint)
 
     if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
+
     if titles is not None:
-        if isinstance(titles, str):
-            nullified_data["title"] = titles
-        else:
-            for key in titles.keys():
-                if key in pruned_data:
-                    if pruned_data[key] is not None:
-                        pruned_data[key]["title"] = titles[key]
+        pruned_data = add_titles(pruned_data, titles)
 
     return pruned_data
 
@@ -160,3 +164,36 @@ def get_poly_3338_bbox(gdf, poly_id):
 def is_di_empty(di):
     if len(di) == 0:
         return 404  # http status code
+
+
+def place_name_and_type(place_id):
+    """
+    Determine if provided place_id corresponds to a known place.
+
+    Args:
+        place_id (str): place identifier (e.g., AK124)
+
+    Returns:
+        Name and type of the place if it was found, otherwise None and None
+    """
+
+    if place_id is None:
+        return None, None
+
+    place_types = list(json_types.keys())
+    place_types.remove("hucs")
+    place_types.remove("huc12s")
+
+    for place_type in place_types:
+        f = open(json_types[place_type], "r")
+        places = json.load(f)
+        f.close()
+
+        for place in places:
+            if place_id == place["id"]:
+                full_place = place["name"]
+                if "alt_name" in place and place["alt_name"] is not None:
+                    full_place += " (" + place["alt_name"] + ")"
+                return full_place, place_type
+
+    return None, None

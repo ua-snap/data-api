@@ -17,9 +17,10 @@ from functools import reduce
 from aiohttp import ClientSession
 from flask import current_app as app, Response
 from rasterstats import zonal_stats
-from config import RAS_BASE_URL
+from config import RAS_BASE_URL, WEB_APP_URL
 from generate_requests import *
 from generate_urls import *
+from luts import place_type_labels
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
@@ -263,7 +264,11 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
 
 def geotiff_zonal_stats(poly, arr, transform, stat_list):
     poly_mask_arr = zonal_stats(
-        poly, arr, affine=transform, nodata=np.nan, stats=stat_list,
+        poly,
+        arr,
+        affine=transform,
+        nodata=np.nan,
+        stats=stat_list,
     )
     return poly_mask_arr
 
@@ -308,7 +313,7 @@ def get_from_dict(data_dict, map_list):
 def parse_meta_xml_str(meta_xml_str):
     """Parse the DescribeCoverage request to get the XML and
     restructure to dict
-    
+
     Args:
         meta_xml_str (str): decoded text XML response from
             DescribeCoverage WCS query
@@ -335,15 +340,15 @@ def parse_meta_xml_str(meta_xml_str):
 
 
 async def get_dim_encodings(cov_id):
-    """Get the dimension encodings from a rasdaman 
-    coverage that has the encodings stored in an 
+    """Get the dimension encodings from a rasdaman
+    coverage that has the encodings stored in an
     "encodings" attribute
-    
+
     Args:
         cov_id (str): ID of the rasdaman coverage
-        
+
     Rreturns:
-        dict of encodings, with axis name as keys holding 
+        dict of encodings, with axis name as keys holding
         dicts of integer-keyed categories
     """
     meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
@@ -380,33 +385,47 @@ def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
         return result_list
 
 
-def create_csv(packaged_data, fieldnames, package_coords, fill_di=None):
+def add_titles(packaged_data, titles):
     """
-    Returns a CSV version of the fetched data, as a string.
-
+    Adds title fields to a JSONlike data package and returns it.
     Args:
-        packaged_data (json): JSON-like data pakage output
+        packaged_data (json): JSONlike data package output
             from the run_fetch_* and run_aggregate_* functions
-        fieldnames (list): list of string values for CSV column names
-            in desired column order
-        package_coord (list): list of string values corresponding to 
-            levels of the packaged_data dict. Should be a subset of fieldnames arg.
-        fill_di (dict): dict to fill in columns with fixed values. 
-            Keys should specify the field name and value should be the 
-            value to fill
-        varname (str): str value used for variable name. Appended 
-        stat (str): str value used for stat name. Appended
-            after fields and before value.
+        titles (list, str): title or list of titles to add to the data package
 
     Returns:
-        string of CSV data
+        data package with titles added
     """
-    output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
-    writer.writeheader()
+    if titles is not None:
+        if isinstance(titles, str):
+            packaged_data["title"] = titles
+        else:
+            for key in titles.keys():
+                if key in packaged_data:
+                    if packaged_data[key] is not None:
+                        packaged_data[key]["title"] = titles[key]
+    return packaged_data
+
+
+def build_csv_dicts(packaged_data, package_coords, fill_di=None):
+    """
+    Returns a list of dicts to be written out later as a CSV.
+    Args:
+        packaged_data (json): JSONlike data package output
+            from the run_fetch_* and run_aggregate_* functions
+        package_coord (list): list of string values corresponding to
+            levels of the packaged_data dict. Should be a subset of fieldnames arg.
+        fill_di (dict): dict to fill in columns with fixed values.
+            Keys should specify the field name and value should be the
+            value to fill
+
+    Returns:
+        list of dicts with keys/values corresponding to fieldnames
+    """
     # extract the coordinate values stored in keys. assumes uniform structure
     # across entire data package (i.e. n levels deep where n == len(fieldnames))
     data_package_coord_combos = extract_nested_dict_keys(packaged_data)
+    rows = []
     for coords in data_package_coord_combos:
         row_di = {}
         # need more general way of handling fields to be inserted before or after
@@ -419,25 +438,72 @@ def create_csv(packaged_data, fieldnames, package_coords, fill_di=None):
                 row_di[fieldname] = value
         # write the actual value
         row_di["value"] = get_from_dict(packaged_data, coords)
-        writer.writerow(row_di)
-    return output.getvalue()
+        rows.append(row_di)
+    return rows
 
 
-def return_csv(csv_data):
-    """Return the CSV data as a download
+def write_csv(csv_dicts, fieldnames, filename, metadata=None):
+    """
+    Creates and returns a downloadable CSV file from list of CSV dicts.
 
     Args:
-        csv_data (?): csv data created with create_csv() function
+        csv_dicts (list): CSV data created with build_csv_dicts function.
+        fieldnames (list): list of fields used to create CSV header row
+        filename (str): File name of downloaded CSV file
 
     Returns:
         CSV Response
     """
+    output = io.StringIO()
+    if metadata is not None:
+        output.write(metadata)
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerows(csv_dicts)
     response = Response(
-        csv_data,
+        output.getvalue(),
         mimetype="text/csv",
         headers={
-            "Content-Type": 'text/csv; name="climate.csv"',
-            "Content-Disposition": 'attachment; filename="climate.csv"',
+            "Content-Type": "text/csv; charset=utf-8",
+            "Content-Disposition": 'attachment; filename="'
+            + filename
+            + "\"; filename*=utf-8''\""
+            + filename
+            + '"',
         },
     )
     return response
+
+
+def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
+    """
+    Creates metadata string to add to beginning of CSV file.
+
+    Args:
+        place_name (str): Name of the place, None of just lat/lon
+        place_id (str): place identifier (e.g., AK124)
+        place_type (str): point or area
+        lat: latitude for points or None for polygons
+        lon: longitude for points or None for polygons
+
+    Returns:
+        Multiline metadata string
+    """
+    metadata = "# Location: "
+    if place_name is None:
+        metadata += lat + " " + lon + "\n"
+    elif place_type == "communities":
+        metadata += place_name + "\n"
+    else:
+        metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
+
+    report_url = WEB_APP_URL + "report/"
+    if place_type is None:
+        report_url += lat + "/" + lon
+    elif place_type == "communities":
+        report_url += "community/" + place_id
+    else:
+        report_url += "area/" + place_id
+    metadata += "# View a report for this location at " + report_url + "\n"
+
+    return metadata

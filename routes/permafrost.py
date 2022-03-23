@@ -1,7 +1,13 @@
 import asyncio
+import io
+import csv
+import copy
+from urllib.parse import quote
 from flask import (
     Blueprint,
+    Response,
     render_template,
+    request,
 )
 
 # local imports
@@ -10,14 +16,25 @@ from fetch_data import (
     fetch_wcs_point_data,
     fetch_bbox_netcdf,
     summarize_within_poly,
+    build_csv_dicts,
+    write_csv,
+    add_titles,
+    csv_metadata,
 )
+
 from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import get_poly_3338_bbox, nullify_nodata, postprocess
+from validate_data import (
+    get_poly_3338_bbox,
+    nullify_nodata,
+    nullify_and_prune,
+    postprocess,
+    place_name_and_type,
+)
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import huc_gdf, permafrost_encodings, akpa_gdf
 from . import routes
@@ -235,5 +252,64 @@ def run_point_fetch_all_permafrost(lat, lon):
         "jorg": package_jorgenson(gs_results[1]),
         "obupfx": package_obu_vector(gs_results[2]),
     }
+
+    csv_dicts = []
+    if request.args.get("format") == "csv":
+        data = nullify_and_prune(data, "permafrost")
+        if data in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+
+        fieldnames = [
+            "source",
+            "era",
+            "model",
+            "scenario",
+            "variable",
+            "value",
+        ]
+
+        gipl_data = {"gipl": data["gipl"]}
+        csv_dicts += build_csv_dicts(
+            gipl_data,
+            fieldnames[0:-1],
+        )
+
+        # Non-GIPL values have a simpler nesting structure and need to be
+        # handled separately.
+        non_gipl_fields = [
+            "source",
+            "variable",
+            "value",
+        ]
+        for source in ["jorg", "obu_magt", "obupfx"]:
+            subset = {source: data[source]}
+            csv_dicts += build_csv_dicts(
+                subset,
+                non_gipl_fields,
+            )
+
+        place_id = request.args.get("community")
+        place_name, place_type = place_name_and_type(place_id)
+
+        metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+        metadata += "# alt is the active layer thickness in meters\n"
+        metadata += "# magt is the mean annual ground temperature in degrees Celsius\n"
+        metadata += "# ice is the estimated ground ice volume\n"
+        metadata += "# pfx is the permafrost extent\n"
+        metadata += "# 2025 represents 2011 - 2040\n"
+        metadata += "# 2050 represents 2036 - 2065\n"
+        metadata += "# 2075 represents 2061 – 2090\n"
+        metadata += "# 2095 represents 2086 – 2100\n"
+
+        metadata += "# gipl is the Geophysical Institute's Permafrost Laboratory\n"
+        for source in ["gipl", "jorg", "obu_magt", "obupfx"]:
+            metadata += "# " + titles[source] + "\n"
+
+        if place_name is not None:
+            filename = "Permafrost for " + quote(place_name) + ".csv"
+        else:
+            filename = "Permafrost for " + lat + ", " + lon + ".csv"
+
+        return write_csv(csv_dicts, fieldnames, filename, metadata)
 
     return postprocess(data, "permafrost", titles)

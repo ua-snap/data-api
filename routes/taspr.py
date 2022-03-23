@@ -21,13 +21,19 @@ from fetch_data import (
     fetch_data,
     get_from_dict,
     summarize_within_poly,
+    csv_metadata,
 )
 from validate_request import (
     validate_latlon,
     project_latlon,
     validate_var_id,
 )
-from validate_data import get_poly_3338_bbox, postprocess
+from validate_data import (
+    get_poly_3338_bbox,
+    nullify_and_prune,
+    postprocess,
+    place_name_and_type,
+)
 from luts import type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
@@ -105,6 +111,13 @@ dim_encodings = {
 var_ep_lu = {
     "temperature": "tas",
     "precipitation": "pr",
+}
+
+
+var_label_lu = {
+    "temperature": "Temperature",
+    "precipitation": "Precipitation",
+    "taspr": "Temperature & Precipitation",
 }
 
 
@@ -340,18 +353,47 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     return ds_list
 
 
-def create_csv(packaged_data):
+def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
     """
     Returns a CSV version of the fetched data, as a string.
 
     Args:
         packaged_data (json): JSON-like data pakage output
             from the run_fetch_* and run_aggregate_* functions
+        var_ep (str): tas, pr, or taspr
+        place (str): place name unless just a lat/lon value
+        place_id (str): community or area ID unless just a lat/lon value
+        place_type (str): point or area
+        lat: latitude unless an area
+        lon: longitude unless an area
 
     Returns:
         string of CSV data
     """
     output = io.StringIO()
+
+    place_name, place_type = place_name_and_type(place_id)
+
+    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+
+    if var_ep in ["temperature", "taspr"]:
+        metadata += "# tas is the temperature at surface in degrees Celsius\n"
+    if var_ep in ["precipitation", "taspr"]:
+        metadata += "# pr is precipitation in millimeters\n"
+
+    metadata += "# mean is the mean of of annual means\n"
+    metadata += "# median is the median of of annual means\n"
+    metadata += "# max is the maximum annual mean\n"
+    metadata += "# min is the minimum annual mean\n"
+    metadata += "# q1 is the first quartile of the annual means\n"
+    metadata += "# q3 is the third quartile of the annual means\n"
+    metadata += "# hi_std is the mean + standard deviation of annual means\n"
+    metadata += "# lo_std is the mean - standard deviation of annual means\n"
+    metadata += "# DJF is December - February\n"
+    metadata += "# MAM is March - May\n"
+    metadata += "# JJA is June - August\n"
+    metadata += "# SON is September - November\n"
+    output.write(metadata)
 
     fieldnames = [
         "variable",
@@ -442,21 +484,33 @@ def create_csv(packaged_data):
     return output.getvalue()
 
 
-def return_csv(csv_data):
+def return_csv(csv_data, var_ep, place_id, lat=None, lon=None):
     """Return the CSV data as a download
 
     Args:
         csv_data (?): csv data created with create_csv() function
+        var_ep (str): tas, pr, or taspr
+        place (str): place name unless just a lat/lon value
+        lat: latitude unless an area
+        lon: longitude unless an area
 
     Returns:
         CSV Response
     """
+
+    place_name, place_type = place_name_and_type(place_id)
+
+    if place_name is not None:
+        filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
+    else:
+        filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
+
     response = Response(
         csv_data,
         mimetype="text/csv",
         headers={
-            "Content-Type": 'text/csv; name="climate.csv"',
-            "Content-Disposition": 'attachment; filename="climate.csv"',
+            "Content-Type": 'text/csv; charset=utf-8',
+            "Content-Disposition": 'attachment; filename="' + filename + '"; filename*=utf-8\'\'"' + filename + '"'
         },
     )
 
@@ -684,8 +738,13 @@ def point_data_endpoint(var_ep, lat, lon):
             return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(point_pkg)
-        return return_csv(csv_data)
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+
+        place_id = request.args.get('community')
+        csv_data = create_csv(point_pkg, var_ep, place_id, lat, lon)
+        return return_csv(csv_data, var_ep, place_id, lat, lon)
 
     return postprocess(point_pkg, "taspr")
 
@@ -719,7 +778,10 @@ def taspr_area_data_endpoint(var_ep, var_id):
         return render_template("422/invalid_area.html"), 422
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(poly_pkg)
-        return return_csv(csv_data)
+        poly_pkg = nullify_and_prune(poly_pkg, "taspr")
+        if poly_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
 
+        csv_data = create_csv(poly_pkg, var_ep, var_id)
+        return return_csv(csv_data, var_ep, var_id)
     return postprocess(poly_pkg, "taspr")

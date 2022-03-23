@@ -89,6 +89,15 @@ json_types = {
     "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
 }
 
+place_type_labels = {
+    "huc8s": "HUC",
+    "protected_areas": "Protected Area",
+    "fire_zones": "Fire Management Unit",
+    "corporations": "Corporation",
+    "climate_divisions": "Climate Division",
+    "ethnolinguistic_regions": "Ethnolinguistic Region",
+}
+
 # Unused variable for now. Can be used by re-caching function to pre-cache
 # all HUC types listed below.
 huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
