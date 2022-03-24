@@ -565,7 +565,7 @@ def run_fetch_alf_area_data(var_ep, var_id):
     try:
         poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
     except:
-        return render_template("422/invalid_protected_area.html"), 422
+        return render_template("422/invalid_area.html"), 422
 
     if request.args.get("format") == "csv":
         poly_pkg = nullify_and_prune(poly_pkg, "alfresco")
