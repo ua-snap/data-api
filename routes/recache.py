@@ -52,7 +52,7 @@ def get_all_jsons():
         # We do not want to expose the entire list of HUC12 IDs for
         # re-caching because there are too many and are not used in
         # our current web applications.
-        if filename == "ak_huc12.json":
+        if filename == "ak_huc12.json" or filename == "ak_communities.json":
             continue
         with open(os.path.join("data/jsons/", filename), "r") as f:
             json_list.extend(json.load(f))
@@ -78,9 +78,10 @@ def get_endpoint(curr_route, curr_type, place):
     else:
         url = host + curr_route + str(place["id"])
 
+    print(url)
     # Collects returned status from GET request
     status = requests.get(url)
-
+    print(status)
     # Logs the status and URL if the HTTP status code != 200
     if status.status_code != 200:
         log_error(url, status.status_code)
