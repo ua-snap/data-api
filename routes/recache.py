@@ -52,7 +52,7 @@ def get_all_jsons():
         # We do not want to expose the entire list of HUC12 IDs for
         # re-caching because there are too many and are not used in
         # our current web applications.
-        if filename == "ak_huc12.json":
+        if filename == "ak_huc12.json" or filename == "ak_communities.json":
             continue
         with open(os.path.join("data/jsons/", filename), "r") as f:
             json_list.extend(json.load(f))

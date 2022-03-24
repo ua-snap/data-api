@@ -10,8 +10,10 @@ vcl 4.0;
 
 # Default backend server is the EB instance running the production data-api
 backend default {
-    .host = "35.81.251.224";
+    .host = "52.13.99.27";
     .port = "80";
+    .between_bytes_timeout = 600s;
+    .first_byte_timeout = 600s;
 }
 
 sub vcl_recv {
