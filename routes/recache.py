@@ -78,10 +78,9 @@ def get_endpoint(curr_route, curr_type, place):
     else:
         url = host + curr_route + str(place["id"])
 
-    print(url)
     # Collects returned status from GET request
     status = requests.get(url)
-    print(status)
+
     # Logs the status and URL if the HTTP status code != 200
     if status.status_code != 200:
         log_error(url, status.status_code)
