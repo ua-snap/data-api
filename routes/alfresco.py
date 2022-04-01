@@ -202,7 +202,8 @@ def package_ar5_alf_point_data(point_data, varname):
                         veg_type = veg_type.lower()
                         veg_type = veg_type.replace(" ", "_")
                         veg_type = veg_type.replace("/", "_")
-                        point_data_pkg[era][model][scenario][veg_type] = {varname: value}
+                        percent = round(value * 100, 2)
+                        point_data_pkg[era][model][scenario][veg_type] = {varname: percent}
 
     if varname == "vt":
         eras = list(dim_encodings["era"].values())
@@ -420,10 +421,14 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
         CSV response object
     """
     varname = var_ep_lu[var_ep]["varname"]
+    if var_ep == "flammability":
+        fieldnames = flammability_fieldnames
+    elif var_ep == "veg_type":
+        fieldnames = veg_type_fieldnames
     csv_dicts = build_csv_dicts(
         data_pkg,
-        flammability_fieldnames,
-        {"variable": varname, "stat": "mean"},
+        fieldnames,
+        {"variable": varname, "stat": "percent"},
     )
 
     place_name, place_type = place_name_and_type(place_id)
@@ -442,7 +447,7 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     else:
         filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
-    return write_csv(csv_dicts, flammability_fieldnames, filename, metadata)
+    return write_csv(csv_dicts, fieldnames, filename, metadata)
 
 
 @routes.route("/alfresco/")
@@ -505,14 +510,14 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
 
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
-        try:
-            point_data_list = asyncio.run(fetch_alf_point_data(x, y, cov_id_str))
-        except Exception as exc:
-            if hasattr(exc, "status") and exc.status == 404:
-                return render_template("404/no_data.html"), 404
-            return render_template("500/server_error.html"), 500
-    else:
-        return render_template("400/bad_request.html"), 400
+        #try:
+        point_data_list = asyncio.run(fetch_alf_point_data(x, y, cov_id_str))
+        # except Exception as exc:
+        #     if hasattr(exc, "status") and exc.status == 404:
+        #         return render_template("404/no_data.html"), 404
+        #     return render_template("500/server_error.html"), 500
+    # else:
+    #     return render_template("400/bad_request.html"), 400
 
     varname = var_ep_lu[var_ep]["varname"]
     if var_ep == "flammability":
