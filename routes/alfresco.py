@@ -467,10 +467,9 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
 
     if var_ep == "flammability":
         metadata += "# rf is relative flammability in number of pixels burned\n"
+        metadata += "# mean is the mean of of annual means\n"
     elif var_ep == "veg_type":
-        metadata += "# rvc is relative vegetation change in number of pixels that changed dominant vegetation type\n"
-
-    metadata += "# mean is the mean of of annual means\n"
+        metadata += "# vt is dominant vegetation type as a percentage of coverage\n"
 
     if place_name is not None:
         filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
