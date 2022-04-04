@@ -181,6 +181,10 @@ async def fetch_bbox_netcdf_list(urls):
     """
     start_time = time.time()
     netcdf_bytes_list = await fetch_data(urls)
+
+    if not isinstance(netcdf_bytes_list, list):
+        netcdf_bytes_list = [netcdf_bytes_list]
+
     app.logger.info(
         f"Fetched BBOX data from Rasdaman, elapsed time {round(time.time() - start_time)}s"
     )

@@ -199,9 +199,6 @@ def package_ar5_alf_point_data(point_data, varname):
                     v_li = value
                     for vi, value in enumerate(v_li):
                         veg_type = dim_encodings["veg_type"][vi]
-                        veg_type = veg_type.lower()
-                        veg_type = veg_type.replace(" ", "_")
-                        veg_type = veg_type.replace("/", "_")
                         percent = round(value * 100, 2)
                         point_data_pkg[era][model][scenario][veg_type] = {varname: percent}
 
@@ -221,10 +218,12 @@ def package_ar5_alf_point_data(point_data, varname):
                     for scenario in scenarios:
                         if scenario != "historical":
                             point_data_pkg[era][model].pop(scenario, None)
-                # Remove CRU-TS "model" and historical era from projected data.
+                # Remove historical era from projected data.
                 else:
                     point_data_pkg[era][model].pop("historical", None)
-                    point_data_pkg[era].pop("CRU-TS", None)
+            # Remove CRU-TS "model" from projected data.
+            if era != "1950-2008":
+                point_data_pkg[era].pop("CRU-TS", None)
     return point_data_pkg
 
 
@@ -348,8 +347,12 @@ def summarize_within_poly_marr(
 
     for map_list, result in zip(dim_combos, results):
         if len(map_list) > 1:
+            if varname == "rf":
+                result = round(result, 4)
+            elif varname == "vt":
+                result = round(result * 100, 2)
             get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = {
-                varname: round(result, 4)
+                varname: result
             }
         else:
             aggr_results[map_list[0]] = round(result, 4)
@@ -385,27 +388,54 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
     # average over the following decades / time periods
     aggr_results = {}
-    historical_results = summarize_within_poly_marr(
-        ds_list[0], poly_mask_arr, flammability_historical_dim_encodings, bandname, varname
-    )
-    #  add the model, scenario, and varname levels for CRU
-    for era in historical_results:
-        aggr_results[era] = {
-            "CRU-TS40": {"CRU_historical": {varname: historical_results[era]}}
-        }
-    # run regular future
-    ar5_results = summarize_within_poly_marr(
-        ds_list[-1], poly_mask_arr, flammability_future_dim_encodings, bandname, varname
-    )
-    for era, summaries in ar5_results.items():
-        aggr_results[era] = summaries
-    # run summary eras for future
-    summary_eras = ["2040-2069", "2070-2099"]
-    for ds, era in zip(ds_list[1:3], summary_eras):
-        aggr_results[era] = summarize_within_poly_marr(
-            ds, poly_mask_arr, flammability_future_dim_encodings, bandname, varname
+    if cov_id_str == "relative_flammability":
+        historical_results = summarize_within_poly_marr(
+            ds_list[0], poly_mask_arr, flammability_historical_dim_encodings, bandname, varname
         )
+        #  add the model, scenario, and varname levels for CRU
+        for era in historical_results:
+            aggr_results[era] = {
+                "CRU-TS40": {"CRU_historical": {varname: historical_results[era]}}
+            }
+        # run regular future
+        ar5_results = summarize_within_poly_marr(
+            ds_list[-1], poly_mask_arr, flammability_future_dim_encodings, bandname, varname
+        )
+        for era, summaries in ar5_results.items():
+            aggr_results[era] = summaries
+        # run summary eras for future
+        summary_eras = ["2040-2069", "2070-2099"]
+        for ds, era in zip(ds_list[1:3], summary_eras):
+            aggr_results[era] = summarize_within_poly_marr(
+                ds, poly_mask_arr, flammability_future_dim_encodings, bandname, varname
+            )
+    elif cov_id_str == "alfresco_vegetation_type_percentage":
+        ar5_results = summarize_within_poly_marr(
+            ds_list[-1], poly_mask_arr, veg_type_dim_encodings, bandname, varname
+        )
+        for era, summaries in ar5_results.items():
+            aggr_results[era] = summaries
 
+        eras = list(veg_type_dim_encodings["era"].values())
+        models = list(veg_type_dim_encodings["model"].values())
+        scenarios = list(veg_type_dim_encodings["scenario"].values())
+        # Remove empty data from invalid combos of era/model/scenario.
+        for era in eras:
+            for model in models:
+                # Remove non-CRU-TS models and non-historical era from historical data.
+                if era == "1950-2008":
+                    if model != "CRU-TS":
+                        aggr_results[era].pop(model, None)
+                        continue
+                    for scenario in scenarios:
+                        if scenario != "historical":
+                            aggr_results[era][model].pop(scenario, None)
+                # Remove historical era from projected data.
+                else:
+                    aggr_results[era][model].pop("historical", None)
+            # Remove CRU-TS "model" from projected data.
+            if era != "1950-2008":
+                aggr_results[era].pop("CRU-TS", None)
     return aggr_results
 
 
