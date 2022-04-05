@@ -43,12 +43,20 @@ flammability_future_dim_encodings = asyncio.run(get_dim_encodings("relative_flam
 flammability_historical_dim_encodings = asyncio.run(
     get_dim_encodings("relative_flammability_historical")
 )
+
+veg_change_future_dim_encodings = flammability_future_dim_encodings
+veg_change_historical_dim_encodings = flammability_historical_dim_encodings
+
 veg_type_dim_encodings = asyncio.run(get_dim_encodings("alfresco_vegetation_type_percentage"))
 
 var_ep_lu = {
     "flammability": {
         "cov_id_str": "relative_flammability",
         "varname": "rf",
+    },
+    "veg_change": {
+        "cov_id_str": "relative_vegetation_change",
+        "varname": "rvc",
     },
     "veg_type": {
         "cov_id_str": "alfresco_vegetation_type_percentage",
@@ -58,11 +66,13 @@ var_ep_lu = {
 
 var_label_lu = {
     "flammability": "Flammability",
+    "veg_change": "Vegetation Change",
     "veg_type": "Vegetation Type",
 }
 
 # CSV field names
 flammability_fieldnames = ["date_range", "model", "scenario", "variable", "stat", "value"]
+veg_change_fieldnames = flammability_fieldnames
 veg_type_fieldnames = ["date_range", "model", "scenario", "veg_type", "variable", "stat", "value"]
 
 
@@ -80,7 +90,7 @@ async def fetch_alf_point_data(x, y, cov_id_str):
     """
     # set up WCS request strings
     request_strs = []
-    if cov_id_str == "relative_flammability":
+    if cov_id_str in ["relative_flammability", "relative_vegetation_change"]:
         # historical data request string
         request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}_historical"))
 
@@ -115,7 +125,7 @@ async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
     # set up WCS request strings
     request_strs = []
 
-    if cov_id_str == "relative_flammability":
+    if cov_id_str in ["relative_flammability", "relative_vegetation_change"]:
         # historical data request string
         request_strs.append(
             generate_netcdf_wcs_getcov_str(bbox_bounds, f"{cov_id_str}_historical")
@@ -177,7 +187,7 @@ def package_ar5_alf_point_data(point_data, varname):
     """
     point_data_pkg = {}
 
-    if varname == "rf":
+    if varname in ["rf", "rvc"]:
         dim_encodings = flammability_future_dim_encodings
     elif varname == "vt":
         dim_encodings = veg_type_dim_encodings
@@ -192,7 +202,7 @@ def package_ar5_alf_point_data(point_data, varname):
             point_data_pkg[era][model] = {}
             for si, value in enumerate(s_li):
                 scenario = dim_encodings["scenario"][si]
-                if varname == "rf":
+                if varname in ["rf", "rvc"]:
                     point_data_pkg[era][model][scenario] = {varname: value}
                 elif varname == "vt":
                     point_data_pkg[era][model][scenario] = {}
@@ -247,7 +257,7 @@ def package_ar5_alf_averaged_point_data(point_data, varname):
         point_data_pkg[model] = {}
         for si, value in enumerate(s_li):
             scenario = flammability_future_dim_encodings["scenario"][si]
-            if varname == "rf":
+            if varname in ["rf", "rvc"]:
                 point_data_pkg[model][scenario] = {varname: round(value, 4)}
             elif varname == "vt":
                 point_data_pkg[model][scenario] = {}
@@ -347,7 +357,7 @@ def summarize_within_poly_marr(
 
     for map_list, result in zip(dim_combos, results):
         if len(map_list) > 1:
-            if varname == "rf":
+            if varname in ["rf", "rvc"]:
                 result = round(result, 4)
             elif varname == "vt":
                 result = round(result * 100, 2)
@@ -363,7 +373,7 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     """Get data summary (e.g. zonal mean) of single variable in polygon.
 
     Args:
-        var_ep (str): variable endpoint. Either flammability or veg_type
+        var_ep (str): variable endpoint. Flammability, veg change, or veg_type
             poly_gdf (GeoDataFrame): the object from which to fetch the polygon,
             e.g. the HUC 8 geodataframe for watershed polygons
         poly_id (str or int): the unique `id` used to identify the Polygon
@@ -388,7 +398,7 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
     # average over the following decades / time periods
     aggr_results = {}
-    if cov_id_str == "relative_flammability":
+    if cov_id_str in ["relative_flammability", "relative_vegetation_change"]:
         historical_results = summarize_within_poly_marr(
             ds_list[0], poly_mask_arr, flammability_historical_dim_encodings, bandname, varname
         )
@@ -443,7 +453,7 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     """Create CSV file with metadata string and location based filename.
     Args:
         data_pkg (dict): JSON-like object of data
-        var_ep (str): flammability or veg_type
+        var_ep (str): flammability, veg change, or veg_type
         place_id: place identifier (e.g., AK124)
         lat: latitude for points or None for polygons
         lon: longitude for points or None for polygons
@@ -451,22 +461,27 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
         CSV response object
     """
     varname = var_ep_lu[var_ep]["varname"]
-    if var_ep == "flammability":
+    if var_ep in ["flammability", "veg_change"]:
         fieldnames = flammability_fieldnames
+        stat = "mean"
     elif var_ep == "veg_type":
         fieldnames = veg_type_fieldnames
+        stat = "percent"
     csv_dicts = build_csv_dicts(
         data_pkg,
         fieldnames,
-        {"variable": varname, "stat": "percent"},
+        {"variable": varname, "stat": stat},
     )
 
     place_name, place_type = place_name_and_type(place_id)
 
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
 
-    if var_ep == "flammability":
+    if var_ep in "flammability":
         metadata += "# rf is relative flammability in number of pixels burned\n"
+        metadata += "# mean is the mean of of annual means\n"
+    elif var_ep == "veg_change":
+        metadata += "# rvc is relative vegetation change in number of pixels that changed dominant vegetation type\n"
         metadata += "# mean is the mean of of annual means\n"
     elif var_ep == "veg_type":
         metadata += "# vt is dominant vegetation type as a percentage of coverage\n"
@@ -482,12 +497,14 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
 @routes.route("/alfresco/")
 @routes.route("/alfresco/abstract/")
 @routes.route("/alfresco/flammability/")
+@routes.route("/alfresco/veg_change/")
 @routes.route("/alfresco/veg_type/")
 def alfresco_about():
     return render_template("alfresco/abstract.html")
 
 
 @routes.route("/alfresco/flammability/point/")
+@routes.route("/alfresco/veg_change/point/")
 @routes.route("/alfresco/veg_type/point/")
 @routes.route("/alfresco/point/")
 def alfresco_about_point():
@@ -495,6 +512,7 @@ def alfresco_about_point():
 
 
 @routes.route("/alfresco/flammability/area/")
+@routes.route("/alfresco/veg_change/area/")
 @routes.route("/alfresco/veg_type/area/")
 @routes.route("/alfresco/area/")
 def alfresco_about_huc():
@@ -502,6 +520,7 @@ def alfresco_about_huc():
 
 
 @routes.route("/alfresco/flammability/local/")
+@routes.route("/alfresco/veg_change/local/")
 @routes.route("/alfresco/veg_type/local/")
 @routes.route("/alfresco/local/")
 def alfresco_about_local():
@@ -514,7 +533,7 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     specified lat/lon and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either flammability or veg_type
+        var_ep (str): variable endpoint. Flammability, veg change, or veg_type
         lat (float): latitude
         lon (float): longitude
 
@@ -539,17 +558,17 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
 
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
-        #try:
-        point_data_list = asyncio.run(fetch_alf_point_data(x, y, cov_id_str))
-        # except Exception as exc:
-        #     if hasattr(exc, "status") and exc.status == 404:
-        #         return render_template("404/no_data.html"), 404
-        #     return render_template("500/server_error.html"), 500
-    # else:
-    #     return render_template("400/bad_request.html"), 400
+        try:
+            point_data_list = asyncio.run(fetch_alf_point_data(x, y, cov_id_str))
+        except Exception as exc:
+            if hasattr(exc, "status") and exc.status == 404:
+                return render_template("404/no_data.html"), 404
+            return render_template("500/server_error.html"), 500
+    else:
+        return render_template("400/bad_request.html"), 400
 
     varname = var_ep_lu[var_ep]["varname"]
-    if var_ep == "flammability":
+    if var_ep in ["flammability", "veg_change"]:
         point_pkg = package_historical_alf_point_data(point_data_list[0], varname)
         # package AR5 data and fold into data pakage
         ar5_point_pkg = package_ar5_alf_point_data(point_data_list[3], varname)
@@ -581,7 +600,7 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     the request lat/lon and returns a summary of data within that HUC
 
     Args:
-        var_ep (str): variable endpoint. Either flammability or veg_type
+        var_ep (str): variable endpoint. Flammability, veg_change, or veg_type
         lat (float): latitude
         lon (float): longitude
 
@@ -647,7 +666,7 @@ def run_fetch_alf_area_data(var_ep, var_id):
     variable and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either veg_type or flammability
+        var_ep (str): variable endpoint. Flammability, veg change, or veg type
         var_id (str): ID for any AOI polygon
     Returns:
         poly_pkg (dict): zonal mean of variable(s) for AOI polygon
