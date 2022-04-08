@@ -495,7 +495,7 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
 
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
 
-    if var_ep in "flammability":
+    if var_ep == "flammability":
         metadata += "# rf is relative flammability in number of pixels burned\n"
         metadata += "# mean is the mean of of annual means\n"
     elif var_ep == "veg_change":
