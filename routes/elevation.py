@@ -75,14 +75,9 @@ def elevation_about_point():
     return render_template("elevation/point.html")
 
 
-@routes.route("/elevation/huc/")
-def elevation_about_huc():
-    return render_template("elevation/huc.html")
-
-
-@routes.route("/elevation/protectedarea/")
-def elevation_about_protectedarea():
-    return render_template("elevation/protectedarea.html")
+@routes.route("/elevation/area/")
+def elevation_about_area():
+    return render_template("elevation/area.html")
 
 
 @routes.route("/elevation/point/<lat>/<lon>")
