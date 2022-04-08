@@ -1,5 +1,6 @@
 """A module to validate fetched data values."""
 import json
+import re
 from flask import render_template
 from luts import json_types
 
@@ -179,6 +180,10 @@ def place_name_and_type(place_id):
 
     if place_id is None:
         return None, None
+
+    # HUC12s, not getting names from them below
+    if (not re.search("[^0-9]", place_id)) and (len(place_id) == 12):
+        return None, "huc12"
 
     place_types = list(json_types.keys())
     place_types.remove("hucs")

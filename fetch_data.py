@@ -484,7 +484,7 @@ def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
     Creates metadata string to add to beginning of CSV file.
 
     Args:
-        place_name (str): Name of the place, None of just lat/lon
+        place_name (str): Name of the place, None if just lat/lon
         place_id (str): place identifier (e.g., AK124)
         place_type (str): point or area
         lat: latitude for points or None for polygons
@@ -496,6 +496,9 @@ def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
     metadata = "# Location: "
     if place_name is None:
         metadata += lat + " " + lon + "\n"
+        # if lat and lon and type huc12, then it's a local / point-to-huc query
+        if place_type == "huc12":
+            metadata += "# Corresponding HUC12 code: " + place_id + "\n"
     elif place_type == "communities":
         metadata += place_name + "\n"
     else:
