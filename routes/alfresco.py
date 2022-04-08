@@ -213,27 +213,8 @@ def package_ar5_alf_point_data(point_data, varname):
                         point_data_pkg[era][model][scenario][veg_type] = {varname: percent}
 
     if varname == "vt":
-        eras = list(dim_encodings["era"].values())
-        models = list(dim_encodings["model"].values())
-        scenarios = list(dim_encodings["scenario"].values())
+        point_data_pkg = remove_invalid_dim_combos(point_data_pkg)
 
-        # Remove empty data from invalid combos of era/model/scenario.
-        for era in eras:
-            for model in models:
-                # Remove non-CRU-TS models and non-historical era from historical data.
-                if era == "1950-2008":
-                    if model != "CRU-TS":
-                        point_data_pkg[era].pop(model, None)
-                        continue
-                    for scenario in scenarios:
-                        if scenario != "historical":
-                            point_data_pkg[era][model].pop(scenario, None)
-                # Remove historical era from projected data.
-                else:
-                    point_data_pkg[era][model].pop("historical", None)
-            # Remove CRU-TS "model" from projected data.
-            if era != "1950-2008":
-                point_data_pkg[era].pop("CRU-TS", None)
     return point_data_pkg
 
 
@@ -425,29 +406,42 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
         )
         for era, summaries in ar5_results.items():
             aggr_results[era] = summaries
+        aggr_results = remove_invalid_dim_combos(aggr_results)
 
-        eras = list(veg_type_dim_encodings["era"].values())
-        models = list(veg_type_dim_encodings["model"].values())
-        scenarios = list(veg_type_dim_encodings["scenario"].values())
-        # Remove empty data from invalid combos of era/model/scenario.
-        for era in eras:
-            for model in models:
-                # Remove non-CRU-TS models and non-historical era from historical data.
-                if era == "1950-2008":
-                    if model != "CRU-TS":
-                        aggr_results[era].pop(model, None)
-                        continue
-                    for scenario in scenarios:
-                        if scenario != "historical":
-                            aggr_results[era][model].pop(scenario, None)
-                # Remove historical era from projected data.
-                else:
-                    aggr_results[era][model].pop("historical", None)
-            # Remove CRU-TS "model" from projected data.
-            if era != "1950-2008":
-                aggr_results[era].pop("CRU-TS", None)
     return aggr_results
 
+
+def remove_invalid_dim_combos(results):
+    """Remove data from invalid era/model/scenario dimension combinations
+
+    Args:
+        results (dict): point or area results data
+
+    Returns:
+        results (dict): point or area results data with invalid combos removed
+    """
+    eras = list(veg_type_dim_encodings["era"].values())
+    models = list(veg_type_dim_encodings["model"].values())
+    scenarios = list(veg_type_dim_encodings["scenario"].values())
+    # Remove empty data from invalid combos of era/model/scenario.
+    for era in eras:
+        for model in models:
+            # Remove non-CRU-TS models and non-historical era from historical data.
+            if era == "1950-2008":
+                if model != "CRU-TS":
+                    results[era].pop(model, None)
+                    continue
+                for scenario in scenarios:
+                    if scenario != "historical":
+                        results[era][model].pop(scenario, None)
+            # Remove historical era from projected data.
+            else:
+                results[era][model].pop("historical", None)
+        # Remove CRU-TS "model" from projected data.
+        if era != "1950-2008":
+            results[era].pop("CRU-TS", None)
+
+    return results
 
 def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     """Create CSV file with metadata string and location based filename.
