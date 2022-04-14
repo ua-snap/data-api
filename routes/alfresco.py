@@ -36,8 +36,6 @@ from . import routes
 
 alfresco_api = Blueprint("alfresco_api", __name__)
 
-
-# create encodings for coverages (currently all coverages share encodings)
 flammability_dim_encodings = asyncio.run(
     get_dim_encodings("alfresco_relative_flammability_30yr")
 )
