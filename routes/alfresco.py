@@ -36,37 +36,23 @@ from . import routes
 
 alfresco_api = Blueprint("alfresco_api", __name__)
 
-
-# These are the encoded coordinate values for the "era" axis of the
-# rasdaman coverages being queried here. Each tuple contains the first
-# and last coordinate for creating WCPS query to average over them.
-# E.g., (3,5) computes average across 2040-2049, 2050-2059, and 2060-2069.
-summary_era_coords = [(3, 5), (6, 8)]
-
-# create encodings for coverages (currently all coverages share encodings)
-flammability_future_dim_encodings = asyncio.run(
-    get_dim_encodings("relative_flammability_future")
+flammability_dim_encodings = asyncio.run(
+    get_dim_encodings("alfresco_relative_flammability_30yr")
 )
-flammability_historical_dim_encodings = asyncio.run(
-    get_dim_encodings("relative_flammability_historical")
-)
-
-veg_change_future_dim_encodings = flammability_future_dim_encodings
-veg_change_historical_dim_encodings = flammability_historical_dim_encodings
 
 veg_type_dim_encodings = asyncio.run(
     get_dim_encodings("alfresco_vegetation_type_percentage")
 )
 
 var_ep_lu = {
-    "flammability": {"cov_id_str": "relative_flammability", "varname": "rf",},
-    "veg_change": {"cov_id_str": "relative_vegetation_change", "varname": "rvc",},
-    "veg_type": {"cov_id_str": "alfresco_vegetation_type_percentage", "varname": "vt",},
+    "flammability": {"cov_id_str": "alfresco_relative_flammability_30yr"},
+    "veg_type": {
+        "cov_id_str": "alfresco_vegetation_type_percentage",
+    },
 }
 
 var_label_lu = {
     "flammability": "Flammability",
-    "veg_change": "Vegetation Change",
     "veg_type": "Vegetation Type",
 }
 
@@ -75,17 +61,15 @@ flammability_fieldnames = [
     "date_range",
     "model",
     "scenario",
-    "variable",
     "stat",
     "value",
 ]
-veg_change_fieldnames = flammability_fieldnames
+
 veg_type_fieldnames = [
     "date_range",
     "model",
     "scenario",
     "veg_type",
-    "variable",
     "stat",
     "value",
 ]
@@ -93,7 +77,7 @@ veg_type_fieldnames = [
 
 async def fetch_alf_point_data(x, y, cov_id_str):
     """Make the async request for the data at the specified point for
-    a specific varname.
+    a specific coverage
 
     Args:
         x (float): lower x-coordinate bound
@@ -105,22 +89,7 @@ async def fetch_alf_point_data(x, y, cov_id_str):
     """
     # set up WCS request strings
     request_strs = []
-    if cov_id_str in ["relative_flammability", "relative_vegetation_change"]:
-        # historical data request string
-        request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}_historical"))
-
-        # generate both future average requests (averages over decades)
-        for coords in summary_era_coords:
-            request_strs.append(
-                generate_average_wcps_str(x, y, f"{cov_id_str}_future", "era", coords)
-            )
-
-        # future non-average request str
-        request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}_future"))
-    elif cov_id_str == "alfresco_vegetation_type_percentage":
-        # historical and projected are combined into the same coverage
-        # averages have already been precomputed before Rasdaman ingest
-        request_strs.append(generate_wcs_getcov_str(x, y, f"{cov_id_str}"))
+    request_strs.append(generate_wcs_getcov_str(x, y, cov_id_str))
     urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
     point_data_list = await fetch_data(urls)
     return point_data_list
@@ -128,7 +97,7 @@ async def fetch_alf_point_data(x, y, cov_id_str):
 
 async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
     """Make the async request for the data at the specified point for
-    a specific varname.
+    a specific coverage
 
     Args:
         bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
@@ -139,72 +108,28 @@ async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
     """
     # set up WCS request strings
     request_strs = []
-
-    if cov_id_str in ["relative_flammability", "relative_vegetation_change"]:
-        # historical data request string
-        request_strs.append(
-            generate_netcdf_wcs_getcov_str(bbox_bounds, f"{cov_id_str}_historical")
-        )
-        # generate both future average requests (averages over decades)
-        for coords in summary_era_coords:
-            # kwargs to pass to function in generate_netcdf_average_wcps_str
-            kwargs = {
-                "cov_id": f"{cov_id_str}_future",
-                "axis_name": "era",
-                "axis_coords": coords,
-                "encoding": "netcdf",
-            }
-            request_strs.append(generate_netcdf_average_wcps_str(bbox_bounds, kwargs))
-        # future non-average request str
-        request_strs.append(
-            generate_netcdf_wcs_getcov_str(bbox_bounds, f"{cov_id_str}_future")
-        )
-    elif cov_id_str == "alfresco_vegetation_type_percentage":
-        # averages for vegetation type were precomputed before Rasdaman ingest
-        request_strs.append(
-            generate_netcdf_wcs_getcov_str(bbox_bounds, f"{cov_id_str}")
-        )
+    request_strs.append(generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id_str))
     urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
     bbox_ds_list = await fetch_bbox_netcdf_list(urls)
     return bbox_ds_list
 
 
-def package_historical_alf_point_data(point_data, varname):
-    """Add dim names to JSON response from point query
-    for the historical coverages
-
-    Args:
-        point_data (list): nested list containing JSON
-            results of historical alfresco point query
-        varname (str): variable name
-
-    Returns:
-        JSON-like dict of query results
-    """
-    point_data_pkg = {}
-    # hard-code summary period for CRU
-    for ei, value in enumerate(point_data):  # (nested list with value at dim 0)
-        era = flammability_historical_dim_encodings["era"][ei]
-        point_data_pkg[era] = {"CRU-TS40": {"CRU_historical": {varname: value}}}
-    return point_data_pkg
-
-
-def package_ar5_alf_point_data(point_data, varname):
+def package_ar5_alf_point_data(point_data, var_ep):
     """Add dim names to JSON response from typical AR5 point query
 
     Args:
         point_data (list): nested list containing JSON
             results of AR5 WCPS query
-        varname (str): variable name
+        var_ep (str): variable name
 
     Returns:
         JSON-like dict of query results
     """
     point_data_pkg = {}
 
-    if varname in ["rf", "rvc"]:
-        dim_encodings = flammability_future_dim_encodings
-    elif varname == "vt":
+    if var_ep == "flammability":
+        dim_encodings = flammability_dim_encodings
+    elif var_ep == "veg_type":
         dim_encodings = veg_type_dim_encodings
 
     # AR5 data:
@@ -217,32 +142,29 @@ def package_ar5_alf_point_data(point_data, varname):
             point_data_pkg[era][model] = {}
             for si, value in enumerate(s_li):
                 scenario = dim_encodings["scenario"][si]
-                if varname in ["rf", "rvc"]:
-                    point_data_pkg[era][model][scenario] = {varname: value}
-                elif varname == "vt":
+                if var_ep == "flammability":
+                    point_data_pkg[era][model][scenario] = value
+                elif var_ep == "veg_type":
                     point_data_pkg[era][model][scenario] = {}
                     v_li = value
                     for vi, value in enumerate(v_li):
                         veg_type = dim_encodings["veg_type"][vi]
                         percent = round(value * 100, 2)
-                        point_data_pkg[era][model][scenario][veg_type] = {
-                            varname: percent
-                        }
+                        point_data_pkg[era][model][scenario][veg_type] = percent
 
-    if varname == "vt":
-        point_data_pkg = remove_invalid_dim_combos(point_data_pkg)
+    point_data_pkg = remove_invalid_dim_combos(var_ep, point_data_pkg)
 
     return point_data_pkg
 
 
-def package_ar5_alf_averaged_point_data(point_data, varname):
+def package_ar5_alf_averaged_point_data(point_data, var_ep):
     """Add dim names to JSON response from WCPS point query
     for the AR5/CMIP5 coverages
 
     Args:
         point_data (list): nested list containing JSON
             results of AR5 WCPS query
-        varname (str): variable name
+        var_ep (str): variable name
 
     Returns:
         JSON-like dict of query results
@@ -255,15 +177,13 @@ def package_ar5_alf_averaged_point_data(point_data, varname):
         point_data_pkg[model] = {}
         for si, value in enumerate(s_li):
             scenario = flammability_future_dim_encodings["scenario"][si]
-            if varname in ["rf", "rvc"]:
-                point_data_pkg[model][scenario] = {varname: round(value, 4)}
-            elif varname == "vt":
+            if var_ep == "flammability":
+                point_data_pkg[model][scenario] = round(value, 4)
+            elif var_ep == "veg_type":
                 point_data_pkg[model][scenario] = {}
                 for vi, value in enumerate(v_li):
                     veg_type = future_dim_encodings["veg_type"][vi]
-                    point_data_pkg[model][scenario][veg_type] = {
-                        varname: round(value, 4)
-                    }
+                    point_data_pkg[model][scenario][veg_type] = round(value, 4)
     return point_data_pkg
 
 
@@ -278,8 +198,8 @@ def get_poly_mask_arr(ds, poly, bandname):
         bandname (str): name of the DataArray containing the data
 
     Returns:
-        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
-            the polygon of interest
+        cropped_poly_mask (numpy.ma.core.MaskedArra): a masked array masking the cells
+            intersecting the polygon of interest, cropped to the right shape
     """
     # need a data layer of same x/y shape just for running a zonal stats
     xy_shape = ds[bandname].values.shape[-2:]
@@ -295,11 +215,12 @@ def get_poly_mask_arr(ds, poly, bandname):
         stats=["mean"],
         raster_out=True,
     )[0]["mini_raster_array"]
-    return poly_mask_arr
+    cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
+    return cropped_poly_mask
 
 
 def summarize_within_poly_marr(
-    ds, poly_mask_arr, dim_encodings, bandname="Gray", varname="Gray"
+    ds, poly_mask_arr, dim_encodings, bandname="Gray", var_ep="Gray"
 ):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
     Return the results as a nested dict.
@@ -317,7 +238,7 @@ def summarize_within_poly_marr(
             data and map integer data coordinates to models, scenarios, variables, etc.
         bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
             the name is not given at ingest
-        varname (str): standard variable name used for storing results
+        var_ep (str): variable (flammability or veg_type)
 
     Returns:
         Nested dict of results for all non-X/Y axis combinations,
@@ -357,11 +278,12 @@ def summarize_within_poly_marr(
 
     for map_list, result in zip(dim_combos, results):
         if len(map_list) > 1:
-            if varname in ["rf", "rvc"]:
+            data = get_from_dict(aggr_results, map_list[:-1])
+            if var_ep == "flammability":
                 result = round(result, 4)
-            elif varname == "vt":
+            elif var_ep == "veg_type":
                 result = round(result * 100, 2)
-            get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = {varname: result}
+            data[map_list[-1]] = result
         else:
             aggr_results[map_list[0]] = round(result, 4)
     return aggr_results
@@ -385,8 +307,6 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
             validating polygon IDs in `validate_data` or `lat_lon` module.
     """
     poly = get_poly_3338_bbox(poly_gdf, poly_id)
-    # mapping between coordinate values (ints) and variable names (strs)
-    varname = var_ep_lu[var_ep]["varname"]
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     ds_list = asyncio.run(fetch_alf_bbox_data(poly.bounds, cov_id_str))
 
@@ -396,47 +316,22 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
     # average over the following decades / time periods
     aggr_results = {}
-    if cov_id_str in ["relative_flammability", "relative_vegetation_change"]:
-        historical_results = summarize_within_poly_marr(
-            ds_list[0],
-            poly_mask_arr,
-            flammability_historical_dim_encodings,
-            bandname,
-            varname,
-        )
-        #  add the model, scenario, and varname levels for CRU
-        for era in historical_results:
-            aggr_results[era] = {
-                "CRU-TS40": {"CRU_historical": {varname: historical_results[era]}}
-            }
-        # run regular future
+    if var_ep == "flammability":
         ar5_results = summarize_within_poly_marr(
-            ds_list[-1],
-            poly_mask_arr,
-            flammability_future_dim_encodings,
-            bandname,
-            varname,
+            ds_list[-1], poly_mask_arr, flammability_dim_encodings, bandname, var_ep
         )
-        for era, summaries in ar5_results.items():
-            aggr_results[era] = summaries
-        # run summary eras for future
-        summary_eras = ["2040-2069", "2070-2099"]
-        for ds, era in zip(ds_list[1:3], summary_eras):
-            aggr_results[era] = summarize_within_poly_marr(
-                ds, poly_mask_arr, flammability_future_dim_encodings, bandname, varname
-            )
-    elif cov_id_str == "alfresco_vegetation_type_percentage":
+    elif var_ep == "veg_type":
         ar5_results = summarize_within_poly_marr(
-            ds_list[-1], poly_mask_arr, veg_type_dim_encodings, bandname, varname
+            ds_list[-1], poly_mask_arr, veg_type_dim_encodings, bandname, var_ep
         )
-        for era, summaries in ar5_results.items():
-            aggr_results[era] = summaries
-        aggr_results = remove_invalid_dim_combos(aggr_results)
+    for era, summaries in ar5_results.items():
+        aggr_results[era] = summaries
+    aggr_results = remove_invalid_dim_combos(var_ep, aggr_results)
 
     return aggr_results
 
 
-def remove_invalid_dim_combos(results):
+def remove_invalid_dim_combos(var_ep, results):
     """Remove data from invalid era/model/scenario dimension combinations
 
     Args:
@@ -445,15 +340,20 @@ def remove_invalid_dim_combos(results):
     Returns:
         results (dict): point or area results data with invalid combos removed
     """
-    eras = list(veg_type_dim_encodings["era"].values())
-    models = list(veg_type_dim_encodings["model"].values())
-    scenarios = list(veg_type_dim_encodings["scenario"].values())
+    if var_ep == "flammability":
+        dim_encodings = flammability_dim_encodings
+    elif var_ep == "veg_type":
+        dim_encodings = veg_type_dim_encodings
+
+    eras = list(dim_encodings["era"].values())
+    models = list(dim_encodings["model"].values())
+    scenarios = list(dim_encodings["scenario"].values())
     # Remove empty data from invalid combos of era/model/scenario.
     for era in eras:
         for model in models:
             # Remove non-CRU-TS models and non-historical era from historical data.
-            if era == "1950-2008":
-                if model != "CRU-TS":
+            if era in ["1950-2008", "1950-1979", "1980-2008"]:
+                if model not in ["CRU-TS", "MODEL-SPINUP"]:
                     results[era].pop(model, None)
                     continue
                 for scenario in scenarios:
@@ -463,8 +363,9 @@ def remove_invalid_dim_combos(results):
             else:
                 results[era][model].pop("historical", None)
         # Remove CRU-TS "model" from projected data.
-        if era != "1950-2008":
+        if era not in ["1950-2008", "1950-1979", "1980-2008"]:
             results[era].pop("CRU-TS", None)
+            results[era].pop("MODEL-SPINUP", None)
 
     return results
 
@@ -480,15 +381,16 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     Returns:
         CSV response object
     """
-    varname = var_ep_lu[var_ep]["varname"]
-    if var_ep in ["flammability", "veg_change"]:
+    if var_ep == "flammability":
         fieldnames = flammability_fieldnames
-        stat = "mean"
+        extra_columns = {"stat": "mean"}
     elif var_ep == "veg_type":
         fieldnames = veg_type_fieldnames
-        stat = "percent"
+        extra_columns = {"stat": "percent"}
     csv_dicts = build_csv_dicts(
-        data_pkg, fieldnames, {"variable": varname, "stat": stat},
+        data_pkg,
+        fieldnames,
+        extra_columns,
     )
 
     place_name, place_type = place_name_and_type(place_id)
@@ -496,13 +398,7 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
 
     if var_ep == "flammability":
-        metadata += "# rf is relative flammability in number of pixels burned\n"
         metadata += "# mean is the mean of of annual means\n"
-    elif var_ep == "veg_change":
-        metadata += "# rvc is relative vegetation change in number of pixels that changed dominant vegetation type\n"
-        metadata += "# mean is the mean of of annual means\n"
-    elif var_ep == "veg_type":
-        metadata += "# vt is dominant vegetation type as a percentage of coverage\n"
 
     if place_name is not None:
         filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
@@ -515,14 +411,12 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
 @routes.route("/alfresco/")
 @routes.route("/alfresco/abstract/")
 @routes.route("/alfresco/flammability/")
-@routes.route("/alfresco/veg_change/")
 @routes.route("/alfresco/veg_type/")
 def alfresco_about():
     return render_template("alfresco/abstract.html")
 
 
 @routes.route("/alfresco/flammability/point/")
-@routes.route("/alfresco/veg_change/point/")
 @routes.route("/alfresco/veg_type/point/")
 @routes.route("/alfresco/point/")
 def alfresco_about_point():
@@ -530,7 +424,6 @@ def alfresco_about_point():
 
 
 @routes.route("/alfresco/flammability/area/")
-@routes.route("/alfresco/veg_change/area/")
 @routes.route("/alfresco/veg_type/area/")
 @routes.route("/alfresco/area/")
 def alfresco_about_huc():
@@ -538,7 +431,6 @@ def alfresco_about_huc():
 
 
 @routes.route("/alfresco/flammability/local/")
-@routes.route("/alfresco/veg_change/local/")
 @routes.route("/alfresco/veg_type/local/")
 @routes.route("/alfresco/local/")
 def alfresco_about_local():
@@ -551,7 +443,7 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     specified lat/lon and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Flammability, veg change, or veg_type
+        var_ep (str): variable endpoint. Flammability or veg_type
         lat (float): latitude
         lon (float): longitude
 
@@ -585,22 +477,7 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     else:
         return render_template("400/bad_request.html"), 400
 
-    varname = var_ep_lu[var_ep]["varname"]
-    if var_ep in ["flammability", "veg_change"]:
-        point_pkg = package_historical_alf_point_data(point_data_list[0], varname)
-        # package AR5 data and fold into data pakage
-        ar5_point_pkg = package_ar5_alf_point_data(point_data_list[3], varname)
-        for era, summaries in ar5_point_pkg.items():
-            point_pkg[era] = summaries
-        # package summary future eras in
-        point_pkg["2040-2069"] = package_ar5_alf_averaged_point_data(
-            point_data_list[1], varname
-        )
-        point_pkg["2070-2099"] = package_ar5_alf_averaged_point_data(
-            point_data_list[2], varname
-        )
-    elif var_ep == "veg_type":
-        point_pkg = package_ar5_alf_point_data(point_data_list, varname)
+    point_pkg = package_ar5_alf_point_data(point_data_list, var_ep)
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "alfresco")
@@ -618,7 +495,7 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     the request lat/lon and returns a summary of data within that HUC
 
     Args:
-        var_ep (str): variable endpoint. Flammability, veg_change, or veg_type
+        var_ep (str): variable endpoint. Flammability or veg_type
         lat (float): latitude
         lon (float): longitude
 

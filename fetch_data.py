@@ -255,8 +255,14 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
         raster_out=True,
     )[0]["mini_raster_array"]
 
-    data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
+    crop_shape = data_arr[0].shape
+    cropped_poly_mask = poly_mask_arr[0:crop_shape[0], 0:crop_shape[1]]
+    data_arr_mask = np.broadcast_to(cropped_poly_mask.mask, data_arr.shape)
     data_arr[data_arr_mask] = np.nan
+
+    # Set any remaining nodata values to nan if they snuck through the mask.
+    data_arr[data_arr == -9.223372e+18] = np.nan
+
     results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
 
     for map_list, result in zip(dim_combos, results):
@@ -324,22 +330,23 @@ def parse_meta_xml_str(meta_xml_str):
     """
     meta_xml = ET.ElementTree(ET.fromstring(meta_xml_str))
     # wow xml
-    dim_encodings = eval(
+    encoding_el = list(
         list(
             list(
                 list(
                     list(
-                        meta_xml.getroot()[0].iter(
-                            "{http://www.opengis.net/gmlcov/1.0}metadata"
-                        )
-                    )[0].iter("{http://www.opengis.net/gmlcov/1.0}Extension")
-                )[0].iter("{http://www.rasdaman.org}covMetadata")
-            )[0].iter("Encoding")
-        )[0].text
-    )
-    # make the coordinate value keys integers
-    for axis, encoding_di in dim_encodings.items():
-        dim_encodings[axis] = {int(k): v for k, v in encoding_di.items()}
+                        meta_xml.getroot().iter("{http://www.opengis.net/wcs/2.0}CoverageDescription")
+                    )[0].iter("{http://www.opengis.net/gmlcov/1.0}metadata")
+                )[0].iter("{http://www.opengis.net/gmlcov/1.0}Extension")
+            )[0].iter("{http://www.rasdaman.org}covMetadata")
+        )[0].iter("Encoding")
+    )[0]
+
+    dim_encodings = {}
+    for dim in encoding_el.iter():
+        if not dim.text.isspace():
+            encoding_di = eval(dim.text)
+            dim_encodings[dim.tag] = {int(k): v for k, v in encoding_di.items()}
     return dim_encodings
 
 

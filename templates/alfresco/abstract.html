@@ -1,141 +1,263 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h3>Post-processed 1km ALFRESCO Data</h3>
-<p>The endpoints here provide access to data products derived from outputs from ALFRESCO simulations done using future (AR5/CMIP5) scenarios and historical (CRU TS 4.0) data completed for the Integrated Ecosystem Model (IEM) project. The current endpoints are described in the "Service Endpoints" section below, and are available for the following datasets:</p>
+<p>
+  The endpoints here provide access to data products derived from outputs from
+  ALFRESCO simulations done using future (AR5/CMIP5) scenarios and historical
+  (CRU TS 4.0) data completed for the Integrated Ecosystem Model (IEM) project.
+  The current endpoints are described in the "Service Endpoints" section below,
+  and are available for the following datasets:
+</p>
 
 <h4>Datasets</h4>
 <table>
-<thead>
-  <tr>
-    <th>Endpoint Name</th>
-    <th>Variable Name</th>
-    <th>Data Layer</th>
-    <th>Description</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td>flammability</td>
-    <td>rf</td>
-    <td>Relative Flammability</td>
-    <td>These data are derived from the fire scar outputs and are computed as the average number of times a pixel burned across all reps for all years of the summary year span. Pixels are 1km x 1km.</td>
-  </tr>
-  <tr>
-    <td>veg_change</td>
-    <td>rvc</td>
-    <td>Relative Vegetation Change</td>
-    <td>These data are derived from the vegetation class data, the principal phenomena being modeled by ALFRESCO. They are computed as the average number of year-to-year transitions of any vegetation class for a pixel, across all reps for all years of the summary year span. Pixels are 1km x 1km.</td>
-  </tr>
-  <tr>
-    <td>veg_type</td>
-    <td>vt</td>
-    <td>Vegetation Type</td>
-    <td>These data are derived from the vegetation class data, the principal phenomena being modeled by ALFRESCO. They are computed as the average percentage of each vegetation type for a pixel, across all reps for all years of the summary year span. Pixels are 1km x 1km.</td>
-  </tr>
-</tbody>
+  <thead>
+    <tr>
+      <th>Endpoint Name</th>
+      <th>Data Layer</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>flammability</td>
+      <td>Flammability</td>
+      <td>
+        These data are derived from the fire scar outputs and are computed as
+        the average number of times a pixel burned across all reps for all years
+        of the summary year span. Pixels are 1km x 1km.
+      </td>
+    </tr>
+    <tr>
+      <td>veg_type</td>
+      <td>Vegetation Type</td>
+      <td>
+        These data are derived from the vegetation class data, the principal
+        phenomena being modeled by ALFRESCO. They are computed as the average
+        percentage of each vegetation type for a pixel, across all reps for all
+        years of the summary year span. Pixels are 1km x 1km.
+      </td>
+    </tr>
+  </tbody>
 </table>
 
 <h4>Service endpoints</h4>
 <p>Here are the existing endpoints for the above datasets.</p>
 <ul>
-    <li><a href="/alfresco/point">Point query</a></li>
-    <li><a href="/alfresco/local">Point-based aggregation of local area (HUC-12)</a></li>
-    <li><a href="/alfresco/area">Aggregate by AOI polygon ID</a></li>
+  <li><a href="/alfresco/point">Point query</a></li>
+  <li>
+    <a href="/alfresco/local">Point-based aggregation of local area (HUC-12)</a>
+  </li>
+  <li><a href="/alfresco/area">Aggregate by AOI polygon ID</a></li>
 </ul>
 
-<h4>Results from queries to the above endpoints will look like this:</h4>
+<h3>Flammability</h3>
+
+<p>Results from flammability endpoints will look like this:</p>
 
 <pre>
-{
-  "1950-1959": {
-    "CRU-TS40": {
-      "CRU_historical": {
-        "rf": 0.0009
+  {
+    "1950-1979": {
+      "MODEL-SPINUP": {
+        "historical": 0.0065
       }
-    }
+    },
+    ...
+    "2010-2039": {
+      "5modelAvg": {
+        "rcp45": 0.0014,
+        "rcp60": 0.0007,
+        "rcp85": 0.0007
+      },
+      ...
+    },
+    ...
   }
-...
-  "2010-2019": {
-    "5modelAvg": {
-      "rcp45": {
-        "rf": 0.0017
-      }
-    }
-  }
-...
-}
 </pre>
 
-The above output is structured as such:
+<p>The above output is structured as such:</p>
 
 <pre>
 {
   &ltera>: {
     &ltmodel>: {
-      &ltscenario>: {
-        &ltvarname>: &ltvalue>
-      }
+      &ltscenario>: &ltvalue>
     }
-  } 
+  }
   ...
 }
 </pre>
 
 <h4>Dimensions:</h4>
 <ul>
-    <li><strong><code>era</code></strong>: Sumary era:</li>
-        <ul>
-            <li>1950-1959</li>
-            <li>1950-2008</li>
-            <li>1960-1969</li>
-            <li>1970-1979</li>
-            <li>1980-1989</li>
-            <li>1990-1999</li>
-            <li>2000-2008</li>
-            <li>2040_2069</li>
-            <li>2070_2099</li>
-            <li>2010_2019</li>
-            <li>2020_2029</li>
-            <li>2030_2039</li>
-            <li>2040_2049</li>
-            <li>2050_2059</li>
-            <li>2060_2069</li>
-            <li>2070_2079</li>
-            <li>2080_2089</li>
-            <li>2090_2099</li>
-        </ul>
-    <li><strong><code>model</code></strong>: AR5 model source, or CRU TS:</li>
-        <ul>
-            <li>NCAR-CCSM4</li>
-            <li>MRI-CGCM3</li>
-            <li>IPSL-CM5A-LR</li>
-            <li>GFDL-CM3</li>
-            <li>GISS-E2-R</li>
-            <li>5modelAvg: the average of the above 5 models</li>
-        </ul>
-    <li><strong><code>scenario</code></strong>: RCP scenario for AR5, or "CRU_historical" for historical</li>
-        <ul>
-            <li>rcp45</li>
-            <li>rcp60</li>
-            <li>rcp85</li>
-            <li>CRU_historical</li>
-        </ul>
+  <li>
+    <strong><code>era</code></strong
+    >: Summary era:
+  </li>
+  <ul>
+    <li>1950-1979</li>
+    <li>1980-2008</li>
+    <li>2010-2039</li>
+    <li>2040-2069</li>
+    <li>2070-2099</li>
+  </ul>
+  <li>
+    <strong><code>model</code></strong
+    >: AR5 model source, or 5-model average, or historical MODEL-SPINUP:
+  </li>
+  <ul>
+    <li>MODEL-SPINUP</li>
+    <li>NCAR-CCSM4</li>
+    <li>MRI-CGCM3</li>
+    <li>IPSL-CM5A-LR</li>
+    <li>GFDL-CM3</li>
+    <li>GISS-E2-R</li>
+    <li>5modelAvg: the average of the above 5 models</li>
+  </ul>
+  <li>
+    <strong><code>scenario</code></strong
+    >: RCP scenario for AR5, or "historical" for historical model spinup
+  </li>
+  <ul>
+    <li>rcp45</li>
+    <li>rcp60</li>
+    <li>rcp85</li>
+    <li>historical</li>
+  </ul>
 </ul>
-<strong>Variables:</strong>
+
+<h3>Vegetation type</h3>
+
+<p>Results from vegetation type endpoints will look like this:</p>
+
+<pre>
+  {
+    "1950-2008": {
+      "MODEL-SPINUP": {
+        "historical": {
+          "barren_lichen_moss": 0,
+          "black_spruce": 0,
+          "deciduous_forest": 50.92,
+          "graminoid_tundra": 0,
+          "not_modeled": 0,
+          "shrub_tundra": 0,
+          "temperate_rainforest": 0,
+          "wetland_tundra": 0,
+          "white_spruce": 49.08
+        }
+      }
+    },
+    ...
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "barren_lichen_moss": 0,
+        "black_spruce": 0,
+        "deciduous_forest": 57.03,
+        "graminoid_tundra": 0,
+        "not_modeled": 0,
+        "shrub_tundra": 0,
+        "temperate_rainforest": 0,
+        "wetland_tundra": 0,
+        "white_spruce": 42.97
+      },
+      "rcp60": {
+        "barren_lichen_moss": 0,
+        "black_spruce": 0,
+        "deciduous_forest": 58.07,
+        "graminoid_tundra": 0,
+        "not_modeled": 0,
+        "shrub_tundra": 0,
+        "temperate_rainforest": 0,
+        "wetland_tundra": 0,
+        "white_spruce": 41.93
+      },
+      "rcp85": {
+        "barren_lichen_moss": 0,
+        "black_spruce": 0,
+        "deciduous_forest": 57.28,
+        "graminoid_tundra": 0,
+        "not_modeled": 0,
+        "shrub_tundra": 0,
+        "temperate_rainforest": 0,
+        "wetland_tundra": 0,
+        "white_spruce": 42.72
+      }
+    },
+    ...
+  }
+</pre>
+
+<p>The above output is structured as such:</p>
+
+<pre>
+{
+  &ltera>: {
+    &ltmodel>: {
+      &ltscenario>: {
+        &ltvegetation_type>: &ltvalue>
+      }
+    }
+  }
+  ...
+}
+</pre>
+
+<h4>Dimensions:</h4>
 <ul>
-    <li><strong><code>rf</code></strong>: <i>(float)</i>, relative flammability.</li>
-    <li><strong><code>rvc</code></strong>: <i>(float)</i>, relative vegetation change.</li>
+  <li>
+    <strong><code>era</code></strong
+    >: Summary era:
+  </li>
+  <ul>
+    <li>1950-2008</li>
+    <li>2010-2039</li>
+    <li>2040-2069</li>
+    <li>2070-2099</li>
+  </ul>
+  <li>
+    <strong><code>model</code></strong
+    >: AR5 model source or historical MODEL-SPINUP:
+  </li>
+  <ul>
+    <li>MODEL-SPINUP</li>
+    <li>NCAR-CCSM4</li>
+    <li>MRI-CGCM3</li>
+    <li>IPSL-CM5A-LR</li>
+    <li>GFDL-CM3</li>
+    <li>GISS-E2-R</li>
+  </ul>
+  <li>
+    <strong><code>scenario</code></strong
+    >: RCP scenario for AR5, or "historical" for historical model spinup
+  </li>
+  <ul>
+    <li>rcp45</li>
+    <li>rcp60</li>
+    <li>rcp85</li>
+    <li>historical</li>
+  </ul>
 </ul>
 
 <h4>Source data</h4>
 
-These data are derived from ALFRESCO model outputs created for the IEM project at a resolution of 1km. For access to the source data used here, please contact uaf-snap-data-tool@alaska.edu and ask about accessing these data.
-
-SNAP also has some similar datasets available for download at longer year spans and for fewer models and scenarios than available here:
+These data are derived from ALFRESCO model outputs created for the IEM project
+at a resolution of 1km. For access to the source data used here, please contact
+uaf-snap-data-tool@alaska.edu and ask about accessing these data. SNAP also has
+some similar datasets available for download at longer year spans and for fewer
+models and scenarios than available here:
 
 <ul>
-    <li><a href="http://ckan.snap.uaf.edu/dataset/alfresco-model-outputs-relative-vegetation-change">ALFRESCO Model outputs - Relative Vegetation Change</a></li>
-    <li><a href="http://ckan.snap.uaf.edu/dataset/alfresco-model-outputs-relative-flammability">ALFRESCO Model outputs - Relative Flammability</a></li>
+  <li>
+    <a
+      href="http://ckan.snap.uaf.edu/dataset/alfresco-model-outputs-relative-vegetation-change"
+      >ALFRESCO Model outputs - Relative Vegetation Change</a
+    >
+  </li>
+  <li>
+    <a
+      href="http://ckan.snap.uaf.edu/dataset/alfresco-model-outputs-relative-flammability"
+      >ALFRESCO Model outputs - Relative Flammability</a
+    >
+  </li>
 </ul>
 
 {% endblock %}
