@@ -14,11 +14,8 @@ from flask import (
 from fetch_data import (
     fetch_data_api,
     fetch_wcs_point_data,
-    fetch_bbox_netcdf,
-    summarize_within_poly,
     build_csv_dicts,
     write_csv,
-    add_titles,
     csv_metadata,
 )
 
@@ -29,14 +26,13 @@ from validate_request import (
     project_latlon,
 )
 from validate_data import (
-    get_poly_3338_bbox,
     nullify_nodata,
     nullify_and_prune,
     postprocess,
     place_name_and_type,
 )
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import huc_gdf, permafrost_encodings, akpa_gdf
+from luts import permafrost_encodings
 from . import routes
 
 permafrost_api = Blueprint("permafrost_api", __name__)
@@ -141,43 +137,6 @@ def package_gipl(gipl_resp):
         for m in di[k].keys():
             di[k][m].pop("historical", None)
     return di
-
-
-def package_gipl_polygon(gipl_polygon_resp):
-    """Package a single data variable (GIPL MAGT or ALT)."""
-    di = gipl_polygon_resp
-    eras = list(permafrost_encodings["eras"].values())
-    models = list(permafrost_encodings["models"].values())
-    scenarios = list(permafrost_encodings["scenarios"].values())
-    models.remove("cruts31")
-    for model in models:
-        di["1995"].pop(model, None)
-    di["1995"]["cruts31"].pop("rcp45", None)
-    di["1995"]["cruts31"].pop("rcp85", None)
-    for k in ["2025", "2050", "2075", "2095"]:
-        di[k].pop("cruts31", None)
-        for m in di[k].keys():
-            di[k][m].pop("historical", None)
-    return di
-
-
-def combine_gipl_poly_var_pkgs(magt_di, alt_di):
-
-    combined_gipl_di = {}
-    for era in magt_di.keys():
-        combined_gipl_di[era] = {}
-        for model in magt_di[era].keys():
-            combined_gipl_di[era][model] = {}
-            for scenario in magt_di[era][model].keys():
-                combined_gipl_di[era][model][scenario] = {}
-                combined_gipl_di[era][model][scenario]["magt"] = magt_di[era][model][
-                    scenario
-                ]
-                combined_gipl_di[era][model][scenario]["alt"] = alt_di[era][model][
-                    scenario
-                ]
-                combined_gipl_di[era][model][scenario]["statistic"] = "Zonal Mean"
-    return combined_gipl_di
 
 
 @routes.route("/permafrost/")
