@@ -8,8 +8,8 @@ from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_data_api,
     fetch_bbox_geotiff_from_gs,
-    geotiff_zonal_stats,
 )
+from polygon_tooling import geotiff_zonal_stats
 from validate_request import (
     validate_latlon,
     validate_var_id,
