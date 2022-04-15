@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import rasterio as rio
 import xarray as xr
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from functools import reduce
 from aiohttp import ClientSession
 from flask import current_app as app, Response
@@ -44,27 +44,27 @@ async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
     return point_data
 
 
-async def fetch_layer_data(url, session, encoding="json"):
-    """Make an awaitable GET request to a URL, return json
-    or netcdf
+# async def fetch_layer_data(url, session, encoding="json"):
+#     """Make an awaitable GET request to a URL, return json
+#     or netcdf
+#        TARGET TO DELETE THIS FUNCTION!!!
+#     Args:
+#         url (str): WCS query URL
+#         session (aiohttp.ClientSession): the client session instance
+#         encoding (str): either "json" or "netcdf", specifying the encoding type
 
-    Args:
-        url (str): WCS query URL
-        session (aiohttp.ClientSession): the client session instance
-        encoding (str): either "json" or "netcdf", specifying the encoding type
+#     Returns:
+#         Query result, deocded differently depending on encoding argument.
+#     """
+#     resp = await session.request(method="GET", url=url)
+#     resp.raise_for_status()
 
-    Returns:
-        Query result, deocded differently depending on encoding argument.
-    """
-    resp = await session.request(method="GET", url=url)
-    resp.raise_for_status()
+#     if encoding == "json":
+#         data = await resp.json()
+#     elif encoding == "netcdf":
+#         data = await resp.read()
 
-    if encoding == "json":
-        data = await resp.json()
-    elif encoding == "netcdf":
-        data = await resp.read()
-
-    return data
+#     return data
 
 
 async def fetch_data_api(backend, workspace, wms_targets, wfs_targets, lat, lon):
@@ -77,7 +77,7 @@ async def fetch_data_api(backend, workspace, wms_targets, wfs_targets, lat, lon)
     )
 
     async with ClientSession() as session:
-        tasks = [fetch_layer_data(url, session) for url in urls]
+        tasks = [make_get_request(url, session) for url in urls]
         results = await asyncio.gather(*tasks)
     return results
 
@@ -193,96 +193,6 @@ async def fetch_bbox_netcdf_list(urls):
     return ds_list
 
 
-def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gray"):
-    """Summarize a single Data Variable of a xarray.DataSet within a polygon.
-    Return the results as a nested dict.
-
-    Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of
-            interest
-        poly (shapely.Polygon): polygon within which to summarize
-        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the data and map integer data coordinates to models, scenarios, variables, etc.
-        varname (str): name of variable represented by ds
-        roundkey (str): variable key that will fetch an integer that determines rounding precision (e.g. 1 for a single decimal place)
-
-    Returns:
-        Nested dict of results for all non-X/Y axis combinations,
-
-    Notes:
-        This default "Gray" is used because it is the default name for ingesting into Rasdaman from GeoTIFFs. Othwerwise it should be the name of a xarray.DataSet DataVariable, i.e. something in `list(ds.keys())`
-    """
-    # will actually operate on underlying DataArray
-
-    da = ds[varname]
-    # get axis (dimension) names and make list of all coordinate combinations
-    all_dims = da.dims
-    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-    iter_coords = list(
-        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-    )
-
-    # generate all combinations of decoded coordinate values
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            # dim_encodings[dimname][coord]
-            dim_encodings[f"{dimname}s"][coord]
-            for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
-
-    aggr_results = generate_nested_dict(dim_combos)
-
-    data_arr = []
-    for coords, map_list in zip(iter_coords, dim_combos):
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        data_arr.append(da.sel(sel_di).values)
-    data_arr = np.array(data_arr)
-
-    # need to transpose the 2D spatial slices if X is the "rows" dimension
-    if all_dims.index("X") < all_dims.index("Y"):
-        data_arr = data_arr.transpose(0, 2, 1)
-
-    # get transform from a DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr[0],
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-
-    crop_shape = data_arr[0].shape
-    cropped_poly_mask = poly_mask_arr[0:crop_shape[0], 0:crop_shape[1]]
-    data_arr_mask = np.broadcast_to(cropped_poly_mask.mask, data_arr.shape)
-    data_arr[data_arr_mask] = np.nan
-
-    # Set any remaining nodata values to nan if they snuck through the mask.
-    data_arr[data_arr == -9.223372e+18] = np.nan
-
-    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-
-    for map_list, result in zip(dim_combos, results):
-        get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
-            result, dim_encodings["rounding"][roundkey]
-        )
-    return aggr_results
-
-
-def geotiff_zonal_stats(poly, arr, transform, stat_list):
-    poly_mask_arr = zonal_stats(
-        poly,
-        arr,
-        affine=transform,
-        nodata=np.nan,
-        stats=stat_list,
-    )
-    return poly_mask_arr
-
-
 def generate_nested_dict(dim_combos):
     """Dynamically generate a nested dict based on the different
     dimension name combinations
@@ -335,7 +245,9 @@ def parse_meta_xml_str(meta_xml_str):
             list(
                 list(
                     list(
-                        meta_xml.getroot().iter("{http://www.opengis.net/wcs/2.0}CoverageDescription")
+                        meta_xml.getroot().iter(
+                            "{http://www.opengis.net/wcs/2.0}CoverageDescription"
+                        )
                     )[0].iter("{http://www.opengis.net/gmlcov/1.0}metadata")
                 )[0].iter("{http://www.opengis.net/gmlcov/1.0}Extension")
             )[0].iter("{http://www.rasdaman.org}covMetadata")
@@ -358,7 +270,7 @@ async def get_dim_encodings(cov_id):
     Args:
         cov_id (str): ID of the rasdaman coverage
 
-    Rreturns:
+    Returns:
         dict of encodings, with axis name as keys holding
         dicts of integer-keyed categories
     """
