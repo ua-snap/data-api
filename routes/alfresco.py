@@ -2,7 +2,6 @@ import asyncio
 import io
 import csv
 import time
-import itertools
 import requests
 import geopandas as gpd
 import numpy as np
@@ -14,11 +13,18 @@ from flask import (
     current_app as app,
 )
 from shapely.geometry import Point
+from polygon_tooling import get_poly_mask_arr, summarize_within_poly
 
 # local imports
 from generate_requests import *
 from generate_urls import generate_wcs_query_url
-from fetch_data import *
+from fetch_data import (
+    fetch_wcs_point_data,
+    get_dim_encodings,
+    fetch_bbox_netcdf_list,
+    generate_nested_dict,
+    get_from_dict,
+)
 from validate_request import (
     validate_latlon,
     project_latlon,
@@ -75,26 +81,6 @@ veg_type_fieldnames = [
 ]
 
 
-async def fetch_alf_point_data(x, y, cov_id_str):
-    """Make the async request for the data at the specified point for
-    a specific coverage
-
-    Args:
-        x (float): lower x-coordinate bound
-        y (float): lower y-coordinate bound
-        cov_id_str (str): shared portion of coverage_ids to query
-
-    Returns:
-        list of data results from each of historical and future coverages
-    """
-    # set up WCS request strings
-    request_strs = []
-    request_strs.append(generate_wcs_getcov_str(x, y, cov_id_str))
-    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
-    point_data_list = await fetch_data(urls)
-    return point_data_list
-
-
 async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
     """Make the async request for the data at the specified point for
     a specific coverage
@@ -104,7 +90,7 @@ async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
         cov_id_str (str): shared portion of coverage_ids to query
 
     Returns:
-        list of data results from each of historical and future coverages
+        list of data results from each coverages
     """
     # set up WCS request strings
     request_strs = []
@@ -157,125 +143,8 @@ def package_ar5_alf_point_data(point_data, var_ep):
     return point_data_pkg
 
 
-def package_ar5_alf_averaged_point_data(point_data, var_ep):
-    """Add dim names to JSON response from WCPS point query
-    for the AR5/CMIP5 coverages
-
-    Args:
-        point_data (list): nested list containing JSON
-            results of AR5 WCPS query
-        var_ep (str): variable name
-
-    Returns:
-        JSON-like dict of query results
-    """
-    point_data_pkg = {}
-    # AR5 data:
-    # model, scenario
-    for mi, s_li in enumerate(point_data):  # (nested list with scenario at dim 0)
-        model = flammability_future_dim_encodings["model"][mi]
-        point_data_pkg[model] = {}
-        for si, value in enumerate(s_li):
-            scenario = flammability_future_dim_encodings["scenario"][si]
-            if var_ep == "flammability":
-                point_data_pkg[model][scenario] = round(value, 4)
-            elif var_ep == "veg_type":
-                point_data_pkg[model][scenario] = {}
-                for vi, value in enumerate(v_li):
-                    veg_type = future_dim_encodings["veg_type"][vi]
-                    point_data_pkg[model][scenario][veg_type] = round(value, 4)
-    return point_data_pkg
-
-
-def get_poly_mask_arr(ds, poly, bandname):
-    """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid
-    zonal summary across results from multiple WCS requests for the same bbox. Wrapper for
-    rasterstats zonal_stats().
-
-    Args:
-        ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
-        poly (shapely.Polygon): polygon to create mask from
-        bandname (str): name of the DataArray containing the data
-
-    Returns:
-        cropped_poly_mask (numpy.ma.core.MaskedArra): a masked array masking the cells
-            intersecting the polygon of interest, cropped to the right shape
-    """
-    # need a data layer of same x/y shape just for running a zonal stats
-    xy_shape = ds[bandname].values.shape[-2:]
-    data_arr = np.zeros(xy_shape)
-    # get affine transform from the xarray.DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr,
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-    cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
-    return cropped_poly_mask
-
-
-def summarize_within_poly_marr(
-    ds, poly_mask_arr, dim_encodings, bandname="Gray", var_ep="Gray"
-):
-    """Summarize a single Data Variable of a xarray.DataSet within a polygon.
-    Return the results as a nested dict.
-
-    NOTE - This is a candidate for de-duplication! Only defining here because some
-    things are out-of-sync with existing ways of doing things (e.g., key names
-    in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
-
-    Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of
-            interest
-        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
-            the polygon of interest
-        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the
-            data and map integer data coordinates to models, scenarios, variables, etc.
-        bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
-            the name is not given at ingest
-        var_ep (str): variable (flammability or veg_type)
-
-    Returns:
-        Nested dict of results for all non-X/Y axis combinations,
-    """
-    # will actually operate on underlying DataArray
-
-    da = ds[bandname]
-    # get axis (dimension) names and make list of all coordinate combinations
-    all_dims = da.dims
-    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-    iter_coords = list(
-        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-    )
-
-    # generate all combinations of decoded coordinate values
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
+def package_alfresco_polygon_summaries(dim_combos, results, var_ep):
     aggr_results = generate_nested_dict(dim_combos)
-
-    data_arr = []
-    for coords in iter_coords:
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        data_arr.append(da.sel(sel_di).values)
-    data_arr = np.array(data_arr)
-
-    # need to transpose the 2D spatial slices if X is the "rows" dimension
-    if all_dims.index("X") < all_dims.index("Y"):
-        data_arr = data_arr.transpose(0, 2, 1)
-
-    data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
-    data_arr[data_arr_mask] = np.nan
-    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-
     for map_list, result in zip(dim_combos, results):
         if len(map_list) > 1:
             data = get_from_dict(aggr_results, map_list[:-1])
@@ -294,7 +163,7 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
 
     Args:
         var_ep (str): variable endpoint. Flammability, veg change, or veg_type
-            poly_gdf (GeoDataFrame): the object from which to fetch the polygon,
+        poly_gdf (GeoDataFrame): the object from which to fetch the polygon,
             e.g. the HUC 8 geodataframe for watershed polygons
         poly_id (str or int): the unique `id` used to identify the Polygon
             for which to compute the zonal mean.
@@ -314,20 +183,25 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     #  for all data layers (avoids computing spatial transform for each layer)
     bandname = "Gray"
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
-    # average over the following decades / time periods
+
     aggr_results = {}
     if var_ep == "flammability":
-        ar5_results = summarize_within_poly_marr(
-            ds_list[-1], poly_mask_arr, flammability_dim_encodings, bandname, var_ep
+        ar5_results, dim_combos = summarize_within_poly(
+            ds_list[-1], poly_mask_arr, flammability_dim_encodings, bandname
+        )
+        ar5_results_di = package_alfresco_polygon_summaries(
+            dim_combos, ar5_results, var_ep
         )
     elif var_ep == "veg_type":
-        ar5_results = summarize_within_poly_marr(
-            ds_list[-1], poly_mask_arr, veg_type_dim_encodings, bandname, var_ep
+        ar5_results, dim_combos = summarize_within_poly(
+            ds_list[-1], poly_mask_arr, veg_type_dim_encodings, bandname
         )
-    for era, summaries in ar5_results.items():
+        ar5_results_di = package_alfresco_polygon_summaries(
+            dim_combos, ar5_results, var_ep
+        )
+    for era, summaries in ar5_results_di.items():
         aggr_results[era] = summaries
     aggr_results = remove_invalid_dim_combos(var_ep, aggr_results)
-
     return aggr_results
 
 
@@ -438,7 +312,7 @@ def alfresco_about_local():
 
 
 @routes.route("/alfresco/<var_ep>/point/<lat>/<lon>")
-def run_fetch_alf_point_data(var_ep, lat, lon):
+def run_fetch_wcs_point_data(var_ep, lat, lon):
     """Point data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
 
@@ -469,7 +343,7 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
         try:
-            point_data_list = asyncio.run(fetch_alf_point_data(x, y, cov_id_str))
+            point_data_list = asyncio.run(fetch_wcs_point_data(x, y, cov_id_str))
         except Exception as exc:
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
@@ -582,10 +456,12 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
     if type(poly_type) is tuple:
         return poly_type
 
-    try:
-        poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
-    except:
-        return render_template("422/invalid_area.html"), 422
+    poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
+
+    # try:
+    #     poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
+    # except:
+    #     return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:
         poly_pkg = nullify_and_prune(poly_pkg, "alfresco")
