@@ -50,6 +50,7 @@ def find_containing_polygons(lat, lon):
     geo_suggestions = {}
 
     proximal_di = {}
+    huc_tb = []
     try:
         near_huc_di, huc_tb = fetch_huc_near_point(p_buff)
         huc_bb = box(*huc_tb)
