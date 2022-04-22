@@ -48,10 +48,10 @@ def package_zonal_stats(src, poly):
     min_band = src.read(1)
     max_band = src.read(2)
     mean_band = src.read(3)
-    zonal_mu = geotiff_zonal_stats(poly, mean_band, transform, ["mean"])
+    zonal_mu = geotiff_zonal_stats(poly, mean_band, src.nodata, transform, ["mean"])
     zonal_mu[0]["mean"] = int(zonal_mu[0]["mean"])
-    zonal_min = geotiff_zonal_stats(poly, min_band, transform, ["min"])
-    zonal_max = geotiff_zonal_stats(poly, max_band, transform, ["max"])
+    zonal_min = geotiff_zonal_stats(poly, min_band, src.nodata, transform, ["min"])
+    zonal_max = geotiff_zonal_stats(poly, max_band, src.nodata, transform, ["max"])
 
     di = {
         "title": "ASTER Global Digital Elevation Model Zonal Statistics",

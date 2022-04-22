@@ -256,12 +256,12 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
     )[0]["mini_raster_array"]
 
     crop_shape = data_arr[0].shape
-    cropped_poly_mask = poly_mask_arr[0:crop_shape[0], 0:crop_shape[1]]
+    cropped_poly_mask = poly_mask_arr[0 : crop_shape[0], 0 : crop_shape[1]]
     data_arr_mask = np.broadcast_to(cropped_poly_mask.mask, data_arr.shape)
     data_arr[data_arr_mask] = np.nan
 
     # Set any remaining nodata values to nan if they snuck through the mask.
-    data_arr[np.isclose(data_arr, -9.223372e+18)] = np.nan
+    data_arr[np.isclose(data_arr, -9.223372e18)] = np.nan
 
     results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
 
@@ -272,12 +272,13 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
     return aggr_results
 
 
-def geotiff_zonal_stats(poly, arr, transform, stat_list):
+def geotiff_zonal_stats(poly, arr, nodata_value, transform, stat_list):
+
     poly_mask_arr = zonal_stats(
         poly,
         arr,
         affine=transform,
-        nodata=np.nan,
+        nodata=nodata_value,
         stats=stat_list,
     )
     return poly_mask_arr
@@ -335,7 +336,9 @@ def parse_meta_xml_str(meta_xml_str):
             list(
                 list(
                     list(
-                        meta_xml.getroot().iter("{http://www.opengis.net/wcs/2.0}CoverageDescription")
+                        meta_xml.getroot().iter(
+                            "{http://www.opengis.net/wcs/2.0}CoverageDescription"
+                        )
                     )[0].iter("{http://www.opengis.net/gmlcov/1.0}metadata")
                 )[0].iter("{http://www.opengis.net/gmlcov/1.0}Extension")
             )[0].iter("{http://www.rasdaman.org}covMetadata")
