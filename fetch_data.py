@@ -261,7 +261,7 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
     data_arr[data_arr_mask] = np.nan
 
     # Set any remaining nodata values to nan if they snuck through the mask.
-    data_arr[data_arr == -9.223372e+18] = np.nan
+    data_arr[np.isclose(data_arr, -9.223372e+18)] = np.nan
 
     results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
 
