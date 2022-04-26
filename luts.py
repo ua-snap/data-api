@@ -87,6 +87,8 @@ json_types = {
     "corporations": "data/jsons/ak_native_corporations.json",
     "climate_divisions": "data/jsons/ak_climate_divisions.json",
     "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
+    "first_nations": "data/jsons/canada_first_nations.json",
+    "game_management_units": "data/jsons/game_management_units.json",
 }
 
 place_type_labels = {
@@ -96,6 +98,8 @@ place_type_labels = {
     "corporations": "Corporation",
     "climate_divisions": "Climate Division",
     "ethnolinguistic_regions": "Ethnolinguistic Region",
+    "first_nations": "Canadian First Nation",
+    "game_management_units": "Game Management Unit",
 }
 
 # Unused variable for now. Can be used by re-caching function to pre-cache
@@ -105,8 +109,8 @@ huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 cached_urls = [
     "/alfresco/flammability/area/",
     "/alfresco/flammability/point/",
-    "/alfresco/veg_change/area/",
-    "/alfresco/veg_change/point/",
+    "/alfresco/veg_type/area/",
+    "/alfresco/veg_type/point/",
     "/elevation/area/",
     "/elevation/point/",
     "/taspr/area/",
@@ -150,6 +154,14 @@ try:
     aketh_src = "data/shapefiles/ethnolinguistic_regions.shp"
     aketh_gdf = gpd.read_file(aketh_src).set_index("id").to_crs(3338)
 
+    # AK Game Management Units
+    akgmu_src = "data/shapefiles/ak_gmu.shp"
+    akgmu_gdf = gpd.read_file(akgmu_src).set_index("id").to_crs(3338)
+
+    # Canadian First Nations
+    cafn_src = "data/shapefiles/first_nation_traditional_territories.shp"
+    cafn_gdf = gpd.read_file(cafn_src).set_index("id").to_crs(3338)
+
     # join HUCs into same GeoDataFrame for easier lookup
     huc_gdf = pd.concat(
         [huc8_gdf.reset_index(), huc12_gdf.reset_index()], ignore_index=True
@@ -164,6 +176,8 @@ try:
     type_di["climate_division"] = akclim_gdf
     type_di["ethnolinguistic_region"] = aketh_gdf
     type_di["fire_zone"] = akfire_gdf
+    type_di["game_management_unit"] = akgmu_gdf
+    type_di["first_nation"] = cafn_gdf
 
     update_needed = False
 except fiona.errors.DriverError:
@@ -178,9 +192,11 @@ except fiona.errors.DriverError:
         akco_gdf,
         akclim_gdf,
         aketh_gdf,
+        akgmu_gdf,
+        cafn_gdf,
         huc_gdf,
         valid_huc_ids,
-    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0)
+    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     type_di = dict()
 
 # look-up for updating place names and data via geo-vector GitHub repo
@@ -225,5 +241,17 @@ shp_di["akclimdivs"] = {
     "src_dir": "climate_divisions",
     "prefix": "ak_climate_divisions",
     "poly_type": "climate_division",
+    "retain": [],
+}
+shp_di["akgmus"] = {
+    "src_dir": "game_management_units",
+    "prefix": "ak_gmu",
+    "poly_type": "game_management_unit",
+    "retain": [],
+}
+shp_di["cnfns"] = {
+    "src_dir": "first_nations",
+    "prefix": "first_nation_traditional_territories",
+    "poly_type": "first_nation",
     "retain": [],
 }
