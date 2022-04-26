@@ -23,6 +23,7 @@ from luts import (
     community_search_radius_m,
     total_bounds_buffer,
     shp_di,
+    all_jsons,
 )
 from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
@@ -146,15 +147,7 @@ def get_json_for_type(type, recurse=False):
         json_list = []
 
         # Runs through each of the JSON files
-        for curr_type in [
-            "communities",
-            "hucs",
-            "protected_areas",
-            "corporations",
-            "climate_divisions",
-            "ethnolinguistic_regions",
-            "fire_zones",
-        ]:
+        for curr_type in all_jsons:
 
             # Sends a recursive call to this function
             curr_js = get_json_for_type(curr_type, recurse=True)

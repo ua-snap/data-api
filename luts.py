@@ -117,6 +117,19 @@ cached_urls = [
     "/taspr/point/",
 ]
 
+# Used for generating output for vector_data for /places/all
+all_jsons = [
+    "communities",
+    "hucs",
+    "protected_areas",
+    "corporations",
+    "climate_divisions",
+    "ethnolinguistic_regions",
+    "fire_zones",
+    "game_management_units",
+    "first_nations",
+]
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including
