@@ -19,6 +19,8 @@ from luts import (
     aketh_gdf,
     akclim_gdf,
     akfire_gdf,
+    akgmu_gdf,
+    cafn_gdf,
     proximity_search_radius_m,
     community_search_radius_m,
     total_bounds_buffer,
@@ -99,6 +101,22 @@ def find_containing_polygons(lat, lon):
     except ValueError:
         near_akfire_di, fm_bb = {}, box(*[1, 1, 1, 1])
 
+    try:
+        near_akgmu_di, gm_tb = fetch_akgmu_near_point(p_buff)
+        gm_bb = box(*gm_tb)
+        gm_bb = gm_bb.buffer(box(*gm_tb).area * total_bounds_buffer)
+        gm_tb = gm_bb.bounds
+    except ValueError:
+        near_akgmu_di, gm_bb = {}, box(*[1, 1, 1, 1])
+
+    try:
+        near_cafn_di, fm_tb = fetch_cafn_near_point(p_buff)
+        fn_bb = box(*fn_tb)
+        fn_bb = fn_bb.buffer(box(*fn_tb).area * total_bounds_buffer)
+        fn_tb = fn_bb.bounds
+    except ValueError:
+        near_cafn_di, fn_bb = {}, box(*[1, 1, 1, 1])
+
     df = csv_to4326_gdf("data/csvs/ak_communities.csv")
     nearby_points_di = package_nearby_points(
         find_nearest_communities(p_buff_community, df)
@@ -110,6 +128,8 @@ def find_containing_polygons(lat, lon):
     proximal_di.update(near_akclim_di)
     proximal_di.update(near_aketh_di)
     proximal_di.update(near_akfire_di)
+    proximal_di.update(near_akgmu_di)
+    proximal_di.update(near_cafn_di)
     proximal_di.update(nearby_points_di)
 
     geo_suggestions.update(proximal_di)
@@ -399,6 +419,26 @@ def fetch_akfire_near_point(pt):
     join = execute_spatial_join(pt, akfire_gdf.reset_index(), "intersects")
     di, tb = package_polys(
         "fire_management_units_near", join, "fire_zone", akfire_gdf, to_wgs=True
+    )
+    return di, tb
+
+
+def fetch_akgmu_near_point(pt):
+    join = execute_spatial_join(pt, akgmu_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "game_management_units_near",
+        join,
+        "game_management_unit",
+        akgmu_gdf,
+        to_wgs=True,
+    )
+    return di, tb
+
+
+def fetch_cafn_near_point(pt):
+    join = execute_spatial_join(pt, cafn_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "ca_first_nations_near", join, "first_nation", cafn_gdf, to_wgs=True
     )
     return di, tb
 
