@@ -38,6 +38,16 @@ Example Geology Query
 Example Physiography Query
  - http://localhost:5000/physiography/point/64.606/-147.345
 
+## Updating the JSON data on the API
+
+We have an endpoint specifically meant to pull down data
+from our geospatial truth repository. This will automatically
+generate GeoJSON files based on those CSVs and shapefiles.
+
+To get the latest data, go to:
+
+ - http://localhost:5000/update/
+
 ## Updating Production API + Varnish Cache
 
 Due to the configuration of our services, we need to both update
