@@ -110,7 +110,7 @@ def find_containing_polygons(lat, lon):
         near_akgmu_di, gm_bb = {}, box(*[1, 1, 1, 1])
 
     try:
-        near_cafn_di, fm_tb = fetch_cafn_near_point(p_buff)
+        near_cafn_di, fn_tb = fetch_cafn_near_point(p_buff)
         fn_bb = box(*fn_tb)
         fn_bb = fn_bb.buffer(box(*fn_tb).area * total_bounds_buffer)
         fn_tb = fn_bb.bounds
