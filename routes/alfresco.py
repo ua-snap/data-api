@@ -36,13 +36,16 @@ from . import routes
 
 alfresco_api = Blueprint("alfresco_api", __name__)
 
-flammability_dim_encodings = asyncio.run(
-    get_dim_encodings("alfresco_relative_flammability_30yr")
-)
+try:
+    flammability_dim_encodings = asyncio.run(
+        get_dim_encodings("alfresco_relative_flammability_30yr")
+    )
 
-veg_type_dim_encodings = asyncio.run(
-    get_dim_encodings("alfresco_vegetation_type_percentage")
-)
+    veg_type_dim_encodings = asyncio.run(
+        get_dim_encodings("alfresco_vegetation_type_percentage")
+    )
+except:
+    print("Missing from Apollo")
 
 var_ep_lu = {
     "flammability": {"cov_id_str": "alfresco_relative_flammability_30yr"},
