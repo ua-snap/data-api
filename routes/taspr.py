@@ -51,16 +51,16 @@ mmm_dim_encodings = {
         2: "tasmin",
     },
     "models": {
-        0: "GFDL-CM3",
-        1: "GISS-E2-R",
-        2: "IPSL-CM5A-LR",
-        3: "MRI-CGCM3",
-        4: "NCAR-CCSM4",
+        2: "GFDL-CM3",
+        3: "GISS-E2-R",
+        4: "IPSL-CM5A-LR",
+        5: "MRI-CGCM3",
+        6: "NCAR-CCSM4",
     },
     "scenarios": {
-        0: "rcp45",
-        1: "rcp60",
-        2: "rcp85",
+        1: "rcp45",
+        2: "rcp60",
+        3: "rcp85",
     }
 }
 
@@ -196,14 +196,78 @@ def get_wcps_request_str(x, y, var_coord, cov_id, summary_decades, encoding="jso
     return wcps_request_str
 
 
-async def fetch_mmm_point_data(x, y, cov_ids, horp):
+def get_mmm_wcps_request_str(x, y, cov_id, scenarios, models, years, tempstat, encoding="json"):
+    """Generates a WCPS query specific to the
+    coverages used for the temperature min-mean-max.
+
+    Args:
+        x (float or str): x-coordinate for point query, or string
+            composed as "x1:x2" for bbox query, where x1 and x2 are
+            lower and upper bounds of bbox
+        y (float or str): y-coordinate for point query, or string
+            composed as "y1:y2" for bbox query, where y1 and y2 are
+            lower and upper bounds of bbox
+        cov_id (str): Rasdaman coverage ID
+        scenarios (str): Comma-separated numbers of requested scenarios
+        models (str): Comma-separated numbers of requested models
+        years (str): Colon-separated full date-time i.e.
+            "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\""
+        tempstat(int): Integer between 0-2 where:
+            - 0 = tasmax
+            - 1 = tasmean
+            - 2 = tasmin
+        encoding (str): currently supports either "json" or "netcdf"
+            for point or bbox queries, respectively
+
+    Returns:
+        WCPS query to be included in generate_wcs_url()
+    """
+
+    if tempstat == 0:
+        operation = "max"
+    elif tempstat == 2:
+        operation = "min"
+    else:
+        operation = "+"
+
+    if (tempstat == 0 or tempstat == 2):
+        wcps_request_str = quote(
+            (
+                f"ProcessCoverages&query=for $c in ({cov_id}) "
+                f"let $a := {operation}(condense {operation} over $s scenario({scenarios}), $m model({models}) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}),tempstat({tempstat})] ) "
+                f'return encode( $a, "application/{encoding}")'
+            )
+        )
+        return wcps_request_str
+    else:
+        # Generates the mean across models and scenarios on the tasmean variable
+
+        # For January 2006 - 2100
+        num_results = 95
+
+        # For historical, January 1900-2015
+        if scenarios == "0:0":
+            num_results = 115
+        wcps_request_str = quote(
+            (
+                f"ProcessCoverages&query=for $c in ({cov_id}) "
+                f"let $a := avg(condense {operation} over $s scenario({scenarios}), $m model({models}) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}),tempstat({tempstat})] / {num_results} ) "
+                f'return encode( $a, "application/{encoding}")'
+            )
+        )
+        return wcps_request_str
+
+
+async def fetch_mmm_point_data(x, y, cov_id, horp):
     """Make the async request for the data at the specified point for
     a specific varname.
 
     Args:
         x (float): lower x-coordinate bound
         y (float): lower y-coordinate bound
-        cov_ids (list): Rasdaman coverage ids
+        cov_id (str): Rasdaman coverage ID string
         horp [Historical or Projected ](str): historical, projected, hp, or all
 
     Returns:
@@ -211,17 +275,21 @@ async def fetch_mmm_point_data(x, y, cov_ids, horp):
         models for a given coordinate
     """
     point_data_list = []
-    for cov_id in cov_ids:
-        if horp == "historical" or horp == "hp" or horp == "all":
-            # Generates URL for historical scenario of CRU TS 4.0
-            request_str = generate_mmm_wcs_getcov_str(x, y, cov_id, 1, 0)
+    if horp == "all":
+        request_str = generate_mmm_wcs_getcov_str(x, y, cov_id, "0,6", "0,3")
+        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
+
+    if horp == "historical" or horp == "hp":
+        # Generates URL for historical scenario of CRU TS 4.0
+        for tempstat in range(0, 3):
+            request_str = get_mmm_wcps_request_str(x, y, cov_id, "0:0", "0:0", "\"1901-01-01T00:00:00.000Z\":\"2015-01-01T00:00:00.000Z\"", tempstat)
             point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
-        if horp == "projected" or horp == "hp" or horp == "all":
-            # All other models and scenarios captured in this loop
-            for model in range(2, 7):
-                for scenario in range(1, 4):
-                    request_str = generate_mmm_wcs_getcov_str(x, y, cov_id, model, scenario)
-                    point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
+
+    if horp == "projected" or horp == "hp":
+        # All other models and scenarios captured in this loop
+        for tempstat in range(0, 3):
+            request_str = get_mmm_wcps_request_str(x, y, cov_id, "1:3", "2:6", "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\"", tempstat)
+            point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
 
     return point_data_list
 
@@ -263,12 +331,11 @@ def package_mmm_point_data(point_data, horp):
 
         Args:
             point_data (list): Nested list of returned data from Rasdaman
-                * point_data is a three-dimensional list with the following indices:
-                    - point_data[i] = model + scenario where 0 is CRU-TS historical and
-                                      rest of the points follow mmm_dim_encodings where the index
-                                      is ((3 * model_num) + 1) + scenario_num
-                    - point_data[i][j] = tasmax(0), tasmean(1), and tasmin(2) or mmm_dim_encodings["tempstats"]
-                    - point_data[i][j][k] = year starting from 1900-2099 [0-199]
+                * point_data is a four-dimensional list with the following indices:
+                    - point_data[i] = variable (tasmax, tasmean, and tasmin)
+                    - point_data[i][j] = year starting from 1900-200 [0-199]
+                    - point_data[i][j][k] = model number between 0-6 in mmm_dim_encodings
+                    - point_data[i][j][k][l] = scenario number between 0-3 in mmm_dim_encodings
             horp [Historical or Projected ](str): historical, projected, hp, or all
 
         Returns:
@@ -285,53 +352,53 @@ def package_mmm_point_data(point_data, horp):
         # Puts together the historical tasmin, tasmean, and tasmax for all 200 years
         point_pkg["CRU-TS"] = dict()
         point_pkg["CRU-TS"]["historical"] = dict()
-        point_pkg["CRU-TS"]["historical"]["tasmax"] = point_data[0][0]
-        point_pkg["CRU-TS"]["historical"]["tasmean"] = point_data[0][1]
-        point_pkg["CRU-TS"]["historical"]["tasmin"] = point_data[0][2]
+
+        for year in range(0, 115):
+            full_year = str(year + 1900)
+            point_pkg["CRU-TS"]["historical"][full_year] = dict()
+            point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][year][0][0]
+            point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][year][0][0]
+            point_pkg["CRU-TS"]["historical"][full_year]["tasmin"] = point_data[2][year][0][0]
 
         ### PROJECTED FUTURE MODELS ###
         # For all models, scenarios, and variables found in mmm_dim_encodings dictionary
+
         for model in mmm_dim_encodings["models"].keys():
             dim_model = mmm_dim_encodings["models"][model]
             point_pkg[dim_model] = dict()
             for scenario in mmm_dim_encodings["scenarios"].keys():
                 dim_scenario = mmm_dim_encodings["scenarios"][scenario]
                 point_pkg[dim_model][dim_scenario] = dict()
-                for variable in mmm_dim_encodings["tempstats"].keys():
-                    dim_variable = mmm_dim_encodings["tempstats"][variable]
-                    index = ((3 * model) + 1) + scenario
-                    point_pkg[dim_model][dim_scenario][dim_variable] = point_data[index][variable]
+                for year in range(106, 200):
+                    full_year = str(year + 1900)
+                    point_pkg[dim_model][dim_scenario][full_year] = dict()
+                    for variable in mmm_dim_encodings["tempstats"].keys():
+                        dim_variable = mmm_dim_encodings["tempstats"][variable]
+                        point_pkg[dim_model][dim_scenario][full_year][dim_variable] = point_data[variable][year][model][scenario]
 
     else:
         if horp == "historical" or horp == "hp":
             # Generate the min, mean and max for historical CRU-TS 4.0 data at this point
             # We only want to generate statistics from the years 1900-2015 as that's all
             # that is available in CRU-TS 4.0
-            historical_max = round(pd.Series(point_data[0][0][:115]).max(), 1)
-            historical_mean = round(pd.Series(point_data[0][1][:115]).mean(), 1)
-            historical_min = round(pd.Series(point_data[0][2][:115]).min(), 1)
+            historical_max = round(point_data[0], 1)
+            historical_mean = round(point_data[1], 1)
+            historical_min = round(point_data[2], 1)
 
             point_pkg["historical"] = dict()
             point_pkg["historical"]["tasmin"] = historical_min
             point_pkg["historical"]["tasmean"] = historical_mean
             point_pkg["historical"]["tasmax"] = historical_max
+
         if horp == "projected" or horp == "hp":
-            # Generate the min, mean, and max across ALL models
-            means, maxs, mins = [], [], []
-            point_data_len = len(point_data)
-
-            # We only want to generate statistics from the years 2006-2099 as the
-            # projected models do not have any data from before 2006.
-            for i in range(point_data_len - 15, point_data_len):
-                maxs.append(pd.Series(point_data[i][0][105:]).max())
-                means.append(pd.Series(point_data[i][1][105:]).mean())
-                mins.append(pd.Series(point_data[i][2][105:]).min())
-
-            # For each of the mins, means, and maxs found across the projected years
-            # find the min, mean, and max across all of those values.
-            projected_max = round(pd.Series(maxs).max(), 1)
-            projected_mean = round(pd.Series(means).mean(), 1)
-            projected_min = round(pd.Series(mins).min(), 1)
+            if (horp == "projected"):
+                projected_max = round(point_data[0], 1)
+                projected_mean = round(point_data[1], 1)
+                projected_min = round(point_data[2], 1)
+            else:
+                projected_max = round(point_data[3], 1)
+                projected_mean = round(point_data[4], 1)
+                projected_min = round(point_data[5], 1)
 
             point_pkg["projected"] = dict()
             point_pkg["projected"]["tasmin"] = projected_min
@@ -686,15 +753,15 @@ def combine_pkg_dicts(tas_di, pr_di):
     return tas_di
 
 
-def run_fetch_mmm_point_data(lat, lon, cov_ids, horp):
+def run_fetch_mmm_point_data(lat, lon, cov_id, horp):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
     Args:
         lat (float): latitude
         lon (float): longitude
-        cov_ids (list):
-            strings of jan_min_max_mean_temp, july_min_max_mean_temp, or both
+        cov_id (list):
+            string of jan_min_max_mean_temp or july_min_max_mean_temp
         horp [Historical or Projected] (str): historical, projected, or all
 
     Returns:
@@ -706,7 +773,7 @@ def run_fetch_mmm_point_data(lat, lon, cov_ids, horp):
     x, y = project_latlon(lat, lon, 3338)
 
     point_data_list = asyncio.run(
-        fetch_mmm_point_data(x, y, cov_ids, horp)
+        fetch_mmm_point_data(x, y, cov_id, horp)
     )
 
     # package point data with decoded coord values (names)
@@ -875,7 +942,7 @@ def mmm_point_data_endpoint(month, horp, lat, lon):
     specified var/lat/lon and return JSON-like dict.
 
     Args:
-        month (str): jan, july, or all
+        month (str): jan or july
         horp [Historical or Projected] (str):  historical, projected, hp, or all
         lat (float): latitude
         lon (float): longitude
@@ -892,11 +959,9 @@ def mmm_point_data_endpoint(month, horp, lat, lon):
 
     try:
         if month == 'jan':
-            cov_id = ["jan_min_max_mean_temp"]
+            cov_id = "jan_min_max_mean_temp"
         elif month == 'july':
-            cov_id = ["july_min_max_mean_temp"]
-        elif month == 'all':
-            cov_id = ["jan_min_max_mean_temp", "july_min_max_mean_temp"]
+            cov_id = "july_min_max_mean_temp"
         else:
             return render_template("400/bad_request.html"), 400
 
