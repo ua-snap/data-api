@@ -61,6 +61,10 @@ mmm_dim_encodings = {
         1: "rcp45",
         2: "rcp60",
         3: "rcp85",
+    },
+    "months": {
+        "jan": "January",
+        "july": "July"
     }
 }
 
@@ -139,6 +143,7 @@ var_label_lu = {
     "temperature": "Temperature",
     "precipitation": "Precipitation",
     "taspr": "Temperature & Precipitation",
+    "mmm": "Temperature Minimum, Mean, and Maximum"
 }
 
 
@@ -391,7 +396,7 @@ def package_mmm_point_data(point_data, horp):
             point_pkg["historical"]["tasmax"] = historical_max
 
         if horp == "projected" or horp == "hp":
-            if (horp == "projected"):
+            if horp == "projected":
                 projected_max = round(point_data[0], 1)
                 projected_mean = round(point_data[1], 1)
                 projected_min = round(point_data[2], 1)
@@ -559,9 +564,9 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
     Returns a CSV version of the fetched data, as a string.
 
     Args:
-        packaged_data (json): JSON-like data pakage output
+        packaged_data (json): JSON-like data package output
             from the run_fetch_* and run_aggregate_* functions
-        var_ep (str): tas, pr, or taspr
+        var_ep (str): tas, pr, mmm, or taspr
         place_id (str): community or area ID unless just a lat/lon value
         lat: latitude unless an area
         lon: longitude unless an area
@@ -569,6 +574,39 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
     Returns:
         string of CSV data
     """
+
+    if var_ep == "mmm":
+        output = io.StringIO()
+
+        fieldnames = [
+            "year",
+            "model",
+            "scenario",
+            "variable",
+            "value"
+        ]
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+
+        writer.writeheader()
+
+        for model in packaged_data.keys():
+            for scenario in packaged_data[model].keys():
+                for year in packaged_data[model][scenario].keys():
+                    for variable in packaged_data[model][scenario][year].keys():
+                        try:
+                            writer.writerow(
+                                {
+                                    "year": year,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "variable": variable,
+                                    "value": packaged_data[model][scenario][year][variable]
+                                }
+                            )
+                        except KeyError:
+                            pass
+        return output.getvalue()
+
     output = io.StringIO()
 
     place_name, place_type = place_name_and_type(place_id)
@@ -683,7 +721,7 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
     return output.getvalue()
 
 
-def return_csv(csv_data, var_ep, place_id, lat=None, lon=None):
+def return_csv(csv_data, var_ep, place_id, lat=None, lon=None, month=None):
     """Return the CSV data as a download
 
     Args:
@@ -692,6 +730,7 @@ def return_csv(csv_data, var_ep, place_id, lat=None, lon=None):
         place_id (str): community or area ID unless just a lat/lon value
         lat: latitude unless an area
         lon: longitude unless an area
+        month (str): Month for MMM (jan or july)
 
     Returns:
         CSV Response
@@ -701,6 +740,8 @@ def return_csv(csv_data, var_ep, place_id, lat=None, lon=None):
 
     if place_name is not None:
         filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
+    elif month is not None:
+        filename = mmm_dim_encodings["months"][month] + " " + var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
     else:
         filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
@@ -971,14 +1012,10 @@ def mmm_point_data_endpoint(month, horp, lat, lon):
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, "taspr")
-        if point_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-
+    if horp == "all" and request.args.get("format") == "csv":
         place_id = request.args.get('community')
-        csv_data = create_csv(point_pkg, var_ep, place_id, lat, lon)
-        return return_csv(csv_data, var_ep, place_id, lat, lon)
+        csv_data = create_csv(point_pkg, "mmm", place_id, lat, lon)
+        return return_csv(csv_data, "mmm", place_id, lat, lon, month)
 
     return point_pkg
 
