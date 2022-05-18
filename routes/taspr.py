@@ -582,8 +582,9 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
             "year",
             "model",
             "scenario",
-            "variable",
-            "value"
+            "tasmin",
+            "tasmean",
+            "tasmax"
         ]
         writer = csv.DictWriter(output, fieldnames=fieldnames)
 
@@ -592,19 +593,19 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
         for model in packaged_data.keys():
             for scenario in packaged_data[model].keys():
                 for year in packaged_data[model][scenario].keys():
-                    for variable in packaged_data[model][scenario][year].keys():
-                        try:
-                            writer.writerow(
-                                {
-                                    "year": year,
-                                    "model": model,
-                                    "scenario": scenario,
-                                    "variable": variable,
-                                    "value": packaged_data[model][scenario][year][variable]
-                                }
-                            )
-                        except KeyError:
-                            pass
+                    try:
+                        writer.writerow(
+                            {
+                                "year": year,
+                                "model": model,
+                                "scenario": scenario,
+                                "tasmin": packaged_data[model][scenario][year]["tasmin"],
+                                "tasmean": packaged_data[model][scenario][year]["tasmean"],
+                                "tasmax":  packaged_data[model][scenario][year]["tasmax"]
+                            }
+                        )
+                    except KeyError:
+                        pass
         return output.getvalue()
 
     output = io.StringIO()
