@@ -583,7 +583,7 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
 
     if var_ep == "mmm":
 
-        metadata += "# tas is the temperature at surface in degrees Celsius\n"
+        metadata = "# tas is the temperature at surface in degrees Celsius\n"
         metadata += "# tasmin is the minimum temperature for the specified model and scenario\n"
         metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
         metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
