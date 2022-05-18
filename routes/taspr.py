@@ -1020,11 +1020,14 @@ def mmm_point_data_endpoint(month, horp, lat, lon):
         return render_template("500/server_error.html"), 500
 
     if horp == "all" and request.args.get("format") == "csv":
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
         place_id = request.args.get('community')
         csv_data = create_csv(point_pkg, "mmm", place_id, lat, lon)
         return return_csv(csv_data, "mmm", place_id, lat, lon, month)
 
-    return point_pkg
+    return postprocess(point_pkg, "taspr")
 
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
