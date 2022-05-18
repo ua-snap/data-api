@@ -983,6 +983,15 @@ def about_point():
 def about_huc():
     return render_template("taspr/area.html")
 
+@routes.route("/mmm/")
+@routes.route("/mmm/abstract/")
+def about_mmm():
+    return render_template("mmm/abstract.html")
+
+@routes.route("/mmm/jan/")
+@routes.route("/mmm/july/")
+def about_mmm_month():
+    return render_template("mmm/month.html")
 
 @routes.route("/mmm/<month>/<horp>/<lat>/<lon>")
 def mmm_point_data_endpoint(month, horp, lat, lon):
