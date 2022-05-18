@@ -575,8 +575,20 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
         string of CSV data
     """
 
+    output = io.StringIO()
+
+    place_name, place_type = place_name_and_type(place_id)
+
+    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+
     if var_ep == "mmm":
-        output = io.StringIO()
+
+        metadata += "# tas is the temperature at surface in degrees Celsius\n"
+        metadata += "# tasmin is the minimum temperature for the specified model and scenario\n"
+        metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
+        metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
+
+        output.write(metadata)
 
         fieldnames = [
             "year",
@@ -608,19 +620,13 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
                         pass
         return output.getvalue()
 
-    output = io.StringIO()
-
-    place_name, place_type = place_name_and_type(place_id)
-
-    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
-
     if var_ep in ["temperature", "taspr"]:
         metadata += "# tas is the temperature at surface in degrees Celsius\n"
     if var_ep in ["precipitation", "taspr"]:
         metadata += "# pr is precipitation in millimeters\n"
 
-    metadata += "# mean is the mean of of annual means\n"
-    metadata += "# median is the median of of annual means\n"
+    metadata += "# mean is the mean of annual means\n"
+    metadata += "# median is the median of annual means\n"
     metadata += "# max is the maximum annual mean\n"
     metadata += "# min is the minimum annual mean\n"
     metadata += "# q1 is the first quartile of the annual means\n"
