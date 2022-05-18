@@ -20,6 +20,44 @@ def get_wcs_xy_str_from_bbox_bounds(poly):
     return xy
 
 
+def generate_mmm_wcs_getcov_str(x, y, cov_id, model, scenario, encoding="json"):
+    """Generate a WCS GetCoverage request for fetching a
+    subset of a coverage over X and Y axes.
+
+    Args:
+        x (float or str): x-coordinate for point query (float), or string
+        composed as "x1,x2" for bbox query, where x1 and x2 are
+        lower and upper bounds of bbox
+        y (float or str): y-coordinate for point query (float), or string
+        composed as "y1,y2" for bbox query, where y1 and y2 are
+        lower and upper bounds of bbox
+        cov_id (str): Rasdaman coverage ID
+        model (int): Model number defined in Rasdaman coverage
+            - 1: CRU-TS 4.0
+            - 2: GFDL-CM3
+            - 3: GISS-E2-R
+            - 4: IPSL-CM5A-LR
+            - 5: MRI-CGCM3
+            - 6: NCAR-CCSM4
+        scenario (int): Scenario number defined in Rasdaman coverage
+            - 0: historical
+            - 1: RCP 4.5
+            - 2: RCP 6.0
+            - 3: RCP 8.5
+    Returns:
+        wcs_getcov_str (str): WCS GetCoverage Request to append to a query URL
+    """
+
+    var_subset_str = f"&SUBSET=model({model})&SUBSET=scenario({scenario})"
+
+    wcs_getcov_str = (
+        f"GetCoverage&COVERAGEID={cov_id}"
+        f"&SUBSET=X({x})&SUBSET=Y({y}){var_subset_str}"
+        f"&FORMAT=application/{encoding}"
+    )
+    return wcs_getcov_str
+
+
 def generate_wcs_getcov_str(x, y, cov_id, var_coord=None, encoding="json"):
     """Generate a WCS GetCoverage request for fetching a
     subset of a coverage over X and Y axes.

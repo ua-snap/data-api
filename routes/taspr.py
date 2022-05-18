@@ -6,6 +6,7 @@ import itertools
 from urllib.parse import quote
 import numpy as np
 import xarray as xr
+import pandas as pd
 from flask import (
     Blueprint,
     Response,
@@ -15,7 +16,7 @@ from flask import (
 )
 
 # local imports
-from generate_requests import generate_wcs_getcov_str
+from generate_requests import generate_wcs_getcov_str, generate_mmm_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_data,
@@ -40,6 +41,32 @@ from . import routes
 
 taspr_api = Blueprint("taspr_api", __name__)
 
+# Dimensions for January and July min, mean, max temperature statistics
+# Table generated from luts.py file found here:
+# https://github.com/ua-snap/rasdaman-ingest/blob/main/arctic_eds/jan_july_tas_stats/jan_min_mean_max_tas/luts.py
+mmm_dim_encodings = {
+    "tempstats": {
+        0: "tasmax",
+        1: "tasmean",
+        2: "tasmin",
+    },
+    "models": {
+        2: "GFDL-CM3",
+        3: "GISS-E2-R",
+        4: "IPSL-CM5A-LR",
+        5: "MRI-CGCM3",
+        6: "NCAR-CCSM4",
+    },
+    "scenarios": {
+        1: "rcp45",
+        2: "rcp60",
+        3: "rcp85",
+    },
+    "months": {
+        "jan": "January",
+        "july": "July"
+    }
+}
 
 # encodings hardcoded for now
 # fmt: off
@@ -107,17 +134,16 @@ dim_encodings = {
     },
 }
 
-
 var_ep_lu = {
     "temperature": "tas",
     "precipitation": "pr",
 }
 
-
 var_label_lu = {
     "temperature": "Temperature",
     "precipitation": "Precipitation",
     "taspr": "Temperature & Precipitation",
+    "mmm": "Temperature Minimum, Mean, and Maximum"
 }
 
 
@@ -175,6 +201,104 @@ def get_wcps_request_str(x, y, var_coord, cov_id, summary_decades, encoding="jso
     return wcps_request_str
 
 
+def get_mmm_wcps_request_str(x, y, cov_id, scenarios, models, years, tempstat, encoding="json"):
+    """Generates a WCPS query specific to the
+    coverages used for the temperature min-mean-max.
+
+    Args:
+        x (float or str): x-coordinate for point query, or string
+            composed as "x1:x2" for bbox query, where x1 and x2 are
+            lower and upper bounds of bbox
+        y (float or str): y-coordinate for point query, or string
+            composed as "y1:y2" for bbox query, where y1 and y2 are
+            lower and upper bounds of bbox
+        cov_id (str): Rasdaman coverage ID
+        scenarios (str): Comma-separated numbers of requested scenarios
+        models (str): Comma-separated numbers of requested models
+        years (str): Colon-separated full date-time i.e.
+            "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\""
+        tempstat(int): Integer between 0-2 where:
+            - 0 = tasmax
+            - 1 = tasmean
+            - 2 = tasmin
+        encoding (str): currently supports either "json" or "netcdf"
+            for point or bbox queries, respectively
+
+    Returns:
+        WCPS query to be included in generate_wcs_url()
+    """
+
+    if tempstat == 0:
+        operation = "max"
+    elif tempstat == 2:
+        operation = "min"
+    else:
+        operation = "+"
+
+    if (tempstat == 0 or tempstat == 2):
+        wcps_request_str = quote(
+            (
+                f"ProcessCoverages&query=for $c in ({cov_id}) "
+                f"let $a := {operation}(condense {operation} over $s scenario({scenarios}), $m model({models}) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}),tempstat({tempstat})] ) "
+                f'return encode( $a, "application/{encoding}")'
+            )
+        )
+        return wcps_request_str
+    else:
+        # Generates the mean across models and scenarios on the tasmean variable
+
+        # For January 2006 - 2100
+        num_results = 95
+
+        # For historical, January 1900-2015
+        if scenarios == "0:0":
+            num_results = 115
+        wcps_request_str = quote(
+            (
+                f"ProcessCoverages&query=for $c in ({cov_id}) "
+                f"let $a := avg(condense {operation} over $s scenario({scenarios}), $m model({models}) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}),tempstat({tempstat})] / {num_results} ) "
+                f'return encode( $a, "application/{encoding}")'
+            )
+        )
+        return wcps_request_str
+
+
+async def fetch_mmm_point_data(x, y, cov_id, horp):
+    """Make the async request for the data at the specified point for
+    a specific varname.
+
+    Args:
+        x (float): lower x-coordinate bound
+        y (float): lower y-coordinate bound
+        cov_id (str): Rasdaman coverage ID string
+        horp [Historical or Projected ](str): historical, projected, hp, or all
+
+    Returns:
+        list of data results from each cov_id for CRU TS 4.0 and all 5 projected
+        models for a given coordinate
+    """
+    point_data_list = []
+    if horp == "all":
+        request_str = generate_mmm_wcs_getcov_str(x, y, cov_id, "0,6", "0,3")
+        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
+
+    if horp == "historical" or horp == "hp":
+        # Generates URL for historical scenario of CRU TS 4.0
+        for tempstat in range(0, 3):
+            request_str = get_mmm_wcps_request_str(x, y, cov_id, "0:0", "0:0", "\"1901-01-01T00:00:00.000Z\":\"2015-01-01T00:00:00.000Z\"", tempstat)
+            point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
+
+    if horp == "projected" or horp == "hp":
+        # All other models and scenarios captured in this loop
+        for tempstat in range(0, 3):
+            request_str = get_mmm_wcps_request_str(x, y, cov_id, "1:3", "2:6", "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\"", tempstat)
+            point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
+
+    return point_data_list
+
+
 async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     """Make the async request for the data at the specified point for
     a specific varname.
@@ -205,6 +329,88 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     point_data_list = await fetch_data(urls)
 
     return point_data_list
+
+
+def package_mmm_point_data(point_data, horp):
+    """Packages min-mean-max point data into JSON-formatted return data
+
+        Args:
+            point_data (list): Nested list of returned data from Rasdaman
+                * point_data is a four-dimensional list with the following indices:
+                    - point_data[i] = variable (tasmax, tasmean, and tasmin)
+                    - point_data[i][j] = year starting from 1900-200 [0-199]
+                    - point_data[i][j][k] = model number between 0-6 in mmm_dim_encodings
+                    - point_data[i][j][k][l] = scenario number between 0-3 in mmm_dim_encodings
+            horp [Historical or Projected ](str): historical, projected, hp, or all
+
+        Returns:
+            Python dictionary of one of four outcomes:
+                * horp == 'historical' - Historical minimum, mean, and maximum
+                * horp == 'projected'  - Projected minimum, mean, and maximum
+                * horp == 'hp'         - Historical & projected minimum, mean, and maximum
+                * horp == 'all'        - All data returned from Rasdaman formatted with string indices
+    """
+    point_pkg = dict()
+    if horp == "all":
+
+        ### HISTORICAL CRU-TS 4.0 ###
+        # Puts together the historical tasmin, tasmean, and tasmax for all 200 years
+        point_pkg["CRU-TS"] = dict()
+        point_pkg["CRU-TS"]["historical"] = dict()
+
+        for year in range(0, 115):
+            full_year = str(year + 1900)
+            point_pkg["CRU-TS"]["historical"][full_year] = dict()
+            point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][year][0][0]
+            point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][year][0][0]
+            point_pkg["CRU-TS"]["historical"][full_year]["tasmin"] = point_data[2][year][0][0]
+
+        ### PROJECTED FUTURE MODELS ###
+        # For all models, scenarios, and variables found in mmm_dim_encodings dictionary
+
+        for model in mmm_dim_encodings["models"].keys():
+            dim_model = mmm_dim_encodings["models"][model]
+            point_pkg[dim_model] = dict()
+            for scenario in mmm_dim_encodings["scenarios"].keys():
+                dim_scenario = mmm_dim_encodings["scenarios"][scenario]
+                point_pkg[dim_model][dim_scenario] = dict()
+                for year in range(106, 200):
+                    full_year = str(year + 1900)
+                    point_pkg[dim_model][dim_scenario][full_year] = dict()
+                    for variable in mmm_dim_encodings["tempstats"].keys():
+                        dim_variable = mmm_dim_encodings["tempstats"][variable]
+                        point_pkg[dim_model][dim_scenario][full_year][dim_variable] = point_data[variable][year][model][scenario]
+
+    else:
+        if horp == "historical" or horp == "hp":
+            # Generate the min, mean and max for historical CRU-TS 4.0 data at this point
+            # We only want to generate statistics from the years 1900-2015 as that's all
+            # that is available in CRU-TS 4.0
+            historical_max = round(point_data[0], 1)
+            historical_mean = round(point_data[1], 1)
+            historical_min = round(point_data[2], 1)
+
+            point_pkg["historical"] = dict()
+            point_pkg["historical"]["tasmin"] = historical_min
+            point_pkg["historical"]["tasmean"] = historical_mean
+            point_pkg["historical"]["tasmax"] = historical_max
+
+        if horp == "projected" or horp == "hp":
+            if horp == "projected":
+                projected_max = round(point_data[0], 1)
+                projected_mean = round(point_data[1], 1)
+                projected_min = round(point_data[2], 1)
+            else:
+                projected_max = round(point_data[3], 1)
+                projected_mean = round(point_data[4], 1)
+                projected_min = round(point_data[5], 1)
+
+            point_pkg["projected"] = dict()
+            point_pkg["projected"]["tasmin"] = projected_min
+            point_pkg["projected"]["tasmean"] = projected_mean
+            point_pkg["projected"]["tasmax"] = projected_max
+
+    return point_pkg
 
 
 def package_cru_point_data(point_data, varname):
@@ -264,7 +470,7 @@ def package_ar5_point_data(point_data, varname):
             season = dim_encodings["seasons"][ai]
             point_data_pkg[decade][season] = {}
             for mod_i, s_li in enumerate(
-                mod_li
+                    mod_li
             ):  # (nested list with scenario at dim 0)
                 model = dim_encodings["models"][mod_i]
                 point_data_pkg[decade][season][model] = {}
@@ -358,31 +564,69 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
     Returns a CSV version of the fetched data, as a string.
 
     Args:
-        packaged_data (json): JSON-like data pakage output
+        packaged_data (json): JSON-like data package output
             from the run_fetch_* and run_aggregate_* functions
-        var_ep (str): tas, pr, or taspr
-        place (str): place name unless just a lat/lon value
+        var_ep (str): tas, pr, mmm, or taspr
         place_id (str): community or area ID unless just a lat/lon value
-        place_type (str): point or area
         lat: latitude unless an area
         lon: longitude unless an area
 
     Returns:
         string of CSV data
     """
+
     output = io.StringIO()
 
     place_name, place_type = place_name_and_type(place_id)
 
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
 
+    if var_ep == "mmm":
+
+        metadata = "# tas is the temperature at surface in degrees Celsius\n"
+        metadata += "# tasmin is the minimum temperature for the specified model and scenario\n"
+        metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
+        metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
+
+        output.write(metadata)
+
+        fieldnames = [
+            "year",
+            "model",
+            "scenario",
+            "tasmin",
+            "tasmean",
+            "tasmax"
+        ]
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+
+        writer.writeheader()
+
+        for model in packaged_data.keys():
+            for scenario in packaged_data[model].keys():
+                for year in packaged_data[model][scenario].keys():
+                    try:
+                        writer.writerow(
+                            {
+                                "year": year,
+                                "model": model,
+                                "scenario": scenario,
+                                "tasmin": packaged_data[model][scenario][year]["tasmin"],
+                                "tasmean": packaged_data[model][scenario][year]["tasmean"],
+                                "tasmax":  packaged_data[model][scenario][year]["tasmax"]
+                            }
+                        )
+                    except KeyError:
+                        pass
+        return output.getvalue()
+
     if var_ep in ["temperature", "taspr"]:
         metadata += "# tas is the temperature at surface in degrees Celsius\n"
     if var_ep in ["precipitation", "taspr"]:
         metadata += "# pr is precipitation in millimeters\n"
 
-    metadata += "# mean is the mean of of annual means\n"
-    metadata += "# median is the median of of annual means\n"
+    metadata += "# mean is the mean of annual means\n"
+    metadata += "# median is the median of annual means\n"
     metadata += "# max is the maximum annual mean\n"
     metadata += "# min is the minimum annual mean\n"
     metadata += "# q1 is the first quartile of the annual means\n"
@@ -484,15 +728,16 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
     return output.getvalue()
 
 
-def return_csv(csv_data, var_ep, place_id, lat=None, lon=None):
+def return_csv(csv_data, var_ep, place_id, lat=None, lon=None, month=None):
     """Return the CSV data as a download
 
     Args:
         csv_data (?): csv data created with create_csv() function
         var_ep (str): tas, pr, or taspr
-        place (str): place name unless just a lat/lon value
+        place_id (str): community or area ID unless just a lat/lon value
         lat: latitude unless an area
         lon: longitude unless an area
+        month (str): Month for MMM (jan or july)
 
     Returns:
         CSV Response
@@ -502,6 +747,8 @@ def return_csv(csv_data, var_ep, place_id, lat=None, lon=None):
 
     if place_name is not None:
         filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
+    elif month is not None:
+        filename = mmm_dim_encodings["months"][month] + " " + var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
     else:
         filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
@@ -522,8 +769,8 @@ def combine_pkg_dicts(tas_di, pr_di):
     for combining tas and pr individual endpoint results
 
     Args:
-        di1 (dict): result dict from point or HUC query for temperature
-        di2 (dict): result dict from point or HUC query for precip
+        tas_di (dict): result dict from point or HUC query for temperature
+        pr_di (dict): result dict from point or HUC query for precip
 
     Returns:
         Combined dict containing both tas and pr results
@@ -554,12 +801,43 @@ def combine_pkg_dicts(tas_di, pr_di):
     return tas_di
 
 
+def run_fetch_mmm_point_data(lat, lon, cov_id, horp):
+    """Run the async tas/pr data requesting for a single point
+    and return data as json
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+        cov_id (list):
+            string of jan_min_max_mean_temp or july_min_max_mean_temp
+        horp [Historical or Projected] (str): historical, projected, or all
+
+    Returns:
+        JSON-like dict of data at provided latitude and longitude
+    """
+    if validate_latlon(lat, lon) is not True:
+        return None
+
+    x, y = project_latlon(lat, lon, 3338)
+
+    point_data_list = asyncio.run(
+        fetch_mmm_point_data(x, y, cov_id, horp)
+    )
+
+    # package point data with decoded coord values (names)
+    # these functions are hard-coded  with coord values for now
+
+    point_pkg = package_mmm_point_data(point_data_list, horp)
+
+    return point_pkg
+
+
 def run_fetch_var_point_data(var_ep, lat, lon):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
     Args:
-        varname (str): Abbreviation name for variable of interest,
+        var_ep (str): Abbreviation name for variable of interest,
             either "tas" or "pr"
         lat (float): latitude
         lon (float): longitude
@@ -580,7 +858,7 @@ def run_fetch_var_point_data(var_ep, lat, lon):
     x, y = project_latlon(lat, lon, 3338)
 
     # get and combine the CRU and AR5 packages
-    # use CRU as basis for combined point package for chronolical consistency
+    # use CRU as basis for combined point package for chronological consistency
     # order of listing: CRU (1950-2009), AR5 2040-2069 summary,
     #     AR5 2070-2099 summary, AR5 seasonal data
     # query CRU baseline summary
@@ -591,7 +869,7 @@ def run_fetch_var_point_data(var_ep, lat, lon):
 
     # package point data with decoded coord values (names)
     # these functions are hard-coded  with coord values for now
-    point_pkg = {}
+    point_pkg = dict()
     point_pkg["1950_2009"] = package_cru_point_data(point_data_list[0], varname)
     point_pkg["2040_2069"] = package_ar5_point_summary(point_data_list[1], varname)
     point_pkg["2070_2099"] = package_ar5_point_summary(point_data_list[2], varname)
@@ -605,7 +883,7 @@ def run_fetch_var_point_data(var_ep, lat, lon):
 
 def run_fetch_point_data(lat, lon):
     """Fetch and combine point data for both
-    temperature and precipitation andpoints
+       temperature and precipitation
 
     Args:
         lat (float): latitude
@@ -704,6 +982,61 @@ def about_point():
 @routes.route("/precipitation/area/")
 def about_huc():
     return render_template("taspr/area.html")
+
+@routes.route("/mmm/")
+@routes.route("/mmm/abstract/")
+def about_mmm():
+    return render_template("mmm/abstract.html")
+
+@routes.route("/mmm/jan/")
+@routes.route("/mmm/july/")
+def about_mmm_month():
+    return render_template("mmm/month.html")
+
+@routes.route("/mmm/<month>/<horp>/<lat>/<lon>")
+def mmm_point_data_endpoint(month, horp, lat, lon):
+    """Point data endpoint. Fetch point data for
+    specified var/lat/lon and return JSON-like dict.
+
+    Args:
+        month (str): jan or july
+        horp [Historical or Projected] (str):  historical, projected, hp, or all
+        lat (float): latitude
+        lon (float): longitude
+
+    Notes:
+        example request: http://localhost:5000/mmm/jan/all/65.0628/-146.1627
+    """
+
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
+
+    try:
+        if month == 'jan':
+            cov_id = "jan_min_max_mean_temp"
+        elif month == 'july':
+            cov_id = "july_min_max_mean_temp"
+        else:
+            return render_template("400/bad_request.html"), 400
+
+        point_pkg = run_fetch_mmm_point_data(lat, lon, cov_id, horp)
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    if horp == "all" and request.args.get("format") == "csv":
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        place_id = request.args.get('community')
+        csv_data = create_csv(point_pkg, "mmm", place_id, lat, lon)
+        return return_csv(csv_data, "mmm", place_id, lat, lon, month)
+
+    return postprocess(point_pkg, "taspr")
 
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
