@@ -142,8 +142,7 @@ var_ep_lu = {
 var_label_lu = {
     "temperature": "Temperature",
     "precipitation": "Precipitation",
-    "taspr": "Temperature & Precipitation",
-    "mmm": "Temperature Minimum, Mean, and Maximum"
+    "taspr": "Temperature & Precipitation"
 }
 
 
@@ -366,7 +365,7 @@ def package_mmm_point_data(point_data, cov_id, horp):
             full_year = str(year + 1900)
             point_pkg["CRU-TS"]["historical"][full_year] = dict()
             if cov_id == "annual_precip_totals":
-                point_pkg["CRU-TS"]["historical"][full_year]["prmean"] = point_data[0][year][0]
+                point_pkg["CRU-TS"]["historical"][full_year]["pr"] = point_data[0][year][0]
             else:
                 point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][year][0][0]
                 point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][year][0][0]
@@ -385,7 +384,7 @@ def package_mmm_point_data(point_data, cov_id, horp):
                     full_year = str(year + 1900)
                     point_pkg[dim_model][dim_scenario][full_year] = dict()
                     if cov_id == "annual_precip_totals":
-                        point_pkg[dim_model][dim_scenario][full_year]["prmean"] = point_data[model][year][scenario]
+                        point_pkg[dim_model][dim_scenario][full_year]["pr"] = point_data[model][year][scenario]
                     else:
                         for variable in mmm_dim_encodings["tempstats"].keys():
                             dim_variable = mmm_dim_encodings["tempstats"][variable]
@@ -581,7 +580,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     return ds_list
 
 
-def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
+def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -603,23 +602,140 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
 
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
 
-    if var_ep == "mmm":
+    if var_ep in ["temperature", "taspr"]:
+        metadata += "# tas is the temperature at surface in degrees Celsius\n"
+        if mmm is True:
+            metadata = "# tas is the temperature at surface in degrees Celsius\n"
+            metadata += "# tasmin is the minimum temperature for the specified model and scenario\n"
+            metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
+            metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
+    if var_ep in ["precipitation", "taspr"]:
+        metadata += "# pr is precipitation in millimeters\n"
+        if mmm is True:
+            metadata = "# pr is precipitation in millimeters\n"
+            metadata += "# pr is the total annual precipitation for the specified model and scenario\n"
 
-        metadata = "# tas is the temperature at surface in degrees Celsius\n"
-        metadata += "# tasmin is the minimum temperature for the specified model and scenario\n"
-        metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
-        metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
+    if mmm is not True:
+        metadata += "# mean is the mean of annual means\n"
+        metadata += "# median is the median of annual means\n"
+        metadata += "# max is the maximum annual mean\n"
+        metadata += "# min is the minimum annual mean\n"
+        metadata += "# q1 is the first quartile of the annual means\n"
+        metadata += "# q3 is the third quartile of the annual means\n"
+        metadata += "# hi_std is the mean + standard deviation of annual means\n"
+        metadata += "# lo_std is the mean - standard deviation of annual means\n"
+        metadata += "# DJF is December - February\n"
+        metadata += "# MAM is March - May\n"
+        metadata += "# JJA is June - August\n"
+        metadata += "# SON is September - November\n"
 
-        output.write(metadata)
+    output.write(metadata)
 
+    if mmm is not True:
         fieldnames = [
-            "year",
+            "variable",
+            "date_range",
+            "season",
             "model",
             "scenario",
-            "tasmin",
-            "tasmean",
-            "tasmax"
+            "stat",
+            "value",
         ]
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+
+        writer.writeheader()
+
+        # add CRU data
+        cru_period = "1950_2009"
+        for season in dim_encodings["seasons"].values():
+            for varname in ["pr", "tas"]:
+                for stat in dim_encodings["stats"].values():
+                    try:
+                        writer.writerow(
+                            {
+                                "variable": varname,
+                                "date_range": cru_period,
+                                "season": season,
+                                "model": "CRU-TS40",
+                                "scenario": "Historical",
+                                "stat": stat,
+                                "value": packaged_data[cru_period][season]["CRU-TS40"][
+                                    "CRU_historical"
+                                ][varname][stat],
+                            }
+                        )
+                    except KeyError:
+                        # if single var query, just ignore attempts to
+                        # write the non-chosen var
+                        pass
+
+        # AR5 periods
+        for ar5_period in ["2040_2069", "2070_2099"]:
+            for season in dim_encodings["seasons"].values():
+                for model in dim_encodings["models"].values():
+                    for scenario in dim_encodings["scenarios"].values():
+                        for varname in ["pr", "tas"]:
+                            try:
+                                writer.writerow(
+                                    {
+                                        "variable": varname,
+                                        "date_range": ar5_period,
+                                        "season": season,
+                                        "model": model,
+                                        "scenario": scenario,
+                                        "stat": "mean",
+                                        "value": packaged_data[ar5_period][season][model][
+                                            scenario
+                                        ][varname],
+                                    }
+                                )
+                            except KeyError:
+                                # if single var query, just ignore attempts to
+                                # write the non-chosen var
+                                pass
+
+        for decade in dim_encodings["decades"].values():
+            for season in dim_encodings["seasons"].values():
+                for model in dim_encodings["models"].values():
+                    for scenario in dim_encodings["scenarios"].values():
+                        for varname in ["pr", "tas"]:
+                            try:
+                                writer.writerow(
+                                    {
+                                        "variable": varname,
+                                        "date_range": decade,
+                                        "season": season,
+                                        "model": model,
+                                        "scenario": scenario,
+                                        "stat": "mean",
+                                        "value": packaged_data[decade][season][model][
+                                            scenario
+                                        ][varname],
+                                    }
+                                )
+                            except KeyError:
+                                # if single var query, just ignore attempts to
+                                # write the non-chosen var
+                                pass
+    else:
+        # This is for a min-mean-max CSV for temperature or precipitation
+        if var_ep == "temperature":
+            fieldnames = [
+                "year",
+                "model",
+                "scenario",
+                "tasmin",
+                "tasmean",
+                "tasmax"
+            ]
+        else:
+            fieldnames = [
+                "year",
+                "model",
+                "scenario",
+                "pr"
+            ]
+
         writer = csv.DictWriter(output, fieldnames=fieldnames)
 
         writer.writeheader()
@@ -628,124 +744,28 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None):
             for scenario in packaged_data[model].keys():
                 for year in packaged_data[model][scenario].keys():
                     try:
-                        writer.writerow(
-                            {
-                                "year": year,
-                                "model": model,
-                                "scenario": scenario,
-                                "tasmin": packaged_data[model][scenario][year]["tasmin"],
-                                "tasmean": packaged_data[model][scenario][year]["tasmean"],
-                                "tasmax":  packaged_data[model][scenario][year]["tasmax"]
-                            }
-                        )
+                        if var_ep == "temperature":
+                            writer.writerow(
+                                {
+                                    "year": year,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "tasmin": packaged_data[model][scenario][year]["tasmin"],
+                                    "tasmean": packaged_data[model][scenario][year]["tasmean"],
+                                    "tasmax": packaged_data[model][scenario][year]["tasmax"]
+                                }
+                            )
+                        else:
+                            writer.writerow(
+                                {
+                                    "year": year,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "pr": packaged_data[model][scenario][year]["pr"]
+                                }
+                            )
                     except KeyError:
                         pass
-        return output.getvalue()
-
-    if var_ep in ["temperature", "taspr"]:
-        metadata += "# tas is the temperature at surface in degrees Celsius\n"
-    if var_ep in ["precipitation", "taspr"]:
-        metadata += "# pr is precipitation in millimeters\n"
-
-    metadata += "# mean is the mean of annual means\n"
-    metadata += "# median is the median of annual means\n"
-    metadata += "# max is the maximum annual mean\n"
-    metadata += "# min is the minimum annual mean\n"
-    metadata += "# q1 is the first quartile of the annual means\n"
-    metadata += "# q3 is the third quartile of the annual means\n"
-    metadata += "# hi_std is the mean + standard deviation of annual means\n"
-    metadata += "# lo_std is the mean - standard deviation of annual means\n"
-    metadata += "# DJF is December - February\n"
-    metadata += "# MAM is March - May\n"
-    metadata += "# JJA is June - August\n"
-    metadata += "# SON is September - November\n"
-    output.write(metadata)
-
-    fieldnames = [
-        "variable",
-        "date_range",
-        "season",
-        "model",
-        "scenario",
-        "stat",
-        "value",
-    ]
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
-
-    writer.writeheader()
-
-    # add CRU data
-    cru_period = "1950_2009"
-    for season in dim_encodings["seasons"].values():
-        for varname in ["pr", "tas"]:
-            for stat in dim_encodings["stats"].values():
-                try:
-                    writer.writerow(
-                        {
-                            "variable": varname,
-                            "date_range": cru_period,
-                            "season": season,
-                            "model": "CRU-TS40",
-                            "scenario": "Historical",
-                            "stat": stat,
-                            "value": packaged_data[cru_period][season]["CRU-TS40"][
-                                "CRU_historical"
-                            ][varname][stat],
-                        }
-                    )
-                except KeyError:
-                    # if single var query, just ignore attempts to
-                    # write the non-chosen var
-                    pass
-
-    # AR5 periods
-    for ar5_period in ["2040_2069", "2070_2099"]:
-        for season in dim_encodings["seasons"].values():
-            for model in dim_encodings["models"].values():
-                for scenario in dim_encodings["scenarios"].values():
-                    for varname in ["pr", "tas"]:
-                        try:
-                            writer.writerow(
-                                {
-                                    "variable": varname,
-                                    "date_range": ar5_period,
-                                    "season": season,
-                                    "model": model,
-                                    "scenario": scenario,
-                                    "stat": "mean",
-                                    "value": packaged_data[ar5_period][season][model][
-                                        scenario
-                                    ][varname],
-                                }
-                            )
-                        except KeyError:
-                            # if single var query, just ignore attempts to
-                            # write the non-chosen var
-                            pass
-
-    for decade in dim_encodings["decades"].values():
-        for season in dim_encodings["seasons"].values():
-            for model in dim_encodings["models"].values():
-                for scenario in dim_encodings["scenarios"].values():
-                    for varname in ["pr", "tas"]:
-                        try:
-                            writer.writerow(
-                                {
-                                    "variable": varname,
-                                    "date_range": decade,
-                                    "season": season,
-                                    "model": model,
-                                    "scenario": scenario,
-                                    "stat": "mean",
-                                    "value": packaged_data[decade][season][model][
-                                        scenario
-                                    ][varname],
-                                }
-                            )
-                        except KeyError:
-                            # if single var query, just ignore attempts to
-                            # write the non-chosen var
-                            pass
 
     return output.getvalue()
 
@@ -1066,8 +1086,12 @@ def mmm_point_data_endpoint(horp, lat, lon, month=None):
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         place_id = request.args.get('community')
-        csv_data = create_csv(point_pkg, "mmm", place_id, lat, lon)
-        return return_csv(csv_data, "mmm", place_id, lat, lon, month)
+        if month == None:
+            var_ep = "precipitation"
+        else:
+            var_ep = "temperature"
+        csv_data = create_csv(point_pkg, var_ep, place_id, lat, lon, True)
+        return return_csv(csv_data, var_ep, place_id, lat, lon, month)
 
     return postprocess(point_pkg, "taspr")
 
