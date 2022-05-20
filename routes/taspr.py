@@ -251,22 +251,12 @@ def get_mmm_wcps_request_str(x, y, cov_id, scenarios, models, years, tempstat, e
     else:
         # Generates the mean across models and scenarios on the tasmean variable
 
-        # For January 2006 - 2100
-        num_results = 95
+        # For projected, 5 models * 3 scenarios
+        num_results = 15
 
-        # For historical, January 1900-2015
+        # For historical, only a single model + scenario
         if scenarios == "0:0":
-            num_results = 115
-
-        if cov_id == "annual_precip_totals":
-            if scenarios == "0:0":
-                # Only a single model + scenario for historical
-                num_results = 1
-            else:
-                # Due to the way the annual precip slices the data, we end up with
-                # the 95 or 115 time step values summed by each of the model + scenario
-                # combinations, which equals 15 total. 5 models * 3 scenarios
-                num_results = 15
+            num_results = 1
 
         wcps_request_str = quote(
             (
@@ -623,7 +613,7 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
     if var_ep in ["precipitation", "taspr"]:
         metadata += "# pr is precipitation in millimeters\n"
         if mmm is True:
-            metadata = "# pr is precipitation in millimeters\n"
+            metadata = "# pr is precipitation in inches\n"
             metadata += "# pr is the total annual precipitation for the specified model and scenario\n"
 
     if mmm is not True:
