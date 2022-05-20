@@ -1026,24 +1026,24 @@ def about_huc():
     return render_template("taspr/area.html")
 
 
-@routes.route("/temperature/mmm/")
-@routes.route("/temperature/mmm/abstract/")
-@routes.route("/precipitation/mmm/")
-@routes.route("/precipitation/mmm/abstract/")
+@routes.route("/mmm/")
+@routes.route("/mmm/abstract/")
 def about_mmm():
     return render_template("mmm/abstract.html")
 
 
-@routes.route("/temperature/mmm/jan/")
-@routes.route("/temperature/mmm/july/")
-@routes.route("/precipitation/mmm/jan/")
-@routes.route("/precipitation/mmm/july/")
-def about_mmm_month():
-    return render_template("mmm/month.html")
+@routes.route("/mmm/temperature")
+def about_mmm_temp():
+    return render_template("mmm/temperature.html")
 
 
-@routes.route("/precipitation/mmm/<horp>/<lat>/<lon>")
-@routes.route("/temperature/mmm/<month>/<horp>/<lat>/<lon>")
+@routes.route("/mmm/precipitation")
+def about_mmm_precip():
+    return render_template("mmm/precipitation.html")
+
+
+@routes.route("/mmm/precipitation/<horp>/<lat>/<lon>")
+@routes.route("/mmm/temperature/<month>/<horp>/<lat>/<lon>")
 def mmm_point_data_endpoint(horp, lat, lon, month=None):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
