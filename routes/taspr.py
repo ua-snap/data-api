@@ -257,6 +257,17 @@ def get_mmm_wcps_request_str(x, y, cov_id, scenarios, models, years, tempstat, e
         # For historical, January 1900-2015
         if scenarios == "0:0":
             num_results = 115
+
+        if cov_id == "annual_precip_totals":
+            if scenarios == "0:0":
+                # Only a single model + scenario for historical
+                num_results = 1
+            else:
+                # Due to the way the annual precip slices the data, we end up with
+                # the 95 or 115 time step values summed by each of the model + scenario
+                # combinations, which equals 15 total. 5 models * 3 scenarios
+                num_results = 15
+
         wcps_request_str = quote(
             (
                 f"ProcessCoverages&query=for $c in ({cov_id}) "
@@ -1086,7 +1097,7 @@ def mmm_point_data_endpoint(horp, lat, lon, month=None):
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         place_id = request.args.get('community')
-        if month == None:
+        if month is None:
             var_ep = "precipitation"
         else:
             var_ep = "temperature"
