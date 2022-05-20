@@ -235,12 +235,16 @@ def get_mmm_wcps_request_str(x, y, cov_id, scenarios, models, years, tempstat, e
     else:
         operation = "+"
 
-    if (tempstat == 0 or tempstat == 2):
+    variable = ""
+    if cov_id != "annual_precip_totals":
+        variable = f",tempstat({tempstat})"
+
+    if tempstat == 0 or tempstat == 2:
         wcps_request_str = quote(
             (
                 f"ProcessCoverages&query=for $c in ({cov_id}) "
                 f"let $a := {operation}(condense {operation} over $s scenario({scenarios}), $m model({models}) "
-                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}),tempstat({tempstat})] ) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}){variable}] ) "
                 f'return encode( $a, "application/{encoding}")'
             )
         )
@@ -258,7 +262,7 @@ def get_mmm_wcps_request_str(x, y, cov_id, scenarios, models, years, tempstat, e
             (
                 f"ProcessCoverages&query=for $c in ({cov_id}) "
                 f"let $a := avg(condense {operation} over $s scenario({scenarios}), $m model({models}) "
-                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}),tempstat({tempstat})] / {num_results} ) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y}){variable}] / {num_results} ) "
                 f'return encode( $a, "application/{encoding}")'
             )
         )
@@ -331,7 +335,7 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     return point_data_list
 
 
-def package_mmm_point_data(point_data, horp):
+def package_mmm_point_data(point_data, cov_id, horp):
     """Packages min-mean-max point data into JSON-formatted return data
 
         Args:
@@ -361,9 +365,12 @@ def package_mmm_point_data(point_data, horp):
         for year in range(0, 115):
             full_year = str(year + 1900)
             point_pkg["CRU-TS"]["historical"][full_year] = dict()
-            point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][year][0][0]
-            point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][year][0][0]
-            point_pkg["CRU-TS"]["historical"][full_year]["tasmin"] = point_data[2][year][0][0]
+            if cov_id == "annual_precip_totals":
+                point_pkg["CRU-TS"]["historical"][full_year]["prmean"] = point_data[0][year][0]
+            else:
+                point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][year][0][0]
+                point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][year][0][0]
+                point_pkg["CRU-TS"]["historical"][full_year]["tasmin"] = point_data[2][year][0][0]
 
         ### PROJECTED FUTURE MODELS ###
         # For all models, scenarios, and variables found in mmm_dim_encodings dictionary
@@ -377,9 +384,12 @@ def package_mmm_point_data(point_data, horp):
                 for year in range(106, 200):
                     full_year = str(year + 1900)
                     point_pkg[dim_model][dim_scenario][full_year] = dict()
-                    for variable in mmm_dim_encodings["tempstats"].keys():
-                        dim_variable = mmm_dim_encodings["tempstats"][variable]
-                        point_pkg[dim_model][dim_scenario][full_year][dim_variable] = point_data[variable][year][model][scenario]
+                    if cov_id == "annual_precip_totals":
+                        point_pkg[dim_model][dim_scenario][full_year]["prmean"] = point_data[model][year][scenario]
+                    else:
+                        for variable in mmm_dim_encodings["tempstats"].keys():
+                            dim_variable = mmm_dim_encodings["tempstats"][variable]
+                            point_pkg[dim_model][dim_scenario][full_year][dim_variable] = point_data[variable][year][model][scenario]
 
     else:
         if horp == "historical" or horp == "hp":
@@ -391,9 +401,15 @@ def package_mmm_point_data(point_data, horp):
             historical_min = round(point_data[2], 1)
 
             point_pkg["historical"] = dict()
-            point_pkg["historical"]["tasmin"] = historical_min
-            point_pkg["historical"]["tasmean"] = historical_mean
-            point_pkg["historical"]["tasmax"] = historical_max
+
+            if cov_id == "annual_precip_totals":
+                point_pkg["historical"]["prmin"] = historical_min
+                point_pkg["historical"]["prmean"] = historical_mean
+                point_pkg["historical"]["prmax"] = historical_max
+            else:
+                point_pkg["historical"]["tasmin"] = historical_min
+                point_pkg["historical"]["tasmean"] = historical_mean
+                point_pkg["historical"]["tasmax"] = historical_max
 
         if horp == "projected" or horp == "hp":
             if horp == "projected":
@@ -406,9 +422,15 @@ def package_mmm_point_data(point_data, horp):
                 projected_min = round(point_data[5], 1)
 
             point_pkg["projected"] = dict()
-            point_pkg["projected"]["tasmin"] = projected_min
-            point_pkg["projected"]["tasmean"] = projected_mean
-            point_pkg["projected"]["tasmax"] = projected_max
+
+            if cov_id == "annual_precip_totals":
+                point_pkg["projected"]["prmin"] = projected_min
+                point_pkg["projected"]["prmean"] = projected_mean
+                point_pkg["projected"]["prmax"] = projected_max
+            else:
+                point_pkg["projected"]["tasmin"] = projected_min
+                point_pkg["projected"]["tasmean"] = projected_mean
+                point_pkg["projected"]["tasmax"] = projected_max
 
     return point_pkg
 
@@ -827,7 +849,7 @@ def run_fetch_mmm_point_data(lat, lon, cov_id, horp):
     # package point data with decoded coord values (names)
     # these functions are hard-coded  with coord values for now
 
-    point_pkg = package_mmm_point_data(point_data_list, horp)
+    point_pkg = package_mmm_point_data(point_data_list, cov_id, horp)
 
     return point_pkg
 
@@ -983,18 +1005,26 @@ def about_point():
 def about_huc():
     return render_template("taspr/area.html")
 
-@routes.route("/mmm/")
-@routes.route("/mmm/abstract/")
+
+@routes.route("/temperature/mmm/")
+@routes.route("/temperature/mmm/abstract/")
+@routes.route("/precipitation/mmm/")
+@routes.route("/precipitation/mmm/abstract/")
 def about_mmm():
     return render_template("mmm/abstract.html")
 
-@routes.route("/mmm/jan/")
-@routes.route("/mmm/july/")
+
+@routes.route("/temperature/mmm/jan/")
+@routes.route("/temperature/mmm/july/")
+@routes.route("/precipitation/mmm/jan/")
+@routes.route("/precipitation/mmm/july/")
 def about_mmm_month():
     return render_template("mmm/month.html")
 
-@routes.route("/mmm/<month>/<horp>/<lat>/<lon>")
-def mmm_point_data_endpoint(month, horp, lat, lon):
+
+@routes.route("/precipitation/mmm/<horp>/<lat>/<lon>")
+@routes.route("/temperature/mmm/<month>/<horp>/<lat>/<lon>")
+def mmm_point_data_endpoint(horp, lat, lon, month=None):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
 
@@ -1014,14 +1044,17 @@ def mmm_point_data_endpoint(month, horp, lat, lon):
     if validation == 422:
         return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
 
-    try:
+    if month is not None:
         if month == 'jan':
             cov_id = "jan_min_max_mean_temp"
         elif month == 'july':
             cov_id = "july_min_max_mean_temp"
         else:
             return render_template("400/bad_request.html"), 400
+    else:
+        cov_id = 'annual_precip_totals'
 
+    try:
         point_pkg = run_fetch_mmm_point_data(lat, lon, cov_id, horp)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
