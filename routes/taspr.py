@@ -371,7 +371,7 @@ def package_mmm_point_data(point_data, cov_id, horp):
         point_pkg["CRU-TS"]["historical"] = dict()
 
         for year in range(0, 115):
-            full_year = str(year + 1900)
+            full_year = str(year + 1901)
             point_pkg["CRU-TS"]["historical"][full_year] = dict()
             if cov_id == "annual_precip_totals":
                 point_pkg["CRU-TS"]["historical"][full_year]["pr"] = point_data[0][year][0]
@@ -390,7 +390,7 @@ def package_mmm_point_data(point_data, cov_id, horp):
                 dim_scenario = mmm_dim_encodings["scenarios"][scenario]
                 point_pkg[dim_model][dim_scenario] = dict()
                 for year in range(106, 200):
-                    full_year = str(year + 1900)
+                    full_year = str(year + 1901)
                     point_pkg[dim_model][dim_scenario][full_year] = dict()
                     if cov_id == "annual_precip_totals":
                         point_pkg[dim_model][dim_scenario][full_year]["pr"] = point_data[model][year][scenario]
