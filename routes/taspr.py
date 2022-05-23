@@ -28,6 +28,7 @@ from validate_request import (
     validate_latlon,
     project_latlon,
     validate_var_id,
+    validate_year,
 )
 from validate_data import (
     get_poly_3338_bbox,
@@ -269,7 +270,7 @@ def get_mmm_wcps_request_str(x, y, cov_id, scenarios, models, years, tempstat, e
         return wcps_request_str
 
 
-async def fetch_mmm_point_data(x, y, cov_id, horp):
+async def fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year):
     """Make the async request for the data at the specified point for
     a specific varname.
 
@@ -289,15 +290,22 @@ async def fetch_mmm_point_data(x, y, cov_id, horp):
         point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
 
     if horp == "historical" or horp == "hp":
+        timestring = "\"1901-01-01T00:00:00.000Z\":\"2015-01-01T00:00:00.000Z\""
+        if start_year is not None:
+            timestring = f"\"{start_year}-01-01T00:00:00.000Z\":\"{end_year}-01-01T00:00:00.000Z\""
+
         # Generates URL for historical scenario of CRU TS 4.0
         for tempstat in range(0, 3):
-            request_str = get_mmm_wcps_request_str(x, y, cov_id, "0:0", "0:0", "\"1901-01-01T00:00:00.000Z\":\"2015-01-01T00:00:00.000Z\"", tempstat)
+            request_str = get_mmm_wcps_request_str(x, y, cov_id, "0:0", "0:0", timestring, tempstat)
             point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
 
     if horp == "projected" or horp == "hp":
+        timestring = "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\""
+        if start_year is not None:
+            timestring = f"\"{start_year}-01-01T00:00:00.000Z\":\"{end_year}-01-01T00:00:00.000Z\""
         # All other models and scenarios captured in this loop
         for tempstat in range(0, 3):
-            request_str = get_mmm_wcps_request_str(x, y, cov_id, "1:3", "2:6", "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\"", tempstat)
+            request_str = get_mmm_wcps_request_str(x, y, cov_id, "1:3", "2:6", timestring, tempstat)
             point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
 
     return point_data_list
@@ -844,7 +852,7 @@ def combine_pkg_dicts(tas_di, pr_di):
     return tas_di
 
 
-def run_fetch_mmm_point_data(lat, lon, cov_id, horp):
+def run_fetch_mmm_point_data(lat, lon, cov_id, horp, start_year, end_year):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
@@ -864,7 +872,7 @@ def run_fetch_mmm_point_data(lat, lon, cov_id, horp):
     x, y = project_latlon(lat, lon, 3338)
 
     point_data_list = asyncio.run(
-        fetch_mmm_point_data(x, y, cov_id, horp)
+        fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year)
     )
 
     # package point data with decoded coord values (names)
@@ -1044,8 +1052,10 @@ def about_mmm_precip():
 
 
 @routes.route("/mmm/precipitation/<horp>/<lat>/<lon>")
+@routes.route("/mmm/precipitation/<horp>/<lat>/<lon>/<start_year>/<end_year>")
 @routes.route("/mmm/temperature/<month>/<horp>/<lat>/<lon>")
-def mmm_point_data_endpoint(horp, lat, lon, month=None):
+@routes.route("/mmm/temperature/<month>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
+def mmm_point_data_endpoint(horp, lat, lon, month=None, start_year=None, end_year=None):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
 
@@ -1054,6 +1064,8 @@ def mmm_point_data_endpoint(horp, lat, lon, month=None):
         horp [Historical or Projected] (str):  historical, projected, hp, or all
         lat (float): latitude
         lon (float): longitude
+        start_year (int): Starting year (1901-2099)
+        end_year (int): Ending year (1901-2099)
 
     Notes:
         example request: http://localhost:5000/mmm/jan/all/65.0628/-146.1627
@@ -1075,8 +1087,17 @@ def mmm_point_data_endpoint(horp, lat, lon, month=None):
     else:
         cov_id = 'annual_precip_totals'
 
+    if start_year is not None:
+        if end_year is not None:
+            validation = validate_year(start_year, end_year)
+
+            if validation == 400:
+                return render_template("400/bad_request.html"), 400
+        else:
+            return render_template("400/bad_request.html"), 400
+
     try:
-        point_pkg = run_fetch_mmm_point_data(lat, lon, cov_id, horp)
+        point_pkg = run_fetch_mmm_point_data(lat, lon, cov_id, horp, start_year, end_year)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
