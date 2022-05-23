@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Invalid year</h3>
+<p>
+  One or both of the provided years are outside of the valid range. Valid years
+  for this endpoint are <code>{{ min_year }}</code> - <code>{{ max_year }}</code>.
+</p>
+{% endblock %}

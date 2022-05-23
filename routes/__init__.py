@@ -15,3 +15,4 @@ from .vectordata import *
 from .recache import *
 from .elevation import *
 from .alfresco import *
+from .degree_days import *
