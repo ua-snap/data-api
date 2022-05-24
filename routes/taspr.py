@@ -1112,6 +1112,7 @@ def about_mmm_precip():
 
 @routes.route("/mmm/<var_ep>/<horp>/<lat>/<lon>")
 @routes.route("/mmm/<var_ep>/<month>/<horp>/<lat>/<lon>")
+@routes.route("/mmm/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
 @routes.route("/mmm/<var_ep>/<month>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
 def mmm_point_data_endpoint(
     var_ep, horp, lat, lon, month=None, start_year=None, end_year=None
