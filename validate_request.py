@@ -60,6 +60,13 @@ def validate_bbox(lat1, lon1, lat2, lon2):
     return valid
 
 
+def validate_year(start_year, end_year):
+    if 1900 < int(start_year) <= 2100 and 1900 < int(end_year) <= 2100 and int(start_year) <= int(end_year):
+        return True
+    else:
+        return 400
+
+
 def validate_var_id(var_id):
     if re.search("[^A-Za-z0-9]", var_id):
         return render_template("400/bad_request.html"), 400
