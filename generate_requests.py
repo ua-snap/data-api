@@ -33,7 +33,7 @@ def generate_mmm_wcs_getcov_str(x, y, cov_id, model, scenario, encoding="json"):
         lower and upper bounds of bbox
         cov_id (str): Rasdaman coverage ID
         model (int): Model number defined in Rasdaman coverage
-            - 1: CRU-TS 4.0
+            - 0: CRU-TS 4.0
             - 2: GFDL-CM3
             - 3: GISS-E2-R
             - 4: IPSL-CM5A-LR
