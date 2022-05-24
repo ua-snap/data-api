@@ -1,32 +1,53 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Temperature at Surface Min, Mean, and Max Point Query</h3>
-<p>Query for historical temperature min, mean, and max for January or July:</p>
-<p>Example: <a href="/mmm/temperature/jan/historical/65.0628/-146.1627">/mmm/temperature/jan/historical/65.0628/-146.1627</a></p>
-<p>Example: <a href="/mmm/temperature/july/historical/65.0628/-146.1627">/mmm/temperature/july/historical/65.0628/-146.1627</a></p>
-<p>Query for projected temperature min, mean, and max for January or July:</p>
-<p>Example: <a href="/mmm/temperature/jan/projected/65.0628/-146.1627">/mmm/temperature/jan/projected/65.0628/-146.1627</a></p>
-<p>Example: <a href="/mmm/temperature/july/projected/65.0628/-146.1627">/mmm/temperature/july/projected/65.0628/-146.1627</a></p>
-<p>Query for both historical and projected temperature min, mean, and max for January or July:</p>
-<p>Example: <a href="/mmm/temperature/jan/hp/65.0628/-146.1627">/mmm/temperature/jan/hp/65.0628/-146.1627</a></p>
-<p>Example: <a href="/mmm/temperature/july/hp/65.0628/-146.1627">/mmm/temperature/july/hp/65.0628/-146.1627</a></p>
-<p>Query for a given date range between 1901-2100 for min, mean, and max to be determined from.</p>
-<p>Add a start year and end year to end of query:</p>
-<p>Example: <a href="/mmm/temperature/jan/hp/65.0628/-146.1627/1901/2020">/mmm/temperature/jan/hp/65.0628/-146.1627/1901/2020</a></p>
-<p>Example: <a href="/mmm/temperature/july/hp/65.0628/-146.1627/1901/2020">/mmm/temperature/july/hp/65.0628/-146.1627/1901/2020</a></p>
-<p>Query for all temperature min, mean, and max data across all historical and projected models from 1901-2100:</p>
-<p>Example: <a href="/mmm/temperature/jan/all/65.0628/-146.1627">/mmm/temperature/jan/all/65.0628/-146.1627</a></p>
-<p>Example: <a href="/mmm/temperature/july/all/65.0628/-146.1627">/mmm/temperature/july/all/65.0628/-146.1627</a></p>
+<h3>Annual Total Precipitation Min, Mean, and Max Point Query</h3>
+<p>This endpoint allows access to various summaries of point extractions from gridded precipitation data. Note, the quantity being modeled and supplied here is also referred to throughout by its standard abbreviated modeling name, "pr".</p>
+<h4>Summary queries for annual total precipitation</h4>
+<p>Query for historical annual total precipitation min, mean, and max:</p>
+<p>Example: <a href="/mmm/precipitation/historical/65.0628/-146.1627">/mmm/precipitation/historical/65.0628/-146.1627</a></p>
+<p>Query for projected annual total precipitation min, mean, and max:</p>
+<p>Example: <a href="/mmm/precipitation/projected/65.0628/-146.1627">/mmm/precipitation/projected/65.0628/-146.1627</a></p>
+<p>Query for both historical and projected annual total precipitation min, mean, and max:
+<p>Example: <a href="/mmm/precipitation/hp/65.0628/-146.1627">/mmm/precipitation/hp/65.0628/-146.1627</a></p>
+
+<b>Results from the queries above will look like this:</b>
+
+<pre>
+{
+  "historical": {
+    "prmax": 21.7,
+    "prmean": 13.5,
+    "prmin": 6.2
+  }
+  ...
+}
+</pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &ltsummary time period type, "historical" or "projected">: {
+    "prmax": &ltmax pr value across all models, scenarios, and years>,
+    "prmean": &ltmean pr value across all models, scenarios, and years>,
+    "prmin": &ltmin pr value across all models, scenarios, and years>
+  }
+  ...
+}
+</pre>
+
+<br>
+<h4>Comprehensive queries for annual total precipitation</h4>
+<p>Query for all annual total precipitation data across all historical and projected models from 1901-2099:</p>
+<p>Example: <a href="/mmm/precipitation/all/65.0628/-146.1627">/mmm/precipitation/all/65.0628/-146.1627</a></p>
 <b>Results from the query above will look like this:</b>
 
 <pre>
 {
   "CRU-TS": {
     "historical": {
-      "1900": {
-        "tasmax": 19.7,
-        "tasmean": 13.4,
-        "tasmin": 7.1
+      "1901": {
+        "pr": 140
       }
   }
   ...
@@ -40,19 +61,23 @@
   &ltmodel>: {
     &ltscenario>:{
       &ltyear>: {
-        "tasmax": &lttasmax value>,
-        "tasmean": &lttasmean value>,
-        "tasmin": &lttasmin value>
-        }
+        "pr": &ltpr value>
       }
+      ...
     }
+    ...
   }
   ...
 }
 </pre>
 
+<h4>Supply summary time period (start / end years)</h4>
+<p>The start and end year to use for any of the summary options from above (i.e. "historical", "projected", or "hp") may be supplied with the query as well, appended to the end of the URL in the form <code>/&ltstart year>/&ltend year></code></p>
+<p>Here is an example to query total annual precipitation data for historical and projected models from 1950-2020:</p>
+<p>Example: <a href="/mmm/precipitation/hp/65.0628/-146.1627/1950/2020">/mmm/precipitation/hp/65.0628/-146.1627/1950/2020</a></p>
+<p>Note - this query option will only work for summary options, not the comprehensive option above (e.g. "all") </p>
+
 <h4>CSV Export</h4>
-<p>To export the point data in a CSV file, append <code>?format=csv</code>.</p>
-<p>Example: <a href="/mmm/temperature/jan/all/65.0628/-146.1627?format=csv">/mmm/temperature/jan/all/65.0628/-146.1627?format=csv</a></p>
-<p>Example: <a href="/mmm/temperature/july/all/65.0628/-146.1627?format=csv">/mmm/temperature/july/all/65.0628/-146.1627?format=csv</a></p>
+<p>To export the annual total precipitation point data in a CSV file, append <code>?format=csv</code>.</p>
+<p>Example: <a href="/mmm/precipitation/all/65.0628/-146.1627?format=csv">/mmm/precipitation/all/65.0628/-146.1627?format=csv</a></p>
 {% endblock %}
