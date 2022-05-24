@@ -159,6 +159,12 @@ b>Results from the queries above will look like this:</b>
 }
 </pre>
 
+<h4>Supply summary time period (start / end years)</h4>
+<p>The start and end year to use for any of the summary options from above (i.e. "historical", "projected", or "hp") may be supplied with the query as well, appended to the end of the URL in the form <code>/&ltstart year>/&ltend year></code></p>
+<p>Here is an example to query mean annual temperature data for historical and projected models from 1950-2020:</p>
+<p>Example: <a href="/mmm/temperature/hp/65.0628/-146.1627/1950/2020">/mmm/temperature/hp/65.0628/-146.1627/1950/2020</a></p>
+<p>Note - this query form will only work for summary options, not the comprehensive options above (e.g. "all") </p>
+
 <h4>CSV Export</h4>
 <p>To export the point data in a CSV file, append <code>?format=csv</code>. Currently only available for the "all" option for the time era variable</p>
 <p>Example: <a href="/mmm/temperature/jan/all/65.0628/-146.1627?format=csv">/mmm/temperature/jan/all/65.0628/-146.1627?format=csv</a></p>
