@@ -228,7 +228,7 @@ def get_mmm_wcps_request_str(
         operation = "+"
 
     variable = ""
-    if cov_id != "annual_precip_totals":
+    if cov_id not in ("annual_precip_totals", "annual_mean_temp"):
         variable = f",tempstat({tempstat})"
 
     if tempstat == 0 or tempstat == 2:
@@ -378,11 +378,23 @@ def package_mmm_point_data(point_data, cov_id, horp):
             full_year = str(year + 1901)
             point_pkg["CRU-TS"]["historical"][full_year] = dict()
             if cov_id == "annual_precip_totals":
-                point_pkg["CRU-TS"]["historical"][full_year]["pr"] = point_data[0][year][0]
+                point_pkg["CRU-TS"]["historical"][full_year]["pr"] = point_data[0][
+                    year
+                ][0]
+            elif cov_id == "annual_mean_temp":
+                point_pkg["CRU-TS"]["historical"][full_year]["tas"] = point_data[0][
+                    year
+                ][0]
             else:
-                point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][year][0][0]
-                point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][year][0][0]
-                point_pkg["CRU-TS"]["historical"][full_year]["tasmin"] = point_data[2][year][0][0]
+                point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][
+                    year
+                ][0][0]
+                point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][
+                    year
+                ][0][0]
+                point_pkg["CRU-TS"]["historical"][full_year]["tasmin"] = point_data[2][
+                    year
+                ][0][0]
 
         ### PROJECTED FUTURE MODELS ###
         # For all models, scenarios, and variables found in mmm_dim_encodings dictionary
@@ -397,11 +409,19 @@ def package_mmm_point_data(point_data, cov_id, horp):
                     full_year = str(year + 1901)
                     point_pkg[dim_model][dim_scenario][full_year] = dict()
                     if cov_id == "annual_precip_totals":
-                        point_pkg[dim_model][dim_scenario][full_year]["pr"] = point_data[model][year][scenario]
+                        point_pkg[dim_model][dim_scenario][full_year][
+                            "pr"
+                        ] = point_data[model][year][scenario]
+                    elif cov_id == "annual_mean_temp":
+                        point_pkg[dim_model][dim_scenario][full_year][
+                            "tas"
+                        ] = point_data[model][year][scenario]
                     else:
                         for variable in mmm_dim_encodings["tempstats"].keys():
                             dim_variable = mmm_dim_encodings["tempstats"][variable]
-                            point_pkg[dim_model][dim_scenario][full_year][dim_variable] = point_data[variable][year][model][scenario]
+                            point_pkg[dim_model][dim_scenario][full_year][
+                                dim_variable
+                            ] = point_data[variable][year][model][scenario]
 
     else:
         if horp == "historical" or horp == "hp":
@@ -597,7 +617,9 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
     return ds_list
 
 
-def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
+def create_csv(
+    packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False, month=None
+):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -608,6 +630,8 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
         place_id (str): community or area ID unless just a lat/lon value
         lat: latitude unless an area
         lon: longitude unless an area
+        mmm (bool): flag for whether packaged_data is for the min-mean-max endpoints
+        month (str): month option used for mmm endpoint for packaged_data
 
     Returns:
         string of CSV data
@@ -622,10 +646,13 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
     if var_ep in ["temperature", "taspr"]:
         metadata += "# tas is the temperature at surface in degrees Celsius\n"
         if mmm is True:
-            metadata = "# tas is the temperature at surface in degrees Celsius\n"
-            metadata += "# tasmin is the minimum temperature for the specified model and scenario\n"
-            metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
-            metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
+            metadata = "# tas is the temperature at surface in degrees Fahrenheit\n"
+            if month is not None:
+                metadata += "# tasmin is the minimum temperature for the specified model and scenario\n"
+                metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
+                metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
+            else:
+                metadata += "# tas is the mean annual temperature for the specified model and scenario\n"
     if var_ep in ["precipitation", "taspr"]:
         metadata += "# pr is precipitation in millimeters\n"
         if mmm is True:
@@ -736,22 +763,17 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
                                 pass
     else:
         # This is for a min-mean-max CSV for temperature or precipitation
-        if var_ep == "temperature":
+        if var_ep == "temperature" and month is not None:
             fieldnames = [
                 "year",
                 "model",
                 "scenario",
                 "tasmin",
                 "tasmean",
-                "tasmax"
+                "tasmax",
             ]
         else:
-            fieldnames = [
-                "year",
-                "model",
-                "scenario",
-                "pr"
-            ]
+            fieldnames = ["year", "model", "scenario", var_ep_lu[var_ep]]
 
         writer = csv.DictWriter(output, fieldnames=fieldnames)
 
@@ -761,15 +783,21 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
             for scenario in packaged_data[model].keys():
                 for year in packaged_data[model][scenario].keys():
                     try:
-                        if var_ep == "temperature":
+                        if var_ep == "temperature" and month is not None:
                             writer.writerow(
                                 {
                                     "year": year,
                                     "model": model,
                                     "scenario": scenario,
-                                    "tasmin": packaged_data[model][scenario][year]["tasmin"],
-                                    "tasmean": packaged_data[model][scenario][year]["tasmean"],
-                                    "tasmax": packaged_data[model][scenario][year]["tasmax"]
+                                    "tasmin": packaged_data[model][scenario][year][
+                                        "tasmin"
+                                    ],
+                                    "tasmean": packaged_data[model][scenario][year][
+                                        "tasmean"
+                                    ],
+                                    "tasmax": packaged_data[model][scenario][year][
+                                        "tasmax"
+                                    ],
                                 }
                             )
                         else:
@@ -778,7 +806,9 @@ def create_csv(packaged_data, var_ep, place_id, lat=None, lon=None, mmm=False):
                                     "year": year,
                                     "model": model,
                                     "scenario": scenario,
-                                    "pr": packaged_data[model][scenario][year]["pr"]
+                                    var_ep_lu[var_ep]: packaged_data[model][scenario][
+                                        year
+                                    ][var_ep_lu[var_ep]],
                                 }
                             )
                     except KeyError:
@@ -1080,15 +1110,17 @@ def about_mmm_precip():
     return render_template("mmm/precipitation.html")
 
 
-@routes.route("/mmm/precipitation/<horp>/<lat>/<lon>")
-@routes.route("/mmm/precipitation/<horp>/<lat>/<lon>/<start_year>/<end_year>")
-@routes.route("/mmm/temperature/<month>/<horp>/<lat>/<lon>")
-@routes.route("/mmm/temperature/<month>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
-def mmm_point_data_endpoint(horp, lat, lon, month=None, start_year=None, end_year=None):
+@routes.route("/mmm/<var_ep>/<horp>/<lat>/<lon>")
+@routes.route("/mmm/<var_ep>/<month>/<horp>/<lat>/<lon>")
+@routes.route("/mmm/<var_ep>/<month>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
+def mmm_point_data_endpoint(
+    var_ep, horp, lat, lon, month=None, start_year=None, end_year=None
+):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
 
     Args:
+        var_ep (str): variable endpoint. Either temperature or precipitation
         month (str): jan or july
         horp [Historical or Projected] (str):  historical, projected, hp, or all
         lat (float): latitude
@@ -1119,7 +1151,10 @@ def mmm_point_data_endpoint(horp, lat, lon, month=None, start_year=None, end_yea
         else:
             return render_template("400/bad_request.html"), 400
     else:
-        cov_id = 'annual_precip_totals'
+        if var_ep == "precipitation":
+            cov_id = "annual_precip_totals"
+        elif var_ep == "temperature":
+            cov_id = "annual_mean_temp"
 
     if start_year is not None:
         if end_year is not None:
@@ -1143,12 +1178,8 @@ def mmm_point_data_endpoint(horp, lat, lon, month=None, start_year=None, end_yea
         point_pkg = nullify_and_prune(point_pkg, "taspr")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        place_id = request.args.get('community')
-        if month is None:
-            var_ep = "precipitation"
-        else:
-            var_ep = "temperature"
-        csv_data = create_csv(point_pkg, var_ep, place_id, lat, lon, True)
+        place_id = request.args.get("community")
+        csv_data = create_csv(point_pkg, var_ep, place_id, lat, lon, True, month)
         return return_csv(csv_data, var_ep, place_id, lat, lon, month)
 
     return postprocess(point_pkg, "taspr")
