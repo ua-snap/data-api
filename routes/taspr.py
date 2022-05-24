@@ -652,7 +652,7 @@ def create_csv(
                 metadata += "# tasmean is the mean temperature for the specified model and scenario\n"
                 metadata += "# tasmax is the maximum temperature for the specified model and scenario\n"
             else:
-                metadata += "# tas is the mean annual temperature for the specified model and scenario\n"
+                metadata = "# tas is the mean annual near-surface air temperature for the specified model and scenario\n"
     if var_ep in ["precipitation", "taspr"]:
         metadata += "# pr is precipitation in millimeters\n"
         if mmm is True:

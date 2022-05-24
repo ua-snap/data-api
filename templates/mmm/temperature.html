@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <h3>Temperature at Surface Min, Mean, and Max Point Query</h3>
+<p>This endpoint allows access to various summaries of point extractions from gridded near-surface air temperature data. Note, the quantity being modeled and supplied here is also referred to throughout by its standard abbreviated modeling name, "tas".</p>
 <h4>Summary queries for January or July</h4>
 <p>The following queries will fetch temperature values summarized across all models and scenarios for specified time eras.</p>
 <p>Query for historical temperature min, mean, and max for January or July:</p>
@@ -77,6 +78,7 @@
       }
       ...
     }
+    ...
   }
   ...
 }
@@ -109,7 +111,7 @@ b>Results from the queries above will look like this:</b>
 
 <pre>
 {
-  &ltsummary timer period type, "historical" or "projected">: {
+  &ltsummary time period type, "historical" or "projected">: {
     "tasmax": &ltmax tas value across all models, scenarios, and years>,
     "tasmean": &ltmean tas value across all models, scenarios, and years>,
     "tasmin": &ltmin tas value across all models, scenarios, and years>
@@ -151,6 +153,7 @@ b>Results from the queries above will look like this:</b>
       }
       ...
     }
+    ...
   }
   ...
 }
@@ -160,5 +163,5 @@ b>Results from the queries above will look like this:</b>
 <p>To export the point data in a CSV file, append <code>?format=csv</code>. Currently only available for the "all" option for the time era variable</p>
 <p>Example: <a href="/mmm/temperature/jan/all/65.0628/-146.1627?format=csv">/mmm/temperature/jan/all/65.0628/-146.1627?format=csv</a></p>
 <p>Example: <a href="/mmm/temperature/july/all/65.0628/-146.1627?format=csv">/mmm/temperature/july/all/65.0628/-146.1627?format=csv</a></p>
-<p>Example: <a href="/mmm/temperature/all/65.0628/-146.1627?format=csv">/mmm/temperature/july/all/65.0628/-146.1627?format=csv</a></p>
+<p>Example: <a href="/mmm/temperature/all/65.0628/-146.1627?format=csv">/mmm/temperature/all/65.0628/-146.1627?format=csv</a></p>
 {% endblock %}
