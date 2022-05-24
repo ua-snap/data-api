@@ -31,7 +31,7 @@
 
 <pre>
 {
-  &ltsummary timer period type, "historical" or "projected">: {
+  &ltsummary time period type, "historical" or "projected">: {
     "tasmax": &ltmax tas value across all models, scenarios, and years>,
     "tasmean": &ltmean tas value across all models, scenarios, and years>,
     "tasmin": &ltmin tas value across all models, scenarios, and years>
@@ -85,7 +85,7 @@
 </pre>
 
 <br>
-<h4>Summary queries for annual mean temperatures</h4>
+<h4>Summary queries for annual mean temperature</h4>
 <p>The following queries will fetch mean annual temperature values summarized across all models and scenarios for specified time eras.</p>
 <p>Query for historical min, mean, and max annual mean temperature:</p>
 <p>Example: <a href="/mmm/temperature/historical/65.0628/-146.1627">/mmm/temperature/historical/65.0628/-146.1627</a></p>
@@ -163,7 +163,7 @@ b>Results from the queries above will look like this:</b>
 <p>The start and end year to use for any of the summary options from above (i.e. "historical", "projected", or "hp") may be supplied with the query as well, appended to the end of the URL in the form <code>/&ltstart year>/&ltend year></code></p>
 <p>Here is an example to query mean annual temperature data for historical and projected models from 1950-2020:</p>
 <p>Example: <a href="/mmm/temperature/hp/65.0628/-146.1627/1950/2020">/mmm/temperature/hp/65.0628/-146.1627/1950/2020</a></p>
-<p>Note - this query form will only work for summary options, not the comprehensive options above (e.g. "all") </p>
+<p>Note - this query option will only work for summary options, not the comprehensive options above (e.g. "all") </p>
 
 <h4>CSV Export</h4>
 <p>To export the point data in a CSV file, append <code>?format=csv</code>. Currently only available for the "all" option for the time era variable</p>
