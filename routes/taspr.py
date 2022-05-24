@@ -1158,6 +1158,9 @@ def mmm_point_data_endpoint(
             cov_id = "annual_mean_temp"
 
     if start_year is not None:
+        if horp == "all":
+            return render_template("400/bad_request.html"), 400
+
         if end_year is not None:
             validation = validate_year(start_year, end_year)
 
