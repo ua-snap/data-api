@@ -26,9 +26,7 @@ degree_days_api = Blueprint("degree_days_api", __name__)
 try:
     # The heating_degree_days, degree_days_below_zero, thawing_index, and
     # freezing_index coverages all share the same dim_encodings
-    dim_encodings = asyncio.run(
-        get_dim_encodings("heating_degree_days")
-    )
+    dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days"))
 except:
     print("Missing from Apollo")
 
@@ -47,15 +45,10 @@ var_label_lu = {
 }
 
 years_lu = {
-    "historical": {
-        "min": 1979,
-        "max": 2015
-    },
-    "projected": {
-        "min": 2006,
-        "max": 2100
-    }
+    "historical": {"min": 1979, "max": 2015},
+    "projected": {"min": 2006, "max": 2100},
 }
+
 
 def get_dd_wcps_request_str(x, y, cov_id, models, years, tempstat, encoding="json"):
     """Generates a WCPS query specific to the
@@ -199,6 +192,7 @@ def package_dd_point_data(point_data, var_ep, horp):
 
     return point_pkg
 
+
 async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
     """Run the async degree days data request for a single point
     and return data as json
@@ -221,22 +215,38 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
     if horp in ["historical", "hp"]:
         min_year = years_lu["historical"]["min"]
         max_year = years_lu["historical"]["max"]
-        timestring = f"\"{min_year}-01-01T00:00:00.000Z\":\"{max_year}-01-01T00:00:00.000Z\""
+        timestring = (
+            f'"{min_year}-01-01T00:00:00.000Z":"{max_year}-01-01T00:00:00.000Z"'
+        )
         if start_year is not None:
-            timestring = f"\"{start_year}-01-01T00:00:00.000Z\":\"{end_year}-01-01T00:00:00.000Z\""
+            timestring = (
+                f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+            )
         for tempstat in range(0, 3):
-            request_str = get_dd_wcps_request_str(x, y, cov_id, "0:0", timestring, tempstat)
-            point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
+            request_str = get_dd_wcps_request_str(
+                x, y, cov_id, "0:0", timestring, tempstat
+            )
+            point_data_list.append(
+                await fetch_data([generate_wcs_query_url(request_str)])
+            )
 
     if horp in ["projected", "hp"]:
         min_year = years_lu["projected"]["min"]
         max_year = years_lu["projected"]["max"]
-        timestring = f"\"{min_year}-01-01T00:00:00.000Z\":\"{max_year}-01-01T00:00:00.000Z\""
+        timestring = (
+            f'"{min_year}-01-01T00:00:00.000Z":"{max_year}-01-01T00:00:00.000Z"'
+        )
         if start_year is not None:
-            timestring = f"\"{start_year}-01-01T00:00:00.000Z\":\"{end_year}-01-01T00:00:00.000Z\""
+            timestring = (
+                f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+            )
         for tempstat in range(0, 3):
-            request_str = get_dd_wcps_request_str(x, y, cov_id, "1:2", timestring, tempstat)
-            point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
+            request_str = get_dd_wcps_request_str(
+                x, y, cov_id, "1:2", timestring, tempstat
+            )
+            point_data_list.append(
+                await fetch_data([generate_wcs_query_url(request_str)])
+            )
 
     return point_data_list
 
@@ -266,9 +276,13 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     )
 
     if var_ep == "heating":
-        metadata = "# dd is the total annual degree days below 65°F for the specified model\n"
+        metadata = (
+            "# dd is the total annual degree days below 65°F for the specified model\n"
+        )
     elif var_ep == "below_zero":
-        metadata = "# dd is the total annual degree days below 0°F for the specified model\n"
+        metadata = (
+            "# dd is the total annual degree days below 0°F for the specified model\n"
+        )
     elif var_ep == "thawing_index":
         metadata = "# dd is the total annual degree days above freezing for the specified model\n"
     elif var_ep == "freezing_index":
@@ -330,12 +344,19 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
             min_year = years_lu["historical"]["min"]
             max_year = years_lu["projected"]["max"]
         if int(start_year) < min_year or int(end_year) > max_year:
-            return render_template("422/invalid_year.html", min_year=min_year, max_year=max_year), 422
+            return (
+                render_template(
+                    "422/invalid_year.html", min_year=min_year, max_year=max_year
+                ),
+                422,
+            )
 
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
         try:
-            point_data_list = asyncio.run(fetch_dd_point_data(x, y, cov_id_str, horp, start_year, end_year))
+            point_data_list = asyncio.run(
+                fetch_dd_point_data(x, y, cov_id_str, horp, start_year, end_year)
+            )
         except Exception as exc:
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
