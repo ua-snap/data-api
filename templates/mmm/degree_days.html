@@ -1,11 +1,11 @@
 {% extends 'base.html' %} {% block content %}
-<h3>Degree Days</h3>
+<h3>Degree Days Min, Mean, and Max Point Query</h3>
 <p>
   The endpoints here provide access to the total annual cumulative degree days
   for several different degree day thresholds.
 </p>
 
-<h4>Datasets</h4>
+<h4>Endpoints</h4>
 <table>
   <thead>
     <tr>
@@ -33,92 +33,109 @@
   </tbody>
 </table>
 
-<h3>Examples</h3>
+<h4>Examples</h4>
 
-<h4>Heating Degree Days</h4>
-<p>Historical: <a href="/mmm/degree_days/heating/historical/65.0628/-146.1627">/mmm/degree_days/heating/historical/65.0628/-146.1627</a></p>
-<p>Projected: <a href="/mmm/degree_days/heating/projected/65.0628/-146.1627">/mmm/degree_days/heating/projected/65.0628/-146.1627</a></p>
-<p>Historical + projected: <a href="/mmm/degree_days/heating/hp/65.0628/-146.1627">/mmm/degree_days/heating/hp/65.0628/-146.1627</a></p>
-<p>Custom year range: <a href="/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2030">/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2030</a></p>
-<p>All: <a href="/mmm/degree_days/heating/all/65.0628/-146.1627">/mmm/degree_days/heating/all/65.0628/-146.1627</a></p>
+<h5>Heating Degree Days</h5>
+<p>Query for historical heating degree days min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/heating/historical/65.0628/-146.1627">/mmm/degree_days/heating/historical/65.0628/-146.1627</a></p>
 
-<h4>Below Zero (0&deg;F) Degree Days</h4>
-<p>Historical: <a href="/mmm/degree_days/below_zero/historical/65.0628/-146.1627">/mmm/degree_days/below_zero/historical/65.0628/-146.1627</a></p>
-<p>Projected: <a href="/mmm/degree_days/below_zero/projected/65.0628/-146.1627">/mmm/degree_days/below_zero/projected/65.0628/-146.1627</a></p>
-<p>Historical + projected: <a href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627">/mmm/degree_days/below_zero/hp/65.0628/-146.1627</a></p>
-<p>Custom year range: <a href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627/1990/2030">/mmm/degree_days/below_zero/hp/65.0628/-146.1627/1990/2030</a></p>
-<p>All: <a href="/mmm/degree_days/below_zero/all/65.0628/-146.1627">/mmm/degree_days/below_zero/all/65.0628/-146.1627</a></p>
+<p>Query for projected heating degree days min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/heating/projected/65.0628/-146.1627">/mmm/degree_days/heating/projected/65.0628/-146.1627</a></p>
 
-<h4>Thawing Index</h4>
-<p>Historical: <a href="/mmm/degree_days/thawing_index/historical/65.0628/-146.1627">/mmm/degree_days/thawing_index/historical/65.0628/-146.1627</a></p>
-<p>Projected: <a href="/mmm/degree_days/thawing_index/projected/65.0628/-146.1627">/mmm/degree_days/thawing_index/projected/65.0628/-146.1627</a></p>
-<p>Historical + projected: <a href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627">/mmm/degree_days/thawing_index/hp/65.0628/-146.1627</a></p>
-<p>Custom year range: <a href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627/1990/2030">/mmm/degree_days/thawing_index/hp/65.0628/-146.1627/1990/2030</a></p>
-<p>All: <a href="/mmm/degree_days/thawing_index/all/65.0628/-146.1627">/mmm/degree_days/thawing_index/all/65.0628/-146.1627</a></p>
+<p>Query for both historical and projected heating degree days min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/heating/hp/65.0628/-146.1627">/mmm/degree_days/heating/hp/65.0628/-146.1627</a></p>
 
-<h4>Freezing Index</h4>
-<p>Historical: <a href="/mmm/degree_days/freezing_index/historical/65.0628/-146.1627">/mmm/degree_days/freezing_index/historical/65.0628/-146.1627</a></p>
-<p>Projected: <a href="/mmm/degree_days/freezing_index/projected/65.0628/-146.1627">/mmm/degree_days/freezing_index/projected/65.0628/-146.1627</a></p>
-<p>Historical + projected: <a href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627">/mmm/degree_days/freezing_index/hp/65.0628/-146.1627</a></p>
-<p>Custom year range: <a href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627/1990/2030">/mmm/degree_days/freezing_index/hp/65.0628/-146.1627/1990/2030</a></p>
-<p>All: <a href="/mmm/degree_days/freezing_index/all/65.0628/-146.1627">/mmm/degree_days/freezing_index/all/65.0628/-146.1627</a></p>
+<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
+<p>Add a start year and end year to end of query:</p>
+<p>Example: <a href="/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2030">/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2030</a></p>
 
-<h3>Output</h3>
+<p>Query for all heating degree days min, mean, and max data across all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/heating/all/65.0628/-146.1627">/mmm/degree_days/heating/all/65.0628/-146.1627</a></p>
 
-<h4>Min/Mean/Max</h4>
+<h5>Below Zero (0&deg;F) Degree Days</h5>
+<p>Query for historical below zero degree days min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/below_zero/historical/65.0628/-146.1627">/mmm/degree_days/below_zero/historical/65.0628/-146.1627</a></p>
 
-<p>Output from the <code>historical</code>, <code>projected</code>, or <code>hp</code> endpoints will look similar to this:</p>
+<p>Query for projected below zero degree days min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/below_zero/projected/65.0628/-146.1627">/mmm/degree_days/below_zero/projected/65.0628/-146.1627</a></p>
 
+<p>Query for both historical and projected below zero degree days min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627">/mmm/degree_days/below_zero/hp/65.0628/-146.1627</a></p>
+
+<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
+<p>Add a start year and end year to end of query:</p>
+<p>Example: <a href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627/1990/2030">/mmm/below_zero/heating/hp/65.0628/-146.1627/1990/2030</a></p>
+
+<p>Query for all below zero degree days min, mean, and max data across all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/below_zero/all/65.0628/-146.1627">/mmm/degree_days/below_zero/all/65.0628/-146.1627</a></p>
+
+<h5>Thawing Index</h5>
+<p>Query for historical thawing index min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/thawing_index/historical/65.0628/-146.1627">/mmm/degree_days/thawing_index/historical/65.0628/-146.1627</a></p>
+
+<p>Query for projected thawing index min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/thawing_index/projected/65.0628/-146.1627">/mmm/degree_days/thawing_index/projected/65.0628/-146.1627</a></p>
+
+<p>Query for both historical and projected thawing index min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627">/mmm/degree_days/thawing_index/hp/65.0628/-146.1627</a></p>
+
+<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
+<p>Add a start year and end year to end of query:</p>
+<p>Example: <a href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627/1990/2030">/mmm/thawing_index/heating/hp/65.0628/-146.1627/1990/2030</a></p>
+
+<p>Query for all thawing index min, mean, and max data across all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/thawing_index/all/65.0628/-146.1627">/mmm/degree_days/thawing_index/all/65.0628/-146.1627</a></p>
+
+<h5>Freezing Index</h5>
+<p>Query for historical freezing index min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/freezing_index/historical/65.0628/-146.1627">/mmm/degree_days/freezing_index/historical/65.0628/-146.1627</a></p>
+
+<p>Query for projected freezing index min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/freezing_index/projected/65.0628/-146.1627">/mmm/degree_days/freezing_index/projected/65.0628/-146.1627</a></p>
+
+<p>Query for both historical and projected freezing index min, mean, and max:<p>
+<p>Example: <a href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627">/mmm/degree_days/freezing_index/hp/65.0628/-146.1627</a></p>
+
+<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
+<p>Add a start year and end year to end of query:</p>
+<p>Example: <a href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627/1990/2030">/mmm/freezing_index/heating/hp/65.0628/-146.1627/1990/2030</a></p>
+
+<p>Query for all freezing index min, mean, and max data across all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/freezing_index/all/65.0628/-146.1627">/mmm/degree_days/freezing_index/all/65.0628/-146.1627</a></p>
+
+<b>Results from the queries above will look like this:</b>
 <pre>
 {
   "historical": {
-    "max": 14972,
-    "mean": 13780.2,
-    "min": 9357
+    "ddmax": 14972,
+    "ddmean": 13696.3,
+    "ddmin": 9357
   },
-  "projected": {
-    "max": 15921,
-    "mean": 12053.6,
-    "min": 8036
-  }
+  ...
 }
 </pre>
 
-<h4>All</h4>
-
-<p>Output from the <code>all</code> endpoints will look similar to this:</p>
+<b>The above output is structured as such:</b>
 
 <pre>
-  {
-    "ERA-Interim": {
-      "1979": 13625,
-      "1980": 13933,
-      ...
-      "2014": 13040,
-      "2015": 9357
-    },
-    "GFDL-CM3": {
-      "2006": 14318,
-      "2007": 12884,
-      ...
-      "2099": 8036,
-      "2100": 8515
-    },
-    "NCAR-CCSM4": {
-      "2006": 13847,
-      "2007": 15804,
-      ...
-      "2099": 10609,
-      "2100": 10472
+{
+    &lthistorical or projected>:{
+      &ltyear>: {
+        "ddmax": &ltddmax value>,
+        "ddmean": &ltddmean value>,
+        "ddmin": &ltddmin value>
+        }
+      }
     }
   }
+  ...
+}
 </pre>
 
 <h4>CSV Export</h4>
-<p>CSV data can be exported from any of the <code>all</code> endpoints by appending <code>?format=csv</code> to the end of the URL.</p>
-<p>All heating degreee day data (CSV): <a href="/mmm/degree_days/heating/all/65.0628/-146.1627?format=csv">/mmm/degree_days/heating/all/65.0628/-146.1627?format=csv</a></p>
-<p>All below 0&deg;F degree day data (CSV): <a href="/mmm/degree_days/below_zero/all/65.0628/-146.1627?format=csv">/mmm/degree_days/below_zero/all/65.0628/-146.1627?format=csv</a></p>
-<p>All thawing index data (CSV): <a href="/mmm/degree_days/thawing_index/all/65.0628/-146.1627?format=csv">/mmm/degree_days/thawing_index/all/65.0628/-146.1627?format=csv</a></p>
-<p>All freezing index data (CSV): <a href="/mmm/degree_days/freezing_index/all/65.0628/-146.1627?format=csv">/mmm/degree_days/freezing_index/all/65.0628/-146.1627?format=csv</a></p>
-
+<p>To export the point data in a CSV file, append <code>?format=csv</code>.</p>
+<p>Example: <a href="/mmm/degree_days/heating/all/65.0628/-146.1627?format=csv">/mmm/degree_days/heating/all/65.0628/-146.1627?format=csv</a></p>
+<p>Example: <a href="/mmm/degree_days/below_zero/all/65.0628/-146.1627?format=csv">/mmm/degree_days/below_zero/all/65.0628/-146.1627?format=csv</a></p>
+<p>Example: <a href="/mmm/degree_days/thawing_index/all/65.0628/-146.1627?format=csv">/mmm/degree_days/thawing_index/all/65.0628/-146.1627?format=csv</a></p>
+<p>Example: <a href="/mmm/degree_days/freezing_index/all/65.0628/-146.1627?format=csv">/mmm/degree_days/freezing_index/all/65.0628/-146.1627?format=csv</a></p>
 {% endblock %}
