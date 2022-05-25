@@ -45,13 +45,6 @@
 <p>Query for both historical and projected heating degree days min, mean, and max:<p>
 <p>Example: <a href="/mmm/degree_days/heating/hp/65.0628/-146.1627">/mmm/degree_days/heating/hp/65.0628/-146.1627</a></p>
 
-<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
-<p>Add a start year and end year to end of query:</p>
-<p>Example: <a href="/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2030">/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2030</a></p>
-
-<p>Query for all heating degree days min, mean, and max data across all historical and projected models from 1979-2100:</p>
-<p>Example: <a href="/mmm/degree_days/heating/all/65.0628/-146.1627">/mmm/degree_days/heating/all/65.0628/-146.1627</a></p>
-
 <h5>Below Zero (0&deg;F) Degree Days</h5>
 <p>Query for historical below zero degree days min, mean, and max:<p>
 <p>Example: <a href="/mmm/degree_days/below_zero/historical/65.0628/-146.1627">/mmm/degree_days/below_zero/historical/65.0628/-146.1627</a></p>
@@ -61,13 +54,6 @@
 
 <p>Query for both historical and projected below zero degree days min, mean, and max:<p>
 <p>Example: <a href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627">/mmm/degree_days/below_zero/hp/65.0628/-146.1627</a></p>
-
-<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
-<p>Add a start year and end year to end of query:</p>
-<p>Example: <a href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627/1990/2030">/mmm/below_zero/heating/hp/65.0628/-146.1627/1990/2030</a></p>
-
-<p>Query for all below zero degree days min, mean, and max data across all historical and projected models from 1979-2100:</p>
-<p>Example: <a href="/mmm/degree_days/below_zero/all/65.0628/-146.1627">/mmm/degree_days/below_zero/all/65.0628/-146.1627</a></p>
 
 <h5>Thawing Index</h5>
 <p>Query for historical thawing index min, mean, and max:<p>
@@ -79,13 +65,6 @@
 <p>Query for both historical and projected thawing index min, mean, and max:<p>
 <p>Example: <a href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627">/mmm/degree_days/thawing_index/hp/65.0628/-146.1627</a></p>
 
-<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
-<p>Add a start year and end year to end of query:</p>
-<p>Example: <a href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627/1990/2030">/mmm/thawing_index/heating/hp/65.0628/-146.1627/1990/2030</a></p>
-
-<p>Query for all thawing index min, mean, and max data across all historical and projected models from 1979-2100:</p>
-<p>Example: <a href="/mmm/degree_days/thawing_index/all/65.0628/-146.1627">/mmm/degree_days/thawing_index/all/65.0628/-146.1627</a></p>
-
 <h5>Freezing Index</h5>
 <p>Query for historical freezing index min, mean, and max:<p>
 <p>Example: <a href="/mmm/degree_days/freezing_index/historical/65.0628/-146.1627">/mmm/degree_days/freezing_index/historical/65.0628/-146.1627</a></p>
@@ -96,14 +75,8 @@
 <p>Query for both historical and projected freezing index min, mean, and max:<p>
 <p>Example: <a href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627">/mmm/degree_days/freezing_index/hp/65.0628/-146.1627</a></p>
 
-<p>Query for a given date range between 1979-2100 for min, mean, and max to be determined from.</p>
-<p>Add a start year and end year to end of query:</p>
-<p>Example: <a href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627/1990/2030">/mmm/freezing_index/heating/hp/65.0628/-146.1627/1990/2030</a></p>
-
-<p>Query for all freezing index min, mean, and max data across all historical and projected models from 1979-2100:</p>
-<p>Example: <a href="/mmm/degree_days/freezing_index/all/65.0628/-146.1627">/mmm/degree_days/freezing_index/all/65.0628/-146.1627</a></p>
-
 <b>Results from the queries above will look like this:</b>
+
 <pre>
 {
   "historical": {
@@ -118,19 +91,64 @@
 <b>The above output is structured as such:</b>
 
 <pre>
-{
-    &lthistorical or projected>:{
-      &ltyear>: {
-        "ddmax": &ltddmax value>,
-        "ddmean": &ltddmean value>,
-        "ddmin": &ltddmin value>
-        }
-      }
+  {
+    <summary time period type, "historical" or "projected">: {
+      "ddmax": <max dd value across all models and years>,
+      "ddmean": <mean dd value across all models and years>,
+      "ddmin": <min dd value across all models and years>
     }
+    ...
+  }
+</pre>
+
+<h4>Comprehensive queries</h4>
+<p>The following queries will fetch degree day values across all available years.</p>
+
+<p>Query for all heating degree days for all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/heating/all/65.0628/-146.1627">/mmm/degree_days/heating/all/65.0628/-146.1627</a></p>
+
+<p>Query for all below zero degree days for all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/below_zero/all/65.0628/-146.1627">/mmm/degree_days/below_zero/all/65.0628/-146.1627</a></p>
+
+<p>Query for all thawing index for all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/thawing_index/all/65.0628/-146.1627">/mmm/degree_days/thawing_index/all/65.0628/-146.1627</a></p>
+
+<p>Query for all freezing index for all historical and projected models from 1979-2100:</p>
+<p>Example: <a href="/mmm/degree_days/freezing_index/all/65.0628/-146.1627">/mmm/degree_days/freezing_index/all/65.0628/-146.1627</a></p>
+
+<b>Results from the query above will look like this:</b>
+
+<pre>
+{
+  "ERA-Interim": {
+    "1979": {
+      "dd:" 4802,
+    }
+    ...
   }
   ...
 }
 </pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &ltmodel>: {
+    &ltyear>: {
+      "dd": &ltdegree days value>,
+    }
+    ...
+  }
+  ...
+}
+</pre>
+
+<h4>Supply summary time period (start / end years)</h4>
+<p>The start and end year to use for any of the summary options from above (i.e. "historical", "projected", or "hp") may be supplied with the query as well, appended to the end of the URL in the form <code>/&ltstart year>/&ltend year></code></p>
+<p>Here is an example to query heating degree days data for historical and projected models from 1990-2020:</p>
+<p>Example: <a href="/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2020">/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2020</a></p>
+<p>Note - this query option will only work for summary options, not the comprehensive options above (e.g. "all") </p>
 
 <h4>CSV Export</h4>
 <p>To export the point data in a CSV file, append <code>?format=csv</code>.</p>
