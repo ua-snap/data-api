@@ -256,6 +256,7 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     fieldnames = [
         "model",
         "year",
+        "variable",
         "value",
     ]
 
@@ -265,13 +266,13 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     )
 
     if var_ep == "heating":
-        metadata = "# value is the total annual degree days below 65°F\n"
+        metadata = "# dd is the total annual degree days below 65°F for the specified model\n"
     elif var_ep == "below_zero":
-        metadata = "# value is the total annual degree days below 0°F\n"
+        metadata = "# dd is the total annual degree days below 0°F for the specified model\n"
     elif var_ep == "thawing_index":
-        metadata = "# value is the total annual degree days above freezing\n"
+        metadata = "# dd is the total annual degree days above freezing for the specified model\n"
     elif var_ep == "freezing_index":
-        metadata = "# value is the total annual degree days below freezing\n"
+        metadata = "# dd is the total annual degree days below freezing for the specified model\n"
 
     filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
