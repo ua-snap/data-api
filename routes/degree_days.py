@@ -73,9 +73,9 @@ def get_dd_wcps_request_str(x, y, cov_id, models, years, tempstat, encoding="jso
         years (str): Colon-separated full date-time i.e.
             "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\""
         tempstat(int): Integer between 0-2 where:
-            - 0 = tasmax
-            - 1 = tasmean
-            - 2 = tasmin
+            - 0 = ddmax
+            - 1 = ddmean
+            - 2 = ddmin
         encoding (str): currently supports either "json" or "netcdf"
             for point or bbox queries, respectively
 
@@ -168,7 +168,7 @@ def package_dd_point_data(point_data, var_ep, horp):
             year_index = 0
             for value in v_li:
                 if year in years:
-                    point_pkg[model][years[year_index]] = value
+                    point_pkg[model][years[year_index]] = {"dd": value}
                     year_index += 1
                 year += 1
     else:
@@ -178,9 +178,9 @@ def package_dd_point_data(point_data, var_ep, horp):
             historical_min = round(point_data[2], 1)
 
             point_pkg["historical"] = {}
-            point_pkg["historical"]["min"] = historical_min
-            point_pkg["historical"]["mean"] = historical_mean
-            point_pkg["historical"]["max"] = historical_max
+            point_pkg["historical"]["ddmin"] = historical_min
+            point_pkg["historical"]["ddmean"] = historical_mean
+            point_pkg["historical"]["ddmax"] = historical_max
 
         if horp in ["projected", "hp"]:
             if horp == "projected":
@@ -193,9 +193,9 @@ def package_dd_point_data(point_data, var_ep, horp):
                 projected_min = round(point_data[5], 1)
 
             point_pkg["projected"] = {}
-            point_pkg["projected"]["min"] = projected_min
-            point_pkg["projected"]["mean"] = projected_mean
-            point_pkg["projected"]["max"] = projected_max
+            point_pkg["projected"]["ddmin"] = projected_min
+            point_pkg["projected"]["ddmean"] = projected_mean
+            point_pkg["projected"]["ddmax"] = projected_max
 
     return point_pkg
 
