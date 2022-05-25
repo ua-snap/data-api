@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 <h3>Historical and Projected Temperature + Precipitation Minimum, Mean, and Maximum</h3>
-<p>The endpoint here provides access to the temperature at surface in degrees Celsius and total annual precipitation in mm for both historical and projected model data over the state of Alaska.</p>
+<p>The endpoint here provides access to the temperature at surface in degrees Fahrenheit and total annual precipitation in inches for both historical and projected model data over the state of Alaska.</p>
 <h4>Service endpoints</h4>
-<p>These endpoints are for point queries to generate TAS and PR min, mean, and max for a given point.
+<p>These endpoints are for point queries to generate temperature and precipitation minimum, mean, and maximum for a given point.
 <ul>
-    <li><a href="/mmm/temperature">Temperature Point Query</a>: TAS min, mean, and max for point.</li>
-    <li><a href="/mmm/precipitation">Precipitation Point Query</a>: PR min, mean, and max for point.</li>
+    <li><a href="/mmm/temperature">Temperature Point Query</a>: min, mean, and max temperature values for point.</li>
+    <li><a href="/mmm/precipitation">Precipitation Point Query</a>: min, mean, and max precipitation values for point.</li>
 </ul>
 {% endblock %}

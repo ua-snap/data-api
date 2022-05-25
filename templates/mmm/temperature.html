@@ -1,20 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
 <h3>Temperature at Surface Min, Mean, and Max Point Query</h3>
+<p>This endpoint allows access to various summaries of point extractions from gridded near-surface air temperature data. Note, the quantity being modeled and supplied here is also referred to throughout by its standard abbreviated modeling name, "tas".</p>
+<h4>Summary queries for January or July</h4>
+<p>The following queries will fetch temperature values summarized across all models and scenarios for specified time eras.</p>
 <p>Query for historical temperature min, mean, and max for January or July:</p>
 <p>Example: <a href="/mmm/temperature/jan/historical/65.0628/-146.1627">/mmm/temperature/jan/historical/65.0628/-146.1627</a></p>
 <p>Example: <a href="/mmm/temperature/july/historical/65.0628/-146.1627">/mmm/temperature/july/historical/65.0628/-146.1627</a></p>
 <p>Query for projected temperature min, mean, and max for January or July:</p>
 <p>Example: <a href="/mmm/temperature/jan/projected/65.0628/-146.1627">/mmm/temperature/jan/projected/65.0628/-146.1627</a></p>
 <p>Example: <a href="/mmm/temperature/july/projected/65.0628/-146.1627">/mmm/temperature/july/projected/65.0628/-146.1627</a></p>
-<p>Query for both historical and projected temperature min, mean, and max for January or July:</p>
+<p>Query for both historical and projected temperature min, mean, and max for January or July:
 <p>Example: <a href="/mmm/temperature/jan/hp/65.0628/-146.1627">/mmm/temperature/jan/hp/65.0628/-146.1627</a></p>
 <p>Example: <a href="/mmm/temperature/july/hp/65.0628/-146.1627">/mmm/temperature/july/hp/65.0628/-146.1627</a></p>
-<p>Query for a given date range between 1901-2100 for min, mean, and max to be determined from.</p>
-<p>Add a start year and end year to end of query:</p>
-<p>Example: <a href="/mmm/temperature/jan/hp/65.0628/-146.1627/1901/2020">/mmm/temperature/jan/hp/65.0628/-146.1627/1901/2020</a></p>
-<p>Example: <a href="/mmm/temperature/july/hp/65.0628/-146.1627/1901/2020">/mmm/temperature/july/hp/65.0628/-146.1627/1901/2020</a></p>
-<p>Query for all temperature min, mean, and max data across all historical and projected models from 1901-2100:</p>
+
+<b>Results from the queries above will look like this:</b>
+
+<pre>
+{
+  "historical": {
+    "tasmax": 21.7,
+    "tasmean": 13.5,
+    "tasmin": 6.2
+  }
+  ...
+}
+</pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &ltsummary time period type, "historical" or "projected">: {
+    "tasmax": &ltmax tas value across all models, scenarios, and years>,
+    "tasmean": &ltmean tas value across all models, scenarios, and years>,
+    "tasmin": &ltmin tas value across all models, scenarios, and years>
+  }
+  ...
+}
+</pre>
+
+<br>
+<h4>Comprehensive queries for January or July</h4>
+<p>The following queries will fetch yearly temperature values across all available years for January or July.</p>
+<p>Query for all Januray or July min, mean, and max temperature data for all historical and projected models from 1901-2099:</p>
 <p>Example: <a href="/mmm/temperature/jan/all/65.0628/-146.1627">/mmm/temperature/jan/all/65.0628/-146.1627</a></p>
 <p>Example: <a href="/mmm/temperature/july/all/65.0628/-146.1627">/mmm/temperature/july/all/65.0628/-146.1627</a></p>
 <b>Results from the query above will look like this:</b>
@@ -23,11 +52,13 @@
 {
   "CRU-TS": {
     "historical": {
-      "1900": {
+      "1901": {
         "tasmax": 19.7,
         "tasmean": 13.4,
         "tasmin": 7.1
       }
+      ...
+    }
   }
   ...
 }
@@ -40,19 +71,103 @@
   &ltmodel>: {
     &ltscenario>:{
       &ltyear>: {
-        "tasmax": &lttasmax value>,
-        "tasmean": &lttasmean value>,
-        "tasmin": &lttasmin value>
+        "tasmax": &ltannual max tas value>,
+        "tasmean": &ltannual mean tas value>,
+        "tasmin": &ltannual min tas value>
         }
       }
+      ...
+    }
+    ...
+  }
+  ...
+}
+</pre>
+
+<br>
+<h4>Summary queries for annual mean temperature</h4>
+<p>The following queries will fetch mean annual temperature values summarized across all models and scenarios for specified time eras.</p>
+<p>Query for historical min, mean, and max annual mean temperature:</p>
+<p>Example: <a href="/mmm/temperature/historical/65.0628/-146.1627">/mmm/temperature/historical/65.0628/-146.1627</a></p>
+<p>Query for projected min, mean, and max annual mean temperature:</p>
+<p>Example: <a href="/mmm/temperature/projected/65.0628/-146.1627">/mmm/temperature/projected/65.0628/-146.1627</a></p>
+<p>Query for both historical and projected min, mean, and max annual mean temperature:</p>
+<p>Example: <a href="/mmm/temperature/hp/65.0628/-146.1627">/mmm/temperature/hp/65.0628/-146.1627</a></p>
+
+<b>Results from the queries above will look like this:</b>
+
+<pre>
+{
+  "historical": {
+    "tasmax": -1.8,
+    "tasmean": -4.4,
+    "tasmin": -7.2
+  }
+  ...
+}
+</pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &ltsummary time period type, "historical" or "projected">: {
+    "tasmax": &ltmax tas value across all models, scenarios, and years>,
+    "tasmean": &ltmean tas value across all models, scenarios, and years>,
+    "tasmin": &ltmin tas value across all models, scenarios, and years>
+  }
+  ...
+}
+</pre>
+
+<br>
+<h4>Comprehensive queries for annual mean temperature</h4>
+<p>The following query will fetch annual mean temperature values across all available years.</p>
+<p>Query for all mean annual temperature data for all historical and projected models from 1901-2099:</p>
+<p>Example: <a href="/mmm/temperature/all/65.0628/-146.1627">/mmm/temperature/all/65.0628/-146.1627</a></p>
+
+<b>Results from the query above will look like this:</b>
+
+<pre>
+{
+  "CRU-TS": {
+    "historical": {
+      "1901": {
+        "tas": -5,
+      }
+      ...
     }
   }
   ...
 }
 </pre>
 
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &ltmodel>: {
+    &ltscenario>:{
+      &ltyear>: {
+        "tas": &ltannual mean tas value>,
+      }
+      ...
+    }
+    ...
+  }
+  ...
+}
+</pre>
+
+<h4>Supply summary time period (start / end years)</h4>
+<p>The start and end year to use for any of the summary options from above (i.e. "historical", "projected", or "hp") may be supplied with the query as well, appended to the end of the URL in the form <code>/&ltstart year>/&ltend year></code></p>
+<p>Here is an example to query mean annual temperature data for historical and projected models from 1950-2020:</p>
+<p>Example: <a href="/mmm/temperature/hp/65.0628/-146.1627/1950/2020">/mmm/temperature/hp/65.0628/-146.1627/1950/2020</a></p>
+<p>Note - this query option will only work for summary options, not the comprehensive options above (e.g. "all") </p>
+
 <h4>CSV Export</h4>
-<p>To export the point data in a CSV file, append <code>?format=csv</code>.</p>
+<p>To export the point data in a CSV file, append <code>?format=csv</code>. Currently only available for the "all" option for the time era variable</p>
 <p>Example: <a href="/mmm/temperature/jan/all/65.0628/-146.1627?format=csv">/mmm/temperature/jan/all/65.0628/-146.1627?format=csv</a></p>
 <p>Example: <a href="/mmm/temperature/july/all/65.0628/-146.1627?format=csv">/mmm/temperature/july/all/65.0628/-146.1627?format=csv</a></p>
+<p>Example: <a href="/mmm/temperature/all/65.0628/-146.1627?format=csv">/mmm/temperature/all/65.0628/-146.1627?format=csv</a></p>
 {% endblock %}
