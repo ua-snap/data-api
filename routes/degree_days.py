@@ -120,14 +120,14 @@ def get_dd_wcps_request_str(x, y, cov_id, models, years, tempstat, encoding="jso
         return wcps_request_str
 
 
-@routes.route("/degree_days/")
-@routes.route("/degree_days/abstract/")
-@routes.route("/degree_days/heating/")
-@routes.route("/degree_days/below_zero/")
-@routes.route("/degree_days/thawing_index/")
-@routes.route("/degree_days/freezing_index/")
+@routes.route("/mmm/degree_days/")
+@routes.route("/mmm/degree_days/abstract/")
+@routes.route("/mmm/degree_days/heating/")
+@routes.route("/mmm/degree_days/below_zero/")
+@routes.route("/mmm/degree_days/thawing_index/")
+@routes.route("/mmm/degree_days/freezing_index/")
 def heating_degree_days_about():
-    return render_template("degree_days/abstract.html")
+    return render_template("/mmm/degree_days.html")
 
 
 def package_dd_point_data(point_data, var_ep, horp):
@@ -278,8 +278,8 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
     return write_csv(csv_dicts, fieldnames, filename, metadata)
 
 
-@routes.route("/degree_days/<var_ep>/<horp>/<lat>/<lon>")
-@routes.route("/degree_days/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
+@routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>")
+@routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
 def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=None):
     """Point data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
