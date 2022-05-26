@@ -11,12 +11,10 @@ from fetch_data import *
 from validate_request import (
     validate_latlon,
     project_latlon,
-    validate_year,
 )
 from validate_data import (
     nullify_and_prune,
     postprocess,
-    place_name_and_type,
 )
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
@@ -314,7 +312,7 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         JSON-like dict of requested degree days data
 
     Notes:
-        example request: http://localhost:5000/degree_days/heating/all/65/-147
+        example request: http://localhost:5000/mmm/degree_days/heating/all/65/-147
     """
     validation = validate_latlon(lat, lon)
     if validation == 400:
@@ -329,33 +327,9 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
 
     x, y = project_latlon(lat, lon, 3338)
 
-    if start_year is not None:
-        if end_year is not None:
-            validation = validate_year(start_year, end_year)
-
-            if validation == 400:
-                return render_template("400/bad_request.html"), 400
-        else:
-            return render_template("400/bad_request.html"), 400
-
-    # Check provided years against valid ranges for historical vs. projected.
-    if start_year is not None:
-        if horp == "historical":
-            min_year = years_lu["historical"]["min"]
-            max_year = years_lu["historical"]["max"]
-        elif horp == "projected":
-            min_year = years_lu["projected"]["min"]
-            max_year = years_lu["projected"]["max"]
-        elif horp == "hp":
-            min_year = years_lu["historical"]["min"]
-            max_year = years_lu["projected"]["max"]
-        if int(start_year) < min_year or int(end_year) > max_year:
-            return (
-                render_template(
-                    "422/invalid_year.html", min_year=min_year, max_year=max_year
-                ),
-                422,
-            )
+    valid_years = validate_years(horp, int(start_year), int(end_year))
+    if valid_years is not True:
+        return valid_years
 
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
@@ -379,3 +353,36 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         return create_csv(point_pkg, var_ep, None, lat=lat, lon=lon)
 
     return postprocess(point_pkg, "degree_days")
+
+
+def validate_years(horp, start_year, end_year):
+    """Check provided years against valid ranges for historical vs. projected.
+
+    Args:
+        horp [Historical or Projected] (str): historical, projected, hp, or all
+        start_year (int): start year for WCPS query or None
+        end_year (int): end year for WCPS query or None
+
+    Returns:
+        True if years are valid, otherwise an error page to show valid years
+    """
+    if None not in [start_year, end_year]:
+        if horp == "historical":
+            min_year = years_lu["historical"]["min"]
+            max_year = years_lu["historical"]["max"]
+        elif horp == "projected":
+            min_year = years_lu["projected"]["min"]
+            max_year = years_lu["projected"]["max"]
+        elif horp == "hp":
+            min_year = years_lu["historical"]["min"]
+            max_year = years_lu["projected"]["max"]
+
+        for year in [start_year, end_year]:
+            if year < min_year or year > max_year:
+                return (
+                    render_template(
+                        "422/invalid_year.html", min_year=min_year, max_year=max_year
+                    ),
+                    422,
+                )
+    return True
