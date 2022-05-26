@@ -130,6 +130,7 @@ def package_dd_point_data(point_data, var_ep, horp):
         point_data (list): nested list containing JSON
             results of WCPS query
         var_ep (str): variable name
+        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of query results
@@ -202,7 +203,9 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
         lon (float): longitude
         cov_id (list): string of heating_degree_days, degree_days_below_zero,
             thawing_index, or freezing_index
-        horp [Historical or Projected] (str): historical, projected, or all
+        horp [Historical or Projected] (str): historical, projected, hp, or all
+        start_year (int): start year for WCPS query or None
+        end_year (int): end year for WCPS query or None
 
     Returns:
         JSON-like dict of data at provided latitude and longitude
@@ -303,6 +306,9 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         var_ep (str): heating, below_zero, thawing_index, or freezing_index
         lat (float): latitude
         lon (float): longitude
+        horp [Historical or Projected] (str): historical, projected, hp, or all
+        start_year (int): optional start year for WCPS query
+        end_year (int): optional end year for WCPS query
 
     Returns:
         JSON-like dict of requested degree days data

@@ -330,7 +330,6 @@ def parse_meta_xml_str(meta_xml_str):
             DescribeCoverage WCS query
     """
     meta_xml = ET.ElementTree(ET.fromstring(meta_xml_str))
-
     # wow xml
     encoding_el = list(
         list(
