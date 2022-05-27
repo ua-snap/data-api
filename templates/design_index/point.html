@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Design Index Point Query</h3>
+<p>
+  The endpoints here provide access to the design thawing index and design freezing index.
+</p>
+
+<h4>Endpoints</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>thawing</td>
+      <td>The mean of the three highest cumulative annual degree days from the thawing index for each era.</td>
+    </tr>
+    <tr>
+      <td>freezing</td>
+      <td>The mean of the three highest cumulative annual degree days from the freezing index for each era.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Examples</h4>
+<p>Query for the historical and projected design thawing index at a provided point:</p>
+<p>Example: <a href="/design_index/thawing/point/65.0628/-146.1627">/design_index/thawing/point/65.0628/-146.1627</a></p>
+<p>Query for the historical and projected design freezing index at a provided point:</p>
+<p>Example: <a href="/design_index/freezing/point/65.0628/-146.1627">/design_index/freezing/point/65.0628/-146.1627</a></p>
+
+<b>Results from the queries above will look like this:</b>
+
+<pre>
+{
+  "ERA-Interim": {
+    "1980-2009": {
+      "di": 3429
+    }
+  },
+  ...
+}
+</pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &lt;model>: {
+    &lt;era>: {
+      "di": &lt;mean of degree days for top three years in era>
+    }
+  },
+  ...
+}
+</pre>
+
+<h4>CSV Export</h4>
+<p>To export the point data in a CSV file, append <code>?format=csv</code>.</p>
+<p>Example: <a href="/design_index/thawing/point/65.0628/-146.1627?format=csv">/design_index/thawing/point/65.0628/-146.1627?format=csv</a></p>
+<p>Example: <a href="/design_index/freezing/point/65.0628/-146.1627?format=csv">/design_index/freezing/point/65.0628/-146.1627?format=csv</a></p>
+{% endblock %}

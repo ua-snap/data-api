@@ -349,7 +349,11 @@ def parse_meta_xml_str(meta_xml_str):
     for dim in encoding_el.iter():
         if not dim.text.isspace():
             encoding_di = eval(dim.text)
-            dim_encodings[dim.tag] = {int(k): v for k, v in encoding_di.items()}
+            for key, value in encoding_di.items():
+                if isinstance(value, dict):
+                    dim_encodings[key] = {int(k): v for k, v in value.items()}
+                else:
+                    dim_encodings[dim.tag] = {int(k): v for k, v in encoding_di.items()}
     return dim_encodings
 
 
