@@ -8,6 +8,7 @@ from fetch_data import add_titles
 
 nodata_values = {
     "alfresco": [-9999],
+    "degree_days": [-9999],
     "elevation": [-9999],
     "fire": [-9999],
     "forest": [65535],
