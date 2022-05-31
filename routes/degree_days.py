@@ -327,9 +327,10 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
 
     x, y = project_latlon(lat, lon, 3338)
 
-    valid_years = validate_years(horp, int(start_year), int(end_year))
-    if valid_years is not True:
-        return valid_years
+    if None not in [start_year, end_year]:
+        valid_years = validate_years(horp, int(start_year), int(end_year))
+        if valid_years is not True:
+            return valid_years
 
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
