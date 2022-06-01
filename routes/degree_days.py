@@ -329,20 +329,12 @@ def create_csv(data_pkg, cov_id_str, place_id=None, lat=None, lon=None):
     Returns:
         CSV response object
     """
-    if cov_id_str in ["design_thawing_index", "design_freezing_index"]:
-        fieldnames = [
-            "model",
-            "year",
-            "variable",
-            "value",
-        ]
-    else:
-        fieldnames = [
-            "model",
-            "year",
-            "variable",
-            "value",
-        ]
+    fieldnames = [
+        "model",
+        "year",
+        "variable",
+        "value",
+    ]
 
     csv_dicts = build_csv_dicts(
         data_pkg,
