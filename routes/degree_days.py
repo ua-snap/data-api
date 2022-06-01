@@ -24,7 +24,11 @@ degree_days_api = Blueprint("degree_days_api", __name__)
 try:
     # The heating_degree_days, degree_days_below_zero, thawing_index, and
     # freezing_index coverages all share the same dim_encodings
-    dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days"))
+    dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days"))
+
+    # The design_thawing_index and design_freezing_index coverages share the
+    # same dim encodings
+    di_dim_encodings = asyncio.run(get_dim_encodings("design_thawing_index"))
 except:
     print("Missing from Apollo")
 
@@ -33,13 +37,17 @@ var_ep_lu = {
     "below_zero": {"cov_id_str": "degree_days_below_zero"},
     "thawing_index": {"cov_id_str": "thawing_index"},
     "freezing_index": {"cov_id_str": "freezing_index"},
+    "design_thawing_index": {"cov_id_str": "design_thawing_index"},
+    "design_freezing_index": {"cov_id_str": "design_freezing_index"},
 }
 
 var_label_lu = {
-    "heating": "Heating Degree Days",
-    "below_zero": "Degree Days Below Zero",
+    "heating_degree_days": "Heating Degree Days",
+    "degree_days_below_zero": "Degree Days Below Zero",
     "thawing_index": "Thawing Index",
     "freezing_index": "Freezing Index",
+    "design_thawing_index": "Design Thawing Index",
+    "design_freezing_index": "Design Freezing Index",
 }
 
 years_lu = {
@@ -117,23 +125,37 @@ def get_dd_wcps_request_str(x, y, cov_id, models, years, tempstat, encoding="jso
 @routes.route("/mmm/degree_days/below_zero/")
 @routes.route("/mmm/degree_days/thawing_index/")
 @routes.route("/mmm/degree_days/freezing_index/")
-def heating_degree_days_about():
+def degree_days_about():
     return render_template("/mmm/degree_days.html")
 
 
+@routes.route("/design_index/")
+@routes.route("/design_index/abstract/")
+@routes.route("/design_index/thawing/")
+@routes.route("/design_index/freezing/")
+def design_index_about():
+    return render_template("/design_index/abstract.html")
+
+
+@routes.route("/design_index/point")
+@routes.route("/design_index/thawing/point")
+@routes.route("/design_index/freezing/point")
+def design_index_about_point():
+    return render_template("/design_index/point.html")
+
+
 def package_dd_point_data(point_data, var_ep, horp):
-    """Add data for JSON response
+    """Add JSON response data for heating_degree_days, below_zero_degree_days,
+    thawing_index, and freezing_index coverages
 
     Args:
-        point_data (list): nested list containing JSON
-            results of WCPS query
+        point_data (list): nested list containing JSON results of WCPS query
         var_ep (str): variable name
         horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of query results
     """
-
     point_pkg = {}
     if horp == "all":
         for mi, v_li in enumerate(point_data):  # (nested list with model at dim 0)
@@ -146,7 +168,7 @@ def package_dd_point_data(point_data, var_ep, horp):
                 max_year = years_lu["projected"]["max"]
                 years = range(min_year, max_year + 1)
 
-            model = dim_encodings["model"][mi]
+            model = dd_dim_encodings["model"][mi]
             point_pkg[model] = {}
 
             # Responses from Rasdaman include the same array length for both
@@ -192,6 +214,33 @@ def package_dd_point_data(point_data, var_ep, horp):
     return point_pkg
 
 
+def package_di_point_data(point_data):
+    """Add JSON response data for design_thawing_index and
+    design_freezing_index coverages
+
+    Args:
+        point_data (list): nested list containing JSON results of WCPS query
+
+    Returns:
+        JSON-like dict of query results
+    """
+    point_pkg = {}
+    for mi, m_li in enumerate(point_data):
+        model = di_dim_encodings["model"][mi]
+        point_pkg[model] = {}
+        for ei, value in enumerate(m_li):
+            era = di_dim_encodings["era"][ei]
+            if mi > 0 and era == "1980-2009":
+                continue
+            if mi == 0 and era != "1980-2009":
+                continue
+            if value is None:
+                point_pkg[model][era] = None
+            else:
+                point_pkg[model][era] = {"di": value}
+    return point_pkg
+
+
 async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
     """Run the async degree days data request for a single point
     and return data as json
@@ -199,7 +248,7 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
     Args:
         lat (float): latitude
         lon (float): longitude
-        cov_id (list): string of heating_degree_days, degree_days_below_zero,
+        cov_id (str): heating_degree_days, degree_days_below_zero,
             thawing_index, or freezing_index
         horp [Historical or Projected] (str): historical, projected, hp, or all
         start_year (int): start year for WCPS query or None
@@ -252,18 +301,34 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
     return point_data_list
 
 
-def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
+async def fetch_di_point_data(x, y, cov_id):
+    """Run the async design index data request for a single point
+    and return data as json
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+        cov_id (str): design_thawing_index or freezing_thawing_index
+
+    Returns:
+        JSON-like dict of data at provided latitude and longitude
+    """
+    request_str = generate_wcs_getcov_str(x, y, cov_id)
+    point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
+    return point_data_list
+
+
+def create_csv(data_pkg, cov_id_str, place_id=None, lat=None, lon=None):
     """Create CSV file with metadata string and location based filename.
     Args:
         data_pkg (dict): JSON-like object of data
-        var_ep (str): heating, below_zero, thawing_index, or freezing_index
+        cov_id_str (str): coverage id string
         place_id: place identifier (e.g., AK124)
         lat: latitude for points or None for polygons
         lon: longitude for points or None for polygons
     Returns:
         CSV response object
     """
-
     fieldnames = [
         "model",
         "year",
@@ -276,20 +341,24 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
         fieldnames,
     )
 
-    if var_ep == "heating":
+    if cov_id_str == "heating_degree_days":
         metadata = (
             "# dd is the total annual degree days below 65°F for the specified model\n"
         )
-    elif var_ep == "below_zero":
+    elif cov_id_str == "degree_days_below_zero":
         metadata = (
             "# dd is the total annual degree days below 0°F for the specified model\n"
         )
-    elif var_ep == "thawing_index":
+    elif cov_id_str == "thawing_index":
         metadata = "# dd is the total annual degree days above freezing for the specified model\n"
-    elif var_ep == "freezing_index":
+    elif cov_id_str == "freezing_index":
         metadata = "# dd is the total annual degree days below freezing for the specified model\n"
+    elif cov_id_str == "design_thawing_index":
+        metadata = "# di is the mean of above freezing degree days for top three years in era\n"
+    elif cov_id_str == "design_freezing_index":
+        metadata = "# di is the mean of below freezing degree days for top three years in era\n"
 
-    filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
+    filename = var_label_lu[cov_id_str] + " for " + lat + ", " + lon + ".csv"
 
     return write_csv(csv_dicts, fieldnames, filename, metadata)
 
@@ -297,7 +366,7 @@ def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
 @routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>")
 @routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
 def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=None):
-    """Point data endpoint. Fetch point data for
+    """Degree days data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
 
     Args:
@@ -351,7 +420,59 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         point_pkg = nullify_and_prune(point_pkg, "degree_days")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, var_ep, None, lat=lat, lon=lon)
+        return create_csv(point_pkg, cov_id_str, None, lat=lat, lon=lon)
+
+    return postprocess(point_pkg, "degree_days")
+
+
+@routes.route("/design_index/<var_ep>/point/<lat>/<lon>")
+def run_fetch_di_point_data(var_ep, lat, lon):
+    """Design index data endpoint. Fetch point data for
+    specified lat/lon and return JSON-like dict.
+
+    Args:
+        var_ep (str): thawing or freezing
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of requested design index data
+
+    Notes:
+        example request: http://localhost:5000/design_index/thawing/point/65/-147
+    """
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+
+    x, y = project_latlon(lat, lon, 3338)
+
+    if var_ep == "thawing":
+        cov_id_str = "design_thawing_index"
+    elif var_ep == "freezing":
+        cov_id_str = "design_freezing_index"
+
+    try:
+        point_data_list = asyncio.run(fetch_di_point_data(x, y, cov_id_str))
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    point_pkg = package_di_point_data(point_data_list)
+
+    if request.args.get("format") == "csv":
+        point_pkg = nullify_and_prune(point_pkg, "degree_days")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        return create_csv(point_pkg, cov_id_str, None, lat=lat, lon=lon)
 
     return postprocess(point_pkg, "degree_days")
 
