@@ -18,6 +18,7 @@ nodata_values = {
     "permafrost": [-9999, -9999.0],
     "physiography": [],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
+    "snow": [-9999],
 }
 
 
