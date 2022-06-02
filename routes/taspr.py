@@ -13,6 +13,7 @@ from flask import (
     render_template,
     request,
     current_app as app,
+    jsonify
 )
 
 # local imports
@@ -1110,6 +1111,102 @@ def about_mmm_precip():
     return render_template("mmm/precipitation.html")
 
 
+@routes.route("/eds/temperature/<lat>/<lon>")
+def get_temperature_plate(lat, lon):
+    """
+        Endpoint for requesting all data required for the Temperature Plate
+        in the ArcticEDS client.
+
+        Args:
+            lat (float): latitude
+            lon (float): longitude
+
+        Notes:
+            example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
+    """
+    temp_plate = dict()
+
+    ### HISTORICAL ###
+    temp_plate['historical'] = dict()
+
+    all = mmm_point_data_endpoint("temperature", "historical", lat, lon)
+    temp_plate['historical']['all'] = all['historical']
+
+    jan = mmm_point_data_endpoint("temperature", "historical", lat, lon, "jan")
+    temp_plate['historical']['jan'] = jan['historical']
+
+    july = mmm_point_data_endpoint("temperature", "historical", lat, lon, "july")
+    temp_plate['historical']['july'] = july['historical']
+
+    ### 2010-2039 ###
+    temp_plate['2010-2039'] = dict()
+
+    all = mmm_point_data_endpoint("temperature", "projected", lat, lon, start_year="2010", end_year="2039")
+    temp_plate['2010-2039']['all'] = all['projected']
+
+    jan = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="jan", start_year="2010", end_year="2039")
+    temp_plate['2010-2039']['jan'] = jan['projected']
+
+    july = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="july", start_year="2010", end_year="2039")
+    temp_plate['2010-2039']['july'] = july['projected']
+
+    ### 2040-2069 ###
+    temp_plate['2040-2069'] = dict()
+
+    all = mmm_point_data_endpoint("temperature", "projected", lat, lon, start_year="2040", end_year="2069")
+    temp_plate['2040-2069']['all'] = all['projected']
+
+    jan = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="jan", start_year="2040", end_year="2069")
+    temp_plate['2040-2069']['jan'] = jan['projected']
+
+    july = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="july", start_year="2040",
+                                   end_year="2069")
+    temp_plate['2040-2069']['july'] = july['projected']
+
+    ### 2070-2099 ###
+    temp_plate['2070-2099'] = dict()
+
+    all = mmm_point_data_endpoint("temperature", "projected", lat, lon, start_year="2070", end_year="2099")
+    temp_plate['2070-2099']['all'] = all['projected']
+
+    jan = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="jan", start_year="2070", end_year="2099")
+    temp_plate['2070-2099']['jan'] = jan['projected']
+
+    july = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="july", start_year="2070",
+                                   end_year="2099")
+    temp_plate['2070-2099']['july'] = july['projected']
+
+    return jsonify(temp_plate)
+
+
+@routes.route("/eds/precipitation/<lat>/<lon>")
+def get_precipitation_plate(lat, lon):
+    """
+            Endpoint for requesting all data required for the Precipitation Plate
+            in the ArcticEDS client.
+
+            Args:
+                lat (float): latitude
+                lon (float): longitude
+
+            Notes:
+                example request: http://localhost:5000/eds/precipitation/65.0628/-146.1627
+        """
+    pr_plate = dict()
+    pr_plate = mmm_point_data_endpoint("precipitation", "historical", lat, lon)
+
+    projected = mmm_point_data_endpoint("precipitation", "projected", lat, lon, start_year="2010", end_year="2039")
+    pr_plate['2010-2039'] = projected['projected']
+
+    projected = mmm_point_data_endpoint("precipitation", "projected", lat, lon, start_year="2040", end_year="2069")
+    pr_plate['2040-2069'] = projected['projected']
+
+    projected = mmm_point_data_endpoint("precipitation", "projected", lat, lon, start_year="2070", end_year="2099")
+    pr_plate['2070-2099'] = projected['projected']
+
+    return jsonify(pr_plate)
+
+
 @routes.route("/mmm/<var_ep>/<horp>/<lat>/<lon>")
 @routes.route("/mmm/<var_ep>/<month>/<horp>/<lat>/<lon>")
 @routes.route("/mmm/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
@@ -1156,6 +1253,8 @@ def mmm_point_data_endpoint(
             cov_id = "annual_precip_totals"
         elif var_ep == "temperature":
             cov_id = "annual_mean_temp"
+        else:
+            return render_template("400/bad_request.html"), 400
 
     if start_year is not None:
         if horp == "all":
