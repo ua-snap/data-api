@@ -1113,6 +1113,17 @@ def about_mmm_precip():
 
 @routes.route("/eds/temperature/<lat>/<lon>")
 def get_temperature_plate(lat, lon):
+    """
+        Endpoint for requesting all data required for the Temperature Plate
+        in the ArcticEDS client.
+
+        Args:
+            lat (float): latitude
+            lon (float): longitude
+
+        Notes:
+            example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
+    """
     temp_plate = list()
     temp_plate.append(mmm_point_data_endpoint("temperature", "historical", lat, lon))
     temp_plate.append(mmm_point_data_endpoint("temperature", "historical", lat, lon, "jan"))
@@ -1136,6 +1147,17 @@ def get_temperature_plate(lat, lon):
 
 @routes.route("/eds/precipitation/<lat>/<lon>")
 def get_precipitation_plate(lat, lon):
+    """
+            Endpoint for requesting all data required for the Precipitation Plate
+            in the ArcticEDS client.
+
+            Args:
+                lat (float): latitude
+                lon (float): longitude
+
+            Notes:
+                example request: http://localhost:5000/eds/precipitation/65.0628/-146.1627
+        """
     pr_plate = list()
     pr_plate.append(mmm_point_data_endpoint("precipitation", "historical", lat, lon))
     pr_plate.append(mmm_point_data_endpoint("precipitation", "projected", lat, lon, start_year="2010", end_year="2039"))
