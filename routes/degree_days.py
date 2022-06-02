@@ -3,6 +3,7 @@ from flask import (
     Blueprint,
     render_template,
     request,
+    jsonify,
 )
 
 # local imports
@@ -142,6 +143,42 @@ def design_index_about():
 @routes.route("/design_index/freezing/point")
 def design_index_about_point():
     return render_template("/design_index/point.html")
+
+
+@routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")
+def get_dd_plate(var_ep, lat, lon):
+    """
+    Endpoint for requesting all data required for the Heating Degree Days,
+    Below Zero Degree Days, Thawing Index, and Freezing Index in the
+    ArcticEDS client.
+    Args:
+        var_ep (str): heating, below_zero, thawing_index, or freezing_index
+        lat (float): latitude
+        lon (float): longitude
+    Notes:
+        example request: http://localhost:5000/eds/degree_days/heating/65.0628/-146.1627
+    """
+    dd_plate = {}
+
+    results = run_fetch_dd_point_data(var_ep, lat, lon, "historical")
+    dd_plate["historical"] = results["historical"]
+
+    results = run_fetch_dd_point_data(
+        var_ep, lat, lon, "projected", start_year="2010", end_year="2039"
+    )
+    dd_plate["2010-2039"] = results["projected"]
+
+    results = run_fetch_dd_point_data(
+        var_ep, lat, lon, "projected", start_year="2040", end_year="2069"
+    )
+    dd_plate["2040-2069"] = results["projected"]
+
+    results = run_fetch_dd_point_data(
+        var_ep, lat, lon, "projected", start_year="2070", end_year="2099"
+    )
+    dd_plate["2070-2099"] = results["projected"]
+
+    return jsonify(dd_plate)
 
 
 def package_dd_point_data(point_data, var_ep, horp):
