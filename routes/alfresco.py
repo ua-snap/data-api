@@ -1,12 +1,7 @@
 import asyncio
-import io
-import csv
-import time
 import itertools
-import requests
 import geopandas as gpd
 import numpy as np
-import xarray as xr
 from flask import (
     Blueprint,
     render_template,
@@ -35,25 +30,18 @@ from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
 alfresco_api = Blueprint("alfresco_api", __name__)
-
-try:
-    flammability_dim_encodings = asyncio.run(
-        get_dim_encodings("alfresco_relative_flammability_30yr")
-    )
-
-    veg_type_dim_encodings = asyncio.run(
-        get_dim_encodings("alfresco_vegetation_type_percentage")
-    )
-except:
-    print("Missing from Apollo")
-
+flammability_dim_encodings = asyncio.run(
+    get_dim_encodings("alfresco_relative_flammability_30yr")
+)
+veg_type_dim_encodings = asyncio.run(
+    get_dim_encodings("alfresco_vegetation_type_percentage")
+)
 var_ep_lu = {
     "flammability": {"cov_id_str": "alfresco_relative_flammability_30yr"},
     "veg_type": {
         "cov_id_str": "alfresco_vegetation_type_percentage",
     },
 }
-
 var_label_lu = {
     "flammability": "Flammability",
     "veg_type": "Vegetation Type",

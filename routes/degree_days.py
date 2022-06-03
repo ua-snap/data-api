@@ -21,16 +21,13 @@ from . import routes
 
 degree_days_api = Blueprint("degree_days_api", __name__)
 
-try:
-    # The heating_degree_days, degree_days_below_zero, thawing_index, and
-    # freezing_index coverages all share the same dim_encodings
-    dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days"))
+# The heating_degree_days, degree_days_below_zero, thawing_index, and
+# freezing_index coverages all share the same dim_encodings
+dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days"))
 
-    # The design_thawing_index and design_freezing_index coverages share the
-    # same dim encodings
-    di_dim_encodings = asyncio.run(get_dim_encodings("design_thawing_index"))
-except:
-    print("Missing from Apollo")
+# The design_thawing_index and design_freezing_index coverages share the
+# same dim encodings
+di_dim_encodings = asyncio.run(get_dim_encodings("design_thawing_index"))
 
 var_ep_lu = {
     "heating": {"cov_id_str": "heating_degree_days"},
