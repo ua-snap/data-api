@@ -528,3 +528,38 @@ def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
     metadata += "# View a report for this location at " + report_url + "\n"
 
     return metadata
+
+
+def deepflatten(iterable, depth=None, types=None, ignore=None):
+    """Flatten a nested list of unknown length. Adapted from the "iteration_utilities" library v. 0.11.0.
+
+    Arguments:
+        iterable -- the nested iterable (e.g., list) you want to flatten
+
+    Keyword Arguments:
+        depth -- flatten the iterable up to this depth (default: {None})
+        types -- types to flatten (default: {None})
+        ignore -- types to not flatten (default: {None})
+
+    Yields:
+        generator for the flattened iterable
+    """
+    if depth is None:
+        depth = float("inf")
+    if depth == -1:
+        yield iterable
+    else:
+        for x in iterable:
+            if ignore is not None and isinstance(x, ignore):
+                yield x
+            if types is None:
+                try:
+                    iter(x)
+                except TypeError:
+                    yield x
+                else:
+                    yield from deepflatten(x, depth - 1, types, ignore)
+            elif not isinstance(x, types):
+                yield x
+            else:
+                yield from deepflatten(x, depth - 1, types, ignore)
