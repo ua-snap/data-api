@@ -414,19 +414,13 @@ async def fetch_di_point_data(x, y, cov_id, horp):
         point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
 
     if horp in ["historical", "hp"]:
-        request_str = get_di_wcps_request_str(
-            x, y, cov_id, "0:0", "0:0"
-        )
-        point_data_list.append(
-            await fetch_data([generate_wcs_query_url(request_str)])
-        )
+        request_str = get_di_wcps_request_str(x, y, cov_id, "0:0", "0:0")
+        point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
 
     if horp in ["projected", "hp"]:
         for era in range(1, 3):
             eras = str(era) + ":" + str(era)
-            request_str = get_di_wcps_request_str(
-                x, y, cov_id, "1:2", eras
-            )
+            request_str = get_di_wcps_request_str(x, y, cov_id, "1:2", eras)
             point_data_list.append(
                 await fetch_data([generate_wcs_query_url(request_str)])
             )
