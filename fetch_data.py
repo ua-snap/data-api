@@ -358,21 +358,27 @@ def parse_meta_xml_str(meta_xml_str):
 
 
 async def get_dim_encodings(cov_id):
-    """Get the dimension encodings from a rasdaman
-    coverage that has the encodings stored in an
-    "encodings" attribute
+    """Get the dimension encodings that map integer values to descriptive strings from a
+    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We
+    handle exceptions where the coverage we are requesting encodings from does not exist
+    on the backend to prevent Rasdaman work from blocking API development.
 
     Args:
         cov_id (str): ID of the rasdaman coverage
 
-    Rreturns:
+    Returns:
         dict of encodings, with axis name as keys holding
         dicts of integer-keyed categories
     """
     meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
-    meta_xml_str = await fetch_data([meta_url])
-    dim_encodings = parse_meta_xml_str(meta_xml_str)
-    return dim_encodings
+    try:
+        meta_xml_str = await fetch_data([meta_url])
+        dim_encodings = parse_meta_xml_str(meta_xml_str)
+        return dim_encodings
+    except:
+        print(
+            f"Warning: Coverage '{cov_id}' is missing from the Rasdaman server {RAS_BASE_URL} you are using."
+        )
 
 
 def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
@@ -528,3 +534,38 @@ def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
     metadata += "# View a report for this location at " + report_url + "\n"
 
     return metadata
+
+
+def deepflatten(iterable, depth=None, types=None, ignore=None):
+    """Flatten a nested list of unknown length. Adapted from the "iteration_utilities" library v. 0.11.0.
+
+    Arguments:
+        iterable -- the nested iterable (e.g., list) you want to flatten
+
+    Keyword Arguments:
+        depth -- flatten the iterable up to this depth (default: {None})
+        types -- types to flatten (default: {None})
+        ignore -- types to not flatten (default: {None})
+
+    Yields:
+        generator for the flattened iterable
+    """
+    if depth is None:
+        depth = float("inf")
+    if depth == -1:
+        yield iterable
+    else:
+        for x in iterable:
+            if ignore is not None and isinstance(x, ignore):
+                yield x
+            if types is None:
+                try:
+                    iter(x)
+                except TypeError:
+                    yield x
+                else:
+                    yield from deepflatten(x, depth - 1, types, ignore)
+            elif not isinstance(x, types):
+                yield x
+            else:
+                yield from deepflatten(x, depth - 1, types, ignore)
