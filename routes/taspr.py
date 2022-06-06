@@ -1,6 +1,7 @@
 import asyncio
 import io
 import csv
+import json
 import time
 import itertools
 from urllib.parse import quote
@@ -1191,7 +1192,7 @@ def get_precipitation_plate(lat, lon):
 
             Notes:
                 example request: http://localhost:5000/eds/precipitation/65.0628/-146.1627
-        """
+    """
     pr_plate = dict()
     pr_plate = mmm_point_data_endpoint("precipitation", "historical", lat, lon)
 

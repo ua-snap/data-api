@@ -3,6 +3,7 @@ from flask import (
     Blueprint,
     render_template,
     request,
+    jsonify,
 )
 
 # local imports
@@ -116,6 +117,47 @@ def get_dd_wcps_request_str(x, y, cov_id, models, years, tempstat, encoding="jso
         return wcps_request_str
 
 
+def get_di_wcps_request_str(x, y, cov_id, models, eras, encoding="json"):
+    """Generates a WCPS query specific to the design index coverages
+
+    Args:
+        x (float or str): x-coordinate for point query, or string
+            composed as "x1:x2" for bbox query, where x1 and x2 are
+            lower and upper bounds of bbox
+        y (float or str): y-coordinate for point query, or string
+            composed as "y1:y2" for bbox query, where y1 and y2 are
+            lower and upper bounds of bbox
+        cov_id (str): Rasdaman coverage ID
+        models (str): Comma-separated numbers of requested models
+        eras (str): The era(s) to calculate mean across
+        encoding (str): currently supports either "json" or "netcdf"
+            for point or bbox queries, respectively
+
+    Returns:
+        WCPS query to be included in generate_wcs_url()
+    """
+    # Generates the mean across models
+
+    # For projected, 2 models
+    num_results = 2
+
+    # For historical, only a single model
+    if models == "0:0":
+        num_results = 1
+
+    operation = "+"
+
+    wcps_request_str = quote(
+        (
+            f"ProcessCoverages&query=for $c in ({cov_id}) "
+            f"let $a := avg(condense {operation} over $m model({models}) "
+            f"using $c[model($m),era({eras}),X({x}),Y({y})] / {num_results} ) "
+            f'return encode( $a, "application/{encoding}")'
+        )
+    )
+    return wcps_request_str
+
+
 @routes.route("/mmm/degree_days/")
 @routes.route("/mmm/degree_days/abstract/")
 @routes.route("/mmm/degree_days/heating/")
@@ -139,6 +181,42 @@ def design_index_about():
 @routes.route("/design_index/freezing/point")
 def design_index_about_point():
     return render_template("/design_index/point.html")
+
+
+@routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")
+def get_dd_plate(var_ep, lat, lon):
+    """
+    Endpoint for requesting all data required for the Heating Degree Days,
+    Below Zero Degree Days, Thawing Index, and Freezing Index in the
+    ArcticEDS client.
+    Args:
+        var_ep (str): heating, below_zero, thawing_index, or freezing_index
+        lat (float): latitude
+        lon (float): longitude
+    Notes:
+        example request: http://localhost:5000/eds/degree_days/heating/65.0628/-146.1627
+    """
+    dd_plate = {}
+
+    results = run_fetch_dd_point_data(var_ep, lat, lon, "historical")
+    dd_plate["historical"] = results["historical"]
+
+    results = run_fetch_dd_point_data(
+        var_ep, lat, lon, "projected", start_year="2010", end_year="2039"
+    )
+    dd_plate["2010-2039"] = results["projected"]
+
+    results = run_fetch_dd_point_data(
+        var_ep, lat, lon, "projected", start_year="2040", end_year="2069"
+    )
+    dd_plate["2040-2069"] = results["projected"]
+
+    results = run_fetch_dd_point_data(
+        var_ep, lat, lon, "projected", start_year="2070", end_year="2099"
+    )
+    dd_plate["2070-2099"] = results["projected"]
+
+    return jsonify(dd_plate)
 
 
 def package_dd_point_data(point_data, var_ep, horp):
@@ -211,30 +289,45 @@ def package_dd_point_data(point_data, var_ep, horp):
     return point_pkg
 
 
-def package_di_point_data(point_data):
+def package_di_point_data(point_data, horp):
     """Add JSON response data for design_thawing_index and
     design_freezing_index coverages
 
     Args:
         point_data (list): nested list containing JSON results of WCPS query
+        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of query results
     """
     point_pkg = {}
-    for mi, m_li in enumerate(point_data):
-        model = di_dim_encodings["model"][mi]
-        point_pkg[model] = {}
-        for ei, value in enumerate(m_li):
-            era = di_dim_encodings["era"][ei]
-            if mi > 0 and era == "1980-2009":
-                continue
-            if mi == 0 and era != "1980-2009":
-                continue
-            if value is None:
-                point_pkg[model][era] = None
-            else:
-                point_pkg[model][era] = {"di": value}
+    if horp == "all":
+        for mi, m_li in enumerate(point_data):
+            model = di_dim_encodings["model"][mi]
+            point_pkg[model] = {}
+            for ei, value in enumerate(m_li):
+                era = di_dim_encodings["era"][ei]
+                if mi > 0 and era == "1980-2009":
+                    continue
+                if mi == 0 and era != "1980-2009":
+                    continue
+                if value is None:
+                    point_pkg[model][era] = None
+                else:
+                    point_pkg[model][era] = {"di": value}
+    else:
+        keys = []
+        if horp in ["historical", "hp"]:
+            keys.append("historical")
+        if horp in ["projected", "hp"]:
+            keys.append("2040-2069")
+            keys.append("2070-2099")
+
+        index = 0
+        for key in keys:
+            point_pkg[key] = {"di": point_data[index]}
+            index += 1
+
     return point_pkg
 
 
@@ -298,7 +391,7 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
     return point_data_list
 
 
-async def fetch_di_point_data(x, y, cov_id):
+async def fetch_di_point_data(x, y, cov_id, horp):
     """Run the async design index data request for a single point
     and return data as json
 
@@ -306,12 +399,29 @@ async def fetch_di_point_data(x, y, cov_id):
         lat (float): latitude
         lon (float): longitude
         cov_id (str): design_thawing_index or freezing_thawing_index
+        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
-    request_str = generate_wcs_getcov_str(x, y, cov_id)
-    point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
+    point_data_list = []
+
+    if horp == "all":
+        request_str = generate_wcs_getcov_str(x, y, cov_id)
+        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
+
+    if horp in ["historical", "hp"]:
+        request_str = get_di_wcps_request_str(x, y, cov_id, "0:0", "0:0")
+        point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
+
+    if horp in ["projected", "hp"]:
+        for era in range(1, 3):
+            eras = str(era) + ":" + str(era)
+            request_str = get_di_wcps_request_str(x, y, cov_id, "1:2", eras)
+            point_data_list.append(
+                await fetch_data([generate_wcs_query_url(request_str)])
+            )
+
     return point_data_list
 
 
@@ -422,8 +532,8 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     return postprocess(point_pkg, "degree_days")
 
 
-@routes.route("/design_index/<var_ep>/point/<lat>/<lon>")
-def run_fetch_di_point_data(var_ep, lat, lon):
+@routes.route("/design_index/<var_ep>/<horp>/point/<lat>/<lon>")
+def run_fetch_di_point_data(var_ep, lat, lon, horp):
     """Design index data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
 
@@ -431,6 +541,7 @@ def run_fetch_di_point_data(var_ep, lat, lon):
         var_ep (str): thawing or freezing
         lat (float): latitude
         lon (float): longitude
+        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of requested design index data
@@ -457,13 +568,13 @@ def run_fetch_di_point_data(var_ep, lat, lon):
         cov_id_str = "design_freezing_index"
 
     try:
-        point_data_list = asyncio.run(fetch_di_point_data(x, y, cov_id_str))
+        point_data_list = asyncio.run(fetch_di_point_data(x, y, cov_id_str, horp))
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    point_pkg = package_di_point_data(point_data_list)
+    point_pkg = package_di_point_data(point_data_list, horp)
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "degree_days")
