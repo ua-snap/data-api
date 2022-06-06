@@ -358,21 +358,27 @@ def parse_meta_xml_str(meta_xml_str):
 
 
 async def get_dim_encodings(cov_id):
-    """Get the dimension encodings from a rasdaman
-    coverage that has the encodings stored in an
-    "encodings" attribute
+    """Get the dimension encodings that map integer values to descriptive strings from a
+    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We
+    handle exceptions where the coverage we are requesting encodings from does not exist
+    on the backend to prevent Rasdaman work from blocking API development.
 
     Args:
         cov_id (str): ID of the rasdaman coverage
 
-    Rreturns:
+    Returns:
         dict of encodings, with axis name as keys holding
         dicts of integer-keyed categories
     """
     meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
-    meta_xml_str = await fetch_data([meta_url])
-    dim_encodings = parse_meta_xml_str(meta_xml_str)
-    return dim_encodings
+    try:
+        meta_xml_str = await fetch_data([meta_url])
+        dim_encodings = parse_meta_xml_str(meta_xml_str)
+        return dim_encodings
+    except:
+        print(
+            f"Warning: Coverage '{cov_id}' is missing from the Rasdaman server {RAS_BASE_URL} you are using."
+        )
 
 
 def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
