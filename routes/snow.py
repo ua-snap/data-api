@@ -24,7 +24,7 @@ from config import WEST_BBOX, EAST_BBOX
 
 snow_api = Blueprint("snow_api", __name__)
 # rasdaman targets
-sfe_coverage_id = "mean_annual_snowfall"
+sfe_coverage_id = "mean_annual_snowfall_mm"
 
 
 def package_sfe_data(sfe_resp):
@@ -98,7 +98,7 @@ def summarize_mmm_sfe(all_sfe_di):
     ]
     mmm_sfe_di["historical"]["sfemin"] = min(hist_vals)
     mmm_sfe_di["historical"]["sfemax"] = max(hist_vals)
-    mmm_sfe_di["historical"]["sfemean"] = round(np.mean(hist_vals), 1)
+    mmm_sfe_di["historical"]["sfemean"] = round(np.mean(hist_vals))
     proj_vals = []
     for model in ["GFDL-CM3", "GISS-E2-R", "IPSL-CM5A-LR", "MRI-CGCM3", "NCAR-CCSM4"]:
         for scenario in ["rcp45", "rcp60", "rcp85"]:
@@ -110,7 +110,7 @@ def summarize_mmm_sfe(all_sfe_di):
                 proj_vals.append(mod_sc_val)
     mmm_sfe_di["projected"]["sfemin"] = min(proj_vals)
     mmm_sfe_di["projected"]["sfemax"] = max(proj_vals)
-    mmm_sfe_di["projected"]["sfemean"] = round(np.mean(proj_vals), 1)
+    mmm_sfe_di["projected"]["sfemean"] = round(np.mean(proj_vals))
     return mmm_sfe_di
 
 
@@ -134,7 +134,7 @@ def create_csv(data_pkg, lat=None, lon=None):
         data_pkg,
         fieldnames,
     )
-    metadata = "#SFE is the total annual snowfall equivalent in inches for the specified model-scenario-decade\n"
+    metadata = "#SFE is the total annual snowfall equivalent in millimeters for the specified model-scenario-decade\n"
     filename = "SFE for " + lat + ", " + lon + ".csv"
     return write_csv(csv_dicts, fieldnames, filename, metadata)
 
