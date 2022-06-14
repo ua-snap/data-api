@@ -14,7 +14,7 @@ from flask import (
     render_template,
     request,
     current_app as app,
-    jsonify
+    jsonify,
 )
 
 # local imports
@@ -48,7 +48,11 @@ taspr_api = Blueprint("taspr_api", __name__)
 # Table generated from luts.py file found here:
 # https://github.com/ua-snap/rasdaman-ingest/blob/main/arctic_eds/jan_july_tas_stats/jan_min_mean_max_tas/luts.py
 mmm_dim_encodings = {
-    "tempstats": {0: "tasmax", 1: "tasmean", 2: "tasmin",},
+    "tempstats": {
+        0: "tasmax",
+        1: "tasmean",
+        2: "tasmin",
+    },
     "models": {
         2: "GFDL-CM3",
         3: "GISS-E2-R",
@@ -56,7 +60,11 @@ mmm_dim_encodings = {
         5: "MRI-CGCM3",
         6: "NCAR-CCSM4",
     },
-    "scenarios": {1: "rcp45", 2: "rcp60", 3: "rcp85",},
+    "scenarios": {
+        1: "rcp45",
+        2: "rcp60",
+        3: "rcp85",
+    },
     "months": {"jan": "January", "july": "July"},
 }
 
@@ -230,7 +238,7 @@ def get_mmm_wcps_request_str(
         operation = "+"
 
     variable = ""
-    if cov_id not in ("annual_precip_totals", "annual_mean_temp"):
+    if cov_id not in ("annual_precip_totals_mm", "annual_mean_temp"):
         variable = f",tempstat({tempstat})"
 
     if tempstat == 0 or tempstat == 2:
@@ -352,21 +360,21 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
 def package_mmm_point_data(point_data, cov_id, horp):
     """Packages min-mean-max point data into JSON-formatted return data
 
-        Args:
-            point_data (list): Nested list of returned data from Rasdaman
-                * point_data is a four-dimensional list with the following indices:
-                    - point_data[i] = variable (tasmax, tasmean, and tasmin)
-                    - point_data[i][j] = year starting from 1900-200 [0-199]
-                    - point_data[i][j][k] = model number between 0-6 in mmm_dim_encodings
-                    - point_data[i][j][k][l] = scenario number between 0-3 in mmm_dim_encodings
-            horp [Historical or Projected ](str): historical, projected, hp, or all
+    Args:
+        point_data (list): Nested list of returned data from Rasdaman
+            * point_data is a four-dimensional list with the following indices:
+                - point_data[i] = variable (tasmax, tasmean, and tasmin)
+                - point_data[i][j] = year starting from 1900-200 [0-199]
+                - point_data[i][j][k] = model number between 0-6 in mmm_dim_encodings
+                - point_data[i][j][k][l] = scenario number between 0-3 in mmm_dim_encodings
+        horp [Historical or Projected ](str): historical, projected, hp, or all
 
-        Returns:
-            Python dictionary of one of four outcomes:
-                * horp == 'historical' - Historical minimum, mean, and maximum
-                * horp == 'projected'  - Projected minimum, mean, and maximum
-                * horp == 'hp'         - Historical & projected minimum, mean, and maximum
-                * horp == 'all'        - All data returned from Rasdaman formatted with string indices
+    Returns:
+        Python dictionary of one of four outcomes:
+            * horp == 'historical' - Historical minimum, mean, and maximum
+            * horp == 'projected'  - Projected minimum, mean, and maximum
+            * horp == 'hp'         - Historical & projected minimum, mean, and maximum
+            * horp == 'all'        - All data returned from Rasdaman formatted with string indices
     """
     point_pkg = dict()
     if horp == "all":
@@ -379,7 +387,7 @@ def package_mmm_point_data(point_data, cov_id, horp):
         for year in range(0, 115):
             full_year = str(year + 1901)
             point_pkg["CRU-TS"]["historical"][full_year] = dict()
-            if cov_id == "annual_precip_totals":
+            if cov_id == "annual_precip_totals_mm":
                 point_pkg["CRU-TS"]["historical"][full_year]["pr"] = point_data[0][
                     year
                 ][0]
@@ -410,7 +418,7 @@ def package_mmm_point_data(point_data, cov_id, horp):
                 for year in range(106, 200):
                     full_year = str(year + 1901)
                     point_pkg[dim_model][dim_scenario][full_year] = dict()
-                    if cov_id == "annual_precip_totals":
+                    if cov_id == "annual_precip_totals_mm":
                         point_pkg[dim_model][dim_scenario][full_year][
                             "pr"
                         ] = point_data[model][year][scenario]
@@ -430,13 +438,13 @@ def package_mmm_point_data(point_data, cov_id, horp):
             # Generate the min, mean and max for historical CRU-TS 4.0 data at this point
             # We only want to generate statistics from the years 1900-2015 as that's all
             # that is available in CRU-TS 4.0
-            historical_max = round(point_data[0], 1)
-            historical_mean = round(point_data[1], 1)
-            historical_min = round(point_data[2], 1)
+            historical_max = round(point_data[0])
+            historical_mean = round(point_data[1])
+            historical_min = round(point_data[2])
 
             point_pkg["historical"] = dict()
 
-            if cov_id == "annual_precip_totals":
+            if cov_id == "annual_precip_totals_mm":
                 point_pkg["historical"]["prmin"] = historical_min
                 point_pkg["historical"]["prmean"] = historical_mean
                 point_pkg["historical"]["prmax"] = historical_max
@@ -447,17 +455,17 @@ def package_mmm_point_data(point_data, cov_id, horp):
 
         if horp == "projected" or horp == "hp":
             if horp == "projected":
-                projected_max = round(point_data[0], 1)
-                projected_mean = round(point_data[1], 1)
-                projected_min = round(point_data[2], 1)
+                projected_max = round(point_data[0])
+                projected_mean = round(point_data[1])
+                projected_min = round(point_data[2])
             else:
-                projected_max = round(point_data[3], 1)
-                projected_mean = round(point_data[4], 1)
-                projected_min = round(point_data[5], 1)
+                projected_max = round(point_data[3])
+                projected_mean = round(point_data[4])
+                projected_min = round(point_data[5])
 
             point_pkg["projected"] = dict()
 
-            if cov_id == "annual_precip_totals":
+            if cov_id == "annual_precip_totals_mm":
                 point_pkg["projected"]["prmin"] = projected_min
                 point_pkg["projected"]["prmean"] = projected_mean
                 point_pkg["projected"]["prmax"] = projected_max
@@ -658,7 +666,7 @@ def create_csv(
     if var_ep in ["precipitation", "taspr"]:
         metadata += "# pr is precipitation in millimeters\n"
         if mmm is True:
-            metadata = "# pr is precipitation in inches\n"
+            metadata = "# pr is precipitation in millimeters\n"
             metadata += "# pr is the total annual precipitation for the specified model and scenario\n"
 
     if mmm is not True:
@@ -1115,67 +1123,119 @@ def about_mmm_precip():
 @routes.route("/eds/temperature/<lat>/<lon>")
 def get_temperature_plate(lat, lon):
     """
-        Endpoint for requesting all data required for the Temperature Plate
-        in the ArcticEDS client.
+    Endpoint for requesting all data required for the Temperature Plate
+    in the ArcticEDS client.
 
-        Args:
-            lat (float): latitude
-            lon (float): longitude
+    Args:
+        lat (float): latitude
+        lon (float): longitude
 
-        Notes:
-            example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
+    Notes:
+        example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
     """
     temp_plate = dict()
 
     ### HISTORICAL ###
-    temp_plate['historical'] = dict()
+    temp_plate["historical"] = dict()
 
     all = mmm_point_data_endpoint("temperature", "historical", lat, lon)
-    temp_plate['historical']['all'] = all['historical']
+    temp_plate["historical"]["all"] = all["historical"]
 
     jan = mmm_point_data_endpoint("temperature", "historical", lat, lon, "jan")
-    temp_plate['historical']['jan'] = jan['historical']
+    temp_plate["historical"]["jan"] = jan["historical"]
 
     july = mmm_point_data_endpoint("temperature", "historical", lat, lon, "july")
-    temp_plate['historical']['july'] = july['historical']
+    temp_plate["historical"]["july"] = july["historical"]
 
     ### 2010-2039 ###
-    temp_plate['2010-2039'] = dict()
+    temp_plate["2010-2039"] = dict()
 
-    all = mmm_point_data_endpoint("temperature", "projected", lat, lon, start_year="2010", end_year="2039")
-    temp_plate['2010-2039']['all'] = all['projected']
+    all = mmm_point_data_endpoint(
+        "temperature", "projected", lat, lon, start_year="2010", end_year="2039"
+    )
+    temp_plate["2010-2039"]["all"] = all["projected"]
 
-    jan = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="jan", start_year="2010", end_year="2039")
-    temp_plate['2010-2039']['jan'] = jan['projected']
+    jan = mmm_point_data_endpoint(
+        "temperature",
+        "projected",
+        lat,
+        lon,
+        month="jan",
+        start_year="2010",
+        end_year="2039",
+    )
+    temp_plate["2010-2039"]["jan"] = jan["projected"]
 
-    july = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="july", start_year="2010", end_year="2039")
-    temp_plate['2010-2039']['july'] = july['projected']
+    july = mmm_point_data_endpoint(
+        "temperature",
+        "projected",
+        lat,
+        lon,
+        month="july",
+        start_year="2010",
+        end_year="2039",
+    )
+    temp_plate["2010-2039"]["july"] = july["projected"]
 
     ### 2040-2069 ###
-    temp_plate['2040-2069'] = dict()
+    temp_plate["2040-2069"] = dict()
 
-    all = mmm_point_data_endpoint("temperature", "projected", lat, lon, start_year="2040", end_year="2069")
-    temp_plate['2040-2069']['all'] = all['projected']
+    all = mmm_point_data_endpoint(
+        "temperature", "projected", lat, lon, start_year="2040", end_year="2069"
+    )
+    temp_plate["2040-2069"]["all"] = all["projected"]
 
-    jan = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="jan", start_year="2040", end_year="2069")
-    temp_plate['2040-2069']['jan'] = jan['projected']
+    jan = mmm_point_data_endpoint(
+        "temperature",
+        "projected",
+        lat,
+        lon,
+        month="jan",
+        start_year="2040",
+        end_year="2069",
+    )
+    temp_plate["2040-2069"]["jan"] = jan["projected"]
 
-    july = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="july", start_year="2040",
-                                   end_year="2069")
-    temp_plate['2040-2069']['july'] = july['projected']
+    july = mmm_point_data_endpoint(
+        "temperature",
+        "projected",
+        lat,
+        lon,
+        month="july",
+        start_year="2040",
+        end_year="2069",
+    )
+    temp_plate["2040-2069"]["july"] = july["projected"]
 
     ### 2070-2099 ###
-    temp_plate['2070-2099'] = dict()
+    temp_plate["2070-2099"] = dict()
 
-    all = mmm_point_data_endpoint("temperature", "projected", lat, lon, start_year="2070", end_year="2099")
-    temp_plate['2070-2099']['all'] = all['projected']
+    all = mmm_point_data_endpoint(
+        "temperature", "projected", lat, lon, start_year="2070", end_year="2099"
+    )
+    temp_plate["2070-2099"]["all"] = all["projected"]
 
-    jan = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="jan", start_year="2070", end_year="2099")
-    temp_plate['2070-2099']['jan'] = jan['projected']
+    jan = mmm_point_data_endpoint(
+        "temperature",
+        "projected",
+        lat,
+        lon,
+        month="jan",
+        start_year="2070",
+        end_year="2099",
+    )
+    temp_plate["2070-2099"]["jan"] = jan["projected"]
 
-    july = mmm_point_data_endpoint("temperature", "projected", lat, lon, month="july", start_year="2070",
-                                   end_year="2099")
-    temp_plate['2070-2099']['july'] = july['projected']
+    july = mmm_point_data_endpoint(
+        "temperature",
+        "projected",
+        lat,
+        lon,
+        month="july",
+        start_year="2070",
+        end_year="2099",
+    )
+    temp_plate["2070-2099"]["july"] = july["projected"]
 
     return jsonify(temp_plate)
 
@@ -1183,27 +1243,33 @@ def get_temperature_plate(lat, lon):
 @routes.route("/eds/precipitation/<lat>/<lon>")
 def get_precipitation_plate(lat, lon):
     """
-            Endpoint for requesting all data required for the Precipitation Plate
-            in the ArcticEDS client.
+    Endpoint for requesting all data required for the Precipitation Plate
+    in the ArcticEDS client.
 
-            Args:
-                lat (float): latitude
-                lon (float): longitude
+    Args:
+        lat (float): latitude
+        lon (float): longitude
 
-            Notes:
-                example request: http://localhost:5000/eds/precipitation/65.0628/-146.1627
+    Notes:
+        example request: http://localhost:5000/eds/precipitation/65.0628/-146.1627
     """
     pr_plate = dict()
     pr_plate = mmm_point_data_endpoint("precipitation", "historical", lat, lon)
 
-    projected = mmm_point_data_endpoint("precipitation", "projected", lat, lon, start_year="2010", end_year="2039")
-    pr_plate['2010-2039'] = projected['projected']
+    projected = mmm_point_data_endpoint(
+        "precipitation", "projected", lat, lon, start_year="2010", end_year="2039"
+    )
+    pr_plate["2010-2039"] = projected["projected"]
 
-    projected = mmm_point_data_endpoint("precipitation", "projected", lat, lon, start_year="2040", end_year="2069")
-    pr_plate['2040-2069'] = projected['projected']
+    projected = mmm_point_data_endpoint(
+        "precipitation", "projected", lat, lon, start_year="2040", end_year="2069"
+    )
+    pr_plate["2040-2069"] = projected["projected"]
 
-    projected = mmm_point_data_endpoint("precipitation", "projected", lat, lon, start_year="2070", end_year="2099")
-    pr_plate['2070-2099'] = projected['projected']
+    projected = mmm_point_data_endpoint(
+        "precipitation", "projected", lat, lon, start_year="2070", end_year="2099"
+    )
+    pr_plate["2070-2099"] = projected["projected"]
 
     return jsonify(pr_plate)
 
@@ -1251,7 +1317,7 @@ def mmm_point_data_endpoint(
             return render_template("400/bad_request.html"), 400
     else:
         if var_ep == "precipitation":
-            cov_id = "annual_precip_totals"
+            cov_id = "annual_precip_totals_mm"
         elif var_ep == "temperature":
             cov_id = "annual_mean_temp"
         else:

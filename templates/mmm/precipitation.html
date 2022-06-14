@@ -1,23 +1,45 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h3>Annual Total Precipitation Min, Mean, and Max Point Query</h3>
-<p>This endpoint allows access to various summaries of point extractions from gridded precipitation data. Note, the quantity being modeled and supplied here is also referred to throughout by its standard abbreviated modeling name, "pr".</p>
-<h4>Summary queries for annual total precipitation</h4>
+<p>
+  This endpoint allows access to various summaries of point extractions from
+  gridded precipitation data. Note, the quantity being modeled and supplied here
+  is also referred to throughout by its standard abbreviated modeling name,
+  "pr".
+</p>
+<h4>Summary queries for annual total precipitation in millimeters</h4>
 <p>Query for historical annual total precipitation min, mean, and max:</p>
-<p>Example: <a href="/mmm/precipitation/historical/65.0628/-146.1627">/mmm/precipitation/historical/65.0628/-146.1627</a></p>
+<p>
+  Example:
+  <a href="/mmm/precipitation/historical/65.0628/-146.1627"
+    >/mmm/precipitation/historical/65.0628/-146.1627</a
+  >
+</p>
 <p>Query for projected annual total precipitation min, mean, and max:</p>
-<p>Example: <a href="/mmm/precipitation/projected/65.0628/-146.1627">/mmm/precipitation/projected/65.0628/-146.1627</a></p>
-<p>Query for both historical and projected annual total precipitation min, mean, and max:
-<p>Example: <a href="/mmm/precipitation/hp/65.0628/-146.1627">/mmm/precipitation/hp/65.0628/-146.1627</a></p>
+<p>
+  Example:
+  <a href="/mmm/precipitation/projected/65.0628/-146.1627"
+    >/mmm/precipitation/projected/65.0628/-146.1627</a
+  >
+</p>
+<p>
+  Query for both historical and projected annual total precipitation min, mean,
+  and max:
+</p>
+<p>
+  Example:
+  <a href="/mmm/precipitation/hp/65.0628/-146.1627"
+    >/mmm/precipitation/hp/65.0628/-146.1627</a
+  >
+</p>
 
 <b>Results from the queries above will look like this:</b>
 
 <pre>
 {
   "historical": {
-    "prmax": 21.7,
-    "prmean": 13.5,
-    "prmin": 6.2
+    "prmax": 578,
+    "prmean": 355,
+    "prmin": 231
   }
   ...
 }
@@ -36,10 +58,18 @@
 }
 </pre>
 
-<br>
-<h4>Comprehensive queries for annual total precipitation</h4>
-<p>Query for all annual total precipitation data across all historical and projected models from 1901-2099:</p>
-<p>Example: <a href="/mmm/precipitation/all/65.0628/-146.1627">/mmm/precipitation/all/65.0628/-146.1627</a></p>
+<br />
+<h4>Comprehensive queries for annual total precipitation in millimeters</h4>
+<p>
+  Query for all annual total precipitation data across all historical and
+  projected models from 1901-2099:
+</p>
+<p>
+  Example:
+  <a href="/mmm/precipitation/all/65.0628/-146.1627"
+    >/mmm/precipitation/all/65.0628/-146.1627</a
+  >
+</p>
 <b>Results from the query above will look like this:</b>
 
 <pre>
@@ -47,7 +77,7 @@
   "CRU-TS": {
     "historical": {
       "1901": {
-        "pr": 140
+        "pr": 360
       }
   }
   ...
@@ -72,12 +102,36 @@
 </pre>
 
 <h4>Supply summary time period (start / end years)</h4>
-<p>The start and end year to use for any of the summary options from above (i.e. "historical", "projected", or "hp") may be supplied with the query as well, appended to the end of the URL in the form <code>/&ltstart year>/&ltend year></code></p>
-<p>Here is an example to query total annual precipitation data for historical and projected models from 1950-2020:</p>
-<p>Example: <a href="/mmm/precipitation/hp/65.0628/-146.1627/1950/2020">/mmm/precipitation/hp/65.0628/-146.1627/1950/2020</a></p>
-<p>Note - this query option will only work for summary options, not the comprehensive option above (e.g. "all") </p>
+<p>
+  The start and end year to use for any of the summary options from above (i.e.
+  "historical", "projected", or "hp") may be supplied with the query as well,
+  appended to the end of the URL in the form
+  <code>/&ltstart year>/&ltend year></code>
+</p>
+<p>
+  Here is an example to query total annual precipitation data for historical and
+  projected models from 1950-2020:
+</p>
+<p>
+  Example:
+  <a href="/mmm/precipitation/hp/65.0628/-146.1627/1950/2020"
+    >/mmm/precipitation/hp/65.0628/-146.1627/1950/2020</a
+  >
+</p>
+<p>
+  Note - this query option will only work for summary options, not the
+  comprehensive option above (e.g. "all")
+</p>
 
 <h4>CSV Export</h4>
-<p>To export the annual total precipitation point data in a CSV file, append <code>?format=csv</code>.</p>
-<p>Example: <a href="/mmm/precipitation/all/65.0628/-146.1627?format=csv">/mmm/precipitation/all/65.0628/-146.1627?format=csv</a></p>
+<p>
+  To export the annual total precipitation point data in a CSV file, append
+  <code>?format=csv</code>.
+</p>
+<p>
+  Example:
+  <a href="/mmm/precipitation/all/65.0628/-146.1627?format=csv"
+    >/mmm/precipitation/all/65.0628/-146.1627?format=csv</a
+  >
+</p>
 {% endblock %}
