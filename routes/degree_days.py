@@ -257,7 +257,7 @@ def package_dd_point_data(point_data, var_ep, horp):
             year_index = 0
             for value in v_li:
                 if year in years:
-                    point_pkg[model][years[year_index]] = {"dd": value}
+                    point_pkg[model][years[year_index]] = {"dd": round(value)}
                     year_index += 1
                 year += 1
     else:
@@ -267,9 +267,9 @@ def package_dd_point_data(point_data, var_ep, horp):
             historical_min = round(point_data[2], 1)
 
             point_pkg["historical"] = {}
-            point_pkg["historical"]["ddmin"] = historical_min
-            point_pkg["historical"]["ddmean"] = historical_mean
-            point_pkg["historical"]["ddmax"] = historical_max
+            point_pkg["historical"]["ddmin"] = round(historical_min)
+            point_pkg["historical"]["ddmean"] = round(historical_mean)
+            point_pkg["historical"]["ddmax"] = round(historical_max)
 
         if horp in ["projected", "hp"]:
             if horp == "projected":
@@ -282,9 +282,9 @@ def package_dd_point_data(point_data, var_ep, horp):
                 projected_min = round(point_data[5], 1)
 
             point_pkg["projected"] = {}
-            point_pkg["projected"]["ddmin"] = projected_min
-            point_pkg["projected"]["ddmean"] = projected_mean
-            point_pkg["projected"]["ddmax"] = projected_max
+            point_pkg["projected"]["ddmin"] = round(projected_min)
+            point_pkg["projected"]["ddmean"] = round(projected_mean)
+            point_pkg["projected"]["ddmax"] = round(projected_max)
 
     return point_pkg
 
@@ -314,7 +314,7 @@ def package_di_point_data(point_data, horp):
                 if value is None:
                     point_pkg[model][era] = None
                 else:
-                    point_pkg[model][era] = {"di": value}
+                    point_pkg[model][era] = {"di": round(value)}
     else:
         keys = []
         if horp in ["historical", "hp"]:
@@ -325,7 +325,7 @@ def package_di_point_data(point_data, horp):
 
         index = 0
         for key in keys:
-            point_pkg[key] = {"di": point_data[index]}
+            point_pkg[key] = {"di": round(point_data[index])}
             index += 1
 
     return point_pkg
