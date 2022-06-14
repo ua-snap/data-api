@@ -125,10 +125,11 @@ def package_gipl(gipl_resp):
     for era in di.keys():
         for model in di[era].keys():
             for scenario in di[era][model]:
-                di[era][model][scenario]["magt"] = float(
-                    flattened_resp[i].split(" ")[0]
-                )
-                di[era][model][scenario]["alt"] = float(flattened_resp[i].split(" ")[1])
+                values = flattened_resp[i].split(" ")
+                magt_value = round(float(values[0]), 1)
+                alt_value = float(values[1])
+                di[era][model][scenario]["magt"] = magt_value
+                di[era][model][scenario]["alt"] = alt_value
                 i += 1
     # This block drops all the invalid dimensional combinations that are a result of jamming historical and projected data into the same data cube. These are no data values (-9999) that should be culled.
     models.remove("cruts31")
