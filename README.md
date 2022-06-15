@@ -10,11 +10,11 @@
 
 `export FLASK_ENV=development`
 
-Set the GeoServer/Rasdaman endpoints if needed:
+Set the GeoServer/Rasdaman endpoints if needed, i.e.:
 
 `export API_GS_BASE_URL=http://...`
 
-`export API_RAS_BASE_URL=http://...`
+`export API_RAS_BASE_URL=https://apollo.snap.uaf.edu/rasdaman/`
 
 `pipenv run flask run`
 
