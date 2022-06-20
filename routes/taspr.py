@@ -357,7 +357,7 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     return point_data_list
 
 
-def package_mmm_point_data(point_data, cov_id, horp):
+def package_mmm_point_data(point_data, cov_id, horp, varname):
     """Packages min-mean-max point data into JSON-formatted return data
 
     Args:
@@ -368,6 +368,8 @@ def package_mmm_point_data(point_data, cov_id, horp):
                 - point_data[i][j][k] = model number between 0-6 in mmm_dim_encodings
                 - point_data[i][j][k][l] = scenario number between 0-3 in mmm_dim_encodings
         horp [Historical or Projected ](str): historical, projected, hp, or all
+        varname (str): variable name to fetch point data
+            for one of "tas" or "pr"
 
     Returns:
         Python dictionary of one of four outcomes:
@@ -438,9 +440,9 @@ def package_mmm_point_data(point_data, cov_id, horp):
             # Generate the min, mean and max for historical CRU-TS 4.0 data at this point
             # We only want to generate statistics from the years 1900-2015 as that's all
             # that is available in CRU-TS 4.0
-            historical_max = round(point_data[0])
-            historical_mean = round(point_data[1])
-            historical_min = round(point_data[2])
+            historical_max = round(point_data[0], dim_encodings["rounding"][varname])
+            historical_mean = round(point_data[1], dim_encodings["rounding"][varname])
+            historical_min = round(point_data[2], dim_encodings["rounding"][varname])
 
             point_pkg["historical"] = dict()
 
@@ -455,13 +457,13 @@ def package_mmm_point_data(point_data, cov_id, horp):
 
         if horp == "projected" or horp == "hp":
             if horp == "projected":
-                projected_max = round(point_data[0])
-                projected_mean = round(point_data[1])
-                projected_min = round(point_data[2])
+                projected_max = round(point_data[0], dim_encodings["rounding"][varname])
+                projected_mean = round(point_data[1], dim_encodings["rounding"][varname])
+                projected_min = round(point_data[2], dim_encodings["rounding"][varname])
             else:
-                projected_max = round(point_data[3])
-                projected_mean = round(point_data[4])
-                projected_min = round(point_data[5])
+                projected_max = round(point_data[3], dim_encodings["rounding"][varname])
+                projected_mean = round(point_data[4], dim_encodings["rounding"][varname])
+                projected_min = round(point_data[5], dim_encodings["rounding"][varname])
 
             point_pkg["projected"] = dict()
 
@@ -913,11 +915,12 @@ def combine_pkg_dicts(tas_di, pr_di):
     return tas_di
 
 
-def run_fetch_mmm_point_data(lat, lon, cov_id, horp, start_year, end_year):
+def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, horp, start_year, end_year):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
     Args:
+        var_ep (str): temperature or precipitation
         lat (float): latitude
         lon (float): longitude
         cov_id (list):
@@ -936,10 +939,10 @@ def run_fetch_mmm_point_data(lat, lon, cov_id, horp, start_year, end_year):
         fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year)
     )
 
+    varname = var_ep_lu[var_ep]
     # package point data with decoded coord values (names)
     # these functions are hard-coded  with coord values for now
-
-    point_pkg = package_mmm_point_data(point_data_list, cov_id, horp)
+    point_pkg = package_mmm_point_data(point_data_list, cov_id, horp, varname)
 
     return point_pkg
 
@@ -1337,7 +1340,7 @@ def mmm_point_data_endpoint(
 
     try:
         point_pkg = run_fetch_mmm_point_data(
-            lat, lon, cov_id, horp, start_year, end_year
+            var_ep, lat, lon, cov_id, horp, start_year, end_year
         )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
