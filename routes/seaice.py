@@ -41,11 +41,24 @@ def package_seaice_data(seaice_resp):
     # intialize the output dict
     di = dict()
     year = dict()
-    months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
     for i in range(len(seaice_resp)):
-        year[f'{months[i%12]}'] = seaice_resp[i]
+        year[f"{months[i%12]}"] = seaice_resp[i]
         if i % 12 == 11:
-            di[f'{1850 + floor(i / 12)}'] = year
+            di[f"{1850 + floor(i / 12)}"] = year
             year = dict()
 
     return di
@@ -53,16 +66,16 @@ def package_seaice_data(seaice_resp):
 
 def package_mmm_seaice_data(seaice_resp, start_year=None, end_year=None):
     """Package the sea ice concentration data into a nested JSON-like dict of
-       min, mean, and max values.
+    min, mean, and max values.
 
-        Arguments:
-            seaice_resp -- the response(s) from the WCS GetCoverage request(s).
-            start_year -- starting year to find mmm
-            end_year -- ending year to find mmm
+     Arguments:
+         seaice_resp -- the response(s) from the WCS GetCoverage request(s).
+         start_year -- starting year to find mmm
+         end_year -- ending year to find mmm
 
-        Returns:
-            di -- a nested dictionary of all sea ice concentration values
-        """
+     Returns:
+         di -- a nested dictionary of all sea ice concentration values
+    """
     # intialize the output dict
     di = dict()
     start_index = 0
@@ -72,9 +85,9 @@ def package_mmm_seaice_data(seaice_resp, start_year=None, end_year=None):
     if end_year != None:
         end_index = (int(end_year) - 1850) * 12
 
-    di['seaice_min'] = min(seaice_resp[start_index:end_index])
-    di['seaice_max'] = max(seaice_resp[start_index:end_index])
-    di['seaice_mean'] = round(np.mean(seaice_resp[start_index:end_index]))
+    di["seaice_min"] = min(seaice_resp[start_index:end_index])
+    di["seaice_max"] = max(seaice_resp[start_index:end_index])
+    di["seaice_mean"] = round(np.mean(seaice_resp[start_index:end_index]))
 
     return di
 
@@ -88,17 +101,17 @@ def about_mmm_seaice():
 @routes.route("/mmm/seaice/<lat>/<lon>/<start_year>/<end_year>")
 def run_mmm_point_fetch_all_seaice(lat, lon, start_year=None, end_year=None):
     """Run the async request for sea ice concentration data at a single point.
-       Finds minimum, maximum, and mean for date range if supplied.
+    Finds minimum, maximum, and mean for date range if supplied.
 
-        Args:
-            lat (float): latitude
-            lon (float): longitude
-            start_year (int): starting year to find mmm
-            end_year(int): ending year to find mmm
+     Args:
+         lat (float): latitude
+         lon (float): longitude
+         start_year (int): starting year to find mmm
+         end_year(int): ending year to find mmm
 
-        Returns:
-            JSON-like dict of min, mean, and max of sea ice concentration data
-        """
+     Returns:
+         JSON-like dict of min, mean, and max of sea ice concentration data
+    """
     validation = validate_latlon(lat, lon)
     date_validation = validate_seaice_year(start_year, end_year)
     if validation == 400 or date_validation == 400:

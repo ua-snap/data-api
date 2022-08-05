@@ -70,8 +70,13 @@ def validate_seaice_year(start_year, end_year):
 
     return True
 
+
 def validate_year(start_year, end_year):
-    if 1900 < int(start_year) <= 2100 and 1900 < int(end_year) <= 2100 and int(start_year) <= int(end_year):
+    if (
+        1900 < int(start_year) <= 2100
+        and 1900 < int(end_year) <= 2100
+        and int(start_year) <= int(end_year)
+    ):
         return True
     else:
         return 400
