@@ -61,10 +61,10 @@ def validate_bbox(lat1, lon1, lat2, lon2):
 
 
 def validate_seaice_year(start_year, end_year):
-    if start_year != None:
+    if start_year is not None:
         if int(start_year) < 1850 or int(start_year) > 2021:
             return 400
-    if end_year != None:
+    if end_year is not None:
         if int(end_year) < 1850 or int(end_year) > 2021:
             return 400
 

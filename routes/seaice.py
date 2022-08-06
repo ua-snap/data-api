@@ -133,8 +133,8 @@ def run_mmm_point_fetch_all_seaice(lat, lon, start_year=None, end_year=None):
         return render_template("500/server_error.html"), 500
 
 
-@routes.route("/seaice/<lat>/<lon>")
-def run_point_fetch_all_seaice(lat, lon):
+@routes.route("/seaice/<lat>/<lon>/<hsia>")
+def run_point_fetch_all_seaice(lat, lon, hsia=None):
     """Run the async request for sea ice concentration data at a single point.
     Args:
         lat (float): latitude
@@ -156,7 +156,10 @@ def run_point_fetch_all_seaice(lat, lon):
     x, y = project_latlon(lat, lon, 3572)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, seaice_coverage_id))
-        return package_seaice_data(rasdaman_response)
+        if (hsia is not None):
+            return rasdaman_response
+        else:
+            return package_seaice_data(rasdaman_response)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
