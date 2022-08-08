@@ -139,6 +139,7 @@ def run_point_fetch_all_seaice(lat, lon, hsia=None):
     Args:
         lat (float): latitude
         lon (float): longitude
+        hsia (string): If not set to None, returns pure list output from Rasdaman
 
     Returns:
         JSON-like dict of sea ice concentration data
