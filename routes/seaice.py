@@ -85,11 +85,22 @@ def package_mmm_seaice_data(seaice_resp, start_year=None, end_year=None):
     if end_year != None:
         end_index = (int(end_year) - 1850) * 12
 
-    di["seaice_min"] = min(seaice_resp[start_index:end_index])
-    di["seaice_max"] = max(seaice_resp[start_index:end_index])
-    di["seaice_mean"] = round(np.mean(seaice_resp[start_index:end_index]))
+    di["historical"] = dict()
+    di["historical"]["seaice_min"] = min(seaice_resp[start_index:end_index])
+    di["historical"]["seaice_max"] = max(seaice_resp[start_index:end_index])
+    di["historical"]["seaice_mean"] = round(np.mean(seaice_resp[start_index:end_index]))
 
     return di
+
+@routes.route("/seaice/")
+@routes.route("/seaice/abstract/")
+def about_seaice():
+    return render_template("seaice/abstract.html")
+
+
+@routes.route("/seaice/point/")
+def about_seaice_point():
+    return render_template("seaice/seaice.html")
 
 
 @routes.route("/mmm/seaice/")
@@ -133,7 +144,8 @@ def run_mmm_point_fetch_all_seaice(lat, lon, start_year=None, end_year=None):
         return render_template("500/server_error.html"), 500
 
 
-@routes.route("/seaice/<lat>/<lon>/<hsia>")
+@routes.route("/seaice/point/<lat>/<lon>/")
+@routes.route("/seaice/point/<lat>/<lon>/<hsia>")
 def run_point_fetch_all_seaice(lat, lon, hsia=None):
     """Run the async request for sea ice concentration data at a single point.
     Args:

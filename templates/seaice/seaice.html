@@ -1,0 +1,36 @@
+{% extends 'base.html' %} {% block content %}
+<h3>Pan Arctic Sea Ice Concentration Point Query</h3>
+<p>
+  This endpoint accesses historical monthly data on sea ice concentration in the
+    Arctic from 1850-2021.
+</p>
+<h4>Historical queries for data at given latitude / longitude</h4>
+<p>Query the historical sea ice concentration at lat / lon:</p>
+<p>
+  Example:
+  <a href="/seaice/point/63.73/-166.32"
+    >/seaice/point/63.73/-166.32</a
+  >
+</p>
+<b>Results from the queries above will look like this:</b>
+<pre>
+{
+  "1850": {
+    "January": 100,
+    "February": 100,
+    "March": 98,
+    ...
+  }
+  ...
+}
+</pre>
+<b>The above output is structured like this:</b>
+<pre>
+{
+  &ltyear>: {
+    "month": &ltone of the 12 months in a year>
+  }
+  ...
+}
+</pre>
+{% endblock %}

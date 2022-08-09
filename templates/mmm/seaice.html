@@ -1,0 +1,43 @@
+{% extends 'base.html' %} {% block content %}
+<h3>Pan Arctic Sea Ice Concentration Min, Mean, and Max</h3>
+<p>
+  This endpoint accesses historical monthly data on sea ice concentration in the
+    Arctic from 1850-2021 and returns minimum, mean, and maximum values.
+</p>
+<h4>Historical queries for min, mean, and max at given latitude / longitude</h4>
+<p>Query the historical sea ice concentration at lat / lon:</p>
+<p>
+  Example:
+  <a href="/mmm/seaice/63.73/-166.32"
+    >/mmm/seaice/63.73/-166.32</a
+  >
+</p>
+<b>Results from the query above will look like this:</b>
+<pre>
+{
+  "historical": {
+  "seaice_max": 100,
+  "seaice_mean": 49,
+  "seaice_min": 0
+  }
+}
+</pre>
+<h4>Historical queries for min, mean, and max at given latitude / longitude between provided years</h4>
+<p>Query the historical sea ice concentration at lat / lon between years:</p>
+<p>
+  Example:
+  <a href="/mmm/seaice/63.73/-166.32/1900/2000"
+    >/mmm/seaice/63.73/-166.32/1900/2000</a
+  >
+</p>
+<b>Results from the query above will look like this:</b>
+<pre>
+{
+  "historical": {
+    "seaice_max": 100,
+    "seaice_mean": 50,
+    "seaice_min": 0
+  }
+}
+</pre>
+{% endblock %}
