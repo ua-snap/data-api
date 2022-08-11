@@ -9,7 +9,7 @@ import json
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
-from config import WEST_BBOX, EAST_BBOX
+from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from luts import valid_huc_ids
 
 
@@ -36,6 +36,28 @@ def validate_latlon(lat, lon):
 
     return 422
 
+def validate_seaice_latlon(lat, lon):
+    """Validate the lat and lon values for pan arctic sea ice.
+    Return True if valid or HTTP status code if validation failed
+    """
+    try:
+        lat_float = float(lat)
+        lon_float = float(lon)
+    except:
+        return 400  # HTTP status code
+    lat_in_world = -90 <= lat_float <= 90
+    lon_in_world = -180 <= lon_float <= 180
+    if not lat_in_world or not lon_in_world:
+        return 400  # HTTP status code
+
+    # Validate against two different BBOXes to deal with antimeridian issues
+    for bbox in [SEAICE_BBOX]:
+        valid_lat = bbox[1] <= lat_float <= bbox[3]
+        valid_lon = bbox[0] <= lon_float <= bbox[2]
+        if valid_lat and valid_lon:
+            return True
+
+    return 422
 
 def validate_bbox(lat1, lon1, lat2, lon2):
     """Validate a bounding box given lat lon values

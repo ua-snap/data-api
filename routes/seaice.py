@@ -16,7 +16,7 @@ from fetch_data import (
     write_csv,
 )
 from validate_request import (
-    validate_latlon,
+    validate_seaice_latlon,
     project_latlon,
     validate_seaice_year,
 )
@@ -123,7 +123,7 @@ def run_mmm_point_fetch_all_seaice(lat, lon, start_year=None, end_year=None):
      Returns:
          JSON-like dict of min, mean, and max of sea ice concentration data
     """
-    validation = validate_latlon(lat, lon)
+    validation = validate_seaice_latlon(lat, lon)
     date_validation = validate_seaice_year(start_year, end_year)
     if validation == 400 or date_validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -156,7 +156,7 @@ def run_point_fetch_all_seaice(lat, lon, hsia=None):
     Returns:
         JSON-like dict of sea ice concentration data
     """
-    validation = validate_latlon(lat, lon)
+    validation = validate_seaice_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
@@ -169,10 +169,10 @@ def run_point_fetch_all_seaice(lat, lon, hsia=None):
     x, y = project_latlon(lat, lon, 3572)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, seaice_coverage_id))
-        if (hsia is not None):
-            return rasdaman_response
+        if hsia is not None:
+            return nullify_and_prune(rasdaman_response, 'seaice')
         else:
-            return package_seaice_data(rasdaman_response)
+            return postprocess(package_seaice_data(rasdaman_response), 'seaice')
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
