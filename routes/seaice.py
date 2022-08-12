@@ -76,6 +76,9 @@ def package_mmm_seaice_data(seaice_resp, start_year=None, end_year=None):
      Returns:
          di -- a nested dictionary of all sea ice concentration values
     """
+    if None in seaice_resp:
+        return render_template("404/no_data.html"), 404
+
     # intialize the output dict
     di = dict()
     start_index = 0
@@ -137,7 +140,8 @@ def run_mmm_point_fetch_all_seaice(lat, lon, start_year=None, end_year=None):
     x, y = project_latlon(lat, lon, 3572)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, seaice_coverage_id))
-        return package_mmm_seaice_data(rasdaman_response, start_year, end_year)
+        pruned_data = nullify_and_prune(rasdaman_response, 'seaice')
+        return package_mmm_seaice_data(pruned_data, start_year, end_year)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
