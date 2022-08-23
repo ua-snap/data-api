@@ -29,6 +29,52 @@ seaice_api = Blueprint("seaice_api", __name__)
 seaice_coverage_id = "hsia_arctic_production"
 
 
+def create_csv(data_pkg, lat=None, lon=None):
+    """Create CSV file with metadata string and location based filename.
+    Args:
+        data_pkg (dict): JSON-like object of data
+        lat: latitude for points or None for polygons
+        lon: longitude for points or None for polygons
+    Returns:
+        CSV response object
+    """
+
+    fieldnames = [
+        "year",
+        "month",
+        "concentration"
+    ]
+
+    months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+
+    csv_pkg = list()
+    for key in data_pkg:
+        year = str(key[0:4])
+        month = months[int(key[4:])]
+        di = dict()
+        di["year"] = year
+        di["month"] = month
+        di["concentration"] = data_pkg[key]
+        csv_pkg.append(di)
+
+    metadata = "# Sea Ice Concentration is the percentage of sea ice coverage at the given latitude and longitude for each year and month.\n"
+    filename = "Sea Ice Concentration for " + lat + ", " + lon + ".csv"
+    return write_csv(csv_pkg, fieldnames, filename, metadata)
+
+
 def package_seaice_data(seaice_resp):
     """Package the sea ice concentration data into a nested JSON-like dict.
 
@@ -153,6 +199,14 @@ def run_point_fetch_all_seaice(lat, lon):
     x, y = project_latlon(lat, lon, 3572)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, seaice_coverage_id))
+        seaice_conc = postprocess(package_seaice_data(rasdaman_response), 'seaice')
+        if request.args.get("format") == "csv":
+            if type(seaice_conc) is not dict:
+                # Returns errors if any are generated
+                return seaice_conc
+            # Returns CSV for download
+            return create_csv(postprocess(package_seaice_data(rasdaman_response), 'seaice'), lat, lon)
+        # Returns sea ice concentrations across years & months
         return postprocess(package_seaice_data(rasdaman_response), 'seaice')
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
