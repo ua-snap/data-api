@@ -25,7 +25,7 @@ from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
 seaice_api = Blueprint("seaice_api", __name__)
-# rasdaman targets
+# Rasdaman targets
 seaice_coverage_id = "hsia_arctic_production"
 
 
@@ -38,28 +38,10 @@ def package_seaice_data(seaice_resp):
     Returns:
         di -- a nested dictionary of all SFE values
     """
-    # intialize the output dict
+    # initialize the output dict
     di = dict()
-    year = dict()
-    months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ]
     for i in range(len(seaice_resp)):
-        year[f"{months[i%12]}"] = seaice_resp[i]
-        if i % 12 == 11:
-            di[f"{1850 + floor(i / 12)}"] = year
-            year = dict()
+        di[f"{1850 + floor(i / 12)}{str(i%12).zfill(2)}"] = seaice_resp[i]
 
     return di
 
@@ -79,7 +61,7 @@ def package_mmm_seaice_data(seaice_resp, start_year=None, end_year=None):
     if None in seaice_resp:
         return render_template("404/no_data.html"), 404
 
-    # intialize the output dict
+    # initialize the output dict
     di = dict()
     start_index = 0
     end_index = len(seaice_resp)
@@ -149,13 +131,11 @@ def run_mmm_point_fetch_all_seaice(lat, lon, start_year=None, end_year=None):
 
 
 @routes.route("/seaice/point/<lat>/<lon>/")
-@routes.route("/seaice/point/<lat>/<lon>/<hsia>")
-def run_point_fetch_all_seaice(lat, lon, hsia=None):
+def run_point_fetch_all_seaice(lat, lon):
     """Run the async request for sea ice concentration data at a single point.
     Args:
         lat (float): latitude
         lon (float): longitude
-        hsia (string): If not set to None, returns pure list output from Rasdaman
 
     Returns:
         JSON-like dict of sea ice concentration data
@@ -173,10 +153,7 @@ def run_point_fetch_all_seaice(lat, lon, hsia=None):
     x, y = project_latlon(lat, lon, 3572)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, seaice_coverage_id))
-        if hsia is not None:
-            return nullify_and_prune(rasdaman_response, 'seaice')
-        else:
-            return postprocess(package_seaice_data(rasdaman_response), 'seaice')
+        return postprocess(package_seaice_data(rasdaman_response), 'seaice')
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
