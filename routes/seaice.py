@@ -87,7 +87,7 @@ def package_seaice_data(seaice_resp):
     # initialize the output dict
     di = dict()
     for i in range(len(seaice_resp)):
-        di[f"{1850 + floor(i / 12)}{str(i%12).zfill(2)}"] = seaice_resp[i]
+        di[f"{1850 + floor(i / 12)}-{str(i%12).zfill(2)}"] = seaice_resp[i]
 
     return di
 
