@@ -132,7 +132,7 @@ def about_seaice():
 
 @routes.route("/seaice/point/")
 def about_seaice_point():
-    return render_template("seaice/seaice.html")
+    return render_template("seaice/point.html")
 
 
 @routes.route("/mmm/seaice/")
