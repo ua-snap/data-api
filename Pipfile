@@ -20,9 +20,9 @@ shapely = "*"
 geos = "*"
 rtree = "*"
 pygeos = "*"
-black = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.9"
