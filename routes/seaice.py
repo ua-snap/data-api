@@ -63,7 +63,8 @@ def create_csv(data_pkg, lat=None, lon=None):
     csv_pkg = list()
     for key in data_pkg:
         year = str(key[0:4])
-        month = months[int(key[4:])]
+        month_index = int(key[5:]) - 1
+        month = months[month_index]
         di = dict()
         di["year"] = year
         di["month"] = month
@@ -87,7 +88,7 @@ def package_seaice_data(seaice_resp):
     # initialize the output dict
     di = dict()
     for i in range(len(seaice_resp)):
-        di[f"{1850 + floor(i / 12)}-{str(i%12).zfill(2)}"] = seaice_resp[i]
+        di[f"{1850 + floor(i / 12)}-{str((i%12) + 1).zfill(2)}"] = seaice_resp[i]
 
     return di
 
