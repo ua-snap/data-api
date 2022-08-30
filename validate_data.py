@@ -87,8 +87,6 @@ def prune_nodata_list(data):
             pruned_value = prune_nodata(value)
             if len(pruned_value) > 0:
                 pruned.append(pruned_value)
-        else:
-            pruned.append(value)
 
     return pruned
 
@@ -120,7 +118,7 @@ def nullify_and_prune(data, endpoint):
 def postprocess(data, endpoint, titles=None):
     """Nullify and prune data, add titles, and return 404 if appropriate"""
     pruned_data = nullify_and_prune(data, endpoint)
-    if pruned_data in [{}, None, 0] or None in pruned_data:
+    if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
 
     if titles is not None:
