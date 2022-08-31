@@ -1,4 +1,5 @@
 import asyncio
+import calendar
 import numpy as np
 from math import floor
 from flask import (
@@ -41,20 +42,9 @@ def create_csv(data_pkg, lat=None, lon=None):
 
     fieldnames = ["year", "month", "concentration"]
 
-    months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-    ]
+    # Generating a list out of this results in an empty starting value
+    # Removes blank starting value for list of month names.
+    months = list(calendar.month_name)[1:]
 
     csv_pkg = list()
     for key in data_pkg:
