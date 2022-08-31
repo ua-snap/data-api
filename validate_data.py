@@ -19,6 +19,7 @@ nodata_values = {
     "physiography": [],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
     "snow": [-9999],
+    "seaice": [120, 254, 255]
 }
 
 
@@ -117,7 +118,6 @@ def nullify_and_prune(data, endpoint):
 def postprocess(data, endpoint, titles=None):
     """Nullify and prune data, add titles, and return 404 if appropriate"""
     pruned_data = nullify_and_prune(data, endpoint)
-
     if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
 

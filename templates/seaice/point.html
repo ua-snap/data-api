@@ -1,0 +1,51 @@
+{% extends 'base.html' %} {% block content %}
+<h3>Pan&ndash;Arctic Sea Ice Concentration Point Query</h3>
+<p>
+  This endpoint accesses historical monthly data on sea ice concentration in the
+    Arctic from 1850&ndash;2021.
+</p>
+<h4>Historical queries for data at given latitude / longitude</h4>
+<p>Query the historical sea ice concentration at lat / lon:</p>
+<p>
+  Example:
+  <a href="/seaice/point/63.73/-166.32"
+    >/seaice/point/63.73/&minus;166.32</a
+  >
+</p>
+<b>Results from the queries above will look like this:</b>
+<pre>
+{
+  "1850-01": 100,
+  "1850-02": 98,
+  "1850-03": 96,
+  ...
+}
+</pre>
+<b>The above output is structured like this:</b>
+<pre>
+{
+  "&lt;year&gt;&ndash;&lt;month&gt;": &lt;sea ice concentration for one of the 12 months in a year&gt;
+  }
+  ...
+}
+</pre>
+<h4>Source data</h4>
+<table>
+<thead>
+  <tr>
+    <th>Gridded Historical Dataset</th>
+    <th>Historical Date Range</th>
+    <th>Spatial Resolution</th>
+    <th>Spatial Coverage</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><a href="https://nsidc.org/data/nsidc-0051/versions/1">Sea Ice Concentrations from Nimbus&ndash;7 SMMR and DMSP SSM/I&ndash;SSMIS Passive Microwave Data, Version 1</a></td>
+    <td>1850&ndash;2022</td>
+    <td>25 km</td>
+    <td>N: 90, S: 30.98, E: 180, W: &minus;180</td>
+  </tr>
+</tbody>
+</table>
+{% endblock %}

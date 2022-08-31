@@ -19,3 +19,7 @@ TODO.md
 data/jsons/
 data/csvs/
 data/shapefiles/
+
+# IDE hidden files
+.idea/
+.vscode/
