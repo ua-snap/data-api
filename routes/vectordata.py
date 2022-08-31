@@ -21,6 +21,8 @@ from luts import (
     akfire_gdf,
     akgmu_gdf,
     cafn_gdf,
+    boro_gdf,
+    akcensus_gdf,
     proximity_search_radius_m,
     community_search_radius_m,
     total_bounds_buffer,
@@ -117,6 +119,22 @@ def find_containing_polygons(lat, lon):
     except ValueError:
         near_cafn_di, fn_bb = {}, box(*[1, 1, 1, 1])
 
+    try:
+        near_akboro_di, fn_tb = fetch_akboros_near_point(p_buff)
+        fn_bb = box(*fn_tb)
+        fn_bb = fn_bb.buffer(box(*fn_tb).area * total_bounds_buffer)
+        fn_tb = fn_bb.bounds
+    except ValueError:
+        near_akboro_di, fn_bb = {}, box(*[1, 1, 1, 1])
+
+    try:
+        near_akcensus_di, fn_tb = fetch_akcensusareas_near_point(p_buff)
+        fn_bb = box(*fn_tb)
+        fn_bb = fn_bb.buffer(box(*fn_tb).area * total_bounds_buffer)
+        fn_tb = fn_bb.bounds
+    except ValueError:
+        near_akcensus_di, fn_bb = {}, box(*[1, 1, 1, 1])
+
     df = csv_to4326_gdf("data/csvs/ak_communities.csv")
     nearby_points_di = package_nearby_points(
         find_nearest_communities(p_buff_community, df)
@@ -131,6 +149,8 @@ def find_containing_polygons(lat, lon):
     proximal_di.update(near_akgmu_di)
     proximal_di.update(near_cafn_di)
     proximal_di.update(nearby_points_di)
+    proximal_di.update(near_akcensus_di)
+    proximal_di.update(near_akboro_di)
 
     geo_suggestions.update(proximal_di)
 
@@ -439,6 +459,20 @@ def fetch_cafn_near_point(pt):
     join = execute_spatial_join(pt, cafn_gdf.reset_index(), "intersects")
     di, tb = package_polys(
         "ca_first_nations_near", join, "first_nation", cafn_gdf, to_wgs=True
+    )
+    return di, tb
+
+
+def fetch_akboros_near_point(pt):
+    join = execute_spatial_join(pt, boro_gdf.reset_index(), "intersects")
+    di, tb = package_polys("ak_boros_near", join, "borough", boro_gdf, to_wgs=True)
+    return di, tb
+
+
+def fetch_akcensusareas_near_point(pt):
+    join = execute_spatial_join(pt, akcensus_gdf.reset_index(), "intersects")
+    di, tb = package_polys(
+        "ak_censusareas_near", join, "census_area", akcensus_gdf, to_wgs=True
     )
     return di, tb
 

@@ -79,6 +79,8 @@ permafrost_encodings = {
 
 json_types = {
     "communities": "data/jsons/ak_communities.json",
+    "boroughs": "data/jsons/ak_boroughs.json",
+    "census_areas": "data/jsons/ak_census_areas.json",
     "hucs": "data/jsons/ak_huc8.json",
     "huc8s": "data/jsons/ak_huc8.json",
     "huc12s": "data/jsons/ak_huc12.json",
@@ -94,6 +96,8 @@ json_types = {
 place_type_labels = {
     "huc8s": "HUC",
     "protected_areas": "Protected Area",
+    "boroughs": "Borough",
+    "census_areas": "Census Area",
     "fire_zones": "Fire Management Unit",
     "corporations": "Corporation",
     "climate_divisions": "Climate Division",
@@ -128,6 +132,8 @@ all_jsons = [
     "fire_zones",
     "game_management_units",
     "first_nations",
+    "boroughs",
+    "census_areas",
 ]
 
 # For the forest endpoint.  This file is just a generated pickle
@@ -175,6 +181,14 @@ try:
     cafn_src = "data/shapefiles/first_nation_traditional_territories.shp"
     cafn_gdf = gpd.read_file(cafn_src).set_index("id").to_crs(3338)
 
+    # Alaska Boroughs
+    boro_src = "data/shapefiles/ak_boroughs.shp"
+    boro_gdf = gpd.read_file(boro_src).set_index("id").to_crs(3338)
+
+    # Unorganized Borough Census Areas
+    akcensus_src = "data/shapefiles/ak_census_areas.shp"
+    akcensus_gdf = gpd.read_file(akcensus_src).set_index("id").to_crs(3338)
+
     # join HUCs into same GeoDataFrame for easier lookup
     huc_gdf = pd.concat(
         [huc8_gdf.reset_index(), huc12_gdf.reset_index()], ignore_index=True
@@ -191,6 +205,8 @@ try:
     type_di["fire_zone"] = akfire_gdf
     type_di["game_management_unit"] = akgmu_gdf
     type_di["first_nation"] = cafn_gdf
+    type_di["borough"] = boro_gdf
+    type_di["census_area"] = akcensus_gdf
 
     update_needed = False
 except fiona.errors.DriverError:
@@ -208,8 +224,10 @@ except fiona.errors.DriverError:
         akgmu_gdf,
         cafn_gdf,
         huc_gdf,
+        boro_gdf,
+        akcensus_gdf,
         valid_huc_ids,
-    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     type_di = dict()
 
 # look-up for updating place names and data via geo-vector GitHub repo
@@ -266,5 +284,17 @@ shp_di["cnfns"] = {
     "src_dir": "first_nations",
     "prefix": "first_nation_traditional_territories",
     "poly_type": "first_nation",
+    "retain": [],
+}
+shp_di["akboros"] = {
+    "src_dir": "boroughs",
+    "prefix": "ak_boroughs",
+    "poly_type": "borough",
+    "retain": [],
+}
+shp_di["akcensusareas"] = {
+    "src_dir": "census_areas",
+    "prefix": "ak_census_areas",
+    "poly_type": "census_area",
     "retain": [],
 }
