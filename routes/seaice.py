@@ -39,11 +39,7 @@ def create_csv(data_pkg, lat=None, lon=None):
         CSV response object
     """
 
-    fieldnames = [
-        "year",
-        "month",
-        "concentration"
-    ]
+    fieldnames = ["year", "month", "concentration"]
 
     months = [
         "January",
@@ -124,6 +120,7 @@ def package_mmm_seaice_data(seaice_resp, start_year=None, end_year=None):
 
     return di
 
+
 @routes.route("/seaice/")
 @routes.route("/seaice/abstract/")
 def about_seaice():
@@ -169,7 +166,7 @@ def run_mmm_point_fetch_all_seaice(lat, lon, start_year=None, end_year=None):
     x, y = project_latlon(lat, lon, 3572)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, seaice_coverage_id))
-        pruned_data = nullify_and_prune(rasdaman_response, 'seaice')
+        pruned_data = nullify_and_prune(rasdaman_response, "seaice")
         return package_mmm_seaice_data(pruned_data, start_year, end_year)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
@@ -200,15 +197,17 @@ def run_point_fetch_all_seaice(lat, lon):
     x, y = project_latlon(lat, lon, 3572)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, seaice_coverage_id))
-        seaice_conc = postprocess(package_seaice_data(rasdaman_response), 'seaice')
+        seaice_conc = postprocess(package_seaice_data(rasdaman_response), "seaice")
         if request.args.get("format") == "csv":
             if type(seaice_conc) is not dict:
                 # Returns errors if any are generated
                 return seaice_conc
             # Returns CSV for download
-            return create_csv(postprocess(package_seaice_data(rasdaman_response), 'seaice'), lat, lon)
+            return create_csv(
+                postprocess(package_seaice_data(rasdaman_response), "seaice"), lat, lon
+            )
         # Returns sea ice concentrations across years & months
-        return postprocess(package_seaice_data(rasdaman_response), 'seaice')
+        return postprocess(package_seaice_data(rasdaman_response), "seaice")
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
