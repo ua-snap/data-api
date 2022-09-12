@@ -1,5 +1,4 @@
 import asyncio
-import calendar
 import numpy as np
 import pandas as pd
 from flask import (
@@ -18,9 +17,7 @@ from fetch_data import (
 from validate_request import (
     validate_latlon,
     project_latlon,
-    # validate_landfastice_year,  # we would want this, but or the ice seasons (oct to july) that are in the actual dataset.
 )
-from validate_data import nullify_and_prune, postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -69,6 +66,28 @@ def package_landfastice_data(landfastice_resp):
     return di
 
 
+def create_landfast_csv(data_pkg, lat=None, lon=None):
+    """Create CSV file with metadata string and location based filename.
+    Args:
+        data_pkg (dict): JSON-like object of data
+        lat: latitude for points or None for polygons
+        lon: longitude for points or None for polygons
+    Returns:
+        CSV response object
+    """
+    fieldnames = [
+        "time",
+        "value",
+    ]
+    csv_dicts = build_csv_dicts(
+        data_pkg,
+        fieldnames,
+    )
+    metadata = "# Landfast Ice Status: 0 indicates absence and 1 indicates presence.\n"
+    filename = "Landfast Ice Extent for " + lat + ", " + lon + ".csv"
+    return write_csv(csv_dicts, fieldnames, filename, metadata)
+
+
 @routes.route("/landfastice/")
 @routes.route("/landfastice/abstract/")
 def about_landfastice():
@@ -82,7 +101,7 @@ def about_landfastice_point():
 
 @routes.route("/landfastice/point/<lat>/<lon>/")
 def run_point_fetch_all_landfastice(lat, lon):
-    """Run the async request for landfast ice extent data at a single point.
+    """Run the async request for all landfast ice extent data at a single point.
     Args:
         lat (float): latitude
         lon (float): longitude
@@ -106,24 +125,13 @@ def run_point_fetch_all_landfastice(lat, lon):
             fetch_wcs_point_data(x, y, landfastice_coverage_id)
         )
         landfastice_time_series = package_landfastice_data(rasdaman_response)
-
-        # landfastice_conc = postprocess(
-        #     package_landfastice_data(rasdaman_response), "landfastice"
-        # )
-        # if request.args.get("format") == "csv":
-        #     if type(landfastice_conc) is not dict:
-        #         # Returns errors if any are generated
-        #         return landfastice_conc
-        #     # Returns CSV for download
-        #     return create_csv(
-        #         postprocess(package_landfastice_data(rasdaman_response), "landfastice"),
-        #         lat,
-        #         lon,
-        #     )
-        # # Returns sea ice concentrations across years & months
-        # return postprocess(package_landfastice_data(rasdaman_response), "landfastice")
-        # return landfast_time_index
-        # return package_landfastice_data(rasdaman_response)
+        # Unlike other endpoints, I'm electing to not call the post-process function on the data package because having an intact time series at this stage may be most useful, and the absence of landfast ice (i.e., no data) may prove useful as well.
+        if request.args.get("format") == "csv":
+            return create_landfast_csv(
+                landfastice_time_series,
+                lat,
+                lon,
+            )
         return landfastice_time_series
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
