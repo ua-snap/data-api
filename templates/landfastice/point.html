@@ -4,45 +4,37 @@
   This endpoint accesses daily landfast ice extent information for the Alaska
   Coastline between October 17th, 1996 and July 14th, 2008.
 </p>
-<h4>Fetch the entire daily time series.</h4>
+<h4>Fetch the entire daily time series</h4>
 <p>Query the daily landfast ice extent for a certain geographic point:</p>
 <p>
   Example:
-  <a href="/landfastice/point/70.77/-146.32"
-    >/landfastice/point/70.77/&minus;146.32</a
+  <a href="/landfastice/point/70.6123/-149.8869/"
+    >/landfastice/point/70.6123/&minus;149.8869</a
   >
 </p>
 <b>Results from queries like the above example will look like this:</b>
 <pre>
-{
-  ...
-}
+  {
+    "01-01-1997": 0, 
+    "01-01-1998": 0, 
+    "01-01-1999": 0, 
+    "01-01-2000": 1, 
+    "01-01-2001": 1, 
+    "01-01-2002": 1, 
+    "01-01-2003": 1, 
+    "01-01-2004": 1, 
+    "01-01-2005": 1, 
+    "01-01-2006": 1, 
+    "01-01-2007": 1, 
+    "01-01-2008": 0,
+    ... 
+} 
 </pre>
 <b>The above output is structured like this:</b>
 <pre>
 {
-  ...
+    "&lt;month&gt;&ndash;&lt;day&gt;&ndash;&lt;year&gt;": &lt;landfast ice <strong>presence (1) or absence (0)</strong> for a specific date in the time series&gt;
+    ...
 }
-</pre>
-<h4>Fetch a single annual ice season (October to July).</h4>
-<p>Query the daily landfast ice extent for a certain geographic point:</p>
-<p>
-  Example:
-  <a href="/landfastice/point/70.77/-146.32"
-    >/landfastice/point/70.77/&minus;146.32</a
-  >
-</p>
-<b>Results from queries like the above example will look like this:</b>
-<pre>
-{
-  ...
-}
-</pre>
-<b>The above output is structured like this:</b>
-<pre>
-{
-  ...
-}
-</pre>
 <h4>Source data</h4>
 {% endblock %}
