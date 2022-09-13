@@ -276,7 +276,7 @@ def summarize_within_poly_marr(
         for model in range(models):
             for scenario in range(scenarios):
                 for snowpack in range(snowpacks):
-                    index = (era * 24) + (model * 6) + (scenario * 3) + snowpack
+                    index = (era * models * scenarios * snowpacks) + (model * scenarios * snowpacks) + (scenario * snowpacks) + snowpack
                     slice = data_arr[index]
                     uniques = np.unique(slice[~np.isnan(slice)], return_counts=True)
                     mode = uniques[0][0]
