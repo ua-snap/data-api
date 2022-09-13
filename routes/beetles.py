@@ -5,13 +5,9 @@ import calendar
 import numpy as np
 from scipy import stats as st
 from math import floor
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    Response
-)
+from flask import Blueprint, render_template, request, Response
 from shapely.geometry import Point
+
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import *
@@ -53,7 +49,6 @@ dim_encodings = {
         1: "HadGEM2-ES",
         2: "MRI-CGCM3",
         3: "NCAR-CCSM4",
-
     },
     "scenario": {
         0: "rcp45",
@@ -91,9 +86,7 @@ async def fetch_beetles_bbox_data(bbox_bounds, cov_id_str):
     return bbox_ds_list
 
 
-def create_csv(
-    packaged_data, place_id, lat=None, lon=None
-):
+def create_csv(packaged_data, place_id, lat=None, lon=None):
     """
     Returns a CSV version of the fetched data, as a string.
 
@@ -113,7 +106,9 @@ def create_csv(
     place_name, place_type = place_name_and_type(place_id)
 
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
-    metadata += "# Values shown are given as low risk = 0, medium risk = 1 and high risk = 2\n"
+    metadata += (
+        "# Values shown are given as low risk = 0, medium risk = 1 and high risk = 2\n"
+    )
     output.write(metadata)
 
     fieldnames = [
@@ -138,7 +133,9 @@ def create_csv(
                                 "model": model,
                                 "scenario": scenario,
                                 "snowpack-level": snowpack,
-                                "beetle-risk": packaged_data[era][model][scenario][snowpack],
+                                "beetle-risk": packaged_data[era][model][scenario][
+                                    snowpack
+                                ],
                             }
                         )
                     except KeyError:
@@ -214,14 +211,14 @@ def package_beetle_data(beetle_resp):
                 di[era][model][scenario] = dict()
                 for sni, ri_li in enumerate(sn_li):
                     snowpack = dim_encodings["snowpack"][sni]
-                    di[era][model][scenario][snowpack] = int(beetle_resp[ei][mi][si][sni])
+                    di[era][model][scenario][snowpack] = int(
+                        beetle_resp[ei][mi][si][sni]
+                    )
 
     return di
 
 
-def summarize_within_poly_marr(
-    ds, poly_mask_arr, bandname="Gray", var_ep="Gray"
-):
+def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray", var_ep="Gray"):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
     Return the results as a nested dict.
 
@@ -266,17 +263,22 @@ def summarize_within_poly_marr(
     data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
     data_arr[data_arr_mask] = np.nan
 
-    eras = len(dim_encodings['era'].keys())
-    models = len(dim_encodings['model'].keys())
-    scenarios = len(dim_encodings['scenario'].keys())
-    snowpacks = len(dim_encodings['snowpack'].keys())
+    eras = len(dim_encodings["era"].keys())
+    models = len(dim_encodings["model"].keys())
+    scenarios = len(dim_encodings["scenario"].keys())
+    snowpacks = len(dim_encodings["snowpack"].keys())
 
-    return_arr = np.zeros((eras,models,scenarios,snowpacks))
+    return_arr = np.zeros((eras, models, scenarios, snowpacks))
     for era in range(eras):
         for model in range(models):
             for scenario in range(scenarios):
                 for snowpack in range(snowpacks):
-                    index = (era * models * scenarios * snowpacks) + (model * scenarios * snowpacks) + (scenario * snowpacks) + snowpack
+                    index = (
+                        (era * models * scenarios * snowpacks)
+                        + (model * scenarios * snowpacks)
+                        + (scenario * snowpacks)
+                        + snowpack
+                    )
                     slice = data_arr[index]
                     uniques = np.unique(slice[~np.isnan(slice)], return_counts=True)
                     mode = uniques[0][0]
@@ -340,9 +342,7 @@ def run_aggregate_var_polygon(poly_gdf, poly_id):
     bandname = "Gray"
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
 
-    agg_results = summarize_within_poly_marr(
-        ds_list[-1], poly_mask_arr, bandname
-    )
+    agg_results = summarize_within_poly_marr(ds_list[-1], poly_mask_arr, bandname)
 
     return package_beetle_data(agg_results)
 
@@ -388,9 +388,12 @@ def run_point_fetch_all_beetles(lat, lon):
                 # Returns errors if any are generated
                 return beetle_risk
             # Returns CSV for download
-            return return_csv(create_csv(
-                postprocess(beetle_risk, "beetles"), None, lat, lon
-            ), None, lat, lon)
+            return return_csv(
+                create_csv(postprocess(beetle_risk, "beetles"), None, lat, lon),
+                None,
+                lat,
+                lon,
+            )
         # Returns beetle risk levels
         return beetle_risk
     except Exception as exc:
