@@ -378,9 +378,7 @@ def get_xml_str_between_tags(meta_xml_str, tag):
 
 async def get_dim_encodings(cov_id, scrape=None):
     """Get the dimension encodings that map integer values to descriptive strings from a
-    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We
-    handle exceptions where the coverage we are requesting encodings from does not exist
-    on the backend to prevent Rasdaman work from blocking API development. We can use the same request to scrape various other parts of the DescribeCoverage XML response, but this optional.
+    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We handle exceptions where the coverage we are requesting encodings from does not exist on the backend to prevent Rasdaman work from blocking API development. We can use the same request to scrape various other parts of the DescribeCoverage XML response, but this optional.
 
     Args:
         cov_id (str): ID of the rasdaman coverage
