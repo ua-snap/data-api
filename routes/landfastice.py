@@ -18,6 +18,7 @@ from validate_request import (
     validate_latlon,
     project_latlon,
 )
+from validate_data import postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -125,14 +126,13 @@ def run_point_fetch_all_landfastice(lat, lon):
             fetch_wcs_point_data(x, y, landfastice_coverage_id)
         )
         landfastice_time_series = package_landfastice_data(rasdaman_response)
-        # Unlike other endpoints, I'm electing to not call the post-process function on the data package because having an intact time series at this stage may be most useful, and the absence of landfast ice (i.e., no data) may prove useful as well.
         if request.args.get("format") == "csv":
             return create_landfast_csv(
-                landfastice_time_series,
+                postprocess(landfastice_time_series, "landfastice"),
                 lat,
                 lon,
             )
-        return landfastice_time_series
+        return postprocess(landfastice_time_series, "landfastice")
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404

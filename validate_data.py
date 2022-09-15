@@ -19,7 +19,8 @@ nodata_values = {
     "physiography": [],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
     "snow": [-9999],
-    "seaice": [120, 254, 255]
+    "seaice": [120, 254, 255],
+    "landfastice": [0],
 }
 
 
