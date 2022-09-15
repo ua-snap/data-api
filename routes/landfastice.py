@@ -76,7 +76,7 @@ def create_landfast_csv(data_pkg, lat=None, lon=None):
         CSV response object
     """
     fieldnames = [
-        "time",
+        "date",
         "value",
     ]
     csv_dicts = build_csv_dicts(
