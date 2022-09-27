@@ -59,15 +59,8 @@ dim_encodings = {
         1: "2040-2069",
         2: "2070-2099",
     },
-    "snowpack": {
-        0: "low",
-        1: "medium"
-    },
-    "beetle_risk": {
-        1: "low",
-        2: "moderate",
-        3: "high"
-    }
+    "snowpack": {0: "low", 1: "medium"},
+    "beetle_risk": {1: "low", 2: "moderate", 3: "high"},
 }
 
 
@@ -115,30 +108,64 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
     )
     output.write(metadata)
 
-    fieldnames = [
-        "era",
-        "model",
-        "scenario",
-        "snowpack-level",
-        "beetle-risk",
-    ]
+    if (
+        "percent-low-risk"
+        in packaged_data["1988-2017"]["Daymet"]["Historical"]["low"].keys()
+    ):
+        fieldnames = [
+            "era",
+            "model",
+            "scenario",
+            "snowpack level",
+            "beetle risk",
+            "percent low risk",
+            "percent medium risk",
+            "percent high risk",
+        ]
+    else:
+        fieldnames = [
+            "era",
+            "model",
+            "scenario",
+            "snowpack level",
+            "beetle risk",
+        ]
     writer = csv.DictWriter(output, fieldnames=fieldnames)
 
     writer.writeheader()
 
     for snowpack in dim_encodings["snowpack"].values():
         try:
-            writer.writerow(
-                {
-                    "era": "1988-2017",
-                    "model": "Daymet",
-                    "scenario": "Historical",
-                    "snowpack-level": snowpack,
-                    "beetle-risk": packaged_data["1988-2017"]["Daymet"]["Historical"][
-                                    snowpack
-                                ],
-                }
-            )
+            if (
+                "percent-low-risk"
+                in packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack].keys()
+            ):
+                writer.writerow(
+                    {
+                        "era": "1988-2017",
+                        "model": "Daymet",
+                        "scenario": "Historical",
+                        "snowpack level": snowpack,
+                        "beetle risk": packaged_data["1988-2017"]["Daymet"][
+                            "Historical"
+                        ][snowpack]["beetle-risk"],
+                        "percent low risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-low-risk'])}%",
+                        "percent medium risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-medium-risk'])}%",
+                        "percent high risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-high-risk'])}%",
+                    }
+                )
+            else:
+                writer.writerow(
+                    {
+                        "era": "1988-2017",
+                        "model": "Daymet",
+                        "scenario": "Historical",
+                        "snowpack level": snowpack,
+                        "beetle risk": packaged_data["1988-2017"]["Daymet"][
+                            "Historical"
+                        ][snowpack]["beetle-risk"],
+                    }
+                )
         except KeyError:
             # if single var query, just ignore attempts to
             # write the non-chosen var
@@ -149,17 +176,36 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
             for scenario in dim_encodings["scenario"].values():
                 for snowpack in dim_encodings["snowpack"].values():
                     try:
-                        writer.writerow(
-                            {
-                                "era": era,
-                                "model": model,
-                                "scenario": scenario,
-                                "snowpack-level": snowpack,
-                                "beetle-risk": packaged_data[era][model][scenario][
-                                    snowpack
-                                ],
-                            }
-                        )
+                        if (
+                            "percent-low-risk"
+                            in packaged_data[era][model][scenario][snowpack].keys()
+                        ):
+                            writer.writerow(
+                                {
+                                    "era": era,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "snowpack level": snowpack,
+                                    "beetle risk": packaged_data[era][model][scenario][
+                                        snowpack
+                                    ]["beetle-risk"],
+                                    "percent low risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-low-risk'])}%",
+                                    "percent medium risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-medium-risk'])}%",
+                                    "percent high risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-high-risk'])}%",
+                                }
+                            )
+                        else:
+                            writer.writerow(
+                                {
+                                    "era": era,
+                                    "model": model,
+                                    "scenario": scenario,
+                                    "snowpack level": snowpack,
+                                    "beetle risk": packaged_data[era][model][scenario][
+                                        snowpack
+                                    ]["beetle-risk"],
+                                }
+                            )
                     except KeyError:
                         # if single var query, just ignore attempts to
                         # write the non-chosen var
@@ -224,19 +270,25 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
     # risk (1 = low, 2 = medium, 3 = high)
 
     # Gather historical risk levels
-    di['1988-2017'] = dict()
-    di['1988-2017']['Daymet'] = dict()
-    di['1988-2017']['Daymet']['Historical'] = dict()
+    di["1988-2017"] = dict()
+    di["1988-2017"]["Daymet"] = dict()
+    di["1988-2017"]["Daymet"]["Historical"] = dict()
     for sni in range(len(beetle_resp[0][0][0])):
         snowpack = dim_encodings["snowpack"][sni]
-        di['1988-2017']['Daymet']['Historical'][snowpack] = dict()
-        di['1988-2017']['Daymet']['Historical'][snowpack]['beetle_risk'] = dim_encodings["beetle_risk"][int(
-                        beetle_resp[0][0][0][sni]
-                    )]
+        di["1988-2017"]["Daymet"]["Historical"][snowpack] = dict()
+        di["1988-2017"]["Daymet"]["Historical"][snowpack][
+            "beetle-risk"
+        ] = dim_encodings["beetle_risk"][int(beetle_resp[0][0][0][sni])]
         if beetle_percents is not None:
-            di['1988-2017']['Daymet']['Historical'][snowpack]['percent_low_risk'] = beetle_percents[0][0][0][sni][0]
-            di['1988-2017']['Daymet']['Historical'][snowpack]['percent_medium_risk'] = beetle_percents[0][0][0][sni][1]
-            di['1988-2017']['Daymet']['Historical'][snowpack]['percent_high_risk'] = beetle_percents[0][0][0][sni][2]
+            di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                "percent-low-risk"
+            ] = beetle_percents[0][0][0][sni][0]
+            di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                "percent-medium-risk"
+            ] = beetle_percents[0][0][0][sni][1]
+            di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                "percent-high-risk"
+            ] = beetle_percents[0][0][0][sni][2]
 
     # Gather predicted risk levels for future eras
     for ei, mod_li in enumerate(beetle_resp[1:]):
@@ -251,13 +303,19 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
                 for sni, risk_level in enumerate(sn_li):
                     snowpack = dim_encodings["snowpack"][sni]
                     di[era][model][scenario][snowpack] = dict()
-                    di[era][model][scenario][snowpack]["beetle_risk"] = dim_encodings["beetle_risk"][int(
-                        risk_level
-                    )]
+                    di[era][model][scenario][snowpack]["beetle-risk"] = dim_encodings[
+                        "beetle_risk"
+                    ][int(risk_level)]
                     if beetle_percents is not None:
-                        di[era][model][scenario][snowpack]["percent_low_risk"] = beetle_percents[ei + 1][mi + 1][si + 1][sni][0]
-                        di[era][model][scenario][snowpack]["percent_medium_risk"] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
-                        di[era][model][scenario][snowpack]["percent_high_risk"] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
+                        di[era][model][scenario][snowpack][
+                            "percent-low-risk"
+                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][0]
+                        di[era][model][scenario][snowpack][
+                            "percent-medium-risk"
+                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
+                        di[era][model][scenario][snowpack][
+                            "percent-high-risk"
+                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
 
     return di
 
@@ -309,10 +367,10 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
 
     # Adds one to each value to generate correct shape and
     # for iterations through the data below.
-    eras = sel_di['era'] + 1
-    models = sel_di['model'] + 1
-    scenarios = sel_di['scenario'] + 1
-    snowpacks = sel_di['snowpack'] + 1
+    eras = sel_di["era"] + 1
+    models = sel_di["model"] + 1
+    scenarios = sel_di["scenario"] + 1
+    snowpacks = sel_di["snowpack"] + 1
 
     return_arr = np.zeros((eras, models, scenarios, snowpacks))
     return_percentages = np.zeros((eras, models, scenarios, snowpacks, 4))
@@ -335,10 +393,14 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
 
                     uniques = np.unique(rm_nan_slice, return_counts=True)
                     mode = uniques[0][0]
-                    return_percentages[era][model][scenario][snowpack][0] = round(uniques[1][0] / len(rm_nan_slice) * 100)
+                    return_percentages[era][model][scenario][snowpack][0] = round(
+                        uniques[1][0] / len(rm_nan_slice) * 100
+                    )
                     if len(uniques[0]) > 1:
                         for i in range(len(uniques[0]) - 1):
-                            return_percentages[era][model][scenario][snowpack][i + 1] = round(uniques[1][i + 1] / len(rm_nan_slice) * 100)
+                            return_percentages[era][model][scenario][snowpack][
+                                i + 1
+                            ] = round(uniques[1][i + 1] / len(rm_nan_slice) * 100)
                             if uniques[1][i + 1] > uniques[1][i]:
                                 mode = uniques[0][i + 1]
                     return_arr[era][model][scenario][snowpack] = int(mode)
@@ -397,7 +459,9 @@ def run_aggregate_var_polygon(poly_gdf, poly_id):
     bandname = "Gray"
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
 
-    agg_results, risk_percentages = summarize_within_poly_marr(ds_list[-1], poly_mask_arr, bandname)
+    agg_results, risk_percentages = summarize_within_poly_marr(
+        ds_list[-1], poly_mask_arr, bandname
+    )
 
     return package_beetle_data(agg_results, risk_percentages)
 
