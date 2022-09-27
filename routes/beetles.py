@@ -204,7 +204,7 @@ def return_csv(csv_data, place_id, lat=None, lon=None):
     return response
 
 
-def package_beetle_data(beetle_resp):
+def package_beetle_data(beetle_resp, beetle_percents=None):
     """Package the beetle risk data into a nested JSON-like dict.
 
     Arguments:
@@ -229,9 +229,14 @@ def package_beetle_data(beetle_resp):
     di['1988-2017']['Daymet']['Historical'] = dict()
     for sni in range(len(beetle_resp[0][0][0])):
         snowpack = dim_encodings["snowpack"][sni]
-        di['1988-2017']['Daymet']['Historical'][snowpack] = dim_encodings["beetle_risk"][int(
+        di['1988-2017']['Daymet']['Historical'][snowpack] = dict()
+        di['1988-2017']['Daymet']['Historical'][snowpack]['beetle_risk'] = dim_encodings["beetle_risk"][int(
                         beetle_resp[0][0][0][sni]
                     )]
+        if beetle_percents is not None:
+            di['1988-2017']['Daymet']['Historical'][snowpack]['percent_low_risk'] = beetle_percents[0][0][0][sni][0]
+            di['1988-2017']['Daymet']['Historical'][snowpack]['percent_medium_risk'] = beetle_percents[0][0][0][sni][1]
+            di['1988-2017']['Daymet']['Historical'][snowpack]['percent_high_risk'] = beetle_percents[0][0][0][sni][2]
 
     # Gather predicted risk levels for future eras
     for ei, mod_li in enumerate(beetle_resp[1:]):
@@ -245,9 +250,14 @@ def package_beetle_data(beetle_resp):
                 di[era][model][scenario] = dict()
                 for sni, risk_level in enumerate(sn_li):
                     snowpack = dim_encodings["snowpack"][sni]
-                    di[era][model][scenario][snowpack] = dim_encodings["beetle_risk"][int(
+                    di[era][model][scenario][snowpack] = dict()
+                    di[era][model][scenario][snowpack]["beetle_risk"] = dim_encodings["beetle_risk"][int(
                         risk_level
                     )]
+                    if beetle_percents is not None:
+                        di[era][model][scenario][snowpack]["percent_low_risk"] = beetle_percents[ei + 1][mi + 1][si + 1][sni][0]
+                        di[era][model][scenario][snowpack]["percent_medium_risk"] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
+                        di[era][model][scenario][snowpack]["percent_high_risk"] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
 
     return di
 
@@ -297,15 +307,15 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
     data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
     data_arr[data_arr_mask] = np.nan
 
-    # Adds one to each value to generate correct shape and iterations through
-    # the data below.
+    # Adds one to each value to generate correct shape and
+    # for iterations through the data below.
     eras = sel_di['era'] + 1
     models = sel_di['model'] + 1
     scenarios = sel_di['scenario'] + 1
     snowpacks = sel_di['snowpack'] + 1
 
     return_arr = np.zeros((eras, models, scenarios, snowpacks))
-    print(return_arr.shape)
+    return_percentages = np.zeros((eras, models, scenarios, snowpacks, 4))
     for era in range(eras):
         for model in range(models):
             for scenario in range(scenarios):
@@ -325,12 +335,14 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
 
                     uniques = np.unique(rm_nan_slice, return_counts=True)
                     mode = uniques[0][0]
+                    return_percentages[era][model][scenario][snowpack][0] = round(uniques[1][0] / len(rm_nan_slice) * 100)
                     if len(uniques[0]) > 1:
                         for i in range(len(uniques[0]) - 1):
+                            return_percentages[era][model][scenario][snowpack][i + 1] = round(uniques[1][i + 1] / len(rm_nan_slice) * 100)
                             if uniques[1][i + 1] > uniques[1][i]:
                                 mode = uniques[0][i + 1]
                     return_arr[era][model][scenario][snowpack] = int(mode)
-    return return_arr
+    return return_arr, return_percentages
 
 
 def get_poly_mask_arr(ds, poly, bandname):
@@ -385,9 +397,9 @@ def run_aggregate_var_polygon(poly_gdf, poly_id):
     bandname = "Gray"
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
 
-    agg_results = summarize_within_poly_marr(ds_list[-1], poly_mask_arr, bandname)
+    agg_results, risk_percentages = summarize_within_poly_marr(ds_list[-1], poly_mask_arr, bandname)
 
-    return package_beetle_data(agg_results)
+    return package_beetle_data(agg_results, risk_percentages)
 
 
 @routes.route("/beetles/")
