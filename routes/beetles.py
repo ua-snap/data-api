@@ -499,26 +499,26 @@ def run_point_fetch_all_beetles(lat, lon):
         )
     x, y = project_latlon(lat, lon, 3338)
 
-    # try:
-    rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, beetle_coverage_id))
-    beetle_risk = postprocess(package_beetle_data(rasdaman_response), "beetles")
-    if request.args.get("format") == "csv":
-        if type(beetle_risk) is not dict:
-            # Returns errors if any are generated
-            return beetle_risk
-        # Returns CSV for download
-        return return_csv(
-            create_csv(postprocess(beetle_risk, "beetles"), None, lat, lon),
-            None,
-            lat,
-            lon,
-        )
-    # Returns beetle risk levels
-    return beetle_risk
-    # except Exception as exc:
-    #     if hasattr(exc, "status") and exc.status == 404:
-    #         return render_template("404/no_data.html"), 404
-    #     return render_template("500/server_error.html"), 500
+    try:
+        rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, beetle_coverage_id))
+        beetle_risk = postprocess(package_beetle_data(rasdaman_response), "beetles")
+        if request.args.get("format") == "csv":
+            if type(beetle_risk) is not dict:
+                # Returns errors if any are generated
+                return beetle_risk
+            # Returns CSV for download
+            return return_csv(
+                create_csv(postprocess(beetle_risk, "beetles"), None, lat, lon),
+                None,
+                lat,
+                lon,
+            )
+        # Returns beetle risk levels
+        return beetle_risk
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
 
 @routes.route("/beetles/area/<var_id>")
@@ -539,10 +539,10 @@ def beetle_area_data_endpoint(var_id):
     if type(poly_type) is tuple:
         return poly_type
 
-    # try:
-    beetle_risk = run_aggregate_var_polygon(type_di[poly_type], var_id)
-    # except:
-    #     return render_template("422/invalid_area.html"), 422
+    try:
+        beetle_risk = run_aggregate_var_polygon(type_di[poly_type], var_id)
+    except:
+        return render_template("422/invalid_area.html"), 422
 
     if request.args.get("format") == "csv":
         beetle_risk = nullify_and_prune(beetle_risk, "beetles")
