@@ -37,7 +37,7 @@ from config import WEST_BBOX, EAST_BBOX
 
 beetles_api = Blueprint("beetles_api", __name__)
 # Rasdaman targets
-beetle_coverage_id = "template_beetle_risk"
+beetle_coverage_id = "beetle_risk"
 #
 # beetle_dim_encodings = asyncio.run(
 #     get_dim_encodings("template_beetle_risk")
@@ -45,10 +45,10 @@ beetle_coverage_id = "template_beetle_risk"
 
 dim_encodings = {
     "model": {
-        0: "GFDL-ESM2M",
-        1: "HadGEM2-ES",
-        2: "MRI-CGCM3",
-        3: "NCAR-CCSM4",
+        0: "NCAR-CCSM4",
+        1: "GFDL-ESM2M",
+        2: "HadGEM2-ES",
+        3: "MRI-CGCM3",
     },
     "scenario": {
         0: "rcp45",
@@ -60,10 +60,14 @@ dim_encodings = {
         2: "2070-2099",
     },
     "snowpack": {
-        0: "high",
-        1: "low",
-        2: "medium",
+        0: "low",
+        1: "medium"
     },
+    "beetle_risk": {
+        1: "low",
+        2: "moderate",
+        3: "high"
+    }
 }
 
 
@@ -107,7 +111,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
 
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
     metadata += (
-        "# Values shown are given as low risk = 0, medium risk = 1 and high risk = 2\n"
+        "# Values shown are for risk level for spruce bark beetle spread in the area.\n"
     )
     output.write(metadata)
 
@@ -121,6 +125,24 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
     writer = csv.DictWriter(output, fieldnames=fieldnames)
 
     writer.writeheader()
+
+    for snowpack in dim_encodings["snowpack"].values():
+        try:
+            writer.writerow(
+                {
+                    "era": "1988-2017",
+                    "model": "Daymet",
+                    "scenario": "Historical",
+                    "snowpack-level": snowpack,
+                    "beetle-risk": packaged_data["1988-2017"]["Daymet"]["Historical"][
+                                    snowpack
+                                ],
+                }
+            )
+        except KeyError:
+            # if single var query, just ignore attempts to
+            # write the non-chosen var
+            pass
 
     for era in dim_encodings["era"].values():
         for model in dim_encodings["model"].values():
@@ -198,27 +220,39 @@ def package_beetle_data(beetle_resp):
     # era (0 = 2010-2039, 1 = 2040-2069, 2 = 2070-2099)
     # models (0 = GFDL-ESM2M, 1 = HadGEM2-ES, 2 = MRI-CGCM3, 3 = NCAR-CCSM4)
     # scenarios (0 = rcp45, 1 = rcp85)
-    # snowpack (0 = high, 1 = low, 2 = medium)
+    # snowpack (0 = low, 1 = medium)
     # risk (1 = low, 2 = medium, 3 = high)
-    for ei, mod_li in enumerate(beetle_resp):
+
+    # Gather historical risk levels
+    di['1988-2017'] = dict()
+    di['1988-2017']['Daymet'] = dict()
+    di['1988-2017']['Daymet']['Historical'] = dict()
+    for sni in range(len(beetle_resp[0][0][0])):
+        snowpack = dim_encodings["snowpack"][sni]
+        di['1988-2017']['Daymet']['Historical'][snowpack] = dim_encodings["beetle_risk"][int(
+                        beetle_resp[0][0][0][sni]
+                    )]
+
+    # Gather predicted risk levels for future eras
+    for ei, mod_li in enumerate(beetle_resp[1:]):
         era = dim_encodings["era"][ei]
         di[era] = dict()
-        for mi, sc_li in enumerate(mod_li):
+        for mi, sc_li in enumerate(mod_li[1:]):
             model = dim_encodings["model"][mi]
             di[era][model] = dict()
-            for si, sn_li in enumerate(sc_li):
+            for si, sn_li in enumerate(sc_li[1:]):
                 scenario = dim_encodings["scenario"][si]
                 di[era][model][scenario] = dict()
-                for sni, ri_li in enumerate(sn_li):
+                for sni, risk_level in enumerate(sn_li):
                     snowpack = dim_encodings["snowpack"][sni]
-                    di[era][model][scenario][snowpack] = int(
-                        beetle_resp[ei][mi][si][sni]
-                    )
+                    di[era][model][scenario][snowpack] = dim_encodings["beetle_risk"][int(
+                        risk_level
+                    )]
 
     return di
 
 
-def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray", var_ep="Gray"):
+def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
     Return the results as a nested dict.
 
@@ -263,12 +297,15 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray", var_ep="Gray"
     data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
     data_arr[data_arr_mask] = np.nan
 
-    eras = len(dim_encodings["era"].keys())
-    models = len(dim_encodings["model"].keys())
-    scenarios = len(dim_encodings["scenario"].keys())
-    snowpacks = len(dim_encodings["snowpack"].keys())
+    # Adds one to each value to generate correct shape and iterations through
+    # the data below.
+    eras = sel_di['era'] + 1
+    models = sel_di['model'] + 1
+    scenarios = sel_di['scenario'] + 1
+    snowpacks = sel_di['snowpack'] + 1
 
     return_arr = np.zeros((eras, models, scenarios, snowpacks))
+    print(return_arr.shape)
     for era in range(eras):
         for model in range(models):
             for scenario in range(scenarios):
@@ -280,7 +317,13 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray", var_ep="Gray"
                         + snowpack
                     )
                     slice = data_arr[index]
-                    uniques = np.unique(slice[~np.isnan(slice)], return_counts=True)
+                    rm_nan_slice = slice[~np.isnan(slice)]
+
+                    if len(rm_nan_slice) == 0:
+                        return_arr[era][model][scenario][snowpack] = 0
+                        continue
+
+                    uniques = np.unique(rm_nan_slice, return_counts=True)
                     mode = uniques[0][0]
                     if len(uniques[0]) > 1:
                         for i in range(len(uniques[0]) - 1):
@@ -315,7 +358,7 @@ def get_poly_mask_arr(ds, poly, bandname):
         data_arr,
         affine=transform,
         nodata=np.nan,
-        stats=["median"],
+        stats=["mean"],
         raster_out=True,
     )[0]["mini_raster_array"]
     cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
@@ -380,26 +423,26 @@ def run_point_fetch_all_beetles(lat, lon):
         )
     x, y = project_latlon(lat, lon, 3338)
 
-    try:
-        rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, beetle_coverage_id))
-        beetle_risk = postprocess(package_beetle_data(rasdaman_response), "beetles")
-        if request.args.get("format") == "csv":
-            if type(beetle_risk) is not dict:
-                # Returns errors if any are generated
-                return beetle_risk
-            # Returns CSV for download
-            return return_csv(
-                create_csv(postprocess(beetle_risk, "beetles"), None, lat, lon),
-                None,
-                lat,
-                lon,
-            )
-        # Returns beetle risk levels
-        return beetle_risk
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
+    # try:
+    rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, beetle_coverage_id))
+    beetle_risk = postprocess(package_beetle_data(rasdaman_response), "beetles")
+    if request.args.get("format") == "csv":
+        if type(beetle_risk) is not dict:
+            # Returns errors if any are generated
+            return beetle_risk
+        # Returns CSV for download
+        return return_csv(
+            create_csv(postprocess(beetle_risk, "beetles"), None, lat, lon),
+            None,
+            lat,
+            lon,
+        )
+    # Returns beetle risk levels
+    return beetle_risk
+    # except Exception as exc:
+    #     if hasattr(exc, "status") and exc.status == 404:
+    #         return render_template("404/no_data.html"), 404
+    #     return render_template("500/server_error.html"), 500
 
 
 @routes.route("/beetles/area/<var_id>")
@@ -420,16 +463,16 @@ def beetle_area_data_endpoint(var_id):
     if type(poly_type) is tuple:
         return poly_type
 
-    try:
-        beetle_risk = run_aggregate_var_polygon(type_di[poly_type], var_id)
-    except:
-        return render_template("422/invalid_area.html"), 422
+    # try:
+    beetle_risk = run_aggregate_var_polygon(type_di[poly_type], var_id)
+    # except:
+    #     return render_template("422/invalid_area.html"), 422
 
     if request.args.get("format") == "csv":
         beetle_risk = nullify_and_prune(beetle_risk, "beetles")
         if beetle_risk in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
 
-        csv_data = create_csv(beetle_risk, var_ep, var_id)
-        return return_csv(csv_data, var_ep, var_id)
+        csv_data = create_csv(beetle_risk, var_id)
+        return return_csv(csv_data, var_id)
     return postprocess(beetle_risk, "beetles")
