@@ -58,7 +58,7 @@ def package_landfastice_data(landfastice_resp):
         landfastice_resp (list) -- the response from the WCS GetCoverage request
 
     Returns:
-        di (dict) -- a dict where the key is a single date and the value is the landfast ice status (1 or 0)
+        di (dict) -- a dict where the key is a single date and the value is the landfast ice status (1 indicates landfast ice is present)
     """
     time_index = generate_time_index("all")
     di = {}
@@ -84,7 +84,7 @@ def create_landfast_csv(data_pkg, lat=None, lon=None):
         data_pkg,
         fieldnames,
     )
-    metadata = "# Landfast Ice Status: 0 indicates absence and 1 indicates presence.\n"
+    metadata = "# Landfast Ice Status: A null value indicates absence and 1 indicates presence.\n"
     filename = "Landfast Ice Extent for " + lat + ", " + lon + ".csv"
     return write_csv(csv_dicts, fieldnames, filename, metadata)
 
