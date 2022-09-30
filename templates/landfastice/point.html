@@ -1,0 +1,64 @@
+{% extends 'base.html' %} {% block content %}
+<h3>Landfast Sea Ice Extent Point Query</h3>
+<p>
+  This endpoint accesses daily landfast ice extent information for the Alaska
+  Coastline between October 17th, 1996 and July 14th, 2008.
+</p>
+<h4>Fetch the entire daily time series</h4>
+<p>Query the daily landfast ice extent for a certain geographic point:</p>
+<p>
+  Example:
+  <a href="/landfastice/point/70.6123/-149.8869/"
+    >/landfastice/point/70.6123/&minus;149.8869</a
+  >
+</p>
+<b>Results from queries like the above example will look like this:</b>
+<pre>
+  {
+    "01-01-1997": null, 
+    "01-01-1998": null, 
+    "01-01-1999": null, 
+    "01-01-2000": 1, 
+    "01-01-2001": 1, 
+    "01-01-2002": 1, 
+    "01-01-2003": 1, 
+    "01-01-2004": 1, 
+    "01-01-2005": 1, 
+    "01-01-2006": 1, 
+    "01-01-2007": 1, 
+    "01-01-2008": null,
+    ... 
+} 
+</pre>
+<b>The above output is structured like this:</b>
+<pre>
+{
+    "&lt;month&gt;&ndash;&lt;day&gt;&ndash;&lt;year&gt;": &lt;landfast ice <strong>presence (1) or absence (null)</strong> for a specific date in the time series&gt;
+    ...
+}
+</pre>
+<h4>CSV Export</h4>
+<p>To export the point data in a CSV file, append <code>?format=csv</code>.</p>
+<p>
+  Example:
+  <a href="/landfastice/point/70.6123/-149.8869?format=csv"
+    >/landfastice/point/70.6123/-149.8869?format=csv</a
+  >
+</p>
+<h4>Source data</h4>
+<!-- This is a bit of a placeholder until the we launch ARDAC or get PI approval to publish in the Catalog.-->
+<p>
+  These data are part of the Arctic Data Collaborative (ARDAC). Scientists
+  working on Arctic research need easily obtainable climate and environmental
+  data. ARDAC is a system of online technologies that curate and distribute
+  relevant Arctic environmental data in formats that improve the ability of
+  scientists to use this data. Users of these data should cite:
+</p>
+<p>
+  Mahoney, A., Eicken, H., Gaylord, A. G., and Shapiro, L. (2007), Alaska
+  landfast sea ice: Links with bathymetry and atmospheric circulation<i
+    >, J. Geophys. Res.,</i
+  >
+  112, C02001, doi:10.1029/2006JC003559.
+</p>
+{% endblock %}

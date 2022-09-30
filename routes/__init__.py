@@ -18,3 +18,4 @@ from .elevation import *
 from .alfresco import *
 from .degree_days import *
 from .snow import *
+from .landfastice import *

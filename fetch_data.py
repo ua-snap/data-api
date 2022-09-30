@@ -323,11 +323,13 @@ def get_from_dict(data_dict, map_list):
 
 def parse_meta_xml_str(meta_xml_str):
     """Parse the DescribeCoverage request to get the XML and
-    restructure to dict
+    restructure the block called "Encoding" to a dict.
 
-    Args:
-        meta_xml_str (str): decoded text XML response from
-            DescribeCoverage WCS query
+    Arguments:
+        meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
+
+    Returns:
+        dim_encodings (dict): lookup table to match data axes or parameters to integer encodings, e.g., '2': 'GFDL-CM3'
     """
     meta_xml = ET.ElementTree(ET.fromstring(meta_xml_str))
     # wow xml
@@ -357,23 +359,43 @@ def parse_meta_xml_str(meta_xml_str):
     return dim_encodings
 
 
-async def get_dim_encodings(cov_id):
+def get_xml_str_between_tags(meta_xml_str, tag):
+    """Get string encapsulated by a known XML tag.
+
+    Arguments:
+        meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
+        tag (str): the xml string that encapsulates the desired information, e.g., 'gmlrgrid:coefficients'
+
+    Returns:
+        str_within_tag (str): string encapsulated by the provided XML tag
+    """
+    tag_open = f"<{tag}>"
+    tag_close = "<"
+    str_after_tag = meta_xml_str.split(tag_open)[1]
+    str_within_tag = str_after_tag.split(tag_close)[0]
+    return str_within_tag
+
+
+async def get_dim_encodings(cov_id, scrape=None):
     """Get the dimension encodings that map integer values to descriptive strings from a
-    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We
-    handle exceptions where the coverage we are requesting encodings from does not exist
-    on the backend to prevent Rasdaman work from blocking API development.
+    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We handle exceptions where the coverage we are requesting encodings from does not exist on the backend to prevent Rasdaman work from blocking API development. We can use the same request to scrape various other parts of the DescribeCoverage XML response, but this optional.
 
     Args:
         cov_id (str): ID of the rasdaman coverage
+        scrape (2-tuple of strings): (description, tag to scrape between)
 
     Returns:
-        dict of encodings, with axis name as keys holding
-        dicts of integer-keyed categories
+        dim_encodings (nested dict): a lookup where coverage axis names are keys that store dicts of integer-keyed categories.
     """
     meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
     try:
         meta_xml_str = await fetch_data([meta_url])
         dim_encodings = parse_meta_xml_str(meta_xml_str)
+        if scrape is not None:
+            scrape_desc, scrape_tag = scrape
+            dim_encodings[scrape_desc] = get_xml_str_between_tags(
+                meta_xml_str, scrape_tag
+            )
         return dim_encodings
     except:
         print(
