@@ -60,7 +60,7 @@ dim_encodings = {
         2: "2070-2099",
     },
     "snowpack": {0: "low", 1: "medium"},
-    "beetle_risk": {1: "low", 2: "moderate", 3: "high"},
+    "beetle_risk": {0: "no data", 1: "low", 2: "moderate", 3: "high"},
 }
 
 
@@ -108,6 +108,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
     )
     output.write(metadata)
 
+    # If this is an area, we include percentages into the CSV fields.
     if (
         "percent-low-risk"
         in packaged_data["1988-2017"]["Daymet"]["Historical"]["low"].keys()
@@ -119,7 +120,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
             "snowpack level",
             "beetle risk",
             "percent low risk",
-            "percent medium risk",
+            "percent moderate risk",
             "percent high risk",
         ]
     else:
@@ -150,7 +151,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
                             "Historical"
                         ][snowpack]["beetle-risk"],
                         "percent low risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-low-risk'])}%",
-                        "percent medium risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-medium-risk'])}%",
+                        "percent moderate risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-medium-risk'])}%",
                         "percent high risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-high-risk'])}%",
                     }
                 )
@@ -190,7 +191,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
                                         snowpack
                                     ]["beetle-risk"],
                                     "percent low risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-low-risk'])}%",
-                                    "percent medium risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-medium-risk'])}%",
+                                    "percent moderate risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-medium-risk'])}%",
                                     "percent high risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-high-risk'])}%",
                                 }
                             )
@@ -262,13 +263,6 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
     # initialize the output dict
     di = dict()
 
-    # Dimensions:
-    # era (0 = 2010-2039, 1 = 2040-2069, 2 = 2070-2099)
-    # models (0 = GFDL-ESM2M, 1 = HadGEM2-ES, 2 = MRI-CGCM3, 3 = NCAR-CCSM4)
-    # scenarios (0 = rcp45, 1 = rcp85)
-    # snowpack (0 = low, 1 = medium)
-    # risk (1 = low, 2 = medium, 3 = high)
-
     # Gather historical risk levels
     di["1988-2017"] = dict()
     di["1988-2017"]["Daymet"] = dict()
@@ -282,15 +276,16 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
         if beetle_percents is not None:
             di["1988-2017"]["Daymet"]["Historical"][snowpack][
                 "percent-low-risk"
-            ] = beetle_percents[0][0][0][sni][0]
-            di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                "percent-medium-risk"
             ] = beetle_percents[0][0][0][sni][1]
             di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                "percent-high-risk"
+                "percent-medium-risk"
             ] = beetle_percents[0][0][0][sni][2]
+            di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                "percent-high-risk"
+            ] = beetle_percents[0][0][0][sni][3]
 
     # Gather predicted risk levels for future eras
+    # We use
     for ei, mod_li in enumerate(beetle_resp[1:]):
         era = dim_encodings["era"][ei]
         di[era] = dict()
@@ -309,13 +304,13 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
                     if beetle_percents is not None:
                         di[era][model][scenario][snowpack][
                             "percent-low-risk"
-                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][0]
-                        di[era][model][scenario][snowpack][
-                            "percent-medium-risk"
                         ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
                         di[era][model][scenario][snowpack][
-                            "percent-high-risk"
+                            "percent-medium-risk"
                         ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
+                        di[era][model][scenario][snowpack][
+                            "percent-high-risk"
+                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][3]
 
     return di
 
@@ -324,27 +319,23 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
     Return the results as a nested dict.
 
-    NOTE - This is a candidate for de-duplication! Only defining here because some
-    things are out-of-sync with existing ways of doing things (e.g., key names
-    in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
-
     Args:
         ds (xarray.DataSet): DataSet with "Gray" as variable of
             interest
         poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
             the polygon of interest
-        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the
-            data and map integer data coordinates to models, scenarios, variables, etc.
-        bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
+        dim_encodings (dict): nested dictionary of thematic key value pairs that characterize the
+            data and map integer data coordinates to models, scenarios, eras, snowpacks, etc.
+        bandname (str): name of variable in ds, defaults to "Gray" for Rasdaman coverages where
             the name is not given at ingest
-        var_ep (str): variable (flammability or veg_type)
 
     Returns:
         Nested dict of results for all non-X/Y axis combinations,
     """
-    # will actually operate on underlying DataArray
 
+    # operates on underlying DataArray
     da = ds[bandname]
+
     # get axis (dimension) names and make list of all coordinate combinations
     all_dims = da.dims
     dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
@@ -373,6 +364,9 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
     snowpacks = sel_di["snowpack"] + 1
 
     return_arr = np.zeros((eras, models, scenarios, snowpacks))
+
+    # Percentages of each slice of the data. Has a last dimension that are
+    # integer values representing 1 = low risk, 2 = moderate risk, 3 = high risk
     return_percentages = np.zeros((eras, models, scenarios, snowpacks, 4))
     for era in range(eras):
         for model in range(models):
@@ -385,24 +379,49 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
                         + snowpack
                     )
                     slice = data_arr[index]
+
+                    # Generates a data array that has all NAN values removed
                     rm_nan_slice = slice[~np.isnan(slice)]
 
+                    # If there is no data in this slice, set the
+                    # value to 0 and continue onto the next data slice.
                     if len(rm_nan_slice) == 0:
                         return_arr[era][model][scenario][snowpack] = 0
                         continue
 
+                    # Generates counts for all 1, 2, or 3 values for beetle risk
                     uniques = np.unique(rm_nan_slice, return_counts=True)
+
+                    # Sets the "mode" to the first of the unique values
+                    # Must have at least one value to have gotten to this part
+                    # of the script.
                     mode = uniques[0][0]
-                    return_percentages[era][model][scenario][snowpack][0] = round(
-                        uniques[1][0] / len(rm_nan_slice) * 100
-                    )
+                    mode_count = uniques[1][0]
+
+                    # Sets the return percentage of the first count value
+                    # If the mode is 1 above, it will take the count for all 1's
+                    # and divide that by the total size of the array to get the
+                    # percentage of the area that is low risk
+                    return_percentages[era][model][scenario][snowpack][
+                        int(mode)
+                    ] = round(mode_count / len(rm_nan_slice) * 100)
+
+                    # If the uniques variable has more than one value, we need to
+                    # check to see if this value should actually be the mode of the
+                    # dataset.
                     if len(uniques[0]) > 1:
-                        for i in range(len(uniques[0]) - 1):
+                        for i in range(1, len(uniques[0])):
+                            # Sets the percentage for this risk value
                             return_percentages[era][model][scenario][snowpack][
-                                i + 1
-                            ] = round(uniques[1][i + 1] / len(rm_nan_slice) * 100)
-                            if uniques[1][i + 1] > uniques[1][i]:
-                                mode = uniques[0][i + 1]
+                                int(uniques[0][i])
+                            ] = round(uniques[1][i] / len(rm_nan_slice) * 100)
+
+                            # If the count of the uniques for the next value is higher
+                            # than the current mode count, change the mode and count of
+                            # the mode.
+                            if uniques[1][i] > mode_count:
+                                mode = uniques[0][i]
+                                mode_count = uniques[1][i]
                     return_arr[era][model][scenario][snowpack] = int(mode)
     return return_arr, return_percentages
 
@@ -529,7 +548,7 @@ def beetle_area_data_endpoint(var_id):
     Args:
         var_id (str): ID for given polygon from polygon endpoint.
     Returns:
-        poly_pkg (dict): zonal mean of variable(s) for AOI polygon
+        poly_pkg (dict): zonal mode of beetle risk and percentages for AOI polygon
 
     """
 
