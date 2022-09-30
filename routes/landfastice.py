@@ -29,24 +29,15 @@ landfastice_encodings = asyncio.run(
 )
 
 
-def generate_time_index(ice_season="all"):
+def generate_time_index():
     """Generate a Pythonic time index for a single October-July ice season.
-
-    Arguments:
-        ice_season (str): Ice season string (YYYY) between 1996 and 2007 or 'all' for the entire time series.
 
     Returns:
         dt_range (pandas DatetimeIndex): a time index with daily frequency
     """
 
-    if ice_season == "all":
-        timestamps = [x[1:-2] for x in landfastice_encodings["time"].split(" ")]
-        date_index = pd.DatetimeIndex(timestamps)
-    else:
-        start, end = landfastice_encodings["ice_season"][ice_season][0].split(", ")
-        dt_start = start.split("T", 1)[0]
-        dt_end = end.split("T", 1)[0]
-        date_index = pd.date_range(start=dt_start, end=dt_end)
+    timestamps = [x[1:-2] for x in landfastice_encodings["time"].split(" ")]
+    date_index = pd.DatetimeIndex(timestamps)
     return date_index
 
 
@@ -60,7 +51,7 @@ def package_landfastice_data(landfastice_resp):
     Returns:
         di (dict) -- a dict where the key is a single date and the value is the landfast ice status (1 indicates landfast ice is present)
     """
-    time_index = generate_time_index("all")
+    time_index = generate_time_index()
     di = {}
     for t, x in zip(list(time_index), landfastice_resp):
         di[t.date().strftime("%m-%d-%Y")] = x
