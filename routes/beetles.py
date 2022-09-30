@@ -488,12 +488,17 @@ def run_aggregate_var_polygon(poly_gdf, poly_id):
 @routes.route("/beetles/")
 @routes.route("/beetles/abstract/")
 def about_beetles():
-    return render_template("seaice/abstract.html")
+    return render_template("beetles/abstract.html")
 
 
 @routes.route("/beetles/point/")
 def about_beetles_point():
-    return render_template("seaice/point.html")
+    return render_template("beetles/point.html")
+
+
+@routes.route("/beetles/area/")
+def about_beetles_area():
+    return render_template("beetles/area.html")
 
 
 @routes.route("/beetles/point/<lat>/<lon>/")
