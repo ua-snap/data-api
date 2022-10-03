@@ -125,9 +125,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
 
     for snowpack in dim_encodings["snowpack"].values():
         try:
-            historical = ackaged_data["1988-2017"]["Daymet"][
-                "Historical"
-            ][snowpack]
+            historical = ackaged_data["1988-2017"]["Daymet"]["Historical"][snowpack]
             if (
                 "percent-low-risk"
                 in packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack].keys()
@@ -165,9 +163,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
             for scenario in dim_encodings["scenario"].values():
                 for snowpack in dim_encodings["snowpack"].values():
                     try:
-                        projected = packaged_data[era][model][scenario][
-                                        snowpack
-                                    ]
+                        projected = packaged_data[era][model][scenario][snowpack]
                         if (
                             "percent-low-risk"
                             in packaged_data[era][model][scenario][snowpack].keys()
