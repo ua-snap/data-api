@@ -3,7 +3,6 @@ import io
 import csv
 import calendar
 import numpy as np
-from scipy import stats as st
 from math import floor
 from flask import Blueprint, render_template, request, Response
 from shapely.geometry import Point
@@ -12,13 +11,6 @@ from shapely.geometry import Point
 from generate_urls import generate_wcs_query_url
 from generate_requests import *
 from fetch_data import *
-from fetch_data import (
-    fetch_data,
-    get_from_dict,
-    summarize_within_poly,
-    csv_metadata,
-    fetch_wcs_point_data,
-)
 from validate_request import (
     validate_latlon,
     project_latlon,
@@ -133,22 +125,24 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
 
     for snowpack in dim_encodings["snowpack"].values():
         try:
+            historical = ackaged_data["1988-2017"]["Daymet"][
+                "Historical"
+            ][snowpack]
             if (
                 "percent-low-risk"
                 in packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack].keys()
             ):
+
                 writer.writerow(
                     {
                         "era": "1988-2017",
                         "model": "Daymet",
                         "scenario": "Historical",
                         "snowpack level": snowpack,
-                        "beetle risk": packaged_data["1988-2017"]["Daymet"][
-                            "Historical"
-                        ][snowpack]["beetle-risk"],
-                        "percent low risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-low-risk'])}%",
-                        "percent moderate risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-medium-risk'])}%",
-                        "percent high risk": f"{int(packaged_data['1988-2017']['Daymet']['Historical'][snowpack]['percent-high-risk'])}%",
+                        "beetle risk": historical["beetle-risk"],
+                        "percent low risk": f"{int(historical['percent-low-risk'])}%",
+                        "percent moderate risk": f"{int(historical['percent-medium-risk'])}%",
+                        "percent high risk": f"{int(historical['percent-high-risk'])}%",
                     }
                 )
             else:
@@ -158,9 +152,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
                         "model": "Daymet",
                         "scenario": "Historical",
                         "snowpack level": snowpack,
-                        "beetle risk": packaged_data["1988-2017"]["Daymet"][
-                            "Historical"
-                        ][snowpack]["beetle-risk"],
+                        "beetle risk": historical["beetle-risk"],
                     }
                 )
         except KeyError:
@@ -173,6 +165,9 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
             for scenario in dim_encodings["scenario"].values():
                 for snowpack in dim_encodings["snowpack"].values():
                     try:
+                        projected = packaged_data[era][model][scenario][
+                                        snowpack
+                                    ]
                         if (
                             "percent-low-risk"
                             in packaged_data[era][model][scenario][snowpack].keys()
@@ -183,12 +178,10 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
                                     "model": model,
                                     "scenario": scenario,
                                     "snowpack level": snowpack,
-                                    "beetle risk": packaged_data[era][model][scenario][
-                                        snowpack
-                                    ]["beetle-risk"],
-                                    "percent low risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-low-risk'])}%",
-                                    "percent moderate risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-medium-risk'])}%",
-                                    "percent high risk": f"{int(packaged_data[era][model][scenario][snowpack]['percent-high-risk'])}%",
+                                    "beetle risk": projected["beetle-risk"],
+                                    "percent low risk": f"{int(projected['percent-low-risk'])}%",
+                                    "percent moderate risk": f"{int(projected['percent-medium-risk'])}%",
+                                    "percent high risk": f"{int(projected['percent-high-risk'])}%",
                                 }
                             )
                         else:
@@ -198,9 +191,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
                                     "model": model,
                                     "scenario": scenario,
                                     "snowpack level": snowpack,
-                                    "beetle risk": packaged_data[era][model][scenario][
-                                        snowpack
-                                    ]["beetle-risk"],
+                                    "beetle risk": projected["beetle-risk"],
                                 }
                             )
                     except KeyError:
@@ -281,7 +272,6 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
             ] = beetle_percents[0][0][0][sni][3]
 
     # Gather predicted risk levels for future eras
-    # We use
     for ei, mod_li in enumerate(beetle_resp[1:]):
         era = dim_encodings["era"][ei]
         di[era] = dict()
@@ -368,6 +358,9 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
         for model in range(models):
             for scenario in range(scenarios):
                 for snowpack in range(snowpacks):
+                    # Generates an index out of the current iteration
+                    # for use with the data_arr that has a flat shape
+                    # that matches the below code.
                     index = (
                         (era * models * scenarios * snowpacks)
                         + (model * scenarios * snowpacks)
