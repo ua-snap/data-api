@@ -125,7 +125,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
 
     for snowpack in dim_encodings["snowpack"].values():
         try:
-            historical = ackaged_data["1988-2017"]["Daymet"]["Historical"][snowpack]
+            historical = packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack]
             if (
                 "percent-low-risk"
                 in packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack].keys()
@@ -516,9 +516,10 @@ def run_point_fetch_all_beetles(lat, lon):
                 # Returns errors if any are generated
                 return beetle_risk
             # Returns CSV for download
+            place_id = request.args.get("community")
             return return_csv(
                 create_csv(postprocess(beetle_risk, "beetles"), None, lat, lon),
-                None,
+                place_id,
                 lat,
                 lon,
             )
