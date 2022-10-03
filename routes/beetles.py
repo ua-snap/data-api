@@ -38,10 +38,6 @@ from config import WEST_BBOX, EAST_BBOX
 beetles_api = Blueprint("beetles_api", __name__)
 # Rasdaman targets
 beetle_coverage_id = "beetle_risk"
-#
-# beetle_dim_encodings = asyncio.run(
-#     get_dim_encodings("template_beetle_risk")
-# )
 
 dim_encodings = {
     "model": {
@@ -322,7 +318,7 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
     Args:
         ds (xarray.DataSet): DataSet with "Gray" as variable of
             interest
-        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
+        poly_mask_arr (numpy.ma.core.MaskedArray): a masked array masking the cells intersecting
             the polygon of interest
         dim_encodings (dict): nested dictionary of thematic key value pairs that characterize the
             data and map integer data coordinates to models, scenarios, eras, snowpacks, etc.
@@ -357,7 +353,7 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
     data_arr[data_arr_mask] = np.nan
 
     # Adds one to each value to generate correct shape and
-    # for iterations through the data below.
+    # iterates through the data below.
     eras = sel_di["era"] + 1
     models = sel_di["model"] + 1
     scenarios = sel_di["scenario"] + 1
