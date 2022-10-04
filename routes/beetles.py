@@ -48,7 +48,7 @@ dim_encodings = {
         2: "2070-2099",
     },
     "snowpack": {0: "low", 1: "medium"},
-    "beetle_risk": {0: "no data", 1: "low", 2: "moderate", 3: "high"},
+    "beetle_risk": {0: 0, 1: "low", 2: "moderate", 3: "high"},
 }
 
 
@@ -130,7 +130,6 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
                 "percent-low-risk"
                 in packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack].keys()
             ):
-
                 writer.writerow(
                     {
                         "era": "1988-2017",
@@ -257,15 +256,33 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
             "beetle-risk"
         ] = dim_encodings["beetle_risk"][int(beetle_resp[0][0][0][sni])]
         if beetle_percents is not None:
-            di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                "percent-low-risk"
-            ] = beetle_percents[0][0][0][sni][1]
-            di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                "percent-medium-risk"
-            ] = beetle_percents[0][0][0][sni][2]
-            di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                "percent-high-risk"
-            ] = beetle_percents[0][0][0][sni][3]
+            # This conditional will check to see if all percentages are 0% meaning that there is no data.
+            # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
+            # sets this place as No data available
+            if (
+                beetle_percents[0][0][0][sni][1] == 0.0
+                and beetle_percents[0][0][0][sni][2] == 0.0
+                and beetle_percents[0][0][0][sni][3] == 0.0
+            ):
+                di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                    "percent-low-risk"
+                ] = 0
+                di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                    "percent-medium-risk"
+                ] = 0
+                di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                    "percent-high-risk"
+                ] = 0
+            else:
+                di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                    "percent-low-risk"
+                ] = beetle_percents[0][0][0][sni][1]
+                di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                    "percent-medium-risk"
+                ] = beetle_percents[0][0][0][sni][2]
+                di["1988-2017"]["Daymet"]["Historical"][snowpack][
+                    "percent-high-risk"
+                ] = beetle_percents[0][0][0][sni][3]
 
     # Gather predicted risk levels for future eras
     for ei, mod_li in enumerate(beetle_resp[1:]):
@@ -284,15 +301,29 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
                         "beetle_risk"
                     ][int(risk_level)]
                     if beetle_percents is not None:
-                        di[era][model][scenario][snowpack][
-                            "percent-low-risk"
-                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
-                        di[era][model][scenario][snowpack][
-                            "percent-medium-risk"
-                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
-                        di[era][model][scenario][snowpack][
-                            "percent-high-risk"
-                        ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][3]
+                        # This conditional will check to see if all percentages are 0% meaning that there is no data.
+                        # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
+                        # sets this place as No data available
+                        if (
+                            beetle_percents[ei + 1][mi + 1][si + 1][sni][1] == 0.0
+                            and beetle_percents[ei + 1][mi + 1][si + 1][sni][2] == 0.0
+                            and beetle_percents[ei + 1][mi + 1][si + 1][sni][3] == 0.0
+                        ):
+                            di[era][model][scenario][snowpack]["percent-low-risk"] = 0
+                            di[era][model][scenario][snowpack][
+                                "percent-medium-risk"
+                            ] = 0
+                            di[era][model][scenario][snowpack]["percent-high-risk"] = 0
+                        else:
+                            di[era][model][scenario][snowpack][
+                                "percent-low-risk"
+                            ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
+                            di[era][model][scenario][snowpack][
+                                "percent-medium-risk"
+                            ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
+                            di[era][model][scenario][snowpack][
+                                "percent-high-risk"
+                            ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][3]
 
     return di
 
@@ -369,9 +400,12 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
                     rm_nan_slice = slice[~np.isnan(slice)]
 
                     # If there is no data in this slice, set the
-                    # value to 0 and continue onto the next data slice.
+                    # value and percentages to 0 and continue onto the next data slice.
                     if len(rm_nan_slice) == 0:
                         return_arr[era][model][scenario][snowpack] = 0
+                        return_percentages[era][model][scenario][snowpack][1] = 0
+                        return_percentages[era][model][scenario][snowpack][2] = 0
+                        return_percentages[era][model][scenario][snowpack][3] = 0
                         continue
 
                     # Generates counts for all 1, 2, or 3 values for beetle risk
@@ -554,11 +588,12 @@ def beetle_area_data_endpoint(var_id):
     except:
         return render_template("422/invalid_area.html"), 422
 
-    if request.args.get("format") == "csv":
-        beetle_risk = nullify_and_prune(beetle_risk, "beetles")
-        if beetle_risk in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
+    beetle_risk = nullify_and_prune(beetle_risk, "beetles")
+    if beetle_risk in [{}, None, 0]:
+        return render_template("404/no_data.html"), 404
 
+    if request.args.get("format") == "csv":
         csv_data = create_csv(beetle_risk, var_id)
         return return_csv(csv_data, var_id)
+
     return postprocess(beetle_risk, "beetles")
