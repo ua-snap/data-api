@@ -48,6 +48,9 @@ dim_encodings = {
         2: "2070-2099",
     },
     "snowpack": {0: "low", 1: "medium"},
+    # The 0 in beetle_risk represents NO DATA in this context,
+    # but needs to remain as 0 to allow for the pruning function
+    # to correctly identify it as unrepresented space in the model.
     "beetle_risk": {0: 0, 1: "low", 2: "moderate", 3: "high"},
 }
 
