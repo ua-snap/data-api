@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Spruce Beetle Risk Data</h3>
+<p>The endpoints here provide access to modeled risk of spruce beetle population growth for future and historical scenarios. This data is for use in the Northern Climate Reports webapp, and have thus been clipped to the working domain of the Integrated Ecosystem Model (IEM) project.</p>
+<h4>Service endpoints</h4>
+<p>There are endpoints for point queries and aggregations (area summaries) for all <a href="/places/all">available places.</a></p>
+<ul>
+    <li><a href="/beetles/point">Point Query</a>: Spruce beetle risk at a single point</li>
+    <li><a href="/beetles/area">Aggregate by AOI polygon ID</a>: Spruce beetle risk within an area of interest polygon, returning the mode of all data in polygon.</li>
+</ul>
+
+<h4>Dimensions:</h4>
+<ul>
+    <li><strong><code>era</code></strong>: Summary era:</li>
+        <ul>
+            <li>1988&ndash;2017</li>
+            <li>2010&ndash;2039</li>
+            <li>2040&ndash;2069</li>
+            <li>2070&ndash;2099</li>
+        </ul>
+    <li><strong><code>model</code></strong>: AR5 model source, or Daymet:</li>
+        <ul>
+            <li>Daymet</li>
+            <li>GFDL&ndash;ESM2M</li>
+            <li>HadGEM2&ndash;ES</li>
+            <li>MRI&ndash;CGCM3</li>
+            <li>NCAR&ndash;CCSM4</li>
+        </ul>
+    <li><strong><code>scenario</code></strong>: RCP scenario for AR5, or "Historical" for Daymet</li>
+        <ul>
+            <li>Historical</li>
+            <li>rcp45</li>
+            <li>rcp85</li>
+        </ul>
+    <li><strong><code>snowpack</code></strong>: Relative snowpack used to model spruce beetle risk</li>
+        <ul>
+            <li>low</li>
+            <li>medium</li>
+        </ul>
+</ul>
+<strong>Variables:</strong>:
+<ul>
+    <li><strong><code>beetle-risk</code></strong>: <i>(text)</i>, low, moderate, or high</li>
+    <li><strong><code>percent-low-risk</code></strong>: <i>(float)</i>, percentage of low risk pixels in polygon AOI</li>
+    <li><strong><code>percent-medium-risk</code></strong>: <i>(float)</i>, percentage of moderate risk pixels in polygon AOI</li>
+    <li><strong><code>percent-high-risk</code></strong>: <i>(float)</i>, percentage of high risk pixels in polygon AOI</li>
+</ul>
+{% endblock %}

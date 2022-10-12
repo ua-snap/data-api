@@ -21,6 +21,7 @@ nodata_values = {
     "snow": [-9999],
     "seaice": [120, 254, 255],
     "landfastice": [0],
+    "beetles": [0]
 }
 
 
@@ -154,7 +155,7 @@ def get_poly_3338_bbox(gdf, poly_id):
 
     Args:
         gdf (geopandas.GeoDataFrame object): polygon features
-        polyid (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
+        poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
         poly (shapely.Polygon): Polygon object used to summarize data within.
         Inlcudes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC

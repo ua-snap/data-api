@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Spruce Beetle Risk Geospatial Polygon Aggregation</h3>
+<p>Query modeled spruce beetle risk data for a specific <a href="/places/all">area of interest polygon ID</a> and provides the mode of the returned AOI.</p>
+<p>Example: <a href="/beetles/area/19020302">/beetles/area/19020302</a></p>
+<h4>CSV Export</h4>
+<p>To export the aggregated data in a CSV file, append <code>?format=csv</code>.</p>
+<p>Example: <a href="/beetles/area/19020302?format=csv">/beetles/area/19020302?format=csv</a></p>
+{% endblock %}
