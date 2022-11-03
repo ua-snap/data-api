@@ -7,11 +7,34 @@ from flask import (
     jsonify,
 )
 import asyncio
+from aiohttp import ClientSession
 import os
-from fetch_data import fetch_data
+from fetch_data import make_get_request
 from . import routes
 
 eds_api = Blueprint("eds_api", __name__)
+
+
+async def fetch_data(url):
+    """Wrapper for make_get_request() which gathers and
+    executes the urls as asyncio tasks
+
+    Args:
+        url (string): URL being requested from API
+
+    Returns:
+        Results of query as JSON
+    """
+    try:
+        async with ClientSession() as session:
+            results = await asyncio.create_task(make_get_request(url, session))
+
+        return results
+    except:
+        # If any of the URLs returns a status other than HTTP status 200,
+        # it will return a blank section of the JSON in the place of the
+        # ArcticEDS report section.
+        return {}
 
 
 async def run_fetch_all_eds(lat, lon):
@@ -43,7 +66,7 @@ async def run_fetch_all_eds(lat, lon):
         f"{host}permafrost/point/{lat}/{lon}",
     ]
 
-    eds = await asyncio.gather(*[fetch_data([request]) for request in all_requests])
+    eds = await asyncio.gather(*[fetch_data(request) for request in all_requests])
 
     return eds
 
