@@ -20,8 +20,7 @@ async def fetch_data(url):
     executes the urls as asyncio tasks
 
     Args:
-        req (tuple(str, str)): req[0] is the key for the section of the JSON
-                               req[1] is the URL requested from the API.
+        url (string): URL being requested from API.
 
     Returns:
         Results of query as JSON
