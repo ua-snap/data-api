@@ -20,7 +20,8 @@ async def fetch_data(url):
     executes the urls as asyncio tasks
 
     Args:
-        url (string): URL being requested from API
+        req (tuple(str, str)): req[0] is the key for the section of the JSON
+                               req[1] is the URL requested from the API.
 
     Returns:
         Results of query as JSON
@@ -28,13 +29,12 @@ async def fetch_data(url):
     try:
         async with ClientSession() as session:
             results = await asyncio.create_task(make_get_request(url, session))
-
         return results
     except:
         # If any of the URLs returns a status other than HTTP status 200,
         # it will return a blank section of the JSON in the place of the
         # ArcticEDS report section.
-        return {}
+        return dict()
 
 
 async def run_fetch_all_eds(lat, lon):
@@ -52,7 +52,7 @@ async def run_fetch_all_eds(lat, lon):
         Multiple variable JSON object
     """
     host = request.host_url
-    all_requests = [
+    all_urls = [
         f"{host}eds/temperature/{lat}/{lon}",
         f"{host}eds/precipitation/{lat}/{lon}",
         f"{host}mmm/snow/snowfallequivalent/hp/{lat}/{lon}",
@@ -66,8 +66,25 @@ async def run_fetch_all_eds(lat, lon):
         f"{host}permafrost/point/{lat}/{lon}",
     ]
 
-    eds = await asyncio.gather(*[fetch_data(request) for request in all_requests])
+    all_keys = [
+        "temperature",
+        "precipitation",
+        "snowfall",
+        "design_freezing",
+        "design_thawing",
+        "freezing_index",
+        "heating_degree_days",
+        "thawing_index",
+        "geology",
+        "physiography",
+        "permafrost",
+    ]
 
+    results = await asyncio.gather(*[fetch_data(url) for url in all_urls])
+
+    eds = dict()
+    for index in range(len(results)):
+        eds[all_keys[index]] = results[index]
     return eds
 
 
