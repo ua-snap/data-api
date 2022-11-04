@@ -8,7 +8,6 @@ from flask import (
 )
 import asyncio
 from aiohttp import ClientSession
-import os
 from fetch_data import make_get_request
 from . import routes
 
