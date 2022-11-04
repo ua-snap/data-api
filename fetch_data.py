@@ -106,6 +106,11 @@ async def make_get_request(url, session):
     elif "DescribeCoverage" in url:
         # DescribeCoverage in URL ==> XML coming back
         data = await resp.text()
+    else:
+        # Only here when requesting a URL within the API.
+        # Used by eds.py to return compiled JSON for all
+        # ArcticEDS plates.
+        data = await resp.json()
 
     return data
 

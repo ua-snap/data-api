@@ -20,3 +20,4 @@ from .degree_days import *
 from .snow import *
 from .landfastice import *
 from .beetles import *
+from .eds import *
