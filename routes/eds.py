@@ -97,19 +97,6 @@ def fetch_all_eds(lat, lon):
 
     Notes:
         example request: http://localhost:5000/eds/all/68.0764/-154.5501
-
-        Order of returned JSON
-        0 - Temperature
-        1 - Precipitation
-        2 - Snowfall
-        3 - Design Freezing Index
-        4 - Design Thawing Index
-        5 - Freezing Index
-        6 - Heating Degree Days
-        7 - Thawing Index
-        8 - Geology
-        9 - Physiography
-       10 - Permafrost
     """
 
     return asyncio.run(run_fetch_all_eds(lat, lon))
