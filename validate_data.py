@@ -21,7 +21,8 @@ nodata_values = {
     "snow": [-9999],
     "seaice": [120, 254, 255],
     "landfastice": [0],
-    "beetles": [0]
+    "beetles": [0],
+    "wet_days_per_year": [-9999]
 }
 
 

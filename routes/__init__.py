@@ -21,3 +21,4 @@ from .snow import *
 from .landfastice import *
 from .beetles import *
 from .eds import *
+from .wet_days_per_year import *
