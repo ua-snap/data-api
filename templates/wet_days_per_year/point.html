@@ -1,0 +1,150 @@
+{% extends 'base.html' %} {% block content %}
+<h3>Wet Days Per Year Point Query</h3>
+<p>The endpoints here provide access to wet days per year data.</p>
+
+<h4>Endpoints</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Endpoint</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>wet_days_per_year</td>
+      <td>
+        The number of days per calendar year where total precipitation amounts
+        are greater than or equal to 1.0 mm.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Examples</h4>
+
+<h5>Wet Days Per Year</h5>
+<p>
+  Query the downscaled ERA-Interim historical average (1980-2009) min, mean, and max number of wet days per year for a point location:
+</p>
+<p></p>
+<p>
+  Example:
+  <a href="/wet_days_per_year/historical/point/65.0628/-146.1627"
+    >/wet_days_per_year/historical/point/65.0628/-146.1627</a
+  >
+</p>
+
+<p>
+  Query the projected RCP 8.5 mid-century (2040-2069) two-model min, mean, and max  number of wet days per year for a point location:
+</p>
+<p></p>
+<p>
+  Example:
+  <a href="/wet_days_per_year/projected/point/65.0628/-146.1627"
+    >/wet_days_per_year/projected/point/65.0628/-146.1627</a
+  >
+</p>
+
+<p>
+  Query the historical and projected min, mean, and max numbers of wet days per year for a point location:
+</p>
+<p></p>
+<p>
+  Example:
+  <a href="/wet_days_per_year/hp/point/65.0628/-146.1627"
+    >/wet_days_per_year/hp/point/65.0628/-146.1627</a
+  >
+</p>
+
+<p>
+  Query the historical or projected min, mean, and max numbers of wet days per year for a point location with specific start and end years:
+</p>
+<p></p>
+<p>
+  Example:
+  <a href="/wet_days_per_year/projected/point/65.0628/-146.1627/2070/2099"
+    >/wet_days_per_year/projected/point/65.0628/-146.1627/2070/2099</a
+  >
+</p>
+
+<b>Results from the queries above will look like this:</b>
+
+<pre>
+{
+  "historical": {
+    "wdpymax": 160, 
+    "wdpymean": 134, 
+    "wdpymin": 112
+  }
+}  
+</pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &lt;era>: {
+    "wdpymax": &lt;max number of wet days per year across all models and years used for the summary era time period>,
+    "wdpymean": &lt;number of wet days per year across all models and years used for the summary era time period>,
+    "wdpymin": &lt;number of wet days per year across all models and years used for the summary era time period>
+  },
+  ...
+}
+</pre>
+
+<h4>Comprehensive queries</h4>
+<p>
+  The following query will fetch a complete wet days per year set of data composed of the ERA-Interim historical baseline (1980-2009) and the entire projection range (2006-2100) for both available models, GFDL-CM3 and NCAR-CCSM4 (both RCP 8.5).
+</p>
+
+<p>
+  Example:
+  <a href="/wet_days_per_year/all/point/65.0628/-146.1627"
+    >/wet_days_per_year/all/point/65.0628/-146.1627</a
+  >
+</p>
+
+<b>Results from the query above will look like this:</b>
+
+<pre>
+{
+  "ERA-Interim": {
+    "1980": {
+      "wdpy": 124
+    }, 
+    "1981": {
+      "wdpy": 119
+    }, 
+    "1982": {
+      "wdpy": 145
+    }, 
+...
+}
+</pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &lt;model>: {
+    &lt;year>: {
+      "wdpy": &lt;count of wet days per year>
+    },
+    ...
+  }
+  ...
+}
+</pre>
+
+</pre>
+
+<h4>CSV Export</h4>
+<p>To export the point data to a CSV file, append <code>?format=csv</code>.</p>
+<p>
+  Example:
+  <a href="/wet_days_per_year/all/point/65.0628/-146.1627?format=csv"
+    >/wet_days_per_year/all/point/65.0628/-146.1627?format=csv</a
+  >
+</p>
+{% endblock %}
