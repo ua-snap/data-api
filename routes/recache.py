@@ -130,7 +130,7 @@ def recache(limit):
     else:
         routes = all_routes()
     for route in routes:
-        if (route.find("point") != -1 or route.find("local") != -1) and (
+        if (route.find("point") != -1 or route.find("local") != -1 or route.find("all") != -1) and (
             route.find("lat") == -1
         ):
             get_all_route_endpoints(route, "community")
