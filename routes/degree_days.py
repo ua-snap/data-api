@@ -49,7 +49,7 @@ var_label_lu = {
 }
 
 years_lu = {
-    "historical": {"min": 1979, "max": 2015},
+    "historical": {"min": 1980, "max": 2009},
     "projected": {"min": 2006, "max": 2100},
 }
 
