@@ -33,6 +33,7 @@ permafrost_api = Blueprint("permafrost_api", __name__)
 
 # rasdaman targets
 permafrost_coverage_id = "iem_gipl_magt_alt_4km"
+gipl_1km_coverage_id = "crrel_gipl_outputs"
 
 # geoserver targets
 wms_targets = [
@@ -44,7 +45,8 @@ wfs_targets = {
 }
 
 titles = {
-    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output",
+    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) 4 km Model Output",
+    "gipl1km": "GIPL 2.0 Mean Annual Ground Temperature (°C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
@@ -173,28 +175,11 @@ def combine_gipl_poly_var_pkgs(magt_di, alt_di):
 
 @routes.route("/permafrost/")
 @routes.route("/permafrost/abstract/")
-@routes.route("/groundtemperature/")
-@routes.route("/groundtemperature/abstract/")
-@routes.route("/activelayer/")
-@routes.route("/activelayer/abstract/")
-@routes.route("/magtalt/")
-@routes.route("/magtalt/abstract/")
-@routes.route("/magtalt/")
-@routes.route("/magtalt/abstract/")
-@routes.route("/alt/")
-@routes.route("/alt/abstract/")
-@routes.route("/magt/")
-@routes.route("/magt/abstract/")
 def pf_about():
     return render_template("permafrost/abstract.html")
 
 
 @routes.route("/permafrost/point/")
-@routes.route("/groundtemperature/point/")
-@routes.route("/activelayer/point/")
-@routes.route("/magtalt/point/")
-@routes.route("/alt/point/")
-@routes.route("/magt/point/")
 def pf_about_point():
     return render_template("permafrost/point.html")
 
