@@ -7,14 +7,8 @@ from flask import (
 )
 
 # local imports
-from fetch_data import (
-    get_dim_encodings,
-    fetch_data_api,
-    fetch_wcs_point_data,
-    build_csv_dicts,
-    write_csv,
-    csv_metadata,
-)
+from generate_urls import generate_wcs_query_url
+from fetch_data import *
 
 from validate_request import (
     validate_latlon,
@@ -38,6 +32,7 @@ permafrost_api = Blueprint("permafrost_api", __name__)
 # rasdaman targets
 permafrost_coverage_id = "iem_gipl_magt_alt_4km"
 gipl_1km_coverage_id = "crrel_gipl_outputs"
+
 
 # geoserver targets
 wms_targets = [
@@ -99,9 +94,9 @@ def package_obu_vector(obu_vector_resp):
 
 def package_gipl1km_point_data(gipl1km_resp):
 
-    di = {}
-
-    return
+    gipl1km_point_pkg = {}
+    # do the packaging
+    return gipl1km_point_pkg
 
 
 def package_gipl(gipl_resp):
@@ -193,6 +188,29 @@ def pf_about():
 @routes.route("/permafrost/point/")
 def pf_about_point():
     return render_template("permafrost/point.html")
+
+
+@routes.route("/permafrost/point/gipl/<lat>/<lon>")
+def run_fetch_gipl_1km_point_data(lat, lon):
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+
+    x, y = project_latlon(lat, lon, 3338)
+    # try:
+    gipl_1km_point_data = asyncio.run(fetch_gipl_1km_point_data(x, y))
+    # except Exception as exc:
+    #    if hasattr(exc, "status") and exc.status == 404:
+    #        return render_template("404/no_data.html"), 404
+    #    return render_template("500/server_error.html"), 500
+    return gipl_1km_point_data
 
 
 @routes.route("/permafrost/point/<lat>/<lon>")
@@ -300,3 +318,10 @@ def run_point_fetch_all_permafrost(lat, lon):
         return write_csv(csv_dicts, fieldnames, filename, metadata)
 
     return postprocess(data, "permafrost", titles)
+
+
+async def fetch_gipl_1km_point_data(x, y):
+    gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
+    print(generate_wcs_query_url(gipl_request_str))
+    gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+    return gipl_point_data
