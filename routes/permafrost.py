@@ -1,11 +1,7 @@
 import asyncio
-import io
-import csv
-import copy
 from urllib.parse import quote
 from flask import (
     Blueprint,
-    Response,
     render_template,
     request,
 )
@@ -14,29 +10,23 @@ from flask import (
 from fetch_data import (
     fetch_data_api,
     fetch_wcs_point_data,
-    fetch_bbox_netcdf,
-    summarize_within_poly,
     build_csv_dicts,
     write_csv,
-    add_titles,
     csv_metadata,
 )
 
-from generate_requests import generate_netcdf_wcs_getcov_str
-from generate_urls import generate_wcs_query_url
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
 from validate_data import (
-    get_poly_3338_bbox,
     nullify_nodata,
     nullify_and_prune,
     postprocess,
     place_name_and_type,
 )
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import huc_gdf, permafrost_encodings, akpa_gdf
+from luts import permafrost_encodings
 from . import routes
 
 permafrost_api = Blueprint("permafrost_api", __name__)
