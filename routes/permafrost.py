@@ -8,6 +8,7 @@ from flask import (
 
 # local imports
 from fetch_data import (
+    get_dim_encodings,
     fetch_data_api,
     fetch_wcs_point_data,
     build_csv_dicts,
@@ -26,7 +27,10 @@ from validate_data import (
     place_name_and_type,
 )
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import permafrost_encodings
+from luts import permafrost_encodings  # there are for the Melvin 4 km data
+
+gipl1km_dim_encodings = asyncio.run(get_dim_encodings("crrel_gipl_outputs"))
+
 from . import routes
 
 permafrost_api = Blueprint("permafrost_api", __name__)
@@ -91,6 +95,13 @@ def package_obu_vector(obu_vector_resp):
     pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
     di = {"pfx": pfx}
     return di
+
+
+def package_gipl1km_point_data(gipl1km_resp):
+
+    di = {}
+
+    return
 
 
 def package_gipl(gipl_resp):
