@@ -1,4 +1,5 @@
 import asyncio
+import pandas as pd
 from urllib.parse import quote
 from flask import (
     Blueprint,
@@ -20,12 +21,13 @@ from validate_data import (
     postprocess,
     place_name_and_type,
 )
-from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import permafrost_encodings  # there are for the Melvin 4 km data
-
-gipl1km_dim_encodings = asyncio.run(get_dim_encodings("crrel_gipl_outputs"))
-
 from . import routes
+from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
+from luts import permafrost_encodings  # for the Melvin 4 km (NCR) data
+
+gipl1km_dim_encodings = asyncio.run(
+    get_dim_encodings("crrel_gipl_outputs", scrape=("time", "gmlrgrid:coefficients", 4))
+)
 
 permafrost_api = Blueprint("permafrost_api", __name__)
 
@@ -92,11 +94,21 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-def package_gipl1km_point_data(gipl1km_resp):
+def generate_gipl1km_time_index():
+    """Generate a Pythonic time index for annual GIPL 1km outputs.
+
+    Returns:
+        dt_range (pandas DatetimeIndex): a time index with annual frequency
+    """
+
+
+def package_gipl1km_point_data(gipl1km_point_resp):
 
     gipl1km_point_pkg = {}
-    # do the packaging
-    return gipl1km_point_pkg
+
+    # create data package with time index information
+    return gipl1km_dim_encodings
+    # return gipl1km_point_pkg
 
 
 def package_gipl(gipl_resp):
@@ -204,13 +216,14 @@ def run_fetch_gipl_1km_point_data(lat, lon):
         )
 
     x, y = project_latlon(lat, lon, 3338)
-    # try:
-    gipl_1km_point_data = asyncio.run(fetch_gipl_1km_point_data(x, y))
-    # except Exception as exc:
-    #    if hasattr(exc, "status") and exc.status == 404:
-    #        return render_template("404/no_data.html"), 404
-    #    return render_template("500/server_error.html"), 500
-    return gipl_1km_point_data
+    try:
+        gipl_1km_point_data = asyncio.run(fetch_gipl_1km_point_data(x, y))
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    return package_gipl1km_point_data(gipl_1km_point_data)
 
 
 @routes.route("/permafrost/point/<lat>/<lon>")
@@ -322,6 +335,5 @@ def run_point_fetch_all_permafrost(lat, lon):
 
 async def fetch_gipl_1km_point_data(x, y):
     gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
-    print(generate_wcs_query_url(gipl_request_str))
     gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
     return gipl_point_data
