@@ -122,10 +122,9 @@ def package_gipl1km_point_data(gipl1km_point_resp):
                 for gipl_var_name in gipl1km_dim_encodings["variable"].values():
                     gipl1km_point_pkg[model_name][year][scenario_name][
                         gipl_var_name
-                    ] = flat_list[i]
+                    ] = round(flat_list[i], 1)
                     i += 1
 
-    # return gipl1km_dim_encodings
     return gipl1km_point_pkg
 
 
@@ -241,7 +240,8 @@ def run_fetch_gipl_1km_point_data(lat, lon):
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    return package_gipl1km_point_data(gipl_1km_point_data)
+    gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
+    return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
 @routes.route("/permafrost/point/<lat>/<lon>")
