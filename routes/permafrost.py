@@ -100,15 +100,33 @@ def generate_gipl1km_time_index():
     Returns:
         dt_range (pandas DatetimeIndex): a time index with annual frequency
     """
+    timestamps = [x[1:-2] for x in gipl1km_dim_encodings["time"].split(" ")]
+    date_index = pd.DatetimeIndex(timestamps)
+    return date_index
 
 
 def package_gipl1km_point_data(gipl1km_point_resp):
+    """Package the response. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9)."""
+
+    flat_list = list(deepflatten(gipl1km_point_resp))
+    i = 0
 
     gipl1km_point_pkg = {}
+    for model_name in gipl1km_dim_encodings["model"].values():
+        gipl1km_point_pkg[model_name] = {}
+        for t in generate_gipl1km_time_index():
+            year = t.date().strftime("%Y")
+            gipl1km_point_pkg[model_name][year] = {}
+            for scenario_name in gipl1km_dim_encodings["scenario"].values():
+                gipl1km_point_pkg[model_name][year][scenario_name] = {}
+                for gipl_var_name in gipl1km_dim_encodings["variable"].values():
+                    gipl1km_point_pkg[model_name][year][scenario_name][
+                        gipl_var_name
+                    ] = flat_list[i]
+                    i += 1
 
-    # create data package with time index information
-    return gipl1km_dim_encodings
-    # return gipl1km_point_pkg
+    # return gipl1km_dim_encodings
+    return gipl1km_point_pkg
 
 
 def package_gipl(gipl_resp):
