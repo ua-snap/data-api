@@ -128,6 +128,32 @@ def package_gipl1km_point_data(gipl1km_point_resp):
     return gipl1km_point_pkg
 
 
+def create_gipl1km_csv(data_pkg, lat=None, lon=None):
+    """Create CSV file with metadata string and location based filename.
+    Args:
+        data_pkg (dict): JSON-like object of data
+        lat: latitude for points or None for polygons
+        lon: longitude for points or None for polygons
+    Returns:
+        CSV response object
+    """
+    fieldnames = [
+        "model",
+        "year",
+        "scenario",
+        "variable",
+        "value",
+    ]
+    csv_dicts = build_csv_dicts(
+        data_pkg,
+        fieldnames,
+    )
+    metadata = "# GIPL model outputs for mean annual ground temperature (°C) at various depths below the surface as well as talik thickness, and depth of permafrost base and top (m)\n"
+    filename = "GIPL 1 km Model Outputs" + " for " + lat + ", " + lon + ".csv"
+
+    return write_csv(csv_dicts, fieldnames, filename, metadata)
+
+
 def package_gipl(gipl_resp):
     """Package GIPL MAGT and ALT netCDF data.
     The response is a nested list object."""
@@ -241,6 +267,11 @@ def run_fetch_gipl_1km_point_data(lat, lon):
         return render_template("500/server_error.html"), 500
 
     gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
+    if request.args.get("format") == "csv":
+        point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        return create_gipl1km_csv(point_pkg, lat=lat, lon=lon)
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
