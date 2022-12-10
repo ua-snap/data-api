@@ -31,12 +31,10 @@ gipl1km_dim_encodings = asyncio.run(
 
 permafrost_api = Blueprint("permafrost_api", __name__)
 
-# rasdaman targets
+# rasdaman coverages
 permafrost_coverage_id = "iem_gipl_magt_alt_4km"
 gipl_1km_coverage_id = "crrel_gipl_outputs"
-
-
-# geoserver targets
+# geoserver layers
 wms_targets = [
     "obu_2018_magt",
 ]
@@ -92,6 +90,47 @@ def package_obu_vector(obu_vector_resp):
     pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
     di = {"pfx": pfx}
     return di
+
+
+def make_gipl1km_wcps_request_str(x, y, models, scenarios, years, summary_operation):
+    """Generate a WCPS query string specific the to GIPL 1 km coverage.
+
+    Arguments:
+        x -- (float) x-coordinate tor the point query
+        y -- (float) y-coordinate tor the point query
+        models -- (str) comma-separated model integers e.g., '0, 1, 2'
+        scenarios -- (str) comma-separated scenario integers e.g., '0, 1'
+        years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
+        summary_operation -- (int) mapping for the summary operation (min, mean, max)
+    """
+    summary_ops = {0: "max", 2: "min"}
+
+    if summary_operation in summary_ops:
+        operation = summary_ops[summary_operation]
+        gipl1km_wcps_str = quote(
+            (
+                "ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
+                f"let $a := {operation}(condense {operation} over $s scenario({scenarios}), $m model({models}) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y})] ) "
+                f'return encode( $a, "application/json")'
+            )
+        )
+        return gipl1km_wcps_str
+    else:
+        operation = "+"
+        # num_results (this should be the product of the models and scenarios!)
+        n_models = len(models.split(","))
+        n_scenarios = len(scenarios.split(","))
+        num_results = n_models * n_scenarios
+        gipl1km_wcps_str = quote(
+            (
+                "ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
+                f"let $a := avg(condense {operation} over $s scenario({scenarios}), $m model({models}) "
+                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y})] / {num_results} ) "
+                f'return encode( $a, "application/json")'
+            )
+        )
+        return gipl1km_wcps_str
 
 
 def generate_gipl1km_time_index():
@@ -246,7 +285,8 @@ def pf_about_point():
 
 
 @routes.route("/permafrost/point/gipl/<lat>/<lon>")
-def run_fetch_gipl_1km_point_data(lat, lon):
+@routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>")
+def run_fetch_gipl_1km_point_data(lat, lon, start_year, end_year):
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -260,7 +300,9 @@ def run_fetch_gipl_1km_point_data(lat, lon):
 
     x, y = project_latlon(lat, lon, 3338)
     try:
-        gipl_1km_point_data = asyncio.run(fetch_gipl_1km_point_data(x, y))
+        gipl_1km_point_data = asyncio.run(
+            fetch_gipl_1km_point_data(x, y, start_year, end_year)
+        )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
@@ -382,7 +424,22 @@ def run_point_fetch_all_permafrost(lat, lon):
     return postprocess(data, "permafrost", titles)
 
 
-async def fetch_gipl_1km_point_data(x, y):
-    gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
-    gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+async def fetch_gipl_1km_point_data(x, y, start_year, end_year):
+    if start_year is not None and end_year is not None:
+        wcps_response_data = []
+        timestring = (
+            f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+        )
+        for summary_operation in range(0, 3):
+            wcps_request_str = make_gipl1km_wcps_request_str(
+                x, y, "0:2", "0:1", timestring, summary_operation
+            )
+            print(generate_wcs_query_url(wcps_request_str))
+            wcps_response_data.append(
+                await fetch_data([generate_wcs_query_url(wcps_request_str)])
+            )
+        return wcps_response_data
+    else:
+        gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
+        gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
     return gipl_point_data
