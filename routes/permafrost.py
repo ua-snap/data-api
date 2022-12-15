@@ -113,25 +113,25 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
 
 
 def package_gipl1km_wcps_data(gipl1km_wcps_resp):
-    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range.
+    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range. Values are rounded to one decimal place because units are either meters or degrees C.
 
     Arguments:
-        gipl1km_wcps_resp -- (list) nested 2-level list of the WCPS response values. The response order must be min-mean-max.
+        gipl1km_wcps_resp -- (list) nested 2-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
 
     Returns:
-        gipl1km_wcps_point_pkg -- (dict) results
+        gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
     """
     gipl1km_wcps_point_pkg = {}
     summary_methods = ["min", "mean", "max"]
     for resp, stat_type in zip(gipl1km_wcps_resp, summary_methods):
         gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"] = {}
         for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
-            gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = v
+            gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
     return gipl1km_wcps_point_pkg
 
 
 def generate_gipl1km_time_index():
-    """Generate a Pythonic time index for annual GIPL 1km outputs.
+    """Generate a time index for annual GIPL 1km outputs.
 
     Returns:
         dt_range (pandas DatetimeIndex): a time index with annual frequency
@@ -142,7 +142,7 @@ def generate_gipl1km_time_index():
 
 
 def package_gipl1km_point_data(gipl1km_point_resp):
-    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9)."""
+    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9). Values are rounded to one decimal place because units are either meters or degrees C."""
 
     flat_list = list(deepflatten(gipl1km_point_resp))
     i = 0
