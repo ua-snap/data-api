@@ -112,6 +112,24 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
     return gipl1km_wcps_str
 
 
+def package_gipl1km_wcps_data(gipl1km_wcps_resp):
+    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range.
+
+    Arguments:
+        gipl1km_wcps_resp -- (list) nested 2-level list of the WCPS response values. The response order must be min-mean-max.
+
+    Returns:
+        gipl1km_wcps_point_pkg -- (dict) results
+    """
+    gipl1km_wcps_point_pkg = {}
+    summary_methods = ["min", "mean", "max"]
+    for resp, stat_type in zip(gipl1km_wcps_resp, summary_methods):
+        gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"] = {}
+        for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
+            gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = v
+    return gipl1km_wcps_point_pkg
+
+
 def generate_gipl1km_time_index():
     """Generate a Pythonic time index for annual GIPL 1km outputs.
 
@@ -124,7 +142,7 @@ def generate_gipl1km_time_index():
 
 
 def package_gipl1km_point_data(gipl1km_point_resp):
-    """Package the response. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9)."""
+    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9)."""
 
     flat_list = list(deepflatten(gipl1km_point_resp))
     i = 0
@@ -265,7 +283,12 @@ def pf_about_point():
 
 @routes.route("/permafrost/point/gipl/<lat>/<lon>")
 @routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>")
-def run_fetch_gipl_1km_point_data(lat, lon, start_year=None, end_year=None):
+@routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>/<summarize>")
+# add another synonym with /summarize/ and use that to break out the summary, may need to default the value of summary_operation to None which would make sense
+# add conditional to call correct packaging function
+def run_fetch_gipl_1km_point_data(
+    lat, lon, start_year=None, end_year=None, summarize=None
+):
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -278,16 +301,23 @@ def run_fetch_gipl_1km_point_data(lat, lon, start_year=None, end_year=None):
         )
 
     x, y = project_latlon(lat, lon, 3338)
+    # add code block to validate year selection
+    # add code block to validate summarize option
+
     try:
         gipl_1km_point_data = asyncio.run(
-            fetch_gipl_1km_point_data(x, y, start_year, end_year)
+            fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize)
         )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
+    if all(val != None for val in [start_year, end_year, summarize]):
+        gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
+    else:
+        gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
+
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
         if point_pkg in [{}, None, 0]:
@@ -403,8 +433,8 @@ def run_point_fetch_all_permafrost(lat, lon):
     return postprocess(data, "permafrost", titles)
 
 
-async def fetch_gipl_1km_point_data(x, y, start_year, end_year):
-    if start_year is not None and end_year is not None:
+async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
+    if all(val != None for val in [start_year, end_year, summarize]):
         wcps_response_data = []
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
@@ -413,7 +443,6 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year):
             wcps_request_str = make_gipl1km_wcps_request_str(
                 x, y, timestring, summary_operation
             )
-            print(generate_wcs_query_url(wcps_request_str))
             wcps_response_data.append(
                 await fetch_data([generate_wcs_query_url(wcps_request_str)])
             )
