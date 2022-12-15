@@ -1,10 +1,8 @@
 {% extends 'base.html' %} {% block content %}
-<h3>
-  Geophysical Institute Permafrost Lab (GIPL) model 1 km output point query
-</h3>
+<h3>Geophysical Institute Permafrost Lab (GIPL) model output</h3>
 <p>
-  Query GIPL model output for a single point specified by latitude and
-  longitude.
+  Query the entire time series of GIPL model outputs (1 km spatial resolution)
+  for ten variables for a single point specified by latitude and longitude.
 </p>
 <p>
   Example:
@@ -12,7 +10,17 @@
     >/permafrost/point/gipl/63.0628/-146.1627</a
   >
 </p>
-<h4>Results from the query above will look like this:</h4>
+<p>
+  Query a specific time slice of GIPL model outputs (1 km spatial resolution)
+  for ten variables for a single point specified by latitude and longitude.
+</p>
+<p>
+  Example:
+  <a href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050"
+    >/permafrost/point/gipl/63.0628/-146.1627/2040/2050</a
+  >
+</p>
+<h4>Results from the above queries will look like this:</h4>
 <pre>
 {
   "5ModelAvg": {
@@ -58,8 +66,40 @@
 }
 </pre>
 
+<p>
+  Query a specific time slice of GIPL model outputs (1 km spatial resolution)
+  for ten variables for a single point specified by latitude and longitude.
+  Summarize the results by computing the minimum, mean, and maximum values for
+  each of the ten variables for the duration of the time slice. Statistics are
+  computed for all models and scenarios.
+</p>
+<p>
+  Example:
+  <a href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm"
+    >/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm</a
+  >
+</p>
+<h4>Results from the above summary query will look like this:</h4>
+<pre>
+{
+  "gipl1kmmax": {...},
+  gipl1kmmean": {...},
+  gipl1kmmin": {...},
+}
+</pre>
+<b>The above output is structured like this:</b>
+<pre>
+{
+    "gipl1kmmax": &ltmax values for all ten variables across all models, scenarios, and years>,
+    "gipl1kmmean": &ltmean values for all ten variables across all models, scenarios, and years>,
+    "gipl1kmmin": &ltmin values for all ten variables across all models, scenarios, and years>
+}
+</pre>
 <h4>CSV Export</h4>
-<p>To export the point data to a CSV file, append <code>?format=csv</code>.</p>
+<p>
+  To export the data from the above queries to a CSV file, append
+  <code>?format=csv</code> to the URL.
+</p>
 <p>
   Example:
   <a href="/permafrost/point/gipl/63.0628/-146.1627?format=csv"
@@ -89,214 +129,7 @@
         }
       }
     },
-    "2025": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.68,
-          "magt": 0
-        },
-        "rcp85": {
-          "alt": 0.66,
-          "magt": 0
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.61,
-          "magt": -1
-        },
-        "rcp85": {
-          "alt": 0.6,
-          "magt": -1.1
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 0.65,
-          "magt": -0.9
-        },
-        "rcp85": {
-          "alt": 0.69,
-          "magt": -0.1
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.61,
-          "magt": -1.2
-        },
-        "rcp85": {
-          "alt": 0.6,
-          "magt": -1.1
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 0.66,
-          "magt": -0.6
-        },
-        "rcp85": {
-          "alt": 0.64,
-          "magt": -0.5
-        }
-      }
-    },
-    "2050": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.98,
-          "magt": 2.2
-        },
-        "rcp85": {
-          "alt": 0.81,
-          "magt": 3.2
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.62,
-          "magt": -0.8
-        },
-        "rcp85": {
-          "alt": 0.64,
-          "magt": -0.2
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 0.68,
-          "magt": -0.2
-        },
-        "rcp85": {
-          "alt": 0.69,
-          "magt": -0.1
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.63,
-          "magt": -0.8
-        },
-        "rcp85": {
-          "alt": 0.63,
-          "magt": -0.6
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 0.67,
-          "magt": -0.4
-        },
-        "rcp85": {
-          "alt": 1.21,
-          "magt": 0.3
-        }
-      }
-    },
-    "2075": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.81,
-          "magt": 3.4
-        },
-        "rcp85": {
-          "alt": 0.54,
-          "magt": 5.6
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.62,
-          "magt": -0.7
-        },
-        "rcp85": {
-          "alt": 0.65,
-          "magt": 0
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 1.26,
-          "magt": 0.1
-        },
-        "rcp85": {
-          "alt": 0.91,
-          "magt": 3.1
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.64,
-          "magt": -0.7
-        },
-        "rcp85": {
-          "alt": 1.19,
-          "magt": 0.1
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 1.17,
-          "magt": 0.7
-        },
-        "rcp85": {
-          "alt": 0.9,
-          "magt": 2.6
-        }
-      }
-    },
-    "2095": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.81,
-          "magt": 3.9
-        },
-        "rcp85": {
-          "alt": 0.33,
-          "magt": 7.5
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.61,
-          "magt": -0.7
-        },
-        "rcp85": {
-          "alt": 1.1,
-          "magt": 0.7
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 1.15,
-          "magt": 0.9
-        },
-        "rcp85": {
-          "alt": 0.66,
-          "magt": 5.2
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.66,
-          "magt": -0.4
-        },
-        "rcp85": {
-          "alt": 0.99,
-          "magt": 1.7
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 1.18,
-          "magt": 0.5
-        },
-        "rcp85": {
-          "alt": 0.6,
-          "magt": 5.5
-        }
-      }
-    },
+    ...
     "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output"
   },
   "jorg": {
