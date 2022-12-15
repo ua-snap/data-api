@@ -100,6 +100,8 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
         y -- (float) y-coordinate for the point query
         years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
         summary_operation -- (str) one of 'min', 'avg', or 'max'
+    Returns:
+        gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
     """
     gipl1km_wcps_str = quote(
         (
@@ -178,7 +180,7 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
     return gipl1km_point_pkg
 
 
-def create_gipl1km_csv(data_pkg, lat=None, lon=None):
+def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
     """Create CSV file with metadata string and location based filename.
     Args:
         data_pkg (dict): JSON-like object of data
@@ -187,18 +189,25 @@ def create_gipl1km_csv(data_pkg, lat=None, lon=None):
     Returns:
         CSV response object
     """
-    fieldnames = [
-        "model",
-        "year",
-        "scenario",
-        "variable",
-        "value",
-    ]
+    if summary is not None:
+        fieldnames = [
+            "summary",
+            "variable",
+            "value",
+        ]
+    else:
+        fieldnames = [
+            "model",
+            "year",
+            "scenario",
+            "variable",
+            "value",
+        ]
     csv_dicts = build_csv_dicts(
         data_pkg,
         fieldnames,
     )
-    metadata = "# GIPL model outputs for mean annual ground temperature (°C) at various depths below the surface as well as talik thickness, and depth of permafrost base and top (m)\n"
+    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (°C) at various depths below the surface as well as talik thickness, depth of permafrost base, and depth of permafrost top (m)\n"
     filename = "GIPL 1 km Model Outputs" + " for " + lat + ", " + lon + ".csv"
 
     return write_csv(csv_dicts, fieldnames, filename, metadata)
@@ -361,6 +370,8 @@ def run_fetch_gipl_1km_point_data(
         point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
+        if summarize is not None:
+            return create_gipl1km_csv(point_pkg, lat=lat, lon=lon, summary=summarize)
         return create_gipl1km_csv(point_pkg, lat=lat, lon=lon)
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
