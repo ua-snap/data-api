@@ -303,7 +303,7 @@ def run_fetch_gipl_1km_point_data(
     x, y = project_latlon(lat, lon, 3338)
 
     # CP: the next two code blocks that validate year and summary type selections could be in the `validate_request` module but the first does use a specific time index so that needs more thought
-    if start_year is not None and end_year is not None:
+    if start_year is not None or end_year is not None:
         try:
             time_index = generate_gipl1km_time_index()
             start_valid = pd.Timestamp(int(start_year), 1, 1) >= time_index.min()
@@ -312,17 +312,17 @@ def run_fetch_gipl_1km_point_data(
             years_valid = start_valid and end_valid and chronological
         except:
             return render_template("400/bad_request.html"), 400
-    if years_valid != True:
-        return render_template("400/bad_request.html"), 400
+        if years_valid != True:
+            return render_template("400/bad_request.html"), 400
 
-    # code block to validate summarize option
+    # validate the summarize option
     if summarize is not None:
         try:
-            summarize_valid = summarize in ["summarize", "mmm"]
+            summarize_valid = summarize in ["summary", "mmm"]
         except:
             return render_template("400/bad_request.html"), 400
-    if summarize_valid != True:
-        return render_template("400/bad_request.html"), 400
+        if summarize_valid != True:
+            return render_template("400/bad_request.html"), 400
 
     try:
         gipl_1km_point_data = asyncio.run(
@@ -454,8 +454,6 @@ def run_point_fetch_all_permafrost(lat, lon):
 
 
 # must handle case where years are provided, but no summary option is given
-
-
 async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
     if all(val != None for val in [start_year, end_year, summarize]):
         wcps_response_data = []
