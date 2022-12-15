@@ -92,45 +92,24 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-def make_gipl1km_wcps_request_str(x, y, models, scenarios, years, summary_operation):
+def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
     """Generate a WCPS query string specific the to GIPL 1 km coverage.
 
     Arguments:
-        x -- (float) x-coordinate tor the point query
-        y -- (float) y-coordinate tor the point query
-        models -- (str) comma-separated model integers e.g., '0, 1, 2'
-        scenarios -- (str) comma-separated scenario integers e.g., '0, 1'
+        x -- (float) x-coordinate for the point query
+        y -- (float) y-coordinate for the point query
         years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
-        summary_operation -- (int) mapping for the summary operation (min, mean, max)
+        summary_operation -- (str) one of 'min', 'avg', or 'max'
     """
-    summary_ops = {0: "max", 2: "min"}
-
-    if summary_operation in summary_ops:
-        operation = summary_ops[summary_operation]
-        gipl1km_wcps_str = quote(
-            (
-                "ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
-                f"let $a := {operation}(condense {operation} over $s scenario({scenarios}), $m model({models}) "
-                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y})] ) "
-                f'return encode( $a, "application/json")'
-            )
+    gipl1km_wcps_str = quote(
+        (
+            f"ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
+            f"  return encode (coverage summary over $v variable(0:9)"
+            f"  values {summary_operation}( $c[variable($v),year({years}),X({x}),Y({y})] )"
+            f', "application/json")'
         )
-        return gipl1km_wcps_str
-    else:
-        operation = "+"
-        # num_results (this should be the product of the models and scenarios!)
-        n_models = len(models.split(","))
-        n_scenarios = len(scenarios.split(","))
-        num_results = n_models * n_scenarios
-        gipl1km_wcps_str = quote(
-            (
-                "ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
-                f"let $a := avg(condense {operation} over $s scenario({scenarios}), $m model({models}) "
-                f"using $c[scenario($s),model($m),year({years}),X({x}),Y({y})] / {num_results} ) "
-                f'return encode( $a, "application/json")'
-            )
-        )
-        return gipl1km_wcps_str
+    )
+    return gipl1km_wcps_str
 
 
 def generate_gipl1km_time_index():
@@ -286,7 +265,7 @@ def pf_about_point():
 
 @routes.route("/permafrost/point/gipl/<lat>/<lon>")
 @routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>")
-def run_fetch_gipl_1km_point_data(lat, lon, start_year, end_year):
+def run_fetch_gipl_1km_point_data(lat, lon, start_year=None, end_year=None):
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -430,9 +409,9 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year):
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
         )
-        for summary_operation in range(0, 3):
+        for summary_operation in ["min", "avg", "max"]:
             wcps_request_str = make_gipl1km_wcps_request_str(
-                x, y, "0:2", "0:1", timestring, summary_operation
+                x, y, timestring, summary_operation
             )
             print(generate_wcs_query_url(wcps_request_str))
             wcps_response_data.append(
@@ -442,4 +421,4 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year):
     else:
         gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
         gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
-    return gipl_point_data
+        return gipl_point_data
