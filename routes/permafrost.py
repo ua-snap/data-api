@@ -141,16 +141,30 @@ def generate_gipl1km_time_index():
     return date_index
 
 
-def package_gipl1km_point_data(gipl1km_point_resp):
-    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9). Values are rounded to one decimal place because units are either meters or degrees C."""
+def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
+    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9). Values are rounded to one decimal place because units are either meters or degrees C.
 
+    Arguments:
+        gipl1km_wcps_resp -- (list) deeply nested list of WCS response values.
+        time_slice -- (tuple) 2-tuple of (start_year, end_year)
+    Returns:
+        gipl1km_point_pkg -- (dict) results for all ten variables, all models, all scenario. defaults to the entire time range (time_slice=None).
+    """
+
+    # must match length of time index when it is sliced
     flat_list = list(deepflatten(gipl1km_point_resp))
     i = 0
 
     gipl1km_point_pkg = {}
     for model_name in gipl1km_dim_encodings["model"].values():
         gipl1km_point_pkg[model_name] = {}
-        for t in generate_gipl1km_time_index():
+        if time_slice is not None:
+            start, stop = time_slice
+            tx = generate_gipl1km_time_index()
+            tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
+        else:
+            tx = generate_gipl1km_time_index()
+        for t in tx:
             year = t.date().strftime("%Y")
             gipl1km_point_pkg[model_name][year] = {}
             for scenario_name in gipl1km_dim_encodings["scenario"].values():
@@ -335,6 +349,11 @@ def run_fetch_gipl_1km_point_data(
 
     if all(val != None for val in [start_year, end_year, summarize]):
         gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
+
+    elif start_year is not None and end_year is not None and summarize is None:
+        gipl_1km_point_package = package_gipl1km_point_data(
+            gipl_1km_point_data, (start_year, end_year)
+        )
     else:
         gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
 
@@ -453,7 +472,6 @@ def run_point_fetch_all_permafrost(lat, lon):
     return postprocess(data, "permafrost", titles)
 
 
-# must handle case where years are provided, but no summary option is given
 async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
     if all(val != None for val in [start_year, end_year, summarize]):
         wcps_response_data = []
@@ -468,6 +486,18 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
                 await fetch_data([generate_wcs_query_url(wcps_request_str)])
             )
         return wcps_response_data
+
+    if start_year is not None and end_year is not None and summarize is None:
+        timestring = (
+            f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+        )
+        time_subset = ("year", timestring)
+        gipl_request_str = generate_wcs_getcov_str(
+            x, y, "crrel_gipl_outputs", time_slice=time_subset
+        )
+        gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+        return gipl_point_data
+
     else:
         gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
         gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
