@@ -22,3 +22,4 @@ from .landfastice import *
 from .beetles import *
 from .eds import *
 from .wet_days_per_year import *
+from .diurnal_temp_variation import *
