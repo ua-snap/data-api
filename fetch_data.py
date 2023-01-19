@@ -364,19 +364,20 @@ def parse_meta_xml_str(meta_xml_str):
     return dim_encodings
 
 
-def get_xml_str_between_tags(meta_xml_str, tag):
-    """Get string encapsulated by a known XML tag.
+def get_xml_str_between_tags(meta_xml_str, tag, occurrence=1):
+    """Get string encapsulated by a known XML tag. Use this function to retrieve time axis values that are not encapsulated by a dictionary and/or are not within the metadata 'Encoding' block.
 
     Arguments:
         meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
         tag (str): the xml string that encapsulates the desired information, e.g., 'gmlrgrid:coefficients'
+        occurrence (int): the occurrence of the tag to parse. some tags are repeated several times in the XML response
 
     Returns:
         str_within_tag (str): string encapsulated by the provided XML tag
     """
     tag_open = f"<{tag}>"
-    tag_close = "<"
-    str_after_tag = meta_xml_str.split(tag_open)[1]
+    tag_close = f"</{tag}>"
+    str_after_tag = meta_xml_str.split(tag_open)[occurrence]
     str_within_tag = str_after_tag.split(tag_close)[0]
     return str_within_tag
 
@@ -387,7 +388,7 @@ async def get_dim_encodings(cov_id, scrape=None):
 
     Args:
         cov_id (str): ID of the rasdaman coverage
-        scrape (2-tuple of strings): (description, tag to scrape between)
+        scrape (3-tuple): (description (str), tag to scrape between (str), and the occurrence (int) of the tag to search for)
 
     Returns:
         dim_encodings (nested dict): a lookup where coverage axis names are keys that store dicts of integer-keyed categories.
@@ -397,9 +398,9 @@ async def get_dim_encodings(cov_id, scrape=None):
         meta_xml_str = await fetch_data([meta_url])
         dim_encodings = parse_meta_xml_str(meta_xml_str)
         if scrape is not None:
-            scrape_desc, scrape_tag = scrape
+            scrape_desc, scrape_tag, occurrence = scrape
             dim_encodings[scrape_desc] = get_xml_str_between_tags(
-                meta_xml_str, scrape_tag
+                meta_xml_str, scrape_tag, occurrence
             )
         return dim_encodings
     except:

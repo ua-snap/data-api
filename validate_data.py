@@ -22,7 +22,8 @@ nodata_values = {
     "seaice": [120, 254, 255],
     "landfastice": [0],
     "beetles": [0],
-    "wet_days_per_year": [-9999]
+    "wet_days_per_year": [-9999],
+    "crrel_gipl": [-9999],
 }
 
 
