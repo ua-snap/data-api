@@ -29,12 +29,55 @@ from luts import (
     shp_di,
     all_jsons,
 )
-from config import EAST_BBOX, WEST_BBOX
+from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from validate_data import is_di_empty, recursive_rounding
 
 data_api = Blueprint("data_api", __name__)
 
+
+@routes.route("/places/sarch/<lat>/<lon>")
+def find_via_gs(lat, lon):
+    communities_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_communities&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
+    communities_resp = requests.get(communities_url, allow_redirects=True)
+    communities_json = json.loads(communities_resp.content)
+    all_comm_intersects = communities_json['features']
+
+    proximal_di = dict()
+    proximal_di['communities'] = dict()
+    for i in range(len(all_comm_intersects)):
+        proximal_di['communities'][i] = dict()
+        proximal_di['communities'][i]['alt_name'] = all_comm_intersects[i]['properties']['alt_name']
+        proximal_di['communities'][i]['id'] = all_comm_intersects[i]['properties']['id']
+        proximal_di['communities'][i]['latitude'] = all_comm_intersects[i]['properties']['latitude']
+        proximal_di['communities'][i]['longitude'] = all_comm_intersects[i]['properties']['longitude']
+        proximal_di['communities'][i]['name'] = all_comm_intersects[i]['properties']['name']
+        proximal_di['communities'][i]['type'] = all_comm_intersects[i]['properties']['type']
+
+    areas_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
+    areas_resp = requests.get(areas_url, allow_redirects=True)
+    areas_json = json.loads(areas_resp.content)
+    all_area_intersects = areas_json['features']
+
+    areas_near = {'borough': 'ak_boros_near', 'census_area': 'ak_censusarea_near',
+                  'climate_division': 'climate_divisions_near', 'corporation': 'corporations_near',
+                  'ethnolinguistic_region': 'ethnolinguistic_regions_near', 'fire_zone': 'fire_management_units_near',
+                  'game_management_unit': 'game_management_units_near', 'huc': 'hucs_near',
+                  'protected_area': 'protected_areas_near'}
+
+    for area_type in areas_near.values():
+        proximal_di[area_type] = dict()
+    for ai in range(len(all_area_intersects)):
+        current_area_type = areas_near[all_area_intersects[ai]['properties']['type']]
+        current_index = len(proximal_di[current_area_type])
+        proximal_di[current_area_type][current_index] = dict()
+
+        proximal_di[current_area_type][current_index]['geojson'] = all_area_intersects[ai]['geometry']
+        proximal_di[current_area_type][current_index]['id'] = all_area_intersects[ai]['properties']['id']
+        proximal_di[current_area_type][current_index]['name'] = all_area_intersects[ai]['properties']['name']
+        proximal_di[current_area_type][current_index]['type'] = all_area_intersects[ai]['properties']['type']
+
+    return Response(response=json.dumps(proximal_di), status=200, mimetype="application/json")
 
 @routes.route("/places/search/<lat>/<lon>")
 def find_containing_polygons(lat, lon):
