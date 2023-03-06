@@ -209,6 +209,48 @@ def find_containing_polygons(lat, lon):
     return recursive_rounding(geo_suggestions.keys(), geo_suggestions.values())
 
 
+@routes.route("/plases/<type>")
+def get_json_for_place(type, recurse=False):
+    if type == "all":
+        json_list = list()
+
+        for curr_type in all_jsons:
+
+            curr_js = get_json_for_type(curr_type, recurse=True)
+
+            json_list.extend(json.loads(curr_js))
+
+        js = json.dumps(json_list)
+
+    else:
+        js_list = list()
+        if type == "communities":
+            communities_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_communities&outputFormat=application%2Fjson&propertyname=(name,alt_name,id,type,latitude,longitude)"
+            communities_resp = requests.get(communities_url, allow_redirects=True)
+            communities_json = json.loads(communities_resp.content)
+            all_comm_intersects = communities_json['features']
+            for i in range(len(all_comm_intersects)):
+                js_list.append(all_comm_intersects[i]['properties'])
+        else:
+            type = type[:-1]
+            areas_url = f"{GS_BASE_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&propertyName=(id,name,type)&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Etype%3C/PropertyName%3E%3CLiteral%3E{type}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
+            areas_resp = requests.get(areas_url, allow_redirects=True)
+            print(areas_resp.content)
+            areas_json = json.loads(areas_resp.content)
+            all_area_intersects = areas_json['features']
+
+            for ai in range(len(all_area_intersects)):
+                js_list.append(all_area_intersects[ai]['properties'])
+
+        js = json.dumps(js_list)
+
+    if recurse:
+        return js
+
+    # Returns Flask JSON Response
+    return Response(response=js, status=200, mimetype="application/json")
+
+
 @routes.route("/places/<type>")
 def get_json_for_type(type, recurse=False):
     """GET function to pull JSON files
@@ -251,6 +293,8 @@ def get_json_for_type(type, recurse=False):
         # Open JSON file and return to requestor
         with open(jsonpath, "r") as infile:
             js = json.dumps(json.load(infile))
+
+        print(js)
 
     if recurse:
         return js
