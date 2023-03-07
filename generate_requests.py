@@ -109,11 +109,10 @@ def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None):
     Returns:
         netcdf_wcs_getcov_str (str): WCS GetCoverage Request to append to a query URL
     """
-
     (x1, y1, x2, y2) = bbox_bounds
     x = f"{x1},{x2}"
     y = f"{y1},{y2}"
-    netcdf_wcs_getcov_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, "netcdf")
+    netcdf_wcs_getcov_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, encoding="netcdf")
     return netcdf_wcs_getcov_str
 
 

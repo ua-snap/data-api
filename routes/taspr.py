@@ -614,7 +614,7 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
             # otheriwse use generic WCS request str
             x = f"{x1},{x2}"
             y = f"{y1},{y2}"
-            request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, encoding)
+            request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, encoding=encoding)
         urls.append(generate_wcs_query_url(request_str))
 
     start_time = time.time()
