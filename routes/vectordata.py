@@ -12,21 +12,6 @@ from shapely.geometry import Point, box
 # local imports
 from . import routes
 from luts import (
-    json_types,
-    huc8_gdf,
-    akpa_gdf,
-    akco_gdf,
-    aketh_gdf,
-    akclim_gdf,
-    akfire_gdf,
-    akgmu_gdf,
-    cafn_gdf,
-    boro_gdf,
-    akcensus_gdf,
-    proximity_search_radius_m,
-    community_search_radius_m,
-    total_bounds_buffer,
-    shp_di,
     all_jsons,
 )
 from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
@@ -36,51 +21,25 @@ from validate_data import is_di_empty, recursive_rounding
 data_api = Blueprint("data_api", __name__)
 
 
-@routes.route("/places/sarch/<lat>/<lon>")
-def find_via_gs(lat, lon):
-    communities_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_communities&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
-    communities_resp = requests.get(communities_url, allow_redirects=True)
-    communities_json = json.loads(communities_resp.content)
-    all_comm_intersects = communities_json['features']
-
-    proximal_di = dict()
-    proximal_di['communities'] = dict()
-    for i in range(len(all_comm_intersects)):
-        proximal_di['communities'][i] = dict()
-        proximal_di['communities'][i]['alt_name'] = all_comm_intersects[i]['properties']['alt_name']
-        proximal_di['communities'][i]['id'] = all_comm_intersects[i]['properties']['id']
-        proximal_di['communities'][i]['latitude'] = all_comm_intersects[i]['properties']['latitude']
-        proximal_di['communities'][i]['longitude'] = all_comm_intersects[i]['properties']['longitude']
-        proximal_di['communities'][i]['name'] = all_comm_intersects[i]['properties']['name']
-        proximal_di['communities'][i]['type'] = all_comm_intersects[i]['properties']['type']
-
-    areas_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
-    areas_resp = requests.get(areas_url, allow_redirects=True)
-    areas_json = json.loads(areas_resp.content)
-    all_area_intersects = areas_json['features']
-
-    areas_near = {'borough': 'ak_boros_near', 'census_area': 'ak_censusarea_near',
-                  'climate_division': 'climate_divisions_near', 'corporation': 'corporations_near',
-                  'ethnolinguistic_region': 'ethnolinguistic_regions_near', 'fire_zone': 'fire_management_units_near',
-                  'game_management_unit': 'game_management_units_near', 'huc': 'hucs_near',
-                  'protected_area': 'protected_areas_near'}
-
-    for area_type in areas_near.values():
-        proximal_di[area_type] = dict()
-    for ai in range(len(all_area_intersects)):
-        current_area_type = areas_near[all_area_intersects[ai]['properties']['type']]
-        current_index = len(proximal_di[current_area_type])
-        proximal_di[current_area_type][current_index] = dict()
-
-        proximal_di[current_area_type][current_index]['geojson'] = all_area_intersects[ai]['geometry']
-        proximal_di[current_area_type][current_index]['id'] = all_area_intersects[ai]['properties']['id']
-        proximal_di[current_area_type][current_index]['name'] = all_area_intersects[ai]['properties']['name']
-        proximal_di[current_area_type][current_index]['type'] = all_area_intersects[ai]['properties']['type']
-
-    return Response(response=json.dumps(proximal_di), status=200, mimetype="application/json")
-
 @routes.route("/places/search/<lat>/<lon>")
-def find_containing_polygons(lat, lon):
+def find_via_gs(lat, lon):
+    """
+     GET function to search for nearby communities and polygon areas
+     by a supplied latitude and longitude.
+
+    Args:
+        lat (float): latitude of requested point
+        lon (float): longitude of requested point
+
+    Returns:
+        JSON-output of all nearby communities and polygon areas.
+
+    Notes:
+        example: http://localhost:5000/places/search/64.28/-144.28
+    """
+
+    # Validate the latitude and longitude are valid and within the bounding
+    # box of our area of interest.
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -91,210 +50,144 @@ def find_containing_polygons(lat, lon):
             ),
             422,
         )
-    p = create_point_gdf(float(lat), float(lon))
-    p_buff = create_buffered_point_gdf(p, proximity_search_radius_m)
-    p_buff_community = create_buffered_point_gdf(p, community_search_radius_m)
 
-    geo_suggestions = {}
+    # WFS request to Geoserver for all communities.
+    communities_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_communities&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
+    communities_resp = requests.get(communities_url, allow_redirects=True)
+    communities_json = json.loads(communities_resp.content)
+    all_comm_intersects = communities_json["features"]
 
-    proximal_di = {}
-    huc_tb = []
-    try:
-        near_huc_di, huc_tb = fetch_huc_near_point(p_buff)
-        huc_bb = box(*huc_tb)
-        hub_bb = huc_bb.buffer(box(*huc_tb).area * total_bounds_buffer)
-        huc_tb = huc_bb.bounds
-    except ValueError:
-        near_huc_di, huc_bb = {}, box(*[1, 1, 1, 1])
-    try:
-        near_akpa_di, pa_tb = fetch_akpa_near_point(p_buff)
-        pa_bb = box(*pa_tb)
-        pa_bb = pa_bb.buffer(box(*pa_tb).area * total_bounds_buffer)
-        pa_tb = pa_bb.bounds
-    except ValueError:
-        near_akpa_di, pa_bb = {}, box(*[1, 1, 1, 1])
+    # Dictionary containing all the communities and
+    # polygon areas by the end of this function.
+    proximal_di = dict()
+    proximal_di["communities"] = dict()
 
-    try:
-        near_akco_di, co_tb = fetch_akco_near_point(p_buff)
-        co_bb = box(*co_tb)
-        co_bb = co_bb.buffer(box(*co_tb).area * total_bounds_buffer)
-        co_tb = co_bb.bounds
-    except ValueError:
-        near_akco_di, co_bb = {}, box(*[1, 1, 1, 1])
+    # For each returned community, grab its name,
+    # alternate name, id, lat, lon, and type. They are all
+    # found within the properties of the returned JSON.
+    for i in range(len(all_comm_intersects)):
+        proximal_di["communities"][i] = all_comm_intersects[i]["properties"]
 
-    try:
-        near_akclim_di, cd_tb = fetch_akclim_near_point(p_buff)
-        cd_bb = box(*cd_tb)
-        cd_bb = cd_bb.buffer(box(*cd_tb).area * total_bounds_buffer)
-        cd_tb = cd_bb.bounds
-    except ValueError:
-        near_akclim_di, cd_bb = {}, box(*[1, 1, 1, 1])
+    # WFS request to Geoserver for all polygon areas.
+    areas_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
+    areas_resp = requests.get(areas_url, allow_redirects=True)
+    areas_json = json.loads(areas_resp.content)
+    all_area_intersects = areas_json["features"]
 
-    try:
-        near_aketh_di, el_tb = fetch_aketh_near_point(p_buff)
-        el_bb = box(*el_tb)
-        el_bb = el_bb.buffer(box(*el_tb).area * total_bounds_buffer)
-        el_tb = el_bb.bounds
-    except ValueError:
-        near_aketh_di, el_bb = {}, box(*[1, 1, 1, 1])
+    # Look-up table for expected value for the NCR application.
+    # TODO: Change these in NCR so we don't need this LUT.
+    areas_near = {
+        "borough": "ak_boros_near",
+        "census_area": "ak_censusarea_near",
+        "climate_division": "climate_divisions_near",
+        "corporation": "corporations_near",
+        "ethnolinguistic_region": "ethnolinguistic_regions_near",
+        "fire_zone": "fire_management_units_near",
+        "game_management_unit": "game_management_units_near",
+        "huc": "hucs_near",
+        "protected_area": "protected_areas_near",
+    }
 
-    try:
-        near_akfire_di, fm_tb = fetch_akfire_near_point(p_buff)
-        fm_bb = box(*fm_tb)
-        fm_bb = fm_bb.buffer(box(*fm_tb).area * total_bounds_buffer)
-        fm_tb = fm_bb.bounds
-    except ValueError:
-        near_akfire_di, fm_bb = {}, box(*[1, 1, 1, 1])
+    # Create the JSON section for each of the area types.
+    for area_type in areas_near.values():
+        proximal_di[area_type] = dict()
 
-    try:
-        near_akgmu_di, gm_tb = fetch_akgmu_near_point(p_buff)
-        gm_bb = box(*gm_tb)
-        gm_bb = gm_bb.buffer(box(*gm_tb).area * total_bounds_buffer)
-        gm_tb = gm_bb.bounds
-    except ValueError:
-        near_akgmu_di, gm_bb = {}, box(*[1, 1, 1, 1])
+    # For each returned area, place it inside the correct area type.
+    # We want to collect the area's geometry, id, name, and type.
+    for ai in range(len(all_area_intersects)):
+        current_area_type = areas_near[all_area_intersects[ai]["properties"]["type"]]
+        current_index = len(proximal_di[current_area_type])
+        proximal_di[current_area_type][current_index] = dict()
 
-    try:
-        near_cafn_di, fn_tb = fetch_cafn_near_point(p_buff)
-        fn_bb = box(*fn_tb)
-        fn_bb = fn_bb.buffer(box(*fn_tb).area * total_bounds_buffer)
-        fn_tb = fn_bb.bounds
-    except ValueError:
-        near_cafn_di, fn_bb = {}, box(*[1, 1, 1, 1])
+        proximal_di[current_area_type][current_index]["geojson"] = all_area_intersects[
+            ai
+        ]["geometry"]
+        proximal_di[current_area_type][current_index]["id"] = all_area_intersects[ai][
+            "properties"
+        ]["id"]
+        proximal_di[current_area_type][current_index]["name"] = all_area_intersects[ai][
+            "properties"
+        ]["name"]
+        proximal_di[current_area_type][current_index]["type"] = all_area_intersects[ai][
+            "properties"
+        ]["type"]
 
-    try:
-        near_akboro_di, fn_tb = fetch_akboros_near_point(p_buff)
-        fn_bb = box(*fn_tb)
-        fn_bb = fn_bb.buffer(box(*fn_tb).area * total_bounds_buffer)
-        fn_tb = fn_bb.bounds
-    except ValueError:
-        near_akboro_di, fn_bb = {}, box(*[1, 1, 1, 1])
-
-    try:
-        near_akcensus_di, fn_tb = fetch_akcensusareas_near_point(p_buff)
-        fn_bb = box(*fn_tb)
-        fn_bb = fn_bb.buffer(box(*fn_tb).area * total_bounds_buffer)
-        fn_tb = fn_bb.bounds
-    except ValueError:
-        near_akcensus_di, fn_bb = {}, box(*[1, 1, 1, 1])
-
-    df = csv_to4326_gdf("data/csvs/ak_communities.csv")
-    nearby_points_di = package_nearby_points(
-        find_nearest_communities(p_buff_community, df)
+    return Response(
+        response=json.dumps(proximal_di), status=200, mimetype="application/json"
     )
 
-    proximal_di.update(near_huc_di)
-    proximal_di.update(near_akpa_di)
-    proximal_di.update(near_akco_di)
-    proximal_di.update(near_akclim_di)
-    proximal_di.update(near_aketh_di)
-    proximal_di.update(near_akfire_di)
-    proximal_di.update(near_akgmu_di)
-    proximal_di.update(near_cafn_di)
-    proximal_di.update(nearby_points_di)
-    proximal_di.update(near_akcensus_di)
-    proximal_di.update(near_akboro_di)
 
-    geo_suggestions.update(proximal_di)
+@routes.route("/places/<type>")
+def get_json_for_type(type, recurse=False):
+    """
+    GET function to pull JSON files
+       Args:
+           type (string): Any of the below types:
+               [communities, hucs, corporations, climate_divisions,
+                ethnolinguistic_regions, game_management_units, fire_zones,
+                first_nations, boroughs, census_areas, protected_areas, all]
+           recurse (boolean): Defaults to False. Being True
+               causes the function to be recursive to allow for
+               the same function to collect all the possible JSONs.
 
-    empty_di_validation = is_di_empty(geo_suggestions)
-    if empty_di_validation == 404:
-        return geo_suggestions, 404
+       Returns:
+           JSON-formatted output of all communities, HUCs,
+           and / or protected areas.
 
-    bbox_ids = ["xmin", "ymin", "xmax", "ymax"]
-    if huc_bb.area >= pa_bb.area:
-        geo_suggestions["total_bounds"] = dict(zip(bbox_ids, list(huc_tb)))
-    else:
-        geo_suggestions["total_bounds"] = dict(zip(bbox_ids, list(pa_tb)))
-    return recursive_rounding(geo_suggestions.keys(), geo_suggestions.values())
-
-
-@routes.route("/plases/<type>")
-def get_json_for_place(type, recurse=False):
+       Notes:
+           example: http://localhost:5000/places/communities
+    """
     if type == "all":
         json_list = list()
 
+        # Loops through all the different types for search field
         for curr_type in all_jsons:
 
+            # Gets the JSON for the current type
             curr_js = get_json_for_type(curr_type, recurse=True)
 
+            # Adds the returned JSON to a list
             json_list.extend(json.loads(curr_js))
 
+        # Dumps the list of JSON into the returned js object
         js = json.dumps(json_list)
 
     else:
         js_list = list()
         if type == "communities":
+            # Requests the Geoserver WFS URL for gathering all the communities
             communities_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_communities&outputFormat=application%2Fjson&propertyname=(name,alt_name,id,type,latitude,longitude)"
             communities_resp = requests.get(communities_url, allow_redirects=True)
             communities_json = json.loads(communities_resp.content)
-            all_comm_intersects = communities_json['features']
-            for i in range(len(all_comm_intersects)):
-                js_list.append(all_comm_intersects[i]['properties'])
+
+            # Pulls out only the "Features" field, containing all the
+            # properties for the communities
+            all_communities = communities_json["features"]
+
+            # For each feature, put the properties (name, id, etc.) into the
+            # list for creation of a JSON object to be returned.
+            for i in range(len(all_communities)):
+                js_list.append(all_communities[i]["properties"])
         else:
+            # Remove the 's' at the end of the type
             type = type[:-1]
+
+            # Requests the Geoserver WFS URL for gathering all the polygon areas
             areas_url = f"{GS_BASE_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&propertyName=(id,name,type)&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Etype%3C/PropertyName%3E%3CLiteral%3E{type}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
             areas_resp = requests.get(areas_url, allow_redirects=True)
-            print(areas_resp.content)
             areas_json = json.loads(areas_resp.content)
-            all_area_intersects = areas_json['features']
 
-            for ai in range(len(all_area_intersects)):
-                js_list.append(all_area_intersects[ai]['properties'])
+            # Pulls out only the "Features" field, containing all the
+            # properties for the areas
+            all_areas = areas_json["features"]
 
+            # For each feature, put the properties (name, id, type) into the
+            # list for creation of a JSON object to be returned.
+            for ai in range(len(all_areas)):
+                js_list.append(all_areas[ai]["properties"])
+
+        # Creates JSON object from created list
         js = json.dumps(js_list)
-
-    if recurse:
-        return js
-
-    # Returns Flask JSON Response
-    return Response(response=js, status=200, mimetype="application/json")
-
-
-@routes.route("/places/<type>")
-def get_json_for_type(type, recurse=False):
-    """GET function to pull JSON files
-    Args:
-        type (string): One of four types:
-            [communities, hucs, protected_areas, all]
-        recurse (boolean): Defaults to False. Being True
-            causes the function to be recursive to allow for
-            the same function to collect all the possible JSONs.
-
-    Returns:
-        JSON-formatted output of all communities, HUCs,
-        and / or protected areas.
-
-    Notes:
-        example: http://localhost:5000/places/communities
-    """
-    if type == "all":
-        json_list = []
-
-        # Runs through each of the JSON files
-        for curr_type in all_jsons:
-
-            # Sends a recursive call to this function
-            curr_js = get_json_for_type(curr_type, recurse=True)
-
-            # Combines the JSON returned into Python list
-            json_list.extend(json.loads(curr_js))
-
-        # Dumps the combined Python list into a single JSON object
-        js = json.dumps(json_list)
-    else:
-        # Generates path to JSON
-        jsonpath = json_types[type]
-
-        # If the JSON doesn't exist, it needs be generated.
-        if not os.path.exists(jsonpath):
-            update_data()
-
-        # Open JSON file and return to requestor
-        with open(jsonpath, "r") as infile:
-            js = json.dumps(json.load(infile))
-
-        print(js)
 
     if recurse:
         return js
@@ -422,177 +315,3 @@ def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained
     # Dump JSON object to local JSON file, append to the file if it exists
     with open(json_types[poly_type + "s"], "w") as outfile:
         json.dump(output, outfile)
-
-
-def create_point_gdf(lat, lon):
-    p = Point(lon, lat)
-    p_gdf = gpd.GeoDataFrame({"geometry": [p]}, crs=4326)
-    return p_gdf
-
-
-def create_buffered_point_gdf(pt, radius):
-    p_buff = pt.to_crs(3338)
-    p_buff.geometry = p_buff.buffer(radius)
-    return p_buff
-
-
-def execute_spatial_join(left, right, predicate):
-    joined = gpd.sjoin(left, right, how="left", predicate=predicate)
-    return joined
-
-
-def package_polys(poly_key, join, poly_type, gdf, to_wgs=False):
-    di = {}
-    di[poly_key] = {}
-
-    if join.isna().any().any():
-        return di
-    else:
-        f_ids = []
-        for k in range(len(join)):
-            di[poly_key][k] = {}
-            di[poly_key][k]["name"] = join.name.values[k]
-            di[poly_key][k]["type"] = poly_type
-            f_id = join.id.values[k]
-            if to_wgs:
-                geojson = gpd.GeoSeries(gdf.to_crs(4326).loc[f_id].geometry).to_json()
-            else:
-                geojson = gpd.GeoSeries(gdf.loc[f_id].geometry).to_json()
-            di[poly_key][k]["geojson"] = json.loads(geojson)["features"][0]["geometry"]
-            di[poly_key][k]["id"] = f_id
-            f_ids.append(f_id)
-        new_gdf = gdf.loc[gdf.index.isin(f_ids)]
-        tb = new_gdf.to_crs(4326).total_bounds.round(4)
-    return di, tb
-
-
-def package_nearby_points(nearby):
-    di = {}
-    di["communities"] = {}
-    if nearby.isna().all(axis=1).all():
-        return di
-    else:
-        nearby = nearby.replace({np.nan: None})
-        for k in range(len(nearby)):
-            comm_di = nearby.iloc[k].to_dict()
-            comm_di["type"] = "community"
-            di["communities"][k] = comm_di
-    return di
-
-
-def fetch_huc_near_point(pt):
-    join = execute_spatial_join(pt, huc8_gdf.reset_index(), "intersects")
-    di, tb = package_polys("hucs_near", join, "huc", huc8_gdf, to_wgs=True)
-    return di, tb
-
-
-def fetch_akpa_near_point(pt):
-    join = execute_spatial_join(pt, akpa_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "protected_areas_near", join, "protected_area", akpa_gdf, to_wgs=True
-    )
-    return di, tb
-
-
-def fetch_akco_near_point(pt):
-    join = execute_spatial_join(pt, akco_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "corporations_near", join, "corporation", akco_gdf, to_wgs=True
-    )
-    return di, tb
-
-
-def fetch_akclim_near_point(pt):
-    join = execute_spatial_join(pt, akclim_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "climate_divisions_near", join, "climate_division", akclim_gdf, to_wgs=True
-    )
-    return di, tb
-
-
-def fetch_aketh_near_point(pt):
-    join = execute_spatial_join(pt, aketh_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "ethnolinguistic_regions_near",
-        join,
-        "ethnolinguistic_region",
-        aketh_gdf,
-        to_wgs=True,
-    )
-    return di, tb
-
-
-def fetch_akfire_near_point(pt):
-    join = execute_spatial_join(pt, akfire_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "fire_management_units_near", join, "fire_zone", akfire_gdf, to_wgs=True
-    )
-    return di, tb
-
-
-def fetch_akgmu_near_point(pt):
-    join = execute_spatial_join(pt, akgmu_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "game_management_units_near",
-        join,
-        "game_management_unit",
-        akgmu_gdf,
-        to_wgs=True,
-    )
-    return di, tb
-
-
-def fetch_cafn_near_point(pt):
-    join = execute_spatial_join(pt, cafn_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "ca_first_nations_near", join, "first_nation", cafn_gdf, to_wgs=True
-    )
-    return di, tb
-
-
-def fetch_akboros_near_point(pt):
-    join = execute_spatial_join(pt, boro_gdf.reset_index(), "intersects")
-    di, tb = package_polys("ak_boros_near", join, "borough", boro_gdf, to_wgs=True)
-    return di, tb
-
-
-def fetch_akcensusareas_near_point(pt):
-    join = execute_spatial_join(pt, akcensus_gdf.reset_index(), "intersects")
-    di, tb = package_polys(
-        "ak_censusareas_near", join, "census_area", akcensus_gdf, to_wgs=True
-    )
-    return di, tb
-
-
-def read_tabular(raw_file, header_row="infer"):
-    """Read data (*. xls, *.dat, *.csv, etc.) to DataFrame"""
-    if raw_file.split(".")[-1][:2] == "xl":
-        raw_df = pd.read_excel(raw_file, header=header_row)
-    else:
-        raw_df = pd.read_csv(raw_file, header=header_row)
-    return raw_df
-
-
-def create_geometry(df):
-    """Add `geometry` to specify spatial coordinates for point vector data"""
-    df["geometry"] = [Point(xy) for xy in zip(df.longitude, df.latitude)]
-    return df
-
-
-def create_geodataframe(df):
-    """Create GeoDataFrame with WGS 84 Spatial Reference"""
-    gdf = gpd.GeoDataFrame(df, geometry="geometry")
-    gdf.crs = "epsg:4326"
-    return gdf
-
-
-def csv_to4326_gdf(fp):
-    df = create_geodataframe(create_geometry(read_tabular(fp)))
-    return df
-
-
-def find_nearest_communities(pt, df):
-    nearby = gpd.sjoin_nearest(
-        pt.to_crs(3338), df.to_crs(3338), how="inner", max_distance=1
-    )
-    return nearby[["name", "alt_name", "id", "latitude", "longitude"]]
