@@ -9,7 +9,8 @@ import json
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
-from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
+from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX, SEAICE_BBOX
+import requests
 from luts import valid_huc_ids
 
 
@@ -36,6 +37,7 @@ def validate_latlon(lat, lon):
 
     return 422
 
+
 def validate_seaice_latlon(lat, lon):
     """Validate the lat and lon values for pan arctic sea ice.
     Return True if valid or HTTP status code if validation failed
@@ -58,6 +60,7 @@ def validate_seaice_latlon(lat, lon):
             return True
 
     return 422
+
 
 def validate_bbox(lat1, lon1, lat2, lon2):
     """Validate a bounding box given lat lon values
@@ -107,11 +110,12 @@ def validate_year(start_year, end_year):
 def validate_var_id(var_id):
     if re.search("[^A-Za-z0-9]", var_id):
         return render_template("400/bad_request.html"), 400
-    for filename in os.listdir("data/jsons/"):
-        with open(os.path.join("data/jsons/", filename), "r") as f:
-            for jsonline in json.loads(f.read()):
-                if var_id == jsonline["id"]:
-                    return jsonline["type"]
+    var_id_check_url = f"{GS_BASE_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&propertyName=(type)&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Eid%3C/PropertyName%3E%3CLiteral%3E{var_id}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
+    var_id_check_resp = requests.get(var_id_check_url, allow_redirects=True)
+    var_id_check = json.loads(var_id_check_resp.content)
+    print(var_id_check["numberMatched"])
+    if var_id_check["numberMatched"] > 0:
+        return var_id_check["features"][0]["properties"]["type"]
     return render_template("422/invalid_area.html"), 400
 
 
