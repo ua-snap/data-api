@@ -139,6 +139,21 @@ all_jsons = [
     "census_areas",
 ]
 
+# Look-up table for expected value for the NCR application.
+# TODO: Change these in NCR so we don't need this LUT.
+areas_near = {
+    "borough": "ak_boros_near",
+    "census_area": "ak_censusarea_near",
+    "climate_division": "climate_divisions_near",
+    "corporation": "corporations_near",
+    "ethnolinguistic_region": "ethnolinguistic_regions_near",
+    "fire_zone": "fire_management_units_near",
+    "game_management_unit": "game_management_units_near",
+    "first_nation": "ca_first_nations_near",
+    "huc": "hucs_near",
+    "protected_area": "protected_areas_near",
+}
+
 # For the forest endpoint.  This file is just a generated pickle
 # from the `dbf` file that will be downloaded with the .zip that
 # is linked in the documentation page for the point query, including

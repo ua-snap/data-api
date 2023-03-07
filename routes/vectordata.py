@@ -13,10 +13,12 @@ from shapely.geometry import Point, box
 from . import routes
 from luts import (
     all_jsons,
+    areas_near,
 )
 from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from validate_data import is_di_empty, recursive_rounding
+from generate_urls import generate_wfs_search_url, generate_wfs_places_url
 
 data_api = Blueprint("data_api", __name__)
 
@@ -52,10 +54,9 @@ def find_via_gs(lat, lon):
         )
 
     # WFS request to Geoserver for all communities.
-    communities_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_communities&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
-    communities_resp = requests.get(communities_url, allow_redirects=True)
+    communities_resp = requests.get(generate_wfs_search_url('all_boundaries:all_communities', lat, lon), allow_redirects=True)
     communities_json = json.loads(communities_resp.content)
-    all_comm_intersects = communities_json["features"]
+    nearby_communities = communities_json["features"]
 
     # Dictionary containing all the communities and
     # polygon areas by the end of this function.
@@ -65,28 +66,13 @@ def find_via_gs(lat, lon):
     # For each returned community, grab its name,
     # alternate name, id, lat, lon, and type. They are all
     # found within the properties of the returned JSON.
-    for i in range(len(all_comm_intersects)):
-        proximal_di["communities"][i] = all_comm_intersects[i]["properties"]
+    for i in range(len(nearby_communities)):
+        proximal_di["communities"][i] = nearby_communities[i]["properties"]
 
     # WFS request to Geoserver for all polygon areas.
-    areas_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
-    areas_resp = requests.get(areas_url, allow_redirects=True)
+    areas_resp = requests.get(generate_wfs_search_url('all_boundaries:all_areas', lat, lon), allow_redirects=True)
     areas_json = json.loads(areas_resp.content)
-    all_area_intersects = areas_json["features"]
-
-    # Look-up table for expected value for the NCR application.
-    # TODO: Change these in NCR so we don't need this LUT.
-    areas_near = {
-        "borough": "ak_boros_near",
-        "census_area": "ak_censusarea_near",
-        "climate_division": "climate_divisions_near",
-        "corporation": "corporations_near",
-        "ethnolinguistic_region": "ethnolinguistic_regions_near",
-        "fire_zone": "fire_management_units_near",
-        "game_management_unit": "game_management_units_near",
-        "huc": "hucs_near",
-        "protected_area": "protected_areas_near",
-    }
+    nearby_areas = areas_json["features"]
 
     # Create the JSON section for each of the area types.
     for area_type in areas_near.values():
@@ -94,27 +80,32 @@ def find_via_gs(lat, lon):
 
     # For each returned area, place it inside the correct area type.
     # We want to collect the area's geometry, id, name, and type.
-    for ai in range(len(all_area_intersects)):
-        current_area_type = areas_near[all_area_intersects[ai]["properties"]["type"]]
+    for ai in range(len(nearby_areas)):
+        current_area_type = areas_near[nearby_areas[ai]["properties"]["type"]]
         current_index = len(proximal_di[current_area_type])
-        proximal_di[current_area_type][current_index] = dict()
-
-        proximal_di[current_area_type][current_index]["geojson"] = all_area_intersects[
-            ai
-        ]["geometry"]
-        proximal_di[current_area_type][current_index]["id"] = all_area_intersects[ai][
-            "properties"
-        ]["id"]
-        proximal_di[current_area_type][current_index]["name"] = all_area_intersects[ai][
-            "properties"
-        ]["name"]
-        proximal_di[current_area_type][current_index]["type"] = all_area_intersects[ai][
-            "properties"
-        ]["type"]
+        proximal_di[current_area_type][current_index] = gather_nearby_area(nearby_areas[ai])
 
     return Response(
         response=json.dumps(proximal_di), status=200, mimetype="application/json"
     )
+
+
+def gather_nearby_area(nearby_area):
+    """
+    Gather data from the nearby area to be returned for the search interface.
+
+        Args:
+            nearby_area (JSON object): JSON containing metadata about current community.
+
+        Returns:
+            Python dictionary containing the geometry, ID, name and type of the area
+    """
+    curr_di = dict()
+    curr_di["geojson"] = nearby_area["geometry"]
+    curr_di["id"] = nearby_area["properties"]["id"]
+    curr_di["name"] = nearby_area["properties"]["name"]
+    curr_di["type"] = nearby_area["properties"]["type"]
+    return curr_di
 
 
 @routes.route("/places/<type>")
@@ -156,8 +147,7 @@ def get_json_for_type(type, recurse=False):
         js_list = list()
         if type == "communities":
             # Requests the Geoserver WFS URL for gathering all the communities
-            communities_url = f"{GS_BASE_URL}/all_boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries%3Aall_communities&outputFormat=application%2Fjson&propertyname=(name,alt_name,id,type,latitude,longitude)"
-            communities_resp = requests.get(communities_url, allow_redirects=True)
+            communities_resp = requests.get(generate_wfs_places_url("all_boundaries:all_communities", "name,alt_name,id,type,latitude,longitude"), allow_redirects=True)
             communities_json = json.loads(communities_resp.content)
 
             # Pulls out only the "Features" field, containing all the
@@ -173,8 +163,7 @@ def get_json_for_type(type, recurse=False):
             type = type[:-1]
 
             # Requests the Geoserver WFS URL for gathering all the polygon areas
-            areas_url = f"{GS_BASE_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&propertyName=(id,name,type)&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Etype%3C/PropertyName%3E%3CLiteral%3E{type}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
-            areas_resp = requests.get(areas_url, allow_redirects=True)
+            areas_resp = requests.get(generate_wfs_places_url("all_boundaries:all_areas", "id,name,type", "type"), allow_redirects=True)
             areas_json = json.loads(areas_resp.content)
 
             # Pulls out only the "Features" field, containing all the
