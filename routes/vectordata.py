@@ -17,7 +17,6 @@ from luts import (
 )
 from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
-from validate_data import is_di_empty, recursive_rounding
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
 
 data_api = Blueprint("data_api", __name__)
