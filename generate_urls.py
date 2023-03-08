@@ -24,20 +24,25 @@ def generate_base_wfs_url(backend, workspace, lat, lon):
     return wfs_base
 
 
-def generate_wfs_search_url(workspace, lat, lon):
+def generate_wfs_search_url(workspace, lat, lon, hucs_pa_only=False):
     wfs_url = (
-        GS_BASE_URL + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName={workspace}&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
+        GS_BASE_URL
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName={workspace}&outputFormat=application%2Fjson&cql_filter=DWithin(the_geom,%20POINT({lon}%20{lat}),%200.7,%20statute%20miles)"
     )
+    if hucs_pa_only:
+        wfs_url += "AND (type=%27huc%27%20OR%20type=%27protected_area%27)"
     return wfs_url
 
 
 def generate_wfs_places_url(workspace, properties, filter=None):
     wfs_url = (
-            GS_BASE_URL + f"wfs?service=WFS&version=2.0.0&request=GetFeature&typeName={workspace}&outputFormat=application%2Fjson&propertyName=({properties})"
+        GS_BASE_URL
+        + f"wfs?service=WFS&version=2.0.0&request=GetFeature&typeName={workspace}&outputFormat=application%2Fjson&propertyName=({properties})"
     )
     if filter:
         wfs_url += f"&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Etype%3C/PropertyName%3E%3CLiteral%3E{filter}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
     return wfs_url
+
 
 def generate_wcs_query_url(request_str, backend=RAS_BASE_URL):
     """Make a WCS URL by plugging a request substring into a base WCS URL.

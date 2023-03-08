@@ -53,8 +53,13 @@ def find_via_gs(lat, lon):
             422,
         )
 
+    total_bounds = [-180, 0, 0, 90]
+
     # WFS request to Geoserver for all communities.
-    communities_resp = requests.get(generate_wfs_search_url('all_boundaries:all_communities', lat, lon), allow_redirects=True)
+    communities_resp = requests.get(
+        generate_wfs_search_url("all_boundaries:all_communities", lat, lon),
+        allow_redirects=True,
+    )
     communities_json = json.loads(communities_resp.content)
     nearby_communities = communities_json["features"]
 
@@ -70,7 +75,10 @@ def find_via_gs(lat, lon):
         proximal_di["communities"][i] = nearby_communities[i]["properties"]
 
     # WFS request to Geoserver for all polygon areas.
-    areas_resp = requests.get(generate_wfs_search_url('all_boundaries:all_areas', lat, lon), allow_redirects=True)
+    areas_resp = requests.get(
+        generate_wfs_search_url("all_boundaries:all_areas", lat, lon),
+        allow_redirects=True,
+    )
     areas_json = json.loads(areas_resp.content)
     nearby_areas = areas_json["features"]
 
@@ -83,11 +91,82 @@ def find_via_gs(lat, lon):
     for ai in range(len(nearby_areas)):
         current_area_type = areas_near[nearby_areas[ai]["properties"]["type"]]
         current_index = len(proximal_di[current_area_type])
-        proximal_di[current_area_type][current_index] = gather_nearby_area(nearby_areas[ai])
+        proximal_di[current_area_type][current_index] = gather_nearby_area(
+            nearby_areas[ai]
+        )
+
+    # Check to see if any communities were found around the point chosen
+    communities_found = (
+        nearby_communities if communities_json["numberMatched"] > 0 else False
+    )
+
+    # Get the total bounds for the communities, HUCs, and protected areas only
+    total_bounds = get_total_bounds(lat, lon, communities_found)
+
+    # Bounding box keys
+    bbox_ids = ["xmin", "ymin", "xmax", "ymax"]
+
+    # Generates bounding box from keys above and the values of the total_bounds
+    proximal_di["total_bounds"] = dict(zip(bbox_ids, list(total_bounds)))
 
     return Response(
         response=json.dumps(proximal_di), status=200, mimetype="application/json"
     )
+
+
+def get_total_bounds(lat, lon, communities=False):
+    """
+    Generates the total bounds of the returned data from a search, but only for
+    communities, HUC8s, and protected areas.
+
+    Args:
+        lat (float): latitude of requested point
+        lon (float): longitude of requested point
+        communities: Either the JSON response containing all communities nearby or False
+
+    Returns:
+        Bounding box for AOI for all communities, HUC8s, and protected areas nearby the
+        selected latitude and longitude.
+
+        Returns as Python list with order [xmin, ymin, xmax, ymax]
+    """
+
+    # Request the nearby HUCs and protected areas only
+    hucs_pa_resp = requests.get(
+        generate_wfs_search_url("all_boundaries:all_areas", lat, lon, True),
+        allow_redirects=True,
+    )
+
+    # From the JSON returned, pull out the features
+    hucs_pa_json = json.loads(hucs_pa_resp.content)
+    nearby_hucs_pa = hucs_pa_json["features"]
+
+    # Create a GeoPandas GeoDataFrame from the nearby HUCs and protected areas
+    areas_gdf = gpd.GeoDataFrame.from_features(nearby_hucs_pa)
+
+    # If there were any nearby communities, we want to ensure our
+    # bounding box includes them.
+    if communities:
+        # Create a GeoPandas GeoDataFrame from the communities
+        communities_gdf = gpd.GeoDataFrame.from_features(communities)
+
+        # Gather the maximum of the total bounds from communities, HUCs, and protected areas
+        total_bounds = np.maximum(communities_gdf.total_bounds, areas_gdf.total_bounds)
+
+        # The most western longitudinal coordinate and the most southern
+        # latitudinal coordinate must be the minimums.
+        total_bounds[0] = np.minimum(
+            communities_gdf.total_bounds[0], areas_gdf.total_bounds[0]
+        )
+        total_bounds[1] = np.minimum(
+            communities_gdf.total_bounds[1], areas_gdf.total_bounds[1]
+        )
+    else:
+        # If no communities are returned from the search, the HUCs and protected areas
+        # bounding box should be used.
+        total_bounds = areas_gdf.total_bounds
+
+    return total_bounds
 
 
 def gather_nearby_area(nearby_area):
@@ -147,7 +226,13 @@ def get_json_for_type(type, recurse=False):
         js_list = list()
         if type == "communities":
             # Requests the Geoserver WFS URL for gathering all the communities
-            communities_resp = requests.get(generate_wfs_places_url("all_boundaries:all_communities", "name,alt_name,id,type,latitude,longitude"), allow_redirects=True)
+            communities_resp = requests.get(
+                generate_wfs_places_url(
+                    "all_boundaries:all_communities",
+                    "name,alt_name,id,type,latitude,longitude",
+                ),
+                allow_redirects=True,
+            )
             communities_json = json.loads(communities_resp.content)
 
             # Pulls out only the "Features" field, containing all the
@@ -163,7 +248,12 @@ def get_json_for_type(type, recurse=False):
             type = type[:-1]
 
             # Requests the Geoserver WFS URL for gathering all the polygon areas
-            areas_resp = requests.get(generate_wfs_places_url("all_boundaries:all_areas", "id,name,type", "type"), allow_redirects=True)
+            areas_resp = requests.get(
+                generate_wfs_places_url(
+                    "all_boundaries:all_areas", "id,name,type", "type"
+                ),
+                allow_redirects=True,
+            )
             areas_json = json.loads(areas_resp.content)
 
             # Pulls out only the "Features" field, containing all the
