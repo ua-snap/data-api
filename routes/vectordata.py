@@ -52,8 +52,6 @@ def find_via_gs(lat, lon):
             422,
         )
 
-    total_bounds = [-180, 0, 0, 90]
-
     # WFS request to Geoserver for all communities.
     communities_resp = requests.get(
         generate_wfs_search_url("all_boundaries:all_communities", lat, lon),
