@@ -12,6 +12,8 @@ from shapely.geometry import Point, box
 # local imports
 from . import routes
 from luts import (
+    json_types,
+    shp_di,
     all_jsons,
     areas_near,
 )
@@ -247,7 +249,7 @@ def get_json_for_type(type, recurse=False):
             # Requests the Geoserver WFS URL for gathering all the polygon areas
             areas_resp = requests.get(
                 generate_wfs_places_url(
-                    "all_boundaries:all_areas", "id,name,type", "type"
+                    "all_boundaries:all_areas", "id,name,type", type
                 ),
                 allow_redirects=True,
             )
