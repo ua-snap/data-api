@@ -167,6 +167,9 @@ try:
     huc8_src = "data/shapefiles/ak_huc8s.shp"
     huc8_gdf = gpd.read_file(huc8_src).set_index("id").to_crs(3338)
 
+    huc10_src = "data/shapefiles/ak_huc10s.shp"
+    huc10_gdf = gpd.read_file(huc10_src).set_index("id").to_crs(3338)
+
     # HUC-12
     huc12_src = "data/shapefiles/ak_huc12s.shp"
     huc12_gdf = gpd.read_file(huc12_src).set_index("id").to_crs(3338)
@@ -213,8 +216,10 @@ try:
     ).set_index("id")
     valid_huc_ids = huc_gdf.index.values
 
+    hucs_gdf = pd.concat([huc8_gdf.reset_index(), huc10_gdf.reset_index()], ignore_index=True).set_index("id")
+
     type_di = dict()
-    type_di["huc"] = huc8_gdf
+    type_di["huc"] = hucs_gdf
     type_di["huc12"] = huc12_gdf
     type_di["protected_area"] = akpa_gdf
     type_di["corporation"] = akco_gdf
