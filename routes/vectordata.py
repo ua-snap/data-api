@@ -12,7 +12,7 @@ from shapely.geometry import Point, box
 # local imports
 from . import routes
 from luts import (
-    json_types,
+    shp_types,
     shp_di,
     all_jsons,
     areas_near,
@@ -297,33 +297,16 @@ def update_json_data():
 
 
 def update_data():
-    """Downloads AOI CSV and shapefiles and converts to JSON format
+    """Downloads AOI shapefiles from Geoserver WFS request for all areas
 
     Args:
         None.
 
     Returns:
         Boolean value indicating success or failure to update datasets.
-        The underlying code updates all the communities, HUCs, and
-        protected areas in Alaska.
+        The underlying code updates all the polygonal areas as local shapefiles
+        for rapid start-up of API and generation of GeoPanda GeoDataFrames.
     """
-    ### Community Locations ###
-
-    # Ensure the path to store CSVs is created
-    path = "data/csvs/"
-    # if not os.path.exists(path):
-    #     os.makedirs(path)
-    # else:
-    #     shutil.rmtree(path)
-    #     os.makedirs(path)
-    #
-    # # Ensure the path to store JSONs is created
-    jsonpath = "data/jsons/"
-    if not os.path.exists(jsonpath):
-        os.makedirs(jsonpath)
-    else:
-        shutil.rmtree(jsonpath)
-        os.makedirs(jsonpath)
 
     # Ensure the path to store shapefiles is created
     shppath = "data/shapefiles/"
@@ -333,58 +316,47 @@ def update_data():
         shutil.rmtree(shppath)
         os.makedirs(shppath)
 
-    wfs_url = (
-        GS_BASE_URL
-        + f"wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries:all_areas&outputFormat=application%2Fjson"
-    )
+    crs = "EPSG:4326"
 
+    # Requests all polygons that make up all areas in the state of Alaska
     areas_resp = requests.get(
-        wfs_url,
+        generate_wfs_places_url("all_boundaries:all_areas"),
         allow_redirects=True,
     )
     all_areas = json.loads(areas_resp.content)["features"]
-    areas_gdf = gpd.GeoDataFrame.from_features(all_areas)
-    # areas_gdf = areas_gdf.drop(columns=["geometry", "alt_name"])
-    # areas_gdf = areas_gdf.loc[areas_gdf['type'] != 'protected_area'].drop(columns=["area_type"])
 
-    # Download CSV for all Alaskan communities and write to local CSV file.
-    # url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
-    # r = requests.get(url, allow_redirects=True)
-    # open(f"{path}ak_communities.csv", "wb").write(r.content)
-    #
-    # # Open CSV file into Pandas data frame
-    # df = pd.read_csv(f"{path}ak_communities.csv")
-    #
-    # # Add type of community to each community
-    # df["type"] = "community"
-    #
-    # # Dump data frame to JSON file
-    # df.to_json(json_types["communities"], orient="records")
+    # Creates a GeoDataFrame from all the features returned from GeoServer
+    areas_gdf = gpd.GeoDataFrame.from_features(all_areas)
 
     for k in shp_di.keys():
+        # If the key is for Alaska HUC12 polygons, we need to download the
+        # remote shapefile as it has not been imported into GS.
+        if k == "akhuc12s":
+            download_shapefiles_from_repo(
+                shp_di["akhuc12s"]["src_dir"], shp_di["akhuc12s"]["prefix"]
+            )
+            continue
 
-        curr_gdf = areas_gdf.loc[areas_gdf['type'] == shp_di[k]['poly_type']]
+        # Pulls out any fields from the GeoDataFrame that are not relevant to
+        # the 'type' of area in the data.
+        curr_gdf = areas_gdf.loc[areas_gdf["type"] == shp_di[k]["poly_type"]]
         remove_columns = ["alt_name", "area_type"]
-        if 'retain' in shp_di[k]:
-            myindex = remove_columns.index(shp_di[k]['retain'])
-            remove_columns.pop(myindex)
+
+        # If the shapefile dictionary has a retain section, it removes the
+        # field not to be deleted from the 'remove_columns' list.
+        if "retain" in shp_di[k]:
+            retain_index = remove_columns.index(shp_di[k]["retain"])
+            remove_columns.pop(retain_index)
         curr_gdf = curr_gdf.drop(columns=remove_columns)
 
-        curr_gdf.to_file(json_types[shp_di[k]['poly_type'] + "s"], driver='GeoJSON', encoding='utf-8')
-        #curr_json = curr_gdf.to_json(orient='records')
-
-    # download_shapefiles_from_repo(shp_di["akhuc12s"]["src_dir"], shp_di["akhuc12s"]["prefix"])
-    # generate_minimal_json_from_shapefile(
-    #     shp_di["akhuc12s"]["prefix"], shp_di["akhuc12s"]["poly_type"], shp_di["akhuc12s"]["retain"]
-    # )
-        #with open(json_types[shp_di[k]['poly_type'] + "s"], 'w', encoding='utf-8') as f:
-        #    f.write(curr_json)
-        #areas_gdf.loc[areas_gdf['type'] == shp_di[k]['poly_type']].to_json(f"data/jsons/{k}.json", orient='records')
-        # areas_gdf.to_json(f"/data/jsons/{k}.json")
-        # download_shapefiles_from_repo(shp_di[k]["src_dir"], shp_di[k]["prefix"])
-        # generate_minimal_json_from_shapefile(
-        #     shp_di[k]["prefix"], shp_di[k]["poly_type"], shp_di[k]["retain"]
-        # )
+        # Writes the GDF to a local shapefile for rapid restarts of the
+        # server when we don't need to update from GeoServer.
+        curr_gdf.to_file(
+            shp_types[shp_di[k]["poly_type"] + "s"],
+            driver="ESRI Shapefile",
+            crs=crs,
+            encoding="utf-8",
+        )
 
 
 def download_shapefiles_from_repo(target_dir, file_prefix):
@@ -397,32 +369,3 @@ def download_shapefiles_from_repo(target_dir, file_prefix):
             open(f"{path}{file_prefix}.{filetype}", "wb").write(r.content)
         except:
             return 404
-
-
-def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained):
-    path = "data/shapefiles/"
-    # Read shapefile into Geopandas data frame
-    df = gpd.read_file(f"{path}{file_prefix}.shp")
-
-    # Create a copy of the original data frame
-    to_retain = ["id", "name"] + fields_retained
-
-    x = df[to_retain].copy()
-
-    # Create a new Pandas data frame from modified data.
-    z = pd.DataFrame(x)
-
-    # Create JSON data from Pandas data frame.
-    shp_json = json.loads(z.T.to_json(orient="columns"))
-
-    # Create a blank output list for appending JSON fields.
-    output = []
-
-    # For each feature in the JSON, add the "type" of the feature e.g. protected_area and append it to the output list.
-    for key in shp_json:
-        shp_json[key]["type"] = poly_type
-        output.append(shp_json[key])
-
-    # Dump JSON object to local JSON file, append to the file if it exists
-    with open(json_types[poly_type + "s"], "w") as outfile:
-        json.dump(output, outfile)

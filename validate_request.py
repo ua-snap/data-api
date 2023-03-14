@@ -113,7 +113,7 @@ def validate_var_id(var_id):
     var_id_check_url = f"{GS_BASE_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&propertyName=(type)&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Eid%3C/PropertyName%3E%3CLiteral%3E{var_id}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
     var_id_check_resp = requests.get(var_id_check_url, allow_redirects=True)
     var_id_check = json.loads(var_id_check_resp.content)
-    print(var_id_check["numberMatched"])
+
     if var_id_check["numberMatched"] > 0:
         return var_id_check["features"][0]["properties"]["type"]
     return render_template("422/invalid_area.html"), 400

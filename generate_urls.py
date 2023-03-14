@@ -34,11 +34,13 @@ def generate_wfs_search_url(workspace, lat, lon, hucs_pa_only=False):
     return wfs_url
 
 
-def generate_wfs_places_url(workspace, properties, filter=None):
+def generate_wfs_places_url(workspace, properties=None, filter=None):
     wfs_url = (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=2.0.0&request=GetFeature&typeName={workspace}&outputFormat=application%2Fjson&propertyName=({properties})"
+        + f"wfs?service=WFS&version=2.0.0&request=GetFeature&typeName={workspace}&outputFormat=application%2Fjson"
     )
+    if properties:
+        wfs_url += f"& propertyName = ({properties})"
     if filter:
         wfs_url += f"&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Etype%3C/PropertyName%3E%3CLiteral%3E{filter}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
     return wfs_url

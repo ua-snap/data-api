@@ -93,6 +93,21 @@ json_types = {
     "game_management_units": "data/jsons/game_management_units.json",
 }
 
+shp_types = {
+    "communities": "data/shapefiles/ak_communities.shp",
+    "boroughs": "data/shapefiles/ak_boroughs.shp",
+    "census_areas": "data/shapefiles/ak_census_areas.shp",
+    "hucs": "data/shapefiles/ak_hucs.shp",
+    "huc12s": "data/shapefiles/ak_huc12s.shp",
+    "protected_areas": "data/shapefiles/ak_protected_areas.shp",
+    "fire_zones": "data/shapefiles/ak_fire_mgmt_zones.shp",
+    "corporations": "data/shapefiles/ak_native_corporations.shp",
+    "climate_divisions": "data/shapefiles/ak_climate_divisions.shp",
+    "ethnolinguistic_regions": "data/shapefiles/ethnolinguistic_regions.shp",
+    "first_nations": "data/shapefiles/canada_first_nations.shp",
+    "game_management_units": "data/shapefiles/game_management_units.shp",
+}
+
 place_type_labels = {
     "huc8s": "HUC",
     "protected_areas": "Protected Area",
@@ -163,58 +178,50 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
 
 try:
     # Below Polygons can be imported by various endpoints
-    # HUC-8 # note these are native WGS84 in the #geo-vector repo
-    hucs_src = "data/jsons/ak_hucs.json"
-    hucs_gdf = gpd.read_file(hucs_src).set_index("id").to_crs(3338)
+    # HUC-8 & HUC-10
+    hucs_gdf = gpd.read_file(shp_types["hucs"]).set_index("id").to_crs(3338)
 
-    print("HUCS")
     # HUC-12
-    huc12_src = "data/shapefiles/ak_huc12s.shp"
-    huc12_gdf = gpd.read_file(huc12_src).set_index("id").to_crs(3338)
-    print("HUCS12")
+    huc12_gdf = gpd.read_file(shp_types["huc12s"]).set_index("id").to_crs(3338)
+
     # AK Protected Areas
-    akpa_src = "data/jsons/ak_protected_areas.json"
-    with fiona.open(akpa_src) as src:
-        akpa_gdf = gpd.GeoDataFrame.from_features(src).set_index("id").to_crs(3338)
-    print("Protected Area")
+    akpa_gdf = gpd.read_file(shp_types["protected_areas"]).set_index("id").to_crs(3338)
+
     # AK Fire Management Zones
-    akfire_src = "data/jsons/ak_fire_mgmt_zones.json"
-    akfire_gdf = gpd.read_file(akfire_src).set_index("id").to_crs(3338)
-    print("Fire")
+    akfire_gdf = gpd.read_file(shp_types["fire_zones"]).set_index("id").to_crs(3338)
+
     # AK Corporations
-    akco_src = "data/jsons/ak_native_corporations.json"
-    akco_gdf = gpd.read_file(akco_src).set_index("id").to_crs(3338)
-    print("Corp")
+    akco_gdf = gpd.read_file(shp_types["corporations"]).set_index("id").to_crs(3338)
+
     # AK Climate Divisions
-    akclim_src = "data/jsons/ak_climate_divisions.json"
-    akclim_gdf = gpd.read_file(akclim_src).set_index("id").to_crs(3338)
-    print("Climate")
+    akclim_gdf = (
+        gpd.read_file(shp_types["climate_divisions"]).set_index("id").to_crs(3338)
+    )
+
     # Ethnolinguistic Regions
-    aketh_src = "data/jsons/ethnolinguistic_regions.json"
-    aketh_gdf = gpd.read_file(aketh_src).set_index("id").to_crs(3338)
-    print("Eth")
+    aketh_gdf = (
+        gpd.read_file(shp_types["ethnolinguistic_regions"]).set_index("id").to_crs(3338)
+    )
+
     # AK Game Management Units
-    akgmu_src = "data/jsons/game_management_units.json"
-    akgmu_gdf = gpd.read_file(akgmu_src).set_index("id").to_crs(3338)
-    print("GMU")
+    akgmu_gdf = (
+        gpd.read_file(shp_types["game_management_units"]).set_index("id").to_crs(3338)
+    )
+
     # Canadian First Nations
-    cafn_src = "data/jsons/canada_first_nations.json"
-    cafn_gdf = gpd.read_file(cafn_src).set_index("id").to_crs(3338)
-    print("CAFN")
+    cafn_gdf = gpd.read_file(shp_types["first_nations"]).set_index("id").to_crs(3338)
+
     # Alaska Boroughs
-    boro_src = "data/jsons/ak_boroughs.json"
-    boro_gdf = gpd.read_file(boro_src).set_index("id").to_crs(3338)
-    print("Boro")
+    boro_gdf = gpd.read_file(shp_types["boroughs"]).set_index("id").to_crs(3338)
+
     # Unorganized Borough Census Areas
-    akcensus_src = "data/jsons/ak_census_areas.json"
-    akcensus_gdf = gpd.read_file(akcensus_src).set_index("id").to_crs(3338)
-    print("Census")
+    akcensus_gdf = gpd.read_file(shp_types["census_areas"]).set_index("id").to_crs(3338)
+
     # join HUCs into same GeoDataFrame for easier lookup
     huc_gdf = pd.concat(
         [hucs_gdf.reset_index(), huc12_gdf.reset_index()], ignore_index=True
     ).set_index("id")
     valid_huc_ids = huc_gdf.index.values
-
 
     type_di = dict()
     type_di["huc"] = hucs_gdf
@@ -233,12 +240,11 @@ try:
 except fiona.errors.DriverError:
     # if this fails, give placeholders until all data can
     # be updated from vectordata.py
-    print("It needs to update?")
     update_needed = True
     (
         huc8_gdf,
         huc12_gdf,
-        # akpa_gdf,
+        akpa_gdf,
         akfire_gdf,
         akco_gdf,
         akclim_gdf,
@@ -259,12 +265,12 @@ shp_di["akhucs"] = {
     "prefix": "ak_hucs",
     "poly_type": "huc",
 }
-# shp_di["akhuc12s"] = {
-#     "src_dir": "alaska_hucs",
-#     "prefix": "ak_huc12s",
-#     "poly_type": "huc12",
-#     "retain": [],
-# }
+shp_di["akhuc12s"] = {
+    "src_dir": "alaska_hucs",
+    "prefix": "ak_huc12s",
+    "poly_type": "huc12",
+    "retain": [],
+}
 shp_di["ak_pa"] = {
     "src_dir": "protected_areas/ak_protected_areas",
     "prefix": "ak_protected_areas",
