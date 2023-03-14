@@ -311,13 +311,13 @@ def update_data():
 
     # Ensure the path to store CSVs is created
     path = "data/csvs/"
-    if not os.path.exists(path):
-        os.makedirs(path)
-    else:
-        shutil.rmtree(path)
-        os.makedirs(path)
-
-    # Ensure the path to store JSONs is created
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
+    # else:
+    #     shutil.rmtree(path)
+    #     os.makedirs(path)
+    #
+    # # Ensure the path to store JSONs is created
     jsonpath = "data/jsons/"
     if not os.path.exists(jsonpath):
         os.makedirs(jsonpath)
@@ -333,25 +333,58 @@ def update_data():
         shutil.rmtree(shppath)
         os.makedirs(shppath)
 
+    wfs_url = (
+        GS_BASE_URL
+        + f"wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries:all_areas&outputFormat=application%2Fjson"
+    )
+
+    areas_resp = requests.get(
+        wfs_url,
+        allow_redirects=True,
+    )
+    all_areas = json.loads(areas_resp.content)["features"]
+    areas_gdf = gpd.GeoDataFrame.from_features(all_areas)
+    # areas_gdf = areas_gdf.drop(columns=["geometry", "alt_name"])
+    # areas_gdf = areas_gdf.loc[areas_gdf['type'] != 'protected_area'].drop(columns=["area_type"])
+
     # Download CSV for all Alaskan communities and write to local CSV file.
-    url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
-    r = requests.get(url, allow_redirects=True)
-    open(f"{path}ak_communities.csv", "wb").write(r.content)
-
-    # Open CSV file into Pandas data frame
-    df = pd.read_csv(f"{path}ak_communities.csv")
-
-    # Add type of community to each community
-    df["type"] = "community"
-
-    # Dump data frame to JSON file
-    df.to_json(json_types["communities"], orient="records")
+    # url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
+    # r = requests.get(url, allow_redirects=True)
+    # open(f"{path}ak_communities.csv", "wb").write(r.content)
+    #
+    # # Open CSV file into Pandas data frame
+    # df = pd.read_csv(f"{path}ak_communities.csv")
+    #
+    # # Add type of community to each community
+    # df["type"] = "community"
+    #
+    # # Dump data frame to JSON file
+    # df.to_json(json_types["communities"], orient="records")
 
     for k in shp_di.keys():
-        download_shapefiles_from_repo(shp_di[k]["src_dir"], shp_di[k]["prefix"])
-        generate_minimal_json_from_shapefile(
-            shp_di[k]["prefix"], shp_di[k]["poly_type"], shp_di[k]["retain"]
-        )
+
+        curr_gdf = areas_gdf.loc[areas_gdf['type'] == shp_di[k]['poly_type']]
+        remove_columns = ["alt_name", "area_type"]
+        if 'retain' in shp_di[k]:
+            myindex = remove_columns.index(shp_di[k]['retain'])
+            remove_columns.pop(myindex)
+        curr_gdf = curr_gdf.drop(columns=remove_columns)
+
+        curr_gdf.to_file(json_types[shp_di[k]['poly_type'] + "s"], driver='GeoJSON', encoding='utf-8')
+        #curr_json = curr_gdf.to_json(orient='records')
+
+    # download_shapefiles_from_repo(shp_di["akhuc12s"]["src_dir"], shp_di["akhuc12s"]["prefix"])
+    # generate_minimal_json_from_shapefile(
+    #     shp_di["akhuc12s"]["prefix"], shp_di["akhuc12s"]["poly_type"], shp_di["akhuc12s"]["retain"]
+    # )
+        #with open(json_types[shp_di[k]['poly_type'] + "s"], 'w', encoding='utf-8') as f:
+        #    f.write(curr_json)
+        #areas_gdf.loc[areas_gdf['type'] == shp_di[k]['poly_type']].to_json(f"data/jsons/{k}.json", orient='records')
+        # areas_gdf.to_json(f"/data/jsons/{k}.json")
+        # download_shapefiles_from_repo(shp_di[k]["src_dir"], shp_di[k]["prefix"])
+        # generate_minimal_json_from_shapefile(
+        #     shp_di[k]["prefix"], shp_di[k]["poly_type"], shp_di[k]["retain"]
+        # )
 
 
 def download_shapefiles_from_repo(target_dir, file_prefix):
