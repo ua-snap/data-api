@@ -116,6 +116,11 @@ def validate_var_id(var_id):
 
     if var_id_check["numberMatched"] > 0:
         return var_id_check["features"][0]["properties"]["type"]
+    elif var_id in valid_huc_ids:
+        if len(var_id) > 10:
+            return "huc12"
+        return "huc"
+
     return render_template("422/invalid_area.html"), 400
 
 
