@@ -9,11 +9,6 @@ host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
 bbox_offset = 0.000000001
 
-# constants used in vectordata.py to search for named locations
-proximity_search_radius_m = (10 ** 5) / 2
-community_search_radius_m = 50000
-total_bounds_buffer = 0.05
-
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
     1: {"type": "Temperate or sub-polar needleleaf forest", "color": "#003d00"},
@@ -162,157 +157,22 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
 
 try:
-    # Below Polygons can be imported by various endpoints
-    # HUC-8 # note these are native WGS84 in the #geo-vector repo
-    huc8_src = "data/shapefiles/ak_huc8s.shp"
-    huc8_gdf = gpd.read_file(huc8_src).set_index("id").to_crs(3338)
-
     # HUC-12
     huc12_src = "data/shapefiles/ak_huc12s.shp"
     huc12_gdf = gpd.read_file(huc12_src).set_index("id").to_crs(3338)
-
-    # AK Protected Areas
-    akpa_src = "data/shapefiles/ak_protected_areas.shp"
-    akpa_gdf = gpd.read_file(akpa_src).set_index("id").to_crs(3338)
-
-    # AK Fire Management Zones
-    akfire_src = "data/shapefiles/ak_fire_management.shp"
-    akfire_gdf = gpd.read_file(akfire_src).set_index("id").to_crs(3338)
-
-    # AK Corporations
-    akco_src = "data/shapefiles/ak_native_corporations.shp"
-    akco_gdf = gpd.read_file(akco_src).set_index("id").to_crs(3338)
-
-    # AK Climate Divisions
-    akclim_src = "data/shapefiles/ak_climate_divisions.shp"
-    akclim_gdf = gpd.read_file(akclim_src).set_index("id").to_crs(3338)
-
-    # Ethnolinguistic Regions
-    aketh_src = "data/shapefiles/ethnolinguistic_regions.shp"
-    aketh_gdf = gpd.read_file(aketh_src).set_index("id").to_crs(3338)
-
-    # AK Game Management Units
-    akgmu_src = "data/shapefiles/ak_gmu.shp"
-    akgmu_gdf = gpd.read_file(akgmu_src).set_index("id").to_crs(3338)
-
-    # Canadian First Nations
-    cafn_src = "data/shapefiles/first_nation_traditional_territories.shp"
-    cafn_gdf = gpd.read_file(cafn_src).set_index("id").to_crs(3338)
-
-    # Alaska Boroughs
-    boro_src = "data/shapefiles/ak_boroughs.shp"
-    boro_gdf = gpd.read_file(boro_src).set_index("id").to_crs(3338)
-
-    # Unorganized Borough Census Areas
-    akcensus_src = "data/shapefiles/ak_census_areas.shp"
-    akcensus_gdf = gpd.read_file(akcensus_src).set_index("id").to_crs(3338)
-
-    # join HUCs into same GeoDataFrame for easier lookup
-    huc_gdf = pd.concat(
-        [huc8_gdf.reset_index(), huc12_gdf.reset_index()], ignore_index=True
-    ).set_index("id")
-    valid_huc_ids = huc_gdf.index.values
-
-    type_di = dict()
-    type_di["huc"] = huc8_gdf
-    type_di["huc12"] = huc12_gdf
-    type_di["protected_area"] = akpa_gdf
-    type_di["corporation"] = akco_gdf
-    type_di["climate_division"] = akclim_gdf
-    type_di["ethnolinguistic_region"] = aketh_gdf
-    type_di["fire_zone"] = akfire_gdf
-    type_di["game_management_unit"] = akgmu_gdf
-    type_di["first_nation"] = cafn_gdf
-    type_di["borough"] = boro_gdf
-    type_di["census_area"] = akcensus_gdf
 
     update_needed = False
 except fiona.errors.DriverError:
     # if this fails, give placeholders until all data can
     # be updated from vectordata.py
     update_needed = True
-    (
-        huc8_gdf,
-        huc12_gdf,
-        akpa_gdf,
-        akfire_gdf,
-        akco_gdf,
-        akclim_gdf,
-        aketh_gdf,
-        akgmu_gdf,
-        cafn_gdf,
-        huc_gdf,
-        boro_gdf,
-        akcensus_gdf,
-        valid_huc_ids,
-    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    type_di = dict()
+    huc12_gdf = 0
 
 # look-up for updating place names and data via geo-vector GitHub repo
-shp_di = {}
-shp_di["akhuc8s"] = {
-    "src_dir": "alaska_hucs",
-    "prefix": "ak_huc8s",
-    "poly_type": "huc",
-    "retain": ["states"],
-}
+shp_di = dict()
 shp_di["akhuc12s"] = {
     "src_dir": "alaska_hucs",
     "prefix": "ak_huc12s",
     "poly_type": "huc12",
     "retain": ["states"],
-}
-shp_di["ak_pa"] = {
-    "src_dir": "protected_areas/ak_protected_areas",
-    "prefix": "ak_protected_areas",
-    "poly_type": "protected_area",
-    "retain": ["area_type"],
-}
-shp_di["akfire"] = {
-    "src_dir": "fire",
-    "prefix": "ak_fire_management",
-    "poly_type": "fire_zone",
-    "retain": ["agency"],
-}
-shp_di["akcorps"] = {
-    "src_dir": "corporation",
-    "prefix": "ak_native_corporations",
-    "poly_type": "corporation",
-    "retain": [],
-}
-shp_di["akethno"] = {
-    "src_dir": "ethnolinguistic",
-    "prefix": "ethnolinguistic_regions",
-    "poly_type": "ethnolinguistic_region",
-    "retain": ["alt_name"],
-}
-shp_di["akclimdivs"] = {
-    "src_dir": "climate_divisions",
-    "prefix": "ak_climate_divisions",
-    "poly_type": "climate_division",
-    "retain": [],
-}
-shp_di["akgmus"] = {
-    "src_dir": "game_management_units",
-    "prefix": "ak_gmu",
-    "poly_type": "game_management_unit",
-    "retain": [],
-}
-shp_di["cnfns"] = {
-    "src_dir": "first_nations",
-    "prefix": "first_nation_traditional_territories",
-    "poly_type": "first_nation",
-    "retain": [],
-}
-shp_di["akboros"] = {
-    "src_dir": "boroughs",
-    "prefix": "ak_boroughs",
-    "poly_type": "borough",
-    "retain": [],
-}
-shp_di["akcensusareas"] = {
-    "src_dir": "census_areas",
-    "prefix": "ak_census_areas",
-    "poly_type": "census_area",
-    "retain": [],
 }

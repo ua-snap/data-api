@@ -16,7 +16,6 @@ from validate_request import (
 )
 from validate_data import get_poly_3338_bbox, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import type_di
 from . import routes
 
 elevation_api = Blueprint("elevation_api", __name__)
@@ -125,7 +124,7 @@ def run_area_fetch_all_elevation(var_id):
         return poly_type
 
     try:
-        poly = get_poly_3338_bbox(type_di[poly_type], var_id)
+        poly = get_poly_3338_bbox(var_id)
     except:
         return render_template("422/invalid_area.html"), 422
 

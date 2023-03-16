@@ -5,9 +5,8 @@ from flask import (
 import json
 
 # local imports
-from luts import type_di
 from validate_request import validate_var_id
-from validate_data import recursive_rounding
+from validate_data import recursive_rounding, get_poly_3338_bbox
 from . import routes
 
 boundary_api = Blueprint("boundary_api", __name__)
@@ -40,7 +39,7 @@ def run_fetch_area_poly(var_id):
         return poly_type
 
     try:
-        poly = type_di[poly_type].loc[[var_id]].to_crs(4326)
+        poly = get_poly_3338_bbox(var_id, 4326)
     except:
         return render_template("422/invalid_area.html"), 422
     poly_geojson = poly.to_json()

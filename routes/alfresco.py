@@ -25,7 +25,7 @@ from validate_data import (
     postprocess,
     place_name_and_type,
 )
-from luts import huc12_gdf, type_di
+from luts import huc12_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -280,7 +280,7 @@ def summarize_within_poly_marr(
     return aggr_results
 
 
-def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
+def run_aggregate_var_polygon(var_ep, poly_id):
     """Get data summary (e.g. zonal mean) of single variable in polygon.
 
     Args:
@@ -297,7 +297,7 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
         Fetches data on the individual instances of the singular dimension combinations. Consider
             validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly_3338_bbox(poly_gdf, poly_id)
+    poly = get_poly_3338_bbox(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     ds_list = asyncio.run(fetch_alf_bbox_data(poly.bounds, cov_id_str))
 
@@ -574,7 +574,7 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
         return poly_type
 
     try:
-        poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
+        poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
     except:
         return render_template("422/invalid_area.html"), 422
 

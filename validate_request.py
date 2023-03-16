@@ -11,7 +11,8 @@ from pyproj import Transformer
 import numpy as np
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 import requests
-from luts import valid_huc_ids
+from generate_urls import generate_wfs_places_url
+from luts import huc12_gdf
 
 
 def validate_latlon(lat, lon):
@@ -110,12 +111,16 @@ def validate_year(start_year, end_year):
 def validate_var_id(var_id):
     if re.search("[^A-Za-z0-9]", var_id):
         return render_template("400/bad_request.html"), 400
-    var_id_check_url = f"{GS_BASE_URL}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=all_boundaries%3Aall_areas&outputFormat=application%2Fjson&propertyName=(type)&filter=%3CFilter%3E%3CPropertyIsEqualTo%3E%3CPropertyName%3Eid%3C/PropertyName%3E%3CLiteral%3E{var_id}%3C/Literal%3E%3C/PropertyIsEqualTo%3E%3C/Filter%3E"
+    var_id_check_url = generate_wfs_places_url(
+        "all_boundaries:all_areas", "type", var_id, "id"
+    )
     var_id_check_resp = requests.get(var_id_check_url, allow_redirects=True)
     var_id_check = json.loads(var_id_check_resp.content)
-    print(var_id_check["numberMatched"])
+
     if var_id_check["numberMatched"] > 0:
         return var_id_check["features"][0]["properties"]["type"]
+    elif var_id in huc12_gdf.index.values:
+        return "huc12"
     return render_template("422/invalid_area.html"), 400
 
 

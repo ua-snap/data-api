@@ -307,24 +307,6 @@ def update_data():
         The underlying code updates all the communities, HUCs, and
         protected areas in Alaska.
     """
-    ### Community Locations ###
-
-    # Ensure the path to store CSVs is created
-    path = "data/csvs/"
-    if not os.path.exists(path):
-        os.makedirs(path)
-    else:
-        shutil.rmtree(path)
-        os.makedirs(path)
-
-    # Ensure the path to store JSONs is created
-    jsonpath = "data/jsons/"
-    if not os.path.exists(jsonpath):
-        os.makedirs(jsonpath)
-    else:
-        shutil.rmtree(jsonpath)
-        os.makedirs(jsonpath)
-
     # Ensure the path to store shapefiles is created
     shppath = "data/shapefiles/"
     if not os.path.exists(shppath):
@@ -333,25 +315,8 @@ def update_data():
         shutil.rmtree(shppath)
         os.makedirs(shppath)
 
-    # Download CSV for all Alaskan communities and write to local CSV file.
-    url = "https://github.com/ua-snap/geospatial-vector-veracity/raw/main/vector_data/point/alaska_point_locations.csv"
-    r = requests.get(url, allow_redirects=True)
-    open(f"{path}ak_communities.csv", "wb").write(r.content)
-
-    # Open CSV file into Pandas data frame
-    df = pd.read_csv(f"{path}ak_communities.csv")
-
-    # Add type of community to each community
-    df["type"] = "community"
-
-    # Dump data frame to JSON file
-    df.to_json(json_types["communities"], orient="records")
-
     for k in shp_di.keys():
         download_shapefiles_from_repo(shp_di[k]["src_dir"], shp_di[k]["prefix"])
-        generate_minimal_json_from_shapefile(
-            shp_di[k]["prefix"], shp_di[k]["poly_type"], shp_di[k]["retain"]
-        )
 
 
 def download_shapefiles_from_repo(target_dir, file_prefix):

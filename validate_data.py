@@ -1,10 +1,13 @@
 """A module to validate fetched data values."""
 import json
 import re
+import geopandas as gpd
+import requests
 from flask import render_template
-from luts import json_types
+from luts import json_types, huc12_gdf
 
 from fetch_data import add_titles
+from generate_urls import generate_wfs_places_url
 
 nodata_values = {
     "alfresco": [-9999],
@@ -152,20 +155,34 @@ def round_by_type(to_round, round_amount=7):
     return to_round
 
 
-def get_poly_3338_bbox(gdf, poly_id):
-    """Get the Polygon Object corresponding to the the ID for a GeoDataFrame
+def get_poly_3338_bbox(poly_id, crs=3338):
+    """Get the Polygon Object corresponding to the ID from GeoServer
 
     Args:
-        gdf (geopandas.GeoDataFrame object): polygon features
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
         poly (shapely.Polygon): Polygon object used to summarize data within.
-        Inlcudes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
+        Includes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
         polygon. Format is (xmin, ymin, xmax, ymax).
     """
-    poly_gdf = gdf.loc[[poly_id]][["geometry"]].to_crs(3338)
-    poly = poly_gdf.iloc[0]["geometry"]
-    return poly
+    try:
+        url = generate_wfs_places_url(
+            "all_boundaries:all_areas", "the_geom", poly_id, "id"
+        )
+        url_resp = requests.get(url, allow_redirects=True)
+        geometry = json.loads(url_resp.content)
+        if crs == 3338:
+            poly_gdf = (
+                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(3338)
+            )
+            poly = poly_gdf.iloc[0]["geometry"]
+        else:
+            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+        return poly
+    except:
+        poly_gdf = huc12_gdf.loc[[poly_id]][["geometry"]].to_crs(3338)
+        poly = poly_gdf.iloc[0]["geometry"]
+        return poly
 
 
 def is_di_empty(di):
