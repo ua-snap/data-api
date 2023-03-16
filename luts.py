@@ -77,22 +77,6 @@ permafrost_encodings = {
     "gipl_units_lu": {"magt": "°C", "alt": "m"},
 }
 
-json_types = {
-    "communities": "data/jsons/ak_communities.json",
-    "boroughs": "data/jsons/ak_boroughs.json",
-    "census_areas": "data/jsons/ak_census_areas.json",
-    "hucs": "data/jsons/ak_hucs.json",
-    "huc8s": "data/jsons/ak_huc8.json",
-    "huc12s": "data/jsons/ak_huc12.json",
-    "protected_areas": "data/jsons/ak_protected_areas.json",
-    "fire_zones": "data/jsons/ak_fire_mgmt_zones.json",
-    "corporations": "data/jsons/ak_native_corporations.json",
-    "climate_divisions": "data/jsons/ak_climate_divisions.json",
-    "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
-    "first_nations": "data/jsons/canada_first_nations.json",
-    "game_management_units": "data/jsons/game_management_units.json",
-}
-
 shp_types = {
     "communities": "data/shapefiles/ak_communities.shp",
     "boroughs": "data/shapefiles/ak_boroughs.shp",
@@ -109,21 +93,17 @@ shp_types = {
 }
 
 place_type_labels = {
-    "huc8s": "HUC",
-    "protected_areas": "Protected Area",
-    "boroughs": "Borough",
-    "census_areas": "Census Area",
-    "fire_zones": "Fire Management Unit",
-    "corporations": "Corporation",
-    "climate_divisions": "Climate Division",
-    "ethnolinguistic_regions": "Ethnolinguistic Region",
-    "first_nations": "Canadian First Nation",
-    "game_management_units": "Game Management Unit",
+    "huc": "HUC",
+    "protected_area": "Protected Area",
+    "borough": "Borough",
+    "census_area": "Census Area",
+    "fire_zone": "Fire Management Unit",
+    "corporation": "Corporation",
+    "climate_division": "Climate Division",
+    "ethnolinguistic_region": "Ethnolinguistic Region",
+    "first_nation": "Canadian First Nation",
+    "game_management_unit": "Game Management Unit",
 }
-
-# Unused variable for now. Can be used by re-caching function to pre-cache
-# all HUC types listed below.
-huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 
 cached_urls = [
     "/alfresco/flammability/area/",
@@ -177,6 +157,8 @@ with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
 
 try:
+    # Community Point Locations
+    comms_gdf = gpd.read_file(shp_types["communities"]).to_crs(3338)
     # Below Polygons can be imported by various endpoints
     # HUC-8 & HUC-10
     hucs_gdf = gpd.read_file(shp_types["hucs"]).set_index("id").to_crs(3338)
@@ -224,6 +206,7 @@ try:
     valid_huc_ids = huc_gdf.index.values
 
     type_di = dict()
+    type_di["community"] = comms_gdf
     type_di["huc"] = hucs_gdf
     type_di["huc12"] = huc12_gdf
     type_di["protected_area"] = akpa_gdf
@@ -242,7 +225,8 @@ except fiona.errors.DriverError:
     # be updated from vectordata.py
     update_needed = True
     (
-        huc8_gdf,
+        comms_gdf,
+        hucs_gdf,
         huc12_gdf,
         akpa_gdf,
         akfire_gdf,
@@ -255,13 +239,12 @@ except fiona.errors.DriverError:
         boro_gdf,
         akcensus_gdf,
         valid_huc_ids,
-    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    ) = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     type_di = dict()
 
 # look-up for updating place names and data via geo-vector GitHub repo
 shp_di = {}
 shp_di["akhucs"] = {
-    "src_dir": "alaska_hucs",
     "prefix": "ak_hucs",
     "poly_type": "huc",
 }
@@ -272,49 +255,40 @@ shp_di["akhuc12s"] = {
     "retain": [],
 }
 shp_di["ak_pa"] = {
-    "src_dir": "protected_areas/ak_protected_areas",
     "prefix": "ak_protected_areas",
     "poly_type": "protected_area",
     "retain": "area_type",
 }
 shp_di["akfire"] = {
-    "src_dir": "fire",
     "prefix": "ak_fire_management",
     "poly_type": "fire_zone",
 }
 shp_di["akcorps"] = {
-    "src_dir": "corporation",
     "prefix": "ak_native_corporations",
     "poly_type": "corporation",
 }
 shp_di["akethno"] = {
-    "src_dir": "ethnolinguistic",
     "prefix": "ethnolinguistic_regions",
     "poly_type": "ethnolinguistic_region",
     "retain": "alt_name",
 }
 shp_di["akclimdivs"] = {
-    "src_dir": "climate_divisions",
     "prefix": "ak_climate_divisions",
     "poly_type": "climate_division",
 }
 shp_di["akgmus"] = {
-    "src_dir": "game_management_units",
     "prefix": "ak_gmu",
     "poly_type": "game_management_unit",
 }
 shp_di["cnfns"] = {
-    "src_dir": "first_nations",
     "prefix": "first_nation_traditional_territories",
     "poly_type": "first_nation",
 }
 shp_di["akboros"] = {
-    "src_dir": "boroughs",
     "prefix": "ak_boroughs",
     "poly_type": "borough",
 }
 shp_di["akcensusareas"] = {
-    "src_dir": "census_areas",
     "prefix": "ak_census_areas",
     "poly_type": "census_area",
 }

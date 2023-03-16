@@ -11,12 +11,7 @@ from shapely.geometry import Point, box
 
 # local imports
 from . import routes
-from luts import (
-    shp_types,
-    shp_di,
-    all_jsons,
-    areas_near,
-)
+from luts import shp_types, shp_di, all_jsons, areas_near, type_di
 from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
@@ -186,12 +181,12 @@ def gather_nearby_area(nearby_area):
     return curr_di
 
 
-@routes.route("/places/<type>")
-def get_json_for_type(type, recurse=False):
+@routes.route("/places/<area_type>")
+def get_json_for_type(area_type, recurse=False):
     """
     GET function to pull JSON files
        Args:
-           type (string): Any of the below types:
+           area_type (string): Any of the below types:
                [communities, hucs, corporations, climate_divisions,
                 ethnolinguistic_regions, game_management_units, fire_zones,
                 first_nations, boroughs, census_areas, protected_areas, all]
@@ -206,7 +201,7 @@ def get_json_for_type(type, recurse=False):
        Notes:
            example: http://localhost:5000/places/communities
     """
-    if type == "all":
+    if area_type == "all":
         json_list = list()
 
         # Loops through all the different types for search field
@@ -223,46 +218,32 @@ def get_json_for_type(type, recurse=False):
 
     else:
         js_list = list()
-        if type == "communities":
-            # Requests the Geoserver WFS URL for gathering all the communities
-            communities_resp = requests.get(
-                generate_wfs_places_url(
-                    "all_boundaries:all_communities",
-                    "name,alt_name,id,type,latitude,longitude",
-                ),
-                allow_redirects=True,
-            )
-            communities_json = json.loads(communities_resp.content)
+        if area_type == "communities":
 
-            # Pulls out only the "Features" field, containing all the
-            # properties for the communities
-            all_communities = communities_json["features"]
+            # Create a copy of the community GDF and delete the
+            # geometry column.
+            comm_gdf = type_di["community"].copy()
+            comm_gdf = comm_gdf.drop(columns=["geometry"])
 
-            # For each feature, put the properties (name, id, etc.) into the
-            # list for creation of a JSON object to be returned.
-            for i in range(len(all_communities)):
-                js_list.append(all_communities[i]["properties"])
+            # Iterate over all communities and add to list
+            for index, community in comm_gdf.iterrows():
+                js_list.append(community.to_dict())
         else:
             # Remove the 's' at the end of the type
-            type = type[:-1]
+            area_type = area_type[:-1]
 
-            # Requests the Geoserver WFS URL for gathering all the polygon areas
-            areas_resp = requests.get(
-                generate_wfs_places_url(
-                    "all_boundaries:all_areas", "id,name,type", type
-                ),
-                allow_redirects=True,
-            )
-            areas_json = json.loads(areas_resp.content)
+            # Create a copy of the current area type's GDF and
+            # delete the geometry column.
+            area_gdf = type_di[area_type].copy()
+            area_gdf = area_gdf.drop(columns=["geometry"])
 
-            # Pulls out only the "Features" field, containing all the
-            # properties for the areas
-            all_areas = areas_json["features"]
-
-            # For each feature, put the properties (name, id, type) into the
-            # list for creation of a JSON object to be returned.
-            for ai in range(len(all_areas)):
-                js_list.append(all_areas[ai]["properties"])
+            # Iterate over all the current area type's AOIs
+            # and add to list.
+            for id, area in area_gdf.iterrows():
+                area_dict = area.to_dict()
+                # Add the ID to the dictionary
+                area_dict["id"] = id
+                js_list.append(area_dict)
 
         # Creates JSON object from created list
         js = json.dumps(js_list)
@@ -317,6 +298,25 @@ def update_data():
         os.makedirs(shppath)
 
     crs = "EPSG:4326"
+
+    # Requests all point locations for communities
+    comms_resp = requests.get(
+        generate_wfs_places_url("all_boundaries:all_communities"),
+        allow_redirects=True,
+    )
+    all_comms = json.loads(comms_resp.content)["features"]
+
+    # Creates a GeoDataFrame from all the communities returned from GeoServer
+    comms_gdf = gpd.GeoDataFrame.from_features(all_comms)
+    comms_gdf = comms_gdf.drop(columns=["km_distanc"])
+
+    # Writes a cached copy of the community point locations to a point shapefile
+    comms_gdf.to_file(
+        shp_types["communities"],
+        driver="ESRI Shapefile",
+        crs=crs,
+        encoding="utf-8",
+    )
 
     # Requests all polygons that make up all areas in the state of Alaska
     areas_resp = requests.get(
