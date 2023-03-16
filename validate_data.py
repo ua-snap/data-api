@@ -2,7 +2,7 @@
 import json
 import re
 from flask import render_template
-from luts import json_types
+from luts import type_di
 
 from fetch_data import add_titles
 
@@ -191,20 +191,19 @@ def place_name_and_type(place_id):
     if (not re.search("[^0-9]", place_id)) and (len(place_id) == 12):
         return None, "huc12"
 
-    place_types = list(json_types.keys())
-    place_types.remove("hucs")
-    place_types.remove("huc12s")
-
-    for place_type in place_types:
-        f = open(json_types[place_type], "r")
-        places = json.load(f)
-        f.close()
-
-        for place in places:
-            if place_id == place["id"]:
+    # Iterate through the available GDFs looking for the
+    # place name and alternate name if available.
+    for curr_type in type_di:
+        shp_gdf = type_di[curr_type]
+        try:
+            place = shp_gdf.loc[place_id]
+            if len(place) > 0:
                 full_place = place["name"]
-                if "alt_name" in place and place["alt_name"] is not None:
+                place_type = place["type"]
+                if "alt_name" in place.keys() and place["alt_name"] is not None:
                     full_place += " (" + place["alt_name"] + ")"
                 return full_place, place_type
+        except:
+            continue
 
     return None, None
