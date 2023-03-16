@@ -149,14 +149,20 @@ areas_near = {
     "protected_area": "protected_areas_near",
 }
 
-# For the forest endpoint.  This file is just a generated pickle
-# from the `dbf` file that will be downloaded with the .zip that
-# is linked in the documentation page for the point query, including
-# only the columns we need for this lookup.
-with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
-    ak_veg_di = pickle.load(fp)
 
-try:
+def load_gdfs():
+    """
+    Simple function for creating GeoPandas GeoDataFrames out of
+    cached shapefiles on the API server. By calling it from a function,
+    we are able to update the underlying shapefiles and have the server
+    reload them into GDFs after.
+
+    Args:
+        None.
+    Returns:
+        A tuple containing a dictionary of all GDFs called type_di
+        and a list of valid_huc_ids.
+    """
     # Community Point Locations
     comms_gdf = gpd.read_file(shp_types["communities"]).to_crs(3338)
     # Below Polygons can be imported by various endpoints
@@ -219,6 +225,18 @@ try:
     type_di["borough"] = boro_gdf
     type_di["census_area"] = akcensus_gdf
 
+    return type_di, valid_huc_ids
+
+
+# For the forest endpoint.  This file is just a generated pickle
+# from the `dbf` file that will be downloaded with the .zip that
+# is linked in the documentation page for the point query, including
+# only the columns we need for this lookup.
+with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
+    ak_veg_di = pickle.load(fp)
+
+try:
+    type_di, valid_huc_ids = load_gdfs()
     update_needed = False
 except fiona.errors.DriverError:
     # if this fails, give placeholders until all data can
@@ -243,7 +261,7 @@ except fiona.errors.DriverError:
     type_di = dict()
 
 # look-up for updating place names and data via geo-vector GitHub repo
-shp_di = {}
+shp_di = dict()
 shp_di["akhucs"] = {
     "prefix": "ak_hucs",
     "poly_type": "huc",

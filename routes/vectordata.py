@@ -11,7 +11,15 @@ from shapely.geometry import Point, box
 
 # local imports
 from . import routes
-from luts import shp_types, shp_di, all_jsons, areas_near, type_di
+from luts import (
+    shp_types,
+    shp_di,
+    all_jsons,
+    areas_near,
+    type_di,
+    valid_huc_ids,
+    load_gdfs,
+)
 from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
@@ -272,6 +280,7 @@ def update_json_data():
          example: http://localhost:5000/update
     """
     update_data()
+    type_di, valid_huc_ids = load_gdfs()
     return Response(
         response='{ "success": "True" }', status=200, mimetype="application/json"
     )

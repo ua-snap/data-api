@@ -25,7 +25,7 @@ from validate_data import (
     postprocess,
     place_name_and_type,
 )
-from luts import huc12_gdf, type_di
+from luts import type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -508,6 +508,7 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     x, y = project_latlon(lat, lon, 3338)
     # intersct the point with the HUC-12 polygons
     point = Point(x, y)
+    huc12_gdf = type_di["huc12"]
     intersect = huc12_gdf["geometry"].intersection(point)
     # algorithm below to find the most qualified HUC, since we cannot
     # rely on a simply intersection because simplified HUC-12s are not mutually
