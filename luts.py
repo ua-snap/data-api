@@ -72,38 +72,18 @@ permafrost_encodings = {
     "gipl_units_lu": {"magt": "°C", "alt": "m"},
 }
 
-json_types = {
-    "communities": "data/jsons/ak_communities.json",
-    "boroughs": "data/jsons/ak_boroughs.json",
-    "census_areas": "data/jsons/ak_census_areas.json",
-    "hucs": "data/jsons/ak_huc8.json",
-    "huc8s": "data/jsons/ak_huc8.json",
-    "huc12s": "data/jsons/ak_huc12.json",
-    "protected_areas": "data/jsons/ak_protected_areas.json",
-    "fire_zones": "data/jsons/ak_fire_mgmt_zones.json",
-    "corporations": "data/jsons/ak_native_corporations.json",
-    "climate_divisions": "data/jsons/ak_climate_divisions.json",
-    "ethnolinguistic_regions": "data/jsons/ethnolinguistic_regions.json",
-    "first_nations": "data/jsons/canada_first_nations.json",
-    "game_management_units": "data/jsons/game_management_units.json",
-}
-
 place_type_labels = {
-    "huc8s": "HUC",
-    "protected_areas": "Protected Area",
-    "boroughs": "Borough",
-    "census_areas": "Census Area",
-    "fire_zones": "Fire Management Unit",
-    "corporations": "Corporation",
-    "climate_divisions": "Climate Division",
-    "ethnolinguistic_regions": "Ethnolinguistic Region",
-    "first_nations": "Canadian First Nation",
-    "game_management_units": "Game Management Unit",
+    "huc": "HUC",
+    "protected_area": "Protected Area",
+    "borough": "Borough",
+    "census_area": "Census Area",
+    "fire_zone": "Fire Management Unit",
+    "corporation": "Corporation",
+    "climate_division": "Climate Division",
+    "ethnolinguistic_region": "Ethnolinguistic Region",
+    "first_nation": "Canadian First Nation",
+    "game_management_unit": "Game Management Unit",
 }
-
-# Unused variable for now. Can be used by re-caching function to pre-cache
-# all HUC types listed below.
-huc_jsons = {json_types["huc8s"], json_types["huc12s"]}
 
 cached_urls = [
     "/alfresco/flammability/area/",

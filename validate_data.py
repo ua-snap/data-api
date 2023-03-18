@@ -4,7 +4,7 @@ import re
 import geopandas as gpd
 import requests
 from flask import render_template
-from luts import json_types, huc12_gdf
+from luts import huc12_gdf
 
 from fetch_data import add_titles
 from generate_urls import generate_wfs_places_url
@@ -208,20 +208,28 @@ def place_name_and_type(place_id):
     if (not re.search("[^0-9]", place_id)) and (len(place_id) == 12):
         return None, "huc12"
 
-    place_types = list(json_types.keys())
-    place_types.remove("hucs")
-    place_types.remove("huc12s")
-
-    for place_type in place_types:
-        f = open(json_types[place_type], "r")
-        places = json.load(f)
-        f.close()
-
-        for place in places:
-            if place_id == place["id"]:
-                full_place = place["name"]
-                if "alt_name" in place and place["alt_name"] is not None:
-                    full_place += " (" + place["alt_name"] + ")"
-                return full_place, place_type
+    areas_url = generate_wfs_places_url(
+        "all_boundaries:all_areas", "name,alt_name,type", place_id, "id"
+    )
+    areas_url_resp = requests.get(areas_url, allow_redirects=True)
+    place = json.loads(areas_url_resp.content)
+    if place["numberMatched"] > 0:
+        place = place["features"][0]["properties"]
+        full_place = place["name"]
+        if place["alt_name"] != "":
+            full_place += " (" + place["alt_name"] + ")"
+        return full_place, place["type"]
+    else:
+        communities_url = generate_wfs_places_url(
+            "all_boundaries:all_communities", "name,alt_name,type", place_id, "id"
+        )
+        communities_url_resp = requests.get(communities_url, allow_redirects=True)
+        place = json.loads(communities_url_resp.content)
+        if place["numberMatched"] > 0:
+            place = place["features"][0]["properties"]
+            full_place = place["name"]
+            if place["alt_name"] != "":
+                full_place += " (" + place["alt_name"] + ")"
+            return full_place, place["type"]
 
     return None, None
