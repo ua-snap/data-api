@@ -12,7 +12,6 @@ from shapely.geometry import Point, box
 # local imports
 from . import routes
 from luts import (
-    json_types,
     shp_di,
     all_jsons,
     areas_near,
