@@ -314,8 +314,8 @@ def update_data():
         shutil.rmtree(shppath)
         os.makedirs(shppath)
 
-    for k in shp_di.keys():
-        download_shapefiles_from_repo(shp_di[k]["src_dir"], shp_di[k]["prefix"])
+    # Downloads AK HUC12s shapefile from GVV
+    download_shapefiles_from_repo(shp_di["akhuc12s"]["src_dir"], shp_di["akhuc12s"]["prefix"])
 
 
 def download_shapefiles_from_repo(target_dir, file_prefix):
