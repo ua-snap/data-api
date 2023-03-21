@@ -1432,10 +1432,10 @@ def taspr_area_data_endpoint(var_ep, var_id):
         return poly_type
 
     try:
-    if var_ep in var_ep_lu.keys():
-        poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
-    elif var_ep == "taspr":
-        poly_pkg = run_aggregate_allvar_polygon(var_id)
+        if var_ep in var_ep_lu.keys():
+            poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
+        elif var_ep == "taspr":
+            poly_pkg = run_aggregate_allvar_polygon(var_id)
     except:
         return render_template("422/invalid_area.html"), 422
 
