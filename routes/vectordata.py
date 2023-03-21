@@ -112,7 +112,7 @@ def find_via_gs(lat, lon):
     )
 
 
-def get_total_bounds(nearby_areas, communities=False):
+def get_total_bounds(nearby_areas, communities=None):
     """
     Generates the total bounds of the returned data from a search, but only for
     communities, HUC8s, and protected areas.
@@ -137,7 +137,7 @@ def get_total_bounds(nearby_areas, communities=False):
 
     # If there were any nearby communities, we want to ensure our
     # bounding box includes them.
-    if communities:
+    if communities is not None:
         # Create a GeoPandas GeoDataFrame from the communities
         communities_gdf = gpd.GeoDataFrame.from_features(communities)
 
