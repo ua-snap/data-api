@@ -141,17 +141,11 @@ def get_total_bounds(nearby_areas, communities=None):
         # Create a GeoPandas GeoDataFrame from the communities
         communities_gdf = gpd.GeoDataFrame.from_features(communities)
 
-        # Gather the maximum of the total bounds from communities, HUCs, and protected areas
-        total_bounds = np.maximum(communities_gdf.total_bounds, huc_pa_gdf.total_bounds)
+        # Combines the communities and HUC / PA GDFs
+        combined_gdf = pd.concat([communities_gdf, huc_pa_gdf], ignore_index=True)
 
-        # The most western longitudinal coordinate and the most southern
-        # latitudinal coordinate must be the minimums.
-        total_bounds[0] = np.minimum(
-            communities_gdf.total_bounds[0], huc_pa_gdf.total_bounds[0]
-        )
-        total_bounds[1] = np.minimum(
-            communities_gdf.total_bounds[1], huc_pa_gdf.total_bounds[1]
-        )
+        # Gets total bounds of combined GDF
+        total_bounds = combined_gdf.total_bounds
     else:
         # If no communities are returned from the search, the HUCs and protected areas
         # bounding box should be used.
