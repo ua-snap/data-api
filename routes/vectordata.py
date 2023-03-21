@@ -99,7 +99,7 @@ def find_via_gs(lat, lon):
     )
 
     # Get the total bounds for the communities, HUCs, and protected areas only
-    total_bounds = get_total_bounds(lat, lon, communities_found)
+    total_bounds = get_total_bounds(nearby_areas, communities_found)
 
     # Bounding box keys
     bbox_ids = ["xmin", "ymin", "xmax", "ymax"]
@@ -112,14 +112,13 @@ def find_via_gs(lat, lon):
     )
 
 
-def get_total_bounds(lat, lon, communities=False):
+def get_total_bounds(nearby_areas, communities=False):
     """
     Generates the total bounds of the returned data from a search, but only for
     communities, HUC8s, and protected areas.
 
     Args:
-        lat (float): latitude of requested point
-        lon (float): longitude of requested point
+        nearby_areas: A JSON response containing all AOI polygons from GeoServer.
         communities: Either the JSON response containing all communities nearby or False
 
     Returns:
@@ -129,18 +128,12 @@ def get_total_bounds(lat, lon, communities=False):
         Returns as Python list with order [xmin, ymin, xmax, ymax]
     """
 
-    # Request the nearby HUCs and protected areas only
-    hucs_pa_resp = requests.get(
-        generate_wfs_search_url("all_boundaries:all_areas", lat, lon, True),
-        allow_redirects=True,
-    )
+    # Create a GeoPandas GeoDataFrame from all of the nearby areas GeoJSON
+    areas_gdf = gpd.GeoDataFrame.from_features(nearby_areas)
 
-    # From the JSON returned, pull out the features
-    hucs_pa_json = json.loads(hucs_pa_resp.content)
-    nearby_hucs_pa = hucs_pa_json["features"]
+    # Make a new GeoPandas GeoDataFrome which contains only the HUCs and protected areas
+    huc_pa_gdf = areas_gdf[areas_gdf['type'].isin(['huc', 'protected_area'])].copy()
 
-    # Create a GeoPandas GeoDataFrame from the nearby HUCs and protected areas
-    areas_gdf = gpd.GeoDataFrame.from_features(nearby_hucs_pa)
 
     # If there were any nearby communities, we want to ensure our
     # bounding box includes them.
@@ -149,20 +142,20 @@ def get_total_bounds(lat, lon, communities=False):
         communities_gdf = gpd.GeoDataFrame.from_features(communities)
 
         # Gather the maximum of the total bounds from communities, HUCs, and protected areas
-        total_bounds = np.maximum(communities_gdf.total_bounds, areas_gdf.total_bounds)
+        total_bounds = np.maximum(communities_gdf.total_bounds, huc_pa_gdf.total_bounds)
 
         # The most western longitudinal coordinate and the most southern
         # latitudinal coordinate must be the minimums.
         total_bounds[0] = np.minimum(
-            communities_gdf.total_bounds[0], areas_gdf.total_bounds[0]
+            communities_gdf.total_bounds[0], huc_pa_gdf.total_bounds[0]
         )
         total_bounds[1] = np.minimum(
-            communities_gdf.total_bounds[1], areas_gdf.total_bounds[1]
+            communities_gdf.total_bounds[1], huc_pa_gdf.total_bounds[1]
         )
     else:
         # If no communities are returned from the search, the HUCs and protected areas
         # bounding box should be used.
-        total_bounds = areas_gdf.total_bounds
+        total_bounds = huc_pa_gdf.total_bounds
 
     return total_bounds
 
