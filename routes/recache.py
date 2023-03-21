@@ -69,7 +69,7 @@ def get_all_route_endpoints(curr_route, curr_type):
 
     Args:
         curr_route - Current route ex. https://earthmaps.io/taspr/huc/
-        curr_type - One of four types: community, huc, pa, or local
+        curr_type - One of the many types availabe such as community or huc.
 
     Returns:
         Nothing.
