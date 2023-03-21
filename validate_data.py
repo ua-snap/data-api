@@ -173,15 +173,18 @@ def get_poly_3338_bbox(poly_id, crs=3338):
         geometry = json.loads(url_resp.content)
         if crs == 3338:
             poly_gdf = (
-                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(3338)
+                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
             )
             poly = poly_gdf.iloc[0]["geometry"]
         else:
             poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
         return poly
     except:
-        poly_gdf = huc12_gdf.loc[[poly_id]][["geometry"]].to_crs(3338)
-        poly = poly_gdf.iloc[0]["geometry"]
+        if crs == 3338:
+            poly_gdf = huc12_gdf.loc[[poly_id]][["geometry"]].to_crs(crs)
+            poly = poly_gdf.iloc[0]["geometry"]
+        else:
+            poly = huc12_gdf.loc[[poly_id]].to_crs(4326)
         return poly
 
 
