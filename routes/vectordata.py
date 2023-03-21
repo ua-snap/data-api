@@ -227,7 +227,7 @@ def get_json_for_type(type, recurse=False):
             communities_resp = requests.get(
                 generate_wfs_places_url(
                     "all_boundaries:all_communities",
-                    "name,alt_name,id,type,latitude,longitude",
+                    "name,alt_name,id,region,country,type,latitude,longitude",
                 ),
                 allow_redirects=True,
             )
