@@ -132,8 +132,7 @@ def get_total_bounds(nearby_areas, communities=None):
     areas_gdf = gpd.GeoDataFrame.from_features(nearby_areas)
 
     # Make a new GeoPandas GeoDataFrome which contains only the HUCs and protected areas
-    huc_pa_gdf = areas_gdf[areas_gdf['type'].isin(['huc', 'protected_area'])].copy()
-
+    huc_pa_gdf = areas_gdf[areas_gdf["type"].isin(["huc", "protected_area"])].copy()
 
     # If there were any nearby communities, we want to ensure our
     # bounding box includes them.
@@ -302,7 +301,9 @@ def update_data():
         os.makedirs(shppath)
 
     # Downloads AK HUC12s shapefile from GVV
-    download_shapefiles_from_repo(shp_di["akhuc12s"]["src_dir"], shp_di["akhuc12s"]["prefix"])
+    download_shapefiles_from_repo(
+        shp_di["akhuc12s"]["src_dir"], shp_di["akhuc12s"]["prefix"]
+    )
 
 
 def download_shapefiles_from_repo(target_dir, file_prefix):
