@@ -234,7 +234,7 @@ def get_json_for_type(type, recurse=False):
             # Requests the Geoserver WFS URL for gathering all the polygon areas
             areas_resp = requests.get(
                 generate_wfs_places_url(
-                    "all_boundaries:all_areas", "id,name,type", type
+                    "all_boundaries:all_areas", "id,name,type,area_type", type
                 ),
                 allow_redirects=True,
             )
@@ -247,7 +247,13 @@ def get_json_for_type(type, recurse=False):
             # For each feature, put the properties (name, id, type) into the
             # list for creation of a JSON object to be returned.
             for ai in range(len(all_areas)):
-                js_list.append(all_areas[ai]["properties"])
+                # If this area is a protected_area, keep area_type in
+                # returned output.
+                if all_areas[ai]["properties"]["area_type"] != "":
+                    js_list.append(all_areas[ai]["properties"])
+                else:
+                    del all_areas[ai]["properties"]["area_type"]
+                    js_list.append(all_areas[ai]["properties"])
 
         # Creates JSON object from created list
         js = json.dumps(js_list)
