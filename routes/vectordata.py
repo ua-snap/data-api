@@ -95,7 +95,7 @@ def find_via_gs(lat, lon):
 
     # Check to see if any communities were found around the point chosen
     communities_found = (
-        nearby_communities if communities_json["numberMatched"] > 0 else False
+        nearby_communities if communities_json["numberMatched"] > 0 else None
     )
 
     # Get the total bounds for the communities, HUCs, and protected areas only
