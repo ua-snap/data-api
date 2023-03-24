@@ -1,10 +1,13 @@
 """A module to validate fetched data values."""
 import json
 import re
+import geopandas as gpd
+import requests
 from flask import render_template
-from luts import json_types
+from luts import huc12_gdf
 
 from fetch_data import add_titles
+from generate_urls import generate_wfs_places_url
 
 nodata_values = {
     "alfresco": [-9999],
@@ -152,20 +155,37 @@ def round_by_type(to_round, round_amount=7):
     return to_round
 
 
-def get_poly_3338_bbox(gdf, poly_id):
-    """Get the Polygon Object corresponding to the the ID for a GeoDataFrame
+def get_poly_3338_bbox(poly_id, crs=3338):
+    """Get the Polygon Object corresponding to the ID from GeoServer
 
     Args:
-        gdf (geopandas.GeoDataFrame object): polygon features
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
         poly (shapely.Polygon): Polygon object used to summarize data within.
-        Inlcudes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
+        Includes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
         polygon. Format is (xmin, ymin, xmax, ymax).
     """
-    poly_gdf = gdf.loc[[poly_id]][["geometry"]].to_crs(3338)
-    poly = poly_gdf.iloc[0]["geometry"]
-    return poly
+    try:
+        url = generate_wfs_places_url(
+            "all_boundaries:all_areas", "the_geom", poly_id, "id"
+        )
+        url_resp = requests.get(url, allow_redirects=True)
+        geometry = json.loads(url_resp.content)
+        if crs == 3338:
+            poly_gdf = (
+                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+            )
+            poly = poly_gdf.iloc[0]["geometry"]
+        else:
+            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+        return poly
+    except:
+        if crs == 3338:
+            poly_gdf = huc12_gdf.loc[[poly_id]][["geometry"]].to_crs(crs)
+            poly = poly_gdf.iloc[0]["geometry"]
+        else:
+            poly = huc12_gdf.loc[[poly_id]].to_crs(4326)
+        return poly
 
 
 def is_di_empty(di):
@@ -191,20 +211,28 @@ def place_name_and_type(place_id):
     if (not re.search("[^0-9]", place_id)) and (len(place_id) == 12):
         return None, "huc12"
 
-    place_types = list(json_types.keys())
-    place_types.remove("hucs")
-    place_types.remove("huc12s")
-
-    for place_type in place_types:
-        f = open(json_types[place_type], "r")
-        places = json.load(f)
-        f.close()
-
-        for place in places:
-            if place_id == place["id"]:
-                full_place = place["name"]
-                if "alt_name" in place and place["alt_name"] is not None:
-                    full_place += " (" + place["alt_name"] + ")"
-                return full_place, place_type
+    areas_url = generate_wfs_places_url(
+        "all_boundaries:all_areas", "name,alt_name,type", place_id, "id"
+    )
+    areas_url_resp = requests.get(areas_url, allow_redirects=True)
+    place = json.loads(areas_url_resp.content)
+    if place["numberMatched"] > 0:
+        place = place["features"][0]["properties"]
+        full_place = place["name"]
+        if place["alt_name"] != "":
+            full_place += " (" + place["alt_name"] + ")"
+        return full_place, place["type"]
+    else:
+        communities_url = generate_wfs_places_url(
+            "all_boundaries:all_communities", "name,alt_name,type", place_id, "id"
+        )
+        communities_url_resp = requests.get(communities_url, allow_redirects=True)
+        place = json.loads(communities_url_resp.content)
+        if place["numberMatched"] > 0:
+            place = place["features"][0]["properties"]
+            full_place = place["name"]
+            if place["alt_name"] != "":
+                full_place += " (" + place["alt_name"] + ")"
+            return full_place, place["type"]
 
     return None, None

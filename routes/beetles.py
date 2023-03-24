@@ -23,7 +23,6 @@ from validate_data import (
     postprocess,
     place_name_and_type,
 )
-from luts import type_di
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -480,11 +479,10 @@ def get_poly_mask_arr(ds, poly, bandname):
     return cropped_poly_mask
 
 
-def run_aggregate_var_polygon(poly_gdf, poly_id):
+def run_aggregate_var_polygon(poly_id):
     """Get data summary (e.g. zonal mean) of single variable in polygon.
 
     Args:
-        poly_gdf (GeoDataFrame): the object from which to fetch the polygon, e.g. the HUC 8 geodataframe for watershed polygons
         poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
 
     Returns:
@@ -493,7 +491,7 @@ def run_aggregate_var_polygon(poly_gdf, poly_id):
     Notes:
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly_3338_bbox(poly_gdf, poly_id)
+    poly = get_poly_3338_bbox(poly_id)
 
     ds_list = asyncio.run(fetch_beetles_bbox_data(poly.bounds, beetle_coverage_id))
 
@@ -587,7 +585,7 @@ def beetle_area_data_endpoint(var_id):
         return poly_type
 
     try:
-        beetle_risk = run_aggregate_var_polygon(type_di[poly_type], var_id)
+        beetle_risk = run_aggregate_var_polygon(var_id)
     except:
         return render_template("422/invalid_area.html"), 422
 

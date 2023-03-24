@@ -547,7 +547,7 @@ def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
         # if lat and lon and type huc12, then it's a local / point-to-huc query
         if place_type == "huc12":
             metadata += "# Corresponding HUC12 code: " + place_id + "\n"
-    elif place_type == "communities":
+    elif place_type == "community":
         metadata += place_name + "\n"
     else:
         metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
@@ -555,7 +555,7 @@ def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
     report_url = WEB_APP_URL + "report/"
     if place_type is None:
         report_url += lat + "/" + lon
-    elif place_type == "communities":
+    elif place_type == "community":
         report_url += "community/" + place_id
     else:
         report_url += "area/" + place_id
