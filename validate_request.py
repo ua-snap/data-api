@@ -119,9 +119,17 @@ def validate_var_id(var_id):
 
     if var_id_check["numberMatched"] > 0:
         return var_id_check["features"][0]["properties"]["type"]
-    elif var_id in huc12_gdf.index.values:
-        return "huc12"
-    return render_template("422/invalid_area.html"), 400
+    else:
+        # Search for HUC12 ID if not found in other areas
+        var_id_check_url = generate_wfs_places_url(
+            "all_boundaries:ak_huc12", "type", var_id, "id"
+        )
+        var_id_check_resp = requests.get(var_id_check_url, allow_redirects=True)
+        var_id_check = json.loads(var_id_check_resp.content)
+        if var_id_check["numberMatched"] > 0:
+            return "huc12"
+        else:
+            return render_template("422/invalid_area.html"), 400
 
 
 def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):

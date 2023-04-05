@@ -180,11 +180,18 @@ def get_poly_3338_bbox(poly_id, crs=3338):
             poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
         return poly
     except:
+        url = generate_wfs_places_url(
+            "all_boundaries:ak_huc12", "the_geom", poly_id, "id"
+        )
+        url_resp = requests.get(url, allow_redirects=True)
+        geometry = json.loads(url_resp.content)
         if crs == 3338:
-            poly_gdf = huc12_gdf.loc[[poly_id]][["geometry"]].to_crs(crs)
+            poly_gdf = (
+                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+            )
             poly = poly_gdf.iloc[0]["geometry"]
         else:
-            poly = huc12_gdf.loc[[poly_id]].to_crs(4326)
+            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
         return poly
 
 
