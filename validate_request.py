@@ -12,7 +12,6 @@ import numpy as np
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 import requests
 from generate_urls import generate_wfs_places_url
-from luts import huc12_gdf
 
 
 def validate_latlon(lat, lon):

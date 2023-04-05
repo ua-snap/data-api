@@ -4,7 +4,6 @@ import re
 import geopandas as gpd
 import requests
 from flask import render_template
-from luts import huc12_gdf
 
 from fetch_data import add_titles
 from generate_urls import generate_wfs_places_url
