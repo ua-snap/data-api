@@ -516,7 +516,7 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     huc12_gdf = gpd.GeoDataFrame.from_features(huc12_features)
 
     # Collect the HUC12 ID for the returned nearest HUC12
-    huc_id = huc12_gdf.loc[0, 'id']
+    huc_id = huc12_gdf.loc[0, "id"]
     huc12_pkg = run_fetch_alf_area_data(var_ep, huc_id, ignore_csv=True)
 
     if request.args.get("format") == "csv":

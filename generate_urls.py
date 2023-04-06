@@ -57,7 +57,6 @@ def generate_wfs_huc12_intersection_url(lat, lon):
     return wfs_url
 
 
-
 def generate_wcs_query_url(request_str, backend=RAS_BASE_URL):
     """Make a WCS URL by plugging a request substring into a base WCS URL.
 
