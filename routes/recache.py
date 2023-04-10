@@ -1,10 +1,12 @@
 from flask import Blueprint, current_app as app, Response
+import asyncio
 import os
 import json
 import requests
 from . import routes
 from luts import host, cached_urls
 from generate_urls import generate_wfs_places_url
+from fetch_data import fetch_data
 
 recache_api = Blueprint("recache_api", __name__)
 
@@ -77,25 +79,20 @@ def get_all_route_endpoints(curr_route, curr_type):
     # Opens the JSON file for the current type and replaces the "variable" portions
     # of the route to allow for the JSON items to fill in those fields.
     if curr_type == "community":
-        communities_resp = requests.get(
-            generate_wfs_places_url(
-                "all_boundaries:all_communities",
-                "latitude,longitude",
-            ),
-            allow_redirects=True,
-        )
-        communities_json = json.loads(communities_resp.content)
-        places = communities_json["features"]
+        places = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:all_communities",
+                        "latitude,longitude",
+                    )
+                ]
+            )
+        )["features"]
     else:
-        areas_resp = requests.get(
-            generate_wfs_places_url("all_boundaries:all_areas", "id"),
-            allow_redirects=True,
-        )
-        areas_json = json.loads(areas_resp.content)
-
-        # Pulls out only the "Features" field, containing all the
-        # properties for the areas
-        places = areas_json["features"]
+        places = asyncio.run(
+            fetch_data([generate_wfs_places_url("all_boundaries:all_areas", "id")])
+        )["features"]
 
     # For each JSON item in the JSON object array
     for place in places:
