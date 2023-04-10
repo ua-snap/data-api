@@ -2,8 +2,6 @@ import asyncio
 import itertools
 import geopandas as gpd
 import numpy as np
-import requests
-import json
 from flask import (
     Blueprint,
     render_template,
@@ -505,12 +503,9 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
         )
 
     # Requests for HUC12s that intersect
-    huc12_resp = requests.get(
-        generate_wfs_huc12_intersection_url(lat, lon),
-        allow_redirects=True,
-    )
-    huc12_json = json.loads(huc12_resp.content)
-    huc12_features = huc12_json["features"]
+    huc12_features = asyncio.run(
+        fetch_data([generate_wfs_huc12_intersection_url(lat, lon)])
+    )["features"]
 
     huc12_gdf = gpd.GeoDataFrame.from_features(huc12_features)
 

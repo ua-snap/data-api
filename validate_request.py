@@ -3,15 +3,15 @@ A module to validate latitude and longitude, contains
 other functions that could be used across multiple endpoints.
 """
 
+import asyncio
 import os
 import re
-import json
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
-import requests
 from generate_urls import generate_wfs_places_url
+from fetch_data import fetch_data
 
 
 def validate_latlon(lat, lon):
@@ -110,21 +110,26 @@ def validate_year(start_year, end_year):
 def validate_var_id(var_id):
     if re.search("[^A-Za-z0-9]", var_id):
         return render_template("400/bad_request.html"), 400
-    var_id_check_url = generate_wfs_places_url(
-        "all_boundaries:all_areas", "type", var_id, "id"
+
+    var_id_check = asyncio.run(
+        fetch_data(
+            [generate_wfs_places_url("all_boundaries:all_areas", "type", var_id, "id")]
+        )
     )
-    var_id_check_resp = requests.get(var_id_check_url, allow_redirects=True)
-    var_id_check = json.loads(var_id_check_resp.content)
 
     if var_id_check["numberMatched"] > 0:
         return var_id_check["features"][0]["properties"]["type"]
     else:
         # Search for HUC12 ID if not found in other areas
-        var_id_check_url = generate_wfs_places_url(
-            "all_boundaries:ak_huc12", "type", var_id, "id"
+        var_id_check = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:ak_huc12", "type", var_id, "id"
+                    )
+                ]
+            )
         )
-        var_id_check_resp = requests.get(var_id_check_url, allow_redirects=True)
-        var_id_check = json.loads(var_id_check_resp.content)
         if var_id_check["numberMatched"] > 0:
             return "huc12"
         else:

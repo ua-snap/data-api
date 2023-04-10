@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, Response
-
+import asyncio
 import geopandas as gpd
 import json
 import pandas as pd
-import requests
 
 # local imports
 from . import routes
@@ -14,6 +13,7 @@ from luts import (
 from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
+from fetch_data import fetch_data
 
 data_api = Blueprint("data_api", __name__)
 
@@ -49,11 +49,12 @@ def find_via_gs(lat, lon):
         )
 
     # WFS request to Geoserver for all communities.
-    communities_resp = requests.get(
-        generate_wfs_search_url("all_boundaries:all_communities", lat, lon),
-        allow_redirects=True,
+    communities_json = asyncio.run(
+        fetch_data(
+            [generate_wfs_search_url("all_boundaries:all_communities", lat, lon)]
+        )
     )
-    communities_json = json.loads(communities_resp.content)
+
     nearby_communities = communities_json["features"]
 
     # Dictionary containing all the communities and
@@ -68,12 +69,9 @@ def find_via_gs(lat, lon):
         proximal_di["communities"][i] = nearby_communities[i]["properties"]
 
     # WFS request to Geoserver for all polygon areas.
-    areas_resp = requests.get(
-        generate_wfs_search_url("all_boundaries:all_areas", lat, lon),
-        allow_redirects=True,
-    )
-    areas_json = json.loads(areas_resp.content)
-    nearby_areas = areas_json["features"]
+    nearby_areas = asyncio.run(
+        fetch_data([generate_wfs_search_url("all_boundaries:all_areas", lat, lon)])
+    )["features"]
 
     # Create the JSON section for each of the area types.
     for area_type in areas_near.values():
@@ -205,18 +203,16 @@ def get_json_for_type(type, recurse=False):
         js_list = list()
         if type == "communities":
             # Requests the Geoserver WFS URL for gathering all the communities
-            communities_resp = requests.get(
-                generate_wfs_places_url(
-                    "all_boundaries:all_communities",
-                    "name,alt_name,id,region,country,type,latitude,longitude",
-                ),
-                allow_redirects=True,
-            )
-            communities_json = json.loads(communities_resp.content)
-
-            # Pulls out only the "Features" field, containing all the
-            # properties for the communities
-            all_communities = communities_json["features"]
+            all_communities = asyncio.run(
+                fetch_data(
+                    [
+                        generate_wfs_places_url(
+                            "all_boundaries:all_communities",
+                            "name,alt_name,id,region,country,type,latitude,longitude",
+                        )
+                    ]
+                )
+            )["features"]
 
             # For each feature, put the properties (name, id, etc.) into the
             # list for creation of a JSON object to be returned.
@@ -227,17 +223,15 @@ def get_json_for_type(type, recurse=False):
             type = type[:-1]
 
             # Requests the Geoserver WFS URL for gathering all the polygon areas
-            areas_resp = requests.get(
-                generate_wfs_places_url(
-                    "all_boundaries:all_areas", "id,name,type,area_type", type
-                ),
-                allow_redirects=True,
-            )
-            areas_json = json.loads(areas_resp.content)
-
-            # Pulls out only the "Features" field, containing all the
-            # properties for the areas
-            all_areas = areas_json["features"]
+            all_areas = asyncio.run(
+                fetch_data(
+                    [
+                        generate_wfs_places_url(
+                            "all_boundaries:all_areas", "id,name,type,area_type", type
+                        )
+                    ]
+                )
+            )["features"]
 
             # For each feature, put the properties (name, id, type) into the
             # list for creation of a JSON object to be returned.
