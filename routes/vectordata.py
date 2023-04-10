@@ -2,12 +2,8 @@ from flask import Blueprint, render_template, Response
 
 import geopandas as gpd
 import json
-import os
-import shutil
-import numpy as np
 import pandas as pd
 import requests
-from shapely.geometry import Point, box
 
 # local imports
 from . import routes
@@ -15,7 +11,7 @@ from luts import (
     all_jsons,
     areas_near,
 )
-from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
+from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
 

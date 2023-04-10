@@ -10,7 +10,6 @@ from flask import (
     request,
     current_app as app,
 )
-from shapely.geometry import Point
 
 # local imports
 from generate_requests import *

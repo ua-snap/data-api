@@ -9,7 +9,7 @@ import json
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
-from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX, SEAICE_BBOX
+from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 import requests
 from generate_urls import generate_wfs_places_url
 
