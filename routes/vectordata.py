@@ -1,24 +1,19 @@
 from flask import Blueprint, render_template, Response
-
+import asyncio
 import geopandas as gpd
 import json
-import os
-import shutil
-import numpy as np
 import pandas as pd
-import requests
-from shapely.geometry import Point, box
 
 # local imports
 from . import routes
 from luts import (
-    shp_di,
     all_jsons,
     areas_near,
 )
-from config import GS_BASE_URL, EAST_BBOX, WEST_BBOX
+from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
+from fetch_data import fetch_data
 
 data_api = Blueprint("data_api", __name__)
 
@@ -54,11 +49,12 @@ def find_via_gs(lat, lon):
         )
 
     # WFS request to Geoserver for all communities.
-    communities_resp = requests.get(
-        generate_wfs_search_url("all_boundaries:all_communities", lat, lon),
-        allow_redirects=True,
+    communities_json = asyncio.run(
+        fetch_data(
+            [generate_wfs_search_url("all_boundaries:all_communities", lat, lon)]
+        )
     )
-    communities_json = json.loads(communities_resp.content)
+
     nearby_communities = communities_json["features"]
 
     # Dictionary containing all the communities and
@@ -73,12 +69,9 @@ def find_via_gs(lat, lon):
         proximal_di["communities"][i] = nearby_communities[i]["properties"]
 
     # WFS request to Geoserver for all polygon areas.
-    areas_resp = requests.get(
-        generate_wfs_search_url("all_boundaries:all_areas", lat, lon),
-        allow_redirects=True,
-    )
-    areas_json = json.loads(areas_resp.content)
-    nearby_areas = areas_json["features"]
+    nearby_areas = asyncio.run(
+        fetch_data([generate_wfs_search_url("all_boundaries:all_areas", lat, lon)])
+    )["features"]
 
     # Create the JSON section for each of the area types.
     for area_type in areas_near.values():
@@ -210,18 +203,16 @@ def get_json_for_type(type, recurse=False):
         js_list = list()
         if type == "communities":
             # Requests the Geoserver WFS URL for gathering all the communities
-            communities_resp = requests.get(
-                generate_wfs_places_url(
-                    "all_boundaries:all_communities",
-                    "name,alt_name,id,region,country,type,latitude,longitude",
-                ),
-                allow_redirects=True,
-            )
-            communities_json = json.loads(communities_resp.content)
-
-            # Pulls out only the "Features" field, containing all the
-            # properties for the communities
-            all_communities = communities_json["features"]
+            all_communities = asyncio.run(
+                fetch_data(
+                    [
+                        generate_wfs_places_url(
+                            "all_boundaries:all_communities",
+                            "name,alt_name,id,region,country,type,latitude,longitude",
+                        )
+                    ]
+                )
+            )["features"]
 
             # For each feature, put the properties (name, id, etc.) into the
             # list for creation of a JSON object to be returned.
@@ -232,17 +223,15 @@ def get_json_for_type(type, recurse=False):
             type = type[:-1]
 
             # Requests the Geoserver WFS URL for gathering all the polygon areas
-            areas_resp = requests.get(
-                generate_wfs_places_url(
-                    "all_boundaries:all_areas", "id,name,type,area_type", type
-                ),
-                allow_redirects=True,
-            )
-            areas_json = json.loads(areas_resp.content)
-
-            # Pulls out only the "Features" field, containing all the
-            # properties for the areas
-            all_areas = areas_json["features"]
+            all_areas = asyncio.run(
+                fetch_data(
+                    [
+                        generate_wfs_places_url(
+                            "all_boundaries:all_areas", "id,name,type,area_type", type
+                        )
+                    ]
+                )
+            )["features"]
 
             # For each feature, put the properties (name, id, type) into the
             # list for creation of a JSON object to be returned.
@@ -263,91 +252,3 @@ def get_json_for_type(type, recurse=False):
 
     # Returns Flask JSON Response
     return Response(response=js, status=200, mimetype="application/json")
-
-
-@routes.route("/update")
-@routes.route("/update/")
-def update_json_data():
-    """GET function for updating underlying CSVs and shapefiles. Creates
-    JSON file from CSVs and shapefiles.
-
-     Args:
-         None.
-
-     Returns:
-         JSON response indicating if a successful update of the data
-         took place.
-
-     Notes:
-         example: http://localhost:5000/update
-    """
-    update_data()
-    return Response(
-        response='{ "success": "True" }', status=200, mimetype="application/json"
-    )
-
-
-def update_data():
-    """Downloads AOI CSV and shapefiles and converts to JSON format
-
-    Args:
-        None.
-
-    Returns:
-        Boolean value indicating success or failure to update datasets.
-        The underlying code updates all the communities, HUCs, and
-        protected areas in Alaska.
-    """
-    # Ensure the path to store shapefiles is created
-    shppath = "data/shapefiles/"
-    if not os.path.exists(shppath):
-        os.makedirs(shppath)
-    else:
-        shutil.rmtree(shppath)
-        os.makedirs(shppath)
-
-    # Downloads AK HUC12s shapefile from GVV
-    download_shapefiles_from_repo(
-        shp_di["akhuc12s"]["src_dir"], shp_di["akhuc12s"]["prefix"]
-    )
-
-
-def download_shapefiles_from_repo(target_dir, file_prefix):
-    path = "data/shapefiles/"
-    # For each required file of the shapefile, download and store locally.
-    for filetype in ["dbf", "prj", "sbn", "sbx", "shp", "shx"]:
-        try:
-            url = f"https://github.com/ua-snap/geospatial-vector-veracity/blob/main/vector_data/polygon/boundaries/{target_dir}/{file_prefix}.{filetype}?raw=true"
-            r = requests.get(url, allow_redirects=True)
-            open(f"{path}{file_prefix}.{filetype}", "wb").write(r.content)
-        except:
-            return 404
-
-
-def generate_minimal_json_from_shapefile(file_prefix, poly_type, fields_retained):
-    path = "data/shapefiles/"
-    # Read shapefile into Geopandas data frame
-    df = gpd.read_file(f"{path}{file_prefix}.shp")
-
-    # Create a copy of the original data frame
-    to_retain = ["id", "name"] + fields_retained
-
-    x = df[to_retain].copy()
-
-    # Create a new Pandas data frame from modified data.
-    z = pd.DataFrame(x)
-
-    # Create JSON data from Pandas data frame.
-    shp_json = json.loads(z.T.to_json(orient="columns"))
-
-    # Create a blank output list for appending JSON fields.
-    output = []
-
-    # For each feature in the JSON, add the "type" of the feature e.g. protected_area and append it to the output list.
-    for key in shp_json:
-        shp_json[key]["type"] = poly_type
-        output.append(shp_json[key])
-
-    # Dump JSON object to local JSON file, append to the file if it exists
-    with open(json_types[poly_type + "s"], "w") as outfile:
-        json.dump(output, outfile)

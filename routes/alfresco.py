@@ -8,11 +8,10 @@ from flask import (
     request,
     current_app as app,
 )
-from shapely.geometry import Point
 
 # local imports
 from generate_requests import *
-from generate_urls import generate_wcs_query_url
+from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersection_url
 from fetch_data import *
 from validate_request import (
     validate_latlon,
@@ -25,7 +24,6 @@ from validate_data import (
     postprocess,
     place_name_and_type,
 )
-from luts import huc12_gdf
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -504,41 +502,18 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
             422,
         )
 
-    # create Point object from coordinates
-    x, y = project_latlon(lat, lon, 3338)
-    # intersct the point with the HUC-12 polygons
-    point = Point(x, y)
-    intersect = huc12_gdf["geometry"].intersection(point)
-    # algorithm below to find the most qualified HUC, since we cannot
-    # rely on a simply intersection because simplified HUC-12s are not mutually
-    # exclusive and exhaustive over AK
-    # (because the simplifying algorithm does not preserve topology of the orginal shapefile)
-    idx_arr = np.where(~np.array([poly.is_empty for poly in intersect]))[0]
-    if len(idx_arr) == 1:
-        # ideal case (and probably most common) - point intersects a single HUC
-        huc_id = huc12_gdf.iloc[idx_arr[0]].name
-    elif len(idx_arr) > 1:
-        # case where multiple polygons intersect the point
-        overlap_gs = gpd.GeoSeries([huc12_gdf["geometry"][idx] for idx in idx_arr])
-        distance = np.array(
-            [gpd.GeoSeries(point).distance(geom.boundary) for geom in overlap_gs]
-        )
-        # whichever polygon has the largest distance to the point is
-        # actually overlapping it the most, so select that one
-        huc_idx = idx_arr[np.argmax(distance)]
-        huc_id = huc12_gdf.iloc[huc_idx].name
-    else:
-        # no intersection, see if a HUC poly is near, within 100m
-        distance = huc12_gdf["geometry"].distance(point)
-        idx_arr = np.where(distance < 100)[0]
-        near_distances = [distance[idx] for idx in idx_arr]
-        if len(idx_arr) == 0:
-            # if still no luck, assume miss
-            return render_template("422/invalid_huc.html"), 422
-        else:
-            # otherwise take nearest HUC within 100m
-            huc_id = huc12_gdf.iloc[idx_arr[np.argmin(near_distances)]].name
+    # Requests for HUC12s that intersect
+    huc12_features = asyncio.run(
+        fetch_data([generate_wfs_huc12_intersection_url(lat, lon)])
+    )["features"]
 
+    if len(huc12_features) < 1:
+        return render_template("404/no_data.html"), 404
+
+    huc12_gdf = gpd.GeoDataFrame.from_features(huc12_features)
+
+    # Collect the HUC12 ID for the returned nearest HUC12
+    huc_id = huc12_gdf.loc[0, "id"]
     huc12_pkg = run_fetch_alf_area_data(var_ep, huc_id, ignore_csv=True)
 
     if request.args.get("format") == "csv":

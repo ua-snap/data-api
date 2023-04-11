@@ -135,24 +135,3 @@ areas_near = {
 # only the columns we need for this lookup.
 with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
     ak_veg_di = pickle.load(fp)
-
-try:
-    # HUC-12
-    huc12_src = "data/shapefiles/ak_huc12s.shp"
-    huc12_gdf = gpd.read_file(huc12_src).set_index("id").to_crs(3338)
-
-    update_needed = False
-except fiona.errors.DriverError:
-    # if this fails, give placeholders until all data can
-    # be updated from vectordata.py
-    update_needed = True
-    huc12_gdf = 0
-
-# look-up for updating place names and data via geo-vector GitHub repo
-shp_di = dict()
-shp_di["akhuc12s"] = {
-    "src_dir": "alaska_hucs",
-    "prefix": "ak_huc12s",
-    "poly_type": "huc12",
-    "retain": ["states"],
-}

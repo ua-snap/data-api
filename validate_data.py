@@ -1,12 +1,10 @@
 """A module to validate fetched data values."""
-import json
+import asyncio
 import re
 import geopandas as gpd
-import requests
 from flask import render_template
-from luts import huc12_gdf
 
-from fetch_data import add_titles
+from fetch_data import add_titles, fetch_data
 from generate_urls import generate_wfs_places_url
 
 nodata_values = {
@@ -166,11 +164,15 @@ def get_poly_3338_bbox(poly_id, crs=3338):
         polygon. Format is (xmin, ymin, xmax, ymax).
     """
     try:
-        url = generate_wfs_places_url(
-            "all_boundaries:all_areas", "the_geom", poly_id, "id"
+        geometry = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:all_areas", "the_geom", poly_id, "id"
+                    )
+                ]
+            )
         )
-        url_resp = requests.get(url, allow_redirects=True)
-        geometry = json.loads(url_resp.content)
         if crs == 3338:
             poly_gdf = (
                 gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
@@ -180,11 +182,22 @@ def get_poly_3338_bbox(poly_id, crs=3338):
             poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
         return poly
     except:
+        geometry = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:ak_huc12", "the_geom", poly_id, "id"
+                    )
+                ]
+            )
+        )
         if crs == 3338:
-            poly_gdf = huc12_gdf.loc[[poly_id]][["geometry"]].to_crs(crs)
+            poly_gdf = (
+                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+            )
             poly = poly_gdf.iloc[0]["geometry"]
         else:
-            poly = huc12_gdf.loc[[poly_id]].to_crs(4326)
+            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
         return poly
 
 
@@ -211,11 +224,15 @@ def place_name_and_type(place_id):
     if (not re.search("[^0-9]", place_id)) and (len(place_id) == 12):
         return None, "huc12"
 
-    areas_url = generate_wfs_places_url(
-        "all_boundaries:all_areas", "name,alt_name,type", place_id, "id"
+    place = asyncio.run(
+        fetch_data(
+            [
+                generate_wfs_places_url(
+                    "all_boundaries:all_areas", "name,alt_name,type", place_id, "id"
+                )
+            ]
+        )
     )
-    areas_url_resp = requests.get(areas_url, allow_redirects=True)
-    place = json.loads(areas_url_resp.content)
     if place["numberMatched"] > 0:
         place = place["features"][0]["properties"]
         full_place = place["name"]
@@ -223,11 +240,18 @@ def place_name_and_type(place_id):
             full_place += " (" + place["alt_name"] + ")"
         return full_place, place["type"]
     else:
-        communities_url = generate_wfs_places_url(
-            "all_boundaries:all_communities", "name,alt_name,type", place_id, "id"
+        place = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:all_communities",
+                        "name,alt_name,type",
+                        place_id,
+                        "id",
+                    )
+                ]
+            )
         )
-        communities_url_resp = requests.get(communities_url, allow_redirects=True)
-        place = json.loads(communities_url_resp.content)
         if place["numberMatched"] > 0:
             place = place["features"][0]["properties"]
             full_place = place["name"]
