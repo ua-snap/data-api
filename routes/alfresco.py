@@ -507,6 +507,9 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
         fetch_data([generate_wfs_huc12_intersection_url(lat, lon)])
     )["features"]
 
+    if len(huc12_features) < 1:
+        return render_template("404/no_data.html"), 404
+
     huc12_gdf = gpd.GeoDataFrame.from_features(huc12_features)
 
     # Collect the HUC12 ID for the returned nearest HUC12
