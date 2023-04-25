@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Spruce Beetle Risk Data</h3>
-<p>The endpoints here provide access to modeled risk of spruce beetle population growth for future and historical scenarios. This data is for use in the Northern Climate Reports webapp, and have thus been clipped to the working domain of the Integrated Ecosystem Model (IEM) project.</p>
+<h3>Climate Protection from Spruce Beetles</h3>
+<p>The endpoints here provide access to modeled climate-related protections against spruce beetle population growth for future and historical scenarios. This data is for use in the Northern Climate Reports webapp, and have thus been clipped to the working domain of the Integrated Ecosystem Model (IEM) project.</p>
 <h4>Service endpoints</h4>
 <p>There are endpoints for point queries and aggregations (area summaries) for all <a href="/places/all">available places.</a></p>
 <ul>
-    <li><a href="/beetles/point">Point Query</a>: Spruce beetle risk at a single point</li>
-    <li><a href="/beetles/area">Aggregate by AOI polygon ID</a>: Spruce beetle risk within an area of interest polygon, returning the mode of all data in polygon.</li>
+    <li><a href="/beetles/point">Point Query</a>: Climate protection from spruce beetles at a single point</li>
+    <li><a href="/beetles/area">Aggregate by AOI polygon ID</a>: Climate protection from spruce beetles within an area of interest polygon, returning the mode of all data in polygon.</li>
 </ul>
 
 <h4>Dimensions:</h4>
@@ -40,9 +40,9 @@
 </ul>
 <strong>Variables:</strong>:
 <ul>
-    <li><strong><code>beetle-risk</code></strong>: <i>(text)</i>, low, moderate, or high</li>
-    <li><strong><code>percent-low-risk</code></strong>: <i>(float)</i>, percentage of low risk pixels in polygon AOI</li>
-    <li><strong><code>percent-medium-risk</code></strong>: <i>(float)</i>, percentage of moderate risk pixels in polygon AOI</li>
-    <li><strong><code>percent-high-risk</code></strong>: <i>(float)</i>, percentage of high risk pixels in polygon AOI</li>
+    <li><strong><code>climate-protection</code></strong>: <i>(text)</i>, high, minimal, or none</li>
+    <li><strong><code>percent-high-protection</code></strong>: <i>(float)</i>, percentage of high climate protection pixels in polygon AOI</li>
+    <li><strong><code>percent-minimal-protection</code></strong>: <i>(float)</i>, percentage of minimal climate protection pixels in polygon AOI</li>
+    <li><strong><code>percent-no-protection</code></strong>: <i>(float)</i>, percentage of no climate protection pixels in polygon AOI</li>
 </ul>
 {% endblock %}
