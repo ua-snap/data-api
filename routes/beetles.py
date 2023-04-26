@@ -94,7 +94,7 @@ def create_csv(packaged_data, place_id, lat=None, lon=None):
 
     metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
     metadata += (
-        "# Values shown are for risk level for spruce beetle spread in the area.\n"
+        "# Values shown are for climate-related protection level from spruce beetle spread in the area.\n"
     )
     output.write(metadata)
 
