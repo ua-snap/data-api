@@ -521,7 +521,7 @@ def about_beetles_area():
     return render_template("beetles/area.html")
 
 
-@routes.route("/beetles/point/<lat>/<lon>/")
+@routes.route("/beetles/point/<lat>/<lon>")
 def run_point_fetch_all_beetles(lat, lon):
     """Run the async request for beetle risk data at a single point.
     Args:
