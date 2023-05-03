@@ -1,50 +1,40 @@
 import asyncio
-import io
-import csv
-import copy
+import pandas as pd
 from urllib.parse import quote
 from flask import (
     Blueprint,
-    Response,
     render_template,
     request,
 )
 
 # local imports
-from fetch_data import (
-    fetch_data_api,
-    fetch_wcs_point_data,
-    fetch_bbox_netcdf,
-    summarize_within_poly,
-    build_csv_dicts,
-    write_csv,
-    add_titles,
-    csv_metadata,
-)
-
-from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
+from fetch_data import *
+
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
 from validate_data import (
-    get_poly_3338_bbox,
     nullify_nodata,
     nullify_and_prune,
     postprocess,
     place_name_and_type,
 )
-from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import huc_gdf, permafrost_encodings, akpa_gdf
 from . import routes
+from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
+from luts import permafrost_encodings  # for the Melvin 4 km (NCR) data
+
+gipl1km_dim_encodings = asyncio.run(
+    get_dim_encodings("crrel_gipl_outputs", scrape=("time", "gmlrgrid:coefficients", 4))
+)
 
 permafrost_api = Blueprint("permafrost_api", __name__)
 
-# rasdaman targets
+# rasdaman coverages
 permafrost_coverage_id = "iem_gipl_magt_alt_4km"
-
-# geoserver targets
+gipl_1km_coverage_id = "crrel_gipl_outputs"
+# geoserver layers
 wms_targets = [
     "obu_2018_magt",
 ]
@@ -54,7 +44,8 @@ wfs_targets = {
 }
 
 titles = {
-    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output",
+    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) 4 km Model Output",
+    "gipl1km": "GIPL 2.0 Mean Annual Ground Temperature (°C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
@@ -99,6 +90,127 @@ def package_obu_vector(obu_vector_resp):
     pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
     di = {"pfx": pfx}
     return di
+
+
+def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
+    """Generate a WCPS query string specific the to GIPL 1 km coverage.
+
+    Arguments:
+        x -- (float) x-coordinate for the point query
+        y -- (float) y-coordinate for the point query
+        years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
+        summary_operation -- (str) one of 'min', 'avg', or 'max'
+    Returns:
+        gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
+    """
+    gipl1km_wcps_str = quote(
+        (
+            f"ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
+            f"  return encode (coverage summary over $v variable(0:9)"
+            f"  values {summary_operation}( $c[variable($v),year({years}),X({x}),Y({y})] )"
+            f', "application/json")'
+        )
+    )
+    return gipl1km_wcps_str
+
+
+def package_gipl1km_wcps_data(gipl1km_wcps_resp):
+    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range. Values are rounded to one decimal place because units are either meters or degrees C.
+
+    Arguments:
+        gipl1km_wcps_resp -- (list) nested 2-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
+
+    Returns:
+        gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
+    """
+    gipl1km_wcps_point_pkg = {}
+    summary_methods = ["min", "mean", "max"]
+    for resp, stat_type in zip(gipl1km_wcps_resp, summary_methods):
+        gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"] = {}
+        for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
+            gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
+    return gipl1km_wcps_point_pkg
+
+
+def generate_gipl1km_time_index():
+    """Generate a time index for annual GIPL 1km outputs.
+
+    Returns:
+        dt_range (pandas DatetimeIndex): a time index with annual frequency
+    """
+    timestamps = [x[1:-2] for x in gipl1km_dim_encodings["time"].split(" ")]
+    date_index = pd.DatetimeIndex(timestamps)
+    return date_index
+
+
+def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
+    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9). Values are rounded to one decimal place because units are either meters or degrees C.
+
+    Arguments:
+        gipl1km_wcps_resp -- (list) deeply nested list of WCS response values.
+        time_slice -- (tuple) 2-tuple of (start_year, end_year)
+    Returns:
+        gipl1km_point_pkg -- (dict) results for all ten variables, all models, all scenario. defaults to the entire time range (time_slice=None).
+    """
+
+    # must match length of time index when it is sliced
+    flat_list = list(deepflatten(gipl1km_point_resp))
+    i = 0
+
+    gipl1km_point_pkg = {}
+    for model_name in gipl1km_dim_encodings["model"].values():
+        gipl1km_point_pkg[model_name] = {}
+        if time_slice is not None:
+            start, stop = time_slice
+            tx = generate_gipl1km_time_index()
+            tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
+        else:
+            tx = generate_gipl1km_time_index()
+        for t in tx:
+            year = t.date().strftime("%Y")
+            gipl1km_point_pkg[model_name][year] = {}
+            for scenario_name in gipl1km_dim_encodings["scenario"].values():
+                gipl1km_point_pkg[model_name][year][scenario_name] = {}
+                for gipl_var_name in gipl1km_dim_encodings["variable"].values():
+                    gipl1km_point_pkg[model_name][year][scenario_name][
+                        gipl_var_name
+                    ] = round(flat_list[i], 1)
+                    i += 1
+
+    return gipl1km_point_pkg
+
+
+def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
+    """Create CSV file with metadata string and location based filename.
+    Args:
+        data_pkg (dict): JSON-like object of data
+        lat: latitude for points or None for polygons
+        lon: longitude for points or None for polygons
+    Returns:
+        CSV response object
+    """
+    if summary is not None:
+        fieldnames = [
+            "summary",
+            "variable",
+            "value",
+        ]
+    else:
+        fieldnames = [
+            "model",
+            "year",
+            "scenario",
+            "variable",
+            "value",
+        ]
+    csv_dicts = build_csv_dicts(
+        data_pkg,
+        fieldnames,
+    )
+    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (°C) at various depths below the surface as well as talik thickness, depth of permafrost base, and depth of permafrost top (m)\n"
+    filename = "GIPL 1 km Model Outputs" + " for " + lat + ", " + lon + ".csv"
+
+    return write_csv(csv_dicts, fieldnames, filename, metadata)
 
 
 def package_gipl(gipl_resp):
@@ -183,30 +295,85 @@ def combine_gipl_poly_var_pkgs(magt_di, alt_di):
 
 @routes.route("/permafrost/")
 @routes.route("/permafrost/abstract/")
-@routes.route("/groundtemperature/")
-@routes.route("/groundtemperature/abstract/")
-@routes.route("/activelayer/")
-@routes.route("/activelayer/abstract/")
-@routes.route("/magtalt/")
-@routes.route("/magtalt/abstract/")
-@routes.route("/magtalt/")
-@routes.route("/magtalt/abstract/")
-@routes.route("/alt/")
-@routes.route("/alt/abstract/")
-@routes.route("/magt/")
-@routes.route("/magt/abstract/")
 def pf_about():
     return render_template("permafrost/abstract.html")
 
 
 @routes.route("/permafrost/point/")
-@routes.route("/groundtemperature/point/")
-@routes.route("/activelayer/point/")
-@routes.route("/magtalt/point/")
-@routes.route("/alt/point/")
-@routes.route("/magt/point/")
 def pf_about_point():
     return render_template("permafrost/point.html")
+
+
+@routes.route("/permafrost/point/gipl/<lat>/<lon>")
+@routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>")
+@routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>/<summarize>")
+# add another synonym with /summarize/ and use that to break out the summary, may need to default the value of summary_operation to None which would make sense
+# add conditional to call correct packaging function
+def run_fetch_gipl_1km_point_data(
+    lat, lon, start_year=None, end_year=None, summarize=None
+):
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+
+    x, y = project_latlon(lat, lon, 3338)
+
+    # CP: the next two code blocks that validate year and summary type selections could be in the `validate_request` module but the first does use a specific time index so that needs more thought
+    if start_year is not None or end_year is not None:
+        try:
+            time_index = generate_gipl1km_time_index()
+            start_valid = pd.Timestamp(int(start_year), 1, 1) >= time_index.min()
+            end_valid = pd.Timestamp(int(end_year), 1, 1) <= time_index.max()
+            chronological = start_year < end_year
+            years_valid = start_valid and end_valid and chronological
+        except:
+            return render_template("400/bad_request.html"), 400
+        if years_valid != True:
+            return render_template("400/bad_request.html"), 400
+
+    # validate the summarize option
+    if summarize is not None:
+        try:
+            summarize_valid = summarize in ["summary", "mmm"]
+        except:
+            return render_template("400/bad_request.html"), 400
+        if summarize_valid != True:
+            return render_template("400/bad_request.html"), 400
+
+    try:
+        gipl_1km_point_data = asyncio.run(
+            fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize)
+        )
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    if all(val != None for val in [start_year, end_year, summarize]):
+        gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
+
+    elif start_year is not None and end_year is not None and summarize is None:
+        gipl_1km_point_package = package_gipl1km_point_data(
+            gipl_1km_point_data, (start_year, end_year)
+        )
+    else:
+        gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
+
+    if request.args.get("format") == "csv":
+        point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        if summarize is not None:
+            return create_gipl1km_csv(point_pkg, lat=lat, lon=lon, summary=summarize)
+        return create_gipl1km_csv(point_pkg, lat=lat, lon=lon)
+    return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
 @routes.route("/permafrost/point/<lat>/<lon>")
@@ -314,3 +481,35 @@ def run_point_fetch_all_permafrost(lat, lon):
         return write_csv(csv_dicts, fieldnames, filename, metadata)
 
     return postprocess(data, "permafrost", titles)
+
+
+async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
+    if all(val != None for val in [start_year, end_year, summarize]):
+        wcps_response_data = []
+        timestring = (
+            f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+        )
+        for summary_operation in ["min", "avg", "max"]:
+            wcps_request_str = make_gipl1km_wcps_request_str(
+                x, y, timestring, summary_operation
+            )
+            wcps_response_data.append(
+                await fetch_data([generate_wcs_query_url(wcps_request_str)])
+            )
+        return wcps_response_data
+
+    if start_year is not None and end_year is not None and summarize is None:
+        timestring = (
+            f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+        )
+        time_subset = ("year", timestring)
+        gipl_request_str = generate_wcs_getcov_str(
+            x, y, "crrel_gipl_outputs", time_slice=time_subset
+        )
+        gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+        return gipl_point_data
+
+    else:
+        gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
+        gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+        return gipl_point_data

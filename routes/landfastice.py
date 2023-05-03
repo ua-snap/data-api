@@ -25,7 +25,9 @@ from config import WEST_BBOX, EAST_BBOX
 landfastice_api = Blueprint("landfastice_api", __name__)
 landfastice_coverage_id = "landfast_sea_ice_extent"
 landfastice_encodings = asyncio.run(
-    get_dim_encodings(landfastice_coverage_id, scrape=("time", "gmlrgrid:coefficients"))
+    get_dim_encodings(
+        landfastice_coverage_id, scrape=("time", "gmlrgrid:coefficients", 1)
+    )
 )
 
 

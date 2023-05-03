@@ -1,8 +1,122 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
+<h3>Geophysical Institute Permafrost Lab (GIPL) model output</h3>
+<p>
+  Query the entire time series of GIPL model outputs (1 km spatial resolution)
+  for ten variables for a single point specified by latitude and longitude.
+</p>
+<p>
+  Example:
+  <a href="/permafrost/point/gipl/63.0628/-146.1627"
+    >/permafrost/point/gipl/63.0628/-146.1627</a
+  >
+</p>
+<p>
+  Query a specific time slice of GIPL model outputs (1 km spatial resolution)
+  for ten variables for a single point specified by latitude and longitude.
+</p>
+<p>
+  Example:
+  <a href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050"
+    >/permafrost/point/gipl/63.0628/-146.1627/2040/2050</a
+  >
+</p>
+<h4>Results from the above queries will look like this:</h4>
+<pre>
+{
+  "5ModelAvg": {
+    "2021": {
+      "RCP 4.5": {
+        "magt0.5m": -2.6,
+        "magt1m": -3.1,
+        "magt2m": -3.3,
+        "magt3m": -3.4,
+        "magt4m": -3.5,
+        "magt5m": -3.5,
+        "magtsurface": -0.0,
+        "permafrostbase": 153.2,
+        "permafrosttop": 0.7,
+        "talikthickness": 0
+  ...
+}
+</pre>
+
+<b>The above output is structured as such:</b>
+
+<pre>
+{
+  &ltmodel>: {
+    &ltyear>:{
+      &ltscenario>: {
+        "magt0.5m": &ltmean annual ground temperature value at 0.5 m depth (°C)>,
+        "magt1m": &ltmean annual ground temperature value at 1 m depth (°C)>,
+        "magt2m": &ltmean annual ground temperature value at 2 m depth (°C)>,
+        "magt3m": &ltmean annual ground temperature value at 3 m depth (°C)>,
+        "magt4m": &ltmean annual ground temperature value at 4 m depth (°C)>,
+        "magt5m": &ltmean annual ground temperature value at 5 m depth (°C)>,
+        "magtsurface": &ltmean annual ground temperature value at 0.01 m depth (°C)>,
+        "permafrostbase": &ltdepth of permafrost base (m)>,
+        "permafrosttop": &ltdepth of permafrost top (m)>,
+        "talikthickness": &ltthickness of talik layer (m)>
+      }
+      ...
+    }
+    ...
+  }
+  ...
+}
+</pre>
+
+<p>
+  Query a specific time slice of GIPL model outputs (1 km spatial resolution)
+  for ten variables for a single point specified by latitude and longitude.
+  Summarize the results by computing the minimum, mean, and maximum values for
+  each of the ten variables for the duration of the time slice. Statistics are
+  computed for all models and scenarios.
+</p>
+<p>
+  Example:
+  <a href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm"
+    >/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm</a
+  >
+</p>
+<h4>Results from the above summary query will look like this:</h4>
+<pre>
+{
+  "gipl1kmmax": {...},
+  gipl1kmmean": {...},
+  gipl1kmmin": {...},
+}
+</pre>
+<b>The above output is structured like this:</b>
+<pre>
+{
+    "gipl1kmmax": &ltmax values for all ten variables across all models, scenarios, and years>,
+    "gipl1kmmean": &ltmean values for all ten variables across all models, scenarios, and years>,
+    "gipl1kmmin": &ltmin values for all ten variables across all models, scenarios, and years>
+}
+</pre>
+<h4>CSV Export</h4>
+<p>
+  To export the data from the above queries to a CSV file, append
+  <code>?format=csv</code> to the URL.
+</p>
+<p>
+  Example:
+  <a href="/permafrost/point/gipl/63.0628/-146.1627?format=csv"
+    >/permafrost/point/gipl/63.0628/-146.1627?format=csv</a
+  >
+</p>
 <h3>Permafrost point query</h3>
-<p>Query permafrost data (e.g. extent, ground temperatures) for a single point specified by latitude and longitude.</p>
-<p>Example: <a href="/permafrost/point/65.0628/-146.1627">/permafrost/point/65.0628/-146.1627</a></p>
+<p>
+  Query permafrost data (e.g. extent, ground temperatures) for a single point
+  specified by latitude and longitude.
+</p>
+<p>
+  Example:
+  <a href="/permafrost/point/65.0628/-146.1627"
+    >/permafrost/point/65.0628/-146.1627</a
+  >
+</p>
 <h4>Results from the query above will look like this:</h4>
 <pre>
 {
@@ -15,214 +129,7 @@
         }
       }
     },
-    "2025": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.68,
-          "magt": 0
-        },
-        "rcp85": {
-          "alt": 0.66,
-          "magt": 0
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.61,
-          "magt": -1
-        },
-        "rcp85": {
-          "alt": 0.6,
-          "magt": -1.1
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 0.65,
-          "magt": -0.9
-        },
-        "rcp85": {
-          "alt": 0.69,
-          "magt": -0.1
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.61,
-          "magt": -1.2
-        },
-        "rcp85": {
-          "alt": 0.6,
-          "magt": -1.1
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 0.66,
-          "magt": -0.6
-        },
-        "rcp85": {
-          "alt": 0.64,
-          "magt": -0.5
-        }
-      }
-    },
-    "2050": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.98,
-          "magt": 2.2
-        },
-        "rcp85": {
-          "alt": 0.81,
-          "magt": 3.2
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.62,
-          "magt": -0.8
-        },
-        "rcp85": {
-          "alt": 0.64,
-          "magt": -0.2
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 0.68,
-          "magt": -0.2
-        },
-        "rcp85": {
-          "alt": 0.69,
-          "magt": -0.1
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.63,
-          "magt": -0.8
-        },
-        "rcp85": {
-          "alt": 0.63,
-          "magt": -0.6
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 0.67,
-          "magt": -0.4
-        },
-        "rcp85": {
-          "alt": 1.21,
-          "magt": 0.3
-        }
-      }
-    },
-    "2075": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.81,
-          "magt": 3.4
-        },
-        "rcp85": {
-          "alt": 0.54,
-          "magt": 5.6
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.62,
-          "magt": -0.7
-        },
-        "rcp85": {
-          "alt": 0.65,
-          "magt": 0
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 1.26,
-          "magt": 0.1
-        },
-        "rcp85": {
-          "alt": 0.91,
-          "magt": 3.1
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.64,
-          "magt": -0.7
-        },
-        "rcp85": {
-          "alt": 1.19,
-          "magt": 0.1
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 1.17,
-          "magt": 0.7
-        },
-        "rcp85": {
-          "alt": 0.9,
-          "magt": 2.6
-        }
-      }
-    },
-    "2095": {
-      "gfdlcm3": {
-        "rcp45": {
-          "alt": 0.81,
-          "magt": 3.9
-        },
-        "rcp85": {
-          "alt": 0.33,
-          "magt": 7.5
-        }
-      },
-      "gisse2r": {
-        "rcp45": {
-          "alt": 0.61,
-          "magt": -0.7
-        },
-        "rcp85": {
-          "alt": 1.1,
-          "magt": 0.7
-        }
-      },
-      "ipslcm5alr": {
-        "rcp45": {
-          "alt": 1.15,
-          "magt": 0.9
-        },
-        "rcp85": {
-          "alt": 0.66,
-          "magt": 5.2
-        }
-      },
-      "mricgcm3": {
-        "rcp45": {
-          "alt": 0.66,
-          "magt": -0.4
-        },
-        "rcp85": {
-          "alt": 0.99,
-          "magt": 1.7
-        }
-      },
-      "ncarccsm4": {
-        "rcp45": {
-          "alt": 1.18,
-          "magt": 0.5
-        },
-        "rcp85": {
-          "alt": 0.6,
-          "magt": 5.5
-        }
-      }
-    },
+    ...
     "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output"
   },
   "jorg": {
@@ -243,73 +150,170 @@
 }
 </pre>
 <ul>
-    <li><strong><code>gipl</code></strong>: GIPL 2.0 Model Outputs
+  <li>
+    <strong><code>gipl</code></strong
+    >: GIPL 2.0 Model Outputs
+    <ul>
+      <li>
+        <strong><code>era</code></strong
+        >: <i>(str)</i>, Era name. "1995" refers to the historical baseline.
+        Otherwise these are 30 year eras surrounding the following center dates,
+        except last era is truncated at 2100: "2025" (2011 - 2040), "2050" (2036
+        - 2065), "2075" (2061 – 2090), "2095" (2086 – 2100).
+      </li>
+      <ul>
+        <li>
+          <strong><code>model</code></strong
+          >: <i>(str)</i>, Climate model driving the GIPL model output.
+        </li>
         <ul>
-            <li><strong><code>era</code></strong>: <i>(str)</i>, Era name. "1995" refers to the historical baseline. Otherwise these are 30 year eras surrounding the following center dates, except last era is truncated at 2100: "2025" (2011 - 2040), "2050" (2036 - 2065), "2075" (2061 – 2090), "2095" (2086 – 2100).</li>
-            <ul>
-                <li><strong><code>model</code></strong>: <i>(str)</i>, Climate model driving the GIPL model output.</li>
-                <ul>
-                    <li><strong><code>scenario</code></strong>: <i>(str)</i>, RCP Emissions Scenario driving the GIPL model output.</li>
-                    <ul>
-                        <li><strong><code>alt</code></strong>: <i>(float)</i>, Active Layer Thickness (m).</li>
-                        <li><strong><code>magt</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
-                        <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-                    </ul>
-                </ul>
-            </ul>
+          <li>
+            <strong><code>scenario</code></strong
+            >: <i>(str)</i>, RCP Emissions Scenario driving the GIPL model
+            output.
+          </li>
+          <ul>
+            <li>
+              <strong><code>alt</code></strong
+              >: <i>(float)</i>, Active Layer Thickness (m).
+            </li>
+            <li>
+              <strong><code>magt</code></strong
+              >: <i>(float)</i>, Mean annual ground temperature (&deg;C).
+            </li>
+            <li>
+              <strong><code>title</code></strong
+              >: <i>(str)</i>, Title describing these results.
+            </li>
+          </ul>
         </ul>
-    <li><strong><code>jorg</code></strong>: Jorgenson et al. (2008) Permafrost Characteristics of Alaska
-        <ul>
-            <li><strong><code>ice</code></strong>: <i>(str)</i>, Estimated ground ice volume.</li>
-            <li><strong><code>pfx</code></strong>: <i>(str)</i>, Permafrost extent.</li>
-            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-        </ul>
-    <li><strong><code>obu_magt</code></strong>: Obu et al. (2018) Modeled Mean Annual Ground Temperature at Top of Permafrost
-        <ul>
-            <li><strong><code>depth</code></strong>: <i>(str)</i>, Top of permafrost (i.e. depth of active layer).</li>
-            <li><strong><code>temp</code></strong>: <i>(float)</i>, Mean annual ground temperature (&deg;C).</li>
-            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-            <li><strong><code>year</code></strong>: <i>(str)</i>, Date range of model output.</li>
-        </ul>
-    <li><strong><code>jorg</code></strong>: Obu et al. (2018) Modeled Permafrost Extent
-        <ul>
-            <li><strong><code>pfx</code></strong>: <i>(str)</i>, Permafrost extent.</li>
-            <li><strong><code>title</code></strong>: <i>(str)</i>, Title describing these results.</li>
-        </ul>
+      </ul>
+    </ul>
+  </li>
+
+  <li>
+    <strong><code>jorg</code></strong
+    >: Jorgenson et al. (2008) Permafrost Characteristics of Alaska
+    <ul>
+      <li>
+        <strong><code>ice</code></strong
+        >: <i>(str)</i>, Estimated ground ice volume.
+      </li>
+      <li>
+        <strong><code>pfx</code></strong
+        >: <i>(str)</i>, Permafrost extent.
+      </li>
+      <li>
+        <strong><code>title</code></strong
+        >: <i>(str)</i>, Title describing these results.
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <strong><code>obu_magt</code></strong
+    >: Obu et al. (2018) Modeled Mean Annual Ground Temperature at Top of
+    Permafrost
+    <ul>
+      <li>
+        <strong><code>depth</code></strong
+        >: <i>(str)</i>, Top of permafrost (i.e. depth of active layer).
+      </li>
+      <li>
+        <strong><code>temp</code></strong
+        >: <i>(float)</i>, Mean annual ground temperature (&deg;C).
+      </li>
+      <li>
+        <strong><code>title</code></strong
+        >: <i>(str)</i>, Title describing these results.
+      </li>
+      <li>
+        <strong><code>year</code></strong
+        >: <i>(str)</i>, Date range of model output.
+      </li>
+    </ul>
+  </li>
+
+  <li>
+    <strong><code>jorg</code></strong
+    >: Obu et al. (2018) Modeled Permafrost Extent
+    <ul>
+      <li>
+        <strong><code>pfx</code></strong
+        >: <i>(str)</i>, Permafrost extent.
+      </li>
+      <li>
+        <strong><code>title</code></strong
+        >: <i>(str)</i>, Title describing these results.
+      </li>
+    </ul>
+  </li>
 </ul>
+
 <h4>Source data</h4>
 <table>
-    <thead>
-        <tr>
-            <th>Data Layer</th>
-            <th>Variables</th>
-            <th>Download link</th>
-            <th>Source</th>
-            <th>Notes</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>GIPL Model Ouputs</td>
-            <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
-            <td><a href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh">Shell Download Script</a></td>
-            <td><a href="https://doi.org/10.1073/pnas.1611056113">Melvin et al. (2017)</a></td>
-            <td>MAGT is modeled for the depth of the active layer.</td>
-        </tr>
-        <tr>
-            <td>Jorgenson Permafrost Characteristics</td>
-            <td>Permafrost Extent, Ground Ice Volume</td>
-            <td><a href="https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606">https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606</a></td>
-            <td><a href="https://catalog.northslopescience.org/dataset/1725">https://catalog.northslopescience.org/dataset/1725</a></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>Obu et al. 2018</td>
-            <td>Mean Annual Ground Temperature, Permafrost Extent</td>
-            <td><a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip</a>, <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip</a></td>
-            <td><a href="https://doi.org/10.1594/PANGAEA.888600">https://doi.org/10.1594/PANGAEA.888600</a></td>
-            <td></td>
-        </tr>
-    </tbody>
+  <thead>
+    <tr>
+      <th>Data Layer</th>
+      <th>Variables</th>
+      <th>Download link</th>
+      <th>Source</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GIPL Model Ouputs</td>
+      <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
+      <td>
+        <a
+          href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh"
+          >Shell Download Script</a
+        >
+      </td>
+      <td>
+        <a href="https://doi.org/10.1073/pnas.1611056113"
+          >Melvin et al. (2017)</a
+        >
+      </td>
+      <td>MAGT is modeled for the depth of the active layer.</td>
+    </tr>
+    <tr>
+      <td>Jorgenson Permafrost Characteristics</td>
+      <td>Permafrost Extent, Ground Ice Volume</td>
+      <td>
+        <a
+          href="https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606"
+          >https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606</a
+        >
+      </td>
+      <td>
+        <a href="https://catalog.northslopescience.org/dataset/1725"
+          >https://catalog.northslopescience.org/dataset/1725</a
+        >
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Obu et al. 2018</td>
+      <td>Mean Annual Ground Temperature, Permafrost Extent</td>
+      <td>
+        <a
+          href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip"
+          >https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip</a
+        >,
+        <a
+          href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip"
+          >https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip</a
+        >
+      </td>
+      <td>
+        <a href="https://doi.org/10.1594/PANGAEA.888600"
+          >https://doi.org/10.1594/PANGAEA.888600</a
+        >
+      </td>
+      <td></td>
+    </tr>
+  </tbody>
 </table>
 {% endblock %}

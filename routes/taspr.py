@@ -38,7 +38,6 @@ from validate_data import (
     postprocess,
     place_name_and_type,
 )
-from luts import type_di
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -458,11 +457,15 @@ def package_mmm_point_data(point_data, cov_id, horp, varname):
         if horp == "projected" or horp == "hp":
             if horp == "projected":
                 projected_max = round(point_data[0], dim_encodings["rounding"][varname])
-                projected_mean = round(point_data[1], dim_encodings["rounding"][varname])
+                projected_mean = round(
+                    point_data[1], dim_encodings["rounding"][varname]
+                )
                 projected_min = round(point_data[2], dim_encodings["rounding"][varname])
             else:
                 projected_max = round(point_data[3], dim_encodings["rounding"][varname])
-                projected_mean = round(point_data[4], dim_encodings["rounding"][varname])
+                projected_mean = round(
+                    point_data[4], dim_encodings["rounding"][varname]
+                )
                 projected_min = round(point_data[5], dim_encodings["rounding"][varname])
 
             point_pkg["projected"] = dict()
@@ -614,7 +617,9 @@ async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades)
             # otheriwse use generic WCS request str
             x = f"{x1},{x2}"
             y = f"{y1},{y2}"
-            request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, encoding)
+            request_str = generate_wcs_getcov_str(
+                x, y, cov_id, var_coord, encoding=encoding
+            )
         urls.append(generate_wcs_query_url(request_str))
 
     start_time = time.time()
@@ -1018,17 +1023,17 @@ def run_fetch_point_data(lat, lon):
     return combined_pkg
 
 
-def run_aggregate_allvar_polygon(poly_gdf, poly_id):
+def run_aggregate_allvar_polygon(poly_id):
     """Get data summary (e.g. zonal mean) within a Polygon for all variables."""
     tas_pkg, pr_pkg = [
-        run_aggregate_var_polygon(var_ep, poly_gdf, poly_id)
+        run_aggregate_var_polygon(var_ep, poly_id)
         for var_ep in ["temperature", "precipitation"]
     ]
     combined_pkg = combine_pkg_dicts(tas_pkg, pr_pkg)
     return combined_pkg
 
 
-def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
+def run_aggregate_var_polygon(var_ep, poly_id):
     """Get data summary (e.g. zonal mean) of single variable in polygon.
 
     Args:
@@ -1042,7 +1047,7 @@ def run_aggregate_var_polygon(var_ep, poly_gdf, poly_id):
     Notes:
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly_3338_bbox(poly_gdf, poly_id)
+    poly = get_poly_3338_bbox(poly_id)
     # mapping between coordinate values (ints) and variable names (strs)
     varname = var_ep_lu[var_ep]
     var_coord = list(dim_encodings["varnames"].keys())[
@@ -1428,9 +1433,9 @@ def taspr_area_data_endpoint(var_ep, var_id):
 
     try:
         if var_ep in var_ep_lu.keys():
-            poly_pkg = run_aggregate_var_polygon(var_ep, type_di[poly_type], var_id)
+            poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
         elif var_ep == "taspr":
-            poly_pkg = run_aggregate_allvar_polygon(type_di[poly_type], var_id)
+            poly_pkg = run_aggregate_allvar_polygon(var_id)
     except:
         return render_template("422/invalid_area.html"), 422
 

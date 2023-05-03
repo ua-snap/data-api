@@ -3,14 +3,15 @@ A module to validate latitude and longitude, contains
 other functions that could be used across multiple endpoints.
 """
 
+import asyncio
 import os
 import re
-import json
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
-from luts import valid_huc_ids
+from generate_urls import generate_wfs_places_url
+from fetch_data import fetch_data
 
 
 def validate_latlon(lat, lon):
@@ -36,6 +37,7 @@ def validate_latlon(lat, lon):
 
     return 422
 
+
 def validate_seaice_latlon(lat, lon):
     """Validate the lat and lon values for pan arctic sea ice.
     Return True if valid or HTTP status code if validation failed
@@ -58,6 +60,7 @@ def validate_seaice_latlon(lat, lon):
             return True
 
     return 422
+
 
 def validate_bbox(lat1, lon1, lat2, lon2):
     """Validate a bounding box given lat lon values
@@ -107,12 +110,30 @@ def validate_year(start_year, end_year):
 def validate_var_id(var_id):
     if re.search("[^A-Za-z0-9]", var_id):
         return render_template("400/bad_request.html"), 400
-    for filename in os.listdir("data/jsons/"):
-        with open(os.path.join("data/jsons/", filename), "r") as f:
-            for jsonline in json.loads(f.read()):
-                if var_id == jsonline["id"]:
-                    return jsonline["type"]
-    return render_template("422/invalid_area.html"), 400
+
+    var_id_check = asyncio.run(
+        fetch_data(
+            [generate_wfs_places_url("all_boundaries:all_areas", "type", var_id, "id")]
+        )
+    )
+
+    if var_id_check["numberMatched"] > 0:
+        return var_id_check["features"][0]["properties"]["type"]
+    else:
+        # Search for HUC12 ID if not found in other areas
+        var_id_check = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:ak_huc12", "type", var_id, "id"
+                    )
+                ]
+            )
+        )
+        if var_id_check["numberMatched"] > 0:
+            return "huc12"
+        else:
+            return render_template("422/invalid_area.html"), 400
 
 
 def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):

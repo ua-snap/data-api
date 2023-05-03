@@ -8,7 +8,7 @@ def get_wcs_xy_str_from_bbox_bounds(poly):
     Args:
         poly (object): shapely.Polygon with 4-tuple bounding box (xmin, ymin, xmax, ymax).
     Returns:
-        xy (tuple): 2-tuple of coordinate strings formatted for WCS requests. 
+        xy (tuple): 2-tuple of coordinate strings formatted for WCS requests.
             Instantiated as a namedtuple for access convenience and s
             elf-documentation when used in service endpoints.
     """
@@ -58,7 +58,9 @@ def generate_mmm_wcs_getcov_str(x, y, cov_id, model, scenario, encoding="json"):
     return wcs_getcov_str
 
 
-def generate_wcs_getcov_str(x, y, cov_id, var_coord=None, encoding="json"):
+def generate_wcs_getcov_str(
+    x, y, cov_id, var_coord=None, time_slice=None, encoding="json"
+):
     """Generate a WCS GetCoverage request for fetching a
     subset of a coverage over X and Y axes.
 
@@ -71,6 +73,7 @@ def generate_wcs_getcov_str(x, y, cov_id, var_coord=None, encoding="json"):
         lower and upper bounds of bbox
         cov_id (str): Rasdaman coverage ID
         var_coord (int): coordinate value corresponding to variable name to query, default=None will include all variables
+        time_slice (tuple): two-tuple of the time axis name (e.g., `year`) and the ISO time-string used to slice the data
         encoding (str): currently supports either "json" or "netcdf"
         for point or bbox queries, respectively
     Returns:
@@ -82,9 +85,14 @@ def generate_wcs_getcov_str(x, y, cov_id, var_coord=None, encoding="json"):
         var_subset_str = f"&SUBSET=varname({var_coord})"
     else:
         var_subset_str = ""
+    if time_slice is not None:
+        time_axis, slice_string = time_slice
+        time_slice_str = f"&SUBSET={time_axis}({slice_string})"
+    else:
+        time_slice_str = ""
     wcs_getcov_str = (
         f"GetCoverage&COVERAGEID={cov_id}"
-        f"&SUBSET=X({x})&SUBSET=Y({y}){var_subset_str}"
+        f"&SUBSET=X({x})&SUBSET=Y({y}){var_subset_str}{time_slice_str}"
         f"&FORMAT=application/{encoding}"
     )
     return wcs_getcov_str
@@ -96,16 +104,15 @@ def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None):
     Args:
         bbox_bounds (tuple): 4-tuple of bounding polygon extent (xmin, ymin, xmax, ymax)
         cov_id (str): Rasdaman coverage ID
-        var_coord (int): coordinate value corresponding to variable name to query, 
+        var_coord (int): coordinate value corresponding to variable name to query,
             default=None will include all variables
     Returns:
         netcdf_wcs_getcov_str (str): WCS GetCoverage Request to append to a query URL
     """
-
     (x1, y1, x2, y2) = bbox_bounds
     x = f"{x1},{x2}"
     y = f"{y1},{y2}"
-    netcdf_wcs_getcov_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, "netcdf")
+    netcdf_wcs_getcov_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, encoding="netcdf")
     return netcdf_wcs_getcov_str
 
 
@@ -127,7 +134,7 @@ def generate_average_wcps_str(
         axis_coords (tuple): 2-tuple of coordinates to average over
             of the form (start, stop)
         slice_di (dict): dict with axis names for keys and
-            coordinates for the values to be used in further 
+            coordinates for the values to be used in further
             subsetting in WCPS query. E.g., {"varname": 0}
         encoding (str): currently supports either "json" or "netcdf"
             for point or bbox queries, respectively
@@ -167,6 +174,8 @@ def generate_netcdf_average_wcps_str(bbox_bounds, generate_average_wcps_str_kwar
     x = f"{x1}:{x2}"
     y = f"{y1}:{y2}"
     netcdf_avg_wcps_str = generate_average_wcps_str(
-        x, y, **generate_average_wcps_str_kwargs,
+        x,
+        y,
+        **generate_average_wcps_str_kwargs,
     )
     return netcdf_avg_wcps_str
