@@ -19,7 +19,7 @@ from config import WEST_BBOX, EAST_BBOX
 indicators_api = Blueprint("indicators_api", __name__)
 
 # All of the cordex_<variable name> coverages should have the same encodings 
-dim_encodings = asyncio.run(get_dim_encodings("cordex_tas"))
+dim_encodings = asyncio.run(get_dim_encodings("cordex_tasmax"))
 
 cordex_indicator_coverage_lu = {
     "tx_days_above": "cordex_tasmax",
@@ -92,7 +92,7 @@ async def fetch_yearly_tx_above_or_below_point_data(indicator_id, **kwargs):
 
     url = generate_wcs_query_url(
         generate_tx_days_above_or_below_wcps_str(
-            cov_id, **kwargs
+            cov_id, above=above, **kwargs
         )
     )
     
@@ -125,8 +125,8 @@ def package_era_indicator_results(point_data_list):
     return di
 
 
-@routes.route("/indicators/tx_days_above/<tx>/point/<lat>/<lon>")
-def run_fetch_tx_days_above_point_data(tx, lat, lon):
+@routes.route("/indicators/<indicator>/<tx>/point/<lat>/<lon>")
+def run_fetch_tx_days_above_point_data(indicator, tx, lat, lon):
     """
 
     Args:
@@ -140,6 +140,8 @@ def run_fetch_tx_days_above_point_data(tx, lat, lon):
     Notes:
         example request: http://localhost:5000/ TO-DO /point/65.0628/-146.1627
     """
+    # TO-DO: validate_indicator(indicator)
+
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -161,7 +163,7 @@ def run_fetch_tx_days_above_point_data(tx, lat, lon):
 
             point_data_list = asyncio.run(
                 fetch_yearly_tx_above_or_below_point_data(
-                    "tx_days_above", tx=tx, lat=lat, lon=lon, start_year=year, n_years=n_years, encoding="json", above=True
+                    indicator, tx=tx, lat=lat, lon=lon, start_year=year, n_years=n_years, encoding="json"
                 )
             )
             era_key = f"{year}-{year + n_years - 1}"
