@@ -1,4 +1,9 @@
-"""Endpoints for climate indicators"""
+"""Endpoints for climate indicators
+
+There are two types of endpoints being developed here currently: 
+1. Endpoint(s) which queries a coverage containing summarized versions of the indicators dataset created for work with John W and TBEC. The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now. 
+2. Endpoint(s) that produce dynamic indicators, which query coverages of specific variables in the base CORDEX dataset we have. Unfortunately, not all desired indicators are going to be easily produced in a similar fashion with this route given the limitations of WCPS. Calling this "dynamic" indicators here.
+"""
 
 import asyncio
 import numpy as np
@@ -8,8 +13,13 @@ from shapely.geometry import Point
 
 # local imports
 from generate_urls import generate_wcs_query_url
+from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
-from validate_request import validate_latlon
+from validate_request import validate_latlon, project_latlon
+from validate_data import (
+    get_poly_3338_bbox,
+    nullify_and_prune,
+)
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -18,10 +28,18 @@ indicators_api = Blueprint("indicators_api", __name__)
 # All of the cordex_<variable name> coverages should have the same encodings
 dim_encodings = asyncio.run(get_dim_encodings("cordex_tasmax"))
 
+# dim encodings for the base indicators coverage
+base_dim_encodings = asyncio.run(get_dim_encodings("cordex_indicators_climatologies"))
+
 cordex_indicator_coverage_lu = {
     "tx_days_above": "cordex_tasmax",
     "tx_days_below": "cordex_tasmin",
 }
+
+
+#
+# Dynamic indicators endpoints
+#
 
 
 def generate_tx_days_above_or_below_wcps_str(
@@ -114,9 +132,8 @@ def package_era_indicator_results(point_data_list):
     for si, mod_li in enumerate(point_data_list):
         scenario = dim_encodings["scenario"][si]
         di[scenario] = dict()
-        for mi, yr_li in enumerate(mod_li):
+        for mi, scenario_li in enumerate(mod_li):
             model = dim_encodings["model"][mi]
-            yr_li = np.array(yr_li).astype(float)
             di[scenario][model] = dict()
             di[scenario][model]["min"] = np.min(yr_li).round(1)
             di[scenario][model]["mean"] = np.mean(yr_li).round(1)
@@ -125,7 +142,7 @@ def package_era_indicator_results(point_data_list):
     return di
 
 
-@routes.route("/indicators/<indicator>/<tx>/point/<lat>/<lon>")
+@routes.route("/indicators/point/<indicator>/<tx>/<lat>/<lon>")
 def run_fetch_tx_days_above_point_data(indicator, tx, lat, lon):
     """
 
@@ -135,10 +152,10 @@ def run_fetch_tx_days_above_point_data(indicator, tx, lat, lon):
         lon (float): longitude
 
     Returns:
-        JSON-like dict of requested ALFRESCO data
+        JSON-like dict of indicator data derived from the CORDEX temperature coverages
 
     Notes:
-        example request: http://localhost:5000/ TO-DO /point/65.0628/-146.1627
+        example request: http://localhost:5000/indicators/point/tx_days_above/20/65.0628/-146.1627
     """
     # TO-DO: validate_indicator(indicator)
 
@@ -178,3 +195,97 @@ def run_fetch_tx_days_above_point_data(indicator, tx, lat, lon):
         return render_template("400/bad_request.html"), 400
 
     return indicator_package
+
+
+#
+# Base indicators endpoint:
+#
+
+
+async def fetch_base_indicators_point_data(x, y):
+    """Make the async request for indicator data for a range of years at a specified point
+
+    Args:
+        x (float):
+        y (float):
+
+    Returns:
+        list of data results from each of historical and future coverages
+    """
+    wcs_str = generate_wcs_getcov_str(
+        x, y, cov_id="cordex_indicators_climatologies", time_slice=("era", "1,2")
+    )
+    url = generate_wcs_query_url(wcs_str)
+    point_data_list = await fetch_data([url])
+
+    return point_data_list
+
+
+def package_base_indicators_data(point_data_list):
+    """Package the indicator values for a given query
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCPS query
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+    """
+    # base_dim_encodings
+    di = dict()
+    for vi, era_li in enumerate(point_data_list):
+        varname = base_dim_encodings["varname"][vi]
+        di[varname] = dict()
+        for ei, model_li in enumerate(era_li):
+            era = base_dim_encodings["era"][ei]
+            di[varname][era] = dict()
+            for mi, scenario_li in enumerate(model_li):
+                model = base_dim_encodings["model"][mi]
+                di[varname][era][model] = dict()
+                for si, stat_li in enumerate(scenario_li):
+                    scenario = base_dim_encodings["scenario"][si]
+                    di[varname][era][model][scenario] = dict()
+                    for ti, value in enumerate(stat_li):
+                        stat = base_dim_encodings["stat"][ti]
+                        di[varname][era][model][scenario][stat] = value
+
+    return di
+
+
+@routes.route("/indicators/base/<lat>/<lon>")
+def run_fetch_base_indicators_point_data(lat, lon):
+    """Query the cordex_indicators_climatologies rasdaman coverage which contains indicators summarized over NCR time eras
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of requested ALFRESCO data
+
+    Notes:
+        example request: http://localhost:5000/ TO-DO /point/65.0628/-146.1627
+    """
+
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+    x, y = project_latlon(lat, lon, 3338)
+
+    try:
+        point_data_list = asyncio.run(fetch_base_indicators_point_data(x=x, y=y))
+
+    except ValueError:
+        return render_template("400/bad_request.html"), 400
+
+    results = package_base_indicators_data(point_data_list)
+
+    results = nullify_and_prune(results, "cordex_indicators")
+
+    return results
