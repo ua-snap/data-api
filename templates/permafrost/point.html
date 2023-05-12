@@ -47,13 +47,13 @@
   &ltmodel>: {
     &ltyear>:{
       &ltscenario>: {
-        "magt0.5m": &ltmean annual ground temperature value at 0.5 m depth (°C)>,
-        "magt1m": &ltmean annual ground temperature value at 1 m depth (°C)>,
-        "magt2m": &ltmean annual ground temperature value at 2 m depth (°C)>,
-        "magt3m": &ltmean annual ground temperature value at 3 m depth (°C)>,
-        "magt4m": &ltmean annual ground temperature value at 4 m depth (°C)>,
-        "magt5m": &ltmean annual ground temperature value at 5 m depth (°C)>,
-        "magtsurface": &ltmean annual ground temperature value at 0.01 m depth (°C)>,
+        "magt0.5m": &ltmean annual ground temperature value at 0.5 m depth (&deg;C)>,
+        "magt1m": &ltmean annual ground temperature value at 1 m depth (&deg;C)>,
+        "magt2m": &ltmean annual ground temperature value at 2 m depth (&deg;C)>,
+        "magt3m": &ltmean annual ground temperature value at 3 m depth (&deg;C)>,
+        "magt4m": &ltmean annual ground temperature value at 4 m depth (&deg;C)>,
+        "magt5m": &ltmean annual ground temperature value at 5 m depth (&deg;C)>,
+        "magtsurface": &ltmean annual ground temperature value at 0.01 m depth (&deg;C)>,
         "permafrostbase": &ltdepth of permafrost base (m)>,
         "permafrosttop": &ltdepth of permafrost top (m)>,
         "talikthickness": &ltthickness of talik layer (m)>
@@ -71,7 +71,7 @@
   for ten variables for a single point specified by latitude and longitude.
   Summarize the results by computing the minimum, mean, and maximum values for
   each of the ten variables for the duration of the time slice. Statistics are
-  computed for all models and scenarios.
+  computed separately for each model, but include all scenarios.
 </p>
 <p>
   Example:
@@ -82,17 +82,23 @@
 <h4>Results from the above summary query will look like this:</h4>
 <pre>
 {
-  "gipl1kmmax": {...},
-  gipl1kmmean": {...},
-  gipl1kmmin": {...},
+  "5ModelAvg": {
+    "gipl1kmmax": {...},
+    "gipl1kmmean": {...},
+    "gipl1kmmin": {...},
+  }
+  ...
 }
 </pre>
 <b>The above output is structured like this:</b>
 <pre>
 {
-    "gipl1kmmax": &ltmax values for all ten variables across all models, scenarios, and years>,
-    "gipl1kmmean": &ltmean values for all ten variables across all models, scenarios, and years>,
-    "gipl1kmmin": &ltmin values for all ten variables across all models, scenarios, and years>
+  &ltmodel>: 
+  {
+    "gipl1kmmax": &ltmax values for all ten variables across all scenarios and years in the time slice>,
+    "gipl1kmmean": &ltmean values for all ten variables across all scenarios and years in the time slice>,
+    "gipl1kmmin": &ltmin values for all ten variables across all scenarios and years in the time slice>
+  }...
 }
 </pre>
 <h4>CSV Export</h4>
@@ -130,7 +136,7 @@
       }
     },
     ...
-    "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) Model Output"
+    "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
   },
   "jorg": {
     "ice": "Moderate",
@@ -140,7 +146,7 @@
   "obu_magt": {
     "depth": "Top of Permafrost",
     "temp": 0.2,
-    "title": "Obu et al. (2018) 2000-2016 Mean Annual Top of Permafrost Ground Temperature (°C)",
+    "title": "Obu et al. (2018) 2000-2016 Mean Annual Top of Permafrost Ground Temperature (&deg;C)",
     "year": "2000-2016"
   },
   "obupfx": {
@@ -263,7 +269,38 @@
   </thead>
   <tbody>
     <tr>
-      <td>GIPL Model Ouputs</td>
+      <td>GIPL 2.0 1 km Model Outputs</td>
+      <td>
+        Mean Annual Ground Temperature at 0.5, 1, 2, 3, 4, 5 m below the surface
+        (&deg;C), Mean Annual Surface (i.e., 0.01 m depth) Temperature (&deg;C),
+        Permafrost top (upper boundary of the permafrost, depth below the
+        surface in m), Permafrost base (lower boundary of the permafrost, depth
+        below the surface in m), Talik thickness (perennially unfrozen ground
+        occurring in permafrost terrain, m)
+      </td>
+      <td>
+        <a href="http://data.snap.uaf.edu/data/Base/AK_1km/GIPL/"
+          >Data Directory</a
+        >
+      </td>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36"
+          >SNAP GeoNetwork Data Catalog</a
+        >
+      </td>
+      <td>
+        Funded by the Broad Agency Announcement Program and the U.S. Army
+        Engineer Research and Development Center and Cold Regions Research and
+        Engineering Laboratory (ERDC-CRREL) under Contract No. W913E521C0010.
+        The GIPL2-MPI/GCM simulations were supported in part by the
+        high-performance computing and data storage resources operated by the
+        Research Computing Systems Group at the University of Alaska Fairbanks
+        Geophysical Institute.
+      </td>
+    </tr>
+    <tr>
+      <td>Melvin 4 km GIPL Model Outputs</td>
       <td>Mean Annual Ground Temperature, Active Layer Thickness</td>
       <td>
         <a
@@ -276,7 +313,10 @@
           >Melvin et al. (2017)</a
         >
       </td>
-      <td>MAGT is modeled for the depth of the active layer.</td>
+      <td>
+        MAGT is modeled for the depth of the active layer. This dataset will
+        eventually be deprecated from the API.
+      </td>
     </tr>
     <tr>
       <td>Jorgenson Permafrost Characteristics</td>
