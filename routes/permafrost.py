@@ -92,7 +92,7 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
+def make_gipl1km_wcps_request_str(x, y, years, summary_operation, model):
     """Generate a WCPS query string specific the to GIPL 1 km coverage.
 
     Arguments:
@@ -100,6 +100,7 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
         y -- (float) y-coordinate for the point query
         years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
         summary_operation -- (str) one of 'min', 'avg', or 'max'
+        model(int) - Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4
     Returns:
         gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
     """
@@ -107,7 +108,7 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
         (
             f"ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
             f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),year({years}),X({x}),Y({y})] )"
+            f"  values {summary_operation}( $c[variable($v),model({model}),year({years}),X({x}),Y({y})] )"
             f', "application/json")'
         )
     )
@@ -115,7 +116,7 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
 
 
 def package_gipl1km_wcps_data(gipl1km_wcps_resp):
-    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range. Values are rounded to one decimal place because units are either meters or degrees C.
+    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range and model type. Values are rounded to one decimal place because units are either meters or degrees C.
 
     Arguments:
         gipl1km_wcps_resp -- (list) nested 2-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
@@ -123,12 +124,15 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
     Returns:
         gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
     """
-    gipl1km_wcps_point_pkg = {}
-    summary_methods = ["min", "mean", "max"]
-    for resp, stat_type in zip(gipl1km_wcps_resp, summary_methods):
-        gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"] = {}
-        for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
-            gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
+    gipl1km_wcps_point_pkg = dict()
+    models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
+    for all_resp, model in zip(gipl1km_wcps_resp, models):
+        gipl1km_wcps_point_pkg[model] = dict()
+        summary_methods = ["min", "mean", "max"]
+        for resp, stat_type in zip(all_resp, summary_methods):
+            gipl1km_wcps_point_pkg[model][f"gipl1km{stat_type}"] = dict()
+            for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
+                gipl1km_wcps_point_pkg[model][f"gipl1km{stat_type}"][k] = round(v, 1)
     return gipl1km_wcps_point_pkg
 
 
@@ -309,71 +313,10 @@ def pf_about_point():
 @routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>/<summarize>")
 # add another synonym with /summarize/ and use that to break out the summary, may need to default the value of summary_operation to None which would make sense
 # add conditional to call correct packaging function
-def run_fetch_gipl_1km_point_data(
-    lat, lon, start_year=None, end_year=None, summarize=None
-):
-    validation = validate_latlon(lat, lon)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    if validation == 422:
-        return (
-            render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
-            ),
-            422,
-        )
-
-    x, y = project_latlon(lat, lon, 3338)
-
-    # CP: the next two code blocks that validate year and summary type selections could be in the `validate_request` module but the first does use a specific time index so that needs more thought
-    if start_year is not None or end_year is not None:
-        try:
-            time_index = generate_gipl1km_time_index()
-            start_valid = pd.Timestamp(int(start_year), 1, 1) >= time_index.min()
-            end_valid = pd.Timestamp(int(end_year), 1, 1) <= time_index.max()
-            chronological = start_year < end_year
-            years_valid = start_valid and end_valid and chronological
-        except:
-            return render_template("400/bad_request.html"), 400
-        if years_valid != True:
-            return render_template("400/bad_request.html"), 400
-
-    # validate the summarize option
-    if summarize is not None:
-        try:
-            summarize_valid = summarize in ["summary", "mmm"]
-        except:
-            return render_template("400/bad_request.html"), 400
-        if summarize_valid != True:
-            return render_template("400/bad_request.html"), 400
-
-    try:
-        gipl_1km_point_data = asyncio.run(
-            fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize)
-        )
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
-
-    if all(val != None for val in [start_year, end_year, summarize]):
-        gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
-
-    elif start_year is not None and end_year is not None and summarize is None:
-        gipl_1km_point_package = package_gipl1km_point_data(
-            gipl_1km_point_data, (start_year, end_year)
-        )
-    else:
-        gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
-
-    if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
-        if point_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-        if summarize is not None:
-            return create_gipl1km_csv(point_pkg, lat=lat, lon=lon, summary=summarize)
-        return create_gipl1km_csv(point_pkg, lat=lat, lon=lon)
-    return postprocess(gipl_1km_point_package, "crrel_gipl")
+def gipl_1km_point_data(lat, lon, start_year=None, end_year=None, summarize=None):
+    return asyncio.run(
+        run_fetch_gipl_1km_point_data(lat, lon, start_year, end_year, summarize)
+    )
 
 
 @routes.route("/permafrost/point/<lat>/<lon>")
@@ -485,17 +428,20 @@ def run_point_fetch_all_permafrost(lat, lon):
 
 async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
     if all(val != None for val in [start_year, end_year, summarize]):
-        wcps_response_data = []
+        wcps_response_data = list()
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
         )
-        for summary_operation in ["min", "avg", "max"]:
-            wcps_request_str = make_gipl1km_wcps_request_str(
-                x, y, timestring, summary_operation
-            )
-            wcps_response_data.append(
-                await fetch_data([generate_wcs_query_url(wcps_request_str)])
-            )
+        for model_num in range(3):
+            model = list()
+            for summary_operation in ["min", "avg", "max"]:
+                wcps_request_str = make_gipl1km_wcps_request_str(
+                    x, y, timestring, summary_operation, model_num
+                )
+                model.append(
+                    await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                )
+            wcps_response_data.append(model)
         return wcps_response_data
 
     if start_year is not None and end_year is not None and summarize is None:
@@ -513,3 +459,101 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
         gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
         gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
         return gipl_point_data
+
+
+async def run_fetch_gipl_1km_point_data(
+    lat, lon, start_year=None, end_year=None, summarize=None
+):
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+
+    x, y = project_latlon(lat, lon, 3338)
+
+    # CP: the next two code blocks that validate year and summary type selections could be in the `validate_request` module but the first does use a specific time index so that needs more thought
+    if start_year is not None or end_year is not None:
+        try:
+            time_index = generate_gipl1km_time_index()
+            start_valid = pd.Timestamp(int(start_year), 1, 1) >= time_index.min()
+            end_valid = pd.Timestamp(int(end_year), 1, 1) <= time_index.max()
+            chronological = start_year < end_year
+            years_valid = start_valid and end_valid and chronological
+        except:
+            return render_template("400/bad_request.html"), 400
+        if years_valid != True:
+            return render_template("400/bad_request.html"), 400
+
+    # validate the summarize option
+    if summarize is not None:
+        try:
+            summarize_valid = summarize in ["summary", "mmm"]
+        except:
+            return render_template("400/bad_request.html"), 400
+        if summarize_valid != True:
+            return render_template("400/bad_request.html"), 400
+
+    try:
+        gipl_1km_point_data = await asyncio.create_task(
+            fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize)
+        )
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    if all(val != None for val in [start_year, end_year, summarize]):
+        gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
+
+    elif start_year is not None and end_year is not None and summarize is None:
+        gipl_1km_point_package = package_gipl1km_point_data(
+            gipl_1km_point_data, (start_year, end_year)
+        )
+    else:
+        gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
+
+    if request.args.get("format") == "csv":
+        point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        if summarize is not None:
+            return create_gipl1km_csv(point_pkg, lat=lat, lon=lon, summary=summarize)
+        return create_gipl1km_csv(point_pkg, lat=lat, lon=lon)
+    return postprocess(
+        gipl_1km_point_package,
+        "crrel_gipl",
+        f"{start_year}-{end_year}" if start_year else None,
+    )
+
+
+async def run_ncr_requests(lat, lon):
+
+    tasks = [
+        asyncio.create_task(
+            run_fetch_gipl_1km_point_data(
+                lat, lon, start_year=2021, end_year=2039, summarize="mmm"
+            )
+        ),
+        asyncio.create_task(
+            run_fetch_gipl_1km_point_data(
+                lat, lon, start_year=2040, end_year=2069, summarize="mmm"
+            )
+        ),
+        asyncio.create_task(
+            run_fetch_gipl_1km_point_data(
+                lat, lon, start_year=2070, end_year=2099, summarize="mmm"
+            )
+        ),
+    ]
+    return await asyncio.gather(*tasks)
+
+
+@routes.route("/ncr/permafrost/point/<lat>/<lon>")
+def permafrost_ncr_request(lat, lon):
+    return asyncio.run(run_ncr_requests(lat, lon))
