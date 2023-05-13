@@ -195,6 +195,7 @@ def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
     """
     if summary is not None:
         fieldnames = [
+            "model",
             "summary",
             "variable",
             "value",
