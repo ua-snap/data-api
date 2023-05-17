@@ -563,4 +563,7 @@ async def run_ncr_requests(lat, lon):
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
 def permafrost_ncr_request(lat, lon):
-    return asyncio.run(run_ncr_requests(lat, lon))
+    permafrostData = asyncio.run(run_ncr_requests(lat, lon))
+    if type(permafrostData[0]) is tuple:
+        return render_template("404/no_data.html"), 404
+    return permafrostData
