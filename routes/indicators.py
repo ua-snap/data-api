@@ -25,17 +25,9 @@ from config import WEST_BBOX, EAST_BBOX
 
 indicators_api = Blueprint("indicators_api", __name__)
 
-# All of the cordex_<variable name> coverages should have the same encodings
-dim_encodings = asyncio.run(get_dim_encodings("cordex_tasmax"))
-
-# dim encodings for the base indicators coverage
-base_dim_encodings = asyncio.run(get_dim_encodings("cordex_indicators_climatologies"))
-
-cordex_indicator_coverage_lu = {
-    "tx_days_above": "cordex_tasmax",
-    "tx_days_below": "cordex_tasmin",
-}
-
+# dim encodings for the NCAR 12km BCSD indicators coverage
+base_dim_encodings = asyncio.run(get_dim_encodings("ncar12km_indicators_era_summaries"))
+print(base_dim_encodings)
 
 #
 # Dynamic indicators endpoints
@@ -213,7 +205,7 @@ async def fetch_base_indicators_point_data(x, y):
         list of data results from each of historical and future coverages
     """
     wcs_str = generate_wcs_getcov_str(
-        x, y, cov_id="cordex_indicators_climatologies", time_slice=("era", "0,2")
+        x, y, cov_id="ncar12km_indicators_era_summaries", time_slice=("era", "0,2")
     )
     url = generate_wcs_query_url(wcs_str)
     point_data_list = await fetch_data([url])
@@ -231,22 +223,23 @@ def package_base_indicators_data(point_data_list):
         di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
     """
     # base_dim_encodings
+    # TO-DO: is there a function for recursively populating a dict like this? If not there should be, this is how we package all of our data
     di = dict()
     for vi, era_li in enumerate(point_data_list):
-        varname = base_dim_encodings["varname"][vi]
-        di[varname] = dict()
+        indicator = base_dim_encodings["indicator"][vi]
+        di[indicator] = dict()
         for ei, model_li in enumerate(era_li):
             era = base_dim_encodings["era"][ei]
-            di[varname][era] = dict()
+            di[indicator][era] = dict()
             for mi, scenario_li in enumerate(model_li):
                 model = base_dim_encodings["model"][mi]
-                di[varname][era][model] = dict()
+                di[indicator][era][model] = dict()
                 for si, stat_li in enumerate(scenario_li):
                     scenario = base_dim_encodings["scenario"][si]
-                    di[varname][era][model][scenario] = dict()
+                    di[indicator][era][model][scenario] = dict()
                     for ti, value in enumerate(stat_li):
                         stat = base_dim_encodings["stat"][ti]
-                        di[varname][era][model][scenario][stat] = value
+                        di[indicator][era][model][scenario][stat] = value
 
     return di
 
@@ -286,6 +279,6 @@ def run_fetch_base_indicators_point_data(lat, lon):
 
     results = package_base_indicators_data(point_data_list)
 
-    results = nullify_and_prune(results, "cordex_indicators")
+    results = nullify_and_prune(results, "ncar12km_indicators")
 
     return results
