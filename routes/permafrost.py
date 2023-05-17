@@ -92,15 +92,16 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-def make_gipl1km_wcps_request_str(x, y, years, summary_operation, model):
+def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation ):
     """Generate a WCPS query string specific the to GIPL 1 km coverage.
 
     Arguments:
         x -- (float) x-coordinate for the point query
         y -- (float) y-coordinate for the point query
         years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
-        summary_operation -- (str) one of 'min', 'avg', or 'max'
         model(int) - Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4
+        scenario(int) - Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
+        summary_operation -- (str) one of 'min', 'avg', or 'max'
     Returns:
         gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
     """
@@ -108,7 +109,7 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation, model):
         (
             f"ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
             f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),model({model}),year({years}),X({x}),Y({y})] )"
+            f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
             f', "application/json")'
         )
     )
@@ -119,7 +120,7 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
     """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range and model type. Values are rounded to one decimal place because units are either meters or degrees C.
 
     Arguments:
-        gipl1km_wcps_resp -- (list) nested 2-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
+        gipl1km_wcps_resp -- (list) nested 3-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
 
     Returns:
         gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
@@ -128,11 +129,14 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
     models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
     for all_resp, model in zip(gipl1km_wcps_resp, models):
         gipl1km_wcps_point_pkg[model] = dict()
-        summary_methods = ["min", "mean", "max"]
-        for resp, stat_type in zip(all_resp, summary_methods):
-            gipl1km_wcps_point_pkg[model][f"gipl1km{stat_type}"] = dict()
-            for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
-                gipl1km_wcps_point_pkg[model][f"gipl1km{stat_type}"][k] = round(v, 1)
+        scenarios = ["rcp45","rcp85"]
+        for scenario_resp, scenario in zip(all_resp, scenarios):
+            gipl1km_wcps_point_pkg[model][scenario] = dict()
+            summary_methods = ["min", "mean", "max"]
+            for resp, stat_type in zip(scenario_resp, summary_methods):
+                gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
+                for k, v in zip(gipl1km_dim_encodings["variable"].values(), scenario_resp):
+                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][k] = round(v, 1)
     return gipl1km_wcps_point_pkg
 
 
@@ -196,6 +200,7 @@ def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
     if summary is not None:
         fieldnames = [
             "model",
+            "scenario",
             "summary",
             "variable",
             "value",
@@ -435,13 +440,14 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
         )
         for model_num in range(3):
             model = list()
-            for summary_operation in ["min", "avg", "max"]:
-                wcps_request_str = make_gipl1km_wcps_request_str(
-                    x, y, timestring, summary_operation, model_num
-                )
-                model.append(
-                    await fetch_data([generate_wcs_query_url(wcps_request_str)])
-                )
+            for scenario in range(2):
+                for summary_operation in ["min", "avg", "max"]:
+                    wcps_request_str = make_gipl1km_wcps_request_str(
+                        x, y, timestring, model_num, scenario, summary_operation
+                    )
+                    model.append(
+                        await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                    )
             wcps_response_data.append(model)
         return wcps_response_data
 
