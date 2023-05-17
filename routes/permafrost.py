@@ -92,7 +92,7 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation ):
+def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation):
     """Generate a WCPS query string specific the to GIPL 1 km coverage.
 
     Arguments:
@@ -129,14 +129,18 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
     models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
     for all_resp, model in zip(gipl1km_wcps_resp, models):
         gipl1km_wcps_point_pkg[model] = dict()
-        scenarios = ["rcp45","rcp85"]
+        scenarios = ["rcp45", "rcp85"]
         for scenario_resp, scenario in zip(all_resp, scenarios):
             gipl1km_wcps_point_pkg[model][scenario] = dict()
             summary_methods = ["min", "mean", "max"]
             for resp, stat_type in zip(scenario_resp, summary_methods):
                 gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
-                for k, v in zip(gipl1km_dim_encodings["variable"].values(), scenario_resp):
-                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][k] = round(v, 1)
+                for k, v in zip(
+                    gipl1km_dim_encodings["variable"].values(), scenario_resp
+                ):
+                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
+                        k
+                    ] = round(v, 1)
     return gipl1km_wcps_point_pkg
 
 
