@@ -24,10 +24,11 @@ from validate_data import (
 from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import permafrost_encodings  # for the Melvin 4 km (NCR) data
+#
+gipl1km_historical_dim_encodings = asyncio.run(
+    get_dim_encodings("iem_gipl_historical", scrape=("time", "gmlrgrid:coefficients", 2)))
 
-gipl1km_dim_encodings = asyncio.run(
-    get_dim_encodings("crrel_gipl_outputs", scrape=("time", "gmlrgrid:coefficients", 4))
-)
+gipl1km_dim_encodings = asyncio.run(get_dim_encodings("crrel_gipl_outputs", scrape=("time", "gmlrgrid:coefficients", 4)))
 
 permafrost_api = Blueprint("permafrost_api", __name__)
 
@@ -92,7 +93,7 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation):
+def make_gipl1km_wcps_request_str(x, y, years, summary_operation, model=None, scenario=None):
     """Generate a WCPS query string specific the to GIPL 1 km coverage.
 
     Arguments:
@@ -105,42 +106,66 @@ def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operatio
     Returns:
         gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
     """
-    gipl1km_wcps_str = quote(
-        (
-            f"ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
-            f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
-            f', "application/json")'
+    if model is None and scenario is None:
+        gipl1km_wcps_str = quote(
+            (
+                f"ProcessCoverages&query=for $c in (iem_gipl_historical) "
+                f"  return encode (coverage summary over $v variable(0:8)"
+                f"  values {summary_operation}( $c[variable($v),year({years}),X({x}),Y({y})] )"
+                f', "application/json")'
+            )
         )
-    )
-    return gipl1km_wcps_str
+        return gipl1km_wcps_str
+    else:
+        gipl1km_wcps_str = quote(
+            (
+                f"ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
+                f"  return encode (coverage summary over $v variable(0:9)"
+                f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
+                f', "application/json")'
+            )
+        )
+        return gipl1km_wcps_str
 
 
-def package_gipl1km_wcps_data(gipl1km_wcps_resp):
+
+def package_gipl1km_wcps_data(gipl1km_wcps_resp, package_type):
     """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range and model type. Values are rounded to one decimal place because units are either meters or degrees C.
 
     Arguments:
         gipl1km_wcps_resp -- (list) nested 3-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
-
+        package_type -- (string) either historical or projected
     Returns:
         gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
     """
     gipl1km_wcps_point_pkg = dict()
-    models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
-    for all_resp, model in zip(gipl1km_wcps_resp, models):
-        gipl1km_wcps_point_pkg[model] = dict()
-        scenarios = ["rcp45", "rcp85"]
-        for scenario_resp, scenario in zip(all_resp, scenarios):
-            gipl1km_wcps_point_pkg[model][scenario] = dict()
-            summary_methods = ["min", "mean", "max"]
-            for resp, stat_type in zip(scenario_resp, summary_methods):
-                gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
-                for k, v in zip(
-                    gipl1km_dim_encodings["variable"].values(), scenario_resp
-                ):
-                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
-                        k
-                    ] = round(v, 1)
+    summary_methods = ["min", "mean", "max"]
+    if package_type == 'historical':
+        gipl1km_wcps_point_pkg['Historical'] = dict()
+        for resp, stat_type in zip(gipl1km_wcps_resp[0], summary_methods):
+            print(resp)
+            gipl1km_wcps_point_pkg['Historical'][f"gipl1km{stat_type}"] = dict()
+            for k, v in zip(
+                gipl1km_historical_dim_encodings["variable"].values(), resp
+            ):
+                gipl1km_wcps_point_pkg['Historical'][f"gipl1km{stat_type}"][
+                    k
+                ] = round(v, 1)
+    else:
+        models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
+        for all_resp, model in zip(gipl1km_wcps_resp, models):
+            gipl1km_wcps_point_pkg[model] = dict()
+            scenarios = ["rcp45", "rcp85"]
+            for scenario_resp, scenario in zip(all_resp, scenarios):
+                gipl1km_wcps_point_pkg[model][scenario] = dict()
+                for resp, stat_type in zip(scenario_resp, summary_methods):
+                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
+                    for k, v in zip(
+                        gipl1km_dim_encodings["variable"].values(), scenario_resp
+                    ):
+                        gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
+                            k
+                        ] = round(v, 1)
     return gipl1km_wcps_point_pkg
 
 
@@ -150,7 +175,7 @@ def generate_gipl1km_time_index():
     Returns:
         dt_range (pandas DatetimeIndex): a time index with annual frequency
     """
-    timestamps = [x[1:-2] for x in gipl1km_dim_encodings["time"].split(" ")]
+    timestamps = [x[1:-2] for x in gipl1km_historical_dim_encodings["time"].split(" ")] + [x[1:-2] for x in gipl1km_dim_encodings["time"].split(" ")]
     date_index = pd.DatetimeIndex(timestamps)
     return date_index
 
@@ -170,26 +195,69 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
     i = 0
 
     gipl1km_point_pkg = {}
-    for model_name in gipl1km_dim_encodings["model"].values():
-        gipl1km_point_pkg[model_name] = {}
-        if time_slice is not None:
+
+    if time_slice is not None and int(time_slice[1]) <= 2015:
+        gipl1km_point_pkg['Historical'] = dict()
+        start, stop = time_slice
+        tx = generate_gipl1km_time_index()
+        tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
+        for t in tx:
+            year = t.date().strftime("%Y")
+            gipl1km_point_pkg['Historical'][year] = dict()
+            for gipl_var_name in gipl1km_historical_dim_encodings["variable"].values():
+                gipl1km_point_pkg['Historical'][year][
+                    gipl_var_name
+                ] = round(flat_list[i], 1)
+                i += 1
+
+        return gipl1km_point_pkg
+
+    elif time_slice is not None and int(time_slice[0]) >= 2021:
+        for model_name in gipl1km_dim_encodings["model"].values():
+            gipl1km_point_pkg[model_name] = {}
             start, stop = time_slice
             tx = generate_gipl1km_time_index()
             tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
-        else:
-            tx = generate_gipl1km_time_index()
+            for t in tx:
+                year = t.date().strftime("%Y")
+                gipl1km_point_pkg[model_name][year] = dict()
+                for scenario_name in gipl1km_dim_encodings["scenario"].values():
+                    gipl1km_point_pkg[model_name][year][scenario_name] = dict()
+                    for gipl_var_name in gipl1km_dim_encodings["variable"].values():
+                        gipl1km_point_pkg[model_name][year][scenario_name][
+                            gipl_var_name
+                        ] = round(flat_list[i], 1)
+                        i += 1
+
+        return gipl1km_point_pkg
+    else:
+        gipl1km_point_pkg['Historical'] = dict()
+        tx = generate_gipl1km_time_index()
+        tx = tx[tx.slice_indexer("1902-01-01", "2015-01-01")]
         for t in tx:
             year = t.date().strftime("%Y")
-            gipl1km_point_pkg[model_name][year] = {}
-            for scenario_name in gipl1km_dim_encodings["scenario"].values():
-                gipl1km_point_pkg[model_name][year][scenario_name] = {}
-                for gipl_var_name in gipl1km_dim_encodings["variable"].values():
-                    gipl1km_point_pkg[model_name][year][scenario_name][
-                        gipl_var_name
-                    ] = round(flat_list[i], 1)
-                    i += 1
+            gipl1km_point_pkg['Historical'][year] = dict()
+            for gipl_var_name in gipl1km_historical_dim_encodings["variable"].values():
+                gipl1km_point_pkg['Historical'][year][
+                    gipl_var_name
+                ] = round(flat_list[i], 1)
+                i += 1
+        for model_name in gipl1km_dim_encodings["model"].values():
+            gipl1km_point_pkg[model_name] = {}
+            tx = generate_gipl1km_time_index()
+            tx = tx[tx.slice_indexer("2021-01-01", "2120-01-01")]
+            for t in tx:
+                year = t.date().strftime("%Y")
+                gipl1km_point_pkg[model_name][year] = dict()
+                for scenario_name in gipl1km_dim_encodings["scenario"].values():
+                    gipl1km_point_pkg[model_name][year][scenario_name] = dict()
+                    for gipl_var_name in gipl1km_dim_encodings["variable"].values():
+                        gipl1km_point_pkg[model_name][year][scenario_name][
+                            gipl_var_name
+                        ] = round(flat_list[i], 1)
+                        i += 1
 
-    return gipl1km_point_pkg
+        return gipl1km_point_pkg
 
 
 def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
@@ -437,38 +505,63 @@ def run_point_fetch_all_permafrost(lat, lon):
 
 
 async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
-    if all(val != None for val in [start_year, end_year, summarize]):
-        wcps_response_data = list()
-        timestring = (
-            f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
-        )
-        for model_num in range(3):
-            model = list()
-            for scenario in range(2):
-                for summary_operation in ["min", "avg", "max"]:
-                    wcps_request_str = make_gipl1km_wcps_request_str(
-                        x, y, timestring, model_num, scenario, summary_operation
-                    )
-                    model.append(
-                        await fetch_data([generate_wcs_query_url(wcps_request_str)])
-                    )
-            wcps_response_data.append(model)
-        return wcps_response_data
+    if all(val is not None for val in [start_year, end_year, summarize]):
+        if int(end_year) <= 2015:
+            # Historical data
+            wcps_response_data = list()
+            timestring = (
+                f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+            )
+            historical = list()
+            for summary_operation in ["min", "avg", "max"]:
+                wcps_request_str = make_gipl1km_wcps_request_str(
+                    x, y, timestring, summary_operation
+                )
+                historical.append(
+                    await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                )
+                wcps_response_data.append(historical)
+            return wcps_response_data
+        else:
+            wcps_response_data = list()
+            timestring = (
+                f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
+            )
+            for model_num in range(3):
+                model = list()
+                for scenario in range(2):
+                    for summary_operation in ["min", "avg", "max"]:
+                        wcps_request_str = make_gipl1km_wcps_request_str(
+                            x, y, timestring, summary_operation, model_num, scenario
+                        )
+                        model.append(
+                            await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                        )
+                wcps_response_data.append(model)
+            return wcps_response_data
 
     if start_year is not None and end_year is not None and summarize is None:
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
         )
         time_subset = ("year", timestring)
-        gipl_request_str = generate_wcs_getcov_str(
-            x, y, "crrel_gipl_outputs", time_slice=time_subset
-        )
-        gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
-        return gipl_point_data
+        if int(end_year) <= 2015:
+            gipl_request_str = generate_wcs_getcov_str(
+                x, y, "iem_gipl_historical", time_slice=time_subset
+            )
+            gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+            return gipl_point_data
+        else:
+            gipl_request_str = generate_wcs_getcov_str(
+                x, y, "crrel_gipl_outputs", time_slice=time_subset
+            )
+            gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+            return gipl_point_data
 
     else:
+        gipl_historical_str = generate_wcs_getcov_str(x, y, "iem_gipl_historical")
         gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
-        gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
+        gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_historical_str), generate_wcs_query_url(gipl_request_str)])
         return gipl_point_data
 
 
@@ -495,7 +588,8 @@ async def run_fetch_gipl_1km_point_data(
             start_valid = pd.Timestamp(int(start_year), 1, 1) >= time_index.min()
             end_valid = pd.Timestamp(int(end_year), 1, 1) <= time_index.max()
             chronological = start_year < end_year
-            years_valid = start_valid and end_valid and chronological
+            missing_dates = int(start_year) < 2021 and int(end_year) > 2015
+            years_valid = start_valid and end_valid and chronological and not missing_dates
         except:
             return render_template("400/bad_request.html"), 400
         if years_valid != True:
@@ -520,7 +614,7 @@ async def run_fetch_gipl_1km_point_data(
         return render_template("500/server_error.html"), 500
 
     if all(val != None for val in [start_year, end_year, summarize]):
-        gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
+        gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data, 'historical' if int(end_year) <= 2015 else 'projected')
 
     elif start_year is not None and end_year is not None and summarize is None:
         gipl_1km_point_package = package_gipl1km_point_data(
