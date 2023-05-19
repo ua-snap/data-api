@@ -147,14 +147,14 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp, package_type):
     gipl1km_wcps_point_pkg = dict()
     summary_methods = ["min", "mean", "max"]
     if package_type == "historical":
-        gipl1km_wcps_point_pkg["Historical"] = dict()
-        gipl1km_wcps_point_pkg["Historical"]["Historical"] = dict()
+        gipl1km_wcps_point_pkg["CRU-TS 4.0"] = dict()
+        gipl1km_wcps_point_pkg["CRU-TS 4.0"]["Historical"] = dict()
         for resp, stat_type in zip(gipl1km_wcps_resp[0], summary_methods):
-            gipl1km_wcps_point_pkg["Historical"]["Historical"][f"gipl1km{stat_type}"] = dict()
+            gipl1km_wcps_point_pkg["CRU-TS 4.0"]["Historical"][f"gipl1km{stat_type}"] = dict()
             for k, v in zip(
                 gipl1km_historical_dim_encodings["variable"].values(), resp
             ):
-                gipl1km_wcps_point_pkg["Historical"]["Historical"][f"gipl1km{stat_type}"][k] = round(
+                gipl1km_wcps_point_pkg["CRU-TS 4.0"]["Historical"][f"gipl1km{stat_type}"][k] = round(
                     v, 1
                 )
     else:
@@ -207,16 +207,16 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
     gipl1km_point_pkg = {}
 
     if time_slice is not None and int(time_slice[1]) <= 2015:
-        gipl1km_point_pkg["Historical"] = dict()
+        gipl1km_point_pkg["CRU-TS 4.0"] = dict()
         start, stop = time_slice
         tx = generate_gipl1km_time_index()
         tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
         for t in tx:
             year = t.date().strftime("%Y")
-            gipl1km_point_pkg["Historical"][year] = dict()
-            gipl1km_point_pkg["Historical"][year]["Historical"] = dict()
+            gipl1km_point_pkg["CRU-TS 4.0"][year] = dict()
+            gipl1km_point_pkg["CRU-TS 4.0"][year]["Historical"] = dict()
             for gipl_var_name in gipl1km_historical_dim_encodings["variable"].values():
-                gipl1km_point_pkg["Historical"][year]["Historical"][gipl_var_name] = round(
+                gipl1km_point_pkg["CRU-TS 4.0"][year]["Historical"][gipl_var_name] = round(
                     flat_list[i], 1
                 )
                 i += 1
@@ -242,15 +242,15 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
 
         return gipl1km_point_pkg
     else:
-        gipl1km_point_pkg["Historical"] = dict()
+        gipl1km_point_pkg["CRU-TS 4.0"] = dict()
         tx = generate_gipl1km_time_index()
         tx = tx[tx.slice_indexer("1902-01-01", "2015-01-01")]
         for t in tx:
             year = t.date().strftime("%Y")
-            gipl1km_point_pkg["Historical"][year] = dict()
-            gipl1km_point_pkg["Historical"][year]["Historical"] = dict()
+            gipl1km_point_pkg["CRU-TS 4.0"][year] = dict()
+            gipl1km_point_pkg["CRU-TS 4.0"][year]["Historical"] = dict()
             for gipl_var_name in gipl1km_historical_dim_encodings["variable"].values():
-                gipl1km_point_pkg["Historical"][year]["Historical"][gipl_var_name] = round(
+                gipl1km_point_pkg["CRU-TS 4.0"][year]["Historical"][gipl_var_name] = round(
                     flat_list[i], 1
                 )
                 i += 1
