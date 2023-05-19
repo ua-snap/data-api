@@ -143,7 +143,6 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp, package_type):
     if package_type == 'historical':
         gipl1km_wcps_point_pkg['Historical'] = dict()
         for resp, stat_type in zip(gipl1km_wcps_resp[0], summary_methods):
-            print(resp)
             gipl1km_wcps_point_pkg['Historical'][f"gipl1km{stat_type}"] = dict()
             for k, v in zip(
                 gipl1km_historical_dim_encodings["variable"].values(), resp
@@ -640,6 +639,11 @@ async def run_fetch_gipl_1km_point_data(
 async def run_ncr_requests(lat, lon):
 
     tasks = [
+        asyncio.create_task(
+            run_fetch_gipl_1km_point_data(
+                lat, lon, start_year=1902, end_year=2015, summarize="mmm"
+            )
+        ),
         asyncio.create_task(
             run_fetch_gipl_1km_point_data(
                 lat, lon, start_year=2021, end_year=2039, summarize="mmm"
