@@ -667,7 +667,7 @@ async def run_ncr_requests(lat, lon):
     tasks = [
         asyncio.create_task(
             run_fetch_gipl_1km_point_data(
-                lat, lon, start_year=1902, end_year=2015, summarize="mmm"
+                lat, lon, start_year=1950, end_year=2015, summarize="mmm"
             )
         ),
         asyncio.create_task(
