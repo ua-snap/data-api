@@ -25,15 +25,16 @@ from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import permafrost_encodings  # for the Melvin 4 km (NCR) data
 
+# rasdaman coverages
+permafrost_coverage_id = "iem_gipl_magt_alt_4km"
+gipl_1km_coverage_id = "crrel_gipl_outputs"
+
 gipl1km_dim_encodings = asyncio.run(
-    get_dim_encodings("crrel_gipl_outputs", scrape=("time", "gmlrgrid:coefficients", 4))
+    get_dim_encodings(gipl_1km_coverage_id, scrape=("time", "gmlrgrid:coefficients", 4))
 )
 
 permafrost_api = Blueprint("permafrost_api", __name__)
 
-# rasdaman coverages
-permafrost_coverage_id = "iem_gipl_magt_alt_4km"
-gipl_1km_coverage_id = "crrel_gipl_outputs"
 # geoserver layers
 wms_targets = [
     "obu_2018_magt",
@@ -49,6 +50,7 @@ titles = {
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
+
 
 # packaging functions unique to each query
 def package_obu_magt(obu_magt_resp):
@@ -107,7 +109,7 @@ def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operatio
     """
     gipl1km_wcps_str = quote(
         (
-            f"ProcessCoverages&query=for $c in (crrel_gipl_outputs) "
+            f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
             f"  return encode (coverage summary over $v variable(0:9)"
             f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
             f', "application/json")'
@@ -221,7 +223,7 @@ def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
         data_pkg,
         fieldnames,
     )
-    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (°C) at various depths below the surface as well as talik thickness, depth of permafrost base, and depth of permafrost top (m)\n"
+    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (°C) at various depths below the surface as well as talik thickness (m) and depths of permafrost base and top (m)\n"
     filename = "GIPL 1 km Model Outputs" + " for " + lat + ", " + lon + ".csv"
 
     return write_csv(csv_dicts, fieldnames, filename, metadata)
@@ -289,7 +291,6 @@ def package_gipl_polygon(gipl_polygon_resp):
 
 
 def combine_gipl_poly_var_pkgs(magt_di, alt_di):
-
     combined_gipl_di = {}
     for era in magt_di.keys():
         combined_gipl_di[era] = {}
@@ -461,13 +462,13 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
         )
         time_subset = ("year", timestring)
         gipl_request_str = generate_wcs_getcov_str(
-            x, y, "crrel_gipl_outputs", time_slice=time_subset
+            x, y, gipl_1km_coverage_id, time_slice=time_subset
         )
         gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
         return gipl_point_data
 
     else:
-        gipl_request_str = generate_wcs_getcov_str(x, y, "crrel_gipl_outputs")
+        gipl_request_str = generate_wcs_getcov_str(x, y, gipl_1km_coverage_id)
         gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
         return gipl_point_data
 
@@ -536,38 +537,121 @@ async def run_fetch_gipl_1km_point_data(
         if summarize is not None:
             return create_gipl1km_csv(point_pkg, lat=lat, lon=lon, summary=summarize)
         return create_gipl1km_csv(point_pkg, lat=lat, lon=lon)
-    return postprocess(
-        gipl_1km_point_package,
-        "crrel_gipl",
-        f"{start_year}-{end_year}" if start_year else None,
-    )
+    return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
 async def run_ncr_requests(lat, lon):
-
-    tasks = [
-        asyncio.create_task(
-            run_fetch_gipl_1km_point_data(
-                lat, lon, start_year=2021, end_year=2039, summarize="mmm"
-            )
-        ),
-        asyncio.create_task(
-            run_fetch_gipl_1km_point_data(
-                lat, lon, start_year=2040, end_year=2069, summarize="mmm"
-            )
-        ),
-        asyncio.create_task(
-            run_fetch_gipl_1km_point_data(
-                lat, lon, start_year=2070, end_year=2099, summarize="mmm"
-            )
-        ),
+    year_ranges = [
+        {
+            "start": 2021,
+            "end": 2039,
+        },
+        {
+            "start": 2040,
+            "end": 2069,
+        },
+        {
+            "start": 2070,
+            "end": 2099,
+        },
     ]
-    return await asyncio.gather(*tasks)
+
+    tasks = []
+    for years in year_ranges:
+        tasks.append(
+            asyncio.create_task(
+                run_fetch_gipl_1km_point_data(
+                    lat,
+                    lon,
+                    start_year=years["start"],
+                    end_year=years["end"],
+                    summarize="mmm",
+                )
+            ),
+        )
+
+    results = await asyncio.gather(*tasks)
+    ncr = dict()
+    for index in range(len(results)):
+        key = f'{year_ranges[index]["start"]}-{year_ranges[index]["end"]}'
+        ncr[key] = results[index]
+
+    return ncr
+
+
+def aggregate_csv(permafrostData):
+    combined_lines = []
+    metadata_captured = False
+    headers_captured = False
+    metadata_line_previously = False
+    for key, value in permafrostData.items():
+        lines = value.get_data().decode("utf-8").split("\n")
+        for idx, line in enumerate(lines):
+            # Grab metadata lines from only one child CSV so they are not
+            # duplicated at the start of each set of era rows.
+            if line.startswith("#"):
+                if not metadata_captured:
+                    combined_lines.append(line)
+                    metadata_captured = True
+                metadata_line_previously = True
+            # Also grab the column header labels exactly once.
+            elif metadata_line_previously:
+                if not headers_captured:
+                    headers = "era," + line
+                    combined_lines.append(headers)
+                    headers_captured = True
+                metadata_line_previously = False
+            # Otherwise, append the era label to the data row.
+            elif line != "":
+                combined_lines.append(key + "," + line)
+
+    return "\n".join(combined_lines)
 
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
 def permafrost_ncr_request(lat, lon):
     permafrostData = asyncio.run(run_ncr_requests(lat, lon))
-    if type(permafrostData[0]) is tuple:
-        return render_template("404/no_data.html"), 404
+
+    # Return corresponding error page if any sub-request returns error.
+    for value in permafrostData.values():
+        if isinstance(value, tuple):
+            if value[1] == 400:
+                return render_template("400/bad_request.html"), 400
+            if value[1] == 404:
+                return render_template("404/no_data.html"), 404
+            if value[1] == 422:
+                return render_template("422/invalid_latlon.html"), 422
+            else:
+                return render_template("500/server_error.html"), 500
+
+    if request.args.get("format") == "csv":
+        # Combine CSV results from multiple eras into a single CSV.
+        csv_content = aggregate_csv(permafrostData)
+
+        place_id = request.args.get("community")
+        if place_id:
+            place_name, place_type = place_name_and_type(place_id)
+            filename = "Permafrost for " + quote(place_name) + ".csv"
+            metadata = csv_metadata(place_name, place_id, place_type)
+        else:
+            filename = "Permafrost for " + lat + ", " + lon + ".csv"
+            metadata = csv_metadata(lat=lat, lon=lon)
+
+        csv_content = metadata + csv_content
+
+        response = Response(
+            csv_content,
+            mimetype="text/csv",
+            headers={
+                "Content-Type": "text/csv; charset=utf-8",
+                "Content-Disposition": 'attachment; filename="'
+                + filename
+                + "\"; filename*=utf-8''\""
+                + filename
+                + '"',
+            },
+        )
+
+        return response
+
     return permafrostData
