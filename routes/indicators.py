@@ -27,7 +27,6 @@ indicators_api = Blueprint("indicators_api", __name__)
 
 # dim encodings for the NCAR 12km BCSD indicators coverage
 base_dim_encodings = asyncio.run(get_dim_encodings("ncar12km_indicators_era_summaries"))
-print(base_dim_encodings)
 
 #
 # Dynamic indicators endpoints
@@ -244,7 +243,7 @@ def package_base_indicators_data(point_data_list):
     return di
 
 
-@routes.route("/indicators/base/<lat>/<lon>")
+@routes.route("/indicators/base/point/<lat>/<lon>")
 def run_fetch_base_indicators_point_data(lat, lon):
     """Query the cordex_indicators_climatologies rasdaman coverage which contains indicators summarized over NCR time eras
 
