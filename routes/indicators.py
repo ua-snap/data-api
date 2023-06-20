@@ -354,7 +354,11 @@ def summarize_within_poly_marr(
     for map_list, result in zip(dim_combos, results):
         if len(map_list) > 1:
             data = get_from_dict(aggr_results, map_list[:-1])
-            result = round(result, 4)
+            result = (
+                round(result, 1)
+                if map_list[0] in ["hd", "cd", "rx1day", "rx5day"]
+                else floor(result)
+            )
             data[map_list[-1]] = result
         else:
             aggr_results[map_list[0]] = round(result, 4)
@@ -416,7 +420,6 @@ def indicators_area_data_endpoint(var_id):
 
     indicators_pkg = run_aggregate_var_polygon(var_id)
 
-    indicators_pkg = nullify_and_prune(indicators_pkg, "ncar12km_indicators")
     if indicators_pkg in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
 
