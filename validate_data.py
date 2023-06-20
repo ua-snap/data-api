@@ -25,7 +25,7 @@ nodata_values = {
     "beetles": [0],
     "wet_days_per_year": [-9999],
     "crrel_gipl": [-9999],
-    "ncar12km_indicators": [-9999],
+    "ncar12km_indicators": [-9999.0, -9999],
 }
 
 

@@ -1,8 +1,8 @@
 """Endpoints for climate indicators
 
 There are two types of endpoints being developed here currently: 
-1. Endpoint(s) which queries a coverage containing summarized versions of the indicators dataset created for work with John W and TBEC. The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now. 
-2. Endpoint(s) that produce dynamic indicators, which query coverages of specific variables in the base CORDEX dataset we have. Unfortunately, not all desired indicators are going to be easily produced in a similar fashion with this route given the limitations of WCPS. Calling this "dynamic" indicators here.
+1. Endpoint(s) which queries a coverage containing summarized versions of the indicators dataset created from the 12km NCAR dataset. The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now (i.e., url suffix: /indicators/base). 
+2. Endpoint(s) that produce dynamic indicators, which query coverages of specific variables in the base CORDEX dataset we have. Unfortunately, not all desired indicators are going to be easily produced in a similar fashion with this route given the limitations of WCPS. This could be called "dynamic" indicators?
 """
 
 import asyncio
@@ -15,18 +15,25 @@ from shapely.geometry import Point
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
-from validate_request import validate_latlon, project_latlon
+from validate_request import (
+    validate_latlon, 
+    project_latlon,
+    validate_var_id
+)
 from validate_data import (
     get_poly_3338_bbox,
     nullify_and_prune,
+    postprocess
 )
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
 indicators_api = Blueprint("indicators_api", __name__)
+# Rasdaman targets
+indicators_coverage_id = "ncar12km_indicators_era_summaries"
 
 # dim encodings for the NCAR 12km BCSD indicators coverage
-base_dim_encodings = asyncio.run(get_dim_encodings("ncar12km_indicators_era_summaries"))
+base_dim_encodings = asyncio.run(get_dim_encodings(indicators_coverage_id))
 
 #
 # Dynamic indicators endpoints
@@ -133,7 +140,7 @@ def package_era_indicator_results(point_data_list):
     return di
 
 
-@routes.route("/indicators/point/<indicator>/<tx>/<lat>/<lon>")
+@routes.route("/indicators/dynamic/point/<indicator>/<tx>/<lat>/<lon>")
 def run_fetch_tx_days_above_point_data(indicator, tx, lat, lon):
     """
 
@@ -204,7 +211,7 @@ async def fetch_base_indicators_point_data(x, y):
         list of data results from each of historical and future coverages
     """
     wcs_str = generate_wcs_getcov_str(
-        x, y, cov_id="ncar12km_indicators_era_summaries", time_slice=("era", "0,2")
+        x, y, cov_id=indicators_coverage_id, time_slice=("era", "0,2")
     )
     url = generate_wcs_query_url(wcs_str)
     point_data_list = await fetch_data([url])
@@ -290,3 +297,129 @@ def run_fetch_base_indicators_point_data(lat, lon):
     results = nullify_and_prune(results, "ncar12km_indicators")
 
     return results
+
+
+def summarize_within_poly_marr(
+    ds, poly_mask_arr, dim_encodings, bandname="Gray"
+):
+    """Summarize a single Data Variable of a xarray.DataSet within a polygon. Return the results as a nested dict.
+
+    NOTE - This is a candidate for de-duplication! Only defining here because some
+    things are out-of-sync with existing ways of doing things (e.g., key names
+    in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
+
+    Args:
+        ds (xarray.DataSet): DataSet with "Gray" as variable of interest
+        poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting the polygon of interest
+        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the data and map integer data coordinates to models, scenarios, variables, etc.
+        bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where the name is not given at ingest
+
+    Returns:
+        Nested dict of results for all non-X/Y axis combinations,
+    """
+    # will actually operate on underlying DataArray
+
+    da = ds[bandname]
+    # get axis (dimension) names and make list of all coordinate combinations
+    all_dims = da.dims
+    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
+    iter_coords = list(
+        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
+    )
+
+    # generate all combinations of decoded coordinate values
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
+    aggr_results = generate_nested_dict(dim_combos)
+
+    data_arr = []
+    for coords in iter_coords:
+        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        data_arr.append(da.sel(sel_di).values)
+    data_arr = np.array(data_arr)
+
+    # need to transpose the 2D spatial slices if X is the "rows" dimension
+    if all_dims.index("X") < all_dims.index("Y"):
+        data_arr = data_arr.transpose(0, 2, 1)
+
+    data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
+    data_arr[data_arr_mask] = np.nan
+    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
+    results[np.isnan(results)] = -9999
+
+    for map_list, result in zip(dim_combos, results):
+        if len(map_list) > 1:
+            data = get_from_dict(aggr_results, map_list[:-1])
+            result = round(result, 4)
+            data[map_list[-1]] = result
+        else:
+            aggr_results[map_list[0]] = round(result, 4)
+    return aggr_results
+
+
+def run_aggregate_var_polygon(poly_id):
+    """Get data summary (e.g. zonal mean) of single variable in polygon.
+
+    Args:
+        poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
+
+    Returns:
+        aggr_results (dict): data representing zonal means within the polygon.
+
+    Notes:
+        Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
+    """
+    poly = get_poly_3338_bbox(poly_id)
+
+    ds_list = asyncio.run(fetch_bbox_data(poly.bounds, indicators_coverage_id))
+
+    bandname = "Gray"
+    poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
+
+    aggr_results = summarize_within_poly_marr(
+        ds_list[-1], poly_mask_arr, base_dim_encodings, bandname
+    )
+
+    for era, summaries in aggr_results.items():
+        aggr_results[era] = summaries
+    
+    #aggr_results = remove_invalid_dim_combos(aggr_results)
+
+    return aggr_results
+
+
+@routes.route("/indicators/base/area/<var_id>")
+def indicators_area_data_endpoint(var_id):
+    """Area aggregation data endpoint. Fetch data within polygon area for specified variable and return JSON-like dict.
+
+    Args:
+        var_id (str): ID for given polygon from polygon endpoint.
+    Returns:
+        poly_pkg (dict): zonal mode of indicator summary results for AOI polygon
+
+    """
+
+    poly_type = validate_var_id(var_id)
+
+    # This is only ever true when it is returning an error template
+    if type(poly_type) is tuple:
+        return poly_type
+
+    # try:
+    #     indicators_pkg = run_aggregate_var_polygon(var_id)
+    # except:
+    #     return render_template("422/invalid_area.html"), 422
+
+    indicators_pkg = run_aggregate_var_polygon(var_id)
+
+    indicators_pkg = nullify_and_prune(indicators_pkg, "ncar12km_indicators")
+    if indicators_pkg in [{}, None, 0]:
+        return render_template("404/no_data.html"), 404
+
+    indicators_pkg = postprocess(indicators_pkg, "ncar12km_indicators")
+
+    return indicators_pkg
