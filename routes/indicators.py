@@ -238,7 +238,16 @@ def package_base_indicators_data(point_data_list):
                     di[indicator][era][model][scenario] = dict()
                     for ti, value in enumerate(stat_li):
                         stat = base_dim_encodings["stat"][ti]
-                        di[indicator][era][model][scenario][stat] = value
+                        di[indicator][era][model][scenario][stat] = (
+                            value
+                            if (
+                                indicator == "hd"
+                                or indicator == "cd"
+                                or indicator == "rx1day"
+                                or indicator == "rx5day"
+                            )
+                            else floor(value)
+                        )
 
     return di
 
