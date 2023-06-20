@@ -413,10 +413,10 @@ def indicators_area_data_endpoint(var_id):
     if type(poly_type) is tuple:
         return poly_type
 
-    # try:
-    #     indicators_pkg = run_aggregate_var_polygon(var_id)
-    # except:
-    #     return render_template("422/invalid_area.html"), 422
+    try:
+        indicators_pkg = run_aggregate_var_polygon(var_id)
+    except:
+        return render_template("422/invalid_area.html"), 422
 
     indicators_pkg = run_aggregate_var_polygon(var_id)
 
