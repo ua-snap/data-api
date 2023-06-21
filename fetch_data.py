@@ -278,7 +278,6 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
 
 
 def geotiff_zonal_stats(poly, arr, nodata_value, transform, stat_list):
-
     poly_mask_arr = zonal_stats(
         poly,
         arr,
@@ -527,7 +526,7 @@ def write_csv(csv_dicts, fieldnames, filename, metadata=None):
     return response
 
 
-def csv_metadata(place_name, place_id, place_type, lat=None, lon=None):
+def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=None):
     """
     Creates metadata string to add to beginning of CSV file.
 
