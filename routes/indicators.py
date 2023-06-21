@@ -15,16 +15,8 @@ from shapely.geometry import Point
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
-from validate_request import (
-    validate_latlon, 
-    project_latlon,
-    validate_var_id
-)
-from validate_data import (
-    get_poly_3338_bbox,
-    nullify_and_prune,
-    postprocess
-)
+from validate_request import validate_latlon, project_latlon, validate_var_id
+from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -299,9 +291,7 @@ def run_fetch_base_indicators_point_data(lat, lon):
     return results
 
 
-def summarize_within_poly_marr(
-    ds, poly_mask_arr, dim_encodings, bandname="Gray"
-):
+def summarize_within_poly_marr(ds, poly_mask_arr, dim_encodings, bandname="Gray"):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon. Return the results as a nested dict.
 
     NOTE - This is a candidate for de-duplication! Only defining here because some
@@ -390,8 +380,6 @@ def run_aggregate_var_polygon(poly_id):
 
     for era, summaries in aggr_results.items():
         aggr_results[era] = summaries
-    
-    #aggr_results = remove_invalid_dim_combos(aggr_results)
 
     return aggr_results
 
