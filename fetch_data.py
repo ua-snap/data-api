@@ -198,6 +198,24 @@ async def fetch_bbox_netcdf_list(urls):
     return ds_list
 
 
+async def fetch_bbox_data(bbox_bounds, cov_id_str):
+    """Make the async request for the data at the specified bbox for a specific coverage
+
+    Args:
+        bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
+        cov_id_str (str): shared portion of coverage_ids to query
+
+    Returns:
+        list of data results from each of historical and future coverages
+    """
+    # set up WCS request strings
+    request_strs = []
+    request_strs.append(generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id_str))
+    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
+    bbox_ds_list = await fetch_bbox_netcdf_list(urls)
+    return bbox_ds_list
+
+
 def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gray"):
     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
     Return the results as a nested dict.
@@ -275,6 +293,36 @@ def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gra
             result, dim_encodings["rounding"][roundkey]
         )
     return aggr_results
+
+
+def get_poly_mask_arr(ds, poly, bandname):
+    """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid zonal summary across results from multiple WCS requests for the same bbox. Wrapper for rasterstats zonal_stats().
+
+    Args:
+        ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+        poly (shapely.Polygon): polygon to create mask from
+        bandname (str): name of the DataArray containing the data
+
+    Returns:
+        cropped_poly_mask (numpy.ma.core.MaskedArra): a masked array masking the cells
+            intersecting the polygon of interest, cropped to the right shape
+    """
+    # need a data layer of same x/y shape just for running a zonal stats
+    xy_shape = ds[bandname].values.shape[-2:]
+    data_arr = np.zeros(xy_shape)
+    # get affine transform from the xarray.DataSet
+    ds.rio.set_spatial_dims("X", "Y")
+    transform = ds.rio.transform()
+    poly_mask_arr = zonal_stats(
+        poly,
+        data_arr,
+        affine=transform,
+        nodata=np.nan,
+        stats=["mean"],
+        raster_out=True,
+    )[0]["mini_raster_array"]
+    cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
+    return cropped_poly_mask
 
 
 def geotiff_zonal_stats(poly, arr, nodata_value, transform, stat_list):
