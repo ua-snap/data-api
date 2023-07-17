@@ -45,8 +45,8 @@ wfs_targets = {
 }
 
 titles = {
-    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) 4 km Model Output",
-    "gipl1km": "GIPL 2.0 Mean Annual Ground Temperature (°C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
+    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (deg C) and Active Layer Thickness (m) 4 km Model Output",
+    "gipl1km": "GIPL 2.0 Mean Annual Ground Temperature (deg C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
@@ -61,7 +61,7 @@ def package_obu_magt(obu_magt_resp):
     year = "2000-2016"
     titles[
         "obu_magt"
-    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
+    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (deg C)"
     temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
     if temp is None:
         return None
@@ -223,7 +223,7 @@ def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
         data_pkg,
         fieldnames,
     )
-    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (°C) at various depths below the surface as well as talik thickness (m) and depths of permafrost base and top (m)\n"
+    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (deg C) at various depths below the surface as well as talik thickness (m) and depths of permafrost base and top (m)\n"
     filename = "GIPL 1 km Model Outputs" + " for " + lat + ", " + lon + ".csv"
 
     return write_csv(csv_dicts, fieldnames, filename, metadata)
@@ -420,8 +420,8 @@ def run_point_fetch_all_permafrost(lat, lon):
         metadata += "# pfx is the permafrost extent\n"
         metadata += "# 2025 represents 2011 - 2040\n"
         metadata += "# 2050 represents 2036 - 2065\n"
-        metadata += "# 2075 represents 2061 – 2090\n"
-        metadata += "# 2095 represents 2086 – 2100\n"
+        metadata += "# 2075 represents 2061 - 2090\n"
+        metadata += "# 2095 represents 2086 - 2100\n"
 
         metadata += "# gipl is the Geophysical Institute's Permafrost Laboratory\n"
         for source in ["gipl", "jorg", "obu_magt", "obupfx"]:
