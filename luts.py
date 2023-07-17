@@ -129,9 +129,3 @@ areas_near = {
     "protected_area": "protected_areas_near",
 }
 
-# For the forest endpoint.  This file is just a generated pickle
-# from the `dbf` file that will be downloaded with the .zip that
-# is linked in the documentation page for the point query, including
-# only the columns we need for this lookup.
-with open("data/luts_pickles/akvegwetlandcomposite.pkl", "rb") as fp:
-    ak_veg_di = pickle.load(fp)
