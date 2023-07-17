@@ -12,7 +12,6 @@ nodata_values = {
     "degree_days": [-9999],
     "elevation": [-9999],
     "fire": [-9999],
-    "forest": [65535],
     "geology": [],
     "glacier": [],
     "mean_annual_precip": [-9999],
