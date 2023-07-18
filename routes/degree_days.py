@@ -9,11 +9,12 @@ from flask import (
 # local imports
 from generate_urls import generate_wcs_query_url
 from fetch_data import *
+from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import (
+from postprocessing import (
     nullify_and_prune,
     postprocess,
 )
@@ -425,51 +426,6 @@ async def fetch_di_point_data(x, y, cov_id, horp):
     return point_data_list
 
 
-def create_csv(data_pkg, cov_id_str, place_id=None, lat=None, lon=None):
-    """Create CSV file with metadata string and location based filename.
-    Args:
-        data_pkg (dict): JSON-like object of data
-        cov_id_str (str): coverage id string
-        place_id: place identifier (e.g., AK124)
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-    fieldnames = [
-        "model",
-        "year",
-        "variable",
-        "value",
-    ]
-
-    csv_dicts = build_csv_dicts(
-        data_pkg,
-        fieldnames,
-    )
-
-    if cov_id_str == "heating_degree_days":
-        metadata = (
-            "# dd is the total annual degree days below 65°F for the specified model\n"
-        )
-    elif cov_id_str == "degree_days_below_zero":
-        metadata = (
-            "# dd is the total annual degree days below 0°F for the specified model\n"
-        )
-    elif cov_id_str == "thawing_index":
-        metadata = "# dd is the total annual degree days above freezing for the specified model\n"
-    elif cov_id_str == "freezing_index":
-        metadata = "# dd is the total annual degree days below freezing for the specified model\n"
-    elif cov_id_str == "design_thawing_index":
-        metadata = "# di is the mean of above freezing degree days for top three years in era\n"
-    elif cov_id_str == "design_freezing_index":
-        metadata = "# di is the mean of below freezing degree days for top three years in era\n"
-
-    filename = var_label_lu[cov_id_str] + " for " + lat + ", " + lon + ".csv"
-
-    return write_csv(csv_dicts, fieldnames, filename, metadata)
-
-
 @routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>")
 @routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
 def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=None):
@@ -524,12 +480,12 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     point_pkg = package_dd_point_data(point_data_list, var_ep, horp)
 
     if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, "degree_days")
+        point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, cov_id_str, None, lat=lat, lon=lon)
+        return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
 
-    return postprocess(point_pkg, "degree_days")
+    return postprocess(point_pkg, cov_id_str)
 
 
 @routes.route("/design_index/<var_ep>/<horp>/point/<lat>/<lon>")
@@ -577,12 +533,12 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
     point_pkg = package_di_point_data(point_data_list, horp)
 
     if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, "degree_days")
+        point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         return create_csv(point_pkg, cov_id_str, None, lat=lat, lon=lon)
 
-    return postprocess(point_pkg, "degree_days")
+    return postprocess(point_pkg, cov_id_str)
 
 
 def validate_years(horp, start_year, end_year):

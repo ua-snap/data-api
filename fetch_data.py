@@ -1,7 +1,6 @@
 """
 A module of data gathering functions for use across multiple endpoints.
 """
-import csv
 import copy
 import io
 import itertools
@@ -10,12 +9,12 @@ import time
 import asyncio
 import xml.etree.ElementTree as ET
 import numpy as np
-import rasterio as rio
 import xarray as xr
+import geopandas as gpd
 from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
-from flask import current_app as app, Response
+from flask import current_app as app
 from rasterstats import zonal_stats
 from config import RAS_BASE_URL, WEB_APP_URL
 from generate_requests import *
@@ -135,6 +134,54 @@ async def fetch_data(urls):
             results = await asyncio.gather(*tasks)
 
     return results
+
+
+def get_poly_3338_bbox(poly_id, crs=3338):
+    """Get the Polygon Object corresponding to the ID from GeoServer
+
+    Args:
+        poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
+    Returns:
+        poly (shapely.Polygon): Polygon object used to summarize data within.
+        Includes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
+        polygon. Format is (xmin, ymin, xmax, ymax).
+    """
+    try:
+        geometry = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:all_areas", "the_geom", poly_id, "id"
+                    )
+                ]
+            )
+        )
+        if crs == 3338:
+            poly_gdf = (
+                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+            )
+            poly = poly_gdf.iloc[0]["geometry"]
+        else:
+            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+        return poly
+    except:
+        geometry = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:ak_huc12", "the_geom", poly_id, "id"
+                    )
+                ]
+            )
+        )
+        if crs == 3338:
+            poly_gdf = (
+                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+            )
+            poly = poly_gdf.iloc[0]["geometry"]
+        else:
+            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+        return poly
 
 
 async def fetch_bbox_geotiff_from_gs(url):
@@ -482,133 +529,6 @@ def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
             extract_nested_dict_keys(dict_[k], result_list, out_line_list)
     if is_return_list:
         return result_list
-
-
-def add_titles(packaged_data, titles):
-    """
-    Adds title fields to a JSONlike data package and returns it.
-    Args:
-        packaged_data (json): JSONlike data package output
-            from the run_fetch_* and run_aggregate_* functions
-        titles (list, str): title or list of titles to add to the data package
-
-    Returns:
-        data package with titles added
-    """
-    if titles is not None:
-        if isinstance(titles, str):
-            packaged_data["title"] = titles
-        else:
-            for key in titles.keys():
-                if key in packaged_data:
-                    if packaged_data[key] is not None:
-                        packaged_data[key]["title"] = titles[key]
-    return packaged_data
-
-
-def build_csv_dicts(packaged_data, package_coords, fill_di=None):
-    """
-    Returns a list of dicts to be written out later as a CSV.
-    Args:
-        packaged_data (json): JSONlike data package output
-            from the run_fetch_* and run_aggregate_* functions
-        package_coord (list): list of string values corresponding to
-            levels of the packaged_data dict. Should be a subset of fieldnames arg.
-        fill_di (dict): dict to fill in columns with fixed values.
-            Keys should specify the field name and value should be the
-            value to fill
-
-    Returns:
-        list of dicts with keys/values corresponding to fieldnames
-    """
-    # extract the coordinate values stored in keys. assumes uniform structure
-    # across entire data package (i.e. n levels deep where n == len(fieldnames))
-    data_package_coord_combos = extract_nested_dict_keys(packaged_data)
-    rows = []
-    for coords in data_package_coord_combos:
-        row_di = {}
-        # need more general way of handling fields to be inserted before or after
-        # what are actually available in packaged dicts
-        for field, coord in zip(package_coords, coords):
-            row_di[field] = coord
-        # fill in columns with fixed values if specified
-        if fill_di:
-            for fieldname, value in fill_di.items():
-                row_di[fieldname] = value
-        # write the actual value
-        row_di["value"] = get_from_dict(packaged_data, coords)
-        rows.append(row_di)
-    return rows
-
-
-def write_csv(csv_dicts, fieldnames, filename, metadata=None):
-    """
-    Creates and returns a downloadable CSV file from list of CSV dicts.
-
-    Args:
-        csv_dicts (list): CSV data created with build_csv_dicts function.
-        fieldnames (list): list of fields used to create CSV header row
-        filename (str): File name of downloaded CSV file
-
-    Returns:
-        CSV Response
-    """
-    output = io.StringIO()
-    if metadata is not None:
-        output.write(metadata)
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
-    writer.writeheader()
-    writer.writerows(csv_dicts)
-    response = Response(
-        output.getvalue(),
-        mimetype="text/csv",
-        headers={
-            "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": 'attachment; filename="'
-            + filename
-            + "\"; filename*=utf-8''\""
-            + filename
-            + '"',
-        },
-    )
-    return response
-
-
-def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=None):
-    """
-    Creates metadata string to add to beginning of CSV file.
-
-    Args:
-        place_name (str): Name of the place, None if just lat/lon
-        place_id (str): place identifier (e.g., AK124)
-        place_type (str): point or area
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-
-    Returns:
-        Multiline metadata string
-    """
-    metadata = "# Location: "
-    if place_name is None:
-        metadata += lat + " " + lon + "\n"
-        # if lat and lon and type huc12, then it's a local / point-to-huc query
-        if place_type == "huc12":
-            metadata += "# Corresponding HUC12 code: " + place_id + "\n"
-    elif place_type == "community":
-        metadata += place_name + "\n"
-    else:
-        metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
-
-    report_url = WEB_APP_URL + "report/"
-    if place_type is None:
-        report_url += lat + "/" + lon
-    elif place_type == "community":
-        report_url += "community/" + place_id
-    else:
-        report_url += "area/" + place_id
-    metadata += "# View a report for this location at " + report_url + "\n"
-
-    return metadata
 
 
 def deepflatten(iterable, depth=None, types=None, ignore=None):

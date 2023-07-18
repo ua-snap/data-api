@@ -10,17 +10,13 @@ from flask import (
 # local imports
 from generate_urls import generate_wcs_query_url
 from fetch_data import *
+from csv_functions import create_csv
 
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import (
-    nullify_nodata,
-    nullify_and_prune,
-    postprocess,
-    place_name_and_type,
-)
+from postprocessing import nullify_and_prune, nullify_nodata, postprocess
 from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import permafrost_encodings  # for the Melvin 4 km (NCR) data
@@ -45,8 +41,8 @@ wfs_targets = {
 }
 
 titles = {
-    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (°C) and Active Layer Thickness (m) 4 km Model Output",
-    "gipl1km": "GIPL 2.0 Mean Annual Ground Temperature (°C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
+    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (deg C) and Active Layer Thickness (m) 4 km Model Output",
+    "gipl1km": "GIPL 2.0 Mean Annual Ground Temperature (deg C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
@@ -61,7 +57,7 @@ def package_obu_magt(obu_magt_resp):
     year = "2000-2016"
     titles[
         "obu_magt"
-    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (°C)"
+    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (deg C)"
     temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
     if temp is None:
         return None
@@ -192,41 +188,6 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
                     i += 1
 
     return gipl1km_point_pkg
-
-
-def create_gipl1km_csv(data_pkg, lat=None, lon=None, summary=None):
-    """Create CSV file with metadata string and location based filename.
-    Args:
-        data_pkg (dict): JSON-like object of data
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-    if summary is not None:
-        fieldnames = [
-            "model",
-            "scenario",
-            "summary",
-            "variable",
-            "value",
-        ]
-    else:
-        fieldnames = [
-            "model",
-            "year",
-            "scenario",
-            "variable",
-            "value",
-        ]
-    csv_dicts = build_csv_dicts(
-        data_pkg,
-        fieldnames,
-    )
-    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (°C) at various depths below the surface as well as talik thickness (m) and depths of permafrost base and top (m)\n"
-    filename = "GIPL 1 km Model Outputs" + " for " + lat + ", " + lon + ".csv"
-
-    return write_csv(csv_dicts, fieldnames, filename, metadata)
 
 
 def package_gipl(gipl_resp):
@@ -375,64 +336,8 @@ def run_point_fetch_all_permafrost(lat, lon):
         "obupfx": package_obu_vector(gs_results[2]),
     }
 
-    csv_dicts = []
     if request.args.get("format") == "csv":
-        data = nullify_and_prune(data, "permafrost")
-        if data in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-
-        fieldnames = [
-            "source",
-            "era",
-            "model",
-            "scenario",
-            "variable",
-            "value",
-        ]
-
-        gipl_data = {"gipl": data["gipl"]}
-        csv_dicts += build_csv_dicts(
-            gipl_data,
-            fieldnames[0:-1],
-        )
-
-        # Non-GIPL values have a simpler nesting structure and need to be
-        # handled separately.
-        non_gipl_fields = [
-            "source",
-            "variable",
-            "value",
-        ]
-        for source in ["jorg", "obu_magt", "obupfx"]:
-            subset = {source: data[source]}
-            csv_dicts += build_csv_dicts(
-                subset,
-                non_gipl_fields,
-            )
-
-        place_id = request.args.get("community")
-        place_name, place_type = place_name_and_type(place_id)
-
-        metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
-        metadata += "# alt is the active layer thickness in meters\n"
-        metadata += "# magt is the mean annual ground temperature in degrees Celsius\n"
-        metadata += "# ice is the estimated ground ice volume\n"
-        metadata += "# pfx is the permafrost extent\n"
-        metadata += "# 2025 represents 2011 - 2040\n"
-        metadata += "# 2050 represents 2036 - 2065\n"
-        metadata += "# 2075 represents 2061 – 2090\n"
-        metadata += "# 2095 represents 2086 – 2100\n"
-
-        metadata += "# gipl is the Geophysical Institute's Permafrost Laboratory\n"
-        for source in ["gipl", "jorg", "obu_magt", "obupfx"]:
-            metadata += "# " + titles[source] + "\n"
-
-        if place_name is not None:
-            filename = "Permafrost for " + quote(place_name) + ".csv"
-        else:
-            filename = "Permafrost for " + lat + ", " + lon + ".csv"
-
-        return write_csv(csv_dicts, fieldnames, filename, metadata)
+        return create_csv(data, "permafrost", lat=lat, lon=lon, source_metadata=titles)
 
     return postprocess(data, "permafrost", titles)
 
@@ -535,8 +440,8 @@ async def run_fetch_gipl_1km_point_data(
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         if summarize is not None:
-            return create_gipl1km_csv(point_pkg, lat=lat, lon=lon, summary=summarize)
-        return create_gipl1km_csv(point_pkg, lat=lat, lon=lon)
+            return create_csv(point_pkg, "gipl_summary", lat=lat, lon=lon)
+        return create_csv(point_pkg, "gipl", lat=lat, lon=lon)
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 

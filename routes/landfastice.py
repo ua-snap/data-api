@@ -1,5 +1,4 @@
 import asyncio
-import numpy as np
 import pandas as pd
 from flask import (
     Blueprint,
@@ -11,14 +10,13 @@ from flask import (
 from fetch_data import (
     fetch_wcs_point_data,
     get_dim_encodings,
-    build_csv_dicts,
-    write_csv,
 )
+from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import postprocess
+from postprocessing import postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -60,28 +58,6 @@ def package_landfastice_data(landfastice_resp):
     return di
 
 
-def create_landfast_csv(data_pkg, lat=None, lon=None):
-    """Create CSV file with metadata string and location based filename.
-    Args:
-        data_pkg (dict): JSON-like object of data
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-    fieldnames = [
-        "date",
-        "value",
-    ]
-    csv_dicts = build_csv_dicts(
-        data_pkg,
-        fieldnames,
-    )
-    metadata = "# Landfast Ice Status: A null value indicates absence and 1 indicates presence.\n"
-    filename = "Landfast Ice Extent for " + lat + ", " + lon + ".csv"
-    return write_csv(csv_dicts, fieldnames, filename, metadata)
-
-
 @routes.route("/landfastice/")
 @routes.route("/landfastice/abstract/")
 def about_landfastice():
@@ -120,11 +96,7 @@ def run_point_fetch_all_landfastice(lat, lon):
         )
         landfastice_time_series = package_landfastice_data(rasdaman_response)
         if request.args.get("format") == "csv":
-            return create_landfast_csv(
-                postprocess(landfastice_time_series, "landfastice"),
-                lat,
-                lon,
-            )
+            return create_csv(landfastice_time_series, "landfastice", lat=lat, lon=lon)
         return postprocess(landfastice_time_series, "landfastice")
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:

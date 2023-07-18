@@ -1,6 +1,4 @@
 import asyncio
-import calendar
-import numpy as np
 from math import floor
 from flask import (
     Blueprint,
@@ -11,55 +9,19 @@ from flask import (
 # local imports
 from fetch_data import (
     fetch_wcs_point_data,
-    get_dim_encodings,
-    deepflatten,
-    build_csv_dicts,
-    write_csv,
 )
+from csv_functions import create_csv
 from validate_request import (
     validate_seaice_latlon,
     project_latlon,
-    validate_seaice_year,
 )
-from validate_data import nullify_and_prune, postprocess
+from postprocessing import postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
 seaice_api = Blueprint("seaice_api", __name__)
 # Rasdaman targets
 seaice_coverage_id = "hsia_arctic_production"
-
-
-def create_csv(data_pkg, lat=None, lon=None):
-    """Create CSV file with metadata string and location based filename.
-    Args:
-        data_pkg (dict): JSON-like object of data
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-
-    fieldnames = ["year", "month", "concentration"]
-
-    # Generating a list out of this results in an empty starting value
-    # Removes blank starting value for list of month names.
-    months = list(calendar.month_name)[1:]
-
-    csv_pkg = list()
-    for key in data_pkg:
-        year = str(key[0:4])
-        month_index = int(key[5:]) - 1
-        month = months[month_index]
-        di = dict()
-        di["year"] = year
-        di["month"] = month
-        di["concentration"] = data_pkg[key]
-        csv_pkg.append(di)
-
-    metadata = "# Sea Ice Concentration is the percentage of sea ice coverage at the given latitude and longitude for each year and month.\n"
-    filename = "Sea Ice Concentration for " + lat + ", " + lon + ".csv"
-    return write_csv(csv_pkg, fieldnames, filename, metadata)
 
 
 def package_seaice_data(seaice_resp):
@@ -73,8 +35,13 @@ def package_seaice_data(seaice_resp):
     """
     # initialize the output dict
     di = dict()
+
+    # For each year and month, checks to see if sea ice percentage is greater than 100,
+    # and sets the value of the percentage for each month to the returned value or 0.
     for i in range(len(seaice_resp)):
-        di[f"{1850 + floor(i / 12)}-{str((i%12) + 1).zfill(2)}"] = seaice_resp[i]
+        di[f"{1850 + floor(i / 12)}-{str((i%12) + 1).zfill(2)}"] = (
+            seaice_resp[i] if seaice_resp[i] <= 100 else 0
+        )
 
     return di
 
@@ -119,9 +86,8 @@ def run_point_fetch_all_seaice(lat, lon):
                 # Returns errors if any are generated
                 return seaice_conc
             # Returns CSV for download
-            return create_csv(
-                postprocess(package_seaice_data(rasdaman_response), "seaice"), lat, lon
-            )
+            data = postprocess(package_seaice_data(rasdaman_response), "seaice")
+            return create_csv(data, "seaice", lat=lat, lon=lon)
         # Returns sea ice concentrations across years & months
         return postprocess(package_seaice_data(rasdaman_response), "seaice")
     except Exception as exc:

@@ -6,24 +6,19 @@ from flask import (
     Blueprint,
     render_template,
     request,
-    current_app as app,
 )
 
 # local imports
 from generate_requests import *
 from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersection_url
 from fetch_data import *
+from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
     project_latlon,
     validate_var_id,
 )
-from validate_data import (
-    get_poly_3338_bbox,
-    nullify_and_prune,
-    postprocess,
-    place_name_and_type,
-)
+from postprocessing import nullify_and_prune, postprocess
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -44,24 +39,6 @@ var_label_lu = {
     "flammability": "Flammability",
     "veg_type": "Vegetation Type",
 }
-
-# CSV field names
-flammability_fieldnames = [
-    "date_range",
-    "model",
-    "scenario",
-    "stat",
-    "value",
-]
-
-veg_type_fieldnames = [
-    "date_range",
-    "model",
-    "scenario",
-    "veg_type",
-    "stat",
-    "value",
-]
 
 
 async def fetch_alf_point_data(x, y, cov_id_str):
@@ -359,44 +336,6 @@ def remove_invalid_dim_combos(var_ep, results):
     return results
 
 
-def create_csv(data_pkg, var_ep, place_id=None, lat=None, lon=None):
-    """Create CSV file with metadata string and location based filename.
-    Args:
-        data_pkg (dict): JSON-like object of data
-        var_ep (str): flammability, veg change, or veg_type
-        place_id: place identifier (e.g., AK124)
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-    if var_ep == "flammability":
-        fieldnames = flammability_fieldnames
-        extra_columns = {"stat": "mean"}
-    elif var_ep == "veg_type":
-        fieldnames = veg_type_fieldnames
-        extra_columns = {"stat": "percent"}
-    csv_dicts = build_csv_dicts(
-        data_pkg,
-        fieldnames,
-        extra_columns,
-    )
-
-    place_name, place_type = place_name_and_type(place_id)
-
-    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
-
-    if var_ep == "flammability":
-        metadata += "# mean is the mean of of annual means\n"
-
-    if place_name is not None:
-        filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
-    else:
-        filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
-
-    return write_csv(csv_dicts, fieldnames, filename, metadata)
-
-
 @routes.route("/alfresco/")
 @routes.route("/alfresco/abstract/")
 @routes.route("/alfresco/flammability/")
@@ -469,13 +408,13 @@ def run_fetch_alf_point_data(var_ep, lat, lon):
     point_pkg = package_ar5_alf_point_data(point_data_list, var_ep)
 
     if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, "alfresco")
+        point_pkg = nullify_and_prune(point_pkg, var_ep)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         place_id = request.args.get("community")
-        return create_csv(point_pkg, var_ep, place_id, lat=lat, lon=lon)
+        return create_csv(point_pkg, var_ep, place_id, lat, lon)
 
-    return postprocess(point_pkg, "alfresco")
+    return postprocess(point_pkg, var_ep)
 
 
 @routes.route("/alfresco/<var_ep>/local/<lat>/<lon>")
@@ -517,11 +456,11 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     huc12_pkg = run_fetch_alf_area_data(var_ep, huc_id, ignore_csv=True)
 
     if request.args.get("format") == "csv":
-        huc12_pkg = nullify_and_prune(huc12_pkg, "alfresco")
+        huc12_pkg = nullify_and_prune(huc12_pkg, var_ep)
         if huc12_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         # return CSV with lat/lon info since HUC12 names not handled
-        return create_csv(huc12_pkg, var_ep, huc_id, lat=lat, lon=lon)
+        return create_csv(huc12_pkg, var_ep, huc_id, lat, lon)
 
     huc12_pkg["huc_id"] = huc_id
     huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/area/{huc_id}"
@@ -554,9 +493,9 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
         return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:
-        poly_pkg = nullify_and_prune(poly_pkg, "alfresco")
+        poly_pkg = nullify_and_prune(poly_pkg, var_ep)
         if poly_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         return create_csv(poly_pkg, var_ep, var_id)
 
-    return postprocess(poly_pkg, "alfresco")
+    return postprocess(poly_pkg, var_ep)

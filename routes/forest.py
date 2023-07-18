@@ -7,7 +7,7 @@ from flask import (
 # local imports
 from fetch_data import fetch_data_api
 from validate_request import validate_latlon
-from validate_data import nullify_nodata, postprocess
+from postprocessing import nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import ak_veg_di
 from . import routes

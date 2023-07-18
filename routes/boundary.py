@@ -6,7 +6,8 @@ import json
 
 # local imports
 from validate_request import validate_var_id
-from validate_data import recursive_rounding, get_poly_3338_bbox
+from postprocessing import recursive_rounding
+from fetch_data import get_poly_3338_bbox
 from . import routes
 
 boundary_api = Blueprint("boundary_api", __name__)

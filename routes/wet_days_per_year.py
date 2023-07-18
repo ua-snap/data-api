@@ -9,11 +9,12 @@ from flask import (
 # local imports
 from generate_urls import generate_wcs_query_url
 from fetch_data import *
+from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import (
+from postprocessing import (
     nullify_and_prune,
     postprocess,
 )
@@ -253,31 +254,6 @@ async def fetch_wet_days_per_year_point_data(x, y, horp, start_year, end_year):
     return point_data_list
 
 
-def create_csv(data_pkg, lat=None, lon=None):
-    """Create CSV file with metadata string and location based filename.
-    Args:
-        data_pkg (dict): JSON-like object of data
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-    fieldnames = [
-        "model",
-        "year",
-        "variable",
-        "value",
-    ]
-    csv_dicts = build_csv_dicts(
-        data_pkg,
-        fieldnames,
-    )
-    metadata = "# wdpy is the count of wet days (days where the total precipitation amount is greater than or equal to 1.0 mm) per calendar year\n"
-    filename = "Wet Days Per Year" + " for " + lat + ", " + lon + ".csv"
-
-    return write_csv(csv_dicts, fieldnames, filename, metadata)
-
-
 # CP: consider if routing synonyms (top-level and mmm-nested) make sense for this endpoint. another alternative could be /precip_inidcators/wet_days_per_year...
 @routes.route("/wet_days_per_year/")
 @routes.route("/wet_days_per_year/abstract/")
@@ -349,7 +325,7 @@ def run_fetch_wet_days_per_year_point_data(
         point_pkg = nullify_and_prune(point_pkg, "wet_days_per_year")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, lat=lat, lon=lon)
+        return create_csv(point_pkg, "wet_days_per_year", lat=lat, lon=lon)
 
     return postprocess(point_pkg, "wet_days_per_year")
 

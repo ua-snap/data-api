@@ -1,28 +1,18 @@
 import asyncio
-import io
-import csv
-import calendar
 import numpy as np
-from math import floor
-from flask import Blueprint, render_template, request, Response
-from shapely.geometry import Point
+from flask import Blueprint, render_template, request
 
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import *
 from fetch_data import *
+from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
     project_latlon,
     validate_var_id,
-    validate_year,
 )
-from validate_data import (
-    get_poly_3338_bbox,
-    nullify_and_prune,
-    postprocess,
-    place_name_and_type,
-)
+from postprocessing import nullify_and_prune, postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -71,168 +61,6 @@ async def fetch_beetles_bbox_data(bbox_bounds, cov_id_str):
     urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
     bbox_ds_list = await fetch_bbox_netcdf_list(urls)
     return bbox_ds_list
-
-
-def create_csv(packaged_data, place_id, lat=None, lon=None):
-    """
-    Returns a CSV version of the fetched data, as a string.
-
-    Args:
-        packaged_data (json): JSON-like data package output
-            from the run_fetch_* and run_aggregate_* functions
-        place_id (str): community or area ID unless just a lat/lon value
-        lat: latitude unless an area
-        lon: longitude unless an area
-
-    Returns:
-        string of CSV data
-    """
-
-    output = io.StringIO()
-
-    place_name, place_type = place_name_and_type(place_id)
-
-    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
-    metadata += (
-        "# Values shown are for climate-related protection level from spruce beetle spread in the area.\n"
-    )
-    output.write(metadata)
-
-    # If this is an area, we include percentages into the CSV fields.
-    if (
-        "percent-high-protection"
-        in packaged_data["1988-2017"]["Daymet"]["Historical"]["low"].keys()
-    ):
-        fieldnames = [
-            "era",
-            "model",
-            "scenario",
-            "snowpack level",
-            "climate protection",
-            "percent high protection",
-            "percent minimal protection",
-            "percent no protection",
-        ]
-    else:
-        fieldnames = [
-            "era",
-            "model",
-            "scenario",
-            "snowpack level",
-            "climate protection",
-        ]
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
-
-    writer.writeheader()
-
-    for snowpack in dim_encodings["snowpack"].values():
-        try:
-            historical = packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack]
-            if (
-                "percent-high-protection"
-                in packaged_data["1988-2017"]["Daymet"]["Historical"][snowpack].keys()
-            ):
-                writer.writerow(
-                    {
-                        "era": "1988-2017",
-                        "model": "Daymet",
-                        "scenario": "Historical",
-                        "snowpack level": snowpack,
-                        "climate protection": historical["climate-protection"],
-                        "percent high protection": f"{int(historical['percent-high-protection'])}%",
-                        "percent minimal protection": f"{int(historical['percent-minimal-protection'])}%",
-                        "percent no protection": f"{int(historical['percent-no-protection'])}%",
-                    }
-                )
-            else:
-                writer.writerow(
-                    {
-                        "era": "1988-2017",
-                        "model": "Daymet",
-                        "scenario": "Historical",
-                        "snowpack level": snowpack,
-                        "climate protection": historical["climate-protection"],
-                    }
-                )
-        except KeyError:
-            # if single var query, just ignore attempts to
-            # write the non-chosen var
-            pass
-
-    for era in dim_encodings["era"].values():
-        for model in dim_encodings["model"].values():
-            for scenario in dim_encodings["scenario"].values():
-                for snowpack in dim_encodings["snowpack"].values():
-                    try:
-                        projected = packaged_data[era][model][scenario][snowpack]
-                        if (
-                            "percent-high-protection"
-                            in packaged_data[era][model][scenario][snowpack].keys()
-                        ):
-                            writer.writerow(
-                                {
-                                    "era": era,
-                                    "model": model,
-                                    "scenario": scenario,
-                                    "snowpack level": snowpack,
-                                    "climate protection": projected["climate-protection"],
-                                    "percent high protection": f"{int(projected['percent-high-protection'])}%",
-                                    "percent minimal protection": f"{int(projected['percent-minimal-protection'])}%",
-                                    "percent no protection": f"{int(projected['percent-no-protection'])}%",
-                                }
-                            )
-                        else:
-                            writer.writerow(
-                                {
-                                    "era": era,
-                                    "model": model,
-                                    "scenario": scenario,
-                                    "snowpack level": snowpack,
-                                    "climate protection": projected["climate-protection"],
-                                }
-                            )
-                    except KeyError:
-                        # if single var query, just ignore attempts to
-                        # write the non-chosen var
-                        pass
-
-    return output.getvalue()
-
-
-def return_csv(csv_data, place_id, lat=None, lon=None):
-    """Return the CSV data as a download
-
-    Args:
-        csv_data (?): csv data created with create_csv() function
-        place_id (str): community or area ID unless just a lat/lon value
-        lat: latitude unless an area
-        lon: longitude unless an area
-
-    Returns:
-        CSV Response
-    """
-
-    place_name, place_type = place_name_and_type(place_id)
-
-    if place_name is not None:
-        filename = "Climate Protection from Spruce Beetles for " + quote(place_name) + ".csv"
-    else:
-        filename = "Climate Protection from Spruce Beetles for " + lat + ", " + lon + ".csv"
-
-    response = Response(
-        csv_data,
-        mimetype="text/csv",
-        headers={
-            "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": 'attachment; filename="'
-            + filename
-            + "\"; filename*=utf-8''\""
-            + filename
-            + '"',
-        },
-    )
-
-    return response
 
 
 def package_beetle_data(beetle_resp, beetle_percents=None):
@@ -299,9 +127,9 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
                 for sni, risk_level in enumerate(sn_li):
                     snowpack = dim_encodings["snowpack"][sni]
                     di[era][model][scenario][snowpack] = dict()
-                    di[era][model][scenario][snowpack]["climate-protection"] = dim_encodings[
-                        "climate_protection"
-                    ][int(risk_level)]
+                    di[era][model][scenario][snowpack][
+                        "climate-protection"
+                    ] = dim_encodings["climate_protection"][int(risk_level)]
                     if beetle_percents is not None:
                         # This conditional will check to see if all percentages are 0% meaning that there is no data.
                         # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
@@ -311,11 +139,15 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
                             and beetle_percents[ei + 1][mi + 1][si + 1][sni][2] == 0.0
                             and beetle_percents[ei + 1][mi + 1][si + 1][sni][3] == 0.0
                         ):
-                            di[era][model][scenario][snowpack]["percent-high-protection"] = 0
+                            di[era][model][scenario][snowpack][
+                                "percent-high-protection"
+                            ] = 0
                             di[era][model][scenario][snowpack][
                                 "percent-minimal-protection"
                             ] = 0
-                            di[era][model][scenario][snowpack]["percent-no-protection"] = 0
+                            di[era][model][scenario][snowpack][
+                                "percent-no-protection"
+                            ] = 0
                         else:
                             di[era][model][scenario][snowpack][
                                 "percent-high-protection"
@@ -545,19 +377,16 @@ def run_point_fetch_all_beetles(lat, lon):
 
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, beetle_coverage_id))
-        climate_protection = postprocess(package_beetle_data(rasdaman_response), "beetles")
+        climate_protection = postprocess(
+            package_beetle_data(rasdaman_response), "beetles"
+        )
         if request.args.get("format") == "csv":
             if type(climate_protection) is not dict:
                 # Returns errors if any are generated
                 return climate_protection
             # Returns CSV for download
             place_id = request.args.get("community")
-            return return_csv(
-                create_csv(postprocess(climate_protection, "beetles"), None, lat, lon),
-                place_id,
-                lat,
-                lon,
-            )
+            return create_csv(climate_protection, "beetles", lat=lat, lon=lon)
         # Returns beetle risk levels
         return climate_protection
     except Exception as exc:
@@ -594,7 +423,6 @@ def beetle_area_data_endpoint(var_id):
         return render_template("404/no_data.html"), 404
 
     if request.args.get("format") == "csv":
-        csv_data = create_csv(climate_protection, var_id)
-        return return_csv(csv_data, var_id)
+        return create_csv(climate_protection, "beetles", var_id)
 
     return postprocess(climate_protection, "beetles")

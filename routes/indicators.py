@@ -16,7 +16,7 @@ from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
 from validate_request import validate_latlon, project_latlon, validate_var_id
-from validate_data import get_poly_3338_bbox, nullify_and_prune, postprocess
+from postprocessing import nullify_and_prune, postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
