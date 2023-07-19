@@ -73,8 +73,13 @@ def package_seaice_data(seaice_resp):
     """
     # initialize the output dict
     di = dict()
+
+    # For each year and month, checks to see if sea ice percentage is greater than 100,
+    # and sets the value of the percentage for each month to the returned value or 0.
     for i in range(len(seaice_resp)):
-        di[f"{1850 + floor(i / 12)}-{str((i%12) + 1).zfill(2)}"] = seaice_resp[i]
+        di[f"{1850 + floor(i / 12)}-{str((i%12) + 1).zfill(2)}"] = (
+            seaice_resp[i] if seaice_resp[i] <= 100 else 0
+        )
 
     return di
 
