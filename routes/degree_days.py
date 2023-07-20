@@ -16,6 +16,7 @@ from validate_request import (
 from validate_data import (
     nullify_and_prune,
     postprocess,
+    place_name_and_type
 )
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
@@ -465,7 +466,12 @@ def create_csv(data_pkg, cov_id_str, place_id=None, lat=None, lon=None):
     elif cov_id_str == "design_freezing_index":
         metadata = "# di is the mean of below freezing degree days for top three years in era\n"
 
-    filename = var_label_lu[cov_id_str] + " for " + lat + ", " + lon + ".csv"
+    place_name, place_type = place_name_and_type(place_id)
+
+    if place_name is not None:
+        filename = var_label_lu[cov_id_str] + " for " + quote(place_name) + ".csv"
+    else:
+        filename = var_label_lu[cov_id_str] + " for " + lat + ", " + lon + ".csv"
 
     return write_csv(csv_dicts, fieldnames, filename, metadata)
 
@@ -525,9 +531,10 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "degree_days")
+        place_id = request.args.get("community")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, cov_id_str, None, lat=lat, lon=lon)
+        return create_csv(point_pkg, cov_id_str, place_id, lat=lat, lon=lon)
 
     return postprocess(point_pkg, "degree_days")
 
@@ -578,9 +585,10 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "degree_days")
+        place_id = request.args.get("community")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, cov_id_str, None, lat=lat, lon=lon)
+        return create_csv(point_pkg, cov_id_str, place_id, lat=lat, lon=lon)
 
     return postprocess(point_pkg, "degree_days")
 
