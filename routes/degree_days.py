@@ -13,11 +13,7 @@ from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import (
-    nullify_and_prune,
-    postprocess,
-    place_name_and_type
-)
+from validate_data import nullify_and_prune, postprocess, place_name_and_type
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -512,7 +508,12 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     if None not in [start_year, end_year]:
         valid_years = validate_years(horp, int(start_year), int(end_year))
         if valid_years is not True:
-            return valid_years
+            return (
+                render_template(
+                    "422/invalid_year.html", min_year=start_year, max_year=end_year
+                ),
+                422,
+            )
 
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
