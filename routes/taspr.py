@@ -851,19 +851,28 @@ def return_csv(csv_data, var_ep, place_id, lat=None, lon=None, month=None):
 
     place_name, place_type = place_name_and_type(place_id)
 
-    if place_name is not None:
+    if month is not None:
+        if place_name is not None:
+            filename = (
+                    mmm_dim_encodings["months"][month]
+                    + " "
+                    + var_label_lu[var_ep]
+                    + " for "
+                    + quote(place_name) + ".csv"
+            )
+        else:
+            filename = (
+                    mmm_dim_encodings["months"][month]
+                    + " "
+                    + var_label_lu[var_ep]
+                    + " for "
+                    + lat
+                    + ", "
+                    + lon
+                    + ".csv"
+            )
+    elif place_name is not None:
         filename = var_label_lu[var_ep] + " for " + quote(place_name) + ".csv"
-    elif month is not None:
-        filename = (
-            mmm_dim_encodings["months"][month]
-            + " "
-            + var_label_lu[var_ep]
-            + " for "
-            + lat
-            + ", "
-            + lon
-            + ".csv"
-        )
     else:
         filename = var_label_lu[var_ep] + " for " + lat + ", " + lon + ".csv"
 
