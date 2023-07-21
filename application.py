@@ -20,6 +20,14 @@ def inject_date():
     return dict(year=year)
 
 
+@app.after_request
+def add_cache_control(response):
+    # Set cache control headers here
+    response.cache_control.max_age=7776000
+    response.cache_control.s_max_age=7776000
+    return response
+
+
 @app.route("/")
 def index():
     """Render index page"""
