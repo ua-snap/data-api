@@ -89,7 +89,7 @@ def package_base_indicators_data(point_data_list):
 
 @routes.route("/indicators/base/point/<lat>/<lon>")
 def run_fetch_base_indicators_point_data(lat, lon):
-    """Query the cordex_indicators_climatologies rasdaman coverage which contains indicators summarized over NCR time eras
+    """Query the NCAR 12km indicators_climatologies rasdaman coverage which contains indicators summarized over NCR time eras
 
     Args:
         lat (float): latitude
