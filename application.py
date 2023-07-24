@@ -23,7 +23,7 @@ def inject_date():
 @app.after_request
 def add_cache_control(response):
     # Set cache control headers here
-    response.cache_control.max_age=7776000
+    response.cache_control.max_age = 7776000
     return response
 
 
@@ -33,6 +33,6 @@ def index():
     return render_template("index.html")
 
 
-@app.route('/robots.txt')
+@app.route("/robots.txt")
 def static_from_root():
     return send_from_directory(app.static_folder, request.path[1:])
