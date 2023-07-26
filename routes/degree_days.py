@@ -14,11 +14,7 @@ from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from postprocessing import (
-    nullify_and_prune,
-    postprocess,
-    place_name_and_type
-)
+from postprocessing import nullify_and_prune, postprocess
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -481,18 +477,10 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     point_pkg = package_dd_point_data(point_data_list, var_ep, horp)
 
     if request.args.get("format") == "csv":
-<<<<<<< HEAD
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
-=======
-        point_pkg = nullify_and_prune(point_pkg, "degree_days")
-        place_id = request.args.get("community")
-        if point_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, cov_id_str, place_id, lat=lat, lon=lon)
->>>>>>> main
 
     return postprocess(point_pkg, cov_id_str)
 
@@ -542,12 +530,7 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
     point_pkg = package_di_point_data(point_data_list, horp)
 
     if request.args.get("format") == "csv":
-<<<<<<< HEAD
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
-=======
-        point_pkg = nullify_and_prune(point_pkg, "degree_days")
-        place_id = request.args.get("community")
->>>>>>> main
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         return create_csv(point_pkg, cov_id_str, place_id, lat=lat, lon=lon)
