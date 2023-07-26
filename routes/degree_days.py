@@ -457,9 +457,9 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     x, y = project_latlon(lat, lon, 3338)
 
     if None not in [start_year, end_year]:
-        valid_years = validate_years(horp, int(start_year), int(end_year))
-        if valid_years is not True:
-            return valid_years
+        valid_year = validate_years(horp, int(start_year), int(end_year))
+        if valid_year is not True:
+            return valid_year
 
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
@@ -564,7 +564,11 @@ def validate_years(horp, start_year, end_year):
             if year < min_year or year > max_year:
                 return (
                     render_template(
-                        "422/invalid_year.html", min_year=min_year, max_year=max_year
+                        "422/invalid_year.html",
+                        start_year=start_year,
+                        end_year=end_year,
+                        min_year=min_year,
+                        max_year=max_year,
                     ),
                     422,
                 )
