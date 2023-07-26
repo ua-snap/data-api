@@ -533,7 +533,7 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, cov_id_str, place_id, lat=lat, lon=lon)
+        return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
 
     return postprocess(point_pkg, cov_id_str)
 
