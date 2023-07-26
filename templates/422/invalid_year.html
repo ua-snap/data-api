@@ -2,7 +2,9 @@
 {% block content %}
 <h3>Invalid year</h3>
 <p>
-  One or both of the provided years are outside of the valid range. Valid years
-  for this endpoint are <code>{{ min_year }}</code> - <code>{{ max_year }}</code>.
+  One or both of these provided years (<code>{{start_year}}</code> &ndash; <code>{{end_year}}</code>) are outside of the valid range.
+</p>
+<p>
+  Valid years for this endpoint are <code>{{ min_year }}</code> &ndash; <code>{{ max_year }}</code>.
 </p>
 {% endblock %}
