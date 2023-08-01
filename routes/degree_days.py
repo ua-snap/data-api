@@ -433,7 +433,7 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         var_ep (str): heating, below_zero, thawing_index, or freezing_index
         lat (float): latitude
         lon (float): longitude
-        horp [Historical or Projected] (str): historical, projected, or hp
+        horp [Historical or Projected] (str): historical, projected, hp, or all
         start_year (int): optional start year for WCPS query
         end_year (int): optional end year for WCPS query
 
@@ -494,7 +494,7 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
         var_ep (str): thawing or freezing
         lat (float): latitude
         lon (float): longitude
-        horp [Historical or Projected] (str): historical, projected, or hp
+        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of requested design index data
