@@ -73,7 +73,7 @@ def create_csv(
     elif endpoint == "veg_type":
         properties = veg_type_csv(data)
     elif endpoint == "wet_days_per_year":
-        properties = wet_days_per_year_csv(data, endpoint)
+        properties = wet_days_per_year_csv(data)
     else:
         return render_template("500/server_error.html"), 500
 
@@ -665,12 +665,12 @@ def wet_days_per_year_csv(data):
     values = ["wdpy"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
-    metadata += "# wdpy is the count of wet days (days where the total precipitation amount is greater than or equal to 1.0 mm) per calendar year\n"
+    metadata = "# wdpy is the count of wet days (days where the total precipitation amount is greater than or equal to 1.0 mm) per calendar year\n"
     filename_data_name = "Wet Days Per Year"
 
     return {
         "csv_dicts": csv_dicts,
         "fieldnames": fieldnames,
-        "metadata": "",
+        "metadata": metadata,
         "filename_data_name": filename_data_name,
     }
