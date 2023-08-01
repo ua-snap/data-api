@@ -492,7 +492,7 @@ def snow_csv(data):
     return {
         "csv_dicts": csv_dicts,
         "fieldnames": fieldnames,
-        "metadata": "",
+        "metadata": metadata,
         "filename_data_name": filename_data_name,
     }
 
@@ -626,7 +626,7 @@ def taspr_csv(data, endpoint):
     return {
         "csv_dicts": csv_dicts,
         "fieldnames": fieldnames,
-        "metadata": "",
+        "metadata": metadata,
         "filename_data_name": filename_data_name,
     }
 
