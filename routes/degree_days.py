@@ -480,7 +480,10 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
+        if horp != "all":
+            return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
+        else:
+            return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
 
     return postprocess(point_pkg, cov_id_str)
 
@@ -533,7 +536,10 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
+        if horp != "all":
+            return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
+        else:
+            return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
 
     return postprocess(point_pkg, cov_id_str)
 

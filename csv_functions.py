@@ -45,9 +45,18 @@ def create_csv(
         "degree_days_below_zero",
         "thawing_index",
         "freezing_index",
+        "heating_degree_days_all",
+        "degree_days_below_zero_all",
+        "thawing_index_all",
+        "freezing_index_all",
     ]:
         properties = degree_days_csv(data, endpoint)
-    elif endpoint in ["design_thawing_index", "design_freezing_index"]:
+    elif endpoint in [
+        "design_thawing_index",
+        "design_freezing_index",
+        "design_thawing_index_all",
+        "design_freezing_index_all",
+    ]:
         properties = design_index_csv(data, endpoint)
     elif endpoint == "flammability":
         properties = flammability_csv(data)
@@ -278,25 +287,40 @@ def beetles_csv(data):
 
 
 def degree_days_csv(data, endpoint):
-    coords = ["model"]
-    values = ["ddmax", "ddmean", "ddmin"]
+    if endpoint in [
+        "heating_degree_days",
+        "degree_days_below_zero",
+        "thawing_index",
+        "freezing_index",
+    ]:
+        coords = ["model"]
+        values = ["ddmax", "ddmean", "ddmin"]
+    elif endpoint in [
+        "heating_degree_days_all",
+        "degree_days_below_zero_all",
+        "thawing_index_all",
+        "freezing_index_all",
+    ]:
+        coords = ["model", "year"]
+        values = ["dd"]
+
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
 
-    if endpoint == "heating_degree_days":
+    if endpoint in ["heating_degree_days", "heating_degree_days_all"]:
         filename_data_name = "Heating Degree Days"
         metadata = (
             "# dd is the total annual degree days below 65°F for the specified model\n"
         )
-    elif endpoint == "degree_days_below_zero":
+    elif endpoint in ["degree_days_below_zero", "degree_days_below_zero_all"]:
         filename_data_name = "Degree Days Below Zero"
         metadata = (
             "# dd is the total annual degree days below 0°F for the specified model\n"
         )
-    elif endpoint == "thawing_index":
+    elif endpoint in ["thawing_index", "thawing_index_all"]:
         filename_data_name = "Thawing Index"
         metadata = "# dd is the total annual degree days above freezing for the specified model\n"
-    elif endpoint == "freezing_index":
+    elif endpoint in ["freezing_index", "freezing_index_all"]:
         filename_data_name = "Freezing Index"
         metadata = "# dd is the total annual degree days below freezing for the specified model\n"
 
@@ -309,15 +333,26 @@ def degree_days_csv(data, endpoint):
 
 
 def design_index_csv(data, endpoint):
-    coords = ["era"]
-    values = ["di"]
+    if endpoint in [
+        "design_thawing_index",
+        "design_freezing_index",
+    ]:
+        coords = ["era"]
+        values = ["di"]
+    elif endpoint in [
+        "design_thawing_index_all",
+        "design_freezing_index_all",
+    ]:
+        coords = ["model", "era"]
+        values = ["di"]
+
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
 
-    if endpoint == "design_thawing_index":
+    if endpoint in ["design_thawing_index", "design_thawing_index_all"]:
         filename_data_name = "Design Thawing Index"
         metadata = "# di is the mean of above freezing degree days for top three years in era\n"
-    elif endpoint == "design_freezing_index":
+    elif endpoint in ["design_freezing_index", "design_freezing_index_all"]:
         filename_data_name = "Design Freezing Index"
         metadata = "# di is the mean of below freezing degree days for top three years in era\n"
 
