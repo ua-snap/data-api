@@ -545,7 +545,7 @@ def taspr_csv(data, endpoint):
         # Any key starting with year less than 2010 is considered historical.
         historical_data = {k: v for (k, v) in data.items() if int(k[0:4]) < 2010}
         coords = ["date_range", "season", "model", "scenario", "variable"]
-        values = ["hi_std", "lo_std", "max", "min", "median", "min", "q1", "q3"]
+        values = ["min", "mean", "max", "median", "hi_std", "lo_std", "q1", "q3"]
         fieldnames = coords + values
         all_fields += fieldnames
         csv_dicts += build_csv_dicts(historical_data, fieldnames, values=values)
@@ -658,6 +658,11 @@ def taspr_csv(data, endpoint):
         elif endpoint == "precipitation_all":
             metadata = pr_metadata
             filename_data_name = "Precipitation"
+
+    # Change "CRU_historical" scenario to just "Historical".
+    for csv_dict in csv_dicts:
+        if csv_dict["scenario"] == "CRU_historical":
+            csv_dict["scenario"] = "Historical"
 
     return {
         "csv_dicts": csv_dicts,
