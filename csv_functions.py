@@ -435,7 +435,9 @@ def landfastice_csv(data):
     values = ["status"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
-    metadata = "# Landfast Ice Status: A null value indicates absence and 1 indicates presence.\n"
+    metadata = (
+        "# Landfast Ice Status: A 0 value indicates absence and 1 indicates presence.\n"
+    )
     filename_data_name = "Landfast Ice Extent"
 
     return {
