@@ -545,7 +545,7 @@ def taspr_csv(data, endpoint):
         # Any key starting with year less than 2010 is considered historical.
         historical_data = {k: v for (k, v) in data.items() if int(k[0:4]) < 2010}
         coords = ["date_range", "season", "model", "scenario", "variable"]
-        values = ["min", "mean", "max", "median", "hi_std", "lo_std", "q1", "q3"]
+        values = ["mean", "min", "max", "median", "hi_std", "lo_std", "q1", "q3"]
         fieldnames = coords + values
         all_fields += fieldnames
         csv_dicts += build_csv_dicts(historical_data, fieldnames, values=values)
