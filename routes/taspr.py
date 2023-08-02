@@ -81,17 +81,10 @@ dot_dim_encodings = {
         11: "60d",
         12: "60m",
         13: "6h",
-        14: "7d"
+        14: "7d",
     },
-    "models": {
-        0: "GFDL-CM3",
-        1: "NCAR-CCSM4"
-    },
-    "eras": {
-        0: "2020-2049",
-        1: "2050-2079",
-        2: "2080-2099"
-    },
+    "models": {0: "GFDL-CM3", 1: "NCAR-CCSM4"},
+    "eras": {0: "2020-2049", 1: "2050-2079", 2: "2080-2099"},
     "intervals": {
         0: "2",
         1: "5",
@@ -101,8 +94,8 @@ dot_dim_encodings = {
         5: "100",
         6: "200",
         7: "500",
-        8: "1000"
-    }
+        8: "1000",
+    },
 }
 
 dot_precip_coverage_id = "dot_precip"
@@ -892,8 +885,8 @@ def run_fetch_dot_precip_point_data(lat, lon):
     # package point data with decoded coord values (names)
     # these functions are hard-coded  with coord values for now
     point_pkg = dict()
-    for interval in range(len(dot_dim_encodings['intervals'])):
-        interval_key = dot_dim_encodings['intervals'][interval]
+    for interval in range(len(dot_dim_encodings["intervals"])):
+        interval_key = dot_dim_encodings["intervals"][interval]
         point_pkg[interval_key] = dict()
         for duration in range(len(dot_dim_encodings["durations"])):
             duration_key = dot_dim_encodings["durations"][duration]
@@ -904,10 +897,18 @@ def run_fetch_dot_precip_point_data(lat, lon):
                 for era in range(len(dot_dim_encodings["eras"])):
                     era_key = dot_dim_encodings["eras"][era]
                     point_pkg[interval_key][duration_key][model_key][era_key] = dict()
-                    pf_data = rasdaman_response[interval][duration][model][era].split(" ")
-                    point_pkg[interval_key][duration_key][model_key][era_key]["pf"] = round(float(pf_data[0]) / 1000, 2)
-                    point_pkg[interval_key][duration_key][model_key][era_key]["pf_upper"] = round(float(pf_data[1]) / 1000, 2)
-                    point_pkg[interval_key][duration_key][model_key][era_key]["pf_lower"] = round(float(pf_data[2]) / 1000, 2)
+                    pf_data = rasdaman_response[interval][duration][model][era].split(
+                        " "
+                    )
+                    point_pkg[interval_key][duration_key][model_key][era_key][
+                        "pf"
+                    ] = round(float(pf_data[0]) / 1000, 2)
+                    point_pkg[interval_key][duration_key][model_key][era_key][
+                        "pf_upper"
+                    ] = round(float(pf_data[1]) / 1000, 2)
+                    point_pkg[interval_key][duration_key][model_key][era_key][
+                        "pf_lower"
+                    ] = round(float(pf_data[2]) / 1000, 2)
 
     return point_pkg
 
@@ -1275,12 +1276,12 @@ def dot_precip_point(lat, lon):
             422,
         )
 
-    try:
-        point_pkg = run_fetch_dot_precip_point_data(lat, lon)
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
+    # try:
+    point_pkg = run_fetch_dot_precip_point_data(lat, lon)
+    # except Exception as exc:
+    #     if hasattr(exc, "status") and exc.status == 404:
+    #         return render_template("404/no_data.html"), 404
+    #     return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "taspr")
@@ -1288,7 +1289,6 @@ def dot_precip_point(lat, lon):
             return render_template("404/no_data.html"), 404
 
         place_id = request.args.get("community")
-        csv_data = create_csv(point_pkg, var_ep, place_id, lat, lon)
-        return return_csv(csv_data, var_ep, place_id, lat, lon)
+        return create_csv(point_pkg, "dot_precip", place_id, lat, lon)
 
     return postprocess(point_pkg, "taspr")

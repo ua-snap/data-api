@@ -19,6 +19,7 @@ nodata_mappings = {
     "design_freezing_index_all": nodata_values["default"],
     "design_thawing_index": nodata_values["default"],
     "design_thawing_index_all": nodata_values["default"],
+    "dot_precip": nodata_values["taspr"],
     "elevation": nodata_values["default"],
     "freezing_index": nodata_values["default"],
     "freezing_index_all": nodata_values["default"],
