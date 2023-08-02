@@ -554,14 +554,14 @@ def taspr_csv(data, endpoint):
         projected_data = {k: v for (k, v) in data.items() if int(k[0:4]) >= 2010}
         coords = ["date_range", "season", "model", "scenario"]
 
-        metadata = "# median is the median of annual means\n"
+        metadata = "# mean is the mean of annual means\n"
+        metadata += "# median is the median of annual means\n"
         metadata += "# max is the maximum annual mean\n"
         metadata += "# min is the minimum annual mean\n"
         metadata += "# q1 is the first quartile of the annual means\n"
         metadata += "# q3 is the third quartile of the annual means\n"
         metadata += "# hi_std is the mean + standard deviation of annual means\n"
         metadata += "# lo_std is the mean - standard deviation of annual means\n"
-        metadata += "# mean is the mean of annual means\n"
         metadata += "# DJF is December - February\n"
         metadata += "# MAM is March - May\n"
         metadata += "# JJA is June - August\n"
@@ -569,19 +569,18 @@ def taspr_csv(data, endpoint):
 
         if endpoint == "temperature":
             values = ["tas"]
-            metadata += tas_metadata
+            metadata = tas_metadata + metadata
             filename_data_name = "Temperature"
         elif endpoint == "precipitation":
             values = ["pr"]
-            metadata += pr_metadata
+            metadata = pr_metadata + metadata
             filename_data_name = "Precipitation"
         elif endpoint == "taspr":
             values = ["tas", "pr"]
-            metadata += tas_metadata + pr_metadata
+            metadata = tas_metadata + pr_metadata + metadata
             filename_data_name = "Temperature & Precipitation"
 
-            fieldnames = coords + values
-
+        fieldnames = coords + values
         all_fields += fieldnames
         csv_dicts += build_csv_dicts(projected_data, fieldnames, values=values)
 
