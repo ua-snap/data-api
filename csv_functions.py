@@ -294,7 +294,7 @@ def degree_days_csv(data, endpoint):
         "freezing_index",
     ]:
         coords = ["model"]
-        values = ["ddmax", "ddmean", "ddmin"]
+        values = ["ddmin", "ddmean", "ddmax"]
     elif endpoint in [
         "heating_degree_days_all",
         "degree_days_below_zero_all",
