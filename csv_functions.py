@@ -81,8 +81,8 @@ def create_csv(
         properties = taspr_csv(data, endpoint)
     elif endpoint == "veg_type":
         properties = veg_type_csv(data)
-    elif endpoint == "wet_days_per_year":
-        properties = wet_days_per_year_csv(data)
+    elif endpoint in ["wet_days_per_year", "wet_days_per_year_all"]:
+        properties = wet_days_per_year_csv(data, endpoint)
     else:
         return render_template("500/server_error.html"), 500
 
@@ -701,12 +701,18 @@ def veg_type_csv(data):
     }
 
 
-def wet_days_per_year_csv(data):
-    coords = [
-        "model",
-        "year",
-    ]
-    values = ["wdpy"]
+def wet_days_per_year_csv(data, endpoint):
+    if endpoint == "wet_days_per_year":
+        coords = [
+            "era",
+        ]
+        values = ["wdpymin", "wdpymean", "wdpymax"]
+    elif endpoint == "wet_days_per_year_all":
+        coords = [
+            "model",
+            "year",
+        ]
+        values = ["wdpy"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
     metadata = "# wdpy is the count of wet days (days where the total precipitation amount is greater than or equal to 1.0 mm) per calendar year\n"

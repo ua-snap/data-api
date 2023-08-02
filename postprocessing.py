@@ -49,6 +49,7 @@ nodata_mappings = {
     "seaice": nodata_values["seaice"],
     "veg_type": nodata_values["default"],
     "wet_days_per_year": nodata_values["default"],
+    "wet_days_per_year_all": nodata_values["default"],
 }
 
 

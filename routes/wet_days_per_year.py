@@ -325,7 +325,10 @@ def run_fetch_wet_days_per_year_point_data(
         point_pkg = nullify_and_prune(point_pkg, "wet_days_per_year")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        return create_csv(point_pkg, "wet_days_per_year", lat=lat, lon=lon)
+        if horp != "all":
+            return create_csv(point_pkg, "wet_days_per_year", lat=lat, lon=lon)
+        else:
+            return create_csv(point_pkg, "wet_days_per_year_all", lat=lat, lon=lon)
 
     return postprocess(point_pkg, "wet_days_per_year")
 
