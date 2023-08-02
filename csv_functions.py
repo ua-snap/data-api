@@ -457,7 +457,6 @@ def permafrost_csv(data, source_metadata):
                 "era",
                 "model",
                 "scenario",
-                "variable",
             ],
             "values": ["magt", "alt"],
         },
@@ -474,6 +473,7 @@ def permafrost_csv(data, source_metadata):
     metadata += "# 2050 represents 2036 - 2065\n"
     metadata += "# 2075 represents 2061 - 2090\n"
     metadata += "# 2095 represents 2086 - 2100\n"
+    metadata += "# gipl is the Geophysical Institute's Permafrost Laboratory\n"
 
     all_fields = []
     csv_dicts = []
@@ -481,7 +481,7 @@ def permafrost_csv(data, source_metadata):
         fieldnames = sources[source]["coords"] + sources[source]["values"]
         all_fields += fieldnames
         source_data = {source: data[source]}
-        metadata += source_metadata[source] + "\n"
+        metadata += "# " + source_metadata[source] + "\n"
         csv_dicts += build_csv_dicts(
             source_data, fieldnames, values=sources[source]["values"]
         )
