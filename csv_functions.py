@@ -221,12 +221,7 @@ def beetles_csv(data):
         "percent-high-protection"
         in data["1988-2017"]["Daymet"]["Historical"]["low"].keys()
     ):
-        coords = [
-            "era",
-            "model",
-            "scenario",
-            "snowpack",
-        ]
+        coords = ["era", "model", "scenario", "snowpack"]
         values = [
             "climate-protection",
             "percent-high-protection",
@@ -234,15 +229,8 @@ def beetles_csv(data):
             "percent-no-protection",
         ]
     else:
-        coords = [
-            "era",
-            "model",
-            "scenario",
-            "snowpack",
-        ]
-        values = [
-            "climate-protection",
-        ]
+        coords = ["era", "model", "scenario", "snowpack"]
+        values = ["climate-protection"]
 
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(
@@ -370,11 +358,7 @@ def flammability_csv(data):
         for model in data[era].keys():
             for scenario, value in data[era][model].items():
                 data[era][model][scenario] = {"mean": value}
-    coords = [
-        "date_range",
-        "model",
-        "scenario",
-    ]
+    coords = ["date_range", "model", "scenario"]
     values = ["mean"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
@@ -391,17 +375,9 @@ def flammability_csv(data):
 
 def gipl_csv(data, endpoint):
     if endpoint == "gipl_summary":
-        coords = [
-            "model",
-            "scenario",
-            "summary",
-        ]
+        coords = ["model", "scenario", "summary"]
     elif endpoint == "gipl":
-        coords = [
-            "model",
-            "year",
-            "scenario",
-        ]
+        coords = ["model", "year", "scenario"]
     values = [
         "magt0.5m",
         "magt1m",
@@ -682,12 +658,7 @@ def veg_type_csv(data):
             for scenario in data[era][model].keys():
                 for veg_type, value in data[era][model][scenario].items():
                     data[era][model][scenario][veg_type] = {"percent": value}
-    coords = [
-        "date_range",
-        "model",
-        "scenario",
-        "veg_type",
-    ]
+    coords = ["date_range", "model", "scenario", "veg_type"]
     values = ["percent"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
@@ -703,15 +674,10 @@ def veg_type_csv(data):
 
 def wet_days_per_year_csv(data, endpoint):
     if endpoint == "wet_days_per_year":
-        coords = [
-            "era",
-        ]
+        coords = ["era"]
         values = ["wdpymin", "wdpymean", "wdpymax"]
     elif endpoint == "wet_days_per_year_all":
-        coords = [
-            "model",
-            "year",
-        ]
+        coords = ["model", "year"]
         values = ["wdpy"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
