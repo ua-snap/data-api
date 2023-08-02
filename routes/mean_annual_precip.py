@@ -7,7 +7,7 @@ from flask import (
 # local imports
 from fetch_data import fetch_data_api
 from validate_request import validate_latlon
-from validate_data import postprocess
+from postprocessing import postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -25,7 +25,6 @@ def package_decadal_mapr(decadal_mapr_resp):
     dec_mapr = []
 
     for i, j in enumerate(wms_targets[0:2]):
-
         model = j.split("_")[-4]
         scenario = j.split("_")[-3]
         dec_start = j.split("_")[-2]
@@ -59,7 +58,8 @@ def mapr_about_point():
 @routes.route("/mean_annual_precip/point/<lat>/<lon>")
 def run_fetch_mapr_data(lat, lon):
     """Run the async mean annual precipitation data requesting and return data as json
-    example request: http://localhost:5000/mean_annual_precipitation/65.0628/-146.1627"""
+    example request: http://localhost:5000/mean_annual_precipitation/65.0628/-146.1627
+    """
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400

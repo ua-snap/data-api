@@ -9,12 +9,13 @@ from fetch_data import (
     fetch_data_api,
     fetch_bbox_geotiff_from_gs,
     geotiff_zonal_stats,
+    get_poly_3338_bbox,
 )
 from validate_request import (
     validate_latlon,
     validate_var_id,
 )
-from validate_data import get_poly_3338_bbox, postprocess
+from postprocessing import postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from . import routes
 

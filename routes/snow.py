@@ -11,14 +11,13 @@ from fetch_data import (
     fetch_wcs_point_data,
     get_dim_encodings,
     deepflatten,
-    build_csv_dicts,
-    write_csv,
 )
+from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import nullify_and_prune, postprocess
+from postprocessing import nullify_and_prune, postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -114,31 +113,6 @@ def summarize_mmm_sfe(all_sfe_di):
     return mmm_sfe_di
 
 
-def create_csv(data_pkg, lat=None, lon=None):
-    """Create CSV file with metadata string and location based filename.
-    Args:
-        data_pkg (dict): JSON-like object of data
-        lat: latitude for points or None for polygons
-        lon: longitude for points or None for polygons
-    Returns:
-        CSV response object
-    """
-    fieldnames = [
-        "model",
-        "scenario",
-        "decade",
-        "variable",
-        "value",
-    ]
-    csv_dicts = build_csv_dicts(
-        data_pkg,
-        fieldnames,
-    )
-    metadata = "#SFE is the total annual snowfall equivalent in millimeters for the specified model-scenario-decade\n"
-    filename = "SFE for " + lat + ", " + lon + ".csv"
-    return write_csv(csv_dicts, fieldnames, filename, metadata)
-
-
 @routes.route("/mmm/snow/")
 @routes.route("/mmm/snow/snowfallequivalent/")
 def about_mmm_snow():
@@ -190,7 +164,7 @@ def run_point_fetch_all_sfe(lat, lon, horp="hp"):
                 point_pkg = nullify_and_prune(horp_case_di[horp], "snow")
                 if point_pkg in [{}, None, 0]:
                     return render_template("404/no_data.html"), 404
-                return create_csv(point_pkg, lat, lon)
+                return create_csv(point_pkg, "snow", lat=lat, lon=lon)
             else:
                 return postprocess(horp_case_di[horp], "snow")
         except KeyError:
