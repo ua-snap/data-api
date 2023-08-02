@@ -618,6 +618,9 @@ def taspr_csv(data, endpoint):
             fieldnames = list(dict.fromkeys(all_fields))
 
     elif endpoint in ["temperature_mmm", "precipitation_mmm"]:
+        tas_metadata = "# tas is the temperature at surface in degrees Celsius\n"
+        pr_metadata = "# pr is precipitation in millimeters\n"
+
         coords = ["model", "scenario", "year"]
         if endpoint == "temperature_mmm":
             values = ["tasmin", "tasmean", "tasmax"]
@@ -637,10 +640,10 @@ def taspr_csv(data, endpoint):
         )
 
         if endpoint == "temperature_mmm":
-            metadata += tas_metadata
+            metadata = tas_metadata + metadata
             filename_data_name = "Temperature"
         elif endpoint == "precipitation_mmm":
-            metadata += pr_metadata
+            metadata = pr_metadata + metadata
             filename_data_name = "Precipitation"
 
     elif endpoint in ["temperature_all", "precipitation_all"]:
