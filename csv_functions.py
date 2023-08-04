@@ -657,7 +657,7 @@ def taspr_csv(data, endpoint):
 
     # Change "CRU_historical" scenario to just "Historical".
     for csv_dict in csv_dicts:
-        if endpoint is not "dot_precip" and csv_dict["scenario"] == "CRU_historical":
+        if endpoint != "dot_precip" and csv_dict["scenario"] == "CRU_historical":
             csv_dict["scenario"] = "Historical"
 
     return {
