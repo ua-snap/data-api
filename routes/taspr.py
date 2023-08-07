@@ -900,16 +900,16 @@ def run_fetch_proj_precip_point_data(lat, lon):
                     pf_data = rasdaman_response[interval][duration][model][era].split(
                         " "
                     )
-                    # Convert values to metric before returning them in API
+                    # Convert values to metric (millimeters) before returning them in the API
                     point_pkg[interval_key][duration_key][model_key][era_key][
                         "pf"
-                    ] = int((float(pf_data[0]) / 1000) * 25.4)
+                    ] = round((float(pf_data[0]) / 1000) * 25.4, 2)
                     point_pkg[interval_key][duration_key][model_key][era_key][
                         "pf_upper"
-                    ] = int((float(pf_data[1]) / 1000) * 25.4)
+                    ] = round((float(pf_data[1]) / 1000) * 25.4, 2)
                     point_pkg[interval_key][duration_key][model_key][era_key][
                         "pf_lower"
-                    ] = int((float(pf_data[2]) / 1000) * 25.4)
+                    ] = round((float(pf_data[2]) / 1000) * 25.4, 2)
 
     return point_pkg
 
