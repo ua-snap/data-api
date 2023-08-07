@@ -866,9 +866,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     return aggr_results
 
 
-def run_fetch_dot_precip_point_data(lat, lon):
-    """Fetch and combine point data for both
-       temperature and precipitation
+def run_fetch_proj_precip_point_data(lat, lon):
+    """Fetch projected precipitation data for a
+       given latitude and longitude.
 
     Args:
         lat (float): latitude
@@ -900,15 +900,16 @@ def run_fetch_dot_precip_point_data(lat, lon):
                     pf_data = rasdaman_response[interval][duration][model][era].split(
                         " "
                     )
+                    # Convert values to metric before returning them in API
                     point_pkg[interval_key][duration_key][model_key][era_key][
                         "pf"
-                    ] = round(float(pf_data[0]) / 1000, 2)
+                    ] = int((float(pf_data[0]) / 1000) * 25.4)
                     point_pkg[interval_key][duration_key][model_key][era_key][
                         "pf_upper"
-                    ] = round(float(pf_data[1]) / 1000, 2)
+                    ] = int((float(pf_data[1]) / 1000) * 25.4)
                     point_pkg[interval_key][duration_key][model_key][era_key][
                         "pf_lower"
-                    ] = round(float(pf_data[2]) / 1000, 2)
+                    ] = int((float(pf_data[2]) / 1000) * 25.4)
 
     return point_pkg
 
@@ -1263,8 +1264,8 @@ def taspr_area_data_endpoint(var_ep, var_id):
     return postprocess(poly_pkg, "taspr")
 
 
-@routes.route("/dot_precip/point/<lat>/<lon>")
-def dot_precip_point(lat, lon):
+@routes.route("/proj_precip/point/<lat>/<lon>")
+def proj_precip_point(lat, lon):
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -1276,12 +1277,12 @@ def dot_precip_point(lat, lon):
             422,
         )
 
-    # try:
-    point_pkg = run_fetch_dot_precip_point_data(lat, lon)
-    # except Exception as exc:
-    #     if hasattr(exc, "status") and exc.status == 404:
-    #         return render_template("404/no_data.html"), 404
-    #     return render_template("500/server_error.html"), 500
+    try:
+        point_pkg = run_fetch_proj_precip_point_data(lat, lon)
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "taspr")

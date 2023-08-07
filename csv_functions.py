@@ -77,7 +77,7 @@ def create_csv(
         "temperature_mmm",
         "temperature_all",
         "precipitation_all",
-        "dot_precip",
+        "proj_precip",
     ]:
         properties = taspr_csv(data, endpoint)
     elif endpoint == "veg_type":
@@ -639,7 +639,7 @@ def taspr_csv(data, endpoint):
             metadata = pr_metadata
             filename_data_name = "Precipitation"
 
-    elif endpoint == "dot_precip":
+    elif endpoint == "proj_precip":
         coords = ["return_interval", "duration", "model", "era"]
         values = ["pf", "pf_lower", "pf_upper"]
         fieldnames = coords + values
@@ -657,7 +657,7 @@ def taspr_csv(data, endpoint):
 
     # Change "CRU_historical" scenario to just "Historical".
     for csv_dict in csv_dicts:
-        if endpoint != "dot_precip" and csv_dict["scenario"] == "CRU_historical":
+        if endpoint != "proj_precip" and csv_dict["scenario"] == "CRU_historical":
             csv_dict["scenario"] = "Historical"
 
     return {
