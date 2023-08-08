@@ -113,10 +113,11 @@ def summarize_mmm_sfe(all_sfe_di):
     return mmm_sfe_di
 
 
+@routes.route("/snow/")
 @routes.route("/mmm/snow/")
 @routes.route("/mmm/snow/snowfallequivalent/")
 def about_mmm_snow():
-    return render_template("mmm/snow.html")
+    return render_template("documentation/snow.html")
 
 
 @routes.route("/mmm/snow/snowfallequivalent/<lat>/<lon>")

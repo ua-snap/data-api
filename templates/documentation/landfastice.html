@@ -1,0 +1,79 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Landfast Sea Ice Extent</h2>
+<p>This endpoint accesses daily landfast ice extent information for the Alaska coastline between October 17th, 1996 and
+  July 14th, 2008.</p>
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>Query the daily landfast ice extent for a certain geographic point:</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Landfast sea ice extent point query</td>
+      <td><a href="/landfastice/point/70.6123/-149.8869">/landfastice/point/70.6123/-149.8869</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from point queries will look like this:</p>
+
+<pre>
+{
+  "01-01-1997": null,
+  "01-01-1998": null,
+  "01-01-1999": null,
+  "01-01-2000": 1,
+  "01-01-2001": 1,
+  "01-01-2002": 1,
+  "01-01-2003": 1,
+  "01-01-2004": 1,
+  "01-01-2005": 1,
+  "01-01-2006": 1,
+  "01-01-2007": 1,
+  "01-01-2008": null,
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "&lt;month&gt;-&lt;day&gt;-&lt;year&gt;": &lt;landfast ice presence (1) or absence (null) for a specific date in the time series&gt;,
+  ...
+}
+</pre>
+
+<h3>Source data</h3>
+<!-- This is a bit of a placeholder until the we launch ARDAC or get PI approval to publish in the Catalog.-->
+<p>
+  These data are part of the Arctic Data Collaborative (ARDAC). Scientists
+  working on Arctic research need easily obtainable climate and environmental
+  data. ARDAC is a system of online technologies that curate and distribute
+  relevant Arctic environmental data in formats that improve the ability of
+  scientists to use this data. Users of these data should cite:
+</p>
+<p>
+  Mahoney, A., Eicken, H., Gaylord, A. G., and Shapiro, L. (2007), Alaska
+  landfast sea ice: Links with bathymetry and atmospheric circulation<i>, J. Geophys. Res.,</i>
+  112, C02001, doi:10.1029/2006JC003559.
+</p>
+
+
+{% endblock %}

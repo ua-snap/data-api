@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Geology Data</h2>
+<p>These data are for use in the Arctic-EDS. Currently, only the USGS detailed rock unit names and ages are available.
+</p>
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>Query the USGS Geologic Map of Alaska at a single point specified by latitude and longitude.</p>
+
+<table class="endpoints">
+    <thead>
+        <tr>
+            <th class="endpoint-label">Endpoint</th>
+            <th class="endpoint-url">Example URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Geology point query</td>
+            <td><a href="/geology/point/69.0628/-144.1627">/geology/point/69.0628/-144.1627</a>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2"></td>
+        </tr>
+    </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from point queries will look like this:</p>
+
+<pre>
+{
+  "age": "Cambrian and Proterozoic",
+  "name": "Wickersham and Neruokpuk units",
+  "title": "USGS Geologic Map of Alaska"
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+<pre>
+{
+  "age": &lt;geologic unit age&gt;,
+  "name": &lt;geologic unit name&gt;,
+  "title": &lt;title describing these results&gt;,
+}
+</pre>
+
+<h3>Source data</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Dataset</th>
+            <th>Download link</th>
+            <th>Source</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href="https://pubs.er.usgs.gov/publication/sim3340">Geologic Map of Alaska</a></td>
+            <td><a
+                    href="http://pubs.usgs.gov/sim/3340/sim3340_shp.zip">http://pubs.usgs.gov/sim/3340/sim3340_shp.zip</a>
+            </td>
+            <td><a href="http://dx.doi.org/10.3133/sim3340">http://dx.doi.org/10.3133/sim3340</a></td>
+            <td>Using the detailed rock unit shapefile.</td>
+        </tr>
+    </tbody>
+</table>
+
+
+{% endblock %}

@@ -271,13 +271,9 @@ def combine_gipl_poly_var_pkgs(magt_di, alt_di):
 
 @routes.route("/permafrost/")
 @routes.route("/permafrost/abstract/")
-def pf_about():
-    return render_template("permafrost/abstract.html")
-
-
 @routes.route("/permafrost/point/")
-def pf_about_point():
-    return render_template("permafrost/point.html")
+def pf_about():
+    return render_template("documentation/permafrost.html")
 
 
 @routes.route("/permafrost/point/gipl/<lat>/<lon>")

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Design Index</h2>
+<p>Query historical and projected design thawing index and design freezing index.</p>
+
+<h3>Datasets</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Dataset</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Thawing</td>
+      <td>
+        The mean of the three highest cumulative annual degree days from the
+        thawing index for each era.
+      </td>
+    </tr>
+    <tr>
+      <td>Freezing</td>
+      <td>
+        The mean of the three highest cumulative annual degree days from the
+        freezing index for each era.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<h3>Service endpoints</h3>
+
+<h4>Summary across all models (point query)</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    </tfoot>
+    <tr>
+      <td>Historical design thawing index</td>
+      <td><a
+          href="/design_index/thawing/historical/point/65.0628/-146.1627">/design_index/thawing/historical/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Projected design thawing index</td>
+      <td><a
+          href="/design_index/thawing/projected/point/65.0628/-146.1627">/design_index/thawing/projected/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Historical and projected design thawing index</td>
+      <td><a
+          href="/design_index/thawing/hp/point/65.0628/-146.1627">/design_index/thawing/hp/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Historical design freezing index</td>
+      <td><a
+          href="/design_index/freezing/historical/point/65.0628/-146.1627">/design_index/thawing/historical/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Projected design freezing index</td>
+      <td><a
+          href="/design_index/freezing/projected/point/65.0628/-146.1627">/design_index/thawing/projected/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Historical and projected design freezing index</td>
+      <td><a
+          href="/design_index/freezing/hp/point/65.0628/-146.1627">/design_index/thawing/hp/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Results from each model (point query)</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Design thawing index across all models</td>
+      <td><a
+          href="/design_index/thawing/all/point/65.0628/-146.1627">/design_index/thawing/all/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Design freezing index across all models</td>
+      <td><a
+          href="/design_index/freezing/all/point/65.0628/-146.1627">/design_index/freezing/all/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Summary across all models</h4>
+
+<p>Point query summaries across all models will look like this:</p>
+
+<pre>
+{
+  "2040-2069": {
+    "di": 3787
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;era&gt;: {
+    "di": &lt;mean of degree days across top three years across models and era&gt;
+  },
+  ...
+}
+</pre>
+
+<h4>Results from each model</h4>
+
+<p>Point query results from each model will look like this:</p>
+
+<pre>
+{
+  ...
+  "GFDL-CM3": {
+    "2040-2069": {
+      "di": 1548
+    },
+    "2070-2099": {
+      "di": 775
+    }
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;era&gt;: {
+      "di": &lt;mean of degree days across top three years across era&gt;
+    },
+    ...
+  },
+  ...
+}
+</pre>
+{% endblock %}

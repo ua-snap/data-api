@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Wildfire Data</h2>
+
+<p>Query near-real-time, historical, and model output relevant to Alaska wildfires.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Wildfire point query</td>
+      <td><a href="/fire/point/65.0628/-146.1627">/fire/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from wildfire queries will look like this:</p>
+
+<pre>
+{
+  "cfd": {
+    "code": 1,
+    "color": "#2b83ba",
+    "title": "Today's Fire Danger",
+    "type": "Low"
+  },
+  "hist_fire": {
+    "Angel Creek - Chena Dome": "1950",
+    "WEST FORK CHENA": "2002"
+  },
+  "is_snow": {
+    "is_snow": false,
+    "title": "Today's Snow Cover"
+  },
+  "lc": {
+    "code": 8,
+    "color": "#b38a33",
+    "title": "Land cover types",
+    "type": "Temperate or sub-polar shrubland"
+  },
+  "prf": {
+    "flamm": 0.0057,
+    "title": "Projected relative flammability"
+  }
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "cfd": {
+    "code": &lt;numeric fire danger rating, range 1 through 5&gt;,
+    "color": &lt;hex color code to visualize fire danger&gt;,
+    "title": &lt;title describing these data&gt;,
+    "type": &lt;fire danger rating&gt;
+  },
+  "hist_fire": {
+    &lt;historical fire name&gt;: &lt;fire year&gt;,
+    ...
+  },
+  "is_snow": {
+    "is_snow": &lt;true if point is covered by snow, otherwise false&gt;,
+    "title": &lt;title describing these data&gt;
+  },
+  "lc": {
+    "code": &lt;numeric land cover code&gt;,
+    "color": &lt;hex color code to visualize land cover&gt;,
+    "title": &lt;title describing these data&gt;,
+    "type": &lt;Land cover description&gt;
+  },
+  "prf": {
+    "flamm": &lt;numeric flammability value&gt;,
+    "title": &lt;title describing these data&gt;
+  }
+}
+</pre>
+
+<h3>Source data</h3>
+<p>See the <a href="https://snap.uaf.edu/tools/alaska-wildfires">Alaska Wildfire Explorer tool for more
+    documentation on
+    these data.</a></p>
+{% endblock %}

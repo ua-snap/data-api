@@ -156,6 +156,13 @@ def get_di_wcps_request_str(x, y, cov_id, models, eras, encoding="json"):
     return wcps_request_str
 
 
+@routes.route("/degree_days/")
+@routes.route("/design_index/abstract/")
+@routes.route("/design_index/thawing/")
+@routes.route("/design_index/freezing/")
+@routes.route("/design_index/point")
+@routes.route("/design_index/thawing/point")
+@routes.route("/design_index/freezing/point")
 @routes.route("/mmm/degree_days/")
 @routes.route("/mmm/degree_days/abstract/")
 @routes.route("/mmm/degree_days/heating/")
@@ -163,22 +170,12 @@ def get_di_wcps_request_str(x, y, cov_id, models, eras, encoding="json"):
 @routes.route("/mmm/degree_days/thawing_index/")
 @routes.route("/mmm/degree_days/freezing_index/")
 def degree_days_about():
-    return render_template("/mmm/degree_days.html")
+    return render_template("/documentation/degree_days.html")
 
 
 @routes.route("/design_index/")
-@routes.route("/design_index/abstract/")
-@routes.route("/design_index/thawing/")
-@routes.route("/design_index/freezing/")
 def design_index_about():
-    return render_template("/design_index/abstract.html")
-
-
-@routes.route("/design_index/point")
-@routes.route("/design_index/thawing/point")
-@routes.route("/design_index/freezing/point")
-def design_index_about_point():
-    return render_template("/design_index/point.html")
+    return render_template("/documentation/design_index.html")
 
 
 @routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")

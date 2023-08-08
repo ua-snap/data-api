@@ -66,18 +66,10 @@ def package_zonal_stats(src, poly):
 
 @routes.route("/elevation/")
 @routes.route("/elevation/abstract/")
-def elevation_about():
-    return render_template("elevation/abstract.html")
-
-
 @routes.route("/elevation/point/")
-def elevation_about_point():
-    return render_template("elevation/point.html")
-
-
 @routes.route("/elevation/area/")
-def elevation_about_area():
-    return render_template("elevation/area.html")
+def elevation_about():
+    return render_template("documentation/elevation.html")
 
 
 @routes.route("/elevation/point/<lat>/<lon>")

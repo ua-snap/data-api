@@ -339,18 +339,10 @@ def run_aggregate_var_polygon(poly_id):
 
 @routes.route("/beetles/")
 @routes.route("/beetles/abstract/")
-def about_beetles():
-    return render_template("beetles/abstract.html")
-
-
 @routes.route("/beetles/point/")
-def about_beetles_point():
-    return render_template("beetles/point.html")
-
-
 @routes.route("/beetles/area/")
-def about_beetles_area():
-    return render_template("beetles/area.html")
+def about_beetles():
+    return render_template("documentation/beetles.html")
 
 
 @routes.route("/beetles/point/<lat>/<lon>")

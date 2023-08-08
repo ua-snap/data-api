@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Glacier Data</h2>
+<p>These data are for use in the Arctic-EDS.</p>
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>Query the glaciology of Alaska for a single point specified by latitude and longitude.</p>
+
+<table class="endpoints">
+    <thead>
+        <tr>
+            <th class="endpoint-label">Endpoint</th>
+            <th class="endpoint-url">Example URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Glacier point query</td>
+            <td><a href="/glacier/point/60.606/-143.345">/glacier/point/60.606/-143.345</a>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2"></td>
+        </tr>
+    </tfoot>
+</table>
+
+
+<h3>Output</h3>
+
+<p>Results from point queries will look like this:</p>
+
+<pre>
+{
+  "ewisc": true,
+  "lwisc": true,
+  "now": {
+    "glacname": "Steller Glacier",
+    "modern": true
+  },
+  "pmax": true,
+  "title": "Past and Present Glaciology of Alaska"
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "ewisc": &lt;the Early Wisconsin Glaciation did/did not cover this point with ice&gt;,
+  "lwisc": &lt;the Late Wisconsin Glaciation did/did not cover this point with ice&gt;,
+  "now": {
+    "glacname": &lt;name of glacier or ice field, if available&gt;,
+    "modern": &lt;the contemporary glacial extent does/does not cover this point with ice&gt;
+  },
+  "pmax": &lt;the Pleistocene Maximum Glacial Extent did/did not cover this point with ice&gt;,
+  "title": &lt;title describing these results&gt;
+}
+</pre>
+
+<h3>Source data</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Dataset</th>
+            <th>Download links</th>
+            <th>Data source</th>
+            <th>Data Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href="http://akatlas.geology.buffalo.edu/">Pleistocene glacier extents in Alaska (MIS 2 , late
+                    Wisconsinan)</a></td>
+            <td><a
+                    href="http://akatlas.geology.buffalo.edu/shp/pgn/LateWisc_pgn.zip">http://akatlas.geology.buffalo.edu/shp/pgn/LateWisc_pgn.zip</a>
+            </td>
+            <td><a href="https://www.ncdc.noaa.gov/paleo-search/study/11921">Alaska Palaeo-Glacier Atlas (Version 2)</a>
+            </td>
+            <td>Vector</td>
+        </tr>
+        <tr>
+            <td><a href="http://akatlas.geology.buffalo.edu/">Pleistocene glacier extents in Alaska (MIS 4 , early
+                    Wisconsinan)</a></td>
+            <td><a
+                    href="http://akatlas.geology.buffalo.edu/shp/pgn/EarlyWisc_pgn.zip">http://akatlas.geology.buffalo.edu/shp/pgn/EarlyWisc_pgn.zip</a>
+            </td>
+            <td><a href="https://www.ncdc.noaa.gov/paleo-search/study/11921">Alaska Palaeo-Glacier Atlas (Version 2)</a>
+            </td>
+            <td>Vector</td>
+        </tr>
+        <tr>
+            <td><a href="http://akatlas.geology.buffalo.edu/">Maximum pleistocene glacier extents in Alaska</a></td>
+            <td><a
+                    href="http://akatlas.geology.buffalo.edu/shp/pgn/MaxPleist_pgn.zip">http://akatlas.geology.buffalo.edu/shp/pgn/MaxPleist_pgn.zip</a>
+            </td>
+            <td><a href="https://www.ncdc.noaa.gov/paleo-search/study/11921">Alaska Palaeo-Glacier Atlas (Version 2)</a>
+            </td>
+            <td>Vector</td>
+        </tr>
+        <tr>
+            <td>GLIMS Modern Glaciers</td>
+            <td><a href="https://www.glims.org/maps/glims">https://www.glims.org/maps/glims</a></td>
+            <td><a href="https://www.glims.org/RGI/index.html">Randolph Glacier Inventory 6.0</a></td>
+            <td>Vector, downloaded from GLIMS map viewer once panned to AK Extent.</td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+{% endblock %}

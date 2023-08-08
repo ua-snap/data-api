@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Pan-Arctic Sea Ice Concentration</h2>
+<p>Query pan-arctic sea ice concentration information for the Arctic.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>
+    This endpoint accesses historical monthly data on sea ice concentration in the
+    Arctic from 1850&ndash;2021.
+</p>
+
+<table class="endpoints">
+    <thead>
+        <tr>
+            <th class="endpoint-label">Endpoint</th>
+            <th class="endpoint-url">Example URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Sea ice concentration point query</td>
+            <td><a href="/seaice/point/63.73/-166.32">/seaice/point/63.73/-166.32</a>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+        </tr>
+    </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from sea ice concentration queries will look like this:</p>
+
+<pre>
+{
+  "1850-01": 100,
+  "1850-02": 98,
+  "1850-03": 96,
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "&lt;year&gt;-&lt;month&gt;": &lt;sea ice concentration for one of the 12 months in a year&gt;,
+  ...
+}
+</pre>
+
+<h3>Source data</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Gridded Historical Dataset</th>
+            <th>Historical Date Range</th>
+            <th>Spatial Resolution</th>
+            <th>Spatial Coverage</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href="https://nsidc.org/data/nsidc-0051/versions/1">Sea Ice Concentrations from Nimbus-7 SMMR
+                    and DMSP SSM/I-SSMIS Passive Microwave Data, Version 1</a></td>
+            <td>1850&ndash;2022</td>
+            <td>25 km</td>
+            <td>N: 90, S: 30.98, E: 180, W: &minus;180</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4"></td>
+        </tr>
+    </tfoot>
+</table>
+
+
+{% endblock %}

@@ -48,13 +48,9 @@ def package_seaice_data(seaice_resp):
 
 @routes.route("/seaice/")
 @routes.route("/seaice/abstract/")
-def about_seaice():
-    return render_template("seaice/abstract.html")
-
-
 @routes.route("/seaice/point/")
-def about_seaice_point():
-    return render_template("seaice/point.html")
+def about_seaice():
+    return render_template("documentation/seaice.html")
 
 
 @routes.route("/seaice/point/<lat>/<lon>/")

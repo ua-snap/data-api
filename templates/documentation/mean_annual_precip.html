@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Mean Annual Precipitation</h2>
+<p>Query mean annual precipitation projections for Alaska.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>Query mean annual precipitation projections for a single point specified by latitude and longitude.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Mean annual precipitation point query</td>
+      <td><a href="/mean_annual_precip/point/65.0628/-146.1627">/mean_annual_precip/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
+
+
+<h3>Output</h3>
+
+<p>Results from point queries will look like this:</p>
+
+<pre>
+{
+  "dec_mapr": [
+    {
+      "dec_end": "2059",
+      "dec_start": "2050",
+      "model": "5modelAvg",
+      "pr_mm": 408,
+      "scenario": "rcp60",
+      "title": "Mean Annual Precipitation (mm) Decadal Summary Projection for 2050-2059"
+    },
+    {
+      "dec_end": "2059",
+      "dec_start": "2050",
+      "model": "5modelAvg",
+      "pr_mm": 436,
+      "scenario": "rcp85",
+      "title": "Mean Annual Precipitation (mm) Decadal Summary Projection for 2050-2059"
+    }
+  ]
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "dec_mapr": [
+    {
+      "dec_end": &lt;end of decade calendar year&gt;,
+      "dec_start": &lt;start of decade calendar year&gt;,
+      "model": &lt;climate model used to generate outputs&gt;,
+      "pr_mm": &lt;mean annual precipitation (mm)&gt;,
+      "scenario": &lt;RCP used to generate outputs&gt;,
+      "title": &lt;title describing these results&gt;
+    },
+    ...
+  ]
+}
+</pre>
+
+<h3>Source data</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Gridded Historical Dataset</th>
+      <th>Gridded Projected Dataset</th>
+      <th>Projected Scenarios</th>
+      <th>Projected Models</th>
+      <th>Historical Date Range</th>
+      <th>Projected Date Range</th>
+      <th>Historical Spatial</th>
+      <th>Projected Spatial</th>
+      <th>Downscaling</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="http://ckan.snap.uaf.edu/dataset/historical-monthly-and-derived-precipitation-products-downscaled-from-cru-ts-data-via-the-delta">Historical
+          monthly and derived delta downscaled from CRU TS (2 km)</a></td>
+      <td><a
+          href="http://ckan.snap.uaf.edu/dataset/projected-monthly-and-derived-precipitation-products-771m-cmip5-ar5">Projected
+          Monthly and Derived Precipitation Products - 771m CMIP5/AR5</a></td>
+      <td>RCP 4.5, RCP 6.0, RCP 8.5</td>
+      <td>GFDL-CM3, NCAR-CCSM4, GISS-E2-R, MRI-CGCM3, IPSL-CM5A-LR, 5-Model Average </td>
+      <td>1901 - 2015</td>
+      <td>2006-2100</td>
+      <td>2 km</td>
+      <td>771 m</td>
+      <td>Delta (PRISM 1961 - 1990, PRISM 1971 - 2000)</td>
+    </tr>
+  </tbody>
+</table>
+
+
+{% endblock %}

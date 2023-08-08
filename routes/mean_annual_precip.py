@@ -46,13 +46,9 @@ def package_decadal_mapr(decadal_mapr_resp):
 
 @routes.route("/mean_annual_precip/")
 @routes.route("/mean_annual_precip/abstract/")
-def mapr_about():
-    return render_template("mean_annual_precip/abstract.html")
-
-
 @routes.route("/mean_annual_precip/point/")
-def mapr_about_point():
-    return render_template("mean_annual_precip/point.html")
+def mapr_about():
+    return render_template("documentation/mean_annual_precip.html")
 
 
 @routes.route("/mean_annual_precip/point/<lat>/<lon>")

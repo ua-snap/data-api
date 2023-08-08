@@ -259,14 +259,10 @@ async def fetch_wet_days_per_year_point_data(x, y, horp, start_year, end_year):
 @routes.route("/wet_days_per_year/abstract/")
 @routes.route("/mmm/wet_days_per_year/")
 @routes.route("/mmm/wet_days_per_year/abstract/")
-def wet_days_per_year_about():
-    return render_template("/wet_days_per_year/abstract.html")
-
-
 @routes.route("/mmm/wet_days_per_year/point")
 @routes.route("/wet_days_per_year/point")
-def wet_days_per_year_about_point():
-    return render_template("/wet_days_per_year/point.html")
+def wet_days_per_year_about():
+    return render_template("/documentation/wet_days_per_year.html")
 
 
 @routes.route("/wet_days_per_year/<horp>/point/<lat>/<lon>")

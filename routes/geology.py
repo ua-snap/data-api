@@ -31,13 +31,9 @@ def package_usgsgeol(geol_resp):
 
 @routes.route("/geology/")
 @routes.route("/geology/abstract/")
-def geo_about():
-    return render_template("geology/abstract.html")
-
-
 @routes.route("/geology/point/")
-def geo_about_point():
-    return render_template("geology/point.html")
+def geo_about():
+    return render_template("documentation/geology.html")
 
 
 @routes.route("/geology/point/<lat>/<lon>")

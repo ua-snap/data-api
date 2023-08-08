@@ -1,0 +1,143 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Snowfall Equivalent</h2>
+
+<p>This endpoint accesses historical and projected modeled decadal summaries of
+  annual snowfall equivalent (SFE) for Alaska. Note that SFE has a very specific
+  meaning in a modeling context: it is the product of the fraction of days in a
+  month with precipitation falling as snow and the total monthly precipitation.
+  That product (monthly) is then summed to create a single annual total SFE
+  value. The SFE values provided here are millimeters of water.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Min/mean/max summaries (point query)</h4>
+
+<p>The following queries will return SFE minimum, mean, and maximum across all models, scenarios, and
+  decades.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Historical SFE min/mean/max</td>
+      <td><a
+          href="/mmm/snow/snowfallequivalent/historical/61.5/-147">/mmm/snow/snowfallequivalent/historical/61.5/-147</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Projected SFE min/mean/max</td>
+      <td><a
+          href="/mmm/snow/snowfallequivalent/projected/61.5/-147">/mmm/snow/snowfallequivalent/projected/61.5/-147</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Historical and projected SFE min/mean/max</td>
+      <td><a href="/mmm/snow/snowfallequivalent/hp/61.5/-147">/mmm/snow/snowfallequivalent/hp/61.5/-147</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Snowfall equivalent for all decades (point query)</h4>
+
+<p>The following query will return SFE for all models, scenarios, and decades (1910-1919 through 2090-2099):</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SFE for all decades</td>
+      <td><a href="/mmm/snow/snowfallequivalent/all/61.5/-147">/mmm/snow/snowfallequivalent/all/61.5/-147</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Min/mean/max summaries</h4>
+
+<p>Results from SFE min/mean/max queries will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    "sfemax": 4876,
+    "sfemean": 3701,
+    "sfemin": 2946
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;"historical" or "projected"&gt;: {
+    "sfemax": &lt;max SFE value across all models, scenarios, and decades&gt;,
+    "sfemean": &lt;mean SFE value across all models, scenarios, and decades&gt;,
+    "sfemin": &lt;min SFE value across all models, scenarios, and decades&gt;
+  },
+  ...
+}
+</pre>
+
+<h4>Snowfall equivalent for all decades</h4>
+
+<p>Results from SFE for all decades queries will look like this:</p>
+
+<pre>
+{
+  "CRU-TS": {
+    "historical": {
+      "1910-1919": {
+        "SFE": 3801
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;scenario&gt;:{
+      &lt;decade&gt;: {
+        "SFE": &lt;annual total sfe value&gt;
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+{% endblock %}

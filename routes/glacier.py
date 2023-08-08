@@ -39,24 +39,20 @@ def package_glaclimits(glaclim_resp):
     return di
 
 
+@routes.route("/glacier/")
 @routes.route("/glaciers/")
 @routes.route("/glaciers/abstract/")
-@routes.route("/glacier/")
 @routes.route("/glacier/abstract/")
 @routes.route("/glaciology/")
 @routes.route("/glaciology/abstract/")
-def glac_about():
-    return render_template("glacier/abstract.html")
-
-
 @routes.route("/glaciers/")
 @routes.route("/glaciers/point/")
 @routes.route("/glacier/")
 @routes.route("/glacier/point/")
 @routes.route("/glaciology/")
 @routes.route("/glaciology/point/")
-def glac_about_point():
-    return render_template("glacier/point.html")
+def glac_about():
+    return render_template("documentation/glacier.html")
 
 
 @routes.route("/glacier/point/<lat>/<lon>")
