@@ -1290,6 +1290,6 @@ def proj_precip_point(lat, lon):
             return render_template("404/no_data.html"), 404
 
         place_id = request.args.get("community")
-        return create_csv(point_pkg, "dot_precip", place_id, lat, lon)
+        return create_csv(point_pkg, "proj_precip", place_id, lat, lon)
 
     return postprocess(point_pkg, "taspr")
