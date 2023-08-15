@@ -77,7 +77,11 @@
   </tfoot>
 </table>
 
-<h4>Future projected maximum precipitation events</h4>
+<h4>Projected maximum precipitation events (point query)</h4>
+
+<p>The following query will return projected maximum precipitation for various return intervals and durations across
+  different models and eras.</p>
+
 <table class="endpoints">
   <thead>
     <tr>
@@ -87,7 +91,7 @@
   </thead>
   <tbody>
     <tr>
-      <td>Future projections of precipitation for Alaska infrastructure for maximum precipitation events.</td>
+      <td>Projected maximum precipitation events</td>
       <td><a href="/proj_precip/point/65.028/-146.1627">/proj_precip/point/65.028/-146.1627</a></td>
     </tr>
   </tbody>
@@ -416,75 +420,75 @@
 <p>Note: The full set of statistics is only available for historical output. Projected output is limited to just the
   mean statistic.</p>
 
-<h4>Future projected maximum precipitation events</h4>
+<h4>Projected maximum precipitation events</h4>
 
-<p>Results from projected future maximum precipitation queries will look like this:</p>
+<p>Results from projected maximum precipitation queries will look like this:</p>
 
 <pre>
-  {
-    "2": {
-      "10d": {
-        "GFDL-CM3": {
-          "2020-2049": {
-            "pf": 89.11,
-            "pf_lower": 81.36,
-            "pf_upper": 98.38
-          },
-          "2050-2079": {
-            "pf": 114.29,
-            "pf_lower": 104.82,
-            "pf_upper": 124.16
-          },
-          "2080-2099": {
-            "pf": 120.36,
-            "pf_lower": 108.04,
-            "pf_upper": 135.83
-          }
+{
+  "2": {
+    "10d": {
+      "GFDL-CM3": {
+        "2020-2049": {
+          "pf": 89.11,
+          "pf_lower": 81.36,
+          "pf_upper": 98.38
         },
-        "NCAR-CCSM4": {
-          "2020-2049": {
-            "pf": 71.02,
-            "pf_lower": 61.54,
-            "pf_upper": 82.04
-          },
-          "2050-2079": {
-            "pf": 82.95,
-            "pf_lower": 73.73,
-            "pf_upper": 92.48
-          },
-          "2080-2099": {
-            "pf": 80.28,
-            "pf_lower": 68.15,
-            "pf_upper": 94.86
-          }
+        "2050-2079": {
+          "pf": 114.29,
+          "pf_lower": 104.82,
+          "pf_upper": 124.16
+        },
+        "2080-2099": {
+          "pf": 120.36,
+          "pf_lower": 108.04,
+          "pf_upper": 135.83
         }
       },
-      ...
+      "NCAR-CCSM4": {
+        "2020-2049": {
+          "pf": 71.02,
+          "pf_lower": 61.54,
+          "pf_upper": 82.04
+        },
+        "2050-2079": {
+          "pf": 82.95,
+          "pf_lower": 73.73,
+          "pf_upper": 92.48
+        },
+        "2080-2099": {
+          "pf": 80.28,
+          "pf_lower": 68.15,
+          "pf_upper": 94.86
+        }
+      }
     },
     ...
-  }
+  },
+  ...
+}
 </pre>
 
 <p>The above output is structured like this:</p>
 
 <pre>
-  {
-    &lt;return_interval&gt;: {
-      &lt;duration&gt;:{
-        &lt;model&gt;: {
-          &lt;era&gt;: {
-            &lt;pf&gt;: &lt;expected maximum precipitation in millimeters&gt;,
-            &lt;pf_lower&gt;: &lt;lower bound of 95% confidence interval in millimeters&gt;,
-            &lt;pf_upper&gt;: &lt;upper bound of 95% confidence interval in millimeters&gt;,  
-          },
-          ...
+{
+  &lt;return_interval&gt;: {
+    &lt;duration&gt;:{
+      &lt;model&gt;: {
+        &lt;era&gt;: {
+          &lt;pf&gt;: &lt;expected maximum precipitation in millimeters&gt;,
+          &lt;pf_lower&gt;: &lt;lower bound of 95% confidence interval in millimeters&gt;,
+          &lt;pf_upper&gt;: &lt;upper bound of 95% confidence interval in millimeters&gt;,
         },
         ...
       },
       ...
     },
     ...
-  }
+  },
+  ...
+}
 </pre>
 
 <h4>Min/mean/max summaries</h4>
