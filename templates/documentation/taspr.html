@@ -416,6 +416,77 @@
 <p>Note: The full set of statistics is only available for historical output. Projected output is limited to just the
   mean statistic.</p>
 
+<h4>Future projected maximum precipitation events</h4>
+
+<p>Results from projected future maximum precipitation queries will look like this:</p>
+
+<pre>
+  {
+    "2": {
+      "10d": {
+        "GFDL-CM3": {
+          "2020-2049": {
+            "pf": 89.11,
+            "pf_lower": 81.36,
+            "pf_upper": 98.38
+          },
+          "2050-2079": {
+            "pf": 114.29,
+            "pf_lower": 104.82,
+            "pf_upper": 124.16
+          },
+          "2080-2099": {
+            "pf": 120.36,
+            "pf_lower": 108.04,
+            "pf_upper": 135.83
+          }
+        },
+        "NCAR-CCSM4": {
+          "2020-2049": {
+            "pf": 71.02,
+            "pf_lower": 61.54,
+            "pf_upper": 82.04
+          },
+          "2050-2079": {
+            "pf": 82.95,
+            "pf_lower": 73.73,
+            "pf_upper": 92.48
+          },
+          "2080-2099": {
+            "pf": 80.28,
+            "pf_lower": 68.15,
+            "pf_upper": 94.86
+          }
+        }
+      },
+      ...
+    },
+    ...
+  }
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+  {
+    &lt;return_interval&gt;: {
+      &lt;duration&gt;:{
+        &lt;model&gt;: {
+          &lt;era&gt;: {
+            &lt;pf&gt;: &lt;expected maximum precipitation in millimeters&gt;,
+            &lt;pf_lower&gt;: &lt;lower bound of 95% confidence interval in millimeters&gt;,
+            &lt;pf_upper&gt;: &lt;upper bound of 95% confidence interval in millimeters&gt;,  
+          },
+          ...
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
+</pre>
+
 <h4>Min/mean/max summaries</h4>
 
 <p>Results from temperature min/mean/max queries will look like this:</p>
@@ -617,6 +688,16 @@
           href="http://data.snap.uaf.edu/data/Base/AK_CAN_2km/projected/AR5_CMIP5_models/Projected_Monthly_and_Derived_Precipitation_Products_2km_CMIP5_AR5/">Data
           directory</a>
       </td>
+      <td><a href="https://esgf-node.llnl.gov/search/cmip5/">CMIP5</a></td>
+    </tr>
+    <tr>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/304b6d89-961e-417d-b6ba-4139c7fe5ff6">Annual
+          maximum precipitation projections for Alaska</a>
+      </td>
+
+      <td><a href="http://data.snap.uaf.edu/data/Base/Other/DOT_Precipitation/">Data directory</a></td>
       <td><a href="https://esgf-node.llnl.gov/search/cmip5/">CMIP5</a></td>
     </tr>
   </tbody>
