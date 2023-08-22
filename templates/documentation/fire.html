@@ -2,7 +2,7 @@
 {% block content %}
 <h2>Wildfire Data</h2>
 
-<p>Query near-real-time, historical, and model output relevant to Alaska wildfires.</p>
+<p>This endpoint provides access to near-real-time, historical, and model output relevant to Alaska wildfires.</p>
 
 <h3>Service endpoints</h3>
 
@@ -94,7 +94,73 @@
 </pre>
 
 <h3>Source data</h3>
-<p>See the <a href="https://snap.uaf.edu/tools/alaska-wildfires">Alaska Wildfire Explorer tool for more
-    documentation on
-    these data.</a></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Download</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://akff.mesowest.org/">Daily Fire Danger Ratings</a>
+      </td>
+      <td><a href="https://akff.mesowest.org/download/">Data page</a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><a href="https://usicecenter.gov/Resources/ImsInfo">Daily Snow Cover</a>
+      </td>
+      <td><a href="https://usicecenter.gov/Products/ImsData">Data page</a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><a href="https://fire.ak.blm.gov/predsvcs/maps.php">Historical Fire Perimeters</a>
+      </td>
+      <td><a
+          href="https://fire.ak.blm.gov/content/maps/aicc/Data/Data%20(zipped%20filegeodatabases)/Alaska_Fire_History_Perimeters_Polygons_1940_2022.zip">ZIP
+          file</a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><a
+          href="https://eros.usgs.gov/doi-remote-sensing-activities/2019/usgs/nalcms-release-new-land-cover-north-america">Land
+          Cover Types</a>
+      </td>
+      <td><a href="http://www.cec.org/north-american-land-change-monitoring-system/">Data page</a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><a href="https://journals.ametsoc.org/view/journals/apme/59/6/JAMC-D-19-0209.1.xml">Historical Lightning
+          Strikes</a>
+      </td>
+      <td><a href="https://search.dataone.org/view/10.24431_rw1k45z_2020_7_23_23548">Data page</a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/eeaaca2c-0280-4226-b126-fda42a2b6214">Flammability</a>
+      </td>
+      <td><a
+          href="http://data.snap.uaf.edu/data/IEM/Outputs/ALF/Gen_1a/alfresco_relative_spatial_outputs/relative_flammability/AR5_CMIP5/">Data
+          directory</a>
+      </td>
+      <td>Refer to the <a href="https://github.com/ua-snap/alfresco/blob/main/docs/ALFRESCO_Guide.pdf">ALFRESCO
+          Guide</a> for information about flammability simulations.</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+</table>
+
 {% endblock %}

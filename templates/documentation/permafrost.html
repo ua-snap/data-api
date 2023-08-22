@@ -2,14 +2,15 @@
 {% block content %}
 <h2>Permafrost Data</h2>
 
-<p>Query permafrost information for Alaska.</p>
+<p>These endpoints provide access to permafrost information for Alaska, including outputs from academic research on
+  permafrost type and extent, as well as modeled ground temperatures from the GIPL 2.0 model.</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Geophysical Institute Permafrost Lab (GIPL) model output (point query)</h4>
 
 <p>
-  Query GIPL model outputs (1 km spatial resolution) for ten variables for a single point specified by latitude and
+  Query GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a single point specified by latitude and
   longitude.
 </p>
 
@@ -43,7 +44,7 @@
 <h4>Geophysical Institute Permafrost Lab (GIPL) min/mean/max summaries (point query)</h4>
 
 <p>
-  Query minimum, mean, and maximum summaries of GIPL model outputs (1 km spatial resolution) for ten variables for a
+  Query minimum, mean, and maximum summaries of GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a
   single point specified by latitude and longitude.
 </p>
 
@@ -256,25 +257,22 @@ the following center dates, except the last era is truncated at 2100: "2025" (20
 (2061&ndash;2090), "2095" (2086&ndash;2100).
 
 <h3>Source data</h3>
+
 <table>
   <thead>
     <tr>
-      <th>Dataset</th>
-      <th>Download links</th>
-      <th>Source</th>
+      <th>Dataset information</th>
+      <th>Download</th>
       <th>Notes</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>GIPL 2.0 1 km Model Outputs</td>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36">GIPL
+          2.0 1 km Model Outputs</a></td>
       <td>
         <a href="http://data.snap.uaf.edu/data/Base/AK_1km/GIPL/">Data directory</a>
-      </td>
-      <td>
-        <a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36">SNAP
-          Data Catalog</a>
       </td>
       <td>Funded by the Broad Agency Announcement Program and the U.S. Army
         Engineer Research and Development Center and Cold Regions Research and
@@ -285,45 +283,37 @@ the following center dates, except the last era is truncated at 2100: "2025" (20
         Geophysical Institute.</td>
     </tr>
     <tr>
-      <td>Melvin 4 km GIPL Model Outputs</td>
+      <td><a href="https://doi.org/10.1073/pnas.1611056113">Melvin 4 km GIPL Model Outputs</a></td>
       <td>
         <a href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh">Download
           script</a>
-      </td>
-      <td>
-        <a href="https://doi.org/10.1073/pnas.1611056113">PNAS</a>
       </td>
       <td>MAGT is modeled for the depth of the active layer. This dataset will
         eventually be deprecated from the API.</td>
     </tr>
     <tr>
-      <td>Jorgenson Permafrost Characteristics</td>
+      <td><a href="https://catalog.northslopescience.org/dataset/1725">Jorgenson Permafrost Characteristics</a></td>
       <td>
         <a
-          href="https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606">Dataset</a>
-      </td>
-      <td>
-        <a href="https://catalog.northslopescience.org/dataset/1725">North Slope Science Catalog</a>
+          href="https://catalog.northslopescience.org/dataset/6803a021-6f72-4aa5-95f6-bc5facd534e8/resource/5811669f-860c-450e-9bc0-9dfc21821606/download/233-permafrost-characteristics-of-alaska-2008-sha.zip">ZIP
+          file</a>
       </td>
       <td></td>
     </tr>
     <tr>
-      <td>Obu et al. 2018</td>
+      <td><a href="https://doi.org/10.1594/PANGAEA.888600">Obu et al. 2018</a></td>
       <td>
         <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">Mean
-          annual ground temperature dataset</a>,<br />
+          annual ground temperature dataset (ZIP file)</a>,<br />
         <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">Permafrost
-          zones dataset</a>
-      </td>
-      <td>
-        <a href="https://doi.org/10.1594/PANGAEA.888600">PANGAEA</a>
+          zones dataset (ZIP file)</a>
       </td>
       <td></td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="4">
+      <td colspan="3">
       </td>
     </tr>
   </tfoot>

@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Glacier Data</h2>
-<p>These data are for use in the Arctic-EDS.</p>
+
 <h3>Service endpoints</h3>
+
+<p>This endpoint provides access to the glaciology of Alaska.</p>
 
 <h4>Point query</h4>
 
-<p>Query the glaciology of Alaska for a single point specified by latitude and longitude.</p>
+<p>Query the glaciology of Alaska at a single point specified by latitude and longitude.</p>
 
 <table class="endpoints">
     <thead>
@@ -66,49 +68,43 @@
 <table>
     <thead>
         <tr>
-            <th>Dataset</th>
-            <th>Download links</th>
-            <th>Data source</th>
-            <th>Data Notes</th>
+            <th>Dataset information</th>
+            <th>Download</th>
+            <th>Notes</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td><a href="http://akatlas.geology.buffalo.edu/">Pleistocene glacier extents in Alaska (MIS 2 , late
+            <td><a href="http://akatlas.geology.buffalo.edu/">Pleistocene glacier extents in Alaska (MIS 2, late
                     Wisconsinan)</a></td>
-            <td><a
-                    href="http://akatlas.geology.buffalo.edu/shp/pgn/LateWisc_pgn.zip">http://akatlas.geology.buffalo.edu/shp/pgn/LateWisc_pgn.zip</a>
+            <td><a href="http://akatlas.geology.buffalo.edu/shp/pgn/LateWisc_pgn.zip">ZIP file</a>
             </td>
-            <td><a href="https://www.ncdc.noaa.gov/paleo-search/study/11921">Alaska Palaeo-Glacier Atlas (Version 2)</a>
-            </td>
-            <td>Vector</td>
+            <td></td>
         </tr>
         <tr>
-            <td><a href="http://akatlas.geology.buffalo.edu/">Pleistocene glacier extents in Alaska (MIS 4 , early
+            <td><a href="http://akatlas.geology.buffalo.edu/">Pleistocene glacier extents in Alaska (MIS 4, early
                     Wisconsinan)</a></td>
-            <td><a
-                    href="http://akatlas.geology.buffalo.edu/shp/pgn/EarlyWisc_pgn.zip">http://akatlas.geology.buffalo.edu/shp/pgn/EarlyWisc_pgn.zip</a>
+            <td><a href="http://akatlas.geology.buffalo.edu/shp/pgn/EarlyWisc_pgn.zip">ZIP file</a>
             </td>
-            <td><a href="https://www.ncdc.noaa.gov/paleo-search/study/11921">Alaska Palaeo-Glacier Atlas (Version 2)</a>
-            </td>
-            <td>Vector</td>
+            <td></td>
         </tr>
         <tr>
             <td><a href="http://akatlas.geology.buffalo.edu/">Maximum pleistocene glacier extents in Alaska</a></td>
-            <td><a
-                    href="http://akatlas.geology.buffalo.edu/shp/pgn/MaxPleist_pgn.zip">http://akatlas.geology.buffalo.edu/shp/pgn/MaxPleist_pgn.zip</a>
+            <td><a href="http://akatlas.geology.buffalo.edu/shp/pgn/MaxPleist_pgn.zip">ZIP file</a>
             </td>
-            <td><a href="https://www.ncdc.noaa.gov/paleo-search/study/11921">Alaska Palaeo-Glacier Atlas (Version 2)</a>
-            </td>
-            <td>Vector</td>
+            <td></td>
         </tr>
         <tr>
-            <td>GLIMS Modern Glaciers</td>
-            <td><a href="https://www.glims.org/maps/glims">https://www.glims.org/maps/glims</a></td>
             <td><a href="https://www.glims.org/RGI/index.html">Randolph Glacier Inventory 6.0</a></td>
-            <td>Vector, downloaded from GLIMS map viewer once panned to AK Extent.</td>
+            <td><a href="https://www.glims.org/maps/glims">GLIMS Modern Glaciers</a></td>
+            <td>Downloaded from GLIMS map viewer once panned to AK Extent.</td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3"></td>
+        </tr>
+    </tfoot>
 </table>
 
 

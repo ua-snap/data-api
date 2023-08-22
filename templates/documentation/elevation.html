@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Elevation Data</h2>
-<p>These data are for use in the Climate Impact Reports tool. Currently the service endpoints query ASTER GDEM elevation
-    data for Alaska and Western Canada. Each query returns three values: minimum, maximum, and mean elevations derived
-    from corresponding interpolations used to resample the source data from 30 m spatial resolution to 1 km. This
-    technique is used to assure elevation fidelity between the original and downsampled data.</p>
+
+<p>This endpoint provides access to ASTER GDEM elevation data for Alaska and Western Canada. Each endpoint returns
+    three values: minimum, maximum, and mean elevations derived from corresponding interpolations used to resample the
+    source data from 30 m spatial resolution to 1 km. This technique is used to assure elevation fidelity between the
+    original and downsampled data.</p>
 
 <h3>Service endpoints</h3>
 
@@ -93,20 +94,25 @@
 <table>
     <thead>
         <tr>
-            <th>Dataset</th>
-            <th>Download Link</th>
-            <th>Data Notes</th>
+            <th>Dataset information</th>
+            <th>Download</th>
+            <th>Notes</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td><a href="https://lpdaac.usgs.gov/products/astgtmv003/">The Terra Advanced Spaceborne Thermal Emission
                     and Reflection Radiometer (ASTER) Global Digital Elevation Model (GDEM) Version 3 (ASTGTM)</a></td>
-            <td><a href="https://github.com/ua-snap/gs-ingest/blob/main/astergdem/download.sh">Download Tiles</a></td>
+            <td><a href="https://github.com/ua-snap/gs-ingest/blob/main/astergdem/download.sh">Download script</a></td>
             <td><strong><code>0</code></strong> indicates sea level. Negative values are expected and indicate
                 depressions below sea level.</td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3"></td>
+        </tr>
+    </tfoot>
 </table>
 
 {% endblock %}

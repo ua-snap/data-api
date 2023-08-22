@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Physiography Data</h2>
-<p>These data are for use in the Arctic-EDS.</p>
+
+<p>This endpoint provides access to EPA Level III Ecoregions of Alaska.</p>
 
 <h3>Service endpoints</h3>
 
@@ -55,24 +56,27 @@
 <table>
     <thead>
         <tr>
-            <th>Dataset</th>
-            <th>Download link</th>
-            <th>Source</th>
+            <th>Dataset information</th>
+            <th>Download</th>
             <th>Notes</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td>EPA Level III Ecoregions for Alaska</td>
-            <td><a href="https://gaftp.epa.gov/EPADataCommons/ORD/Ecoregions/ak/ak_eco_l3.zip">Alaska Level III
-                    Shapefile (3 MB)</a></td>
-            <td><a href="https://www.epa.gov/eco-research/ecoregion-download-files-state-region-10#pane-01">EPA
-                    Ecoregions</a></td>
+            <td><a href="https://www.epa.gov/eco-research/ecoregion-download-files-state-region-10#pane-01">EPA Level
+                    III Ecoregions for Alaska</a></td>
+            <td><a href="https://gaftp.epa.gov/EPADataCommons/ORD/Ecoregions/ak/ak_eco_l3.zip">ZIP file</a></td>
             <td>Ecoregions are essentially equivalent to the more archaic "physiographic provinces." Ecoregions do
                 combine landscape and vegetation variables, but have less detail about vegetation when compared to "land
                 cover" or "forest type" datasets. Topography plays a prominent role.</td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3">
+            </td>
+        </tr>
+    </tfoot>
 </table>
 
 

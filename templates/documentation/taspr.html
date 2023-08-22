@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Temperature and Precipitation Data</h2>
-<p>The endpoints here provide access to 2km downscaled temperature and precipitation data for future (AR5/CMIP5) and
-  historical (CRU TS 4.0) scenarios. There are endpoints for either of these variables individually or in combination.
-  These data are for use in the Northern Climate Reports webapp, and have thus been clipped to the working domain of the
-  Integrated Ecosystem Model (IEM) project.</p>
+
+<p>These endpoints provide access to historical and projected 2km downscaled temperature and precipitation data.
+  Temperature and precipitation data can be accessed individually or combined. These data have been clipped to the
+  working domain of the Integrated Ecosystem Model (IEM) project.</p>
 
 <h3>Service endpoints</h3>
 
@@ -79,8 +79,7 @@
 
 <h4>Min/mean/max summaries (point query)</h4>
 
-<p>The following queries will return the minimum, mean, and maximum temperature values summarized across all models,
-  scenarios, and years.
+<p>Query the minimum, mean, and maximum temperature values summarized across all models, scenarios, and years.
 </p>
 
 <table class="endpoints">
@@ -165,9 +164,8 @@
 
 <h4>Min/mean/max summaries across provided year range (point query)</h4>
 
-<p>The following queries will return the minimum, mean, and maximum temperature values summarized across all models and
-  scenarios for the specified year range. Valid year ranges are between 1901&ndash;2015 for historical data and
-  2007&ndash;2100 for projected data.
+<p>Query the minimum, mean, and maximum temperature values summarized across all models and scenarios for the specified
+  year range. Valid year ranges are between 1901&ndash;2015 for historical data and 2007&ndash;2100 for projected data.
 </p>
 
 <table class="endpoints">
@@ -258,7 +256,7 @@
 
 <h4>Min/mean/max summaries for all years (point query)</h4>
 
-<p>The following queries will return min/mean/max values across the specified month for each year.</p>
+<p>Query the min/mean/max values across the specified month for each year.</p>
 
 <table class="endpoints">
   <thead>
@@ -289,7 +287,7 @@
 
 <h4>Annual mean temperature or annual total precipitation (point query)</h4>
 
-<p>The following queries will return annual values across all available years.</p>
+<p>Query annual values across all available years.</p>
 
 <table class="endpoints">
   <thead>
@@ -552,9 +550,8 @@
 <table>
   <thead>
     <tr>
-      <th>Dataset</th>
-      <th>Download links</th>
-      <th>Data source</th>
+      <th>Dataset information</th>
+      <th>Download</th>
     </tr>
   </thead>
   <tbody>
@@ -566,7 +563,6 @@
           href="http://data.snap.uaf.edu/data/Base/AK_CAN_2km/historical/CRU_TS/Historical_Monthly_and_Derived_Temperature_Products_2km_CRU_TS/">Data
           directory</a>
       </td>
-      <td><a href="https://crudata.uea.ac.uk/cru/data/hrg/">CRU TS 4.0</a></td>
     </tr>
     <tr>
       <td><a
@@ -576,7 +572,6 @@
           href="http://data.snap.uaf.edu/data/Base/AK_CAN_2km/historical/CRU_TS/Historical_Monthly_and_Derived_Precipitation_Products_2km_CRU_TS/">Data
           directory</a>
       </td>
-      <td><a href="https://crudata.uea.ac.uk/cru/data/hrg/">CRU TS 4.0</a></td>
     </tr>
     <tr>
       <td><a
@@ -586,7 +581,6 @@
           href="http://data.snap.uaf.edu/data/Base/AK_CAN_2km/projected/AR5_CMIP5_models/Projected_Monthly_and_Derived_Temperature_Products_2km_CMIP5_AR5/">Data
           directory</a>
       </td>
-      <td><a href="https://esgf-node.llnl.gov/search/cmip5/">CMIP5</a></td>
     </tr>
     <tr>
       <td><a
@@ -596,12 +590,11 @@
           href="http://data.snap.uaf.edu/data/Base/AK_CAN_2km/projected/AR5_CMIP5_models/Projected_Monthly_and_Derived_Precipitation_Products_2km_CMIP5_AR5/">Data
           directory</a>
       </td>
-      <td><a href="https://esgf-node.llnl.gov/search/cmip5/">CMIP5</a></td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="3"></td>
+      <td colspan="2"></td>
     </tr>
   </tfoot>
 </table>

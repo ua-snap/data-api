@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Geology Data</h2>
-<p>These data are for use in the Arctic-EDS. Currently, only the USGS detailed rock unit names and ages are available.
-</p>
+
+<p>This endpoint provides access to USGS rock unit names and ages.</p>
+
 <h3>Service endpoints</h3>
 
 <h4>Point query</h4>
@@ -55,9 +56,8 @@
 <table>
     <thead>
         <tr>
-            <th>Dataset</th>
-            <th>Download link</th>
-            <th>Source</th>
+            <th>Dataset information</th>
+            <th>Download</th>
             <th>Notes</th>
         </tr>
     </thead>
@@ -67,10 +67,14 @@
             <td><a
                     href="http://pubs.usgs.gov/sim/3340/sim3340_shp.zip">http://pubs.usgs.gov/sim/3340/sim3340_shp.zip</a>
             </td>
-            <td><a href="http://dx.doi.org/10.3133/sim3340">http://dx.doi.org/10.3133/sim3340</a></td>
             <td>Using the detailed rock unit shapefile.</td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3"></td>
+        </tr>
+    </tfoot>
 </table>
 
 

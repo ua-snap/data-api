@@ -2,16 +2,15 @@
 <h2>Degree Days Min, Mean, and Max Point Query</h2>
 
 <p>
-  The endpoints here provide access to the total annual cumulative degree days for several different degree day
-  thresholds.
+  These endpoints provide access to historical and projected total annual cumulative degree days for several different
+  degree day thresholds.
 </p>
 
 <h3>Service endpoints</h3>
 
 <h4>Min/mean/max summaries (point query)</h4>
 
-<p>The following queries will return the minimum, mean, and maximum degree days values summarized across all models and
-  years.
+<p>Query the minimum, mean, and maximum degree days values summarized across all models and years.
 </p>
 
 <table class="endpoints">
@@ -103,9 +102,8 @@
 
 <h4>Min/mean/max summaries across provided year range (point query)</h4>
 
-<p>The following queries will return the minimum, mean, and maximum degree days values summarized across all models and
-  years for the specified year range. Valid year ranges are between 1980&ndash;2009 for historical data and
-  2006&ndash;2100 for projected data.
+<p>Query the minimum, mean, and maximum degree days values summarized across all models and years for the specified year
+  range. Valid year ranges are between 1980&ndash;2009 for historical data and 2006&ndash;2100 for projected data.
 </p>
 
 <table class="endpoints">
@@ -198,7 +196,7 @@
 
 <h4>Degree days for all years (point query)</h4>
 
-<p>The following queries will return degree days values for each model and year.</p>
+<p>Query degree days values for each model and year.</p>
 
 <table class="endpoints">
   <thead>
@@ -298,5 +296,30 @@
   ...
 }
 </pre>
+
+<h3>Source data</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/3d4cc2e2-5cfb-4fed-b397-06854edb747f">20
+          km annual degree day totals at multiple thresholds for Alaska, 1980-2100</a></td>
+      <td><a href="http://data.snap.uaf.edu/data/Base/AK_WRF/Arctic_EDS_degree_days/">Data
+          directory</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
 
 {% endblock %}
