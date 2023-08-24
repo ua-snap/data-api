@@ -367,7 +367,7 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
         )
         time_subset = ("year", timestring)
         gipl_request_str = generate_wcs_getcov_str(
-            x, y, gipl_1km_coverage_id, time_slice=time_subset
+            x, y, gipl_1km_coverage_id, var_slice=time_subset
         )
         gipl_point_data = await fetch_data([generate_wcs_query_url(gipl_request_str)])
         return gipl_point_data

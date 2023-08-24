@@ -22,7 +22,7 @@ from generate_urls import *
 from luts import place_type_labels
 
 
-async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
+async def fetch_wcs_point_data(x, y, cov_id, var_coord=None, var_slice=None):
     """Create the async request for data at the specified point.
 
     Args:
@@ -36,7 +36,7 @@ async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
         Data results from fetch_data()
     """
     urls = []
-    request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord)
+    request_str = generate_wcs_getcov_str(x, y, cov_id, var_coord, var_slice=var_slice)
     url = generate_wcs_query_url(request_str)
     urls.append(url)
     point_data = await fetch_data(urls)

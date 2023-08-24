@@ -39,7 +39,7 @@ async def fetch_base_indicators_point_data(x, y):
         list of data results from each of historical and future coverages
     """
     wcs_str = generate_wcs_getcov_str(
-        x, y, cov_id=indicators_coverage_id, time_slice=("era", "0,2")
+        x, y, cov_id=indicators_coverage_id, var_slice=("era", "0,2")
     )
     url = generate_wcs_query_url(wcs_str)
     point_data_list = await fetch_data([url])

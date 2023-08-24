@@ -31,6 +31,7 @@ nodata_mappings = {
     "glacier": [],
     "heating_degree_days": nodata_values["default"],
     "heating_degree_days_all": nodata_values["default"],
+    "hydrology": nodata_values["default"],
     "landfastice": [],
     "mean_annual_precip": nodata_values["default"],
     "ncar12km_indicators": nodata_values["ncar12km_indicators"],
