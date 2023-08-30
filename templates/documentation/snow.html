@@ -1,10 +1,19 @@
 {% extends 'base.html' %} {% block content %}
 <h2>Snowfall Equivalent</h2>
 
-<p>These endpoints provide access to historical and projected modeled decadal summaries of annual snowfall equivalent
-  (SFE) for Alaska. Note that SFE has a very specific meaning in a modeling context: it is the product of the fraction
-  of days in a month with precipitation falling as snow and the total monthly precipitation. That product (monthly) is
-  then summed to create a single annual total SFE value. The SFE values provided here are millimeters of water.</p>
+<p>
+  These endpoints provide access to historical and projected modeled decadal summaries of annual snowfall equivalent
+  (SFE) for Alaska at a resolution of 771m. Historical data were derived from the CRU TS 3.1 dataset. Projections were
+  derived from GFDL-CM3, GISS-E2-R, IPSL-CM5A-LR, MRI-CGCM3, and NCAR-CCSM4 model outputs using the RCP 4.5, RCP 6.0,
+  and RCP 8.5 emissions scenarios. Data can be accessed as summarized means for each decade from 1910&ndash;2009 or
+  minimum, mean, and maximum summaries across all historical or projected years.
+</p>
+
+<p>
+  Note that SFE has a very specific meaning in a modeling context: it is the product of the fraction of days in a month
+  with precipitation falling as snow and the total monthly precipitation. That product (monthly) is then summed to
+  create a single annual total SFE value. The SFE values provided here are millimeters of water.
+</p>
 
 <h3>Service endpoints</h3>
 
