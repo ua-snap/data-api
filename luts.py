@@ -128,4 +128,3 @@ areas_near = {
     "huc": "hucs_near",
     "protected_area": "protected_areas_near",
 }
-
