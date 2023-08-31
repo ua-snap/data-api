@@ -471,7 +471,6 @@ def get_xml_content(meta_xml_str, tag, occurrence=1):
     Returns:
         tag_content (str): content of the provided XML tag
     """
-
     xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
     meta_tree = ET.XML(xml_bytes)
     matches = []
