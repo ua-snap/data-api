@@ -20,6 +20,7 @@ shapely = "*"
 geos = "*"
 rtree = "*"
 pygeos = "*"
+lxml = "*"
 
 [dev-packages]
 black = "*"

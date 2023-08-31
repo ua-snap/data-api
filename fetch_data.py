@@ -7,12 +7,12 @@ import itertools
 import operator
 import time
 import asyncio
-import xml.etree.ElementTree as ET
 import numpy as np
 import xarray as xr
 import geopandas as gpd
 from collections import defaultdict
 from functools import reduce
+from lxml import etree as ET
 from aiohttp import ClientSession
 from flask import current_app as app
 from rasterstats import zonal_stats
@@ -431,14 +431,15 @@ def parse_meta_xml_str(meta_xml_str):
     Returns:
         dim_encodings (dict): lookup table to match data axes or parameters to integer encodings, e.g., '2': 'GFDL-CM3'
     """
-    meta_xml = ET.ElementTree(ET.fromstring(meta_xml_str))
+    xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
+    meta_tree = ET.XML(xml_bytes)
     # wow xml
     encoding_el = list(
         list(
             list(
                 list(
                     list(
-                        meta_xml.getroot().iter(
+                        meta_tree.iter(
                             "{http://www.opengis.net/wcs/2.0}CoverageDescription"
                         )
                     )[0].iter("{http://www.opengis.net/gmlcov/1.0}metadata")
@@ -459,22 +460,25 @@ def parse_meta_xml_str(meta_xml_str):
     return dim_encodings
 
 
-def get_xml_str_between_tags(meta_xml_str, tag, occurrence=1):
-    """Get string encapsulated by a known XML tag. Use this function to retrieve time axis values that are not encapsulated by a dictionary and/or are not within the metadata 'Encoding' block.
+def get_xml_content(meta_xml_str, tag, occurrence=1):
+    """Get content of XML element. Use this function to retrieve time axis values that are not encapsulated by a dictionary and/or are not within the metadata 'Encoding' block.
 
     Arguments:
         meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
-        tag (str): the xml string that encapsulates the desired information, e.g., 'gmlrgrid:coefficients'
+        tag (str): the xml element that encapsulates the desired content, e.g., 'gmlrgrid:coefficients'
         occurrence (int): the occurrence of the tag to parse. some tags are repeated several times in the XML response
 
     Returns:
-        str_within_tag (str): string encapsulated by the provided XML tag
+        tag_content (str): content of the provided XML tag
     """
-    tag_open = f"<{tag}>"
-    tag_close = f"</{tag}>"
-    str_after_tag = meta_xml_str.split(tag_open)[occurrence]
-    str_within_tag = str_after_tag.split(tag_close)[0]
-    return str_within_tag
+
+    xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
+    meta_tree = ET.XML(xml_bytes)
+    matches = []
+    for match in meta_tree.findall(f".//{tag}", meta_tree.nsmap):
+        matches.append(match.text)
+    tag_content = matches[occurrence - 1]
+    return tag_content
 
 
 async def get_dim_encodings(cov_id, scrape=None):
@@ -494,7 +498,7 @@ async def get_dim_encodings(cov_id, scrape=None):
         dim_encodings = parse_meta_xml_str(meta_xml_str)
         if scrape is not None:
             scrape_desc, scrape_tag, occurrence = scrape
-            dim_encodings[scrape_desc] = get_xml_str_between_tags(
+            dim_encodings[scrape_desc] = get_xml_content(
                 meta_xml_str, scrape_tag, occurrence
             )
         return dim_encodings
