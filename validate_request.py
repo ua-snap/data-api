@@ -4,8 +4,6 @@ other functions that could be used across multiple endpoints.
 """
 
 import asyncio
-import os
-import re
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
@@ -108,7 +106,7 @@ def validate_year(start_year, end_year):
 
 
 def validate_var_id(var_id):
-    if re.search("[^A-Za-z0-9]", var_id):
+    if not var_id.isalnum():
         return render_template("400/bad_request.html"), 400
 
     var_id_check = asyncio.run(
