@@ -828,44 +828,24 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     return aggr_results
 
 
+@routes.route("/taspr/")
 @routes.route("/temperature/")
 @routes.route("/temperature/abstract/")
 @routes.route("/precipitation/")
 @routes.route("/precipitation/abstract/")
-@routes.route("/taspr/")
 @routes.route("/taspr/abstract/")
-def about():
-    return render_template("taspr/abstract.html")
-
-
 @routes.route("/taspr/point/")
 @routes.route("/temperature/point/")
 @routes.route("/precipitation/point/")
-def about_point():
-    return render_template("taspr/point.html")
-
-
 @routes.route("/taspr/area/")
 @routes.route("/temperature/area/")
 @routes.route("/precipitation/area/")
-def about_huc():
-    return render_template("taspr/area.html")
-
-
 @routes.route("/mmm/")
 @routes.route("/mmm/abstract/")
-def about_mmm():
-    return render_template("mmm/abstract.html")
-
-
 @routes.route("/mmm/temperature")
-def about_mmm_temp():
-    return render_template("mmm/temperature.html")
-
-
 @routes.route("/mmm/precipitation")
-def about_mmm_precip():
-    return render_template("mmm/precipitation.html")
+def about():
+    return render_template("documentation/taspr.html")
 
 
 @routes.route("/eds/temperature/<lat>/<lon>")

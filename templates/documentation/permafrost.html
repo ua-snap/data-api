@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Permafrost Data</h2>
+
+<p>
+  These endpoints provide access to permafrost information for Alaska, including outputs from academic research on
+  permafrost type and extent as well as ground temperatures.
+</p>
+
+<p>
+  Annual projections of permafrost top and base depths, talik thickness, and mean annual ground temperature at seven
+  different depths were provided by the GIPL 2.0 model at a resolution of 1km for years 2021&ndash;2120. These
+  projections are provided for GFDL-CM3 and NCAR-CCSM4 model outputs, as well as a 5-model average, under the RCP
+  4.5 and RCP 8.5 emissions scenarios.
+</p>
+
+<p>
+  Active layer thickness and mean annual ground temperature data are also provided as summarized means across
+  2011&ndash;2040, 2036&ndash;2065, 2061&ndash;2090, 2086&ndash;2100 vs. a historical baseline from 1995 at a resolution
+  of 4km. Data were provided by Melvin et al. using GIPL 2.0 model outputs. The historical baseline was derived from CRU
+  TS 3.1. Projections were derived from GFDL-CM3, GISS-E2R, IPSL-CM5A-LR, MRI-CGCM3, NCAR-CCSM4 model outputs, as well
+  as a 5-model average, under the RCP 4.5 and RCP 8.5 emissions scenarios.
+</p>
+
+<p>
+  Permafrost extent and ground ice volume data from 2008 were provided by Jorgenson et al. Mean annual top of permafrost
+  ground temperature and permafrost extent data from 2000&ndash;2016 were provided by Obu et al.
+</p>
+
+<p>Links to academic references and source datasets are included at the bottom of this page.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Geophysical Institute Permafrost Lab (GIPL) model output (point query)</h4>
+
+<p>
+  Query GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a single point specified by latitude and
+  longitude.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GIPL point query of entire time series</td>
+      <td><a href="/permafrost/point/gipl/63.0628/-146.1627">/permafrost/point/gipl/63.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>GIPL point query within year range</td>
+      <td><a
+          href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050">/permafrost/point/gipl/63.0628/-146.1627/2040/2050</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Geophysical Institute Permafrost Lab (GIPL) min/mean/max summaries (point query)</h4>
+
+<p>
+  Query minimum, mean, and maximum summaries of GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a
+  single point specified by latitude and longitude.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GIPL point query within year range min/mean/max summary</td>
+      <td><a
+          href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm">/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Permafrost model output summaries from multiple sources (point query)</h4>
+
+<p>Query permafrost model outputs (e.g. extent, ground temperatures) from multiple sources.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Multiple permafrost data sources point query summary</td>
+      <td><a href="/permafrost/point/65.0628/-146.1627">/permafrost/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Geophysical Institute Permafrost Lab (GIPL) model output</h4>
+
+<p>Results from GIPL entire series or time slice queries will look like this:</p>
+
+<pre>
+{
+  "5ModelAvg": {
+    "2021": {
+      "RCP 4.5": {
+        "magt0.5m": -2.6,
+        "magt1m": -3.1,
+        "magt2m": -3.3,
+        "magt3m": -3.4,
+        "magt4m": -3.5,
+        "magt5m": -3.5,
+        "magtsurface": -0.0,
+        "permafrostbase": 153.2,
+        "permafrosttop": 0.7,
+        "talikthickness": 0
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;year&gt;:{
+      &lt;scenario&gt;: {
+        "magt0.5m": &lt;mean annual ground temperature value at 0.5 m depth (&deg;C)&gt;,
+        "magt1m": &lt;mean annual ground temperature value at 1 m depth (&deg;C)&gt;,
+        "magt2m": &lt;mean annual ground temperature value at 2 m depth (&deg;C)&gt;,
+        "magt3m": &lt;mean annual ground temperature value at 3 m depth (&deg;C)&gt;,
+        "magt4m": &lt;mean annual ground temperature value at 4 m depth (&deg;C)&gt;,
+        "magt5m": &lt;mean annual ground temperature value at 5 m depth (&deg;C)&gt;,
+        "magtsurface": &lt;mean annual ground temperature value at 0.01 m depth (&deg;C)&gt;,
+        "permafrostbase": &lt;depth of permafrost base (m)&gt;,
+        "permafrosttop": &lt;depth of permafrost top (m)&gt;,
+        "talikthickness": &lt;thickness of talik layer (m)&gt;
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h4>Geophysical Institute Permafrost Lab (GIPL) min/mean/max summaries</h4>
+
+<p>Results from min/mean/max summary queries will look like this:</p>
+
+<pre>
+{
+  "5ModelAvg": {
+    "gipl1kmmax": {...},
+    "gipl1kmmean": {...},
+    "gipl1kmmin": {...},
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    "gipl1kmmax": &lt;max values for all ten variables across all scenarios and years in the time slice&gt;,
+    "gipl1kmmean": &lt;mean values for all ten variables across all scenarios and years in the time slice&gt;,
+    "gipl1kmmin": &lt;min values for all ten variables across all scenarios and years in the time slice&gt;
+  },
+  ...
+}
+</pre>
+
+<h4>Summaries from multiple sources</h4>
+
+<p>Results from multiple source summary queries will look like this:</p>
+
+<pre>
+{
+  "gipl": {
+    "1995": {
+      "cruts31": {
+        "historical": {
+          "alt": 0.59,
+          "magt": -2.2
+        }
+      }
+    },
+    ...
+    "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+  },
+  "jorg": {
+    "ice": "Moderate",
+    "pfx": "Discontinuous",
+    "title": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume"
+  },
+  "obu_magt": {
+    "depth": "Top of Permafrost",
+    "temp": 0.2,
+    "title": "Obu et al. (2018) 2000-2016 Mean Annual Top of Permafrost Ground Temperature (&deg;C)",
+    "year": "2000-2016"
+  },
+  "obupfx": {
+    "pfx": "Sporadic",
+    "title": "Obu et al. (2018) Permafrost Extent"
+  }
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "gipl": {
+    &lt;era&gt;<sup>1</sup>: {
+      &lt;model&gt;: {
+        &lt;scenario&gt;: {
+          "alt": &lt;active layer thickness (m)&gt;,
+          "magt": &lt;mean annual ground temperature (&deg;C)&gt;
+        },
+        ...
+      },
+      ...
+    },
+    ...
+    "title": &lt;title describing these results&gt;
+  },
+  "jorg": {
+    "ice": &lt;estimated ground ice volume&gt;,
+    "pfx": &lt;permafrost extent&gt;,
+    "title": &lt;title describing these results&gt;
+  },
+  "obu_magt": {
+    "depth": &lt;top of permafrost (i.e. depth of active layer)&gt;,
+    "temp": &lt;mean annual ground temperature (&deg;C)&gt;,
+    "title": &lt;title describing these results&gt;,
+    "year": &lt;date range of model output&gt;
+  },
+  "obupfx": {
+    "pfx": &lt;permafrost extent&gt;,
+    "title": &lt;title describing these results&gt;
+  }
+}
+</pre>
+
+<sup>1</sup> Note for GIPL eras: "1995" refers to the historical baseline. Otherwise these are 30 year eras surrounding
+the following center dates, except the last era is truncated at 2100: "2025" (2011-2040), "2050" (2036-2065), "2075"
+(2061&ndash;2090), "2095" (2086&ndash;2100).
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Link</th>
+      <th>Download</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36">GIPL
+          2.0 1 km Model Outputs</a></td>
+      <td><a
+          href="https://www.researchgate.net/publication/294700098_Numerical_modeling_of_spatial_permafrost_dynamics_in_Alaska">Link</a>
+      </td>
+      <td>
+        <a href="http://data.snap.uaf.edu/data/Base/AK_1km/GIPL/">Data directory</a>
+      </td>
+      <td>Funded by the Broad Agency Announcement Program and the U.S. Army
+        Engineer Research and Development Center and Cold Regions Research and
+        Engineering Laboratory (ERDC-CRREL) under Contract No. W913E521C0010.
+        The GIPL2-MPI/GCM simulations were supported in part by the
+        high-performance computing and data storage resources operated by the
+        Research Computing Systems Group at the University of Alaska Fairbanks
+        Geophysical Institute.</td>
+    </tr>
+    <tr>
+      <td>Melvin 4 km GIPL Model Outputs</td>
+      <td><a href="https://doi.org/10.1073/pnas.1611056113">Link</a>
+      </td>
+      <td>
+        <a href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh">Download
+          script</a>
+      </td>
+      <td>MAGT is modeled for the depth of the active layer. This dataset will
+        eventually be deprecated from the API.</td>
+    </tr>
+    <tr>
+      <td><a href="https://catalog.northslopescience.org/dataset/1725">Jorgenson Permafrost Characteristics</a></td>
+      <td><a
+          href="https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf">Link</a>
+      </td>
+      <td>
+        <a
+          href="https://catalog.northslopescience.org/dataset/6803a021-6f72-4aa5-95f6-bc5facd534e8/resource/5811669f-860c-450e-9bc0-9dfc21821606/download/233-permafrost-characteristics-of-alaska-2008-sha.zip">ZIP
+          file</a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Obu et al. 2018</td>
+      <td><a href="https://doi.org/10.1594/PANGAEA.888600">Link</a></td>
+      <td>
+        <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">Mean
+          annual ground temperature dataset (ZIP file)</a>,<br />
+        <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">Permafrost
+          zones dataset (ZIP file)</a>
+      </td>
+      <td></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="4">
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+{% endblock %}

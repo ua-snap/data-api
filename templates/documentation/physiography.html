@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Physiography Data</h2>
+
+<p>This endpoint provides access to EPA Level III Ecoregions of Alaska.</p>
+
+<p>Links to an academic reference and source dataset are included at the bottom of this page.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>Query the EPA Level III Ecoregions of Alaska at a single point specified by latitude and longitude.</p>
+
+<table class="endpoints">
+    <thead>
+        <tr>
+            <th class="endpoint-label">Endpoint</th>
+            <th class="endpoint-url">Example URL</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Physiography point query</td>
+            <td><a href="/physiography/point/65.0628/-146.1627">/physiography/point/65.0628/-146.1627</a>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2"></td>
+        </tr>
+    </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from physiography queries will look like this:</p>
+
+<pre>
+{
+  "name": "Interior Highlands",
+  "title": "EPA Level III Ecoregions of Alaska"
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "name": &lt;title describing these results&gt;,
+  "title": &lt;EPA level III ecoregion name&gt;
+}
+</pre>
+
+<h3>Source data</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Dataset information</th>
+            <th>Paper</th>
+            <th>Download</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href="https://www.epa.gov/eco-research/ecoregion-download-files-state-region-10#pane-01">EPA Level
+                    III Ecoregions for Alaska</a></td>
+            <td><a href="https://dggs.alaska.gov/webpubs/usgs/p/text/p0482.pdf">Link</a></td>
+            <td><a href="https://gaftp.epa.gov/EPADataCommons/ORD/Ecoregions/ak/ak_eco_l3.zip">ZIP file</a></td>
+            <td>Ecoregions are essentially equivalent to the more archaic "physiographic provinces." Ecoregions do
+                combine landscape and vegetation variables, but have less detail about vegetation when compared to "land
+                cover" or "forest type" datasets. Topography plays a prominent role.</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4">
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+
+{% endblock %}

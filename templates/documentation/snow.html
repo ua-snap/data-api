@@ -1,0 +1,186 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Snowfall Equivalent</h2>
+
+<p>
+  These endpoints provide access to historical and projected modeled decadal summaries of annual snowfall equivalent
+  (SFE) for Alaska at a resolution of 771m. Historical data were derived from the CRU TS 3.1 dataset. Projections were
+  derived from GFDL-CM3, GISS-E2-R, IPSL-CM5A-LR, MRI-CGCM3, and NCAR-CCSM4 model outputs under the RCP 4.5, RCP 6.0,
+  and RCP 8.5 emissions scenarios. Data can be accessed as summarized means for each decade from 1910&ndash;2009 or
+  minimum, mean, and maximum summaries across all historical or projected years.
+</p>
+
+<p>
+  Note that SFE has a very specific meaning in a modeling context: it is the product of the fraction of days in a month
+  with precipitation falling as snow and the total monthly precipitation. That product (monthly) is then summed to
+  create a single annual total SFE value. The SFE values provided here are millimeters of water.
+</p>
+
+<p>Links to academic references and source datasets are included at the bottom of this page.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Min/mean/max summaries (point query)</h4>
+
+<p>Query SFE minimum, mean, and maximum across all models, scenarios, and decades.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Historical SFE min/mean/max</td>
+      <td><a
+          href="/mmm/snow/snowfallequivalent/historical/61.5/-147">/mmm/snow/snowfallequivalent/historical/61.5/-147</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Projected SFE min/mean/max</td>
+      <td><a
+          href="/mmm/snow/snowfallequivalent/projected/61.5/-147">/mmm/snow/snowfallequivalent/projected/61.5/-147</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Historical and projected SFE min/mean/max</td>
+      <td><a href="/mmm/snow/snowfallequivalent/hp/61.5/-147">/mmm/snow/snowfallequivalent/hp/61.5/-147</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Snowfall equivalent for all decades (point query)</h4>
+
+<p>Query SFE for all models and scenarios for each decade (1910&ndash;1919 through 2090&ndash;2099).</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SFE for all decades</td>
+      <td><a href="/mmm/snow/snowfallequivalent/all/61.5/-147">/mmm/snow/snowfallequivalent/all/61.5/-147</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Min/mean/max summaries</h4>
+
+<p>Results from SFE min/mean/max queries will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    "sfemax": 4876,
+    "sfemean": 3701,
+    "sfemin": 2946
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;"historical" or "projected"&gt;: {
+    "sfemax": &lt;max SFE value across all models, scenarios, and decades&gt;,
+    "sfemean": &lt;mean SFE value across all models, scenarios, and decades&gt;,
+    "sfemin": &lt;min SFE value across all models, scenarios, and decades&gt;
+  },
+  ...
+}
+</pre>
+
+<h4>Snowfall equivalent for all decades</h4>
+
+<p>Results from SFE for all decades queries will look like this:</p>
+
+<pre>
+{
+  "CRU-TS": {
+    "historical": {
+      "1910-1919": {
+        "SFE": 3801
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;scenario&gt;:{
+      &lt;decade&gt;: {
+        "SFE": &lt;annual total sfe value&gt;
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Paper</th>
+      <th>Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="
+          https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/557db5d5-dbeb-470a-a9c4-b80d78aa8668">Historical
+          Decadal Averages of Monthly Snowfall Equivalent 771m CRU TS3.0/TS3.1</a></td>
+      <td><a href="https://doi.org/10.3390/w10050668">Link</a></td>
+      <td><a href="http://data.snap.uaf.edu/data/Base/AK_771m/historical/CRU_TS/SWE/">Data directory</a></td>
+    </tr>
+    <tr>
+      <td><a
+          href="
+          https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/7c0c1a65-794e-4770-aa72-4628d357808e">Projected
+          Decadal Averages of Monthly Snowfall Equivalent 771m CMIP5/AR5</a></td>
+      <td><a href="https://doi.org/10.3390/w10050668">Link</a></td>
+      <td><a href="http://data.snap.uaf.edu/data/Base/AK_771m/projected/AR5_CMIP5_models/SWE/">Data directory</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+</table>
+
+{% endblock %}

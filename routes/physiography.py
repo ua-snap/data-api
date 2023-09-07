@@ -30,13 +30,9 @@ def package_epaecoreg(eco_resp):
 
 @routes.route("/physiography/")
 @routes.route("/physiography/abstract/")
-def phys_about():
-    return render_template("physiography/abstract.html")
-
-
 @routes.route("/physiography/point/")
-def phys_about_point():
-    return render_template("physiography/point.html")
+def phys_about():
+    return render_template("documentation/physiography.html")
 
 
 @routes.route("/physiography/point/<lat>/<lon>")

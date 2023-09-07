@@ -79,7 +79,7 @@ async def run_fetch_all_eds(lat, lon):
         "physiography",
         "permafrost",
         "wet_days_per_year",
-        "elevation"
+        "elevation",
     ]
 
     results = await asyncio.gather(*[fetch_data(url) for url in all_urls])

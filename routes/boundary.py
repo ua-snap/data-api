@@ -17,7 +17,7 @@ boundary_api = Blueprint("boundary_api", __name__)
 @routes.route("/boundary/abstract/")
 @routes.route("/boundary/area/")
 def boundary_about():
-    return render_template("boundary/abstract.html")
+    return render_template("documentation/boundary.html")
 
 
 @routes.route("/boundary/area/<var_id>")

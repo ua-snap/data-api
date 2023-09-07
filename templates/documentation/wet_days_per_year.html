@@ -1,0 +1,210 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Wet Days Per Year</h2>
+
+<p>
+  These endpoints provide access to historical and projected number of wet days per year at a resolution of
+  20km. Historical data are available for years 1980&ndash;2009 and were derived from the ERA-Interim
+  dataset. Projections are available for years 2006&ndash;2100 and were derived from GFDL-CM3 and NCAR-CCSM4 model
+  outputs under the RCP 8.5 emissions scenario. A wet day is defined as a day with precipitation accumulation greater
+  than or equal to 1.0mm.</p>
+
+<p>Links to academic references and a source dataset are included at the bottom of this page.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Min/mean/max summaries (point query)</h4>
+
+<p>Query a complete set of wet days per year composed of the ERA-Interim historical baseline (1980&ndash;2009) and the
+  entire projected range (2006&ndash;2100) for both available models, GFDL-CM3 and NCAR-CCSM4 (both RCP 8.5).
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Historical wet days per year</td>
+      <td><a
+          href="/wet_days_per_year/historical/point/65.0628/-146.1627">/wet_days_per_year/historical/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Projected wet days per year</td>
+      <td><a
+          href="/wet_days_per_year/projected/point/65.0628/-146.1627">/wet_days_per_year/projected/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Historical and projected wet days per year</td>
+      <td><a href="/wet_days_per_year/hp/point/65.0628/-146.1627">/wet_days_per_year/hp/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Min/mean/max summaries across provided year range (point query)</h4>
+
+<p>Query wet days per year for the specified year range. Valid year ranges are between 1980&ndash;2009 for historical
+  data and 2006&ndash;2100 for projected data.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Historical wet days per year within year range</td>
+      <td><a
+          href="/wet_days_per_year/historical/point/65.0628/-146.1627/1990/2000">/wet_days_per_year/historical/point/65.0628/-146.1627/1990/2000</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Projected wet days per year within year range</td>
+      <td><a
+          href="/wet_days_per_year/projected/point/65.0628/-146.1627/2040/2060">/wet_days_per_year/projected/point/65.0628/-146.1627/2040/2060</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Historical and projected wet days per year within year range</td>
+      <td><a
+          href="/wet_days_per_year/hp/point/65.0628/-146.1627/1990/2060">/wet_days_per_year/hp/point/65.0628/-146.1627/1990/2040</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Wet days per year for all years (point query)</h4>
+
+<p>Query wet days per year for all models, scenarios, and years (1980&ndash;2100):</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Wet days per year for all years</td>
+      <td><a href="/wet_days_per_year/all/point/65.0628/-146.16270">/wet_days_per_year/all/point/65.0628/-146.16270</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Min/mean/max summaries</h4>
+
+<p>Results from wet days per year min/mean/max queries will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    "wdpymax": 160,
+    "wdpymean": 134,
+    "wdpymin": 112
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;era&gt;: {
+    "wdpymax": &lt;max number of wet days per year across all models and years used for the summary era time period&gt;,
+    "wdpymean": &lt;number of wet days per year across all models and years used for the summary era time period&gt;,
+    "wdpymin": &lt;number of wet days per year across all models and years used for the summary era time period&gt;
+  },
+  ...
+}
+</pre>
+
+<h4>Wet days per year for all years</h4>
+
+<p>Results from wet days per year for all years queries will look like this:</p>
+
+<pre>
+{
+  "ERA-Interim": {
+    "1980": {
+      "wdpy": 124
+    },
+    "1981": {
+      "wdpy": 119
+    },
+    "1982": {
+      "wdpy": 145
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;year&gt;: {
+      "wdpy": &lt;count of wet days per year&gt;
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h3>Source data</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Paper</th>
+      <th>Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/8b51ce8c-7fd9-4541-9736-990c0a008005">Wet
+          Days Per Year</a></td>
+      <td><a href="https://journals.ametsoc.org/view/journals/apme/55/3/jamc-d-15-0153.1.xml">Historical</a>, <a
+          href="https://journals.ametsoc.org/view/journals/apme/56/9/jamc-d-16-0415.1.xml">Projected</a></td>
+      <td><a href="http://data.snap.uaf.edu/data/Base/AK_WRF/Arctic_EDS_wet_days_per_year/">Data directory</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+</table>
+
+{% endblock %}

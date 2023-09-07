@@ -1,0 +1,79 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Boundary Data</h2>
+<p>
+  These endpoints provide access to a common set of areas, and their respective boundary data, used across SNAP tools
+  and data.
+</p>
+
+<h3>Service endpoints</h3>
+
+<p>Polygon queries will return the boundary's representative GeoJSON.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>All available area-of-interest ID codes</td>
+      <td><a href="/places/all">/places/all</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of a HUC-8</td>
+      <td><a href="/boundary/area/19070506">/boundary/area/19070506</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of a HUC-12</td>
+      <td><a href="/boundary/area/190202011303">/boundary/area/190202011303</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of an Alaska, British Columbia, or Yukon protected area</td>
+      <td><a href="/boundary/area/NPS12">/boundary/area/NPS12</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of an Alaska Native corporation</td>
+      <td><a href="/boundary/area/NC8">/boundary/area/NC8</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of an Alaska climate division</td>
+      <td><a href="/boundary/area/CD3">/boundary/area/CD3</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of an fire management zone</td>
+      <td><a href="/boundary/area/FIRE2">/boundary/area/FIRE2</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of an Alaska ethnolinguistic region</td>
+      <td><a href="/boundary/area/EL4">/boundary/area/EL4</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of an Alaska borough (county equivalent)</td>
+      <td><a href="/boundary/area/BORO4">/boundary/area/BORO4</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of Alaska census areas for the Unorganized Borough</td>
+      <td><a href="/boundary/area/CENS3">/boundary/area/CENS3</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+{% endblock %}

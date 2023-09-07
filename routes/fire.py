@@ -93,14 +93,10 @@ def package_landcover(landcover_resp):
 @routes.route("/fire/abstract/")
 @routes.route("/wildfire/")
 @routes.route("/wildfire/abstract/")
-def fire_about():
-    return render_template("fire/abstract.html")
-
-
 @routes.route("/wildfire/point/")
 @routes.route("/fire/point/")
-def fire_about_point():
-    return render_template("fire/point.html")
+def fire_about():
+    return render_template("documentation/fire.html")
 
 
 @routes.route("/wildfire/point/<lat>/<lon>")

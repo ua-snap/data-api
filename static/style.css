@@ -9,3 +9,15 @@
 footer.footer {
 	padding-bottom:  6rem;
 }
+
+.content table.endpoints:not(:last-child) {
+	margin-bottom: 2rem;
+}
+
+th.endpoint-label {
+	width: 50%
+}
+
+th.endpoint-url {
+	width: 50%
+}

@@ -1,0 +1,287 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Flammability and Vegetation Type (ALFRESCO)</h2>
+
+<p>
+  These endpoints provide access to flammability and vegetation type data products derived from ALFRESCO simulations at
+  a resolution of 1km. Historical data are derived from the CRU TS 4.0 dataset and are summarized across years
+  1950&ndash;1979 and 1980&ndash;2008. Projections were simulated using GFDL-CM3, GISS-E2-R, IPSL-CM5A-LR, MRI-CGCM3,
+  and NCAR-CCSM4 model outputs under the RCP 4.5, RCP 6.0, and RCP 8.5 emissions scenarios. Projections simulating a
+  5-model average under RCP 4.5, RCP 6.0, and RCP 8.5 are also available. Projections are provided as summarized means
+  of 30-year eras from 2010&ndash;2099.
+</p>
+
+<p>
+  See the <a href="https://uaf-snap.org/project/alfresco-and-habitat-research/">ALFRESCO and Habitat Research project
+    page</a> for more information. Links to academic references and similar datasets are included at the bottom of this
+  page.</p>
+</p>
+
+<h3>Datasets</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Dataset</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Flammability</td>
+      <td>
+        These data are derived from the fire scar outputs and are computed as
+        the average number of times a pixel burned across all reps for all years
+        of the summary year span. Pixels are 1km x 1km.
+      </td>
+    </tr>
+    <tr>
+      <td>Vegetation Type</td>
+      <td>
+        These data are derived from the vegetation class data, the principal
+        phenomena being modeled by ALFRESCO. They are computed as the average
+        percentage of each vegetation type for a pixel, across all reps for all
+        years of the summary year span. Pixels are 1km x 1km.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+<p>
+  Query data derived from 1km ALFRESCO for a single point specified by latitude
+  and longitude.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Flammability point query</td>
+      <td><a href="/alfresco/flammability/point/65.0628/-146.1627">/alfresco/flammability/point/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Vegetation type point query</td>
+      <td><a href="/alfresco/veg_type/point/65.0628/-146.1627">/alfresco/veg_type/point/65.0628/-146.1627</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Intersecting area query</h4>
+<p>
+  Query data derived from 1km ALFRESCO outputs for a point location specified by
+  latitude and longitude, and return the mean of the pixels within the HUC-12
+  that intersects the supplied point location. 12-digit HUC shapefiles accessed at
+  <a href="https://datagateway.nrcs.usda.gov/">https://datagateway.nrcs.usda.gov/</a>
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Flammability intersecting area query</td>
+      <td><a href="/alfresco/flammability/local/65.4844/-145.4036">/alfresco/flammability/local/65.4844/-145.4036</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Vegetation type intersecting area query</td>
+      <td><a href="/alfresco/veg_type/local/65.4844/-145.4036">/alfresco/veg_type/local/65.4844/-145.4036</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Area query</h4>
+<p>
+  Query data derived from 1km ALFRESCO outputs for an
+  <a href="/places/all">area of interest polygon ID</a> and aggregate by mean. 8-digit HUC shapefiles accessed at
+  <a href="https://datagateway.nrcs.usda.gov/">https://datagateway.nrcs.usda.gov/</a>
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Flammability area query</td>
+      <td><a href="/alfresco/flammability/area/19080309">/alfresco/flammability/area/19080309</a></td>
+    </tr>
+    <tr>
+      <td>Vegetation type area query</td>
+      <td><a href="/alfresco/veg_type/area/19080309">/alfresco/veg_type/area/19080309</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Flammability</h4>
+
+<p>Results from flammability endpoints will look like this:</p>
+
+<pre>
+{
+  "1950-1979": {
+    "MODEL-SPINUP": {
+      "historical": 0.0065
+    }
+  },
+  ...
+  "2010-2039": {
+    "5modelAvg": {
+      "rcp45": 0.0014,
+      "rcp60": 0.0007,
+      "rcp85": 0.0007
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;era&gt;: {
+    &lt;model&gt;: {
+      &lt;scenario&gt;: &lt;flammability&gt;
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h4>Vegetation type</h4>
+
+<p>Results from vegetation type endpoints will look like this:</p>
+
+<pre>
+{
+  "1950-2008": {
+    "MODEL-SPINUP": {
+      "historical": {
+        "barren_lichen_moss": 0,
+        "black_spruce": 0,
+        "deciduous_forest": 50.92,
+        "graminoid_tundra": 0,
+        "not_modeled": 0,
+        "shrub_tundra": 0,
+        "temperate_rainforest": 0,
+        "wetland_tundra": 0,
+        "white_spruce": 49.08
+      }
+    }
+  },
+  ...
+  "NCAR-CCSM4": {
+    "rcp45": {
+      "barren_lichen_moss": 0,
+      "black_spruce": 0,
+      "deciduous_forest": 57.03,
+      "graminoid_tundra": 0,
+      "not_modeled": 0,
+      "shrub_tundra": 0,
+      "temperate_rainforest": 0,
+      "wetland_tundra": 0,
+      "white_spruce": 42.97
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;era&gt;: {
+    &lt;model&gt;: {
+      &lt;scenario&gt;: {
+        &lt;vegetation type&gt;: &lt;percentage&gt;
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h3>Source data</h3>
+
+<p>Refer to the <a href="https://github.com/ua-snap/alfresco/blob/main/docs/ALFRESCO_Guide.pdf">ALFRESCO Guide</a> for
+  information about how these simulations were performed. For access to the source data used here, please contact
+  uaf-snap-data-tool@alaska.edu and ask about accessing these data.</p>
+<p>SNAP also has some similar datasets available for download at longer year spans and for fewer models and scenarios
+  than available here:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Paper</th>
+      <th>Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/210f00ff-86e5-47dd-a406-9167af3630af">
+          ALFRESCO Model Outputs - Relative Vegetation Change</a></td>
+      <td><a href="https://doi.org/10.1007/s10980-011-9574-6">Link</a></td>
+      <td><a
+          href="http://data.snap.uaf.edu/data/IEM/Outputs/ALF/Gen_1a/alfresco_relative_spatial_outputs/relative_vegetation_change/AR5_CMIP5/">Data
+          directory</a>
+      </td>
+    </tr>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/eeaaca2c-0280-4226-b126-fda42a2b6214">
+          ALFRESCO Model Outputs - Relative Flammability</a></td>
+      <td><a href="https://doi.org/10.1007/s10980-011-9574-6">Link</a></td>
+      <td><a
+          href="http://data.snap.uaf.edu/data/IEM/Outputs/ALF/Gen_1a/alfresco_relative_spatial_outputs/relative_flammability/AR5_CMIP5/">Data
+          directory</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+</table>
+
+{% endblock %}
