@@ -163,12 +163,12 @@ def get_di_wcps_request_str(x, y, cov_id, models, eras, encoding="json"):
 @routes.route("/design_index/point")
 @routes.route("/design_index/thawing/point")
 @routes.route("/design_index/freezing/point")
-@routes.route("/mmm/degree_days/")
-@routes.route("/mmm/degree_days/abstract/")
-@routes.route("/mmm/degree_days/heating/")
-@routes.route("/mmm/degree_days/below_zero/")
-@routes.route("/mmm/degree_days/thawing_index/")
-@routes.route("/mmm/degree_days/freezing_index/")
+@routes.route("/degree_days/")
+@routes.route("/degree_days/abstract/")
+@routes.route("/degree_days/heating/")
+@routes.route("/degree_days/below_zero/")
+@routes.route("/degree_days/thawing_index/")
+@routes.route("/degree_days/freezing_index/")
 def degree_days_about():
     return render_template("/documentation/degree_days.html")
 
@@ -191,43 +191,75 @@ def get_dd_plate(var_ep, lat, lon):
     Notes:
         example request: http://localhost:5000/eds/degree_days/heating/65.0628/-146.1627
     """
-    dd_plate = {}
+    summarized_data = {}
+    if "historical" not in summarized_data:
+        summarized_data["historical"] = {}
 
-    results = run_fetch_dd_point_data(var_ep, lat, lon, "historical")
-    dd_plate["historical"] = results["historical"]
+    all_data = run_fetch_dd_point_data(var_ep, lat, lon)
 
-    results = run_fetch_dd_point_data(
-        var_ep, lat, lon, "projected", start_year="2010", end_year="2039"
-    )
-    dd_plate["2010-2039"] = results["projected"]
+    historical_values = list(map(lambda x: x["dd"], all_data["ERA-Interim"].values()))
+    summarized_data["historical"] = {
+        "ddmax": max(historical_values),
+        "ddmean": round(np.mean(historical_values)),
+        "ddmin": min(historical_values),
+    }
 
-    results = run_fetch_dd_point_data(
-        var_ep, lat, lon, "projected", start_year="2040", end_year="2069"
-    )
-    dd_plate["2040-2069"] = results["projected"]
+    eras = [
+        {"start": 2010, "end": 2039},
+        {"start": 2040, "end": 2069},
+        {"start": 2070, "end": 2099},
+    ]
+    models = list(all_data.keys())
+    models.remove("ERA-Interim")
+    for era in eras:
+        era_label = str(era["start"]) + "-" + str(era["end"])
+        if era_label not in summarized_data:
+            summarized_data[era_label] = {}
+        dd_values = []
+        for model in all_data.keys():
+            for year, value in all_data[model].items():
+                if year >= era["start"] and year <= era["end"]:
+                    dd_values.append(value["dd"])
+        summarized_data[era_label] = {
+            "ddmin": min(dd_values),
+            "ddmean": round(np.mean(dd_values)),
+            "ddmax": max(dd_values),
+        }
 
-    results = run_fetch_dd_point_data(
-        var_ep, lat, lon, "projected", start_year="2070", end_year="2099"
-    )
-    dd_plate["2070-2099"] = results["projected"]
-
-    return jsonify(dd_plate)
+    return jsonify(summarized_data)
 
 
-def package_dd_point_data(point_data, var_ep, horp):
+def package_dd_point_data(point_data, start_year=None, end_year=None):
     """Add JSON response data for heating_degree_days, below_zero_degree_days,
     thawing_index, and freezing_index coverages
 
     Args:
         point_data (list): nested list containing JSON results of WCPS query
-        var_ep (str): variable name
-        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of query results
     """
     point_pkg = {}
-    if horp == "all":
+
+    if request.args.get("summarize") == "mmm":
+        historical_max = round(point_data[0], 1)
+        historical_mean = round(point_data[1], 1)
+        historical_min = round(point_data[2], 1)
+
+        point_pkg["historical"] = {}
+        point_pkg["historical"]["ddmin"] = round(historical_min)
+        point_pkg["historical"]["ddmean"] = round(historical_mean)
+        point_pkg["historical"]["ddmax"] = round(historical_max)
+
+        projected_max = round(point_data[3], 1)
+        projected_mean = round(point_data[4], 1)
+        projected_min = round(point_data[5], 1)
+
+        point_pkg["projected"] = {}
+        point_pkg["projected"]["ddmin"] = round(projected_min)
+        point_pkg["projected"]["ddmean"] = round(projected_mean)
+        point_pkg["projected"]["ddmax"] = round(projected_max)
+    else:
         for mi, v_li in enumerate(point_data):  # (nested list with model at dim 0)
             if mi == 0:
                 min_year = years_lu["historical"]["min"]
@@ -250,53 +282,37 @@ def package_dd_point_data(point_data, var_ep, horp):
             # arrays.
             year = years_lu["historical"]["min"]
             year_index = 0
+            if None in [start_year, end_year]:
+                start_year = years_lu["historical"]["min"]
+                end_year = years_lu["projected"]["max"]
             for value in v_li:
                 if year in years:
-                    point_pkg[model][years[year_index]] = {"dd": round(value)}
+                    if year >= int(start_year) and year <= int(end_year):
+                        point_pkg[model][years[year_index]] = {"dd": round(value)}
                     year_index += 1
                 year += 1
-    else:
-        if horp in ["historical", "hp"]:
-            historical_max = round(point_data[0], 1)
-            historical_mean = round(point_data[1], 1)
-            historical_min = round(point_data[2], 1)
-
-            point_pkg["historical"] = {}
-            point_pkg["historical"]["ddmin"] = round(historical_min)
-            point_pkg["historical"]["ddmean"] = round(historical_mean)
-            point_pkg["historical"]["ddmax"] = round(historical_max)
-
-        if horp in ["projected", "hp"]:
-            if horp == "projected":
-                projected_max = round(point_data[0], 1)
-                projected_mean = round(point_data[1], 1)
-                projected_min = round(point_data[2], 1)
-            else:
-                projected_max = round(point_data[3], 1)
-                projected_mean = round(point_data[4], 1)
-                projected_min = round(point_data[5], 1)
-
-            point_pkg["projected"] = {}
-            point_pkg["projected"]["ddmin"] = round(projected_min)
-            point_pkg["projected"]["ddmean"] = round(projected_mean)
-            point_pkg["projected"]["ddmax"] = round(projected_max)
 
     return point_pkg
 
 
-def package_di_point_data(point_data, horp):
+def package_di_point_data(point_data):
     """Add JSON response data for design_thawing_index and
     design_freezing_index coverages
 
     Args:
         point_data (list): nested list containing JSON results of WCPS query
-        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of query results
     """
     point_pkg = {}
-    if horp == "all":
+    if request.args.get("summarize") == "mmm":
+        keys = ["historical", "2040-2069", "2070-2099"]
+        index = 0
+        for key in keys:
+            point_pkg[key] = {"di": round(point_data[index])}
+            index += 1
+    else:
         for mi, m_li in enumerate(point_data):
             model = di_dim_encodings["model"][mi]
             point_pkg[model] = {}
@@ -310,23 +326,10 @@ def package_di_point_data(point_data, horp):
                     point_pkg[model][era] = None
                 else:
                     point_pkg[model][era] = {"di": round(value)}
-    else:
-        keys = []
-        if horp in ["historical", "hp"]:
-            keys.append("historical")
-        if horp in ["projected", "hp"]:
-            keys.append("2040-2069")
-            keys.append("2070-2099")
-
-        index = 0
-        for key in keys:
-            point_pkg[key] = {"di": round(point_data[index])}
-            index += 1
-
     return point_pkg
 
 
-async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
+async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
     """Run the async degree days data request for a single point
     and return data as json
 
@@ -335,7 +338,6 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
         lon (float): longitude
         cov_id (str): heating_degree_days, degree_days_below_zero,
             thawing_index, or freezing_index
-        horp [Historical or Projected] (str): historical, projected, hp, or all
         start_year (int): start year for WCPS query or None
         end_year (int): end year for WCPS query or None
 
@@ -343,11 +345,7 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
         JSON-like dict of data at provided latitude and longitude
     """
     point_data_list = []
-    if horp == "all":
-        request_str = generate_wcs_getcov_str(x, y, cov_id)
-        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
-
-    if horp in ["historical", "hp"]:
+    if request.args.get("summarize") == "mmm":
         min_year = years_lu["historical"]["min"]
         max_year = years_lu["historical"]["max"]
         timestring = (
@@ -365,7 +363,6 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
                 await fetch_data([generate_wcs_query_url(request_str)])
             )
 
-    if horp in ["projected", "hp"]:
         min_year = years_lu["projected"]["min"]
         max_year = years_lu["projected"]["max"]
         timestring = (
@@ -382,11 +379,13 @@ async def fetch_dd_point_data(x, y, cov_id, horp, start_year, end_year):
             point_data_list.append(
                 await fetch_data([generate_wcs_query_url(request_str)])
             )
-
+    else:
+        request_str = generate_wcs_getcov_str(x, y, cov_id)
+        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
     return point_data_list
 
 
-async def fetch_di_point_data(x, y, cov_id, horp):
+async def fetch_di_point_data(x, y, cov_id):
     """Run the async design index data request for a single point
     and return data as json
 
@@ -394,35 +393,30 @@ async def fetch_di_point_data(x, y, cov_id, horp):
         lat (float): latitude
         lon (float): longitude
         cov_id (str): design_thawing_index or freezing_thawing_index
-        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
     point_data_list = []
-
-    if horp == "all":
-        request_str = generate_wcs_getcov_str(x, y, cov_id)
-        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
-
-    if horp in ["historical", "hp"]:
+    if request.args.get("summarize") == "mmm":
         request_str = get_di_wcps_request_str(x, y, cov_id, "0:0", "0:0")
         point_data_list.append(await fetch_data([generate_wcs_query_url(request_str)]))
 
-    if horp in ["projected", "hp"]:
         for era in range(1, 3):
             eras = str(era) + ":" + str(era)
             request_str = get_di_wcps_request_str(x, y, cov_id, "1:2", eras)
             point_data_list.append(
                 await fetch_data([generate_wcs_query_url(request_str)])
             )
-
+    else:
+        request_str = generate_wcs_getcov_str(x, y, cov_id)
+        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
     return point_data_list
 
 
-@routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>")
-@routes.route("/mmm/degree_days/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
-def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=None):
+@routes.route("/degree_days/<var_ep>/<lat>/<lon>")
+@routes.route("/degree_days/<var_ep>/<lat>/<lon>/<start_year>/<end_year>")
+def run_fetch_dd_point_data(var_ep, lat, lon, start_year=None, end_year=None):
     """Degree days data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
 
@@ -430,7 +424,6 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         var_ep (str): heating, below_zero, thawing_index, or freezing_index
         lat (float): latitude
         lon (float): longitude
-        horp [Historical or Projected] (str): historical, projected, hp, or all
         start_year (int): optional start year for WCPS query
         end_year (int): optional end year for WCPS query
 
@@ -438,7 +431,7 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         JSON-like dict of requested degree days data
 
     Notes:
-        example request: http://localhost:5000/mmm/degree_days/heating/all/65/-147
+        example request: http://localhost:5000/degree_days/heating/all/65/-147
     """
     validation = validate_latlon(lat, lon)
     if validation == 400:
@@ -454,7 +447,7 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     x, y = project_latlon(lat, lon, 3338)
 
     if None not in [start_year, end_year]:
-        valid_year = validate_years(horp, int(start_year), int(end_year))
+        valid_year = validate_years(int(start_year), int(end_year))
         if valid_year is not True:
             return valid_year
 
@@ -462,7 +455,7 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
         try:
             point_data_list = asyncio.run(
-                fetch_dd_point_data(x, y, cov_id_str, horp, start_year, end_year)
+                fetch_dd_point_data(x, y, cov_id_str, start_year, end_year)
             )
         except Exception as exc:
             if hasattr(exc, "status") and exc.status == 404:
@@ -471,13 +464,13 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     else:
         return render_template("400/bad_request.html"), 400
 
-    point_pkg = package_dd_point_data(point_data_list, var_ep, horp)
+    point_pkg = package_dd_point_data(point_data_list, start_year, end_year)
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        if horp != "all":
+        if request.args.get("summarize") == "mmm":
             return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
         else:
             return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
@@ -485,8 +478,8 @@ def run_fetch_dd_point_data(var_ep, lat, lon, horp, start_year=None, end_year=No
     return postprocess(point_pkg, cov_id_str)
 
 
-@routes.route("/design_index/<var_ep>/<horp>/point/<lat>/<lon>")
-def run_fetch_di_point_data(var_ep, lat, lon, horp):
+@routes.route("/design_index/<var_ep>/point/<lat>/<lon>")
+def run_fetch_di_point_data(var_ep, lat, lon):
     """Design index data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
 
@@ -494,7 +487,6 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
         var_ep (str): thawing or freezing
         lat (float): latitude
         lon (float): longitude
-        horp [Historical or Projected] (str): historical, projected, hp, or all
 
     Returns:
         JSON-like dict of requested design index data
@@ -521,19 +513,19 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
         cov_id_str = "design_freezing_index"
 
     try:
-        point_data_list = asyncio.run(fetch_di_point_data(x, y, cov_id_str, horp))
+        point_data_list = asyncio.run(fetch_di_point_data(x, y, cov_id_str))
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    point_pkg = package_di_point_data(point_data_list, horp)
+    point_pkg = package_di_point_data(point_data_list)
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        if horp != "all":
+        if request.args.get("summarize") == "mmm":
             return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
         else:
             return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
@@ -541,11 +533,10 @@ def run_fetch_di_point_data(var_ep, lat, lon, horp):
     return postprocess(point_pkg, cov_id_str)
 
 
-def validate_years(horp, start_year, end_year):
+def validate_years(start_year, end_year):
     """Check provided years against valid ranges for historical vs. projected.
 
     Args:
-        horp [Historical or Projected] (str): historical, projected, hp, or all
         start_year (int): start year for WCPS query or None
         end_year (int): end year for WCPS query or None
 
@@ -553,15 +544,8 @@ def validate_years(horp, start_year, end_year):
         True if years are valid, otherwise an error page to show valid years
     """
     if None not in [start_year, end_year]:
-        if horp == "historical":
-            min_year = years_lu["historical"]["min"]
-            max_year = years_lu["historical"]["max"]
-        elif horp == "projected":
-            min_year = years_lu["projected"]["min"]
-            max_year = years_lu["projected"]["max"]
-        elif horp == "hp":
-            min_year = years_lu["historical"]["min"]
-            max_year = years_lu["projected"]["max"]
+        min_year = years_lu["historical"]["min"]
+        max_year = years_lu["projected"]["max"]
 
         for year in [start_year, end_year]:
             if year < min_year or year > max_year:
