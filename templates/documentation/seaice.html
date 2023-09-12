@@ -1,15 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Pan-Arctic Sea Ice Concentration</h2>
-<p>Query pan-arctic sea ice concentration information for the Arctic.</p>
+
+<p>
+    This endpoint provides access to monthly pan-Arctic sea ice concentration data at a resolution of approximately
+    17.1km for years 1850&ndash;2021. Data were provided by Walsh et al.
+</p>
+
+<p>Links to an academic reference and source dataset are included at the bottom of this page.</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Point query</h4>
 
 <p>
-    This endpoint accesses historical monthly data on sea ice concentration in the
-    Arctic from 1850&ndash;2021.
+    Query historical monthly pan-Arctic sea ice concentration data from 1850&ndash;2021 at a single point specified by
+    latitude and longitude.
 </p>
 
 <table class="endpoints">
@@ -56,27 +62,29 @@
 </pre>
 
 <h3>Source data</h3>
+
 <table>
     <thead>
         <tr>
-            <th>Gridded Historical Dataset</th>
-            <th>Historical Date Range</th>
-            <th>Spatial Resolution</th>
-            <th>Spatial Coverage</th>
+            <th>Dataset information</th>
+            <th>Paper</th>
+            <th>Download</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td><a href="https://nsidc.org/data/nsidc-0051/versions/1">Sea Ice Concentrations from Nimbus-7 SMMR
-                    and DMSP SSM/I-SSMIS Passive Microwave Data, Version 1</a></td>
-            <td>1850&ndash;2022</td>
-            <td>25 km</td>
-            <td>N: 90, S: 30.98, E: 180, W: &minus;180</td>
+            <td><a
+                    href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/047e91c7-35c6-410a-a1ef-95539c1ee328">Historical
+                    Sea Ice Atlas: Observed Estimates of Sea Ice Concentration in Alaska Waters</a></td>
+            <td><a
+                    href="https://www.tandfonline.com/doi/abs/10.1111/j.1931-0846.2016.12195.x?journalCode=utgr20">Link</a>
+            </td>
+            <td><a href="http://data.snap.uaf.edu/data/Base/Other/Historical_Sea_Ice_Atlas/">Data directory</a></td>
         </tr>
     </tbody>
     <tfoot>
         <tr>
-            <td colspan="4"></td>
+            <td colspan="3"></td>
         </tr>
     </tfoot>
 </table>

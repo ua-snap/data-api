@@ -2,14 +2,39 @@
 {% block content %}
 <h2>Permafrost Data</h2>
 
-<p>Query permafrost information for Alaska.</p>
+<p>
+  These endpoints provide access to permafrost information for Alaska, including outputs from academic research on
+  permafrost type and extent as well as ground temperatures.
+</p>
+
+<p>
+  Annual projections of permafrost top and base depths, talik thickness, and mean annual ground temperature at seven
+  different depths were provided by the GIPL 2.0 model at a resolution of 1km for years 2021&ndash;2120. These
+  projections are provided for GFDL-CM3 and NCAR-CCSM4 model outputs, as well as a 5-model average, under the RCP
+  4.5 and RCP 8.5 emissions scenarios.
+</p>
+
+<p>
+  Active layer thickness and mean annual ground temperature data are also provided as summarized means across
+  2011&ndash;2040, 2036&ndash;2065, 2061&ndash;2090, 2086&ndash;2100 vs. a historical baseline from 1995 at a resolution
+  of 4km. Data were provided by Melvin et al. using GIPL 2.0 model outputs. The historical baseline was derived from CRU
+  TS 3.1. Projections were derived from GFDL-CM3, GISS-E2R, IPSL-CM5A-LR, MRI-CGCM3, NCAR-CCSM4 model outputs, as well
+  as a 5-model average, under the RCP 4.5 and RCP 8.5 emissions scenarios.
+</p>
+
+<p>
+  Permafrost extent and ground ice volume data from 2008 were provided by Jorgenson et al. Mean annual top of permafrost
+  ground temperature and permafrost extent data from 2000&ndash;2016 were provided by Obu et al.
+</p>
+
+<p>Links to academic references and source datasets are included at the bottom of this page.</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Geophysical Institute Permafrost Lab (GIPL) model output (point query)</h4>
 
 <p>
-  Query GIPL model outputs (1 km spatial resolution) for ten variables for a single point specified by latitude and
+  Query GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a single point specified by latitude and
   longitude.
 </p>
 
@@ -43,7 +68,7 @@
 <h4>Geophysical Institute Permafrost Lab (GIPL) min/mean/max summaries (point query)</h4>
 
 <p>
-  Query minimum, mean, and maximum summaries of GIPL model outputs (1 km spatial resolution) for ten variables for a
+  Query minimum, mean, and maximum summaries of GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a
   single point specified by latitude and longitude.
 </p>
 
@@ -256,25 +281,26 @@ the following center dates, except the last era is truncated at 2100: "2025" (20
 (2061&ndash;2090), "2095" (2086&ndash;2100).
 
 <h3>Source data</h3>
+
 <table>
   <thead>
     <tr>
-      <th>Dataset</th>
-      <th>Download links</th>
-      <th>Source</th>
+      <th>Dataset information</th>
+      <th>Link</th>
+      <th>Download</th>
       <th>Notes</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>GIPL 2.0 1 km Model Outputs</td>
-      <td>
-        <a href="http://data.snap.uaf.edu/data/Base/AK_1km/GIPL/">Data directory</a>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36">GIPL
+          2.0 1 km Model Outputs</a></td>
+      <td><a
+          href="https://www.researchgate.net/publication/294700098_Numerical_modeling_of_spatial_permafrost_dynamics_in_Alaska">Link</a>
       </td>
       <td>
-        <a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36">SNAP
-          Data Catalog</a>
+        <a href="http://data.snap.uaf.edu/data/Base/AK_1km/GIPL/">Data directory</a>
       </td>
       <td>Funded by the Broad Agency Announcement Program and the U.S. Army
         Engineer Research and Development Center and Cold Regions Research and
@@ -286,37 +312,35 @@ the following center dates, except the last era is truncated at 2100: "2025" (20
     </tr>
     <tr>
       <td>Melvin 4 km GIPL Model Outputs</td>
+      <td><a href="https://doi.org/10.1073/pnas.1611056113">Link</a>
+      </td>
       <td>
         <a href="https://raw.githubusercontent.com/ua-snap/rasdaman-ingest/main/iem/gipl2_4km/download_melvin.sh">Download
           script</a>
-      </td>
-      <td>
-        <a href="https://doi.org/10.1073/pnas.1611056113">PNAS</a>
       </td>
       <td>MAGT is modeled for the depth of the active layer. This dataset will
         eventually be deprecated from the API.</td>
     </tr>
     <tr>
-      <td>Jorgenson Permafrost Characteristics</td>
-      <td>
-        <a
-          href="https://catalog.northslopescience.org/dataset/1725/resource/5811669f-860c-450e-9bc0-9dfc21821606">Dataset</a>
+      <td><a href="https://catalog.northslopescience.org/dataset/1725">Jorgenson Permafrost Characteristics</a></td>
+      <td><a
+          href="https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf">Link</a>
       </td>
       <td>
-        <a href="https://catalog.northslopescience.org/dataset/1725">North Slope Science Catalog</a>
+        <a
+          href="https://catalog.northslopescience.org/dataset/6803a021-6f72-4aa5-95f6-bc5facd534e8/resource/5811669f-860c-450e-9bc0-9dfc21821606/download/233-permafrost-characteristics-of-alaska-2008-sha.zip">ZIP
+          file</a>
       </td>
       <td></td>
     </tr>
     <tr>
       <td>Obu et al. 2018</td>
+      <td><a href="https://doi.org/10.1594/PANGAEA.888600">Link</a></td>
       <td>
         <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">Mean
-          annual ground temperature dataset</a>,<br />
+          annual ground temperature dataset (ZIP file)</a>,<br />
         <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">Permafrost
-          zones dataset</a>
-      </td>
-      <td>
-        <a href="https://doi.org/10.1594/PANGAEA.888600">PANGAEA</a>
+          zones dataset (ZIP file)</a>
       </td>
       <td></td>
     </tr>

@@ -1,11 +1,19 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Post-processed 1km ALFRESCO Data</h2>
+<h2>Flammability and Vegetation Type (ALFRESCO)</h2>
+
 <p>
-  The endpoints here provide access to data products derived from outputs from
-  ALFRESCO simulations done using future (AR5/CMIP5) scenarios and historical
-  (CRU TS 4.0) data completed for the Integrated Ecosystem Model (IEM) project.
-  The current endpoints are described in the "Service Endpoints" section below,
-  and are available for the following datasets:
+  These endpoints provide access to flammability and vegetation type data products derived from ALFRESCO simulations at
+  a resolution of 1km. Historical data are derived from the CRU TS 4.0 dataset and are summarized across years
+  1950&ndash;1979 and 1980&ndash;2008. Projections were simulated using GFDL-CM3, GISS-E2-R, IPSL-CM5A-LR, MRI-CGCM3,
+  and NCAR-CCSM4 model outputs under the RCP 4.5, RCP 6.0, and RCP 8.5 emissions scenarios. Projections simulating a
+  5-model average under RCP 4.5, RCP 6.0, and RCP 8.5 are also available. Projections are provided as summarized means
+  of 30-year eras from 2010&ndash;2099.
+</p>
+
+<p>
+  See the <a href="https://uaf-snap.org/project/alfresco-and-habitat-research/">ALFRESCO and Habitat Research project
+    page</a> for more information. Links to academic references and similar datasets are included at the bottom of this
+  page.</p>
 </p>
 
 <h3>Datasets</h3>
@@ -233,21 +241,47 @@
 
 <h3>Source data</h3>
 
-These data are derived from ALFRESCO model outputs created for the IEM project
-at a resolution of 1km. For access to the source data used here, please contact
-uaf-snap-data-tool@alaska.edu and ask about accessing these data. SNAP also has
-some similar datasets available for download at longer year spans and for fewer
-models and scenarios than available here:
+<p>Refer to the <a href="https://github.com/ua-snap/alfresco/blob/main/docs/ALFRESCO_Guide.pdf">ALFRESCO Guide</a> for
+  information about how these simulations were performed. For access to the source data used here, please contact
+  uaf-snap-data-tool@alaska.edu and ask about accessing these data.</p>
+<p>SNAP also has some similar datasets available for download at longer year spans and for fewer models and scenarios
+  than available here:</p>
 
-<ul>
-  <li>
-    <a href="http://ckan.snap.uaf.edu/dataset/alfresco-model-outputs-relative-vegetation-change">ALFRESCO Model outputs
-      - Relative Vegetation Change</a>
-  </li>
-  <li>
-    <a href="http://ckan.snap.uaf.edu/dataset/alfresco-model-outputs-relative-flammability">ALFRESCO Model outputs -
-      Relative Flammability</a>
-  </li>
-</ul>
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Paper</th>
+      <th>Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/210f00ff-86e5-47dd-a406-9167af3630af">
+          ALFRESCO Model Outputs - Relative Vegetation Change</a></td>
+      <td><a href="https://doi.org/10.1007/s10980-011-9574-6">Link</a></td>
+      <td><a
+          href="http://data.snap.uaf.edu/data/IEM/Outputs/ALF/Gen_1a/alfresco_relative_spatial_outputs/relative_vegetation_change/AR5_CMIP5/">Data
+          directory</a>
+      </td>
+    </tr>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/eeaaca2c-0280-4226-b126-fda42a2b6214">
+          ALFRESCO Model Outputs - Relative Flammability</a></td>
+      <td><a href="https://doi.org/10.1007/s10980-011-9574-6">Link</a></td>
+      <td><a
+          href="http://data.snap.uaf.edu/data/IEM/Outputs/ALF/Gen_1a/alfresco_relative_spatial_outputs/relative_flammability/AR5_CMIP5/">Data
+          directory</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+</table>
 
 {% endblock %}

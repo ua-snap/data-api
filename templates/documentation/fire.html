@@ -2,7 +2,18 @@
 {% block content %}
 <h2>Wildfire Data</h2>
 
-<p>Query near-real-time, historical, and model output relevant to Alaska wildfires.</p>
+<p>
+  This endpoint provides access to near-real-time, historical, and model output relevant to Alaska wildfires. Daily
+  fire danger classifications were provided by MesoWest Alaska Fires & Fuels at a resolution of 2.9km. Daily snow cover
+  status is provided by the U.S. National Ice Center's Interactive Multisensor Snow and Ice Mapping System (IMS) at a
+  resolution of 994m. Land cover types from 2015 were provided by the North American Land Change Monitoring System at a
+  resolution of 30m. Historical fires from 1940&ndash;2021 were provided by the Alaska Interagency Coordination Center
+  (AICC). Flammability projections are summarized across years 2000&ndash;2099 and were provided by ALFRESCO model
+  outputs, simulated with the CRU TS 4.0 dataset (2000&ndash;2015) and NCAR-CCSM4 model outputs using the RCP 8.5
+  emissions scenario (2016&ndash;2099).
+</p>
+
+<p>Links to academic references and source datasets are included at the bottom of this page.</p>
 
 <h3>Service endpoints</h3>
 
@@ -94,7 +105,69 @@
 </pre>
 
 <h3>Source data</h3>
-<p>See the <a href="https://snap.uaf.edu/tools/alaska-wildfires">Alaska Wildfire Explorer tool for more
-    documentation on
-    these data.</a></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Dataset information</th>
+      <th>Paper</th>
+      <th>Download</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a href="https://akff.mesowest.org/">Daily Fire Danger Ratings</a></td>
+      <td><a href="https://pubs.cif-ifc.org/doi/abs/10.5558/tfc65450-6">Link</a></td>
+      <td><a href="https://akff.mesowest.org/download/">Data page</a>
+      </td>
+    </tr>
+    <tr>
+      <td><a href="https://usicecenter.gov/Resources/ImsInfo">Daily Snow Cover</a></td>
+      <td><a href="https://usicecenter.gov/docs/ims-hydro-proc-ramsay-1998.pdf">Link</a></td>
+      <td><a href="https://usicecenter.gov/Products/ImsData">Data page</a>
+      </td>
+    </tr>
+    <tr>
+      <td><a href="https://fire.ak.blm.gov/predsvcs/maps.php">Historical Fire Perimeters</a></td>
+      <td><a href="https://www.publish.csiro.au/wf/wf02023">Link</a></td>
+      <td><a
+          href="https://fire.ak.blm.gov/content/maps/aicc/Data/Data%20(zipped%20filegeodatabases)/Alaska_Fire_History_Perimeters_Polygons_1940_2022.zip">ZIP
+          file</a>
+      </td>
+    </tr>
+    <tr>
+      <td><a
+          href="https://eros.usgs.gov/doi-remote-sensing-activities/2019/usgs/nalcms-release-new-land-cover-north-america">Land
+          Cover Types</a>
+      </td>
+      <td><a href="https://doi.org/10.1007/s10980-011-9574-6">Link</a></td>
+      <td><a href="http://www.cec.org/north-american-land-change-monitoring-system/">Data page</a>
+      </td>
+    </tr>
+    <tr>
+      <td><a href="https://journals.ametsoc.org/view/journals/apme/59/6/JAMC-D-19-0209.1.xml">Historical Lightning
+          Strikes</a>
+      </td>
+      <td><a href="https://journals.ametsoc.org/view/journals/apme/59/6/JAMC-D-19-0209.1.xml">Link</a></td>
+      <td><a href="https://search.dataone.org/view/10.24431_rw1k45z_2020_7_23_23548">Data page</a>
+      </td>
+    </tr>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/eeaaca2c-0280-4226-b126-fda42a2b6214">Flammability</a>
+      </td>
+      <td><a href="https://doi.org/10.1007/s10980-011-9574-6">Link</a></td>
+      <td><a
+          href="http://data.snap.uaf.edu/data/IEM/Outputs/ALF/Gen_1a/alfresco_relative_spatial_outputs/relative_flammability/AR5_CMIP5/">Data
+          directory</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3"></td>
+    </tr>
+  </tfoot>
+</table>
+
 {% endblock %}

@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Elevation Data</h2>
-<p>These data are for use in the Climate Impact Reports tool. Currently the service endpoints query ASTER GDEM elevation
-    data for Alaska and Western Canada. Each query returns three values: minimum, maximum, and mean elevations derived
-    from corresponding interpolations used to resample the source data from 30 m spatial resolution to 1 km. This
-    technique is used to assure elevation fidelity between the original and downsampled data.</p>
+
+<p>
+    This service endpoint queries ASTER GDEM elevation data for Alaska and Western Canada. Each query returns three
+    values: minimum, maximum, and mean elevations derived from corresponding interpolations used to resample the source
+    data from 30m spatial resolution to 1km. This technique is used to assure elevation fidelity between the original
+    and downsampled data.
+</p>
+
+<p>Links to an academic reference and source dataset are included at the bottom of this page.</p>
 
 <h3>Service endpoints</h3>
 
@@ -93,20 +98,29 @@
 <table>
     <thead>
         <tr>
-            <th>Dataset</th>
-            <th>Download Link</th>
-            <th>Data Notes</th>
+            <th>Dataset information</th>
+            <th>Paper</th>
+            <th>Download</th>
+            <th>Notes</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td><a href="https://lpdaac.usgs.gov/products/astgtmv003/">The Terra Advanced Spaceborne Thermal Emission
                     and Reflection Radiometer (ASTER) Global Digital Elevation Model (GDEM) Version 3 (ASTGTM)</a></td>
-            <td><a href="https://github.com/ua-snap/gs-ingest/blob/main/astergdem/download.sh">Download Tiles</a></td>
+            <td><a
+                    href="https://www.researchgate.net/profile/Ghulam-Shaikh-2/post/How-to-input-GCPs-for-a-fully-glaciated-cartosat-scene-for-DEM-generation-with-SRTM-C-as-reference-DEM-for-elevation-values/attachment/59d6264679197b8077984928/AS%3A321520658780160%401453667907209/download/alaska_sdmi_dem_whitepaper_final.pdf">Link</a>
+            </td>
+            <td><a href="https://github.com/ua-snap/gs-ingest/blob/main/astergdem/download.sh">Download script</a></td>
             <td><strong><code>0</code></strong> indicates sea level. Negative values are expected and indicate
                 depressions below sea level.</td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4"></td>
+        </tr>
+    </tfoot>
 </table>
 
 {% endblock %}

@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Geology Data</h2>
-<p>These data are for use in the Arctic-EDS. Currently, only the USGS detailed rock unit names and ages are available.
-</p>
+
+<p>This endpoint provides access to rock unit names and ages from the USGS Geologic Map of Alaska.</p>
+
+<p>Links to an academic reference and source dataset are included at the bottom of this page.</p>
+
 <h3>Service endpoints</h3>
 
 <h4>Point query</h4>
@@ -55,22 +58,26 @@
 <table>
     <thead>
         <tr>
-            <th>Dataset</th>
-            <th>Download link</th>
-            <th>Source</th>
+            <th>Dataset information</th>
+            <th>Paper</th>
+            <th>Download</th>
             <th>Notes</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td><a href="https://pubs.er.usgs.gov/publication/sim3340">Geologic Map of Alaska</a></td>
-            <td><a
-                    href="http://pubs.usgs.gov/sim/3340/sim3340_shp.zip">http://pubs.usgs.gov/sim/3340/sim3340_shp.zip</a>
+            <td><a href="https://pubs.usgs.gov/sim/3340/sim3340_pamphlet.pdf">Link</a></td>
+            <td><a href="http://pubs.usgs.gov/sim/3340/sim3340_shp.zip">ZIP file</a>
             </td>
-            <td><a href="http://dx.doi.org/10.3133/sim3340">http://dx.doi.org/10.3133/sim3340</a></td>
             <td>Using the detailed rock unit shapefile.</td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="4"></td>
+        </tr>
+    </tfoot>
 </table>
 
 
