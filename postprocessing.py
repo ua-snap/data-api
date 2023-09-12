@@ -39,6 +39,7 @@ nodata_mappings = {
     "precipitation": nodata_values["taspr"],
     "precipitation_all": nodata_values["taspr"],
     "precipitation_mmm": nodata_values["taspr"],
+    "proj_precip": nodata_values["taspr"],
     "temperature": nodata_values["taspr"],
     "temperature_all": nodata_values["taspr"],
     "temperature_mmm": nodata_values["taspr"],

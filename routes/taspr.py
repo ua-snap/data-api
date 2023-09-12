@@ -18,6 +18,7 @@ from generate_requests import generate_wcs_getcov_str, generate_mmm_wcs_getcov_s
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_data,
+    fetch_wcs_point_data,
     get_from_dict,
     summarize_within_poly,
     get_poly_3338_bbox,
@@ -62,6 +63,43 @@ mmm_dim_encodings = {
     },
     "months": {"jan": "January", "july": "July"},
 }
+
+
+dot_dim_encodings = {
+    "durations": {
+        0: "10d",
+        1: "12h",
+        2: "20d",
+        3: "24h",
+        4: "2d",
+        5: "2h",
+        6: "30d",
+        7: "3d",
+        8: "3h",
+        9: "45d",
+        10: "4d",
+        11: "60d",
+        12: "60m",
+        13: "6h",
+        14: "7d",
+    },
+    "models": {0: "GFDL-CM3", 1: "NCAR-CCSM4"},
+    "eras": {0: "2020-2049", 1: "2050-2079", 2: "2080-2099"},
+    "intervals": {
+        0: "2",
+        1: "5",
+        2: "10",
+        3: "25",
+        4: "50",
+        5: "100",
+        6: "200",
+        7: "500",
+        8: "1000",
+    },
+}
+
+dot_precip_coverage_id = "dot_precip"
+
 
 # encodings hardcoded for now
 # fmt: off
@@ -828,6 +866,54 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     return aggr_results
 
 
+def run_fetch_proj_precip_point_data(lat, lon):
+    """Fetch projected precipitation data for a
+       given latitude and longitude.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of data at provided latitude and
+        longitude
+    """
+    x, y = project_latlon(lat, lon, 3338)
+
+    rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, dot_precip_coverage_id))
+
+    # package point data with decoded coord values (names)
+    # these functions are hard-coded  with coord values for now
+    point_pkg = dict()
+    for interval in range(len(dot_dim_encodings["intervals"])):
+        interval_key = dot_dim_encodings["intervals"][interval]
+        point_pkg[interval_key] = dict()
+        for duration in range(len(dot_dim_encodings["durations"])):
+            duration_key = dot_dim_encodings["durations"][duration]
+            point_pkg[interval_key][duration_key] = dict()
+            for model in range(len(dot_dim_encodings["models"])):
+                model_key = dot_dim_encodings["models"][model]
+                point_pkg[interval_key][duration_key][model_key] = dict()
+                for era in range(len(dot_dim_encodings["eras"])):
+                    era_key = dot_dim_encodings["eras"][era]
+                    point_pkg[interval_key][duration_key][model_key][era_key] = dict()
+                    pf_data = rasdaman_response[interval][duration][model][era].split(
+                        " "
+                    )
+                    # Convert values to metric (millimeters) before returning them in the API
+                    point_pkg[interval_key][duration_key][model_key][era_key][
+                        "pf"
+                    ] = round((float(pf_data[0]) / 1000) * 25.4, 2)
+                    point_pkg[interval_key][duration_key][model_key][era_key][
+                        "pf_upper"
+                    ] = round((float(pf_data[1]) / 1000) * 25.4, 2)
+                    point_pkg[interval_key][duration_key][model_key][era_key][
+                        "pf_lower"
+                    ] = round((float(pf_data[2]) / 1000) * 25.4, 2)
+
+    return point_pkg
+
+
 @routes.route("/taspr/")
 @routes.route("/temperature/")
 @routes.route("/temperature/abstract/")
@@ -1176,3 +1262,34 @@ def taspr_area_data_endpoint(var_ep, var_id):
 
         return create_csv(poly_pkg, var_ep, var_id)
     return postprocess(poly_pkg, "taspr")
+
+
+@routes.route("/proj_precip/point/<lat>/<lon>")
+def proj_precip_point(lat, lon):
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+
+    try:
+        point_pkg = run_fetch_proj_precip_point_data(lat, lon)
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    if request.args.get("format") == "csv":
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+
+        place_id = request.args.get("community")
+        return create_csv(point_pkg, "proj_precip", place_id, lat, lon)
+
+    return postprocess(point_pkg, "taspr")
