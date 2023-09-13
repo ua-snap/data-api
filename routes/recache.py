@@ -1,6 +1,5 @@
 from flask import Blueprint, current_app as app, Response
 import asyncio
-import os
 import json
 import requests
 from . import routes
@@ -33,10 +32,7 @@ def log_error(url, status):
         url - The URL that caused the status
         status - Python requests status object
     """
-    # Stores log in data directory for now
-    log = open("data/error-log.txt", "a")
-    log.write(str(status) + ": " + url + "\n")
-    log.close()
+    app.logger.warning(str(status) + ": " + url)
 
 
 def get_endpoint(curr_route, curr_type, place):
