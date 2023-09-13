@@ -54,8 +54,6 @@ async def run_fetch_all_eds(lat, lon):
         f"{host}eds/temperature/{lat}/{lon}",
         f"{host}eds/precipitation/{lat}/{lon}",
         f"{host}mmm/snow/snowfallequivalent/hp/{lat}/{lon}",
-        f"{host}design_index/freezing/hp/point/{lat}/{lon}",
-        f"{host}design_index/thawing/hp/point/{lat}/{lon}",
         f"{host}eds/degree_days/freezing_index/{lat}/{lon}",
         f"{host}eds/degree_days/heating/{lat}/{lon}",
         f"{host}eds/degree_days/thawing_index/{lat}/{lon}",
@@ -64,14 +62,13 @@ async def run_fetch_all_eds(lat, lon):
         f"{host}permafrost/point/{lat}/{lon}",
         f"{host}eds/wet_days_per_year/point/{lat}/{lon}",
         f"{host}elevation/point/{lat}/{lon}",
+        f"{host}proj_precip/point/{lat}/{lon}",
     ]
 
     all_keys = [
         "temperature",
         "precipitation",
         "snowfall",
-        "design_freezing",
-        "design_thawing",
         "freezing_index",
         "heating_degree_days",
         "thawing_index",
@@ -80,6 +77,7 @@ async def run_fetch_all_eds(lat, lon):
         "permafrost",
         "wet_days_per_year",
         "elevation",
+        "proj_precip",
     ]
 
     results = await asyncio.gather(*[fetch_data(url) for url in all_urls])

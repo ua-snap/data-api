@@ -31,7 +31,11 @@ def create_csv(
         place_id = request.args.get("community")
     place_name, place_type = place_name_and_type(place_id)
 
-    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+    if not endpoint.startswith("places_"):
+        metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+    else:
+        metadata = ""
+
     properties = {}
 
     data = nullify_and_prune(data, endpoint)
@@ -51,13 +55,6 @@ def create_csv(
         "freezing_index_all",
     ]:
         properties = degree_days_csv(data, endpoint)
-    elif endpoint in [
-        "design_thawing_index",
-        "design_freezing_index",
-        "design_thawing_index_all",
-        "design_freezing_index_all",
-    ]:
-        properties = design_index_csv(data, endpoint)
     elif endpoint == "flammability":
         properties = flammability_csv(data)
     elif endpoint in ["gipl", "gipl_summary"]:
@@ -66,6 +63,8 @@ def create_csv(
         properties = landfastice_csv(data)
     elif endpoint == "permafrost":
         properties = permafrost_csv(data, source_metadata)
+    elif endpoint.startswith("places_"):
+        properties = places_csv(data, endpoint)
     elif endpoint == "seaice":
         properties = seaice_csv(data)
     elif endpoint == "snow":
@@ -77,6 +76,7 @@ def create_csv(
         "temperature_mmm",
         "temperature_all",
         "precipitation_all",
+        "proj_precip",
     ]:
         properties = taspr_csv(data, endpoint)
     elif endpoint == "veg_type":
@@ -92,11 +92,14 @@ def create_csv(
     filename = ""
     if filename_prefix is not None:
         filename += filename_prefix + " "
-    filename += properties["filename_data_name"] + " for "
-    if place_name is not None:
-        filename += quote(place_name) + ".csv"
-    else:
-        filename += lat + ", " + lon + ".csv"
+    filename += properties["filename_data_name"]
+    if not endpoint.startswith("places_"):
+        filename += " for "
+        if place_name is not None:
+            filename += quote(place_name)
+        else:
+            filename += lat + ", " + lon
+    filename += ".csv"
     properties["filename"] = filename
 
     return write_csv(properties)
@@ -320,38 +323,6 @@ def degree_days_csv(data, endpoint):
     }
 
 
-def design_index_csv(data, endpoint):
-    if endpoint in [
-        "design_thawing_index",
-        "design_freezing_index",
-    ]:
-        coords = ["era"]
-        values = ["di"]
-    elif endpoint in [
-        "design_thawing_index_all",
-        "design_freezing_index_all",
-    ]:
-        coords = ["model", "era"]
-        values = ["di"]
-
-    fieldnames = coords + values
-    csv_dicts = build_csv_dicts(data, fieldnames, values=values)
-
-    if endpoint in ["design_thawing_index", "design_thawing_index_all"]:
-        filename_data_name = "Design Thawing Index"
-        metadata = "# di is the mean of above freezing degree days for top three years in era\n"
-    elif endpoint in ["design_freezing_index", "design_freezing_index_all"]:
-        filename_data_name = "Design Freezing Index"
-        metadata = "# di is the mean of below freezing degree days for top three years in era\n"
-
-    return {
-        "csv_dicts": csv_dicts,
-        "fieldnames": fieldnames,
-        "metadata": metadata,
-        "filename_data_name": filename_data_name,
-    }
-
-
 def flammability_csv(data):
     # Reformat data to nesting structure expected by other CSV functions.
     for era in data.keys():
@@ -462,6 +433,70 @@ def permafrost_csv(data, source_metadata):
             source_data, fieldnames, values=sources[source]["values"]
         )
     fieldnames = list(dict.fromkeys(all_fields))
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def places_csv(data, endpoint):
+    if endpoint in ["places_all", "places_communities"]:
+        values = [
+            "name",
+            "alt_name",
+            "region",
+            "country",
+            "latitude",
+            "longitude",
+            "type",
+        ]
+    else:
+        values = [
+            "name",
+            "type",
+        ]
+
+    reformatted_data = {}
+    for item in data:
+        reformatted_data[item["id"]] = {}
+        for key in values:
+            if key in item.keys():
+                reformatted_data[item["id"]].update({key: item[key]})
+            else:
+                reformatted_data[item["id"]].update({key: None})
+
+    coords = ["id"]
+    fieldnames = coords + values
+    csv_dicts = build_csv_dicts(reformatted_data, fieldnames, values=values)
+    metadata = "# Places listed here can be used in queries to the Alaska + Arctic Geospatial Data API\n"
+
+    if endpoint == "places_all":
+        filename_data_name = "Places (All)"
+    elif endpoint == "places_communities":
+        filename_data_name = "Places (Communities)"
+    elif endpoint == "places_huc":
+        filename_data_name = "Places (HUCs)"
+    elif endpoint == "places_corporation":
+        filename_data_name = "Places (Corporations)"
+    elif endpoint == "places_climate_division":
+        filename_data_name = "Places (Climate Divisions)"
+    elif endpoint == "places_ethnolinguistic_region":
+        filename_data_name = "Places (Ethnolinguistic Regions)"
+    elif endpoint == "places_game_management_unit":
+        filename_data_name = "Places (Game Management Units)"
+    elif endpoint == "places_fire_zone":
+        filename_data_name = "Places (Fire Zones)"
+    elif endpoint == "places_first_nation":
+        filename_data_name = "Places (First Nations)"
+    elif endpoint == "places_borough":
+        filename_data_name = "Places (Boroughs)"
+    elif endpoint == "places_census_area":
+        filename_data_name = "Places (Census Areas)"
+    elif endpoint == "places_protected_area":
+        filename_data_name = "Places (Protected Areas)"
 
     return {
         "csv_dicts": csv_dicts,
@@ -638,9 +673,25 @@ def taspr_csv(data, endpoint):
             metadata = pr_metadata
             filename_data_name = "Precipitation"
 
+    elif endpoint == "proj_precip":
+        coords = ["return_interval", "duration", "model", "era"]
+        values = ["pf", "pf_lower", "pf_upper"]
+        fieldnames = coords + values
+        csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+        metadata = "# return_interval is used for the Annual Exceedance Probability (1 / return_interval)\n"
+        metadata += "# duration is the amount of time for the predicted amount of precipitation\n"
+        metadata += "# model is the model the data is derived from\n"
+        metadata += (
+            "# era is the time range for this predicted amount of precipitation \n"
+        )
+        metadata += "# pf is the amount of precipitation predicted\n"
+        metadata += "# pf_lower is the lower bound of the 95% confidence interval of the variable pf\n"
+        metadata += "# pf_upper is the upper bound of the 95% confidence interval of the variable pf\n"
+        filename_data_name = "Future Projections of Precipitation"
+
     # Change "CRU_historical" scenario to just "Historical".
     for csv_dict in csv_dicts:
-        if csv_dict["scenario"] == "CRU_historical":
+        if endpoint != "proj_precip" and csv_dict["scenario"] == "CRU_historical":
             csv_dict["scenario"] = "Historical"
 
     return {

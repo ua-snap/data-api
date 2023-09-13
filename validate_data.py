@@ -1,5 +1,4 @@
 """A module to validate fetched data values."""
-import re
 import asyncio
 from config import RAS_BASE_URL, WEB_APP_URL
 from generate_requests import *
@@ -23,7 +22,7 @@ def place_name_and_type(place_id):
         return None, None
 
     # HUC12s, not getting names from them below
-    if (not re.search("[^0-9]", place_id)) and (len(place_id) == 12):
+    if place_id.isdigit() and len(place_id) == 12:
         return None, "huc12"
 
     place = asyncio.run(
