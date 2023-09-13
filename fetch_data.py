@@ -433,20 +433,7 @@ def parse_meta_xml_str(meta_xml_str):
     """
     xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
     meta_tree = ET.XML(xml_bytes)
-    # wow xml
-    encoding_el = list(
-        list(
-            list(
-                list(
-                    list(
-                        meta_tree.iter(
-                            "{http://www.opengis.net/wcs/2.0}CoverageDescription"
-                        )
-                    )[0].iter("{http://www.opengis.net/gmlcov/1.0}metadata")
-                )[0].iter("{http://www.opengis.net/gmlcov/1.0}Extension")
-            )[0].iter("{http://www.rasdaman.org}covMetadata")
-        )[0].iter("Encoding")
-    )[0]
+    encoding_el = meta_tree.findall(".//Encoding")[0]
 
     dim_encodings = {}
     for dim in encoding_el.iter():
