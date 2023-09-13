@@ -31,7 +31,11 @@ def create_csv(
         place_id = request.args.get("community")
     place_name, place_type = place_name_and_type(place_id)
 
-    metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+    if not endpoint.startswith("places_"):
+        metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+    else:
+        metadata = ""
+
     properties = {}
 
     data = nullify_and_prune(data, endpoint)
@@ -59,6 +63,8 @@ def create_csv(
         properties = landfastice_csv(data)
     elif endpoint == "permafrost":
         properties = permafrost_csv(data, source_metadata)
+    elif endpoint.startswith("places_"):
+        properties = places_csv(data, endpoint)
     elif endpoint == "seaice":
         properties = seaice_csv(data)
     elif endpoint == "snow":
@@ -86,11 +92,14 @@ def create_csv(
     filename = ""
     if filename_prefix is not None:
         filename += filename_prefix + " "
-    filename += properties["filename_data_name"] + " for "
-    if place_name is not None:
-        filename += quote(place_name) + ".csv"
-    else:
-        filename += lat + ", " + lon + ".csv"
+    filename += properties["filename_data_name"]
+    if not endpoint.startswith("places_"):
+        filename += " for "
+        if place_name is not None:
+            filename += quote(place_name)
+        else:
+            filename += lat + ", " + lon
+    filename += ".csv"
     properties["filename"] = filename
 
     return write_csv(properties)
@@ -424,6 +433,70 @@ def permafrost_csv(data, source_metadata):
             source_data, fieldnames, values=sources[source]["values"]
         )
     fieldnames = list(dict.fromkeys(all_fields))
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def places_csv(data, endpoint):
+    if endpoint in ["places_all", "places_communities"]:
+        values = [
+            "name",
+            "alt_name",
+            "region",
+            "country",
+            "latitude",
+            "longitude",
+            "type",
+        ]
+    else:
+        values = [
+            "name",
+            "type",
+        ]
+
+    reformatted_data = {}
+    for item in data:
+        reformatted_data[item["id"]] = {}
+        for key in values:
+            if key in item.keys():
+                reformatted_data[item["id"]].update({key: item[key]})
+            else:
+                reformatted_data[item["id"]].update({key: None})
+
+    coords = ["id"]
+    fieldnames = coords + values
+    csv_dicts = build_csv_dicts(reformatted_data, fieldnames, values=values)
+    metadata = "# Places listed here can be used in queries to the Alaska + Arctic Geospatial Data API\n"
+
+    if endpoint == "places_all":
+        filename_data_name = "Places (All)"
+    elif endpoint == "places_communities":
+        filename_data_name = "Places (Communities)"
+    elif endpoint == "places_huc":
+        filename_data_name = "Places (HUCs)"
+    elif endpoint == "places_corporation":
+        filename_data_name = "Places (Corporations)"
+    elif endpoint == "places_climate_division":
+        filename_data_name = "Places (Climate Divisions)"
+    elif endpoint == "places_ethnolinguistic_region":
+        filename_data_name = "Places (Ethnolinguistic Regions)"
+    elif endpoint == "places_game_management_unit":
+        filename_data_name = "Places (Game Management Units)"
+    elif endpoint == "places_fire_zone":
+        filename_data_name = "Places (Fire Zones)"
+    elif endpoint == "places_first_nation":
+        filename_data_name = "Places (First Nations)"
+    elif endpoint == "places_borough":
+        filename_data_name = "Places (Boroughs)"
+    elif endpoint == "places_census_area":
+        filename_data_name = "Places (Census Areas)"
+    elif endpoint == "places_protected_area":
+        filename_data_name = "Places (Protected Areas)"
 
     return {
         "csv_dicts": csv_dicts,
