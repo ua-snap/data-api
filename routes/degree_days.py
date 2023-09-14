@@ -221,6 +221,8 @@ def package_dd_point_data(point_data, var_ep, horp):
             point_pkg["projected"]["ddmean"] = round(projected_mean)
             point_pkg["projected"]["ddmax"] = round(projected_max)
 
+        point_pkg["units"] = dd_dim_encodings["units"]
+
     return point_pkg
 
 
