@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, Response
+from flask import Blueprint, render_template, Response, request
 import asyncio
 import geopandas as gpd
 import json
@@ -14,6 +14,7 @@ from config import EAST_BBOX, WEST_BBOX
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
 from fetch_data import fetch_data
+from csv_functions import create_csv
 
 data_api = Blueprint("data_api", __name__)
 
@@ -189,7 +190,6 @@ def get_json_for_type(type, recurse=False):
 
         # Loops through all the different types for search field
         for curr_type in all_jsons:
-
             # Gets the JSON for the current type
             curr_js = get_json_for_type(curr_type, recurse=True)
 
@@ -249,6 +249,9 @@ def get_json_for_type(type, recurse=False):
 
     if recurse:
         return js
+
+    if request.args.get("format") == "csv":
+        return create_csv(json.loads(js), "places_" + type)
 
     # Returns Flask JSON Response
     return Response(response=js, status=200, mimetype="application/json")
