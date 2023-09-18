@@ -109,9 +109,53 @@
   </tfoot>
 </table>
 
-<h4>Min/mean/max summaries (point query)</h4>
+<h4>Yearly values (point query)</h4>
 
-<p>Query the minimum, mean, and maximum temperature values summarized across all models, scenarios, and years.
+<p>Query temperature and precipitation for each year summarized across all models and scenarios.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Annual mean temperature</td>
+      <td><a href="/temperature/65.0628/-146.1627">/temperature/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Annual total precipitation</td>
+      <td><a href="/precipitation/65.0628/-146.1627">/precipitation/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>January temperature min/mean/max</td>
+      <td><a href="/temperature/jan/65.0628/-146.1627">/temperature/jan/65.0628/-146.1627</a>
+      </td>
+    </tr>
+    <tr>
+      <td>July temperature min/mean/max</td>
+      <td><a href="/temperature/july/65.0628/-146.1627">/temperature/july/65.0628/-146.1627</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">Min/mean/max summaries of historical and projected years are available by appending
+        <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to the URL.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Yearly values within provided year range (point query)</h4>
+
+<p>Query temperature and precipitation for each year within a provided range summarized across all models and
+  scenarios. Valid year ranges are between 1901&ndash;2015 for historical data and 2007&ndash;2100 for projected data.
 </p>
 
 <table class="endpoints">
@@ -123,226 +167,32 @@
   </thead>
   <tbody>
     <tr>
-      <td>Historical temperature min/mean/max</td>
-      <td><a href="/mmm/temperature/historical/65.0628/-146.1627">/mmm/temperature/historical/65.0628/-146.1627</a>
+      <td>Annual mean temperature within year range</td>
+      <td><a href="/temperature/65.0628/-146.1627/1940/2060">/temperature/65.0628/-146.1627/1940/2060</a>
       </td>
     </tr>
     <tr>
-      <td>Projected temperature min/mean/max</td>
-      <td><a href="/mmm/temperature/projected/65.0628/-146.1627">/mmm/temperature/projected/65.0628/-146.1627</a>
+      <td>Annual total precipitation within year range</td>
+      <td><a href="/precipitation/65.0628/-146.1627/1940/2060">/precipitation/65.0628/-146.1627/1940/2060</a>
       </td>
     </tr>
     <tr>
-      <td>Historical and projected temperature min/mean/max</td>
-      <td><a href="/mmm/temperature/hp/65.0628/-146.1627">/mmm/temperature/hp/65.0628/-146.1627</a>
+      <td>January temperature min/mean/max within year range</td>
+      <td><a href="/temperature/jan/65.0628/-146.1627/1940/2060">/temperature/jan/65.0628/-146.1627/1940/2060</a>
       </td>
     </tr>
     <tr>
-      <td>Historical precipitation min/mean/max</td>
-      <td><a href="/mmm/precipitation/historical/65.0628/-146.1627">/mmm/precipitation/historical/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected precipitation min/mean/max</td>
-      <td><a href="/mmm/precipitation/projected/65.0628/-146.1627">/mmm/precipitation/projected/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected precipitation min/mean/max</td>
-      <td><a href="/mmm/precipitation/hp/65.0628/-146.1627">/mmm/precipitation/hp/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>January historical temperature min/mean/max</td>
-      <td><a
-          href="/mmm/temperature/jan/historical/65.0628/-146.1627">/mmm/temperature/jan/historical/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>July historical temperature min/mean/max</td>
-      <td><a
-          href="/mmm/temperature/july/historical/65.0628/-146.1627">/mmm/temperature/july/historical/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>January projected temperature min/mean/max</td>
-      <td><a
-          href="/mmm/temperature/jan/projected/65.0628/-146.1627">/mmm/temperature/jan/projected/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>July projected temperature min/mean/max</td>
-      <td><a
-          href="/mmm/temperature/july/projected/65.0628/-146.1627">/mmm/temperature/july/projected/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>January historical and projected temperature min/mean/max</td>
-      <td><a href="/mmm/temperature/jan/hp/65.0628/-146.1627">/mmm/temperature/jan/hp/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>July historical and projected temperature min/mean/max</td>
-      <td><a href="/mmm/temperature/july/hp/65.0628/-146.1627">/mmm/temperature/july/hp/65.0628/-146.1627</a>
+      <td>July temperature min/mean/max within year range</td>
+      <td><a href="/temperature/july/65.0628/-146.1627/1940/2060">/temperature/july/65.0628/-146.1627/1940/2060</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2"></td>
-    </tr>
-  </tfoot>
-</table>
-
-<h4>Min/mean/max summaries across provided year range (point query)</h4>
-
-<p>Query the minimum, mean, and maximum temperature values summarized across all models and scenarios for the specified
-  year range. Valid year ranges are between 1901&ndash;2015 for historical data and 2007&ndash;2100 for projected data.
-</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Historical temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/historical/65.0628/-146.1627/1940/1990">/mmm/temperature/historical/65.0628/-146.1627/1940/1990</a>
+      <td colspan="2">Min/mean/max summaries of historical and projected years are available by appending
+        <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to the URL.
       </td>
-    </tr>
-    <tr>
-      <td>Projected temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/projected/65.0628/-146.1627/2040/2060">/mmm/temperature/projected/65.0628/-146.1627/2040/2060</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected temperature min/mean/max within year range</td>
-      <td><a href="/mmm/temperature/hp/65.0628/-146.1627/1940/2060">/mmm/temperature/hp/65.0628/-146.1627/1940/2060</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical precipitation min/mean/max within year range</td>
-      <td><a
-          href="/mmm/precipitation/historical/65.0628/-146.1627/1940/1990">/mmm/precipitation/historical/65.0628/-146.1627/1940/1990</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected precipitation min/mean/max within year range</td>
-      <td><a href="/mmm/precipitation/projected/65.0628/-146.1627">/mmm/precipitation/projected/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected precipitation min/mean/max within year range</td>
-      <td><a
-          href="/mmm/precipitation/hp/65.0628/-146.1627/1940/2060">/mmm/precipitation/hp/65.0628/-146.1627/1940/2060</a>
-      </td>
-    </tr>
-    <tr>
-      <td>January historical temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/jan/historical/65.0628/-146.1627/1940/1990">/mmm/temperature/jan/historical/65.0628/-146.1627/1940/1990</a>
-      </td>
-    </tr>
-    <tr>
-      <td>July historical temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/july/historical/65.0628/-146.1627/1940/1990">/mmm/temperature/july/historical/65.0628/-146.1627/1940/1990</a>
-      </td>
-    </tr>
-    <tr>
-      <td>January projected temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/jan/projected/65.0628/-146.1627/2040/2060">/mmm/temperature/jan/projected/65.0628/-146.1627/2040/2060</a>
-      </td>
-    </tr>
-    <tr>
-      <td>July projected temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/july/projected/65.0628/-146.1627/2040/2060">/mmm/temperature/july/projected/65.0628/-146.1627/2040/2060</a>
-      </td>
-    </tr>
-    <tr>
-      <td>January historical and projected temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/jan/hp/65.0628/-146.1627/1940/2060">/mmm/temperature/jan/hp/65.0628/-146.1627/1940/2060</a>
-      </td>
-    </tr>
-    <tr>
-      <td>July historical and projected temperature min/mean/max within year range</td>
-      <td><a
-          href="/mmm/temperature/july/hp/65.0628/-146.1627/1940/2060">/mmm/temperature/july/hp/65.0628/-146.1627/1940/2060</a>
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2"></td>
-    </tr>
-  </tfoot>
-</table>
-
-<h4>Min/mean/max summaries for all years (point query)</h4>
-
-<p>Query the min/mean/max values across the specified month for each year.</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>January yearly historical and projected precipitation min/mean/max</td>
-      <td><a href="/mmm/temperature/jan/all/65.0628/-146.1627">/mmm/temperature/jan/all/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>July yearly historical and projected precipitation min/mean/max</td>
-      <td><a href="/mmm/temperature/july/all/65.0628/-146.1627">/mmm/temperature/july/all/65.0628/-146.1627</a>
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
-    </tr>
-  </tfoot>
-</table>
-
-
-<h4>Annual mean temperature or annual total precipitation (point query)</h4>
-
-<p>Query annual values across all available years.</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Historical and projected annual mean temperature</td>
-      <td><a href="/mmm/temperature/all/65.0628/-146.1627">/mmm/temperature/all/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected annual total precipitation</td>
-      <td><a href="/mmm/precipitation/all/65.0628/-146.1627">/mmm/precipitation/all/65.0628/-146.1627</a>
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
     </tr>
   </tfoot>
 </table>
@@ -496,39 +346,45 @@
 }
 </pre>
 
-<h4>Min/mean/max summaries</h4>
+<h4>Annual mean temperature or annual total precipitation</h4>
 
-<p>Results from temperature min/mean/max queries will look like this:</p>
+<p>Results from annual mean temperature queries will look like this:</p>
 
 <pre>
 {
-  "historical": {
-    "tasmax": -1.8,
-    "tasmean": -4.4,
-    "tasmin": -7.2
+  "CRU-TS": {
+    "historical": {
+      "1901": {
+        "tas": -5
+      },
+      "1902": {
+        "tas": -5.6
+      },
+      ...
+    },
+    ...
   },
-  "projected": {
-    "tasmax": 6.6,
-    "tasmean": -1,
-    "tasmin": -6.2
-  }
+  ...
 }
 </pre>
 
-<p>Results from precipitation min/mean/max queries will look like this:</p>
+<p>Results from annual total precipitation queries will look like this:</p>
 
 <pre>
 {
-  "historical": {
-    "prmax": 640,
-    "prmean": 398,
-    "prmin": 260
+  "CRU-TS": {
+    "historical": {
+      "1901": {
+        "pr": 403
+      },
+      "1902": {
+        "pr": 403
+      },
+      ...
+    },
+    ...
   },
-  "projected": {
-    "prmax": 919,
-    "prmean": 499,
-    "prmin": 291
-  }
+  ...
 }
 </pre>
 
@@ -536,18 +392,22 @@
 
 <pre>
 {
-  &lt;historial or projected&gt;: {
-    &lt;temperature (tas) or precipitation (pr) max&gt;: &lt;max value across all models, scenarios, and years&gt;,
-    &lt;temperature (tas) or precipitation (pr) mean&gt;: &lt;mean value across all models, scenarios, and years&gt;,
-    &lt;temperature (tas) or precipitation (pr) min&gt;: &lt;min value across all models, scenarios, and years&gt;
+  &lt;model&gt;: {
+    &lt;historial or projected&gt;: {
+      &lt;year&gt;: {
+        &lt;tas or pr&gt;: &lt;mean temperature or total precipitation for the year&gt;,
+      },
+      ...
+    },
+    ...
   },
   ...
 }
 </pre>
 
-<h4>Min/mean/max summaries for all years</h4>
+<h4>January/July yearly min/mean/max summaries</h4>
 
-<p>Results from yearly temperature min/mean/max queries will look like this:</p>
+<p>Results from yearly January/July temperature min/mean/max queries will look like this:</p>
 
 <pre>
 {
@@ -590,45 +450,41 @@
 }
 </pre>
 
-<h4>Annual mean temperature or annual total precipitation</h4>
+<h4>Min/mean/max summaries across multiple years</h4>
 
-<p>Annual mean temperature queries will look like this:</p>
+<p>Results from temperature min/mean/max queries (using the <code>?summarize=mmm</code> URL parameter) will look like
+  this:</p>
 
 <pre>
 {
-  "CRU-TS": {
-    "historical": {
-      "1901": {
-        "tas": -5
-      },
-      "1902": {
-        "tas": -5.6
-      },
-      ...
-    },
-    ...
+  "historical": {
+    "tasmax": -1.8,
+    "tasmean": -4.4,
+    "tasmin": -7.2
   },
-  ...
+  "projected": {
+    "tasmax": 6.6,
+    "tasmean": -1,
+    "tasmin": -6.2
+  }
 }
 </pre>
 
-<p>Annual total precipitation queries will look like this:</p>
+<p>Results from precipitation min/mean/max queries (using the <code>?summarize=mmm</code> URL parameter) will look like
+  this:</p>
 
 <pre>
 {
-  "CRU-TS": {
-    "historical": {
-      "1901": {
-        "pr": 403
-      },
-      "1902": {
-        "pr": 403
-      },
-      ...
-    },
-    ...
+  "historical": {
+    "prmax": 640,
+    "prmean": 398,
+    "prmin": 260
   },
-  ...
+  "projected": {
+    "prmax": 919,
+    "prmean": 499,
+    "prmin": 291
+  }
 }
 </pre>
 
@@ -636,14 +492,10 @@
 
 <pre>
 {
-  &lt;model&gt;: {
-    &lt;historial or projected&gt;: {
-      &lt;year&gt;: {
-        &lt;tas or pr&gt;: &lt;mean temperature or total precipitation for the year&gt;,
-      },
-      ...
-    },
-    ...
+  &lt;historial or projected&gt;: {
+    &lt;temperature (tas) or precipitation (pr) max&gt;: &lt;max value across all models, scenarios, and years&gt;,
+    &lt;temperature (tas) or precipitation (pr) mean&gt;: &lt;mean value across all models, scenarios, and years&gt;,
+    &lt;temperature (tas) or precipitation (pr) min&gt;: &lt;min value across all models, scenarios, and years&gt;
   },
   ...
 }

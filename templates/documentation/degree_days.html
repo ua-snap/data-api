@@ -1,5 +1,5 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Degree Days Min, Mean, and Max Point Query</h2>
+<h2>Degree Days</h2>
 
 <p>
   These endpoints provide access to historical and projected total annual cumulative degree days for several different
@@ -13,10 +13,10 @@
 
 <h3>Service endpoints</h3>
 
-<h4>Min/mean/max summaries (point query)</h4>
+<h4>Degree days (point query)</h4>
 
-<p>Query the minimum, mean, and maximum degree days values summarized across all models and years.
-</p>
+<p>Query degree days for all models and years. Included years are between 1980&ndash;2009 for historical
+  data and 2006&ndash;2100 for projected data.</p>
 
 <table class="endpoints">
   <thead>
@@ -27,181 +27,42 @@
   </thead>
   <tbody>
     <tr>
-      <td>Historical degree days below 65&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/heating/historical/65.0628/-146.1627">/mmm/degree_days/heating/historical/65.0628/-146.1627</a>
+      <td>Degree days below 65&deg;F</td>
+      <td><a href="/degree_days/heating/65.0628/-146.1627">/degree_days/heating/65.0628/-146.1627</a>
       </td>
     </tr>
     <tr>
-      <td>Projected degree days below 65&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/heating/projected/65.0628/-146.1627">/mmm/degree_days/heating/projected/65.0628/-146.1627</a>
+      <td>Degree days below 0&deg;F</td>
+      <td><a href="/degree_days/below_zero/65.0628/-146.1627">/degree_days/below_zero/65.0628/-146.1627</a>
       </td>
     </tr>
     <tr>
-      <td>Historical and projected degree days below 65&deg;F min/mean/max</td>
-      <td><a href="/mmm/degree_days/heating/hp/65.0628/-146.1627">/mmm/degree_days/heating/hp/65.0628/-146.1627</a>
+      <td>Degree days above 32&deg;F</td>
+      <td><a href="/degree_days/thawing_index/65.0628/-146.1627">/degree_days/thawing_index/65.0628/-146.1627</a>
       </td>
     </tr>
     <tr>
-      <td>Historical degree days below 0&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/below_zero/historical/65.0628/-146.1627">/mmm/degree_days/below_zero/historical/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected degree days below 0&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/below_zero/projected/65.0628/-146.1627">/mmm/degree_days/below_zero/projected/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected degree days below 0&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627">/mmm/degree_days/below_zero/hp/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical degree days above 32&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/thawing_index/historical/65.0628/-146.1627">/mmm/degree_days/thawing_index/historical/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected degree days above 32&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/thawing_index/projected/65.0628/-146.1627">/mmm/degree_days/thawing_index/projected/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected degree days above 32&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627">/mmm/degree_days/thawing_index/hp/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical degree days below 32&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/freezing_index/historical/65.0628/-146.1627">/mmm/degree_days/freezing_index/historical/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected degree days below 32&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/freezing_index/projected/65.0628/-146.1627">/mmm/degree_days/freezing_index/projected/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected degree days below 32&deg;F min/mean/max</td>
-      <td><a
-          href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627">/mmm/degree_days/freezing_index/hp/65.0628/-146.1627</a>
+      <td>Degree days below 32&deg;F</td>
+      <td><a href="/degree_days/freezing_index/65.0628/-146.1627">/degree_days/freezing_index/65.0628/-146.1627</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        Min/mean/max summaries of historical and projected years are available by appending
+        <code>?summarize=mmm</code> to the
+        URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
 
-<h4>Min/mean/max summaries across provided year range (point query)</h4>
+<h4>Degree days across provided year range (point query)</h4>
 
-<p>Query the minimum, mean, and maximum degree days values summarized across all models and years for the specified year
-  range. Valid year ranges are between 1980&ndash;2009 for historical data and 2006&ndash;2100 for projected data.
-</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Historical degree days below 65&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/heating/historical/65.0628/-146.1627/1990/2000">/mmm/degree_days/heating/historical/65.0628/-146.1627/1990/2000</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected degree days below 65&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/heating/projected/65.0628/-146.1627/2040/2080">/mmm/degree_days/heating/projected/65.0628/-146.1627/2040/2080</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected degree days below 65&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2080">/mmm/degree_days/heating/hp/65.0628/-146.1627/1990/2080</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical degree days below 0&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/below_zero/historical/65.0628/-146.1627/1990/2000">/mmm/degree_days/below_zero/historical/65.0628/-146.1627/1990/2000</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected degree days below 0&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/below_zero/projected/65.0628/-146.1627/2040/2080">/mmm/degree_days/below_zero/projected/65.0628/-146.1627/2040/2080</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected degree days below 0&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/below_zero/hp/65.0628/-146.1627/1990/2080">/mmm/degree_days/below_zero/hp/65.0628/-146.1627/1990/2080</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical degree days above 32&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/thawing_index/historical/65.0628/-146.1627/1990/2000">/mmm/degree_days/thawing_index/historical/65.0628/-146.1627/1990/2000</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected degree days above 32&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/thawing_index/projected/65.0628/-146.1627/2040/2080">/mmm/degree_days/thawing_index/projected/65.0628/-146.1627/2040/2080</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected degree days above 32&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/thawing_index/hp/65.0628/-146.1627/1990/2080">/mmm/degree_days/thawing_index/hp/65.0628/-146.1627/1990/2080</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical degree days below 32&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/freezing_index/historical/65.0628/-146.1627/1990/2000">/mmm/degree_days/freezing_index/historical/65.0628/-146.1627/1990/2000</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected degree days below 32&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/freezing_index/projected/65.0628/-146.1627/2040/2080">/mmm/degree_days/freezing_index/projected/65.0628/-146.1627/2040/2080</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected degree days below 32&deg;F min/mean/max within year range</td>
-      <td><a
-          href="/mmm/degree_days/freezing_index/hp/65.0628/-146.1627/1990/2080">/mmm/degree_days/freezing_index/hp/65.0628/-146.1627/1990/2080</a>
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
-    </tr>
-  </tfoot>
-</table>
-
-<h4>Degree days for all years (point query)</h4>
-
-<p>Query degree days values for each model and year.</p>
+<p>Query degree days values for the specified year range. Valid year ranges are between 1980&ndash;2009 for historical
+  data and 2006&ndash;2100 for projected data.</p>
 
 <table class="endpoints">
   <thead>
@@ -212,65 +73,42 @@
   </thead>
   <tbody>
     <tr>
-      <td>Historical and projected degree days below 65&deg;F</td>
-      <td><a href="/mmm/degree_days/heating/all/65.0628/-146.1627">/mmm/degree_days/heating/all/65.0628/-146.1627</a>
+      <td>Degree days below 65&deg;F within year range</td>
+      <td><a
+          href="/degree_days/heating/65.0628/-146.1627/1990/2080">/degree_days/heating/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
     <tr>
-      <td>Historical and projected degree days below 0&deg;F</td>
+      <td>Degree days below 0&deg;F within year range</td>
       <td><a
-          href="/mmm/degree_days/below_zero/all/65.0628/-146.1627">/mmm/degree_days/below_zero/all/65.0628/-146.1627</a>
+          href="/degree_days/below_zero/65.0628/-146.1627/1990/2080">/degree_days/below_zero/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
     <tr>
-      <td>Historical and projected degree days above 32&deg;F</td>
+      <td>Degree days above 32&deg;F within year range</td>
       <td><a
-          href="/mmm/degree_days/thawing_index/all/65.0628/-146.1627">/mmm/degree_days/thawing_index/all/65.0628/-146.1627</a>
+          href="/degree_days/thawing_index/65.0628/-146.1627/1990/2080">/degree_days/thawing_index/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
     <tr>
-      <td>Historical and projected degree days below 32&deg;F</td>
+      <td>Degree days below 32&deg;F within year range</td>
       <td><a
-          href="/mmm/degree_days/freezing_index/all/65.0628/-146.1627">/mmm/degree_days/freezing_index/all/65.0628/-146.1627</a>
+          href="/degree_days/freezing_index/65.0628/-146.1627/1990/2080">/degree_days/freezing_index/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        Min/mean/max summaries of historical and projected years are available by appending <code>?summarize=mmm</code>
+        to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
 
 <h3>Output</h3>
-
-<h4>Min/mean/max summaries (point query)</h4>
-
-<p>Results from min/mean/max queries will look like this:</p>
-
-<pre>
-{
-  "historical": {
-    "ddmax": 14972,
-    "ddmean": 13696,
-    "ddmin": 9357
-  },
-  ...
-}
-</pre>
-
-<p>The above output is structured like this:</p>
-
-<pre>
-{
-  &lt;"historical" or "projected"&gt;: {
-    "ddmax": &lt;max dd value across all models and years&gt;,
-    "ddmean": &lt;mean dd value across all models and years&gt;,
-    "ddmin": &lt;min dd value across all models and years&gt;
-  },
-  ...
-}
-</pre>
 
 <h4>Degree days for all years (point query)</h4>
 
@@ -297,6 +135,34 @@
       "dd": &lt;degree days value&gt;,
     },
     ...
+  },
+  ...
+}
+</pre>
+
+<h4>Min/mean/max summaries (point query)</h4>
+
+<p>Results from min/mean/max queries (using the <code>?summarize=mmm</code> URL parameter) will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    "ddmax": 14972,
+    "ddmean": 13696,
+    "ddmin": 9357
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;"historical" or "projected"&gt;: {
+    "ddmax": &lt;max dd value across all models and years&gt;,
+    "ddmean": &lt;mean dd value across all models and years&gt;,
+    "ddmin": &lt;min dd value across all models and years&gt;
   },
   ...
 }

@@ -114,21 +114,16 @@ def summarize_mmm_sfe(all_sfe_di):
 
 
 @routes.route("/snow/")
-@routes.route("/mmm/snow/")
-@routes.route("/mmm/snow/snowfallequivalent/")
 def about_mmm_snow():
     return render_template("documentation/snow.html")
 
 
-@routes.route("/mmm/snow/snowfallequivalent/<lat>/<lon>")
-# the above route is included to avoid a 500 error when horp is omitted entirely
-@routes.route("/mmm/snow/snowfallequivalent/<horp>/<lat>/<lon>")
-def run_point_fetch_all_sfe(lat, lon, horp="hp"):
+@routes.route("/snow/snowfallequivalent/<lat>/<lon>")
+def run_point_fetch_all_sfe(lat, lon):
     """Run the async request for SFE data at a single point.
     Args:
         lat (float): latitude
         lon (float): longitude
-        horp (string): one of "historical", "projected", "hp", or "all")
 
     Returns:
         JSON-like dict of SFE data
@@ -146,28 +141,21 @@ def run_point_fetch_all_sfe(lat, lon, horp="hp"):
     x, y = project_latlon(lat, lon, 3338)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, sfe_coverage_id))
-        horp_case_di = {
-            "all": package_sfe_data(rasdaman_response),
-            "hp": summarize_mmm_sfe(package_sfe_data(rasdaman_response)),
-            "historical": {
-                "historical": summarize_mmm_sfe(package_sfe_data(rasdaman_response))[
-                    "historical"
-                ]
-            },
-            "projected": {
-                "projected": summarize_mmm_sfe(package_sfe_data(rasdaman_response))[
-                    "projected"
-                ]
-            },
-        }
+        if request.args.get("summarize") == "mmm":
+            point_pkg = summarize_mmm_sfe(package_sfe_data(rasdaman_response))
+        else:
+            point_pkg = package_sfe_data(rasdaman_response)
         try:
-            if horp == "all" and request.args.get("format") == "csv":
-                point_pkg = nullify_and_prune(horp_case_di[horp], "snow")
+            if (
+                not request.args.get("summarize") == "mmm"
+                and request.args.get("format") == "csv"
+            ):
+                point_pkg = nullify_and_prune(point_pkg, "snow")
                 if point_pkg in [{}, None, 0]:
                     return render_template("404/no_data.html"), 404
                 return create_csv(point_pkg, "snow", lat=lat, lon=lon)
             else:
-                return postprocess(horp_case_di[horp], "snow")
+                return postprocess(point_pkg, "snow")
         except KeyError:
             return render_template("400/bad_request.html"), 400
     except Exception as exc:

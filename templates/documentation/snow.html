@@ -19,44 +19,7 @@
 
 <h3>Service endpoints</h3>
 
-<h4>Min/mean/max summaries (point query)</h4>
-
-<p>Query SFE minimum, mean, and maximum across all models, scenarios, and decades.</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Historical SFE min/mean/max</td>
-      <td><a
-          href="/mmm/snow/snowfallequivalent/historical/61.5/-147">/mmm/snow/snowfallequivalent/historical/61.5/-147</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Projected SFE min/mean/max</td>
-      <td><a
-          href="/mmm/snow/snowfallequivalent/projected/61.5/-147">/mmm/snow/snowfallequivalent/projected/61.5/-147</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Historical and projected SFE min/mean/max</td>
-      <td><a href="/mmm/snow/snowfallequivalent/hp/61.5/-147">/mmm/snow/snowfallequivalent/hp/61.5/-147</a>
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2"></td>
-    </tr>
-  </tfoot>
-</table>
-
-<h4>Snowfall equivalent for all decades (point query)</h4>
+<h4>Decadal SFE (point query)</h4>
 
 <p>Query SFE for all models and scenarios for each decade (1910&ndash;1919 through 2090&ndash;2099).</p>
 
@@ -69,51 +32,26 @@
   </thead>
   <tbody>
     <tr>
-      <td>SFE for all decades</td>
-      <td><a href="/mmm/snow/snowfallequivalent/all/61.5/-147">/mmm/snow/snowfallequivalent/all/61.5/-147</a>
+      <td>Decadal SFE</td>
+      <td><a href="/snow/snowfallequivalent/61.5/-147">/snow/snowfallequivalent/61.5/-147</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">Min/mean/max summaries of historical and projected years are available by appending
+        <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
 
 <h3>Output</h3>
 
-<h4>Min/mean/max summaries</h4>
+<h4>Decadal snowfall equivalent</h4>
 
-<p>Results from SFE min/mean/max queries will look like this:</p>
-
-<pre>
-{
-  "historical": {
-    "sfemax": 4876,
-    "sfemean": 3701,
-    "sfemin": 2946
-  },
-  ...
-}
-</pre>
-
-<p>The above output is structured like this:</p>
-
-<pre>
-{
-  &lt;"historical" or "projected"&gt;: {
-    "sfemax": &lt;max SFE value across all models, scenarios, and decades&gt;,
-    "sfemean": &lt;mean SFE value across all models, scenarios, and decades&gt;,
-    "sfemin": &lt;min SFE value across all models, scenarios, and decades&gt;
-  },
-  ...
-}
-</pre>
-
-<h4>Snowfall equivalent for all decades</h4>
-
-<p>Results from SFE for all decades queries will look like this:</p>
+<p>Results from decadal SFE queries will look like this:</p>
 
 <pre>
 {
@@ -142,6 +80,34 @@
       ...
     },
     ...
+  },
+  ...
+}
+</pre>
+
+<h4>Min/mean/max summaries</h4>
+
+<p>Results from SFE min/mean/max queries (using the <code>?summarize=mmm</code> URL parameter) will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    "sfemax": 4876,
+    "sfemean": 3701,
+    "sfemin": 2946
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;"historical" or "projected"&gt;: {
+    "sfemax": &lt;max SFE value across all models, scenarios, and decades&gt;,
+    "sfemean": &lt;mean SFE value across all models, scenarios, and decades&gt;,
+    "sfemin": &lt;min SFE value across all models, scenarios, and decades&gt;
   },
   ...
 }

@@ -299,7 +299,7 @@ def get_mmm_wcps_request_str(
         return wcps_request_str
 
 
-async def fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year):
+async def fetch_mmm_point_data(x, y, cov_id, start_year, end_year):
     """Make the async request for the data at the specified point for
     a specific varname.
 
@@ -307,18 +307,13 @@ async def fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year):
         x (float): lower x-coordinate bound
         y (float): lower y-coordinate bound
         cov_id (str): Rasdaman coverage ID string
-        horp [Historical or Projected ](str): historical, projected, hp, or all
 
     Returns:
         list of data results from each cov_id for CRU TS 4.0 and all 5 projected
         models for a given coordinate
     """
     point_data_list = []
-    if horp == "all":
-        request_str = generate_mmm_wcs_getcov_str(x, y, cov_id, "0,6", "0,3")
-        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
-
-    if horp == "historical" or horp == "hp":
+    if request.args.get("summarize") == "mmm":
         timestring = '"1901-01-01T00:00:00.000Z":"2015-01-01T00:00:00.000Z"'
         if start_year is not None:
             timestring = (
@@ -334,7 +329,6 @@ async def fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year):
                 await fetch_data([generate_wcs_query_url(request_str)])
             )
 
-    if horp == "projected" or horp == "hp":
         timestring = '"2006-01-01T00:00:00.000Z":"2100-01-01T00:00:00.000Z"'
         if start_year is not None:
             timestring = (
@@ -348,6 +342,9 @@ async def fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year):
             point_data_list.append(
                 await fetch_data([generate_wcs_query_url(request_str)])
             )
+    else:
+        request_str = generate_mmm_wcs_getcov_str(x, y, cov_id, "0,6", "0,3")
+        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
 
     return point_data_list
 
@@ -384,7 +381,7 @@ async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     return point_data_list
 
 
-def package_mmm_point_data(point_data, cov_id, horp, varname):
+def package_mmm_point_data(point_data, cov_id, varname, start_year=None, end_year=None):
     """Packages min-mean-max point data into JSON-formatted return data
 
     Args:
@@ -394,44 +391,75 @@ def package_mmm_point_data(point_data, cov_id, horp, varname):
                 - point_data[i][j] = year starting from 1900-200 [0-199]
                 - point_data[i][j][k] = model number between 0-6 in mmm_dim_encodings
                 - point_data[i][j][k][l] = scenario number between 0-3 in mmm_dim_encodings
-        horp [Historical or Projected ](str): historical, projected, hp, or all
         varname (str): variable name to fetch point data
             for one of "tas" or "pr"
 
     Returns:
-        Python dictionary of one of four outcomes:
-            * horp == 'historical' - Historical minimum, mean, and maximum
-            * horp == 'projected'  - Projected minimum, mean, and maximum
-            * horp == 'hp'         - Historical & projected minimum, mean, and maximum
-            * horp == 'all'        - All data returned from Rasdaman formatted with string indices
+        Python dictionary of either all data or summary if ?summarize=mmm is set.
     """
     point_pkg = dict()
-    if horp == "all":
+    if request.args.get("summarize") == "mmm":
+        # Generate the min, mean and max for historical CRU-TS 4.0 data at this point
+        # We only want to generate statistics from the years 1900-2015 as that's all
+        # that is available in CRU-TS 4.0
+        historical_max = round(point_data[0], dim_encodings["rounding"][varname])
+        historical_mean = round(point_data[1], dim_encodings["rounding"][varname])
+        historical_min = round(point_data[2], dim_encodings["rounding"][varname])
+
+        point_pkg["historical"] = dict()
+
+        if cov_id == "annual_precip_totals_mm":
+            point_pkg["historical"]["prmin"] = historical_min
+            point_pkg["historical"]["prmean"] = historical_mean
+            point_pkg["historical"]["prmax"] = historical_max
+        else:
+            point_pkg["historical"]["tasmin"] = historical_min
+            point_pkg["historical"]["tasmean"] = historical_mean
+            point_pkg["historical"]["tasmax"] = historical_max
+
+        projected_max = round(point_data[3], dim_encodings["rounding"][varname])
+        projected_mean = round(point_data[4], dim_encodings["rounding"][varname])
+        projected_min = round(point_data[5], dim_encodings["rounding"][varname])
+
+        point_pkg["projected"] = dict()
+
+        if cov_id == "annual_precip_totals_mm":
+            point_pkg["projected"]["prmin"] = projected_min
+            point_pkg["projected"]["prmean"] = projected_mean
+            point_pkg["projected"]["prmax"] = projected_max
+        else:
+            point_pkg["projected"]["tasmin"] = projected_min
+            point_pkg["projected"]["tasmean"] = projected_mean
+            point_pkg["projected"]["tasmax"] = projected_max
+    else:
         ### HISTORICAL CRU-TS 4.0 ###
         # Puts together the historical tasmin, tasmean, and tasmax for all 200 years
         point_pkg["CRU-TS"] = dict()
         point_pkg["CRU-TS"]["historical"] = dict()
 
-        for year in range(0, 115):
-            full_year = str(year + 1901)
-            point_pkg["CRU-TS"]["historical"][full_year] = dict()
+        for year_offset in range(0, 115):
+            year = year_offset + 1901
+            if None not in [start_year, end_year]:
+                if year < int(start_year) or year > int(end_year):
+                    continue
+            point_pkg["CRU-TS"]["historical"][str(year)] = dict()
             if cov_id == "annual_precip_totals_mm":
-                point_pkg["CRU-TS"]["historical"][full_year]["pr"] = point_data[0][
-                    year
+                point_pkg["CRU-TS"]["historical"][str(year)]["pr"] = point_data[0][
+                    year_offset
                 ][0]
             elif cov_id == "annual_mean_temp":
-                point_pkg["CRU-TS"]["historical"][full_year]["tas"] = point_data[0][
-                    year
+                point_pkg["CRU-TS"]["historical"][str(year)]["tas"] = point_data[0][
+                    year_offset
                 ][0]
             else:
-                point_pkg["CRU-TS"]["historical"][full_year]["tasmax"] = point_data[0][
-                    year
+                point_pkg["CRU-TS"]["historical"][str(year)]["tasmax"] = point_data[0][
+                    year_offset
                 ][0][0]
-                point_pkg["CRU-TS"]["historical"][full_year]["tasmean"] = point_data[1][
-                    year
+                point_pkg["CRU-TS"]["historical"][str(year)]["tasmean"] = point_data[1][
+                    year_offset
                 ][0][0]
-                point_pkg["CRU-TS"]["historical"][full_year]["tasmin"] = point_data[2][
-                    year
+                point_pkg["CRU-TS"]["historical"][str(year)]["tasmin"] = point_data[2][
+                    year_offset
                 ][0][0]
 
         ### PROJECTED FUTURE MODELS ###
@@ -443,68 +471,26 @@ def package_mmm_point_data(point_data, cov_id, horp, varname):
             for scenario in mmm_dim_encodings["scenarios"].keys():
                 dim_scenario = mmm_dim_encodings["scenarios"][scenario]
                 point_pkg[dim_model][dim_scenario] = dict()
-                for year in range(106, 200):
-                    full_year = str(year + 1901)
-                    point_pkg[dim_model][dim_scenario][full_year] = dict()
+                for year_offset in range(106, 200):
+                    year = year_offset + 1901
+                    if None not in [start_year, end_year]:
+                        if year < int(start_year) or year > int(end_year):
+                            continue
+                    point_pkg[dim_model][dim_scenario][str(year)] = dict()
                     if cov_id == "annual_precip_totals_mm":
-                        point_pkg[dim_model][dim_scenario][full_year][
+                        point_pkg[dim_model][dim_scenario][str(year)][
                             "pr"
-                        ] = point_data[model][year][scenario]
+                        ] = point_data[model][year_offset][scenario]
                     elif cov_id == "annual_mean_temp":
-                        point_pkg[dim_model][dim_scenario][full_year][
+                        point_pkg[dim_model][dim_scenario][str(year)][
                             "tas"
-                        ] = point_data[model][year][scenario]
+                        ] = point_data[model][year_offset][scenario]
                     else:
                         for variable in mmm_dim_encodings["tempstats"].keys():
                             dim_variable = mmm_dim_encodings["tempstats"][variable]
-                            point_pkg[dim_model][dim_scenario][full_year][
+                            point_pkg[dim_model][dim_scenario][str(year)][
                                 dim_variable
-                            ] = point_data[variable][year][model][scenario]
-
-    else:
-        if horp == "historical" or horp == "hp":
-            # Generate the min, mean and max for historical CRU-TS 4.0 data at this point
-            # We only want to generate statistics from the years 1900-2015 as that's all
-            # that is available in CRU-TS 4.0
-            historical_max = round(point_data[0], dim_encodings["rounding"][varname])
-            historical_mean = round(point_data[1], dim_encodings["rounding"][varname])
-            historical_min = round(point_data[2], dim_encodings["rounding"][varname])
-
-            point_pkg["historical"] = dict()
-
-            if cov_id == "annual_precip_totals_mm":
-                point_pkg["historical"]["prmin"] = historical_min
-                point_pkg["historical"]["prmean"] = historical_mean
-                point_pkg["historical"]["prmax"] = historical_max
-            else:
-                point_pkg["historical"]["tasmin"] = historical_min
-                point_pkg["historical"]["tasmean"] = historical_mean
-                point_pkg["historical"]["tasmax"] = historical_max
-
-        if horp == "projected" or horp == "hp":
-            if horp == "projected":
-                projected_max = round(point_data[0], dim_encodings["rounding"][varname])
-                projected_mean = round(
-                    point_data[1], dim_encodings["rounding"][varname]
-                )
-                projected_min = round(point_data[2], dim_encodings["rounding"][varname])
-            else:
-                projected_max = round(point_data[3], dim_encodings["rounding"][varname])
-                projected_mean = round(
-                    point_data[4], dim_encodings["rounding"][varname]
-                )
-                projected_min = round(point_data[5], dim_encodings["rounding"][varname])
-
-            point_pkg["projected"] = dict()
-
-            if cov_id == "annual_precip_totals_mm":
-                point_pkg["projected"]["prmin"] = projected_min
-                point_pkg["projected"]["prmean"] = projected_mean
-                point_pkg["projected"]["prmax"] = projected_max
-            else:
-                point_pkg["projected"]["tasmin"] = projected_min
-                point_pkg["projected"]["tasmean"] = projected_mean
-                point_pkg["projected"]["tasmax"] = projected_max
+                            ] = point_data[variable][year_offset][model][scenario]
 
     return point_pkg
 
@@ -698,7 +684,7 @@ def combine_pkg_dicts(tas_di, pr_di):
     return tas_di
 
 
-def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, horp, start_year, end_year):
+def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, start_year, end_year):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
@@ -708,7 +694,6 @@ def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, horp, start_year, end_yea
         lon (float): longitude
         cov_id (list):
             string of jan_min_max_mean_temp or july_min_max_mean_temp
-        horp [Historical or Projected] (str): historical, projected, or all
 
     Returns:
         JSON-like dict of data at provided latitude and longitude
@@ -719,13 +704,15 @@ def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, horp, start_year, end_yea
     x, y = project_latlon(lat, lon, 3338)
 
     point_data_list = asyncio.run(
-        fetch_mmm_point_data(x, y, cov_id, horp, start_year, end_year)
+        fetch_mmm_point_data(x, y, cov_id, start_year, end_year)
     )
 
     varname = var_ep_lu[var_ep]
     # package point data with decoded coord values (names)
     # these functions are hard-coded  with coord values for now
-    point_pkg = package_mmm_point_data(point_data_list, cov_id, horp, varname)
+    point_pkg = package_mmm_point_data(
+        point_data_list, cov_id, varname, start_year, end_year
+    )
 
     return point_pkg
 
@@ -926,10 +913,6 @@ def run_fetch_proj_precip_point_data(lat, lon):
 @routes.route("/taspr/area/")
 @routes.route("/temperature/area/")
 @routes.route("/precipitation/area/")
-@routes.route("/mmm/")
-@routes.route("/mmm/abstract/")
-@routes.route("/mmm/temperature")
-@routes.route("/mmm/precipitation")
 def about():
     return render_template("documentation/taspr.html")
 
@@ -947,111 +930,82 @@ def get_temperature_plate(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
     """
-    temp_plate = dict()
+    months = ["all", "jan", "july"]
+    summarized_data = {}
+    for month in months:
+        if "historical" not in summarized_data:
+            summarized_data["historical"] = {}
+        if month == "all":
+            month_param = None
+        else:
+            month_param = month
+        all_data = mmm_point_data_endpoint("temperature", lat, lon, month_param)
 
-    ### HISTORICAL ###
-    temp_plate["historical"] = dict()
+        if month != "all":
+            historical_min_values = list(
+                map(lambda x: x["tasmin"], all_data["CRU-TS"]["historical"].values())
+            )
+            historical_mean_values = list(
+                map(lambda x: x["tasmean"], all_data["CRU-TS"]["historical"].values())
+            )
+            historical_max_values = list(
+                map(lambda x: x["tasmax"], all_data["CRU-TS"]["historical"].values())
+            )
+            summarized_data["historical"][month] = {
+                "tasmin": min(historical_min_values),
+                "tasmean": round(np.mean(historical_mean_values), 1),
+                "tasmax": max(historical_max_values),
+            }
+        else:
+            historical_mean_values = list(
+                map(lambda x: x["tas"], all_data["CRU-TS"]["historical"].values())
+            )
+            summarized_data["historical"][month] = {
+                "tasmin": min(historical_mean_values),
+                "tasmean": round(np.mean(historical_mean_values), 1),
+                "tasmax": max(historical_mean_values),
+            }
 
-    all = mmm_point_data_endpoint("temperature", "historical", lat, lon)
-    temp_plate["historical"]["all"] = all["historical"]
+        eras = [
+            {"start": 2010, "end": 2039},
+            {"start": 2040, "end": 2069},
+            {"start": 2070, "end": 2099},
+        ]
+        models = list(all_data.keys())
+        models.remove("CRU-TS")
+        for era in eras:
+            era_label = str(era["start"]) + "-" + str(era["end"])
+            if era_label not in summarized_data:
+                summarized_data[era_label] = {}
+            min_values = []
+            mean_values = []
+            max_values = []
+            for model in models:
+                for scenarios in all_data[model].keys():
+                    for key, value in all_data[model][scenarios].items():
+                        year = int(key)
+                        if year >= era["start"] and year <= era["end"]:
+                            if month != "all":
+                                min_values.append(value["tasmin"])
+                                mean_values.append(value["tasmean"])
+                                max_values.append(value["tasmax"])
+                            else:
+                                mean_values.append(value["tas"])
 
-    jan = mmm_point_data_endpoint("temperature", "historical", lat, lon, "jan")
-    temp_plate["historical"]["jan"] = jan["historical"]
+            if month != "all":
+                summarized_data[era_label][month] = {
+                    "tasmin": min(min_values),
+                    "tasmean": round(np.mean(mean_values), 1),
+                    "tasmax": max(max_values),
+                }
+            else:
+                summarized_data[era_label][month] = {
+                    "tasmin": min(mean_values),
+                    "tasmean": round(np.mean(mean_values), 1),
+                    "tasmax": max(mean_values),
+                }
 
-    july = mmm_point_data_endpoint("temperature", "historical", lat, lon, "july")
-    temp_plate["historical"]["july"] = july["historical"]
-
-    ### 2010-2039 ###
-    temp_plate["2010-2039"] = dict()
-
-    all = mmm_point_data_endpoint(
-        "temperature", "projected", lat, lon, start_year="2010", end_year="2039"
-    )
-    temp_plate["2010-2039"]["all"] = all["projected"]
-
-    jan = mmm_point_data_endpoint(
-        "temperature",
-        "projected",
-        lat,
-        lon,
-        month="jan",
-        start_year="2010",
-        end_year="2039",
-    )
-    temp_plate["2010-2039"]["jan"] = jan["projected"]
-
-    july = mmm_point_data_endpoint(
-        "temperature",
-        "projected",
-        lat,
-        lon,
-        month="july",
-        start_year="2010",
-        end_year="2039",
-    )
-    temp_plate["2010-2039"]["july"] = july["projected"]
-
-    ### 2040-2069 ###
-    temp_plate["2040-2069"] = dict()
-
-    all = mmm_point_data_endpoint(
-        "temperature", "projected", lat, lon, start_year="2040", end_year="2069"
-    )
-    temp_plate["2040-2069"]["all"] = all["projected"]
-
-    jan = mmm_point_data_endpoint(
-        "temperature",
-        "projected",
-        lat,
-        lon,
-        month="jan",
-        start_year="2040",
-        end_year="2069",
-    )
-    temp_plate["2040-2069"]["jan"] = jan["projected"]
-
-    july = mmm_point_data_endpoint(
-        "temperature",
-        "projected",
-        lat,
-        lon,
-        month="july",
-        start_year="2040",
-        end_year="2069",
-    )
-    temp_plate["2040-2069"]["july"] = july["projected"]
-
-    ### 2070-2099 ###
-    temp_plate["2070-2099"] = dict()
-
-    all = mmm_point_data_endpoint(
-        "temperature", "projected", lat, lon, start_year="2070", end_year="2099"
-    )
-    temp_plate["2070-2099"]["all"] = all["projected"]
-
-    jan = mmm_point_data_endpoint(
-        "temperature",
-        "projected",
-        lat,
-        lon,
-        month="jan",
-        start_year="2070",
-        end_year="2099",
-    )
-    temp_plate["2070-2099"]["jan"] = jan["projected"]
-
-    july = mmm_point_data_endpoint(
-        "temperature",
-        "projected",
-        lat,
-        lon,
-        month="july",
-        start_year="2070",
-        end_year="2099",
-    )
-    temp_plate["2070-2099"]["july"] = july["projected"]
-
-    return jsonify(temp_plate)
+    return jsonify(summarized_data)
 
 
 @routes.route("/eds/precipitation/<lat>/<lon>")
@@ -1067,33 +1021,45 @@ def get_precipitation_plate(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/precipitation/65.0628/-146.1627
     """
-    pr_plate = dict()
-    pr_plate = mmm_point_data_endpoint("precipitation", "historical", lat, lon)
-
-    projected = mmm_point_data_endpoint(
-        "precipitation", "projected", lat, lon, start_year="2010", end_year="2039"
+    summarized_data = {}
+    all_data = mmm_point_data_endpoint("precipitation", lat, lon)
+    historical_values = list(
+        map(lambda x: x["pr"], all_data["CRU-TS"]["historical"].values())
     )
-    pr_plate["2010-2039"] = projected["projected"]
+    summarized_data["historical"] = {
+        "prmin": min(historical_values),
+        "prmean": round(np.mean(historical_values)),
+        "prmax": max(historical_values),
+    }
+    eras = [
+        {"start": 2010, "end": 2039},
+        {"start": 2040, "end": 2069},
+        {"start": 2070, "end": 2099},
+    ]
+    models = list(all_data.keys())
+    models.remove("CRU-TS")
+    for era in eras:
+        values = []
+        for model in models:
+            for scenarios in all_data[model].keys():
+                for key, value in all_data[model][scenarios].items():
+                    year = int(key)
+                    if year >= era["start"] and year <= era["end"]:
+                        values.append(value["pr"])
+        summarized_data[str(era["start"]) + "-" + str(era["end"])] = {
+            "prmin": min(values),
+            "prmean": round(np.mean(values)),
+            "prmax": max(values),
+        }
+    return jsonify(summarized_data)
 
-    projected = mmm_point_data_endpoint(
-        "precipitation", "projected", lat, lon, start_year="2040", end_year="2069"
-    )
-    pr_plate["2040-2069"] = projected["projected"]
 
-    projected = mmm_point_data_endpoint(
-        "precipitation", "projected", lat, lon, start_year="2070", end_year="2099"
-    )
-    pr_plate["2070-2099"] = projected["projected"]
-
-    return jsonify(pr_plate)
-
-
-@routes.route("/mmm/<var_ep>/<horp>/<lat>/<lon>")
-@routes.route("/mmm/<var_ep>/<month>/<horp>/<lat>/<lon>")
-@routes.route("/mmm/<var_ep>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
-@routes.route("/mmm/<var_ep>/<month>/<horp>/<lat>/<lon>/<start_year>/<end_year>")
+@routes.route("/<var_ep>/<lat>/<lon>")
+@routes.route("/<var_ep>/<month>/<lat>/<lon>")
+@routes.route("/<var_ep>/<lat>/<lon>/<start_year>/<end_year>")
+@routes.route("/<var_ep>/<month>/<lat>/<lon>/<start_year>/<end_year>")
 def mmm_point_data_endpoint(
-    var_ep, horp, lat, lon, month=None, start_year=None, end_year=None
+    var_ep, lat, lon, month=None, start_year=None, end_year=None
 ):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
@@ -1101,14 +1067,13 @@ def mmm_point_data_endpoint(
     Args:
         var_ep (str): variable endpoint. Either temperature or precipitation
         month (str): jan or july
-        horp [Historical or Projected] (str):  historical, projected, hp, or all
         lat (float): latitude
         lon (float): longitude
         start_year (int): Starting year (1901-2099)
         end_year (int): Ending year (1901-2099)
 
     Notes:
-        example request: http://localhost:5000/mmm/jan/all/65.0628/-146.1627
+        example request: http://localhost:5000/jan/65.0628/-146.1627
     """
 
     validation = validate_latlon(lat, lon)
@@ -1137,28 +1102,24 @@ def mmm_point_data_endpoint(
         else:
             return render_template("400/bad_request.html"), 400
 
-    if start_year is not None:
-        if horp == "all":
-            return render_template("400/bad_request.html"), 400
-
-        if end_year is not None:
-            validation = validate_year(start_year, end_year)
-
-            if validation == 400:
-                return render_template("400/bad_request.html"), 400
-        else:
+    if None not in [start_year, end_year]:
+        validation = validate_year(start_year, end_year)
+        if validation == 400:
             return render_template("400/bad_request.html"), 400
 
     try:
         point_pkg = run_fetch_mmm_point_data(
-            var_ep, lat, lon, cov_id, horp, start_year, end_year
+            var_ep, lat, lon, cov_id, start_year, end_year
         )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    if horp == "all" and request.args.get("format") == "csv":
+    if (
+        not request.args.get("summarize") == "mmm"
+        and request.args.get("format") == "csv"
+    ):
         point_pkg = nullify_and_prune(point_pkg, "taspr")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
