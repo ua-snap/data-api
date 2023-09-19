@@ -19,10 +19,8 @@ from validate_request import (
 from postprocessing import nullify_and_prune, nullify_nodata, postprocess
 from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import permafrost_encodings  # for the Melvin 4 km (NCR) data
 
-# rasdaman coverages
-permafrost_coverage_id = "iem_gipl_magt_alt_4km"
+# rasdaman coverage
 gipl_1km_coverage_id = "crrel_gipl_outputs"
 
 gipl1km_dim_encodings = asyncio.run(
@@ -41,8 +39,7 @@ wfs_targets = {
 }
 
 titles = {
-    "gipl": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (deg C) and Active Layer Thickness (m) 4 km Model Output",
-    "gipl1km": "GIPL 2.0 Mean Annual Ground Temperature (deg C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
+    "gipl_1km": "GIPL 2.0 Mean Annual Ground Temperature (deg C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
@@ -190,67 +187,6 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
     return gipl1km_point_pkg
 
 
-def package_gipl(gipl_resp):
-    """Package GIPL MAGT and ALT netCDF data.
-    The response is a nested list object."""
-    eras = list(permafrost_encodings["eras"].values())
-    models = list(permafrost_encodings["models"].values())
-    scenarios = list(permafrost_encodings["scenarios"].values())
-    varnames = permafrost_encodings["gipl_varnames"]
-
-    # Flatten this response (twice)
-    flattened_resp = sum(sum(gipl_resp, []), [])
-
-    # Initialize dict structure
-    di = {
-        era: {
-            m: {sc: {var: "value" for var in varnames} for sc in scenarios}
-            for m in models
-        }
-        for era in eras
-    }
-
-    i = 0
-    for era in di.keys():
-        for model in di[era].keys():
-            for scenario in di[era][model]:
-                values = flattened_resp[i].split(" ")
-                magt_value = round(float(values[0]), 1)
-                alt_value = float(values[1])
-                di[era][model][scenario]["magt"] = magt_value
-                di[era][model][scenario]["alt"] = alt_value
-                i += 1
-    # This block drops all the invalid dimensional combinations that are a result of jamming historical and projected data into the same data cube. These are no data values (-9999) that should be culled.
-    models.remove("cruts31")
-    for model in models:
-        di["1995"].pop(model, None)
-    di["1995"]["cruts31"].pop("rcp45", None)
-    di["1995"]["cruts31"].pop("rcp85", None)
-    for k in ["2025", "2050", "2075", "2095"]:
-        di[k].pop("cruts31", None)
-        for m in di[k].keys():
-            di[k][m].pop("historical", None)
-    return di
-
-
-def package_gipl_polygon(gipl_polygon_resp):
-    """Package a single data variable (GIPL MAGT or ALT)."""
-    di = gipl_polygon_resp
-    eras = list(permafrost_encodings["eras"].values())
-    models = list(permafrost_encodings["models"].values())
-    scenarios = list(permafrost_encodings["scenarios"].values())
-    models.remove("cruts31")
-    for model in models:
-        di["1995"].pop(model, None)
-    di["1995"]["cruts31"].pop("rcp45", None)
-    di["1995"]["cruts31"].pop("rcp85", None)
-    for k in ["2025", "2050", "2075", "2095"]:
-        di[k].pop("cruts31", None)
-        for m in di[k].keys():
-            di[k][m].pop("historical", None)
-    return di
-
-
 def combine_gipl_poly_var_pkgs(magt_di, alt_di):
     combined_gipl_di = {}
     for era in magt_di.keys():
@@ -317,16 +253,14 @@ def run_point_fetch_all_permafrost(lat, lon):
     x, y = project_latlon(lat, lon, 3338)
 
     try:
-        rasdaman_results = asyncio.run(
-            fetch_wcs_point_data(x, y, permafrost_coverage_id)
-        )
+        rasdaman_results = asyncio.run(fetch_wcs_point_data(x, y, gipl_1km_coverage_id))
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
     data = {
-        "gipl": package_gipl(rasdaman_results),
+        "gipl_1km": package_gipl1km_point_data(rasdaman_results),
         "obu_magt": package_obu_magt(gs_results[0]),
         "jorg": package_jorgenson(gs_results[1]),
         "obupfx": package_obu_vector(gs_results[2]),

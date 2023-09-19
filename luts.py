@@ -1,9 +1,5 @@
 """Module for look-up-table like objects"""
 import os
-import pickle
-import fiona
-import geopandas as gpd
-import pandas as pd
 
 host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
@@ -52,24 +48,6 @@ snow_status = {
     3: "Sea ice",
     4: True,
     0: "No data at this location.",
-}
-
-permafrost_encodings = {
-    "eras": {0: "1995", 1: "2025", 2: "2050", 3: "2075", 4: "2095"},
-    "models": {
-        0: "cruts31",
-        1: "gfdlcm3",
-        2: "gisse2r",
-        3: "ipslcm5alr",
-        4: "mricgcm3",
-        5: "ncarccsm4",
-    },
-    "scenarios": {0: "historical", 1: "rcp45", 2: "rcp85"},
-    "rounding": {"magt": 1, "alt": 1},
-    "gipl_varnames": ["magt", "alt"],
-    "gipl_era_starts": ["1986", "2011", "2036", "2061", "2086"],
-    "gipl_era_ends": ["2005", "2040", "2065", "2090", "2100"],
-    "gipl_units_lu": {"magt": "°C", "alt": "m"},
 }
 
 place_type_labels = {
