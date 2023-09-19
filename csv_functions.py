@@ -398,28 +398,39 @@ def landfastice_csv(data):
 def permafrost_csv(data, source_metadata):
     filename_data_name = "Permafrost"
     sources = {
-        "gipl": {
+        "gipl_1km": {
             "coords": [
                 "source",
-                "era",
                 "model",
+                "year",
                 "scenario",
             ],
-            "values": ["magt", "alt"],
+            "values": [
+                "magt0.5m",
+                "magt1m",
+                "magt2m",
+                "magt3m",
+                "magt4m",
+                "magt5m",
+                "magtsurface",
+                "permafrostbase",
+                "permafrosttop",
+                "talikthickness",
+            ],
         },
         "jorg": {"coords": ["source"], "values": ["ice", "pfx"]},
         "obu_magt": {"coords": ["source"], "values": ["year", "depth", "temp"]},
         "obupfx": {"coords": ["source"], "values": ["pfx"]},
     }
 
-    metadata = "# alt is the active layer thickness in meters\n"
-    metadata += "# magt is the mean annual ground temperature in degrees Celsius\n"
+    metadata = "# magt*m is the mean annual ground temperature at a given depth (* meters) in degrees Celsius\n"
+    metadata += "# magtsurface is the mean annual ground temperature at the ground surface in degrees Celsius\n"
+    metadata += "# permafrost base is the lower boundary of the permafrost below the surface in meters\n"
+    metadata += "# permafrost top is the upper boundary of the permafrost below the surface in meters\n"
+    metadata += "# talikthickness is the thickness of the perennially unfrozen ground occurring in permafrost terrain in meters\n"
     metadata += "# ice is the estimated ground ice volume\n"
     metadata += "# pfx is the permafrost extent\n"
-    metadata += "# 2025 represents 2011 - 2040\n"
-    metadata += "# 2050 represents 2036 - 2065\n"
-    metadata += "# 2075 represents 2061 - 2090\n"
-    metadata += "# 2095 represents 2086 - 2100\n"
+
     metadata += "# gipl is the Geophysical Institute's Permafrost Laboratory\n"
 
     all_fields = []

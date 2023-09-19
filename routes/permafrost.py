@@ -39,7 +39,7 @@ wfs_targets = {
 }
 
 titles = {
-    "gipl_1km": "GIPL 2.0 Mean Annual Ground Temperature (deg C), Permafrost Base, Permafrost Top, and Talik Thickness (m) 1 km Model Output",
+    "gipl_1km": "GIPL 2.0 1km Model Output: Mean Annual Ground Temperature (deg C) at Permafrost Base and Permafrost Top; Talik Thickness (m)",
     "jorg": "Jorgenson et al. (2008) Permafrost Extent and Ground Ice Volume",
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
