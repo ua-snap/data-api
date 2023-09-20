@@ -1225,7 +1225,7 @@ def taspr_area_data_endpoint(var_ep, var_id):
     return postprocess(poly_pkg, "taspr")
 
 
-@routes.route("/proj_precip/point/<lat>/<lon>")
+@routes.route("/precipitation/frequency/point/<lat>/<lon>")
 def proj_precip_point(lat, lon):
     validation = validate_latlon(lat, lon)
     if validation == 400:

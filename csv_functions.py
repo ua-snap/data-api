@@ -684,7 +684,7 @@ def taspr_csv(data, endpoint):
         metadata += (
             "# era is the time range for this predicted amount of precipitation \n"
         )
-        metadata += "# pf is the amount of precipitation predicted\n"
+        metadata += "# pf is amount of precipitation in mm\n"
         metadata += "# pf_lower is the lower bound of the 95% confidence interval of the variable pf\n"
         metadata += "# pf_upper is the upper bound of the 95% confidence interval of the variable pf\n"
         filename_data_name = "Future Projections of Precipitation"

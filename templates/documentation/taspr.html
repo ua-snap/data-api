@@ -84,9 +84,9 @@
   </tfoot>
 </table>
 
-<h4>Projected maximum precipitation events (point query)</h4>
+<h4>Precipitation frequency (point query)</h4>
 
-<p>The following query will return projected maximum precipitation for various return intervals and durations across
+<p>The following query will return precipitation frequency for various return intervals and durations across
   different models and eras.</p>
 
 <table class="endpoints">
@@ -98,8 +98,9 @@
   </thead>
   <tbody>
     <tr>
-      <td>Projected maximum precipitation events</td>
-      <td><a href="/proj_precip/point/65.028/-146.1627">/proj_precip/point/65.028/-146.1627</a></td>
+      <td>Precipitation frequency</td>
+      <td><a href="/precipitation/frequency/point/65.028/-146.1627">/precipitation/frequency/point/65.028/-146.1627</a>
+      </td>
     </tr>
   </tbody>
   <tfoot>
@@ -275,9 +276,9 @@
 <p>Note: The full set of statistics is only available for historical output. Projected output is limited to just the
   mean statistic.</p>
 
-<h4>Projected maximum precipitation events</h4>
+<h4>Precipitation frequency</h4>
 
-<p>Results from projected maximum precipitation queries will look like this:</p>
+<p>Results from precipitation frequency queries will look like this:</p>
 
 <pre>
 {
@@ -502,6 +503,9 @@
 </pre>
 
 <h3>Source data</h3>
+<p>For more information about precipitation frequency, see the <a
+    href="https://uaf-snap.org/wp-content/uploads/2021/05/dot-precip_FINAL-REPORT_20210526.pdf">Future Projections of
+    Precipitation for Alaska Infrastructure: Final Report</a>.</p>
 <table>
   <thead>
     <tr>
@@ -514,7 +518,10 @@
       <td><a
           href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/3b2b24ff-4916-4d92-95b7-c6b2fcefd381">Historical
           Monthly and Derived Temperature Products - 2km CRU TS 4.0</a></td>
-      <td rowspan="4" style="vertical-align: middle; border-bottom: none;">Walsh J.E., Bhatt U.S., Littell J. S., Leonawicz M., Lindgren M., Kurkowski T. A., Bieniek P. A., Gray S., & Rupp T. S. (2018).  Downscaling of climate model output for Alaskan stakeholders, <i>Environmental Modelling & Software, 110</i>, 38&ndash;51.  DOI <a href="https://doi.org/10.1016/j.envsoft.2018.03.021">10.1016/j.envsoft.2018.03.021</a></td>
+      <td rowspan="4" style="vertical-align: middle; border-bottom: none;">Walsh J.E., Bhatt U.S., Littell J. S.,
+        Leonawicz M., Lindgren M., Kurkowski T. A., Bieniek P. A., Gray S., & Rupp T. S. (2018). Downscaling of climate
+        model output for Alaskan stakeholders, <i>Environmental Modelling & Software, 110</i>, 38&ndash;51. DOI <a
+          href="https://doi.org/10.1016/j.envsoft.2018.03.021">10.1016/j.envsoft.2018.03.021</a></td>
     </tr>
     <tr>
       <td><a
@@ -530,6 +537,15 @@
       <td><a
           href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/f44595c8-5384-4c02-9ab4-f7a9c43e92eb">Projected
           Monthly and Derived Precipitation Products - 2km CMIP5/AR5</a></td>
+    </tr>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/304b6d89-961e-417d-b6ba-4139c7fe5ff6">Annual
+          maximum precipitation projections for Alaska</a></td>
+      <td>Bieniek, P. A., Bhatt, U. S., Walsh, J. E., Rupp, T. S., Zhang, J., Krieger, J. R. & Lader, R. (2016).
+        Dynamical Downscaling of ERA-Interim Temperature and Precipitation for Alaska. <i>Journal of Applied Meteorology
+          and Climatology, 55</i>(03), 635&ndash;654. <a
+          href="https://doi.org/10.1175/JAMC-D-15-0153.1">https://doi.org/10.1175/JAMC-D-15-0153.1</a></td>
     </tr>
   </tbody>
 </table>
