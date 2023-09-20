@@ -216,12 +216,14 @@
           "permafrostbase": 178.7,
           "permafrosttop": 0.8,
           "talikthickness": 0
-            }
-          }
         },
         ...
-        "title": "GIPL 2.0 1km Model Output: Mean Annual Ground Temperature (deg C) at Permafrost Base and Permafrost Top; Talik Thickness (m)"
       },
+      ...
+    },
+    ...
+    "title": "GIPL 2.0 1km Model Output: Mean Annual Ground Temperature (deg C) at Permafrost Base and Permafrost Top; Talik Thickness (m)"
+  },
   "jorg": {
     "ice": "Moderate",
     "pfx": "Discontinuous",
@@ -243,27 +245,28 @@
 <p>The above output is structured like this:</p>
 
 <pre>
-"gipl_1km": {
-  &lt;model&gt;: {
-    &lt;year&gt;:{
-      &lt;scenario&gt;: {
-        "magt0.5m": &lt;mean annual ground temperature value at 0.5 m depth (&deg;C)&gt;,
-        "magt1m": &lt;mean annual ground temperature value at 1 m depth (&deg;C)&gt;,
-        "magt2m": &lt;mean annual ground temperature value at 2 m depth (&deg;C)&gt;,
-        "magt3m": &lt;mean annual ground temperature value at 3 m depth (&deg;C)&gt;,
-        "magt4m": &lt;mean annual ground temperature value at 4 m depth (&deg;C)&gt;,
-        "magt5m": &lt;mean annual ground temperature value at 5 m depth (&deg;C)&gt;,
-        "magtsurface": &lt;mean annual ground temperature value at 0.01 m depth (&deg;C)&gt;,
-        "permafrostbase": &lt;depth of permafrost base (m)&gt;,
-        "permafrosttop": &lt;depth of permafrost top (m)&gt;,
-        "talikthickness": &lt;thickness of talik layer (m)&gt;
+{
+  "gipl_1km": {
+    &lt;model&gt;: {
+      &lt;year&gt;: {
+        &lt;scenario&gt;: {
+          "magt0.5m": &lt;mean annual ground temperature value at 0.5 m depth (&deg;C)&gt;,
+          "magt1m": &lt;mean annual ground temperature value at 1 m depth (&deg;C)&gt;,
+          "magt2m": &lt;mean annual ground temperature value at 2 m depth (&deg;C)&gt;,
+          "magt3m": &lt;mean annual ground temperature value at 3 m depth (&deg;C)&gt;,
+          "magt4m": &lt;mean annual ground temperature value at 4 m depth (&deg;C)&gt;,
+          "magt5m": &lt;mean annual ground temperature value at 5 m depth (&deg;C)&gt;,
+          "magtsurface": &lt;mean annual ground temperature value at 0.01 m depth (&deg;C)&gt;,
+          "permafrostbase": &lt;depth of permafrost base (m)&gt;,
+          "permafrosttop": &lt;depth of permafrost top (m)&gt;,
+          "talikthickness": &lt;thickness of talik layer (m)&gt;
+        },
+        ...
       },
       ...
     },
     ...
-  },
-  ...
-  "title": &lt;title describing these results&gt;
+    "title": &lt;title describing these results&gt;
   },
   "jorg": {
     "ice": &lt;estimated ground ice volume&gt;,
@@ -280,7 +283,7 @@
     "pfx": &lt;permafrost extent&gt;,
     "title": &lt;title describing these results&gt;
   }
-
+}
 </pre>
 
 <h3>Source data</h3>
