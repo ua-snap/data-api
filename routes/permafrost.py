@@ -187,24 +187,6 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
     return gipl1km_point_pkg
 
 
-def combine_gipl_poly_var_pkgs(magt_di, alt_di):
-    combined_gipl_di = {}
-    for era in magt_di.keys():
-        combined_gipl_di[era] = {}
-        for model in magt_di[era].keys():
-            combined_gipl_di[era][model] = {}
-            for scenario in magt_di[era][model].keys():
-                combined_gipl_di[era][model][scenario] = {}
-                combined_gipl_di[era][model][scenario]["magt"] = magt_di[era][model][
-                    scenario
-                ]
-                combined_gipl_di[era][model][scenario]["alt"] = alt_di[era][model][
-                    scenario
-                ]
-                combined_gipl_di[era][model][scenario]["statistic"] = "Zonal Mean"
-    return combined_gipl_di
-
-
 @routes.route("/permafrost/")
 @routes.route("/permafrost/abstract/")
 @routes.route("/permafrost/point/")
