@@ -15,14 +15,6 @@
 </p>
 
 <p>
-  Active layer thickness and mean annual ground temperature data are also provided as summarized means across
-  2011&ndash;2040, 2036&ndash;2065, 2061&ndash;2090, 2086&ndash;2100 vs. a historical baseline from 1995 at a resolution
-  of 4km. Data were provided by Melvin et al. using GIPL 2.0 model outputs. The historical baseline was derived from CRU
-  TS 3.1. Projections were derived from GFDL-CM3, GISS-E2R, IPSL-CM5A-LR, MRI-CGCM3, NCAR-CCSM4 model outputs, as well
-  as a 5-model average, under the RCP 4.5 and RCP 8.5 emissions scenarios.
-</p>
-
-<p>
   Permafrost extent and ground ice volume data from 2008 were provided by Jorgenson et al. Mean annual top of permafrost
   ground temperature and permafrost extent data from 2000&ndash;2016 were provided by Obu et al.
 </p>
@@ -210,17 +202,27 @@
 
 <pre>
 {
-  "gipl": {
-    "1995": {
-      "cruts31": {
-        "historical": {
-          "alt": 0.59,
-          "magt": -2.2
-        }
-      }
+  "gipl_1km": {
+    "5ModelAvg": {
+      "2021": {
+        "RCP 4.5": {
+          "magt0.5m": -2.8,
+          "magt1m": -3.1,
+          "magt2m": -3.4,
+          "magt3m": -3.5,
+          "magt4m": -3.6,
+          "magt5m": -3.6,
+          "magtsurface": -1.1,
+          "permafrostbase": 178.7,
+          "permafrosttop": 0.8,
+          "talikthickness": 0
+        },
+        ...
+      },
+      ...
     },
     ...
-    "title": "Melvin et al. (2017) GIPL 2.0 Mean Annual Ground Temperature (&deg;C) and Active Layer Thickness (m) Model Output"
+    "title": "GIPL 2.0 1km Model Output: Mean Annual Ground Temperature (deg C) at Permafrost Base and Permafrost Top; Talik Thickness (m)"
   },
   "jorg": {
     "ice": "Moderate",
@@ -244,12 +246,20 @@
 
 <pre>
 {
-  "gipl": {
-    &lt;era&gt;<sup>1</sup>: {
-      &lt;model&gt;: {
+  "gipl_1km": {
+    &lt;model&gt;: {
+      &lt;year&gt;: {
         &lt;scenario&gt;: {
-          "alt": &lt;active layer thickness (m)&gt;,
-          "magt": &lt;mean annual ground temperature (&deg;C)&gt;
+          "magt0.5m": &lt;mean annual ground temperature value at 0.5 m depth (&deg;C)&gt;,
+          "magt1m": &lt;mean annual ground temperature value at 1 m depth (&deg;C)&gt;,
+          "magt2m": &lt;mean annual ground temperature value at 2 m depth (&deg;C)&gt;,
+          "magt3m": &lt;mean annual ground temperature value at 3 m depth (&deg;C)&gt;,
+          "magt4m": &lt;mean annual ground temperature value at 4 m depth (&deg;C)&gt;,
+          "magt5m": &lt;mean annual ground temperature value at 5 m depth (&deg;C)&gt;,
+          "magtsurface": &lt;mean annual ground temperature value at 0.01 m depth (&deg;C)&gt;,
+          "permafrostbase": &lt;depth of permafrost base (m)&gt;,
+          "permafrosttop": &lt;depth of permafrost top (m)&gt;,
+          "talikthickness": &lt;thickness of talik layer (m)&gt;
         },
         ...
       },
@@ -276,10 +286,6 @@
 }
 </pre>
 
-<sup>1</sup> Note for GIPL eras: "1995" refers to the historical baseline. Otherwise these are 30 year eras surrounding
-the following center dates, except the last era is truncated at 2100: "2025" (2011-2040), "2050" (2036-2065), "2075"
-(2061&ndash;2090), "2095" (2086&ndash;2100).
-
 <h3>Source data</h3>
 
 <table>
@@ -294,21 +300,32 @@ the following center dates, except the last era is truncated at 2100: "2025" (20
       <td><a
           href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36">GIPL
           2.0 1 km Model Outputs</a></td>
-      <td>Marchenko, S., Romanovsky, V., & Tipenko, G. (2008). Numerical modeling of spatial permafrost dynamics in Alaska.  <i>Ninth International Conference on Permafrost, Online Proceedings, Volume 2</i>, 1125&ndash;1130.  Accessed 2023-09-08 from <a href="https://www.permafrost.org/event/icop9/">https://www.permafrost.org/event/icop9/</a>
+      <td>Marchenko, S., Romanovsky, V., & Tipenko, G. (2008). Numerical modeling of spatial permafrost dynamics in
+        Alaska. <i>Ninth International Conference on Permafrost, Online Proceedings, Volume 2</i>, 1125&ndash;1130.
+        Accessed 2023-09-08 from <a
+          href="https://www.permafrost.org/event/icop9/">https://www.permafrost.org/event/icop9/</a>
       </td>
-      
+
     </tr>
     <tr>
       <td><a href="https://catalog.northslopescience.org/dataset/1725">Jorgenson Permafrost Characteristics</a></td>
-      <td>Jorgenson, M., Yoshikawa, K., Kanevskiy, M., Shur, Y., Romanovsky, V., Marchenko, S., & Jones, B. (2008). Permafrost Characteristics of Alaska + Map. <i>Ninth International Conference on Permafrost, Online Proceedings, Volume 1</i>, 121&ndash;122.  Accessed 2023-09-08 from <a href="https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf">https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf</a>
+      <td>Jorgenson, M., Yoshikawa, K., Kanevskiy, M., Shur, Y., Romanovsky, V., Marchenko, S., & Jones, B. (2008).
+        Permafrost Characteristics of Alaska + Map. <i>Ninth International Conference on Permafrost, Online Proceedings,
+          Volume 1</i>, 121&ndash;122. Accessed 2023-09-08 from <a
+          href="https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf">https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf</a>
       </td>
     </tr>
     <tr>
-      <td><a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">Mean
+      <td><a
+          href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">Mean
           annual ground temperature dataset (ZIP file)</a>,<br />
         <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">Permafrost
-          zones dataset (ZIP file)</a></td>
-      <td>Obu, J., Westermann, S., Kääb, A., & Bartsch, A. (2018). Ground Temperature Map, 2000-2016. <i>Northern Hemisphere Permafrost.</i> Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research, Bremerhaven, PANGAEA, <a href="https://doi.org/10.1594/PANGAEA.888600">https://doi.org/10.1594/PANGAEA.888600</a></td>
+          zones dataset (ZIP file)</a>
+      </td>
+      <td>Obu, J., Westermann, S., Kääb, A., & Bartsch, A. (2018). Ground Temperature Map, 2000-2016. <i>Northern
+          Hemisphere Permafrost.</i> Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research,
+        Bremerhaven, PANGAEA, <a
+          href="https://doi.org/10.1594/PANGAEA.888600">https://doi.org/10.1594/PANGAEA.888600</a></td>
     </tr>
   </tbody>
 </table>
