@@ -59,7 +59,7 @@ async def run_fetch_all_eds(lat, lon):
         f"{host}eds/degree_days/thawing_index/{lat}/{lon}",
         f"{host}geology/point/{lat}/{lon}",
         f"{host}physiography/point/{lat}/{lon}",
-        f"{host}permafrost/point/gipl/{lat}/{lon}/2021/2031",
+        f"{host}permafrost/point/gipl/{lat}/{lon}/2021/2030",
         f"{host}eds/wet_days_per_year/point/{lat}/{lon}",
         f"{host}elevation/point/{lat}/{lon}",
         f"{host}proj_precip/point/{lat}/{lon}",
