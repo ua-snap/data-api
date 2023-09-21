@@ -267,7 +267,7 @@ def run_point_fetch_all_permafrost(lat, lon):
     Returns:
         JSON-like dict of permafrost data, or CSV of permafrost data if format=csv
     """
-    # validate request arguments if they exist; allow only format argument, otherwise throw an error
+    # validate request arguments if they exist; allow only format=csv argument, otherwise throw an error
     if len(request.args) == 0:
         pass
     elif "format" in request.args:
@@ -389,7 +389,7 @@ async def run_fetch_gipl_1km_point_data(
 
     x, y = project_latlon(lat, lon, 3338)
 
-    # CP: the next two code blocks that validate year and summary type selections could be in the `validate_request` module but the first does use a specific time index so that needs more thought
+    # year validation could be moved to `validate_request` module: need a function that uses the time index from rasdaman coverage to validate min/max years... could this be an API-wide function for all rasdaman coverages?
     if start_year is not None or end_year is not None:
         try:
             time_index = generate_gipl1km_time_index()
