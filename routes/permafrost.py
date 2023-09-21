@@ -220,6 +220,18 @@ def gipl_1km_point_data(lat, lon, start_year=None, end_year=None):
             )
         )
 
+    elif all(key in request.args for key in ["summarize", "format"]):
+        if (request.args.get("summarize") == "mmm") & (
+            request.args.get("format") == "csv"
+        ):
+            return asyncio.run(
+                run_fetch_gipl_1km_point_data(
+                    lat, lon, start_year, end_year, summarize="mmm"
+                )
+            )
+        else:
+            return render_template("400/bad_request.html"), 400
+
     elif "summarize" in request.args:
         if request.args.get("summarize") == "mmm":
             return asyncio.run(
