@@ -27,10 +27,6 @@ Example Fire Query:
  -  http://localhost:5000/fire/point/65.0628/-146.1627
  -  http://localhost:5000/fire/point/52.906/-148.345
 
-Example Glacier Query:
- - http://localhost:5000/glacier/point/60.606/-143.345
- - http://localhost:5000/glacier/point/52.906/-148.345
-
 Example Geology Query
  - http://localhost:5000/geology/point/69.606/-145.345
  - http://localhost:5000/geology/point/56.606/-143.345
