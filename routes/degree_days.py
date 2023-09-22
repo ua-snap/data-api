@@ -147,7 +147,7 @@ def get_dd_plate(var_ep, lat, lon, preview=None):
 
         # Iterate through the keys in both dictionaries
         for key in first.keys() | last.keys():
-            # Merge the dictionaries for the current key
+            # Merge the dictionaries on the current key
             combined_dict[key] = {
                 **(first.get(key, {}) or {}),
                 **(last.get(key, {}) or {}),

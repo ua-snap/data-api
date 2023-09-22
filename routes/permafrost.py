@@ -354,7 +354,7 @@ async def run_fetch_gipl_1km_point_data(
 
 
 async def run_eds_requests(lat, lon):
-    year_ranges = [{"start": 2021, "end": 2025}, {"start": 2095, "end": 2100}]
+    year_ranges = [{"start": 2021, "end": 2025}, {"start": 2096, "end": 2100}]
     tasks = []
     for years in year_ranges:
         tasks.append(
@@ -438,6 +438,17 @@ def aggregate_csv(permafrostData):
 
 
 def combine_permafrost_preview(permafrostData):
+    """
+    Combines the permafrost data that contains the models, years,
+    scenarios, and variables so that each model contains the years associated with th
+        Args:
+            permafrostData - JSON-like dictionary of permafrost values
+                             ranging from 2011-2015 and 2096-2100
+
+        Returns:
+            JSON-like dict of preview permafrost data
+    """
+
     # Initialize an empty dictionary to store the combined data
     permafrost_data = {}
 
@@ -467,8 +478,18 @@ def combine_permafrost_preview(permafrostData):
 
 @routes.route("/eds/permafrost/point/<lat>/<lon>")
 def permafrost_eds_request(lat, lon):
+    """
+    Endpoint for providing permafrost preview of GIPL 2.0 data
+        Args:
+            lat (float): latitude
+            lon (float): longitude
+
+        Returns:
+            JSON-like dict of preview permafrost data
+    """
     permafrostData = asyncio.run(run_eds_requests(lat, lon))
 
+    # Error response checking for invalid input parameters
     for response in permafrostData:
         if isinstance(response, tuple):
             # Returns error template that was generated for invalid request
