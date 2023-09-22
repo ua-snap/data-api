@@ -117,8 +117,8 @@ def degree_days_about():
     return render_template("/documentation/degree_days.html")
 
 
-@routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")
-def get_dd_plate(var_ep, lat, lon):
+@routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>/<preview>")
+def get_dd_plate(var_ep, lat, lon, preview=None):
     """
     Endpoint for requesting all data required for the Heating Degree Days,
     Below Zero Degree Days, Thawing Index, and Freezing Index in the
@@ -127,45 +127,72 @@ def get_dd_plate(var_ep, lat, lon):
         var_ep (str): heating, below_zero, thawing_index, or freezing_index
         lat (float): latitude
         lon (float): longitude
+        preview (string): Generates CSV preview for degree day variable for
+                          ArcticEDS.
     Notes:
         example request: http://localhost:5000/eds/degree_days/heating/65.0628/-146.1627
     """
-    summarized_data = {}
-    if "historical" not in summarized_data:
-        summarized_data["historical"] = {}
+    if preview:
+        # Grabs the first and last 5 years of
+        # the data for a particular variable
+        first = run_fetch_dd_point_data(var_ep, lat, lon, 1980, 1984)
+        last = run_fetch_dd_point_data(var_ep, lat, lon, 2096, 2100)
+        combined_dict = {}
 
-    all_data = run_fetch_dd_point_data(var_ep, lat, lon)
+        # Error response checking for invalid input parameters
+        for response in [first, last]:
+            if isinstance(response, tuple):
+                # Returns error template that was generated for invalid request
+                return response[0]
 
-    historical_values = list(map(lambda x: x["dd"], all_data["ERA-Interim"].values()))
-    summarized_data["historical"] = {
-        "ddmax": max(historical_values),
-        "ddmean": round(np.mean(historical_values)),
-        "ddmin": min(historical_values),
-    }
+        # Iterate through the keys in both dictionaries
+        for key in first.keys() | last.keys():
+            # Merge the dictionaries for the current key
+            combined_dict[key] = {
+                **(first.get(key, {}) or {}),
+                **(last.get(key, {}) or {}),
+            }
 
-    eras = [
-        {"start": 2010, "end": 2039},
-        {"start": 2040, "end": 2069},
-        {"start": 2070, "end": 2099},
-    ]
-    models = list(all_data.keys())
-    models.remove("ERA-Interim")
-    for era in eras:
-        era_label = str(era["start"]) + "-" + str(era["end"])
-        if era_label not in summarized_data:
-            summarized_data[era_label] = {}
-        dd_values = []
-        for model in all_data.keys():
-            for year, value in all_data[model].items():
-                if year >= era["start"] and year <= era["end"]:
-                    dd_values.append(value["dd"])
-        summarized_data[era_label] = {
-            "ddmin": min(dd_values),
-            "ddmean": round(np.mean(dd_values)),
-            "ddmax": max(dd_values),
+        return jsonify(combined_dict)
+    else:
+        summarized_data = {}
+        if "historical" not in summarized_data:
+            summarized_data["historical"] = {}
+
+        all_data = run_fetch_dd_point_data(var_ep, lat, lon)
+
+        historical_values = list(
+            map(lambda x: x["dd"], all_data["ERA-Interim"].values())
+        )
+        summarized_data["historical"] = {
+            "ddmax": max(historical_values),
+            "ddmean": round(np.mean(historical_values)),
+            "ddmin": min(historical_values),
         }
 
-    return jsonify(summarized_data)
+        eras = [
+            {"start": 2010, "end": 2039},
+            {"start": 2040, "end": 2069},
+            {"start": 2070, "end": 2099},
+        ]
+        models = list(all_data.keys())
+        models.remove("ERA-Interim")
+        for era in eras:
+            era_label = str(era["start"]) + "-" + str(era["end"])
+            if era_label not in summarized_data:
+                summarized_data[era_label] = {}
+            dd_values = []
+            for model in all_data.keys():
+                for year, value in all_data[model].items():
+                    if year >= era["start"] and year <= era["end"]:
+                        dd_values.append(value["dd"])
+            summarized_data[era_label] = {
+                "ddmin": min(dd_values),
+                "ddmean": round(np.mean(dd_values)),
+                "ddmax": max(dd_values),
+            }
+
+        return jsonify(summarized_data)
 
 
 def package_dd_point_data(point_data, start_year=None, end_year=None):
@@ -290,7 +317,6 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
     return point_data_list
 
 
-
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>")
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>/<start_year>/<end_year>")
 def run_fetch_dd_point_data(var_ep, lat, lon, start_year=None, end_year=None):
@@ -353,7 +379,6 @@ def run_fetch_dd_point_data(var_ep, lat, lon, start_year=None, end_year=None):
             return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
 
     return postprocess(point_pkg, cov_id_str)
-
 
 
 def validate_years(start_year, end_year):
