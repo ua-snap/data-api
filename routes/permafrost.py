@@ -357,6 +357,33 @@ async def run_fetch_gipl_1km_point_data(
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
+async def run_eds_requests(lat, lon):
+    year_ranges = [
+        {
+            "start": 2021,
+            "end": 2025
+        },
+        {
+            "start": 2095,
+            "end": 2100
+        }
+        ]
+    tasks = []
+    for years in year_ranges:
+        tasks.append(
+            asyncio.create_task(
+                run_fetch_gipl_1km_point_data(
+                    lat,
+                    lon,
+                    start_year=years["start"],
+                    end_year=years["end"]
+                )
+            ),
+        )
+
+    results = await asyncio.gather(*tasks)
+    return results
+
 async def run_ncr_requests(lat, lon):
     year_ranges = [
         {
@@ -423,6 +450,20 @@ def aggregate_csv(permafrostData):
                 combined_lines.append(key + "," + line)
 
     return "\n".join(combined_lines)
+
+
+
+@routes.route("/eds/permafrost/point/<lat>/<lon>")
+def permafrost_eds_request(lat, lon):
+    permafrostData = asyncio.run(run_eds_requests(lat, lon))
+
+    for response in permafrostData:
+        if isinstance(response, tuple):
+            # Returns error template that was generated for invalid request
+            return response[0]
+
+    return permafrostData
+
 
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
