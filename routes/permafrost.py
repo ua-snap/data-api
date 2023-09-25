@@ -1,11 +1,7 @@
 import asyncio
 import pandas as pd
 from urllib.parse import quote
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-)
+from flask import Blueprint, render_template, request, jsonify
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -434,6 +430,22 @@ async def run_fetch_gipl_1km_point_data(
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
+async def run_eds_requests(lat, lon):
+    year_ranges = [{"start": 2021, "end": 2025}, {"start": 2096, "end": 2100}]
+    tasks = []
+    for years in year_ranges:
+        tasks.append(
+            asyncio.create_task(
+                run_fetch_gipl_1km_point_data(
+                    lat, lon, start_year=years["start"], end_year=years["end"]
+                )
+            ),
+        )
+
+    results = await asyncio.gather(*tasks)
+    return results
+
+
 async def run_ncr_requests(lat, lon):
     year_ranges = [
         {
@@ -500,6 +512,67 @@ def aggregate_csv(permafrostData):
                 combined_lines.append(key + "," + line)
 
     return "\n".join(combined_lines)
+
+
+def combine_permafrost_preview(permafrostData):
+    """
+    Combines the permafrost data that contains the models, years,
+    scenarios, and variables so that each model contains the years associated with th
+        Args:
+            permafrostData - JSON-like dictionary of permafrost values
+                             ranging from 2011-2015 and 2096-2100
+
+        Returns:
+            JSON-like dict of preview permafrost data
+    """
+
+    # Initialize an empty dictionary to store the combined data
+    permafrost_data = {}
+
+    # Iterate through the original data
+    for model_data in permafrostData:
+        for model_name, model_values in model_data.items():
+            # Check if the model_name is already in the permafrost_data dictionary
+            if model_name not in permafrost_data:
+                permafrost_data[model_name] = {}
+
+            for year, year_data in model_values.items():
+                # Check if the year is already in the permafrost_data[model_name] dictionary
+                if year not in permafrost_data[model_name]:
+                    permafrost_data[model_name][year] = {}
+
+                for scenario, scenario_data in year_data.items():
+                    # Check if the scenario is already in the permafrost_data[model_name][year] dictionary
+                    if scenario not in permafrost_data[model_name][year]:
+                        permafrost_data[model_name][year][scenario] = {}
+
+                    for variable, value in scenario_data.items():
+                        # Assign the value to the permafrost_data[model_name][year][scenario][variable]
+                        permafrost_data[model_name][year][scenario][variable] = value
+
+    return permafrost_data
+
+
+@routes.route("/eds/permafrost/point/<lat>/<lon>")
+def permafrost_eds_request(lat, lon):
+    """
+    Endpoint for providing permafrost preview of GIPL 2.0 data
+        Args:
+            lat (float): latitude
+            lon (float): longitude
+
+        Returns:
+            JSON-like dict of preview permafrost data
+    """
+    permafrostData = asyncio.run(run_eds_requests(lat, lon))
+
+    # Error response checking for invalid input parameters
+    for response in permafrostData:
+        if isinstance(response, tuple):
+            # Returns error template that was generated for invalid request
+            return response[0]
+
+    return jsonify(combine_permafrost_preview(permafrostData))
 
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
