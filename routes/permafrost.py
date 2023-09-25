@@ -196,25 +196,88 @@ def pf_about():
 
 @routes.route("/permafrost/point/gipl/<lat>/<lon>")
 @routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>")
-@routes.route("/permafrost/point/gipl/<lat>/<lon>/<start_year>/<end_year>/<summarize>")
-# add another synonym with /summarize/ and use that to break out the summary, may need to default the value of summary_operation to None which would make sense
-# add conditional to call correct packaging function
-def gipl_1km_point_data(lat, lon, start_year=None, end_year=None, summarize=None):
-    return asyncio.run(
-        run_fetch_gipl_1km_point_data(lat, lon, start_year, end_year, summarize)
-    )
+def gipl_1km_point_data(lat, lon, start_year=None, end_year=None):
+    """Run the async request for GIPL permafrost data at a single point.
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+        start_year (float): start year
+        end_year (float): end year
+
+    Optional request args:
+        summarize: summarization method; must be 'mmm' for min, mean, max summary (eg, '?summarize=mmm' appended to endpoint)
+        format: format for data export; must be 'csv' for CSV export (eg, '?format=csv' appended to endpoint)
+
+    Returns:
+        JSON-like dict of permafrost data, or CSV of permafrost data if format=csv
+    """
+    # validate request arguments if they exist; set summarize argument accordingly
+
+    if len(request.args) == 0:
+        return asyncio.run(
+            run_fetch_gipl_1km_point_data(
+                lat, lon, start_year, end_year, summarize=None
+            )
+        )
+
+    elif all(key in request.args for key in ["summarize", "format"]):
+        if (request.args.get("summarize") == "mmm") & (
+            request.args.get("format") == "csv"
+        ):
+            return asyncio.run(
+                run_fetch_gipl_1km_point_data(
+                    lat, lon, start_year, end_year, summarize="mmm"
+                )
+            )
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    elif "summarize" in request.args:
+        if request.args.get("summarize") == "mmm":
+            return asyncio.run(
+                run_fetch_gipl_1km_point_data(
+                    lat, lon, start_year, end_year, summarize="mmm"
+                )
+            )
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    elif "format" in request.args:
+        if request.args.get("format") == "csv":
+            return asyncio.run(
+                run_fetch_gipl_1km_point_data(
+                    lat, lon, start_year, end_year, summarize=None
+                )
+            )
+
+    else:
+        return render_template("400/bad_request.html"), 400
 
 
 @routes.route("/permafrost/point/<lat>/<lon>")
 def run_point_fetch_all_permafrost(lat, lon):
-    """Run the async request for permafrost data at a single point.
+    """Run the async request for all permafrost data at a single point.
     Args:
         lat (float): latitude
         lon (float): longitude
 
+    Optional request args:
+        format: format for data export; must be 'csv' for CSV export (eg, '?format=csv' appended to endpoint)
+
     Returns:
-        JSON-like dict of permafrost data
+        JSON-like dict of permafrost data, or CSV of permafrost data if format=csv
     """
+    # validate request arguments if they exist; allow only format=csv argument, otherwise throw an error
+    if len(request.args) == 0:
+        pass
+    elif "format" in request.args:
+        if request.args.get("format") == "csv":
+            pass
+        else:
+            return render_template("400/bad_request.html"), 400
+    else:
+        return render_template("400/bad_request.html"), 400
+
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -273,6 +336,26 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
             wcps_response_data.append(model)
         return wcps_response_data
 
+    if start_year is None and end_year is None and summarize is not None:
+        wcps_response_data = list()
+        # in lieu of start/end dates but requesting a summary, use min and max years of dataset to summarize entire dataset
+        time_index = generate_gipl1km_time_index()
+        minyear = str(time_index.min())[:4]
+        maxyear = str(time_index.max())[:4]
+        timestring = f'"{minyear}-01-01T00:00:00.000Z":"{maxyear}-01-01T00:00:00.000Z"'
+        for model_num in range(3):
+            model = list()
+            for scenario in range(2):
+                for summary_operation in ["min", "avg", "max"]:
+                    wcps_request_str = make_gipl1km_wcps_request_str(
+                        x, y, timestring, model_num, scenario, summary_operation
+                    )
+                    model.append(
+                        await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                    )
+            wcps_response_data.append(model)
+        return wcps_response_data
+
     if start_year is not None and end_year is not None and summarize is None:
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
@@ -306,7 +389,7 @@ async def run_fetch_gipl_1km_point_data(
 
     x, y = project_latlon(lat, lon, 3338)
 
-    # CP: the next two code blocks that validate year and summary type selections could be in the `validate_request` module but the first does use a specific time index so that needs more thought
+    # year validation could be moved to `validate_request` module: need a function that uses the time index from rasdaman coverage to validate min/max years... could this be an API-wide function for all rasdaman coverages?
     if start_year is not None or end_year is not None:
         try:
             time_index = generate_gipl1km_time_index()
@@ -319,15 +402,6 @@ async def run_fetch_gipl_1km_point_data(
         if years_valid != True:
             return render_template("400/bad_request.html"), 400
 
-    # validate the summarize option
-    if summarize is not None:
-        try:
-            summarize_valid = summarize in ["summary", "mmm"]
-        except:
-            return render_template("400/bad_request.html"), 400
-        if summarize_valid != True:
-            return render_template("400/bad_request.html"), 400
-
     try:
         gipl_1km_point_data = await asyncio.create_task(
             fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize)
@@ -338,6 +412,9 @@ async def run_fetch_gipl_1km_point_data(
         return render_template("500/server_error.html"), 500
 
     if all(val != None for val in [start_year, end_year, summarize]):
+        gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
+
+    elif start_year is None and end_year is None and summarize is not None:
         gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
 
     elif start_year is not None and end_year is not None and summarize is None:
