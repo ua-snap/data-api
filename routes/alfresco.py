@@ -15,7 +15,6 @@ from fetch_data import *
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
-    project_latlon,
     validate_var_id,
 )
 from postprocessing import nullify_and_prune, postprocess
@@ -41,26 +40,6 @@ var_label_lu = {
 }
 
 
-async def fetch_alf_point_data(x, y, cov_id_str):
-    """Make the async request for the data at the specified point for
-    a specific coverage
-
-    Args:
-        x (float): lower x-coordinate bound
-        y (float): lower y-coordinate bound
-        cov_id_str (str): shared portion of coverage_ids to query
-
-    Returns:
-        list of data results from each of historical and future coverages
-    """
-    # set up WCS request strings
-    request_strs = []
-    request_strs.append(generate_wcs_getcov_str(x, y, cov_id_str))
-    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
-    point_data_list = await fetch_data(urls)
-    return point_data_list
-
-
 async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
     """Make the async request for the data at the specified point for
     a specific coverage
@@ -78,79 +57,6 @@ async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
     urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
     bbox_ds_list = await fetch_bbox_netcdf_list(urls)
     return bbox_ds_list
-
-
-def package_ar5_alf_point_data(point_data, var_ep):
-    """Add dim names to JSON response from typical AR5 point query
-
-    Args:
-        point_data (list): nested list containing JSON
-            results of AR5 WCPS query
-        var_ep (str): variable name
-
-    Returns:
-        JSON-like dict of query results
-    """
-    point_data_pkg = {}
-
-    if var_ep == "flammability":
-        dim_encodings = flammability_dim_encodings
-    elif var_ep == "veg_type":
-        dim_encodings = veg_type_dim_encodings
-
-    # AR5 data:
-    # era, model, scenario
-    for ei, m_li in enumerate(point_data):  # (nested list with model at dim 0)
-        era = dim_encodings["era"][ei]
-        point_data_pkg[era] = {}
-        for mi, s_li in enumerate(m_li):  # (nested list with scenario at dim 0)
-            model = dim_encodings["model"][mi]
-            point_data_pkg[era][model] = {}
-            for si, value in enumerate(s_li):
-                scenario = dim_encodings["scenario"][si]
-                if var_ep == "flammability":
-                    point_data_pkg[era][model][scenario] = value
-                elif var_ep == "veg_type":
-                    point_data_pkg[era][model][scenario] = {}
-                    v_li = value
-                    for vi, value in enumerate(v_li):
-                        veg_type = dim_encodings["veg_type"][vi]
-                        percent = round(value * 100, 2)
-                        point_data_pkg[era][model][scenario][veg_type] = percent
-
-    point_data_pkg = remove_invalid_dim_combos(var_ep, point_data_pkg)
-
-    return point_data_pkg
-
-
-def package_ar5_alf_averaged_point_data(point_data, var_ep):
-    """Add dim names to JSON response from WCPS point query
-    for the AR5/CMIP5 coverages
-
-    Args:
-        point_data (list): nested list containing JSON
-            results of AR5 WCPS query
-        var_ep (str): variable name
-
-    Returns:
-        JSON-like dict of query results
-    """
-    point_data_pkg = {}
-    # AR5 data:
-    # model, scenario
-    for mi, s_li in enumerate(point_data):  # (nested list with scenario at dim 0)
-        model = flammability_future_dim_encodings["model"][mi]
-        point_data_pkg[model] = {}
-        for si, value in enumerate(s_li):
-            scenario = flammability_future_dim_encodings["scenario"][si]
-            if var_ep == "flammability":
-                point_data_pkg[model][scenario] = round(value, 4)
-            elif var_ep == "veg_type":
-                point_data_pkg[model][scenario] = {}
-                for vi, value in enumerate(v_li):
-                    veg_type = future_dim_encodings["veg_type"][vi]
-                    point_data_pkg[model][scenario][veg_type] = round(value, 4)
-    return point_data_pkg
 
 
 def get_poly_mask_arr(ds, poly, bandname):
@@ -342,7 +248,6 @@ def remove_invalid_dim_combos(var_ep, results):
 @routes.route("/alfresco/veg_type/")
 @routes.route("/alfresco/flammability/point/")
 @routes.route("/alfresco/veg_type/point/")
-@routes.route("/alfresco/point/")
 @routes.route("/alfresco/flammability/area/")
 @routes.route("/alfresco/veg_type/area/")
 @routes.route("/alfresco/area/")
@@ -351,58 +256,6 @@ def remove_invalid_dim_combos(var_ep, results):
 @routes.route("/alfresco/local/")
 def alfresco_about():
     return render_template("documentation/alfresco.html")
-
-
-@routes.route("/alfresco/<var_ep>/point/<lat>/<lon>")
-def run_fetch_alf_point_data(var_ep, lat, lon):
-    """Point data endpoint. Fetch point data for
-    specified lat/lon and return JSON-like dict.
-
-    Args:
-        var_ep (str): variable endpoint. Flammability or veg_type
-        lat (float): latitude
-        lon (float): longitude
-
-    Returns:
-        JSON-like dict of requested ALFRESCO data
-
-    Notes:
-        example request: http://localhost:5000/flammability/point/65.0628/-146.1627
-    """
-    validation = validate_latlon(lat, lon)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    if validation == 422:
-        return (
-            render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
-            ),
-            422,
-        )
-
-    x, y = project_latlon(lat, lon, 3338)
-
-    if var_ep in var_ep_lu.keys():
-        cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
-        try:
-            point_data_list = asyncio.run(fetch_alf_point_data(x, y, cov_id_str))
-        except Exception as exc:
-            if hasattr(exc, "status") and exc.status == 404:
-                return render_template("404/no_data.html"), 404
-            return render_template("500/server_error.html"), 500
-    else:
-        return render_template("400/bad_request.html"), 400
-
-    point_pkg = package_ar5_alf_point_data(point_data_list, var_ep)
-
-    if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, var_ep)
-        if point_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-        place_id = request.args.get("community")
-        return create_csv(point_pkg, var_ep, place_id, lat, lon)
-
-    return postprocess(point_pkg, var_ep)
 
 
 @routes.route("/alfresco/<var_ep>/local/<lat>/<lon>")

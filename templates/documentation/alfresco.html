@@ -10,6 +10,12 @@
   of 30-year eras from 2010&ndash;2099.
 </p>
 
+<p>Due to the statistical nature of the ALFRESCO model, selecting a single pixel for output is not recommended.
+  Therefore, there is no point query service endpoint for this dataset. Instead, this API offers summarized data
+  corresponding to Hydrologic Unit (Level 12), or HUC-12, polygons as a reasonable compromise between local specificity
+  and statistically-valid interpretation.
+</p>
+
 <p>
   See the <a href="https://uaf-snap.org/project/alfresco-and-habitat-research/">ALFRESCO and Habitat Research project
     page</a> for more information. Links to academic references and similar datasets are included at the bottom of this
@@ -46,37 +52,6 @@
 </table>
 
 <h3>Service endpoints</h3>
-
-<h4>Point query</h4>
-<p>
-  Query data derived from 1km ALFRESCO for a single point specified by latitude
-  and longitude.
-</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Flammability point query</td>
-      <td><a href="/alfresco/flammability/point/65.0628/-146.1627">/alfresco/flammability/point/65.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>Vegetation type point query</td>
-      <td><a href="/alfresco/veg_type/point/65.0628/-146.1627">/alfresco/veg_type/point/65.0628/-146.1627</a></td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
-    </tr>
-  </tfoot>
-</table>
 
 <h4>Intersecting area query</h4>
 <p>
@@ -259,13 +234,16 @@
       <td><a
           href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/210f00ff-86e5-47dd-a406-9167af3630af">
           ALFRESCO Model Outputs - Relative Vegetation Change</a></td>
-      <td rowspan="2" style="vertical-align: middle; border-bottom: none;">Johnstone, J. F., Rupp, T. S., Olson, M. & Verbyla, D. (2011).  Modeling impacts of fire severity on successional trajectories and future fire behavior in Alaskan boreal forests.  <i>Landscape Ecology, 26</i>, 487&ndash;500.  <a href="https://doi.org/10.1007/s10980-011-9574-6">https://doi.org/10.1007/s10980-011-9574-6</a></td>
+      <td rowspan="2" style="vertical-align: middle; border-bottom: none;">Johnstone, J. F., Rupp, T. S., Olson, M. &
+        Verbyla, D. (2011). Modeling impacts of fire severity on successional trajectories and future fire behavior in
+        Alaskan boreal forests. <i>Landscape Ecology, 26</i>, 487&ndash;500. <a
+          href="https://doi.org/10.1007/s10980-011-9574-6">https://doi.org/10.1007/s10980-011-9574-6</a></td>
     </tr>
     <tr>
       <td><a
           href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/eeaaca2c-0280-4226-b126-fda42a2b6214">
           ALFRESCO Model Outputs - Relative Flammability</a></td>
-      
+
       <td>
     </tr>
   </tbody>
