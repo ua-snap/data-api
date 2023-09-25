@@ -1,70 +1,37 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h2>Permafrost Data</h2>
 
 <p>
-  These endpoints provide access to permafrost information for Alaska, including outputs from academic research on
-  permafrost type and extent as well as ground temperatures.
+  These endpoints provide access to permafrost information for Alaska, including
+  outputs from academic research on permafrost type and extent as well as ground
+  temperatures.
 </p>
 
 <p>
-  Annual projections of permafrost top and base depths, talik thickness, and mean annual ground temperature at seven
-  different depths were provided by the GIPL 2.0 model at a resolution of 1km for years 2021&ndash;2120. These
-  projections are provided for GFDL-CM3 and NCAR-CCSM4 model outputs, as well as a 5-model average, under the RCP
-  4.5 and RCP 8.5 emissions scenarios.
+  Annual projections of permafrost top and base depths, talik thickness, and
+  mean annual ground temperature at seven different depths were provided by the
+  GIPL 2.0 model at a resolution of 1km for years 2021&ndash;2120. These
+  projections are provided for GFDL-CM3 and NCAR-CCSM4 model outputs, as well as
+  a 5-model average, under the RCP 4.5 and RCP 8.5 emissions scenarios.
 </p>
 
 <p>
-  Permafrost extent and ground ice volume data from 2008 were provided by Jorgenson et al. Mean annual top of permafrost
-  ground temperature and permafrost extent data from 2000&ndash;2016 were provided by Obu et al.
+  Permafrost extent and ground ice volume data from 2008 were provided by
+  Jorgenson et al. Mean annual top of permafrost ground temperature and
+  permafrost extent data from 2000&ndash;2016 were provided by Obu et al.
 </p>
 
-<p>Links to academic references and source datasets are included at the bottom of this page.</p>
+<p>
+  Links to academic references and source datasets are included at the bottom of
+  this page.
+</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Geophysical Institute Permafrost Lab (GIPL) model output (point query)</h4>
 
 <p>
-  Query GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a single point specified by latitude and
-  longitude.
-</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GIPL point query of entire time series</td>
-      <td><a href="/permafrost/point/gipl/63.0628/-146.1627">/permafrost/point/gipl/63.0628/-146.1627</a>
-      </td>
-    </tr>
-    <tr>
-      <td>GIPL point query within year range</td>
-      <td><a
-          href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050">/permafrost/point/gipl/63.0628/-146.1627/2040/2050</a>
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">Min/mean/max summaries of projected years are available by appending
-        <code>?summarize=mmm</code> to the URL. <br> CSV output is also available by appending <code>?format=csv</code>
-        to
-        the URL.
-      </td>
-    </tr>
-  </tfoot>
-</table>
-
-<!-- <h4>Geophysical Institute Permafrost Lab (GIPL) min/mean/max summaries (point query)</h4>
-
-<p>
-  Query minimum, mean, and maximum summaries of GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a
+  Query GIPL 2.0 model outputs (1 km spatial resolution) for ten variables for a
   single point specified by latitude and longitude.
 </p>
 
@@ -77,22 +44,40 @@
   </thead>
   <tbody>
     <tr>
-      <td>GIPL point query within year range min/mean/max summary</td>
-      <td><a
-          href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm">/permafrost/point/gipl/63.0628/-146.1627/2040/2050/mmm</a>
+      <td>GIPL point query of entire time series</td>
+      <td>
+        <a href="/permafrost/point/gipl/63.0628/-146.1627"
+          >/permafrost/point/gipl/63.0628/-146.1627</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>GIPL point query within year range</td>
+      <td>
+        <a href="/permafrost/point/gipl/63.0628/-146.1627/2040/2050"
+          >/permafrost/point/gipl/63.0628/-146.1627/2040/2050</a
+        >
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        Min/mean/max summaries of projected years are available by appending
+        <code>?summarize=mmm</code> to the URL. <br />
+        CSV output is also available by appending <code>?format=csv</code>
+        to the URL.
+      </td>
     </tr>
   </tfoot>
-</table> -->
+</table>
 
 <h4>Permafrost model output summaries from multiple sources (point query)</h4>
 
-<p>Query permafrost model outputs (e.g. extent, ground temperatures) from multiple sources.</p>
+<p>
+  Query permafrost model outputs (e.g. extent, ground temperatures) from
+  multiple sources.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -104,13 +89,18 @@
   <tbody>
     <tr>
       <td>Multiple permafrost data sources point query summary</td>
-      <td><a href="/permafrost/point/65.0628/-146.1627">/permafrost/point/65.0628/-146.1627</a>
+      <td>
+        <a href="/permafrost/point/65.0628/-146.1627"
+          >/permafrost/point/65.0628/-146.1627</a
+        >
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
       </td>
     </tr>
   </tfoot>
@@ -120,7 +110,9 @@
 
 <h4>Geophysical Institute Permafrost Lab (GIPL) model output</h4>
 
-<p>Results from GIPL entire series or time slice queries will look like this:</p>
+<p>
+  Results from GIPL entire series or time slice queries will look like this:
+</p>
 
 <pre>
 {
@@ -301,35 +293,64 @@
   </thead>
   <tbody>
     <tr>
-      <td><a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36">GIPL
-          2.0 1 km Model Outputs</a></td>
-      <td>Marchenko, S., Romanovsky, V., & Tipenko, G. (2008). Numerical modeling of spatial permafrost dynamics in
-        Alaska. <i>Ninth International Conference on Permafrost, Online Proceedings, Volume 2</i>, 1125&ndash;1130.
-        Accessed 2023-09-08 from <a
-          href="https://www.permafrost.org/event/icop9/">https://www.permafrost.org/event/icop9/</a>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/c24a957b-8a56-40bf-bc09-43a567182d36"
+          >GIPL 2.0 1 km Model Outputs</a
+        >
       </td>
-
+      <td>
+        Marchenko, S., Romanovsky, V., & Tipenko, G. (2008). Numerical modeling
+        of spatial permafrost dynamics in Alaska.
+        <i
+          >Ninth International Conference on Permafrost, Online Proceedings,
+          Volume 2</i
+        >, 1125&ndash;1130. Accessed 2023-09-08 from
+        <a href="https://www.permafrost.org/event/icop9/"
+          >https://www.permafrost.org/event/icop9/</a
+        >
+      </td>
     </tr>
     <tr>
-      <td><a href="https://catalog.northslopescience.org/dataset/1725">Jorgenson Permafrost Characteristics</a></td>
-      <td>Jorgenson, M., Yoshikawa, K., Kanevskiy, M., Shur, Y., Romanovsky, V., Marchenko, S., & Jones, B. (2008).
-        Permafrost Characteristics of Alaska + Map. <i>Ninth International Conference on Permafrost, Online Proceedings,
-          Volume 1</i>, 121&ndash;122. Accessed 2023-09-08 from <a
-          href="https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf">https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf</a>
+      <td>
+        <a href="https://catalog.northslopescience.org/dataset/1725"
+          >Jorgenson Permafrost Characteristics</a
+        >
+      </td>
+      <td>
+        Jorgenson, M., Yoshikawa, K., Kanevskiy, M., Shur, Y., Romanovsky, V.,
+        Marchenko, S., & Jones, B. (2008). Permafrost Characteristics of Alaska
+        + Map.
+        <i
+          >Ninth International Conference on Permafrost, Online Proceedings,
+          Volume 1</i
+        >, 121&ndash;122. Accessed 2023-09-08 from
+        <a
+          href="https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf"
+          >https://www.researchgate.net/profile/Sergey-Marchenko-3/publication/334524021_Permafrost_Characteristics_of_Alaska_Map/links/5d2f7672a6fdcc2462e86fae/Permafrost-Characteristics-of-Alaska-Map.pdf</a
+        >
       </td>
     </tr>
     <tr>
-      <td><a
-          href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip">Mean
-          annual ground temperature dataset (ZIP file)</a>,<br />
-        <a href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip">Permafrost
-          zones dataset (ZIP file)</a>
+      <td>
+        <a
+          href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_MAGTM_5.0_20181127_2000_2016_NH.zip"
+          >Mean annual ground temperature dataset (ZIP file)</a
+        >,<br />
+        <a
+          href="https://store.pangaea.de/Publications/ObuJ-etal_2018/UiO_PEX_PERZONES_5.0_20181128_2000_2016_NH.zip"
+          >Permafrost zones dataset (ZIP file)</a
+        >
       </td>
-      <td>Obu, J., Westermann, S., Kääb, A., & Bartsch, A. (2018). Ground Temperature Map, 2000-2016. <i>Northern
-          Hemisphere Permafrost.</i> Alfred Wegener Institute, Helmholtz Centre for Polar and Marine Research,
-        Bremerhaven, PANGAEA, <a
-          href="https://doi.org/10.1594/PANGAEA.888600">https://doi.org/10.1594/PANGAEA.888600</a></td>
+      <td>
+        Obu, J., Westermann, S., Kääb, A., & Bartsch, A. (2018). Ground
+        Temperature Map, 2000-2016.
+        <i>Northern Hemisphere Permafrost.</i> Alfred Wegener Institute,
+        Helmholtz Centre for Polar and Marine Research, Bremerhaven, PANGAEA,
+        <a href="https://doi.org/10.1594/PANGAEA.888600"
+          >https://doi.org/10.1594/PANGAEA.888600</a
+        >
+      </td>
     </tr>
   </tbody>
 </table>
