@@ -6,22 +6,28 @@
 
 ## Running application
 
+Set `flask` application environment variables:
+
 `export FLASK_APP=application.py`
 
-`export FLASK_ENV=development`
+`export FLASK_DEBUG=True`
 
-Set the GeoServer/Rasdaman endpoints if needed, i.e.:
+Set the GeoServer/Rasdaman URL environment variables. (If not set using environment variables, these will default to the URLs found in `config.py`.):
 
 `export API_GS_BASE_URL=http://...`
 
 `export API_RAS_BASE_URL=https://apollo.snap.uaf.edu/rasdaman/`
 
+Run the application:
+
 `pipenv run flask run`
+
+## Query API endpoints
 
 Example Permafrost Query:
 
-- http://localhost:5000/permafrost/point/65.0628/-146.1627
-- http://localhost:5000/permafrost/point/52.906/-148.345
+- http://localhost:5000/permafrost/point/gipl/65.0628/-146.1627
+- http://localhost:5000/permafrost/point/gipl/52.906/-148.345
 
 Example Fire Query:
 
