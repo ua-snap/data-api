@@ -248,7 +248,6 @@ def remove_invalid_dim_combos(var_ep, results):
 @routes.route("/alfresco/veg_type/")
 @routes.route("/alfresco/flammability/point/")
 @routes.route("/alfresco/veg_type/point/")
-@routes.route("/alfresco/point/")
 @routes.route("/alfresco/flammability/area/")
 @routes.route("/alfresco/veg_type/area/")
 @routes.route("/alfresco/area/")
