@@ -1,7 +1,7 @@
 import asyncio
 import pandas as pd
 from urllib.parse import quote
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, Response
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -370,7 +370,7 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
 
 
 async def run_fetch_gipl_1km_point_data(
-    lat, lon, start_year=None, end_year=None, summarize=None
+    lat, lon, start_year=None, end_year=None, summarize=None, preview=None
 ):
     validation = validate_latlon(lat, lon)
     if validation == 400:
@@ -420,7 +420,7 @@ async def run_fetch_gipl_1km_point_data(
     else:
         gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
 
-    if request.args.get("format") == "csv":
+    if request.args.get("format") == "csv" or preview:
         point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
@@ -437,7 +437,7 @@ async def run_eds_requests(lat, lon):
         tasks.append(
             asyncio.create_task(
                 run_fetch_gipl_1km_point_data(
-                    lat, lon, start_year=years["start"], end_year=years["end"]
+                    lat, lon, start_year=years["start"], end_year=years["end"], preview=True
                 )
             ),
         )
@@ -564,15 +564,25 @@ def permafrost_eds_request(lat, lon):
         Returns:
             JSON-like dict of preview permafrost data
     """
-    permafrostData = asyncio.run(run_eds_requests(lat, lon))
-
+    permafrostData = dict()
+    permafrostData['permafrost'] = dict()
+    # summary = permafrost_ncr_request(lat, lon)
+    preview = asyncio.run(run_eds_requests(lat, lon))
+    print(preview)
+    # preview_response = Response(
+    #     preview,
+    #     mimetype="text/csv",
+    #     headers={
+    #         "Content-Type": "text/csv; charset=utf-8"
+    #     }
+    # )
     # Error response checking for invalid input parameters
-    for response in permafrostData:
-        if isinstance(response, tuple):
-            # Returns error template that was generated for invalid request
-            return response[0]
+    # for response in preview:
+    #     if isinstance(response, tuple):
+    #         # Returns error template that was generated for invalid request
+    #         return response[0]
 
-    return jsonify(combine_permafrost_preview(permafrostData))
+    return preview['csv_dicts']
 
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
