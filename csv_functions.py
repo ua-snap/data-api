@@ -55,6 +55,9 @@ def create_csv(
         "freezing_index_all",
     ]:
         properties = degree_days_csv(data, endpoint)
+    elif endpoint == "dd_preview":
+        metadata = ""
+        properties = degree_days_csv(data, endpoint)
     elif endpoint == "flammability":
         properties = flammability_csv(data)
     elif endpoint in ["gipl", "gipl_summary"]:
@@ -165,6 +168,9 @@ def build_csv_dicts(packaged_data, package_coords, fill_di=None, values=None):
     rows = []
     previous_coord_breadcrumb = None
     for coords in data_package_coord_combos:
+        # If there is no data, don't add to CSV line
+        if len(coords)<= 1:
+            continue
         row_di = {}
         # need more general way of handling fields to be inserted before or after
         # what are actually available in packaged dicts
@@ -293,6 +299,7 @@ def degree_days_csv(data, endpoint):
         "degree_days_below_zero_all",
         "thawing_index_all",
         "freezing_index_all",
+        "dd_preview",
     ]:
         coords = ["model", "year"]
         values = ["dd"]
@@ -316,6 +323,9 @@ def degree_days_csv(data, endpoint):
     elif endpoint in ["freezing_index", "freezing_index_all"]:
         filename_data_name = "Freezing Index"
         metadata = "# dd is the total annual degree days below freezing for the specified model\n"
+    elif endpoint in ["dd_preview"]:
+        filename_data_name = ""
+        metadata = ""
 
     return {
         "csv_dicts": csv_dicts,
