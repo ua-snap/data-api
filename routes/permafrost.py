@@ -432,7 +432,7 @@ async def run_fetch_gipl_1km_point_data(
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
-async def run_eds_requests(lat, lon):
+async def run_eds_preview(lat, lon):
     year_ranges = [{"start": 2021, "end": 2025}, {"start": 2096, "end": 2100}]
     tasks = []
     for years in year_ranges:
@@ -574,13 +574,17 @@ def permafrost_eds_request(lat, lon):
 
     # Get the summary and preview data
     summary = permafrost_ncr_request(lat, lon)
-    preview = asyncio.run(run_eds_requests(lat, lon))
+
+    # Check for error response from summary response
+    if isinstance(summary, tuple):
+        return summary[0]
+
+    preview = asyncio.run(run_eds_preview(lat, lon))
 
     # Check for error responses in the preview
     for response in preview:
-        if isinstance(response, Response) and response.status_code != 200:
-            # If an error response is encountered, return it immediately
-            return response
+        if isinstance(response, tuple):
+            return response[0]
 
     # If there are no error responses, include the summary and preview data in the response
     permafrostData["summary"] = summary
@@ -588,8 +592,9 @@ def permafrost_eds_request(lat, lon):
 
     preview_string = [r.data.decode("utf-8") for r in preview]
 
-    preview_future = preview_string[1].split("\n")[1:]
-    permafrostData["preview"] = preview_string[0] + "\n".join(preview_future)
+    preview_past = preview_string[0].split("\n")[:6]
+    preview_future = preview_string[1].split("\n")[-6:]
+    permafrostData["preview"] = "\n".join(preview_past) + "\n".join(preview_future)
     return jsonify(permafrostData)
 
 
@@ -605,7 +610,12 @@ def permafrost_ncr_request(lat, lon):
             if value[1] == 404:
                 return render_template("404/no_data.html"), 404
             if value[1] == 422:
-                return render_template("422/invalid_latlon.html"), 422
+                return (
+                    render_template(
+                        "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+                    ),
+                    422,
+                )
             else:
                 return render_template("500/server_error.html"), 500
 
