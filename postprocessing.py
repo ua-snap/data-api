@@ -22,6 +22,7 @@ nodata_mappings = {
     "geology": [],
     "gipl": [],
     "gipl_summary": [],
+    "gipl_preview": [],
     "heating_degree_days": nodata_values["default"],
     "heating_degree_days_all": nodata_values["default"],
     "landfastice": [],

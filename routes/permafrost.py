@@ -424,6 +424,8 @@ async def run_fetch_gipl_1km_point_data(
         point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
+        if preview:
+            return create_csv(point_pkg, "gipl_preview", lat=lat, lon=lon)
         if summarize is not None:
             return create_csv(point_pkg, "gipl_summary", lat=lat, lon=lon)
         return create_csv(point_pkg, "gipl", lat=lat, lon=lon)
@@ -437,7 +439,11 @@ async def run_eds_requests(lat, lon):
         tasks.append(
             asyncio.create_task(
                 run_fetch_gipl_1km_point_data(
-                    lat, lon, start_year=years["start"], end_year=years["end"], preview=True
+                    lat,
+                    lon,
+                    start_year=years["start"],
+                    end_year=years["end"],
+                    preview=True,
                 )
             ),
         )
@@ -565,24 +571,29 @@ def permafrost_eds_request(lat, lon):
             JSON-like dict of preview permafrost data
     """
     permafrostData = dict()
-    permafrostData['permafrost'] = dict()
-    # summary = permafrost_ncr_request(lat, lon)
-    preview = asyncio.run(run_eds_requests(lat, lon))
-    print(preview)
-    # preview_response = Response(
-    #     preview,
-    #     mimetype="text/csv",
-    #     headers={
-    #         "Content-Type": "text/csv; charset=utf-8"
-    #     }
-    # )
-    # Error response checking for invalid input parameters
-    # for response in preview:
-    #     if isinstance(response, tuple):
-    #         # Returns error template that was generated for invalid request
-    #         return response[0]
+    permafrostData["permafrost"] = dict()
 
-    return preview['csv_dicts']
+    # Get the summary and preview data
+    summary = permafrost_ncr_request(lat, lon)
+    preview = asyncio.run(run_eds_requests(lat, lon))
+
+    # Check for error responses in the preview
+    for response in preview:
+        if isinstance(response, Response) and response.status_code != 200:
+            # If an error response is encountered, return it immediately
+            return response
+
+    # If there are no error responses, include the summary and preview data in the response
+    permafrostData["permafrost"]["summary"] = summary
+    # permafrostData["permafrost"]["preview"] = [r.data.decode("utf-8") for r in preview]
+
+    preview_string = [r.data.decode("utf-8") for r in preview]
+
+    preview_future = preview_string[1].split("\n")[1:]
+    permafrostData["permafrost"]["preview"] = preview_string[0] + "\n".join(
+        preview_future
+    )
+    return jsonify(permafrostData)
 
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
