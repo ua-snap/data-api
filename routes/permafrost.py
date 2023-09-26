@@ -571,7 +571,6 @@ def permafrost_eds_request(lat, lon):
             JSON-like dict of preview permafrost data
     """
     permafrostData = dict()
-    permafrostData["permafrost"] = dict()
 
     # Get the summary and preview data
     summary = permafrost_ncr_request(lat, lon)
@@ -584,15 +583,13 @@ def permafrost_eds_request(lat, lon):
             return response
 
     # If there are no error responses, include the summary and preview data in the response
-    permafrostData["permafrost"]["summary"] = summary
+    permafrostData["summary"] = summary
     # permafrostData["permafrost"]["preview"] = [r.data.decode("utf-8") for r in preview]
 
     preview_string = [r.data.decode("utf-8") for r in preview]
 
     preview_future = preview_string[1].split("\n")[1:]
-    permafrostData["permafrost"]["preview"] = preview_string[0] + "\n".join(
-        preview_future
-    )
+    permafrostData["preview"] = preview_string[0] + "\n".join(preview_future)
     return jsonify(permafrostData)
 
 
