@@ -346,7 +346,7 @@ def flammability_csv(data):
 
 def gipl_csv(data, endpoint):
     if endpoint == "gipl_summary":
-        coords = ["model", "scenario", "summary"]
+        coords = ["summary"]
     elif endpoint == "gipl":
         coords = ["model", "year", "scenario"]
     values = [
