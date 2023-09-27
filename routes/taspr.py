@@ -1006,20 +1006,20 @@ def get_temperature_plate(lat, lon):
                     "tasmax": max(mean_values),
                 }
 
-    temp['summary'] = summarized_data
+    temp["summary"] = summarized_data
 
-    first = mmm_point_data_endpoint('temperature', lat, lon, None, 1901, 1905, True)
-    last = mmm_point_data_endpoint('temperature', lat, lon, None, 2096, 2100, True)
+    first = mmm_point_data_endpoint("temperature", lat, lon, None, 1901, 1905, True)
+    last = mmm_point_data_endpoint("temperature", lat, lon, None, 2096, 2100, True)
 
     for response in [first, last]:
         if isinstance(response, tuple):
             # Returns error template that was generated for invalid request
             return response[0]
 
-    no_metadata = "\n".join(first.data.decode('utf-8').split("\n")[3:])
-    no_header = "\n".join(last.data.decode('utf-8').split("\n")[-6:])
+    no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[3:])
+    no_header = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
 
-    temp['preview'] = no_metadata + no_header
+    temp["preview"] = no_metadata + no_header
 
     return jsonify(temp)
 
@@ -1073,18 +1073,18 @@ def get_precipitation_plate(lat, lon):
 
     pr["summary"] = summarized_data
 
-    first = mmm_point_data_endpoint('precipitation', lat, lon, None, 1901, 1905, True)
-    last = mmm_point_data_endpoint('precipitation', lat, lon, None, 2096, 2100, True)
+    first = mmm_point_data_endpoint("precipitation", lat, lon, None, 1901, 1905, True)
+    last = mmm_point_data_endpoint("precipitation", lat, lon, None, 2096, 2100, True)
 
     for response in [first, last]:
         if isinstance(response, tuple):
             # Returns error template that was generated for invalid request
             return response[0]
 
-    no_metadata = "\n".join(first.data.decode('utf-8').split("\n")[3:])
-    no_header = "\n".join(last.data.decode('utf-8').split("\n")[-6:])
+    no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[3:])
+    no_header = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
 
-    pr['preview'] = no_metadata + no_header
+    pr["preview"] = no_metadata + no_header
 
     return jsonify(pr)
 
@@ -1151,9 +1151,8 @@ def mmm_point_data_endpoint(
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    if (
-        not request.args.get("summarize") == "mmm"
-        and (request.args.get("format") == "csv" or preview)
+    if not request.args.get("summarize") == "mmm" and (
+        request.args.get("format") == "csv" or preview
     ):
         point_pkg = nullify_and_prune(point_pkg, "taspr")
         if point_pkg in [{}, None, 0]:

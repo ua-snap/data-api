@@ -138,9 +138,7 @@ def get_dd_plate(var_ep, lat, lon):
 
     all_data = run_fetch_dd_point_data(var_ep, lat, lon)
 
-    historical_values = list(
-        map(lambda x: x["dd"], all_data["ERA-Interim"].values())
-    )
+    historical_values = list(map(lambda x: x["dd"], all_data["ERA-Interim"].values()))
     summarized_data["historical"] = {
         "ddmax": max(historical_values),
         "ddmean": round(np.mean(historical_values)),
@@ -169,7 +167,7 @@ def get_dd_plate(var_ep, lat, lon):
             "ddmax": max(dd_values),
         }
 
-    dd['summary'] = summarized_data
+    dd["summary"] = summarized_data
 
     first = run_fetch_dd_point_data(var_ep, lat, lon, 1980, 1984, True)
     last = run_fetch_dd_point_data(var_ep, lat, lon, 2096, 2100, True)
@@ -179,9 +177,9 @@ def get_dd_plate(var_ep, lat, lon):
             # Returns error template that was generated for invalid request
             return response[0]
 
-    noheader = "\n".join(last.data.decode('utf-8').split("\n")[-6:])
+    noheader = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
 
-    dd['preview'] = first.data.decode("utf-8") + noheader
+    dd["preview"] = first.data.decode("utf-8") + noheader
     return jsonify(dd)
 
 
@@ -309,7 +307,9 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
 
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>")
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>/<start_year>/<end_year>")
-def run_fetch_dd_point_data(var_ep, lat, lon, start_year=None, end_year=None, preview=None):
+def run_fetch_dd_point_data(
+    var_ep, lat, lon, start_year=None, end_year=None, preview=None
+):
     """Degree days data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
 
