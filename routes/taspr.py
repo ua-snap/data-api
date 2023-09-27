@@ -930,6 +930,7 @@ def get_temperature_plate(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
     """
+    temp = dict()
     months = ["all", "jan", "july"]
     summarized_data = {}
     for month in months:
@@ -1005,7 +1006,22 @@ def get_temperature_plate(lat, lon):
                     "tasmax": max(mean_values),
                 }
 
-    return jsonify(summarized_data)
+    temp['summary'] = summarized_data
+
+    first = mmm_point_data_endpoint('temperature', lat, lon, None, 1901, 1905, True)
+    last = mmm_point_data_endpoint('temperature', lat, lon, None, 2096, 2100, True)
+
+    for response in [first, last]:
+        if isinstance(response, tuple):
+            # Returns error template that was generated for invalid request
+            return response[0]
+
+    no_metadata = "\n".join(first.data.decode('utf-8').split("\n")[3:])
+    no_header = "\n".join(last.data.decode('utf-8').split("\n")[-6:])
+
+    temp['preview'] = no_metadata + no_header
+
+    return jsonify(temp)
 
 
 @routes.route("/eds/precipitation/<lat>/<lon>")
