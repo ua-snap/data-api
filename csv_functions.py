@@ -169,7 +169,7 @@ def build_csv_dicts(packaged_data, package_coords, fill_di=None, values=None):
     previous_coord_breadcrumb = None
     for coords in data_package_coord_combos:
         # If there is no data, don't add to CSV line
-        if len(coords)<= 1:
+        if len(coords) <= 1:
             continue
         row_di = {}
         # need more general way of handling fields to be inserted before or after
@@ -358,7 +358,7 @@ def flammability_csv(data):
 
 def gipl_csv(data, endpoint):
     if endpoint == "gipl_summary":
-        coords = ["model", "scenario", "summary"]
+        coords = ["summary"]
     elif endpoint == "gipl" or endpoint == "gipl_preview":
         coords = ["model", "year", "scenario"]
     values = [
