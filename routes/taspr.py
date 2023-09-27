@@ -1021,6 +1021,9 @@ def get_precipitation_plate(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/precipitation/65.0628/-146.1627
     """
+
+    pr = dict()
+
     summarized_data = {}
     all_data = mmm_point_data_endpoint("precipitation", lat, lon)
     historical_values = list(
@@ -1051,7 +1054,23 @@ def get_precipitation_plate(lat, lon):
             "prmean": round(np.mean(values)),
             "prmax": max(values),
         }
-    return jsonify(summarized_data)
+
+    pr["summary"] = summarized_data
+
+    first = mmm_point_data_endpoint('precipitation', lat, lon, None, 1901, 1905, True)
+    last = mmm_point_data_endpoint('precipitation', lat, lon, None, 2096, 2100, True)
+
+    for response in [first, last]:
+        if isinstance(response, tuple):
+            # Returns error template that was generated for invalid request
+            return response[0]
+
+    no_metadata = "\n".join(first.data.decode('utf-8').split("\n")[3:])
+    no_header = "\n".join(last.data.decode('utf-8').split("\n")[-6:])
+
+    pr['preview'] = no_metadata + no_header
+
+    return jsonify(pr)
 
 
 @routes.route("/<var_ep>/<lat>/<lon>")
@@ -1059,7 +1078,7 @@ def get_precipitation_plate(lat, lon):
 @routes.route("/<var_ep>/<lat>/<lon>/<start_year>/<end_year>")
 @routes.route("/<var_ep>/<month>/<lat>/<lon>/<start_year>/<end_year>")
 def mmm_point_data_endpoint(
-    var_ep, lat, lon, month=None, start_year=None, end_year=None
+    var_ep, lat, lon, month=None, start_year=None, end_year=None, preview=None
 ):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
@@ -1118,7 +1137,7 @@ def mmm_point_data_endpoint(
 
     if (
         not request.args.get("summarize") == "mmm"
-        and request.args.get("format") == "csv"
+        and (request.args.get("format") == "csv" or preview)
     ):
         point_pkg = nullify_and_prune(point_pkg, "taspr")
         if point_pkg in [{}, None, 0]:
@@ -1135,6 +1154,8 @@ def mmm_point_data_endpoint(
                 lon,
                 filename_prefix=filename_prefix,
             )
+        # elif preview:
+        #     return create_csv(point_pkg, var_ep + "_preview", place_id, lat, lon)
         else:
             return create_csv(point_pkg, var_ep + "_all", place_id, lat, lon)
 
