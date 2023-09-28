@@ -14,7 +14,6 @@ nodata_mappings = {
     "crrel_gipl": nodata_values["default"],
     "degree_days_below_zero": nodata_values["default"],
     "degree_days_below_zero_all": nodata_values["default"],
-    "dd_preview": nodata_values["default"],
     "elevation": nodata_values["default"],
     "freezing_index": nodata_values["default"],
     "freezing_index_all": nodata_values["default"],

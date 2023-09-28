@@ -55,9 +55,6 @@ def create_csv(
         "freezing_index_all",
     ]:
         properties = degree_days_csv(data, endpoint)
-    elif endpoint == "dd_preview":
-        metadata = ""
-        properties = degree_days_csv(data, endpoint)
     elif endpoint == "flammability":
         properties = flammability_csv(data)
     elif endpoint in ["gipl", "gipl_summary"]:
@@ -321,9 +318,6 @@ def degree_days_csv(data, endpoint):
     elif endpoint in ["freezing_index", "freezing_index_all"]:
         filename_data_name = "Freezing Index"
         metadata = "# dd is the total annual degree days below freezing for the specified model\n"
-    elif endpoint in ["dd_preview"]:
-        filename_data_name = ""
-        metadata = ""
 
     return {
         "csv_dicts": csv_dicts,

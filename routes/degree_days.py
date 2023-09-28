@@ -138,6 +138,11 @@ def get_dd_plate(var_ep, lat, lon):
 
     all_data = run_fetch_dd_point_data(var_ep, lat, lon)
 
+    # Checks if error exists from fetching DD point
+    if isinstance(all_data, tuple):
+        # Returns error template that was generated for invalid request
+        return all_data[0]
+
     historical_values = list(map(lambda x: x["dd"], all_data["ERA-Interim"].values()))
     summarized_data["historical"] = {
         "ddmax": max(historical_values),
@@ -169,17 +174,19 @@ def get_dd_plate(var_ep, lat, lon):
 
     dd["summary"] = summarized_data
 
-    first = run_fetch_dd_point_data(var_ep, lat, lon, 1980, 1984, True)
-    last = run_fetch_dd_point_data(var_ep, lat, lon, 2096, 2100, True)
+    preview = run_fetch_dd_point_data(var_ep, lat, lon, preview=True)
 
-    for response in [first, last]:
-        if isinstance(response, tuple):
-            # Returns error template that was generated for invalid request
-            return response[0]
+    # Checks if error exists from preview CSV request
+    if isinstance(preview, tuple):
+        # Returns error template that was generated for invalid request
+        return preview[0]
 
-    noheader = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
+    dd_csv = preview.data.decode("utf-8")
+    first = "\n".join(dd_csv.split("\n")[3:9]) + "\n"
+    last = "\n".join(dd_csv.split("\n")[-6:])
 
-    dd["preview"] = first.data.decode("utf-8") + noheader
+    dd["preview"] = first + last
+
     return jsonify(dd)
 
 
@@ -363,8 +370,6 @@ def run_fetch_dd_point_data(
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        if preview:
-            return create_csv(point_pkg, "dd_preview", lat=lat, lon=lon)
         if request.args.get("summarize") == "mmm":
             return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
         else:
