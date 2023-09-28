@@ -407,9 +407,7 @@ async def run_fetch_gipl_1km_point_data(
         point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-            # if preview:
-            #     return create_csv(point_pkg, "gipl_preview", lat=lat, lon=lon)
-            # if summarize is not None:
+        if summarize is not None:
             return create_csv(point_pkg, "gipl_summary", lat=lat, lon=lon)
         return create_csv(point_pkg, "gipl", lat=lat, lon=lon)
     return postprocess(gipl_1km_point_package, "crrel_gipl")
