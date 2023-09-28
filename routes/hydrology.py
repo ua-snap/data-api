@@ -178,11 +178,9 @@ def run_get_hydrology_point_data(lat, lon):
         return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, "hydrology")
-        if point_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-
-        place_id = request.args.get("community")
-        return create_csv(point_pkg, "hydrology", place_id, lat, lon)
-
+        # point_pkg = nullify_and_prune(point_pkg, "hydrology")
+        # if point_pkg in [{}, None, 0]:
+        # return render_template("404/no_data.html"), 404
+        # place_id = request.args.get("community")
+        return create_csv(point_pkg, "hydrology", place_id=None, lat=lat, lon=lon)
     return postprocess(point_pkg, "hydrology")
