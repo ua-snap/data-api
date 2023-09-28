@@ -53,7 +53,7 @@ async def run_fetch_all_eds(lat, lon):
     all_urls = [
         f"{host}eds/temperature/{lat}/{lon}",
         f"{host}eds/precipitation/{lat}/{lon}",
-        f"{host}snow/snowfallequivalent/{lat}/{lon}?summarize=mmm",
+        f"{host}eds/snow/{lat}/{lon}",
         f"{host}eds/degree_days/freezing_index/{lat}/{lon}",
         f"{host}eds/degree_days/heating/{lat}/{lon}",
         f"{host}eds/degree_days/thawing_index/{lat}/{lon}",

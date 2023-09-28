@@ -1,10 +1,6 @@
 import asyncio
 import numpy as np
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-)
+from flask import Blueprint, render_template, request, jsonify
 
 # local imports
 from fetch_data import (
@@ -113,13 +109,26 @@ def summarize_mmm_sfe(all_sfe_di):
     return mmm_sfe_di
 
 
+@routes.route("/eds/snow/<lat>/<lon>")
+def eds_snow_data(lat, lon):
+    snow = dict()
+    snow["summary"] = run_point_fetch_all_sfe(lat, lon, summarize=True)
+    snow_csv = run_point_fetch_all_sfe(lat, lon, preview=True)
+    snow_csv = snow_csv.data.decode("utf-8")
+    first = "\n".join(snow_csv.split("\n")[3:8])
+    last = "\n".join(snow_csv.split("\n")[-6:])
+
+    snow["preview"] = first + last
+    return jsonify(snow)
+
+
 @routes.route("/snow/")
 def about_mmm_snow():
     return render_template("documentation/snow.html")
 
 
 @routes.route("/snow/snowfallequivalent/<lat>/<lon>")
-def run_point_fetch_all_sfe(lat, lon):
+def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
     """Run the async request for SFE data at a single point.
     Args:
         lat (float): latitude
@@ -141,14 +150,13 @@ def run_point_fetch_all_sfe(lat, lon):
     x, y = project_latlon(lat, lon, 3338)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, sfe_coverage_id))
-        if request.args.get("summarize") == "mmm":
+        if request.args.get("summarize") == "mmm" or summarize:
             point_pkg = summarize_mmm_sfe(package_sfe_data(rasdaman_response))
         else:
             point_pkg = package_sfe_data(rasdaman_response)
         try:
-            if (
-                not request.args.get("summarize") == "mmm"
-                and request.args.get("format") == "csv"
+            if not request.args.get("summarize") == "mmm" and (
+                request.args.get("format") == "csv" or preview
             ):
                 point_pkg = nullify_and_prune(point_pkg, "snow")
                 if point_pkg in [{}, None, 0]:
