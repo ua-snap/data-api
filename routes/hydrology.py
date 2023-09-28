@@ -128,7 +128,12 @@ def run_fetch_hydrology_point_data(lat, lon):
     for variable in range(len(dim_encodings["varnames"])):
         rasdaman_response.append(
             asyncio.run(
-                fetch_wcs_point_data(x, y, hydrology_coverage_id, var_coord=variable)
+                fetch_wcs_point_data(
+                    x,
+                    y,
+                    hydrology_coverage_id,
+                    var_coord=variable,
+                )
             )
         )
 
