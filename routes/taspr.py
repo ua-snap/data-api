@@ -942,6 +942,11 @@ def get_temperature_plate(lat, lon):
             month_param = month
         all_data = mmm_point_data_endpoint("temperature", lat, lon, month_param)
 
+        # Checks if error exists from fetching DD point
+        if isinstance(all_data, tuple):
+            # Returns error template that was generated for invalid request
+            return all_data[0]
+
         if month != "all":
             historical_min_values = list(
                 map(lambda x: x["tasmin"], all_data["CRU-TS"]["historical"].values())
@@ -1042,6 +1047,12 @@ def get_precipitation_plate(lat, lon):
 
     summarized_data = {}
     all_data = mmm_point_data_endpoint("precipitation", lat, lon)
+
+    # Checks if error exists from fetching DD point
+    if isinstance(all_data, tuple):
+        # Returns error template that was generated for invalid request
+        return all_data[0]
+
     historical_values = list(
         map(lambda x: x["pr"], all_data["CRU-TS"]["historical"].values())
     )
