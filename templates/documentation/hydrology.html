@@ -1,0 +1,151 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Hydrology</h2>
+
+<p>
+  These endpoints provide access to historical and projected modeled decadal
+  summaries of hydrologic data for Alaska at a resolution of XXXm. Historical
+  data were derived from the XXX dataset. Projections were derived from XXX,
+  YYY, and ZZZ model outputs under the RCP 4.5 and RCP 8.5 emissions scenarios.
+</p>
+
+<p>
+  Links to academic references and source datasets are included at the bottom of
+  this page.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>All hydrologic variables (point query)</h4>
+
+<p>
+  Query all hydrologic variables for all models and scenarios for each decade.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Decadal variables</td>
+      <td>
+        <a href="/hydrology/point/61.5/-147">/hydrology/point/61.5/-147</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Decadal hydrology variables</h4>
+
+<p>Results from decadal queries will look like this:</p>
+
+<pre>
+  {
+    "ACCESS1-3": {
+      "rcp45": {
+        "apr": {
+          "1950-1959": {
+            "evap": "3",
+            "glacier_melt": "0",
+            "iwe": "131342",
+            "pcp": "120",
+            "runoff": "0",
+            "sm1": "10",
+            "sm2": "440",
+            "sm3": "0",
+            "snow_melt": "0",
+            "swe": "1348",
+            "tmax": "-6.5",
+            "tmin": "-20.7"
+          },
+          ...
+        },
+      ...
+    },
+    ...
+  },
+  ...
+},
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;scenario&gt;: {
+      &lt;month&gt;: {
+        &lt;decade&gt;: {
+          "evap": &lt;monthly sum of daily evapotranspiration, mm&gt;,
+          "glacier_melt": &lt;monthly sum of daily glacier ice melt, mm&gt;,
+          "iwe": &lt;monthly maximum of daily ice water equivalent, mm&gt;,
+          "pcp": &lt;monthly sum of daily precipitation, mm&gt;,
+          "runoff": &lt;monthly sum of daily surface runoff, mm&gt;,
+          "sm1": &lt;monthly mean of daily soil moisture in layer 1, mm&gt;,
+          "sm2": &lt;monthly mean of daily soil moisture in layer 2, mm&gt;,
+          "sm3": &lt;monthly mean of daily soil moisture in layer 3, mm&gt;,
+          "snow_melt": &lt;monthly sum of daily snowmelt, mm&gt;,
+          "swe": &lt;monthly maximum of daily snow water equivalent, mm&gt;,
+          "tmax": &lt;monthly mean of daily maximum air temperature at 2m, degrees C&gt;,
+          "tmin": &lt;monthly mean of daily minimum air temperature at 2m, degrees C&gt;,
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metadata & source data access</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a
+          href="https://github.com/ua-snap/ardac-curation/tree/ncar12km_decadal_summaries/ncar12km_decadal_summaries"
+          >Near-Surface Met + VIC Hydrologic Model Outputs: NCAR 12 km
+          Edition</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a
+          href="https://www.earthsystemgrid.org/dataset/ucar.ral.hydro.predictions.html"
+          >21st Century Hydrologic Projections for Alaska and Hawaii</a
+        >
+      </td>
+      <td>
+        Mizukami, N., Newman, A. J., Wood, A. W., Gutmann, E. D., and Hamman, J.
+        J. (2022). Boulder, CO: UCAR/NCAR/RAL.
+        <a href="https://doi.org/10.5065/c3kn-2y77"
+          >https://doi.org/10.5065/c3kn-2y77</a
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}

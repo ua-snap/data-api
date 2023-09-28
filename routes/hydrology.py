@@ -140,6 +140,13 @@ def run_fetch_hydrology_point_data(lat, lon):
     return point_pkg
 
 
+@routes.route("/hydrology/")
+@routes.route("/hydrology/abstract/")
+@routes.route("/hydrology/point/")
+def hydro_about():
+    return render_template("documentation/hydrology.html")
+
+
 @routes.route("/hydrology/point/<lat>/<lon>")
 def run_get_hydrology_point_data(lat, lon):
     validation = validate_latlon(lat, lon)
