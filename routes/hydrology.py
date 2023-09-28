@@ -1,10 +1,5 @@
 import asyncio
-import io
-import time
-import itertools
 from urllib.parse import quote
-import numpy as np
-import xarray as xr
 from flask import (
     Blueprint,
     render_template,
@@ -14,26 +9,13 @@ from flask import (
 )
 
 # local imports
-from generate_requests import generate_wcs_getcov_str, generate_mmm_wcs_getcov_str
-from generate_urls import generate_wcs_query_url
-from fetch_data import (
-    fetch_data,
-    fetch_wcs_point_data,
-    get_from_dict,
-    summarize_within_poly,
-    get_poly_3338_bbox,
-)
+from fetch_data import fetch_wcs_point_data
 from validate_request import (
     validate_latlon,
     project_latlon,
-    validate_var_id,
-    validate_year,
 )
 from validate_data import *
-from postprocessing import (
-    nullify_and_prune,
-    postprocess,
-)
+from postprocessing import postprocess
 from csv_functions import create_csv
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
@@ -178,9 +160,7 @@ def run_get_hydrology_point_data(lat, lon):
         return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
-        # point_pkg = nullify_and_prune(point_pkg, "hydrology")
-        # if point_pkg in [{}, None, 0]:
-        # return render_template("404/no_data.html"), 404
+        # need to implement "community" arg later
         # place_id = request.args.get("community")
         return create_csv(point_pkg, "hydrology", place_id=None, lat=lat, lon=lon)
     return postprocess(point_pkg, "hydrology")
