@@ -168,6 +168,10 @@ def run_get_hydrology_point_data(lat, lon):
 
     if request.args.get("format") == "csv":
         # need to implement "community" arg later
-        # place_id = request.args.get("community")
+        place_id = request.args.get("community")
+        if place_id:
+            return create_csv(
+                point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
+            )
         return create_csv(point_pkg, "hydrology", place_id=None, lat=lat, lon=lon)
     return postprocess(point_pkg, "hydrology")
