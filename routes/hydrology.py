@@ -116,47 +116,44 @@ def run_fetch_hydrology_point_data(lat, lon):
 
     Returns:
         JSON-like dict of data at provided latitude and
-        longitude
+        longitude for all variables
     """
     x, y = project_latlon(lat, lon, 3338)
-    rasdaman_response = list()
 
-    # Due to the large amount of dimensions, it was found that splitting up
-    # our Rasdaman requests across each of the variable dimension (12 different values)
-    # and recombining on the API was much faster than simply requesting all of the
-    # data at once.
-    for variable in range(len(dim_encodings["varnames"])):
-        rasdaman_response.append(
-            asyncio.run(
-                fetch_wcs_point_data(
-                    x,
-                    y,
-                    hydrology_coverage_id,
-                    var_coord=variable,
-                )
-            )
+    rasdaman_response = asyncio.run(
+        fetch_wcs_point_data(
+            x,
+            y,
+            hydrology_coverage_id,
+            var_coord=None,
         )
+    )
 
     # package point data with decoded coord values (names)
-    # these functions are hard-coded  with coord values for now
     point_pkg = dict()
-    for variable in range(len(dim_encodings["varnames"])):
-        variable_key = dim_encodings["varnames"][variable]
-        point_pkg[variable_key] = dict()
-        for model in range(len(dim_encodings["models"])):
-            model_key = dim_encodings["models"][model]
-            point_pkg[variable_key][model_key] = dict()
-            for scenario in range(len(dim_encodings["scenarios"])):
-                scenario_key = dim_encodings["scenarios"][scenario]
-                point_pkg[variable_key][model_key][scenario_key] = dict()
-                for month in range(len(dim_encodings["months"])):
-                    month_key = dim_encodings["months"][month]
-                    point_pkg[variable_key][model_key][scenario_key][month_key] = dict()
-                    for era in range(len(dim_encodings["eras"])):
-                        era_key = dim_encodings["eras"][era]
-                        point_pkg[variable_key][model_key][scenario_key][month_key][
-                            era_key
-                        ] = rasdaman_response[variable][model][scenario][month][era]
+    for model_coord in dim_encodings["models"].keys():
+        model_name = dim_encodings["models"][model_coord]
+        point_pkg[model_name] = dict()
+        for scenario_coord in dim_encodings["scenarios"].keys():
+            scenario_name = dim_encodings["scenarios"][scenario_coord]
+            point_pkg[model_name][scenario_name] = dict()
+            for month_coord in dim_encodings["months"].keys():
+                month_name = dim_encodings["months"][month_coord]
+                point_pkg[model_name][scenario_name][month_name] = dict()
+                for era_coord in dim_encodings["eras"].keys():
+                    era_name = dim_encodings["eras"][era_coord]
+                    point_pkg[model_name][scenario_name][month_name][era_name] = dict()
+                    for var_coord in dim_encodings["varnames"].keys():
+                        var_name = dim_encodings["varnames"][var_coord]
+                        point_pkg[model_name][scenario_name][month_name][era_name][
+                            var_name
+                        ] = rasdaman_response[model_coord][scenario_coord][month_coord][
+                            era_coord
+                        ].split(
+                            " "
+                        )[
+                            var_coord
+                        ]
 
     return point_pkg
 
