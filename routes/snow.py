@@ -112,13 +112,26 @@ def summarize_mmm_sfe(all_sfe_di):
 @routes.route("/eds/snow/<lat>/<lon>")
 def eds_snow_data(lat, lon):
     snow = dict()
-    snow["summary"] = run_point_fetch_all_sfe(lat, lon, summarize=True)
-    snow_csv = run_point_fetch_all_sfe(lat, lon, preview=True)
-    snow_csv = snow_csv.data.decode("utf-8")
+
+    summary = run_point_fetch_all_sfe(lat, lon, summarize=True)
+    # Check for error response from summary response
+    if isinstance(summary, tuple):
+        return summary[0]
+
+    snow["summary"] = summary
+
+    preview = run_point_fetch_all_sfe(lat, lon, preview=True)
+    # Check for error responses in the preview
+    for response in preview:
+        if isinstance(response, tuple):
+            return response[0]
+
+    snow_csv = preview.data.decode("utf-8")
     first = "\n".join(snow_csv.split("\n")[3:9]) + "\n"
     last = "\n".join(snow_csv.split("\n")[-6:])
 
     snow["preview"] = first + last
+
     return jsonify(snow)
 
 
