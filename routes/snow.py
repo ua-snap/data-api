@@ -115,7 +115,7 @@ def eds_snow_data(lat, lon):
     snow["summary"] = run_point_fetch_all_sfe(lat, lon, summarize=True)
     snow_csv = run_point_fetch_all_sfe(lat, lon, preview=True)
     snow_csv = snow_csv.data.decode("utf-8")
-    first = "\n".join(snow_csv.split("\n")[3:8])
+    first = "\n".join(snow_csv.split("\n")[3:9]) + "\n"
     last = "\n".join(snow_csv.split("\n")[-6:])
 
     snow["preview"] = first + last
