@@ -122,9 +122,9 @@ def eds_snow_data(lat, lon):
 
     preview = run_point_fetch_all_sfe(lat, lon, preview=True)
     # Check for error responses in the preview
-    for response in preview:
-        if isinstance(response, tuple):
-            return response[0]
+    if isinstance(preview, tuple):
+        # Returns error template that was generated for invalid request
+        return preview[0]
 
     snow_csv = preview.data.decode("utf-8")
     first = "\n".join(snow_csv.split("\n")[3:9]) + "\n"
