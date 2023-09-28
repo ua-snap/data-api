@@ -62,8 +62,6 @@ def create_csv(
         properties = flammability_csv(data)
     elif endpoint in ["gipl", "gipl_summary"]:
         properties = gipl_csv(data, endpoint)
-    elif endpoint == "gipl_preview":
-        return gipl_preview_csv(data)
     elif endpoint == "landfastice":
         properties = landfastice_csv(data)
     elif endpoint == "permafrost":
@@ -387,29 +385,6 @@ def gipl_csv(data, endpoint):
         "metadata": metadata,
         "filename_data_name": filename_data_name,
     }
-
-
-def gipl_preview_csv(data):
-    # Handle gipl data differently to return CSV as a string
-    properties = gipl_csv(data, "gipl_preview")
-
-    # Build the CSV content as a string
-    output = io.StringIO()
-    output.write(properties["metadata"])
-    writer = csv.DictWriter(output, fieldnames=properties["fieldnames"])
-    writer.writeheader()
-    writer.writerows(properties["csv_dicts"])
-    csv_data = output.getvalue()
-
-    # Return the CSV data as a response without a filename
-    response = Response(
-        csv_data,
-        mimetype="text/csv",
-        headers={
-            "Content-Type": "text/csv; charset=utf-8",
-        },
-    )
-    return response
 
 
 def landfastice_csv(data):

@@ -407,9 +407,9 @@ async def run_fetch_gipl_1km_point_data(
         point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        if preview:
-            return create_csv(point_pkg, "gipl_preview", lat=lat, lon=lon)
-        if summarize is not None:
+            # if preview:
+            #     return create_csv(point_pkg, "gipl_preview", lat=lat, lon=lon)
+            # if summarize is not None:
             return create_csv(point_pkg, "gipl_summary", lat=lat, lon=lon)
         return create_csv(point_pkg, "gipl", lat=lat, lon=lon)
     return postprocess(gipl_1km_point_package, "crrel_gipl")
@@ -503,46 +503,7 @@ def aggregate_csv(permafrostData):
     return "\n".join(combined_lines)
 
 
-def combine_permafrost_preview(permafrostData):
-    """
-    Combines the permafrost data that contains the models, years,
-    scenarios, and variables so that each model contains the years associated with th
-        Args:
-            permafrostData - JSON-like dictionary of permafrost values
-                             ranging from 2011-2015 and 2096-2100
-
-        Returns:
-            JSON-like dict of preview permafrost data
-    """
-
-    # Initialize an empty dictionary to store the combined data
-    permafrost_data = {}
-
-    # Iterate through the original data
-    for model_data in permafrostData:
-        for model_name, model_values in model_data.items():
-            # Check if the model_name is already in the permafrost_data dictionary
-            if model_name not in permafrost_data:
-                permafrost_data[model_name] = {}
-
-            for year, year_data in model_values.items():
-                # Check if the year is already in the permafrost_data[model_name] dictionary
-                if year not in permafrost_data[model_name]:
-                    permafrost_data[model_name][year] = {}
-
-                for scenario, scenario_data in year_data.items():
-                    # Check if the scenario is already in the permafrost_data[model_name][year] dictionary
-                    if scenario not in permafrost_data[model_name][year]:
-                        permafrost_data[model_name][year][scenario] = {}
-
-                    for variable, value in scenario_data.items():
-                        # Assign the value to the permafrost_data[model_name][year][scenario][variable]
-                        permafrost_data[model_name][year][scenario][variable] = value
-
-    return permafrost_data
-
-
-@routes.route("/eds/permafrost/point/<lat>/<lon>")
+@routes.route("/eds/permafrost/<lat>/<lon>")
 def permafrost_eds_request(lat, lon):
     """
     Endpoint for providing permafrost preview of GIPL 2.0 data
@@ -575,7 +536,7 @@ def permafrost_eds_request(lat, lon):
 
     preview_string = [r.data.decode("utf-8") for r in preview]
 
-    preview_past = preview_string[0].split("\n")[:6]
+    preview_past = preview_string[0].split("\n")[3:9]
     preview_future = preview_string[1].split("\n")[-6:]
     permafrostData["preview"] = (
         "\n".join(preview_past) + "\n" + "\n".join(preview_future)
