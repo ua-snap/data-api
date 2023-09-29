@@ -9,11 +9,13 @@ from flask import (
 )
 
 # local imports
-from fetch_data import fetch_wcs_point_data
+from fetch_data import fetch_wcs_point_data, fetch_data
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
+from generate_requests import generate_average_wcps_str
+from generate_urls import generate_wcs_query_url
 from validate_data import *
 from postprocessing import postprocess
 from csv_functions import create_csv
@@ -89,7 +91,7 @@ dim_encodings = {
 
 
 def run_fetch_hydrology_point_data(lat, lon):
-    """Fetch projected precipitation data for a
+    """Fetch all hydrology data for a
        given latitude and longitude.
 
     Args:
@@ -140,6 +142,31 @@ def run_fetch_hydrology_point_data(lat, lon):
     return point_pkg
 
 
+### unfinished function, need to fix WCPS request string
+def run_fetch_hydrology_point_data_mmm(lat, lon):
+    """Fetch summarized hydrology data for a
+       given latitude and longitude.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of data at provided latitude and
+        longitude for all variables
+    """
+    x, y = project_latlon(lat, lon, 3338)
+
+    wcps_str = generate_average_wcps_str(x, y, hydrology_coverage_id, "eras", (0, 14))
+    wcps_query_url = generate_wcs_query_url(wcps_str)
+    rasdaman_response = asyncio.run(fetch_data([wcps_query_url]))
+    return rasdaman_response
+
+    # package point data with decoded coord values (names)
+    # point_pkg = dict()
+    # return point_pkg
+
+
 @routes.route("/hydrology/")
 @routes.route("/hydrology/abstract/")
 @routes.route("/hydrology/point/")
@@ -159,19 +186,43 @@ def run_get_hydrology_point_data(lat, lon):
             ),
             422,
         )
-    try:
-        point_pkg = run_fetch_hydrology_point_data(lat, lon)
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
 
-    if request.args.get("format") == "csv":
-        # need to implement "community" arg later
-        place_id = request.args.get("community")
-        if place_id:
-            return create_csv(
-                point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
-            )
-        return create_csv(point_pkg, "hydrology", place_id=None, lat=lat, lon=lon)
-    return postprocess(point_pkg, "hydrology")
+    # validate request arguments if they exist; set summarize argument accordingly
+    if len(request.args) == 0:
+        try:
+            point_pkg = run_fetch_hydrology_point_data(lat, lon)
+            return postprocess(point_pkg, "hydrology")
+
+        except Exception as exc:
+            if hasattr(exc, "status") and exc.status == 404:
+                return render_template("404/no_data.html"), 404
+            return render_template("500/server_error.html"), 500
+
+    elif all(key in request.args for key in ["summarize", "format"]):
+        if (request.args.get("summarize") == "mmm") & (
+            request.args.get("format") == "csv"
+        ):
+            #### run_fetch_hydrology_point_data_mmm() and create_csv() routine
+            return "mmm and csv route"
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    elif "summarize" in request.args:
+        if request.args.get("summarize") == "mmm":
+            #### run_fetch_hydrology_point_data_mmm() and return JSON
+            return "mmm only route"
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    elif "format" in request.args:
+        if request.args.get("format") == "csv":
+            point_pkg = run_fetch_hydrology_point_data(lat, lon)
+            place_id = request.args.get("community")
+            if place_id:
+                return create_csv(
+                    point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
+                )
+            return create_csv(point_pkg, "hydrology", place_id=None, lat=lat, lon=lon)
+
+    else:
+        return render_template("400/bad_request.html"), 400
