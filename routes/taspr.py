@@ -4,6 +4,8 @@ import time
 import itertools
 from urllib.parse import quote
 import numpy as np
+import pandas as pd
+import json
 import xarray as xr
 from flask import (
     Blueprint,
@@ -91,8 +93,6 @@ tas_2km_dim_encodings = {
         11: "December",
     },
 }
-
-tas_2km_cov_id = "tas_2km_projected"
 
 dot_dim_encodings = {
     "durations": {
@@ -700,6 +700,242 @@ def package_ar5_point_summary(point_data, varname):
     return point_data_pkg
 
 
+def create_temperature_eds_summary(temp_json):
+    hist_df = pd.DataFrame.from_dict(temp_json["historical"], orient="index")
+    hist_monthly_mmm = pd.DataFrame(columns=["Month", "tasmean", "tasmax", "tasmin"])
+
+    all_monthly_means = []
+    all_monthly_maxes = []
+    all_monthly_mins = []
+
+    # Iterate through all months
+    for month in hist_df.index:
+        # Extract 'tasmean', 'tasmax', and 'tasmin' values if they exist, or set to NaN if missing
+        try:
+            monthly_data = hist_df.loc[month]
+
+            # Initialize lists to store 'tasmean', 'tasmax', and 'tasmin' values for each year in the month
+            monthly_mean_values = []
+            monthly_max_values = []
+            monthly_min_values = []
+
+            # Iterate through the year data within the month
+            for year, data in monthly_data.items():
+                if "tasmean" in data:
+                    monthly_mean_values.append(pd.to_numeric(data["tasmean"]))
+                if "tasmax" in data:
+                    monthly_max_values.append(pd.to_numeric(data["tasmax"]))
+                if "tasmin" in data:
+                    monthly_min_values.append(pd.to_numeric(data["tasmin"]))
+
+            # Calculate the mean of 'tasmean', the maximum of 'tasmax', and the minimum of 'tasmin' for the month
+            if monthly_mean_values:
+                monthly_mean = round(
+                    sum(monthly_mean_values) / len(monthly_mean_values), 1
+                )
+            else:
+                monthly_mean = None
+
+            if monthly_max_values:
+                monthly_max = max(monthly_max_values)
+            else:
+                monthly_max = None
+
+            if monthly_min_values:
+                monthly_min = min(monthly_min_values)
+            else:
+                monthly_min = None
+
+        except KeyError:
+            monthly_mean = None
+            monthly_max = None
+            monthly_min = None
+
+        # Append the results to the hist_monthly_mmm DataFrame
+        hist_monthly_mmm = hist_monthly_mmm.append(
+            {
+                "Month": month,
+                "tasmean": monthly_mean,
+                "tasmax": monthly_max,
+                "tasmin": monthly_min,
+            },
+            ignore_index=True,
+        )
+
+        # Append the monthly values to the aggregated lists
+        all_monthly_means.extend(monthly_mean_values)
+        all_monthly_maxes.extend(monthly_max_values)
+        all_monthly_mins.extend(monthly_min_values)
+
+    # Calculate the aggregated values for the "Annual" row
+    annual_mean = round(sum(all_monthly_means) / len(all_monthly_means), 1)
+    annual_max = max(all_monthly_maxes)
+    annual_min = min(all_monthly_mins)
+
+    hist_monthly_mmm = hist_monthly_mmm.append(
+        {
+            "Month": "Annual",
+            "tasmean": annual_mean,
+            "tasmax": annual_max,
+            "tasmin": annual_min,
+        },
+        ignore_index=True,
+    )
+
+    eras_of_interest = [
+        [year for year in range(2010, 2040)],
+        [year for year in range(2040, 2070)],
+        [year for year in range(2070, 2100)],
+    ]
+    model_options = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
+    rcp_options = ["rcp45", "rcp85"]
+
+    # Initialize DataFrames to store the results
+    projected_monthly_mmm = pd.DataFrame(
+        columns=["Month", "tasmean", "tasmax", "tasmin"]
+    )
+
+    # Iterate through sub-sections and rcp options
+    for years_of_interest in eras_of_interest:
+        for model_option in model_options:
+            for rcp_option in rcp_options:
+                # Extract the relevant data for the current combination
+                projected_data = temp_json["projected"][model_option][rcp_option]
+
+                # Initialize lists to store 'tasmean', 'tasmax', and 'tasmin' values for the years of interest
+                all_monthly_mean_values = []
+                all_monthly_max_values = []
+                all_monthly_min_values = []
+
+                # Iterate through all months
+                for month, year_data in projected_data.items():
+                    # Initialize lists to store 'tasmean', 'tasmax', and 'tasmin' values for the years of interest
+                    monthly_mean_values = []
+                    monthly_max_values = []
+                    monthly_min_values = []
+
+                    # Iterate through the year data within the month
+                    for year, data in year_data.items():
+                        if year in years_of_interest:
+                            if "tasmean" in data:
+                                monthly_mean_values.append(
+                                    pd.to_numeric(data["tasmean"])
+                                )
+                            if "tasmax" in data:
+                                monthly_max_values.append(pd.to_numeric(data["tasmax"]))
+                            if "tasmin" in data:
+                                monthly_min_values.append(pd.to_numeric(data["tasmin"]))
+
+                    if model_option == "5ModelAvg":
+                        # Append the monthly values to the aggregated lists
+                        all_monthly_mean_values.extend(monthly_mean_values)
+                        all_monthly_max_values.extend(monthly_max_values)
+                        all_monthly_min_values.extend(monthly_min_values)
+
+                    if monthly_mean_values:
+                        monthly_mean = round(
+                            sum(monthly_mean_values) / len(monthly_mean_values), 1
+                        )
+                    else:
+                        monthly_mean = None
+
+                    if monthly_max_values:
+                        monthly_max = max(monthly_max_values)
+                    else:
+                        monthly_max = None
+
+                    if monthly_min_values:
+                        monthly_min = min(monthly_min_values)
+                    else:
+                        monthly_min = None
+
+                    combination_label = f"{model_option}_{rcp_option}_{month}_{years_of_interest[0]}_{years_of_interest[-1]}"
+                    projected_monthly_mmm = projected_monthly_mmm.append(
+                        {
+                            "Month": combination_label,
+                            "tasmean": monthly_mean,
+                            "tasmax": monthly_max,
+                            "tasmin": monthly_min,
+                        },
+                        ignore_index=True,
+                    )
+
+                # Calculate the aggregated values for the current combination
+                if all_monthly_mean_values:
+                    annual_mean = round(
+                        sum(all_monthly_mean_values) / len(all_monthly_mean_values), 1
+                    )
+                else:
+                    annual_mean = None
+
+                if all_monthly_max_values:
+                    annual_max = max(all_monthly_max_values)
+                else:
+                    annual_max = None
+
+                if all_monthly_min_values:
+                    annual_min = min(all_monthly_min_values)
+                else:
+                    annual_min = None
+
+                if model_option == "5ModelAvg":
+                    # Append the results to the projected_monthly_mmm DataFrame
+                    # only if the 5ModelAvg since we only want the annual values
+                    # from that model option.
+                    combination_label = f"{model_option}_{rcp_option}_Annual_{years_of_interest[0]}_{years_of_interest[-1]}"
+                    projected_monthly_mmm = projected_monthly_mmm.append(
+                        {
+                            "Month": combination_label,
+                            "tasmean": annual_mean,
+                            "tasmax": annual_max,
+                            "tasmin": annual_min,
+                        },
+                        ignore_index=True,
+                    )
+
+    # Initialize an empty dictionary for the final JSON
+    result_json = {}
+
+    # Create the 'historical' section
+    hist_data = {}
+    for index, row in hist_monthly_mmm.iterrows():
+        month = row["Month"]
+        tasmean = row["tasmean"]
+        tasmax = row["tasmax"]
+        tasmin = row["tasmin"]
+        hist_data[month] = {"tasmean": tasmean, "tasmax": tasmax, "tasmin": tasmin}
+
+    result_json["historical"] = hist_data
+
+    # Create the 'projected' section
+    projected_data = {}
+
+    grouped_projected = projected_monthly_mmm.groupby("Month")
+    for combination_label, group in grouped_projected:
+        model_option, rcp_option, month, era_start, era_end = combination_label.split(
+            "_"
+        )
+
+        if model_option not in projected_data:
+            projected_data[model_option] = {}
+
+        if rcp_option not in projected_data[model_option]:
+            projected_data[model_option][rcp_option] = {}
+
+        if month not in projected_data[model_option][rcp_option]:
+            projected_data[model_option][rcp_option][month] = {}
+
+        era_key = f"{era_start}-{era_end}"
+        projected_data[model_option][rcp_option][month][era_key] = {
+            "tasmean": group["tasmean"].values[0],
+            "tasmax": group["tasmax"].values[0],
+            "tasmin": group["tasmin"].values[0],
+        }
+
+    result_json["projected"] = projected_data
+    return result_json
+
+
 async def fetch_bbox_netcdf(x1, y1, x2, y2, var_coord, cov_ids, summary_decades):
     """Make the async request for the data within the specified bbox
 
@@ -1062,102 +1298,22 @@ def get_temperature_plate(lat, lon):
         example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
     """
     temp = dict()
-    # months = ["all", "jan", "july"]
-    # summarized_data = {}
-    # for month in months:
-    #     if "historical" not in summarized_data:
-    #         summarized_data["historical"] = {}
-    #     if month == "all":
-    #         month_param = None
-    #     else:
-    #         month_param = month
-    #     all_data = mmm_point_data_endpoint("temperature", lat, lon, month_param)
-    #
-    #     # Checks if error exists from fetching DD point
-    #     if isinstance(all_data, tuple):
-    #         # Returns error template that was generated for invalid request
-    #         return all_data[0]
-    #
-    #     if month != "all":
-    #         historical_min_values = list(
-    #             map(lambda x: x["tasmin"], all_data["CRU-TS"]["historical"].values())
-    #         )
-    #         historical_mean_values = list(
-    #             map(lambda x: x["tasmean"], all_data["CRU-TS"]["historical"].values())
-    #         )
-    #         historical_max_values = list(
-    #             map(lambda x: x["tasmax"], all_data["CRU-TS"]["historical"].values())
-    #         )
-    #         summarized_data["historical"][month] = {
-    #             "tasmin": min(historical_min_values),
-    #             "tasmean": round(np.mean(historical_mean_values), 1),
-    #             "tasmax": max(historical_max_values),
-    #         }
-    #     else:
-    #         historical_mean_values = list(
-    #             map(lambda x: x["tas"], all_data["CRU-TS"]["historical"].values())
-    #         )
-    #         summarized_data["historical"][month] = {
-    #             "tasmin": min(historical_mean_values),
-    #             "tasmean": round(np.mean(historical_mean_values), 1),
-    #             "tasmax": max(historical_mean_values),
-    #         }
-    #
-    #     eras = [
-    #         {"start": 2010, "end": 2039},
-    #         {"start": 2040, "end": 2069},
-    #         {"start": 2070, "end": 2099},
-    #     ]
-    #     models = list(all_data.keys())
-    #     models.remove("CRU-TS")
-    #     for era in eras:
-    #         era_label = str(era["start"]) + "-" + str(era["end"])
-    #         if era_label not in summarized_data:
-    #             summarized_data[era_label] = {}
-    #         min_values = []
-    #         mean_values = []
-    #         max_values = []
-    #         for model in models:
-    #             for scenarios in all_data[model].keys():
-    #                 for key, value in all_data[model][scenarios].items():
-    #                     year = int(key)
-    #                     if year >= era["start"] and year <= era["end"]:
-    #                         if month != "all":
-    #                             min_values.append(value["tasmin"])
-    #                             mean_values.append(value["tasmean"])
-    #                             max_values.append(value["tasmax"])
-    #                         else:
-    #                             mean_values.append(value["tas"])
-    #
-    #         if month != "all":
-    #             summarized_data[era_label][month] = {
-    #                 "tasmin": min(min_values),
-    #                 "tasmean": round(np.mean(mean_values), 1),
-    #                 "tasmax": max(max_values),
-    #             }
-    #         else:
-    #             summarized_data[era_label][month] = {
-    #                 "tasmin": min(mean_values),
-    #                 "tasmean": round(np.mean(mean_values), 1),
-    #                 "tasmax": max(mean_values),
-    #             }
-    #
-    # temp["summary"] = summarized_data
 
-    temp_data = tas_2km_point_data_endpoint(lat, lon)
+    temp_json = tas_2km_point_data_endpoint(lat, lon)
 
-    first = mmm_point_data_endpoint("temperature", lat, lon, None, 1901, 1905, True)
-    last = mmm_point_data_endpoint("temperature", lat, lon, None, 2096, 2100, True)
+    temp["summary"] = create_temperature_eds_summary(temp_json)
 
-    for response in [first, last]:
-        if isinstance(response, tuple):
-            # Returns error template that was generated for invalid request
-            return response[0]
+    point_pkg = nullify_and_prune(temp_json, "tas2km")
+    if point_pkg in [{}, None, 0]:
+        return render_template("404/no_data.html"), 404
 
-    no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[3:])
-    no_header = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
+    place_id = request.args.get("community")
+    temp_csv = create_csv(point_pkg, "tas2km", place_id, lat, lon)
+    temp_csv = temp_csv.data.decode("utf-8")
+    first = "\n".join(temp_csv.split("\n")[6:12]) + "\n"
+    last = "\n".join(temp_csv.split("\n")[-6:])
 
-    temp["preview"] = no_metadata + no_header
+    temp["preview"] = first + last
 
     return jsonify(temp)
 
