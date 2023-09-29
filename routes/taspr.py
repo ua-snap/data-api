@@ -273,7 +273,7 @@ def get_tas_2km_wcps_request_str(
         y (float or str): y-coordinate for point query, or string
             composed as "y1:y2" for bbox query, where y1 and y2 are
             lower and upper bounds of bbox
-        var_coord (int): coordinate value corresponding to varname to query
+        month (int): Any integer between 0-11 for January - December
         summary_years (tuple): 2-tuple of integers mapped to
             desired range of years to summarise over,
             e.g. (2006, 2016) for 2006-2016
@@ -601,6 +601,8 @@ def package_tas_2km_point_data(point_data):
         JSON-like dict of query results
     """
     point_data_pkg = dict()
+    point_data_pkg['historical'] = dict()
+    point_data_pkg['projected'] = dict()
 
     if request.args.get("summarize") == "mmm":
         for model_idx, model_li in enumerate(point_data):
@@ -615,20 +617,32 @@ def package_tas_2km_point_data(point_data):
                     "tasmin": round(float(var_values[2]), 1),
                 }
     else:
-        for model_idx, model_li in enumerate(point_data):
+        for month_idx, month_li in enumerate(point_data[0]):
+            month = tas_2km_dim_encodings["months"][month_idx]
+            point_data_pkg['historical'][month] = dict()
+            for year_idx, year_li in enumerate(month_li):
+                # First year is 2006, so add 2006 to the index
+                year = year_idx + 1901
+                var_values = year_li.split(" ")
+                point_data_pkg['historical'][month][year] = {
+                    "tasmean": var_values[0],
+                    "tasmax": var_values[1],
+                    "tasmin": var_values[2],
+                }
+        for model_idx, model_li in enumerate(point_data[1]):
             model = tas_2km_dim_encodings["models"][model_idx]
-            point_data_pkg[model] = dict()
+            point_data_pkg['projected'][model] = dict()
             for scenario_idx, scenario_li in enumerate(model_li):
                 scenario = tas_2km_dim_encodings["scenarios"][scenario_idx]
-                point_data_pkg[model][scenario] = dict()
+                point_data_pkg['projected'][model][scenario] = dict()
                 for month_idx, month_li in enumerate(scenario_li):
                     month = tas_2km_dim_encodings["months"][month_idx]
-                    point_data_pkg[model][scenario][month] = dict()
+                    point_data_pkg['projected'][model][scenario][month] = dict()
                     for year_idx, year_li in enumerate(month_li):
                         # First year is 2006, so add 2006 to the index
                         year = year_idx + 2006
                         var_values = year_li.split(" ")
-                        point_data_pkg[model][scenario][month][year] = {
+                        point_data_pkg['projected'][model][scenario][month][year] = {
                             "tasmean": var_values[0],
                             "tasmax": var_values[1],
                             "tasmin": var_values[2],
@@ -859,7 +873,7 @@ def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, start_year, end_year):
     return point_pkg
 
 
-def run_fetch_tas_2km_point_data(lat, lon, month=None, summary_years=None):
+async def run_fetch_tas_2km_point_data(lat, lon, month=None, summary_years=None):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
@@ -882,13 +896,18 @@ def run_fetch_tas_2km_point_data(lat, lon, month=None, summary_years=None):
     if month is not None:
         if summary_years is None:
             summary_years = (0, 94)
-        point_data_list = asyncio.run(
+        results = asyncio.run(
             fetch_tas_2km_mmm_point_data(x, y, month, summary_years)
         )
     else:
-        point_data_list = asyncio.run(fetch_wcs_point_data(x, y, "tas_2km_projected"))
+        tasks = []
+        for coverage in ["historical", "projected"]:
+            tasks.append(
+                asyncio.create_task(fetch_wcs_point_data(x, y, f"tas_2km_{coverage}"))
+            )
+        results = await asyncio.gather(*tasks)
 
-    point_pkg = package_tas_2km_point_data(point_data_list)
+    point_pkg = package_tas_2km_point_data(results)
 
     return point_pkg
 
@@ -1107,87 +1126,89 @@ def get_temperature_plate(lat, lon):
         example request: http://localhost:5000/eds/temperature/65.0628/-146.1627
     """
     temp = dict()
-    months = ["all", "jan", "july"]
-    summarized_data = {}
-    for month in months:
-        if "historical" not in summarized_data:
-            summarized_data["historical"] = {}
-        if month == "all":
-            month_param = None
-        else:
-            month_param = month
-        all_data = mmm_point_data_endpoint("temperature", lat, lon, month_param)
+    # months = ["all", "jan", "july"]
+    # summarized_data = {}
+    # for month in months:
+    #     if "historical" not in summarized_data:
+    #         summarized_data["historical"] = {}
+    #     if month == "all":
+    #         month_param = None
+    #     else:
+    #         month_param = month
+    #     all_data = mmm_point_data_endpoint("temperature", lat, lon, month_param)
+    #
+    #     # Checks if error exists from fetching DD point
+    #     if isinstance(all_data, tuple):
+    #         # Returns error template that was generated for invalid request
+    #         return all_data[0]
+    #
+    #     if month != "all":
+    #         historical_min_values = list(
+    #             map(lambda x: x["tasmin"], all_data["CRU-TS"]["historical"].values())
+    #         )
+    #         historical_mean_values = list(
+    #             map(lambda x: x["tasmean"], all_data["CRU-TS"]["historical"].values())
+    #         )
+    #         historical_max_values = list(
+    #             map(lambda x: x["tasmax"], all_data["CRU-TS"]["historical"].values())
+    #         )
+    #         summarized_data["historical"][month] = {
+    #             "tasmin": min(historical_min_values),
+    #             "tasmean": round(np.mean(historical_mean_values), 1),
+    #             "tasmax": max(historical_max_values),
+    #         }
+    #     else:
+    #         historical_mean_values = list(
+    #             map(lambda x: x["tas"], all_data["CRU-TS"]["historical"].values())
+    #         )
+    #         summarized_data["historical"][month] = {
+    #             "tasmin": min(historical_mean_values),
+    #             "tasmean": round(np.mean(historical_mean_values), 1),
+    #             "tasmax": max(historical_mean_values),
+    #         }
+    #
+    #     eras = [
+    #         {"start": 2010, "end": 2039},
+    #         {"start": 2040, "end": 2069},
+    #         {"start": 2070, "end": 2099},
+    #     ]
+    #     models = list(all_data.keys())
+    #     models.remove("CRU-TS")
+    #     for era in eras:
+    #         era_label = str(era["start"]) + "-" + str(era["end"])
+    #         if era_label not in summarized_data:
+    #             summarized_data[era_label] = {}
+    #         min_values = []
+    #         mean_values = []
+    #         max_values = []
+    #         for model in models:
+    #             for scenarios in all_data[model].keys():
+    #                 for key, value in all_data[model][scenarios].items():
+    #                     year = int(key)
+    #                     if year >= era["start"] and year <= era["end"]:
+    #                         if month != "all":
+    #                             min_values.append(value["tasmin"])
+    #                             mean_values.append(value["tasmean"])
+    #                             max_values.append(value["tasmax"])
+    #                         else:
+    #                             mean_values.append(value["tas"])
+    #
+    #         if month != "all":
+    #             summarized_data[era_label][month] = {
+    #                 "tasmin": min(min_values),
+    #                 "tasmean": round(np.mean(mean_values), 1),
+    #                 "tasmax": max(max_values),
+    #             }
+    #         else:
+    #             summarized_data[era_label][month] = {
+    #                 "tasmin": min(mean_values),
+    #                 "tasmean": round(np.mean(mean_values), 1),
+    #                 "tasmax": max(mean_values),
+    #             }
+    #
+    # temp["summary"] = summarized_data
 
-        # Checks if error exists from fetching DD point
-        if isinstance(all_data, tuple):
-            # Returns error template that was generated for invalid request
-            return all_data[0]
-
-        if month != "all":
-            historical_min_values = list(
-                map(lambda x: x["tasmin"], all_data["CRU-TS"]["historical"].values())
-            )
-            historical_mean_values = list(
-                map(lambda x: x["tasmean"], all_data["CRU-TS"]["historical"].values())
-            )
-            historical_max_values = list(
-                map(lambda x: x["tasmax"], all_data["CRU-TS"]["historical"].values())
-            )
-            summarized_data["historical"][month] = {
-                "tasmin": min(historical_min_values),
-                "tasmean": round(np.mean(historical_mean_values), 1),
-                "tasmax": max(historical_max_values),
-            }
-        else:
-            historical_mean_values = list(
-                map(lambda x: x["tas"], all_data["CRU-TS"]["historical"].values())
-            )
-            summarized_data["historical"][month] = {
-                "tasmin": min(historical_mean_values),
-                "tasmean": round(np.mean(historical_mean_values), 1),
-                "tasmax": max(historical_mean_values),
-            }
-
-        eras = [
-            {"start": 2010, "end": 2039},
-            {"start": 2040, "end": 2069},
-            {"start": 2070, "end": 2099},
-        ]
-        models = list(all_data.keys())
-        models.remove("CRU-TS")
-        for era in eras:
-            era_label = str(era["start"]) + "-" + str(era["end"])
-            if era_label not in summarized_data:
-                summarized_data[era_label] = {}
-            min_values = []
-            mean_values = []
-            max_values = []
-            for model in models:
-                for scenarios in all_data[model].keys():
-                    for key, value in all_data[model][scenarios].items():
-                        year = int(key)
-                        if year >= era["start"] and year <= era["end"]:
-                            if month != "all":
-                                min_values.append(value["tasmin"])
-                                mean_values.append(value["tasmean"])
-                                max_values.append(value["tasmax"])
-                            else:
-                                mean_values.append(value["tas"])
-
-            if month != "all":
-                summarized_data[era_label][month] = {
-                    "tasmin": min(min_values),
-                    "tasmean": round(np.mean(mean_values), 1),
-                    "tasmax": max(max_values),
-                }
-            else:
-                summarized_data[era_label][month] = {
-                    "tasmin": min(mean_values),
-                    "tasmean": round(np.mean(mean_values), 1),
-                    "tasmax": max(mean_values),
-                }
-
-    temp["summary"] = summarized_data
+    temp_data = tas_2km_point_data_endpoint(lat, lon)
 
     first = mmm_point_data_endpoint("temperature", lat, lon, None, 1901, 1905, True)
     last = mmm_point_data_endpoint("temperature", lat, lon, None, 2096, 2100, True)
@@ -1365,6 +1386,7 @@ def mmm_point_data_endpoint(
 
 
 @routes.route("/tas2km/point/<lat>/<lon>")
+@routes.route("/tas2km/point/<lat>/<lon>/<month>")
 @routes.route("/tas2km/point/<lat>/<lon>/<month>/<start_year>/<end_year>")
 def tas_2km_point_data_endpoint(lat, lon, month=0, start_year=2006, end_year=2100):
     """Point data endpoint. Fetch point data for
@@ -1398,7 +1420,7 @@ def tas_2km_point_data_endpoint(lat, lon, month=0, start_year=2006, end_year=210
                 lat, lon, month, (int(start_year) - 2006, int(end_year) - 2006)
             )
         else:
-            point_pkg = run_fetch_tas_2km_point_data(lat, lon)
+            point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
