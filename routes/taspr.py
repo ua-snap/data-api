@@ -1376,14 +1376,14 @@ def tas_2km_point_data_endpoint(lat, lon):
         return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        point_pkg = nullify_and_prune(point_pkg, "tas2km")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
 
         place_id = request.args.get("community")
         return create_csv(point_pkg, "tas2km", place_id, lat, lon)
 
-    return postprocess(point_pkg, "taspr")
+    return postprocess(point_pkg, "tas2km")
 
 
 @routes.route("/<var_ep>/point/<lat>/<lon>")
