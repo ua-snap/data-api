@@ -257,46 +257,6 @@ def get_wcps_request_str(x, y, var_coord, cov_id, summary_decades, encoding="jso
     return wcps_request_str
 
 
-def get_tas_2km_wcps_request_str(
-    x, y, month=0, summary_years=(2006, 2100), encoding="json"
-):
-    """Generates a WCPS query specific to the
-    coverages used in the endpoints herein. The only
-    axis we are currently averaging over is "decade", so
-    this function creates a WCPS query from integer
-    values corresponding to decades to summarize over.
-
-    Args:
-        x (float or str): x-coordinate for point query, or string
-            composed as "x1:x2" for bbox query, where x1 and x2 are
-            lower and upper bounds of bbox
-        y (float or str): y-coordinate for point query, or string
-            composed as "y1:y2" for bbox query, where y1 and y2 are
-            lower and upper bounds of bbox
-        month (int): Any integer between 0-11 for January - December
-        summary_years (tuple): 2-tuple of integers mapped to
-            desired range of years to summarise over,
-            e.g. (2006, 2016) for 2006-2016
-        encoding (str): currently supports either "json" or "netcdf"
-            for point or bbox queries, respectively
-
-    Returns:
-        WCPS query to be included in generate_wcs_url()
-    """
-    d1, d2 = summary_years
-    n = len(np.arange(d1, d2 + 1))
-    wcps_request_str = quote(
-        (
-            f"ProcessCoverages&query=for $c in ({tas_2km_cov_id}) "
-            f"let $a := (condense + over $t year({d1}:{d2}) "
-            f"using $c[year($t),X({x}),Y({y}),month({month})] ) / {n} "
-            f'return encode( $a , "application/{encoding}")'
-        )
-    )
-
-    return wcps_request_str
-
-
 def get_mmm_wcps_request_str(
     x, y, cov_id, scenarios, models, years, tempstat, encoding="json"
 ):
@@ -601,52 +561,39 @@ def package_tas_2km_point_data(point_data):
         JSON-like dict of query results
     """
     point_data_pkg = dict()
-    point_data_pkg['historical'] = dict()
-    point_data_pkg['projected'] = dict()
+    point_data_pkg["historical"] = dict()
+    point_data_pkg["projected"] = dict()
 
-    if request.args.get("summarize") == "mmm":
-        for model_idx, model_li in enumerate(point_data):
-            model = tas_2km_dim_encodings["models"][model_idx]
-            point_data_pkg[model] = dict()
-            for scenario_idx, scenario_li in enumerate(model_li):
-                scenario = tas_2km_dim_encodings["scenarios"][scenario_idx]
-                var_values = scenario_li.split(" ")
-                point_data_pkg[model][scenario] = {
-                    "tasmean": round(float(var_values[0]), 1),
-                    "tasmax": round(float(var_values[1]), 1),
-                    "tasmin": round(float(var_values[2]), 1),
-                }
-    else:
-        for month_idx, month_li in enumerate(point_data[0]):
-            month = tas_2km_dim_encodings["months"][month_idx]
-            point_data_pkg['historical'][month] = dict()
-            for year_idx, year_li in enumerate(month_li):
-                # First year is 2006, so add 2006 to the index
-                year = year_idx + 1901
-                var_values = year_li.split(" ")
-                point_data_pkg['historical'][month][year] = {
-                    "tasmean": var_values[0],
-                    "tasmax": var_values[1],
-                    "tasmin": var_values[2],
-                }
-        for model_idx, model_li in enumerate(point_data[1]):
-            model = tas_2km_dim_encodings["models"][model_idx]
-            point_data_pkg['projected'][model] = dict()
-            for scenario_idx, scenario_li in enumerate(model_li):
-                scenario = tas_2km_dim_encodings["scenarios"][scenario_idx]
-                point_data_pkg['projected'][model][scenario] = dict()
-                for month_idx, month_li in enumerate(scenario_li):
-                    month = tas_2km_dim_encodings["months"][month_idx]
-                    point_data_pkg['projected'][model][scenario][month] = dict()
-                    for year_idx, year_li in enumerate(month_li):
-                        # First year is 2006, so add 2006 to the index
-                        year = year_idx + 2006
-                        var_values = year_li.split(" ")
-                        point_data_pkg['projected'][model][scenario][month][year] = {
-                            "tasmean": var_values[0],
-                            "tasmax": var_values[1],
-                            "tasmin": var_values[2],
-                        }
+    for month_idx, month_li in enumerate(point_data[0]):
+        month = tas_2km_dim_encodings["months"][month_idx]
+        point_data_pkg["historical"][month] = dict()
+        for year_idx, year_li in enumerate(month_li):
+            # First year is 1901, so add 1901 to the index
+            year = year_idx + 1901
+            var_values = year_li.split(" ")
+            point_data_pkg["historical"][month][year] = {
+                "tasmean": var_values[0],
+                "tasmax": var_values[1],
+                "tasmin": var_values[2],
+            }
+    for model_idx, model_li in enumerate(point_data[1]):
+        model = tas_2km_dim_encodings["models"][model_idx]
+        point_data_pkg["projected"][model] = dict()
+        for scenario_idx, scenario_li in enumerate(model_li):
+            scenario = tas_2km_dim_encodings["scenarios"][scenario_idx]
+            point_data_pkg["projected"][model][scenario] = dict()
+            for month_idx, month_li in enumerate(scenario_li):
+                month = tas_2km_dim_encodings["months"][month_idx]
+                point_data_pkg["projected"][model][scenario][month] = dict()
+                for year_idx, year_li in enumerate(month_li):
+                    # First year is 2006, so add 2006 to the index
+                    year = year_idx + 2006
+                    var_values = year_li.split(" ")
+                    point_data_pkg["projected"][model][scenario][month][year] = {
+                        "tasmean": var_values[0],
+                        "tasmax": var_values[1],
+                        "tasmin": var_values[2],
+                    }
 
     return point_data_pkg
 
@@ -873,17 +820,13 @@ def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, start_year, end_year):
     return point_pkg
 
 
-async def run_fetch_tas_2km_point_data(lat, lon, month=None, summary_years=None):
+async def run_fetch_tas_2km_point_data(lat, lon):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
     Args:
         lat (float): latitude
         lon (float): longitude
-        month (int): month to summarize over, one of 0 - 11
-        summary_years (tuple): 2-tuple of integers mapped to
-            desired range of years to summarise over,
-            e.g. (0, 10) for 2006-2016
 
     Returns:
         JSON-like dict of data at provided latitude and longitude
@@ -893,19 +836,12 @@ async def run_fetch_tas_2km_point_data(lat, lon, month=None, summary_years=None)
 
     x, y = project_latlon(lat, lon, 3338)
 
-    if month is not None:
-        if summary_years is None:
-            summary_years = (0, 94)
-        results = asyncio.run(
-            fetch_tas_2km_mmm_point_data(x, y, month, summary_years)
+    tasks = []
+    for coverage in ["historical", "projected"]:
+        tasks.append(
+            asyncio.create_task(fetch_wcs_point_data(x, y, f"tas_2km_{coverage}"))
         )
-    else:
-        tasks = []
-        for coverage in ["historical", "projected"]:
-            tasks.append(
-                asyncio.create_task(fetch_wcs_point_data(x, y, f"tas_2km_{coverage}"))
-            )
-        results = await asyncio.gather(*tasks)
+    results = await asyncio.gather(*tasks)
 
     point_pkg = package_tas_2km_point_data(results)
 
@@ -1386,18 +1322,13 @@ def mmm_point_data_endpoint(
 
 
 @routes.route("/tas2km/point/<lat>/<lon>")
-@routes.route("/tas2km/point/<lat>/<lon>/<month>")
-@routes.route("/tas2km/point/<lat>/<lon>/<month>/<start_year>/<end_year>")
-def tas_2km_point_data_endpoint(lat, lon, month=0, start_year=2006, end_year=2100):
+def tas_2km_point_data_endpoint(lat, lon):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
 
     Args:
         lat (float): latitude
         lon (float): longitude
-        month (int): month to summarize over, one of 0 - 11
-        start_year (int): Starting year 2006
-        end_year (int): Ending year 2100
 
     Notes:
         example request: http://localhost:5000/tas2km/point/65.0628/-146.1627
@@ -1415,12 +1346,7 @@ def tas_2km_point_data_endpoint(lat, lon, month=0, start_year=2006, end_year=210
         )
 
     try:
-        if request.args.get("summarize") == "mmm":
-            point_pkg = run_fetch_tas_2km_point_data(
-                lat, lon, month, (int(start_year) - 2006, int(end_year) - 2006)
-            )
-        else:
-            point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
+        point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
