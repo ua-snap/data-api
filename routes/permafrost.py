@@ -1,7 +1,7 @@
 import asyncio
 import pandas as pd
 from urllib.parse import quote
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, Response
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -83,24 +83,22 @@ def package_obu_vector(obu_vector_resp):
     return di
 
 
-def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation):
+def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
     """Generate a WCPS query string specific the to GIPL 1 km coverage.
 
     Arguments:
         x -- (float) x-coordinate for the point query
         y -- (float) y-coordinate for the point query
-        years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
-        model(int) - Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4
-        scenario(int) - Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
+        years -- (str) colon-separated ISO datetime, e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
         summary_operation -- (str) one of 'min', 'avg', or 'max'
     Returns:
-        gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
+        gipl1km_wcps_str -- (str) fragment used to construct WCPS request
     """
     gipl1km_wcps_str = quote(
         (
             f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
             f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
+            f"  values {summary_operation}( $c[variable($v),year({years}),X({x}),Y({y})] )"
             f', "application/json")'
         )
     )
@@ -108,30 +106,22 @@ def make_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operatio
 
 
 def package_gipl1km_wcps_data(gipl1km_wcps_resp):
-    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range and model type. Values are rounded to one decimal place because units are either meters or degrees C.
+    """Package the min-mean-max summary of ten GIPL variables. Summary is done across all models and scenarios for a given year range. Values rounded to one decimal place because units are either meters or degrees C.
 
     Arguments:
-        gipl1km_wcps_resp -- (list) nested 3-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
+        gipl1km_wcps_resp -- (list) nested list of WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
 
     Returns:
         gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
     """
     gipl1km_wcps_point_pkg = dict()
-    models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
-    for all_resp, model in zip(gipl1km_wcps_resp, models):
-        gipl1km_wcps_point_pkg[model] = dict()
-        scenarios = ["rcp45", "rcp85"]
-        for scenario_resp, scenario in zip(all_resp, scenarios):
-            gipl1km_wcps_point_pkg[model][scenario] = dict()
-            summary_methods = ["min", "mean", "max"]
-            for resp, stat_type in zip(scenario_resp, summary_methods):
-                gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
-                for k, v in zip(
-                    gipl1km_dim_encodings["variable"].values(), scenario_resp
-                ):
-                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
-                        k
-                    ] = round(v, 1)
+
+    for summary_op_resp, stat_type in zip(gipl1km_wcps_resp, ["min", "mean", "max"]):
+        gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"] = dict()
+
+        for k, v in zip(gipl1km_dim_encodings["variable"].values(), summary_op_resp):
+            gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
+
     return gipl1km_wcps_point_pkg
 
 
@@ -150,7 +140,7 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
     """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9). Values are rounded to one decimal place because units are either meters or degrees C.
 
     Arguments:
-        gipl1km_wcps_resp -- (list) deeply nested list of WCS response values.
+        gipl1km_point_resp -- (list) deeply nested list of WCS response values.
         time_slice -- (tuple) 2-tuple of (start_year, end_year)
     Returns:
         gipl1km_point_pkg -- (dict) results for all ten variables, all models, all scenario. defaults to the entire time range (time_slice=None).
@@ -319,17 +309,14 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
         )
-        for model_num in range(3):
-            model = list()
-            for scenario in range(2):
-                for summary_operation in ["min", "avg", "max"]:
-                    wcps_request_str = make_gipl1km_wcps_request_str(
-                        x, y, timestring, model_num, scenario, summary_operation
-                    )
-                    model.append(
-                        await fetch_data([generate_wcs_query_url(wcps_request_str)])
-                    )
-            wcps_response_data.append(model)
+        for summary_operation in ["min", "avg", "max"]:
+            wcps_request_str = make_gipl1km_wcps_request_str(
+                x, y, timestring, summary_operation
+            )
+            wcps_response_data.append(
+                await fetch_data([generate_wcs_query_url(wcps_request_str)])
+            )
+
         return wcps_response_data
 
     if start_year is None and end_year is None and summarize is not None:
@@ -339,17 +326,13 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
         minyear = str(time_index.min())[:4]
         maxyear = str(time_index.max())[:4]
         timestring = f'"{minyear}-01-01T00:00:00.000Z":"{maxyear}-01-01T00:00:00.000Z"'
-        for model_num in range(3):
-            model = list()
-            for scenario in range(2):
-                for summary_operation in ["min", "avg", "max"]:
-                    wcps_request_str = make_gipl1km_wcps_request_str(
-                        x, y, timestring, model_num, scenario, summary_operation
-                    )
-                    model.append(
-                        await fetch_data([generate_wcs_query_url(wcps_request_str)])
-                    )
-            wcps_response_data.append(model)
+        for summary_operation in ["min", "avg", "max"]:
+            wcps_request_str = make_gipl1km_wcps_request_str(
+                x, y, timestring, summary_operation
+            )
+            wcps_response_data.append(
+                await fetch_data([generate_wcs_query_url(wcps_request_str)])
+            )
         return wcps_response_data
 
     if start_year is not None and end_year is not None and summarize is None:
@@ -370,7 +353,7 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
 
 
 async def run_fetch_gipl_1km_point_data(
-    lat, lon, start_year=None, end_year=None, summarize=None
+    lat, lon, start_year=None, end_year=None, summarize=None, preview=None
 ):
     validation = validate_latlon(lat, lon)
     if validation == 400:
@@ -420,7 +403,7 @@ async def run_fetch_gipl_1km_point_data(
     else:
         gipl_1km_point_package = package_gipl1km_point_data(gipl_1km_point_data)
 
-    if request.args.get("format") == "csv":
+    if request.args.get("format") == "csv" or preview:
         point_pkg = nullify_and_prune(gipl_1km_point_package, "crrel_gipl")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
@@ -430,14 +413,18 @@ async def run_fetch_gipl_1km_point_data(
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
-async def run_eds_requests(lat, lon):
+async def run_eds_preview(lat, lon):
     year_ranges = [{"start": 2021, "end": 2025}, {"start": 2096, "end": 2100}]
     tasks = []
     for years in year_ranges:
         tasks.append(
             asyncio.create_task(
                 run_fetch_gipl_1km_point_data(
-                    lat, lon, start_year=years["start"], end_year=years["end"]
+                    lat,
+                    lon,
+                    start_year=years["start"],
+                    end_year=years["end"],
+                    preview=True,
                 )
             ),
         )
@@ -514,46 +501,7 @@ def aggregate_csv(permafrostData):
     return "\n".join(combined_lines)
 
 
-def combine_permafrost_preview(permafrostData):
-    """
-    Combines the permafrost data that contains the models, years,
-    scenarios, and variables so that each model contains the years associated with th
-        Args:
-            permafrostData - JSON-like dictionary of permafrost values
-                             ranging from 2011-2015 and 2096-2100
-
-        Returns:
-            JSON-like dict of preview permafrost data
-    """
-
-    # Initialize an empty dictionary to store the combined data
-    permafrost_data = {}
-
-    # Iterate through the original data
-    for model_data in permafrostData:
-        for model_name, model_values in model_data.items():
-            # Check if the model_name is already in the permafrost_data dictionary
-            if model_name not in permafrost_data:
-                permafrost_data[model_name] = {}
-
-            for year, year_data in model_values.items():
-                # Check if the year is already in the permafrost_data[model_name] dictionary
-                if year not in permafrost_data[model_name]:
-                    permafrost_data[model_name][year] = {}
-
-                for scenario, scenario_data in year_data.items():
-                    # Check if the scenario is already in the permafrost_data[model_name][year] dictionary
-                    if scenario not in permafrost_data[model_name][year]:
-                        permafrost_data[model_name][year][scenario] = {}
-
-                    for variable, value in scenario_data.items():
-                        # Assign the value to the permafrost_data[model_name][year][scenario][variable]
-                        permafrost_data[model_name][year][scenario][variable] = value
-
-    return permafrost_data
-
-
-@routes.route("/eds/permafrost/point/<lat>/<lon>")
+@routes.route("/eds/permafrost/<lat>/<lon>")
 def permafrost_eds_request(lat, lon):
     """
     Endpoint for providing permafrost preview of GIPL 2.0 data
@@ -564,15 +512,35 @@ def permafrost_eds_request(lat, lon):
         Returns:
             JSON-like dict of preview permafrost data
     """
-    permafrostData = asyncio.run(run_eds_requests(lat, lon))
+    permafrostData = dict()
 
-    # Error response checking for invalid input parameters
-    for response in permafrostData:
+    # Get the summary and preview data
+    summary = permafrost_ncr_request(lat, lon)
+
+    # Check for error response from summary response
+    if isinstance(summary, tuple):
+        return summary[0]
+
+    preview = asyncio.run(run_eds_preview(lat, lon))
+
+    # Check for error responses in the preview
+    for response in preview:
         if isinstance(response, tuple):
-            # Returns error template that was generated for invalid request
             return response[0]
 
-    return jsonify(combine_permafrost_preview(permafrostData))
+    # If there are no error responses, include the summary and preview data in the response
+    permafrostData["summary"] = summary
+    # permafrostData["permafrost"]["preview"] = [r.data.decode("utf-8") for r in preview]
+
+    preview_string = [r.data.decode("utf-8") for r in preview]
+
+    preview_past = preview_string[0].split("\n")[3:9]
+    preview_future = preview_string[1].split("\n")[-6:]
+    permafrostData["preview"] = (
+        "\n".join(preview_past) + "\n" + "\n".join(preview_future)
+    )
+
+    return jsonify(permafrostData)
 
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
@@ -587,7 +555,14 @@ def permafrost_ncr_request(lat, lon):
             if value[1] == 404:
                 return render_template("404/no_data.html"), 404
             if value[1] == 422:
-                return render_template("422/invalid_latlon.html"), 422
+                return (
+                    render_template(
+                        "422/invalid_latlon.html",
+                        west_bbox=WEST_BBOX,
+                        east_bbox=EAST_BBOX,
+                    ),
+                    422,
+                )
             else:
                 return render_template("500/server_error.html"), 500
 

@@ -163,6 +163,9 @@ def build_csv_dicts(packaged_data, package_coords, fill_di=None, values=None):
     rows = []
     previous_coord_breadcrumb = None
     for coords in data_package_coord_combos:
+        # If there is no data, don't add to CSV line
+        if len(coords) <= 1:
+            continue
         row_di = {}
         # need more general way of handling fields to be inserted before or after
         # what are actually available in packaged dicts
@@ -291,6 +294,7 @@ def degree_days_csv(data, endpoint):
         "degree_days_below_zero_all",
         "thawing_index_all",
         "freezing_index_all",
+        "dd_preview",
     ]:
         coords = ["model", "year"]
         values = ["dd"]
@@ -346,8 +350,8 @@ def flammability_csv(data):
 
 def gipl_csv(data, endpoint):
     if endpoint == "gipl_summary":
-        coords = ["model", "scenario", "summary"]
-    elif endpoint == "gipl":
+        coords = ["summary"]
+    elif endpoint == "gipl" or endpoint == "gipl_preview":
         coords = ["model", "year", "scenario"]
     values = [
         "magt0.5m",
@@ -363,7 +367,10 @@ def gipl_csv(data, endpoint):
     ]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
-    metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (deg C) at various depths below the surface as well as talik thickness (m) and depths of permafrost base and top (m)\n"
+    if endpoint == "gipl_preview":
+        metadata = ""
+    else:
+        metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (deg C) at various depths below the surface as well as talik thickness (m) and depths of permafrost base and top (m)\n"
     filename_data_name = "GIPL 1 km Model Outputs"
 
     return {

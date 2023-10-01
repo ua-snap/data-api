@@ -117,8 +117,8 @@ def degree_days_about():
     return render_template("/documentation/degree_days.html")
 
 
-@routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>/<preview>")
-def get_dd_plate(var_ep, lat, lon, preview=None):
+@routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")
+def get_dd_plate(var_ep, lat, lon):
     """
     Endpoint for requesting all data required for the Heating Degree Days,
     Below Zero Degree Days, Thawing Index, and Freezing Index in the
@@ -127,72 +127,67 @@ def get_dd_plate(var_ep, lat, lon, preview=None):
         var_ep (str): heating, below_zero, thawing_index, or freezing_index
         lat (float): latitude
         lon (float): longitude
-        preview (string): Generates CSV preview for degree day variable for
-                          ArcticEDS.
     Notes:
         example request: http://localhost:5000/eds/degree_days/heating/65.0628/-146.1627
     """
-    if preview:
-        # Grabs the first and last 5 years of
-        # the data for a particular variable
-        first = run_fetch_dd_point_data(var_ep, lat, lon, 1980, 1984)
-        last = run_fetch_dd_point_data(var_ep, lat, lon, 2096, 2100)
-        combined_dict = {}
+    dd = dict()
 
-        # Error response checking for invalid input parameters
-        for response in [first, last]:
-            if isinstance(response, tuple):
-                # Returns error template that was generated for invalid request
-                return response[0]
+    summarized_data = {}
+    if "historical" not in summarized_data:
+        summarized_data["historical"] = {}
 
-        # Iterate through the keys in both dictionaries
-        for key in first.keys() | last.keys():
-            # Merge the dictionaries on the current key
-            combined_dict[key] = {
-                **(first.get(key, {}) or {}),
-                **(last.get(key, {}) or {}),
-            }
+    all_data = run_fetch_dd_point_data(var_ep, lat, lon)
 
-        return jsonify(combined_dict)
-    else:
-        summarized_data = {}
-        if "historical" not in summarized_data:
-            summarized_data["historical"] = {}
+    # Checks if error exists from fetching DD point
+    if isinstance(all_data, tuple):
+        # Returns error template that was generated for invalid request
+        return all_data[0]
 
-        all_data = run_fetch_dd_point_data(var_ep, lat, lon)
+    historical_values = list(map(lambda x: x["dd"], all_data["ERA-Interim"].values()))
+    summarized_data["historical"] = {
+        "ddmax": max(historical_values),
+        "ddmean": round(np.mean(historical_values)),
+        "ddmin": min(historical_values),
+    }
 
-        historical_values = list(
-            map(lambda x: x["dd"], all_data["ERA-Interim"].values())
-        )
-        summarized_data["historical"] = {
-            "ddmax": max(historical_values),
-            "ddmean": round(np.mean(historical_values)),
-            "ddmin": min(historical_values),
+    eras = [
+        {"start": 2010, "end": 2039},
+        {"start": 2040, "end": 2069},
+        {"start": 2070, "end": 2099},
+    ]
+    models = list(all_data.keys())
+    models.remove("ERA-Interim")
+    for era in eras:
+        era_label = str(era["start"]) + "-" + str(era["end"])
+        if era_label not in summarized_data:
+            summarized_data[era_label] = {}
+        dd_values = []
+        for model in all_data.keys():
+            for year, value in all_data[model].items():
+                if year >= era["start"] and year <= era["end"]:
+                    dd_values.append(value["dd"])
+        summarized_data[era_label] = {
+            "ddmin": min(dd_values),
+            "ddmean": round(np.mean(dd_values)),
+            "ddmax": max(dd_values),
         }
 
-        eras = [
-            {"start": 2010, "end": 2039},
-            {"start": 2040, "end": 2069},
-            {"start": 2070, "end": 2099},
-        ]
-        models = list(all_data.keys())
-        models.remove("ERA-Interim")
-        for era in eras:
-            era_label = str(era["start"]) + "-" + str(era["end"])
-            if era_label not in summarized_data:
-                summarized_data[era_label] = {}
-            dd_values = []
-            for model in all_data.keys():
-                for year, value in all_data[model].items():
-                    if year >= era["start"] and year <= era["end"]:
-                        dd_values.append(value["dd"])
-            summarized_data[era_label] = {
-                "ddmin": min(dd_values),
-                "ddmean": round(np.mean(dd_values)),
-                "ddmax": max(dd_values),
-            }
+    dd["summary"] = summarized_data
 
-        return jsonify(summarized_data)
+    preview = run_fetch_dd_point_data(var_ep, lat, lon, preview=True)
+
+    # Checks if error exists from preview CSV request
+    if isinstance(preview, tuple):
+        # Returns error template that was generated for invalid request
+        return preview[0]
+
+    dd_csv = preview.data.decode("utf-8")
+    first = "\n".join(dd_csv.split("\n")[3:9]) + "\n"
+    last = "\n".join(dd_csv.split("\n")[-6:])
+
+    dd["preview"] = first + last
+
+    return jsonify(dd)
 
 
 def package_dd_point_data(point_data, start_year=None, end_year=None):
@@ -319,7 +314,9 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
 
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>")
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>/<start_year>/<end_year>")
-def run_fetch_dd_point_data(var_ep, lat, lon, start_year=None, end_year=None):
+def run_fetch_dd_point_data(
+    var_ep, lat, lon, start_year=None, end_year=None, preview=None
+):
     """Degree days data endpoint. Fetch point data for
     specified lat/lon and return JSON-like dict.
 
@@ -369,7 +366,7 @@ def run_fetch_dd_point_data(var_ep, lat, lon, start_year=None, end_year=None):
 
     point_pkg = package_dd_point_data(point_data_list, start_year, end_year)
 
-    if request.args.get("format") == "csv":
+    if request.args.get("format") == "csv" or preview:
         point_pkg = nullify_and_prune(point_pkg, cov_id_str)
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404

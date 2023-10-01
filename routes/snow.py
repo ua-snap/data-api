@@ -1,10 +1,6 @@
 import asyncio
 import numpy as np
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-)
+from flask import Blueprint, render_template, request, jsonify
 
 # local imports
 from fetch_data import (
@@ -113,13 +109,39 @@ def summarize_mmm_sfe(all_sfe_di):
     return mmm_sfe_di
 
 
+@routes.route("/eds/snow/<lat>/<lon>")
+def eds_snow_data(lat, lon):
+    snow = dict()
+
+    summary = run_point_fetch_all_sfe(lat, lon, summarize=True)
+    # Check for error response from summary response
+    if isinstance(summary, tuple):
+        return summary[0]
+
+    snow["summary"] = summary
+
+    preview = run_point_fetch_all_sfe(lat, lon, preview=True)
+    # Check for error responses in the preview
+    if isinstance(preview, tuple):
+        # Returns error template that was generated for invalid request
+        return preview[0]
+
+    snow_csv = preview.data.decode("utf-8")
+    first = "\n".join(snow_csv.split("\n")[3:9]) + "\n"
+    last = "\n".join(snow_csv.split("\n")[-6:])
+
+    snow["preview"] = first + last
+
+    return jsonify(snow)
+
+
 @routes.route("/snow/")
 def about_mmm_snow():
     return render_template("documentation/snow.html")
 
 
 @routes.route("/snow/snowfallequivalent/<lat>/<lon>")
-def run_point_fetch_all_sfe(lat, lon):
+def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
     """Run the async request for SFE data at a single point.
     Args:
         lat (float): latitude
@@ -141,14 +163,13 @@ def run_point_fetch_all_sfe(lat, lon):
     x, y = project_latlon(lat, lon, 3338)
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, sfe_coverage_id))
-        if request.args.get("summarize") == "mmm":
+        if request.args.get("summarize") == "mmm" or summarize:
             point_pkg = summarize_mmm_sfe(package_sfe_data(rasdaman_response))
         else:
             point_pkg = package_sfe_data(rasdaman_response)
         try:
-            if (
-                not request.args.get("summarize") == "mmm"
-                and request.args.get("format") == "csv"
+            if not request.args.get("summarize") == "mmm" and (
+                request.args.get("format") == "csv" or preview
             ):
                 point_pkg = nullify_and_prune(point_pkg, "snow")
                 if point_pkg in [{}, None, 0]:
