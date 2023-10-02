@@ -35,6 +35,22 @@ async def fetch_data(url):
         return dict()
 
 
+async def fetch_data_with_retry(url, max_retries=3):
+    for retry in range(max_retries):
+        response = await fetch_data(url)
+        # If the response is not blank, return the response
+        if response != dict():
+            return response
+        elif retry < max_retries - 1:
+            # Sleep for a moment before retrying the given endpoint
+            print(f"Retrying {url} after attempt {retry + 1}")
+            await asyncio.sleep(2)
+        else:
+            # If all retries are empty dictionaries, return the blank section
+            # to allow ArcticEDS to continue showing other sections.
+            return response
+
+
 async def run_fetch_all_eds(lat, lon):
     """
     Fetches a list of data API end points to generate a multiple
@@ -80,7 +96,7 @@ async def run_fetch_all_eds(lat, lon):
         "proj_precip",
     ]
 
-    results = await asyncio.gather(*[fetch_data(url) for url in all_urls])
+    results = await asyncio.gather(*[fetch_data_with_retry(url) for url in all_urls])
 
     eds = dict()
     for index in range(len(results)):

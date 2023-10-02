@@ -752,14 +752,16 @@ def create_temperature_eds_summary(temp_json):
             monthly_min = None
 
         # Append the results to the hist_monthly_mmm DataFrame
-        hist_monthly_mmm = hist_monthly_mmm.append(
+        row_to_append = pd.DataFrame(
             {
-                "Month": month,
-                "tasmean": monthly_mean,
-                "tasmax": monthly_max,
-                "tasmin": monthly_min,
-            },
-            ignore_index=True,
+                "Month": [month],
+                "tasmean": [monthly_mean],
+                "tasmax": [monthly_max],
+                "tasmin": [monthly_min],
+            }
+        )
+        hist_monthly_mmm = pd.concat(
+            [hist_monthly_mmm, row_to_append], ignore_index=True
         )
 
         # Append the monthly values to the aggregated lists
@@ -772,15 +774,15 @@ def create_temperature_eds_summary(temp_json):
     annual_max = max(all_monthly_maxes)
     annual_min = min(all_monthly_mins)
 
-    hist_monthly_mmm = hist_monthly_mmm.append(
+    row_to_append = pd.DataFrame(
         {
-            "Month": "Annual",
-            "tasmean": annual_mean,
-            "tasmax": annual_max,
-            "tasmin": annual_min,
-        },
-        ignore_index=True,
+            "Month": ["Annual"],
+            "tasmean": [annual_mean],
+            "tasmax": [annual_max],
+            "tasmin": [annual_min],
+        }
     )
+    hist_monthly_mmm = pd.concat([hist_monthly_mmm, row_to_append], ignore_index=True)
 
     eras_of_interest = [
         [year for year in range(2010, 2040)],
@@ -850,14 +852,16 @@ def create_temperature_eds_summary(temp_json):
                         monthly_min = None
 
                     combination_label = f"{model_option}_{rcp_option}_{month}_{years_of_interest[0]}_{years_of_interest[-1]}"
-                    projected_monthly_mmm = projected_monthly_mmm.append(
+                    row_to_append = pd.DataFrame(
                         {
-                            "Month": combination_label,
-                            "tasmean": monthly_mean,
-                            "tasmax": monthly_max,
-                            "tasmin": monthly_min,
-                        },
-                        ignore_index=True,
+                            "Month": [combination_label],
+                            "tasmean": [monthly_mean],
+                            "tasmax": [monthly_max],
+                            "tasmin": [monthly_min],
+                        }
+                    )
+                    projected_monthly_mmm = pd.concat(
+                        [projected_monthly_mmm, row_to_append], ignore_index=True
                     )
 
                 # Calculate the aggregated values for the current combination
@@ -883,14 +887,16 @@ def create_temperature_eds_summary(temp_json):
                     # only if the 5ModelAvg since we only want the annual values
                     # from that model option.
                     combination_label = f"{model_option}_{rcp_option}_Annual_{years_of_interest[0]}_{years_of_interest[-1]}"
-                    projected_monthly_mmm = projected_monthly_mmm.append(
+                    row_to_append = pd.DataFrame(
                         {
-                            "Month": combination_label,
-                            "tasmean": annual_mean,
-                            "tasmax": annual_max,
-                            "tasmin": annual_min,
-                        },
-                        ignore_index=True,
+                            "Month": [combination_label],
+                            "tasmean": [annual_mean],
+                            "tasmax": [annual_max],
+                            "tasmin": [annual_min],
+                        }
+                    )
+                    projected_monthly_mmm = pd.concat(
+                        [projected_monthly_mmm, row_to_append], ignore_index=True
                     )
 
     # Initialize an empty dictionary for the final JSON
@@ -1300,6 +1306,10 @@ def get_temperature_plate(lat, lon):
     temp = dict()
 
     temp_json = tas_2km_point_data_endpoint(lat, lon)
+
+    if isinstance(temp_json, tuple):
+        # Returns error template that was generated for invalid request
+        return temp_json[0]
 
     temp["summary"] = create_temperature_eds_summary(temp_json)
 
