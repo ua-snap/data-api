@@ -3,14 +3,15 @@
 
 <p>
   These endpoints provide access to historical and projected modeled decadal
-  summaries of hydrologic data for Alaska at a resolution of XXXm. Historical
-  data were derived from the XXX dataset. Projections were derived from XXX,
-  YYY, and ZZZ model outputs under the RCP 4.5 and RCP 8.5 emissions scenarios.
+  summaries of hydrologic data for Alaska at a resolution of 12km. These data
+  were derived by applying the Variable Infiltration Capacity (VIC) model to
+  downscaled CMIP5 historical and projected climate data, using RCP 4.5 and RCP
+  8.5 emissions scenarios.
 </p>
 
 <p>
-  Links to academic references and source datasets are included at the bottom of
-  this page.
+  For more detailed model information, see the links to academic references and
+  source datasets included at the bottom of this page.
 </p>
 
 <h3>Service endpoints</h3>
@@ -18,7 +19,8 @@
 <h4>All hydrologic variables (point query)</h4>
 
 <p>
-  Query all hydrologic variables for all models and scenarios for each decade.
+  Query hydrologic variables for all models and scenarios. Monthly variable data
+  is averaged over each decade.
 </p>
 
 <table class="endpoints">
@@ -30,7 +32,7 @@
   </thead>
   <tbody>
     <tr>
-      <td>Decadal variables</td>
+      <td>Decadal means for all variables</td>
       <td>
         <a href="/hydrology/point/61.5/-147">/hydrology/point/61.5/-147</a>
       </td>
@@ -39,8 +41,12 @@
   <tfoot>
     <tr>
       <td colspan="2">
-        CSV output is available by appending <code>?format=csv</code> to the
-        URL.
+        Min/mean/max summaries of across all decades are available by appending
+        <code>?summarize=mmm</code> to the URL. <br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?summarize=mmm&format=csv</code>).
       </td>
     </tr>
   </tfoot>
@@ -101,6 +107,106 @@
           "swe": &lt;monthly maximum of daily snow water equivalent, mm&gt;,
           "tmax": &lt;monthly mean of daily maximum air temperature at 2m, degrees C&gt;,
           "tmin": &lt;monthly mean of daily minimum air temperature at 2m, degrees C&gt;,
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h4>Min/mean/max summaries across all decades</h4>
+
+<p>Results from min/mean/max summary queries will look like this:</p>
+
+<pre>
+  {
+    "ACCESS1-3": {
+      "rcp45": {
+        "apr": {
+          "evap": {
+            "max": 13.0,
+            "mean": 0.5,
+            "min": -16.0
+          },
+          "glacier_melt": {
+            "max": 42090.0,
+            "mean": 4289.65,
+            "min": 0.0
+          },
+          "iwe": {
+            "max": 207495.0,
+            "mean": 151004.6,
+            "min": 64746.0
+          },
+          "pcp": {
+            "max": 749.0,
+            "mean": 219.32,
+            "min": 23.0
+          },
+          "runoff": {
+            "max": 1941.0,
+            "mean": 217.61,
+            "min": 0.0
+          },
+          "sm1": {
+            "max": 10.0,
+            "mean": 9.98,
+            "min": 9.0
+          },
+          "sm2": {
+            "max": 440.0,
+            "mean": 439.82,
+            "min": 408.0
+          },
+          "sm3": {
+            "max": 27.0,
+            "mean": 0.07,
+            "min": 0.0
+          },
+          "snow_melt": {
+            "max": 1943.0,
+            "mean": 217.74,
+            "min": 0.0
+          },
+          "swe": {
+            "max": 2090.0,
+            "mean": 957.38,
+            "min": 5.0
+          },
+          "tmax": {
+            "max": 20.4,
+            "mean": -3.74,
+            "min": -23.3
+          },
+          "tmin": {
+            "max": 5.7,
+            "mean": -15.39,
+            "min": -35.0
+          }
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;scenario&gt;: {
+      &lt;month&gt;: {
+        &lt;variable&gt;: {
+          "max": &lt;maxmimum values for variable across all decades&gt;,
+          "mean": &lt;mean values for variable across all decades&gt;,
+          "min": &lt;minimum values for variable across all decades&gt;
         },
         ...
       },

@@ -1,4 +1,5 @@
 import asyncio
+import numpy as np
 from urllib.parse import quote
 from flask import (
     Blueprint,
@@ -142,10 +143,9 @@ def run_fetch_hydrology_point_data(lat, lon):
     return point_pkg
 
 
-### unfinished function, need to fix WCPS request string
 def run_fetch_hydrology_point_data_mmm(lat, lon):
-    """Fetch summarized hydrology data for a
-       given latitude and longitude.
+    """Fetch hydrology data for a
+       given latitude and longitude, and summarize over eras.
 
     Args:
         lat (float): latitude
@@ -155,16 +155,71 @@ def run_fetch_hydrology_point_data_mmm(lat, lon):
         JSON-like dict of data at provided latitude and
         longitude for all variables
     """
-    x, y = project_latlon(lat, lon, 3338)
+    # get standard point data package
+    point_pkg = run_fetch_hydrology_point_data(lat, lon)
 
-    wcps_str = generate_average_wcps_str(x, y, hydrology_coverage_id, "eras", (0, 14))
-    wcps_query_url = generate_wcs_query_url(wcps_str)
-    rasdaman_response = asyncio.run(fetch_data([wcps_query_url]))
-    return rasdaman_response
+    # compute min/mean/max across eras for each variable name
+    mmm_dict = dict()
 
-    # package point data with decoded coord values (names)
-    # point_pkg = dict()
-    # return point_pkg
+    var_names = []
+    for var_coord in dim_encodings["varnames"].keys():
+        var_names.append(dim_encodings["varnames"][var_coord])
+
+        for var_name in var_names:
+            values = []
+
+            for model_coord in dim_encodings["models"].keys():
+                model_name = dim_encodings["models"][model_coord]
+                for scenario_coord in dim_encodings["scenarios"].keys():
+                    scenario_name = dim_encodings["scenarios"][scenario_coord]
+                    for month_coord in dim_encodings["months"].keys():
+                        month_name = dim_encodings["months"][month_coord]
+                        for era_coord in dim_encodings["eras"].keys():
+                            era_name = dim_encodings["eras"][era_coord]
+
+                            values.append(
+                                float(
+                                    point_pkg[model_name][scenario_name][month_name][
+                                        era_name
+                                    ][var_name]
+                                )
+                            )
+
+            min_value, mean_value, max_value = (
+                min(values),
+                round(np.nanmean(values), 2),
+                max(values),
+            )
+
+            mmm_dict[var_name] = min_value, mean_value, max_value
+
+    # repackage point data with mmm values
+    point_pkg_mmm = dict()
+    for model_coord in dim_encodings["models"].keys():
+        model_name = dim_encodings["models"][model_coord]
+        point_pkg_mmm[model_name] = dict()
+        for scenario_coord in dim_encodings["scenarios"].keys():
+            scenario_name = dim_encodings["scenarios"][scenario_coord]
+            point_pkg_mmm[model_name][scenario_name] = dict()
+            for month_coord in dim_encodings["months"].keys():
+                month_name = dim_encodings["months"][month_coord]
+                point_pkg_mmm[model_name][scenario_name][month_name] = dict()
+                for var_coord in dim_encodings["varnames"].keys():
+                    var_name = dim_encodings["varnames"][var_coord]
+                    point_pkg_mmm[model_name][scenario_name][month_name][
+                        var_name
+                    ] = dict()
+                    point_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                        "min"
+                    ] = mmm_dict[var_name][0]
+                    point_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                        "mean"
+                    ] = mmm_dict[var_name][1]
+                    point_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                        "max"
+                    ] = mmm_dict[var_name][2]
+
+    return point_pkg_mmm
 
 
 @routes.route("/hydrology/")
@@ -202,27 +257,51 @@ def run_get_hydrology_point_data(lat, lon):
         if (request.args.get("summarize") == "mmm") & (
             request.args.get("format") == "csv"
         ):
-            #### run_fetch_hydrology_point_data_mmm() and create_csv() routine
-            return "mmm and csv route"
+            try:
+                point_pkg = run_fetch_hydrology_point_data_mmm(lat, lon)
+                place_id = request.args.get("community")
+                if place_id:
+                    return create_csv(
+                        point_pkg, "hydrology_mmm", place_id=place_id, lat=lat, lon=lon
+                    )
+                else:
+                    return create_csv(point_pkg, "hydrology_mmm", lat=lat, lon=lon)
+            except Exception as exc:
+                if hasattr(exc, "status") and exc.status == 404:
+                    return render_template("404/no_data.html"), 404
+                return render_template("500/server_error.html"), 500
+
         else:
             return render_template("400/bad_request.html"), 400
 
     elif "summarize" in request.args:
         if request.args.get("summarize") == "mmm":
-            #### run_fetch_hydrology_point_data_mmm() and return JSON
-            return "mmm only route"
+            try:
+                return run_fetch_hydrology_point_data_mmm(lat, lon)
+            except Exception as exc:
+                if hasattr(exc, "status") and exc.status == 404:
+                    return render_template("404/no_data.html"), 404
+                return render_template("500/server_error.html"), 500
         else:
             return render_template("400/bad_request.html"), 400
 
     elif "format" in request.args:
         if request.args.get("format") == "csv":
-            point_pkg = run_fetch_hydrology_point_data(lat, lon)
-            place_id = request.args.get("community")
-            if place_id:
-                return create_csv(
-                    point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
-                )
-            return create_csv(point_pkg, "hydrology", place_id=None, lat=lat, lon=lon)
+            try:
+                point_pkg = run_fetch_hydrology_point_data(lat, lon)
+                place_id = request.args.get("community")
+                if place_id:
+                    return create_csv(
+                        point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
+                    )
+                else:
+                    return create_csv(
+                        point_pkg, "hydrology", place_id=None, lat=lat, lon=lon
+                    )
+            except Exception as exc:
+                if hasattr(exc, "status") and exc.status == 404:
+                    return render_template("404/no_data.html"), 404
+                return render_template("500/server_error.html"), 500
 
     else:
         return render_template("400/bad_request.html"), 400

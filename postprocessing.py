@@ -25,6 +25,7 @@ nodata_mappings = {
     "heating_degree_days": nodata_values["default"],
     "heating_degree_days_all": nodata_values["default"],
     "hydrology": nodata_values["default"],
+    "hydrology_mmm": nodata_values["default"],
     "landfastice": [],
     "ncar12km_indicators": nodata_values["ncar12km_indicators"],
     "permafrost": nodata_values["permafrost"],
