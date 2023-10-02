@@ -562,16 +562,18 @@ def package_tas_2km_point_data(point_data):
     """
     point_data_pkg = dict()
     point_data_pkg["historical"] = dict()
+    point_data_pkg["historical"]["CRU-TS"] = dict()
+    point_data_pkg["historical"]["CRU-TS"]["historical"] = dict()
     point_data_pkg["projected"] = dict()
 
     for month_idx, month_li in enumerate(point_data[0]):
         month = tas_2km_dim_encodings["months"][month_idx]
-        point_data_pkg["historical"][month] = dict()
+        point_data_pkg["historical"]["CRU-TS"]["historical"][month] = dict()
         for year_idx, year_li in enumerate(month_li):
             # First year is 1901, so add 1901 to the index
             year = year_idx + 1901
             var_values = year_li.split(" ")
-            point_data_pkg["historical"][month][year] = {
+            point_data_pkg["historical"]["CRU-TS"]["historical"][month][year] = {
                 "tasmean": var_values[0],
                 "tasmax": var_values[1],
                 "tasmin": var_values[2],
@@ -701,7 +703,9 @@ def package_ar5_point_summary(point_data, varname):
 
 
 def create_temperature_eds_summary(temp_json):
-    hist_df = pd.DataFrame.from_dict(temp_json["historical"], orient="index")
+    hist_df = pd.DataFrame.from_dict(
+        temp_json["historical"]["CRU-TS"]["historical"], orient="index"
+    )
     hist_monthly_mmm = pd.DataFrame(columns=["Month", "tasmean", "tasmax", "tasmin"])
 
     all_monthly_means = []
@@ -911,7 +915,9 @@ def create_temperature_eds_summary(temp_json):
         tasmin = row["tasmin"]
         hist_data[month] = {"tasmean": tasmean, "tasmax": tasmax, "tasmin": tasmin}
 
-    result_json["historical"] = hist_data
+    result_json["historical"] = dict()
+    result_json["historical"]["CRU-TS"] = dict()
+    result_json["historical"]["CRU-TS"]["historical"] = hist_data
 
     # Create the 'projected' section
     projected_data = {}
@@ -1511,12 +1517,12 @@ def tas_2km_point_data_endpoint(lat, lon):
             422,
         )
 
-    try:
-        point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
+    # try:
+    point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
+    # except Exception as exc:
+    #     if hasattr(exc, "status") and exc.status == 404:
+    #         return render_template("404/no_data.html"), 404
+    #     return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "tas2km")

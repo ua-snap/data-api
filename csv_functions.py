@@ -715,7 +715,8 @@ def taspr_csv(data, endpoint):
         values = ["tasmin", "tasmean", "tasmax"]
         fieldnames = coords + values
         all_fields += fieldnames
-        csv_dicts += build_csv_dicts(data, fieldnames, values=values)
+        csv_dicts += build_csv_dicts(data["historical"], fieldnames, values=values)
+        csv_dicts += build_csv_dicts(data["projected"], fieldnames, values=values)
 
         metadata = "# tasmin is the minimum temperature in degrees C\n"
         metadata += "# tasmean is the mean temperature in degrees C\n"

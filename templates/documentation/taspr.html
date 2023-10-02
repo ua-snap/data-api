@@ -433,11 +433,17 @@
 <pre>
 {
   "historical": {
-    "April": {
-      "1901": {
-        "tasmax": "-0.5",
-        "tasmean": "-6.2",
-        "tasmin": "-12.2"
+    "CRU-TS": {
+      "historical": {
+        "April": {
+          "1901": {
+            "tasmax": "-0.5",
+            "tasmean": "-6.2",
+            "tasmin": "-12.2"
+          },
+          ...
+        },
+        ...
       },
       ...
     },
@@ -467,17 +473,23 @@
 
 <pre>
 {
-    historial: {
-      &lt;month&gt;: {
-        &lt;year&gt;: {
-          "tasmax": &lt;max tas value for the specified month during this year&gt;,
-          "tasmean": &lt;mean tas value for the specified month during this year&gt;,
-          "tasmin": &lt;min tas value for the specified month during this year&gt;;
+    historical: {
+      CRU-TS: {
+        historical: {
+          &lt;month&gt;: {
+            &lt;year&gt;: {
+              "tasmax": &lt;max tas value for the specified month during this year&gt;,
+              "tasmean": &lt;mean tas value for the specified month during this year&gt;,
+              "tasmin": &lt;min tas value for the specified month during this year&gt;;
+            },
+            ...
+          },
+          ...
         },
         ...
       },
       ...
-    },
+  },
   projected: {
     &lt;model&gt;: {
       &lt;scenario&gt;: {
