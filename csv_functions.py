@@ -1,4 +1,4 @@
-from flask import request, Response
+from flask import request, Response, request
 import csv
 from postprocessing import *
 from fetch_data import *
@@ -130,14 +130,11 @@ def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=
     else:
         metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
 
-    report_url = WEB_APP_URL + "report/"
-    if place_type is None:
-        report_url += lat + "/" + lon
-    elif place_type == "community":
-        report_url += "community/" + place_id
-    else:
-        report_url += "area/" + place_id
-    metadata += "# View a report for this location at " + report_url + "\n"
+    metadata += (
+        "# View a report for this location at https://earthmaps.io"
+        + request.path
+        + "\n"
+    )
 
     return metadata
 
