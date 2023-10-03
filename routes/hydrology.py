@@ -1,22 +1,18 @@
 import asyncio
 import numpy as np
-from urllib.parse import quote
 from flask import (
     Blueprint,
     render_template,
     request,
     current_app as app,
-    jsonify,
 )
 
 # local imports
-from fetch_data import fetch_wcs_point_data, fetch_data
+from fetch_data import fetch_wcs_point_data
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from generate_requests import generate_average_wcps_str
-from generate_urls import generate_wcs_query_url
 from validate_data import *
 from postprocessing import postprocess
 from csv_functions import create_csv
