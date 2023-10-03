@@ -158,42 +158,7 @@ def run_fetch_hydrology_point_data_mmm(lat, lon):
     # get standard point data package
     point_pkg = run_fetch_hydrology_point_data(lat, lon)
 
-    # compute min/mean/max across eras for each variable name
-    mmm_dict = dict()
-
-    var_names = []
-    for var_coord in dim_encodings["varnames"].keys():
-        var_names.append(dim_encodings["varnames"][var_coord])
-
-        for var_name in var_names:
-            values = []
-
-            for model_coord in dim_encodings["models"].keys():
-                model_name = dim_encodings["models"][model_coord]
-                for scenario_coord in dim_encodings["scenarios"].keys():
-                    scenario_name = dim_encodings["scenarios"][scenario_coord]
-                    for month_coord in dim_encodings["months"].keys():
-                        month_name = dim_encodings["months"][month_coord]
-                        for era_coord in dim_encodings["eras"].keys():
-                            era_name = dim_encodings["eras"][era_coord]
-
-                            values.append(
-                                float(
-                                    point_pkg[model_name][scenario_name][month_name][
-                                        era_name
-                                    ][var_name]
-                                )
-                            )
-
-            min_value, mean_value, max_value = (
-                min(values),
-                round(np.nanmean(values), 2),
-                max(values),
-            )
-
-            mmm_dict[var_name] = min_value, mean_value, max_value
-
-    # repackage point data with mmm values
+    # repackage point data with mmm values computed across eras
     point_pkg_mmm = dict()
     for model_coord in dim_encodings["models"].keys():
         model_name = dim_encodings["models"][model_coord]
@@ -209,15 +174,44 @@ def run_fetch_hydrology_point_data_mmm(lat, lon):
                     point_pkg_mmm[model_name][scenario_name][month_name][
                         var_name
                     ] = dict()
+
+                    values = list()
+
+                    for era_coord in dim_encodings["eras"].keys():
+                        era_name = dim_encodings["eras"][era_coord]
+
+                        values.append(
+                            float(
+                                point_pkg[model_name][scenario_name][month_name][
+                                    era_name
+                                ][var_name]
+                            )
+                        )
+
+                    min_value, mean_value, max_value = (
+                        min(values),
+                        round(np.nanmean(values), 2),
+                        max(values),
+                    )
+
+                    # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
+
+                    if np.isnan(min_value):
+                        min_value = "nan"
+                    if np.isnan(mean_value):
+                        mean_value = "nan"
+                    if np.isnan(max_value):
+                        max_value = "nan"
+
                     point_pkg_mmm[model_name][scenario_name][month_name][var_name][
                         "min"
-                    ] = mmm_dict[var_name][0]
+                    ] = min_value
                     point_pkg_mmm[model_name][scenario_name][month_name][var_name][
                         "mean"
-                    ] = mmm_dict[var_name][1]
+                    ] = mean_value
                     point_pkg_mmm[model_name][scenario_name][month_name][var_name][
                         "max"
-                    ] = mmm_dict[var_name][2]
+                    ] = max_value
 
     return point_pkg_mmm
 
