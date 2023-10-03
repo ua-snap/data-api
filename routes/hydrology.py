@@ -292,6 +292,8 @@ def run_get_hydrology_point_data(lat, lon):
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
                 return render_template("500/server_error.html"), 500
+        else:
+            return render_template("400/bad_request.html"), 400
 
     else:
         return render_template("400/bad_request.html"), 400
