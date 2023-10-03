@@ -519,14 +519,14 @@ def permafrost_eds_request(lat, lon):
 
     # Check for error response from summary response
     if isinstance(summary, tuple):
-        return summary[0]
+        return summary
 
     preview = asyncio.run(run_eds_preview(lat, lon))
 
     # Check for error responses in the preview
     for response in preview:
         if isinstance(response, tuple):
-            return response[0]
+            return response
 
     # If there are no error responses, include the summary and preview data in the response
     permafrostData["summary"] = summary

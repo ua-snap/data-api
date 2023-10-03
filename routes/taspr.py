@@ -1315,7 +1315,7 @@ def get_temperature_plate(lat, lon):
 
     if isinstance(temp_json, tuple):
         # Returns error template that was generated for invalid request
-        return temp_json[0]
+        return temp_json
 
     temp["summary"] = create_temperature_eds_summary(temp_json)
 
@@ -1356,7 +1356,7 @@ def get_precipitation_plate(lat, lon):
     # Checks if error exists from fetching DD point
     if isinstance(all_data, tuple):
         # Returns error template that was generated for invalid request
-        return all_data[0]
+        return all_data
 
     historical_values = list(
         map(lambda x: x["pr"], all_data["CRU-TS"]["historical"].values())
@@ -1395,7 +1395,7 @@ def get_precipitation_plate(lat, lon):
     for response in [first, last]:
         if isinstance(response, tuple):
             # Returns error template that was generated for invalid request
-            return response[0]
+            return response
 
     no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[3:])
     no_header = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
@@ -1640,11 +1640,11 @@ def proj_precip_point(lat, lon):
         return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
-        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        point_pkg = nullify_and_prune(point_pkg, "proj_precip")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
 
         place_id = request.args.get("community")
         return create_csv(point_pkg, "proj_precip", place_id, lat, lon)
 
-    return postprocess(point_pkg, "taspr")
+    return postprocess(point_pkg, "proj_precip")
