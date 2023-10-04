@@ -30,8 +30,7 @@ async def fetch_data(url):
         return results
     except ClientResponseError as e:
         # If any of the URLs returns a status other than HTTP status 200,
-        # it will return a blank section of the JSON in the place of the
-        # ArcticEDS report section.
+        # it will return the error given to determine what went wrong.
         return e
 
 
@@ -46,7 +45,7 @@ async def fetch_data_with_retry(url, max_retries=3):
             print(f"Retrying {url} after attempt {retry + 1}")
             await asyncio.sleep(2)
         else:
-            # If all retries are empty dictionaries, return the blank section
+            # If all retries are error codes, return the blank section
             # to allow ArcticEDS to continue showing other sections.
             return dict()
 
