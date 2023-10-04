@@ -48,6 +48,13 @@ Example Physiography Query
 Due to the configuration of our services, we need to both update
 our API instance + restart our Varnish cache when necessary.
 
+Prior to deploying, update the `requirements.txt`:
+
+```bash
+pipenv run pip freeze > requirements.txt 
+git commit -am'update requirements.txt'
+```
+
 Instructions for this can be found here:
 
 - [SNAP Data API Instructions](https://docs.google.com/document/d/1Z31-mkDE0skITOuOOMBQwuO2I8jUDuApm7VX-A9v1LA/edit?usp=sharing)
