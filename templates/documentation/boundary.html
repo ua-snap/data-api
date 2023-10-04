@@ -7,7 +7,9 @@
 
 <h3>Service endpoints</h3>
 
-<p>Polygon queries will return the boundary's representative GeoJSON.</p>
+<h4>Available places</h4>
+
+<p>Query a list of community or areas of interest by type.</p>
 
 <table class="endpoints">
   <thead>
@@ -18,10 +20,73 @@
   </thead>
   <tbody>
     <tr>
-      <td>All available area-of-interest ID codes</td>
-      <td><a href="/places/all">/places/all</a>
-      </td>
+      <td>All available areas of interest</td>
+      <td><a href="/places/all">/places/all</a></td>
     </tr>
+    <tr>
+      <td>Communities</td>
+      <td><a href="/places/communities">/places/communities</a></td>
+    </tr>
+    <tr>
+      <td>Hydrological unit codes (HUCs)</td>
+      <td><a href="/places/hucs">/places/hucs</a></td>
+    </tr>
+    <tr>
+      <td>Alaska, British Columbia, or Yukon protected areas</td>
+      <td><a href="/places/protected_areas">/places/protected_areas</a></td>
+    </tr>
+    <tr>
+      <td>Alaska Native corporations</td>
+      <td><a href="/places/corporations">/places/corporations</a></td>
+    </tr>
+    <tr>
+      <td>Alaska climate divisions</td>
+      <td><a href="/places/climate_divisions">/places/climate_divisions</a></td>
+    </tr>
+    <tr>
+      <td>Fire management zones</td>
+      <td><a href="/places/fire_zones">/places/fire_zones</a></td>
+    </tr>
+    <tr>
+      <td>Alaska ethnolinguistic regions</td>
+      <td><a href="/places/ethnolinguistic_regions">/places/ethnolinguistic_regions</a></td>
+    </tr>
+    <tr>
+      <td>Alaska boroughs (county equivalent)</td>
+      <td><a href="/places/boroughs">/places/boroughs</a></td>
+    </tr>
+    <tr>
+      <td>Alaska census areas for the Unorganized Borough</td>
+      <td><a href="/places/census_areas">/places/census_areas</a></td>
+    </tr>
+    <tr>
+      <td>Game management units</td>
+      <td><a href="/places/game_management_units">/places/game_management_units</a></td>
+    </tr>
+    <tr>
+      <td>First nations</td>
+      <td><a href="/places/first_nations">/places/first_nations</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>GeoJSON polygons</h4>
+
+<p>Query the GeoJSON polygon(s) for a provided boundary identifier.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
     <tr>
       <td>Polygon of a HUC-8</td>
       <td><a href="/boundary/area/19070506">/boundary/area/19070506</a>
@@ -48,7 +113,7 @@
       </td>
     </tr>
     <tr>
-      <td>Polygon of an fire management zone</td>
+      <td>Polygon of a fire management zone</td>
       <td><a href="/boundary/area/FIRE2">/boundary/area/FIRE2</a>
       </td>
     </tr>
@@ -63,9 +128,17 @@
       </td>
     </tr>
     <tr>
-      <td>Polygon of Alaska census areas for the Unorganized Borough</td>
+      <td>Polygon of an Alaska census area for the Unorganized Borough</td>
       <td><a href="/boundary/area/CENS3">/boundary/area/CENS3</a>
       </td>
+    </tr>
+    <tr>
+      <td>Polygon of a game management unit</td>
+      <td><a href="/boundary/area/GMU5">/boundary/area/GMU5</a></td>
+    </tr>
+    <tr>
+      <td>Polygon of a first nation</td>
+      <td><a href="/boundary/area/FNTT6">/boundary/area/FNTT6</a></td>
     </tr>
   </tbody>
   <tfoot>

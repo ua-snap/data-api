@@ -1,12 +1,19 @@
+body {
+	background-color: #f3f3ed;
+	color: #061728 !important;
+}
+
 .headerbanner {
 	padding: .5rem;
 	text-transform: uppercase;
 	text-align:  center;
 	letter-spacing:  .3ex;
-	border-bottom:  1px solid #aaa;
+	border-bottom:  1px solid #ddd;
+	background-color: #f6f6f1;
 }
 
 footer.footer {
+	padding-top: 6rem;
 	padding-bottom:  6rem;
 }
 

@@ -1569,6 +1569,8 @@ def point_data_endpoint(var_ep, lat, lon):
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
             return render_template("500/server_error.html"), 500
+    else:
+        return render_template("400/bad_request.html"), 400
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "taspr")
@@ -1606,6 +1608,9 @@ def taspr_area_data_endpoint(var_ep, var_id):
             poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
         elif var_ep == "taspr":
             poly_pkg = run_aggregate_allvar_polygon(var_id)
+        else:
+            return render_template("400/bad_request.html"), 400
+
     except:
         return render_template("422/invalid_area.html"), 422
 
@@ -1618,7 +1623,7 @@ def taspr_area_data_endpoint(var_ep, var_id):
     return postprocess(poly_pkg, "taspr")
 
 
-@routes.route("/proj_precip/point/<lat>/<lon>")
+@routes.route("/precipitation/frequency/point/<lat>/<lon>")
 def proj_precip_point(lat, lon):
     validation = validate_latlon(lat, lon)
     if validation == 400:

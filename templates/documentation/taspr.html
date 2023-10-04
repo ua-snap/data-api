@@ -1,23 +1,30 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h2>Temperature and Precipitation Data</h2>
 
 <p>
-  These endpoints provide access to historical and projected downscaled temperature and precipitation data at a
-  resolution of 2km. Temperature and precipitation data can be accessed individually or together. Historical data were
-  derived using the CRU TS 4.0 dataset. Projections were derived from MRI-CGCM3 and NCAR-CCSM4 model outputs, as well as
-  a 5-model average, under the RCP 4.5, RCP 6.0, and RCP 8.5 emissions scenarios. Data can be accessed for individual
-  years, summarized means across decades or multi-decade eras, or minimum, mean, and maximum summaries for January or
-  July across 1901&ndash;2100.
+  These endpoints provide access to historical and projected downscaled
+  temperature and precipitation data at a resolution of 2km. Temperature and
+  precipitation data can be accessed individually or together. Historical data
+  were derived using the CRU TS 4.0 dataset. Projections were derived from
+  MRI-CGCM3 and NCAR-CCSM4 model outputs, as well as a 5-model average, under
+  the RCP 4.5, RCP 6.0, and RCP 8.5 emissions scenarios. Data can be accessed
+  for individual years, summarized means across decades or multi-decade eras, or
+  minimum, mean, and maximum summaries for January or July across
+  1901&ndash;2100.
 </p>
 
-<p>Links to academic references and source datasets are included at the bottom of this page.</p>
+<p>
+  Links to academic references and source datasets are included at the bottom of
+  this page.
+</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Seasonal averages (point query)</h4>
 
-<p>Query SNAP's 2km downscaled temperature or precipitation data for a single point specified by latitude and longitude.
+<p>
+  Query SNAP's 2km downscaled temperature or precipitation data for a single
+  point specified by latitude and longitude.
 </p>
 
 <table class="endpoints">
@@ -30,31 +37,45 @@
   <tbody>
     <tr>
       <td>Temperature point query</td>
-      <td><a href="/temperature/point/65.0628/-146.1627">/temperature/point/65.0628/-146.1627</a>
+      <td>
+        <a href="/temperature/point/65.0628/-146.1627"
+          >/temperature/point/65.0628/-146.1627</a
+        >
       </td>
     </tr>
     <tr>
       <td>Precipitation point query</td>
-      <td><a href="/precipitation/point/65.0628/-146.1627">/precipitation/point/65.0628/-146.1627</a>
+      <td>
+        <a href="/precipitation/point/65.0628/-146.1627"
+          >/precipitation/point/65.0628/-146.1627</a
+        >
       </td>
     </tr>
     <tr>
       <td>Temperature and precipitation point query</td>
-      <td><a href="/taspr/point/65.0628/-146.1627">/taspr/point/65.0628/-146.1627</a>
+      <td>
+        <a href="/taspr/point/65.0628/-146.1627"
+          >/taspr/point/65.0628/-146.1627</a
+        >
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
 
 <h4>Seasonal averages (area query)</h4>
 
-<p>Query SNAP's 2km downscaled temperature or precipitation data for a specific <a href="/places/all">area of interest
-    polygon ID</a> and aggregate by mean.</p>
+<p>
+  Query SNAP's 2km downscaled temperature or precipitation data for a specific
+  <a href="/places/all">area of interest polygon ID</a> and aggregate by mean.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -66,11 +87,15 @@
   <tbody>
     <tr>
       <td>Temperature area query</td>
-      <td><a href="/temperature/area/19010208">/temperature/area/19010208</a></td>
+      <td>
+        <a href="/temperature/area/19010208">/temperature/area/19010208</a>
+      </td>
     </tr>
     <tr>
       <td>Precipitation area query</td>
-      <td><a href="/precipitation/area/19010208">/precipitation/area/19010208</a></td>
+      <td>
+        <a href="/precipitation/area/19010208">/precipitation/area/19010208</a>
+      </td>
     </tr>
     <tr>
       <td>Temperature and precipitation area query</td>
@@ -79,15 +104,20 @@
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
 
-<h4>Projected maximum precipitation events (point query)</h4>
+<h4>Precipitation frequency (point query)</h4>
 
-<p>The following query will return projected maximum precipitation for various return intervals and durations across
-  different models and eras.</p>
+<p>
+  The following query will return precipitation frequency for various return
+  intervals and durations across different models and eras.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -98,20 +128,30 @@
   </thead>
   <tbody>
     <tr>
-      <td>Projected maximum precipitation events</td>
-      <td><a href="/proj_precip/point/65.028/-146.1627">/proj_precip/point/65.028/-146.1627</a></td>
+      <td>Precipitation frequency</td>
+      <td>
+        <a href="/precipitation/frequency/point/65.028/-146.1627"
+          >/precipitation/frequency/point/65.028/-146.1627</a
+        >
+      </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
 
 <h4>Yearly values (point query)</h4>
 
-<p>Query temperature and precipitation for each year summarized across all models and scenarios.</p>
+<p>
+  Query temperature and precipitation for each year summarized across all models
+  and scenarios.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -123,30 +163,38 @@
   <tbody>
     <tr>
       <td>Annual mean temperature</td>
-      <td><a href="/temperature/65.0628/-146.1627">/temperature/65.0628/-146.1627</a>
+      <td>
+        <a href="/temperature/65.0628/-146.1627"
+          >/temperature/65.0628/-146.1627</a
+        >
       </td>
     </tr>
     <tr>
       <td>Annual total precipitation</td>
-      <td><a href="/precipitation/65.0628/-146.1627">/precipitation/65.0628/-146.1627</a>
+      <td>
+        <a href="/precipitation/65.0628/-146.1627"
+          >/precipitation/65.0628/-146.1627</a
+        >
       </td>
     </tr>
     <tr>
-      <td>January temperature min/mean/max</td>
+      <td>January temperature</td>
       <td><a href="/temperature/jan/65.0628/-146.1627">/temperature/jan/65.0628/-146.1627</a>
       </td>
     </tr>
     <tr>
-      <td>July temperature min/mean/max</td>
+      <td>July temperature</td>
       <td><a href="/temperature/july/65.0628/-146.1627">/temperature/july/65.0628/-146.1627</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">Min/mean/max summaries of historical and projected years are available by appending
-        <code>?summarize=mmm</code> to the URL.<br />
-        CSV output is also available by appending <code>?format=csv</code> to the URL.
+      <td colspan="2">
+        Min/mean/max summaries of historical and projected years are available
+        by appending <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
       </td>
     </tr>
   </tfoot>
@@ -175,8 +223,10 @@
 
 <h4>Yearly values within provided year range (point query)</h4>
 
-<p>Query temperature and precipitation for each year within a provided range summarized across all models and
-  scenarios. Valid year ranges are between 1901&ndash;2015 for historical data and 2007&ndash;2100 for projected data.
+<p>
+  Query temperature and precipitation for each year within a provided range
+  summarized across all models and scenarios. Valid year ranges are between
+  1901&ndash;2015 for historical data and 2007&ndash;2100 for projected data.
 </p>
 
 <table class="endpoints">
@@ -189,30 +239,38 @@
   <tbody>
     <tr>
       <td>Annual mean temperature within year range</td>
-      <td><a href="/temperature/65.0628/-146.1627/1940/2060">/temperature/65.0628/-146.1627/1940/2060</a>
+      <td>
+        <a href="/temperature/65.0628/-146.1627/1940/2060"
+          >/temperature/65.0628/-146.1627/1940/2060</a
+        >
       </td>
     </tr>
     <tr>
       <td>Annual total precipitation within year range</td>
-      <td><a href="/precipitation/65.0628/-146.1627/1940/2060">/precipitation/65.0628/-146.1627/1940/2060</a>
+      <td>
+        <a href="/precipitation/65.0628/-146.1627/1940/2060"
+          >/precipitation/65.0628/-146.1627/1940/2060</a
+        >
       </td>
     </tr>
     <tr>
-      <td>January temperature min/mean/max within year range</td>
+      <td>January temperature within year range</td>
       <td><a href="/temperature/jan/65.0628/-146.1627/1940/2060">/temperature/jan/65.0628/-146.1627/1940/2060</a>
       </td>
     </tr>
     <tr>
-      <td>July temperature min/mean/max within year range</td>
+      <td>July temperature within year range</td>
       <td><a href="/temperature/july/65.0628/-146.1627/1940/2060">/temperature/july/65.0628/-146.1627/1940/2060</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">Min/mean/max summaries of historical and projected years are available by appending
-        <code>?summarize=mmm</code> to the URL.<br />
-        CSV output is also available by appending <code>?format=csv</code> to the URL.
+      <td colspan="2">
+        Min/mean/max summaries of historical and projected years are available
+        by appending <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
       </td>
     </tr>
   </tfoot>
@@ -224,7 +282,10 @@
 
 <h4>Seasonal averages</h4>
 
-<p>Results from, for example, combined temperature and precipitation (taspr) queries will look like this:</p>
+<p>
+  Results from, for example, combined temperature and precipitation (taspr)
+  queries will look like this:
+</p>
 
 <pre>
 {
@@ -293,12 +354,14 @@
 }
 </pre>
 
-<p>Note: The full set of statistics is only available for historical output. Projected output is limited to just the
-  mean statistic.</p>
+<p>
+  Note: The full set of statistics is only available for historical output.
+  Projected output is limited to just the mean statistic.
+</p>
 
-<h4>Projected maximum precipitation events</h4>
+<h4>Precipitation frequency</h4>
 
-<p>Results from projected maximum precipitation queries will look like this:</p>
+<p>Results from precipitation frequency queries will look like this:</p>
 
 <pre>
 {
@@ -409,7 +472,10 @@
 }
 </pre>
 
-<p>The above output for both temperature and precipitation is structured like this:</p>
+<p>
+  The above output for both temperature and precipitation is structured like
+  this:
+</p>
 
 <pre>
 {
@@ -509,9 +575,10 @@
   }
 }
 </pre>
-<h4>January/July yearly min/mean/max summaries</h4>
 
-<p>Results from yearly January/July temperature min/mean/max queries will look like this:</p>
+<h4>January/July temperature</h4>
+
+<p>Results from January/July temperature queries will look like this:</p>
 
 <pre>
 {
@@ -556,8 +623,10 @@
 
 <h4>Min/mean/max summaries across multiple years</h4>
 
-<p>Results from temperature min/mean/max queries (using the <code>?summarize=mmm</code> URL parameter) will look like
-  this:</p>
+<p>
+  Results from temperature min/mean/max queries (using the
+  <code>?summarize=mmm</code> URL parameter) will look like this:
+</p>
 
 <pre>
 {
@@ -574,8 +643,10 @@
 }
 </pre>
 
-<p>Results from precipitation min/mean/max queries (using the <code>?summarize=mmm</code> URL parameter) will look like
-  this:</p>
+<p>
+  Results from precipitation min/mean/max queries (using the
+  <code>?summarize=mmm</code> URL parameter) will look like this:
+</p>
 
 <pre>
 {
@@ -592,7 +663,10 @@
 }
 </pre>
 
-<p>The above output for both temperature and precipitation is structured like this:</p>
+<p>
+  The above output for both temperature and precipitation is structured like
+  this:
+</p>
 
 <pre>
 {
@@ -606,6 +680,14 @@
 </pre>
 
 <h3>Source data</h3>
+<p>
+  For more information about precipitation frequency, see the
+  <a
+    href="https://uaf-snap.org/wp-content/uploads/2021/05/dot-precip_FINAL-REPORT_20210526.pdf"
+    >Future Projections of Precipitation for Alaska Infrastructure: Final
+    Report</a
+  >.
+</p>
 <table>
   <thead>
     <tr>
@@ -618,22 +700,63 @@
       <td><a
           href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/3b2b24ff-4916-4d92-95b7-c6b2fcefd381">Historical
           Monthly and Derived Temperature Products - 2km CRU TS 4.0</a></td>
-      <td rowspan="4" style="vertical-align: middle; border-bottom: none;">Walsh J.E., Bhatt U.S., Littell J. S., Leonawicz M., Lindgren M., Kurkowski T. A., Bieniek P. A., Gray S., & Rupp T. S. (2018).  Downscaling of climate model output for Alaskan stakeholders, <i>Environmental Modelling & Software, 110</i>, 38&ndash;51.  DOI <a href="https://doi.org/10.1016/j.envsoft.2018.03.021">10.1016/j.envsoft.2018.03.021</a></td>
+      <td rowspan="4" style="vertical-align: middle; border-bottom: none;">Walsh J.E., Bhatt U.S., Littell J. S.,
+        Leonawicz M., Lindgren M., Kurkowski T. A., Bieniek P. A., Gray S., & Rupp T. S. (2018). Downscaling of climate
+        model output for Alaskan stakeholders, <i>Environmental Modelling & Software, 110</i>, 38&ndash;51. DOI <a
+          href="https://doi.org/10.1016/j.envsoft.2018.03.021">10.1016/j.envsoft.2018.03.021</a></td>
     </tr>
     <tr>
-      <td><a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/9eeef879-42ee-4bbe-a54e-435716ad0c90">Historical
-          Monthly and Derived Precipitation Products - 2km CRU TS 4.0</a></td>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/9eeef879-42ee-4bbe-a54e-435716ad0c90"
+          >Historical Monthly and Derived Precipitation Products - 2km CRU TS
+          4.0</a
+        >
+      </td>
     </tr>
     <tr>
-      <td><a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/ba834996-ad15-4785-9b43-ef2af86a5ad9">Projected
-          Monthly and Derived Temperature Products - 2km CMIP5/AR5</a></td>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/ba834996-ad15-4785-9b43-ef2af86a5ad9"
+          >Projected Monthly and Derived Temperature Products - 2km CMIP5/AR5</a
+        >
+      </td>
     </tr>
     <tr>
-      <td><a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/f44595c8-5384-4c02-9ab4-f7a9c43e92eb">Projected
-          Monthly and Derived Precipitation Products - 2km CMIP5/AR5</a></td>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/f44595c8-5384-4c02-9ab4-f7a9c43e92eb"
+          >Projected Monthly and Derived Precipitation Products - 2km
+          CMIP5/AR5</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/304b6d89-961e-417d-b6ba-4139c7fe5ff6"
+          >Annual maximum precipitation projections for Alaska</a
+        >
+      </td>
+      <td>
+        Bieniek, P. A., Bhatt, U. S., Walsh, J. E., Rupp, T. S., Zhang, J.,
+        Krieger, J. R. & Lader, R. (2016). Dynamical Downscaling of ERA-Interim
+        Temperature and Precipitation for Alaska.
+        <i>Journal of Applied Meteorology and Climatology, 55</i>(03),
+        635&ndash;654.
+        <a href="https://doi.org/10.1175/JAMC-D-15-0153.1"
+          >https://doi.org/10.1175/JAMC-D-15-0153.1</a
+        >
+        <br />
+        <br />
+        Bieniek P.A., Walsh J.E., Fresco N., Tauxe C., Redilla K. (2022).
+        Anticipated changes in Alaska extreme precipitation.
+        <i>Journal of Applied Meteorology and Climatology, 61</i>(2),
+        97&ndash;108.
+        <a href="https://doi.org/10.1175/JAMC-D-21-0106.1"
+          >https://doi.org/10.1175/JAMC-D-21-0106.1</a
+        >
+      </td>
     </tr>
   </tbody>
 </table>

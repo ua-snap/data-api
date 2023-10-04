@@ -1,4 +1,4 @@
-from flask import request, Response
+from flask import request, Response, request
 import csv
 from postprocessing import *
 from fetch_data import *
@@ -131,14 +131,11 @@ def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=
     else:
         metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
 
-    report_url = WEB_APP_URL + "report/"
-    if place_type is None:
-        report_url += lat + "/" + lon
-    elif place_type == "community":
-        report_url += "community/" + place_id
-    else:
-        report_url += "area/" + place_id
-    metadata += "# View a report for this location at " + report_url + "\n"
+    metadata += (
+        "# View a report for this location at https://earthmaps.io"
+        + request.path
+        + "\n"
+    )
 
     return metadata
 
@@ -703,7 +700,7 @@ def taspr_csv(data, endpoint):
         metadata += (
             "# era is the time range for this predicted amount of precipitation \n"
         )
-        metadata += "# pf is the amount of precipitation predicted\n"
+        metadata += "# pf is amount of precipitation in mm\n"
         metadata += "# pf_lower is the lower bound of the 95% confidence interval of the variable pf\n"
         metadata += "# pf_upper is the upper bound of the 95% confidence interval of the variable pf\n"
         filename_data_name = "Future Projections of Precipitation"
