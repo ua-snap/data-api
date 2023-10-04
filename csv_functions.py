@@ -84,6 +84,9 @@ def create_csv(
         properties = veg_type_csv(data)
     elif endpoint in ["wet_days_per_year", "wet_days_per_year_all"]:
         properties = wet_days_per_year_csv(data, endpoint)
+    elif endpoint in ["hydrology", "hydrology_mmm"]:
+        properties = hydrology_csv(data, endpoint)
+
     else:
         return render_template("500/server_error.html"), 500
 
@@ -777,3 +780,95 @@ def wet_days_per_year_csv(data, endpoint):
         "metadata": metadata,
         "filename_data_name": filename_data_name,
     }
+
+
+def hydrology_csv(data, endpoint):
+    if endpoint == "hydrology":
+        coords = ["model", "scenario", "month", "era"]
+        values = [
+            "evap",
+            "glacier_melt",
+            "iwe",
+            "pcp",
+            "runoff",
+            "sm1",
+            "sm2",
+            "sm3",
+            "snow_melt",
+            "swe",
+            "tmax",
+            "tmin",
+        ]
+        fieldnames = coords + values
+        csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+        metadata = "# Hydrology model outputs for ten variables; decadal means of monthly values.\n"
+        metadata += "# model is the model the data is derived from\n"
+        metadata += "# scenario is the emissions scenario\n"
+        metadata += "# month is the month of year over which data are summarized\n"
+        metadata += "# era is the decade over which data are summarized\n"
+        metadata += "# variable is the hydrology variable name\n"
+        metadata += "# evap is the decadal mean of the monthly sum of daily evapotranspiration in mm\n"
+        metadata += "# glacier_melt is the decadal mean of the monthly sum of daily glacier ice melt in mm\n"
+        metadata += "# iwe is the decadal mean of the monthly maximum of daily ice water equivalent in mm\n"
+        metadata += "# pcp is the decadal mean of the monthly sum of daily precipitation in mm\n"
+        metadata += "# runoff is the decadal mean of the monthly sum of daily surface runoff in mm\n"
+        metadata += "# sm1 is the decadal mean of the monthly mean of daily soil moisture in layer 1 in mm\n"
+        metadata += "# sm2 is the decadal mean of the monthly mean of daily soil moisture in layer 2 in mm\n"
+        metadata += "# sm3 is the decadal mean of the monthly mean of daily soil moisture in layer 3 in mm\n"
+        metadata += "# snowmelt is the decadal mean of the monthly sum of daily snowmelt in mm\n"
+        metadata += "# swe is the decadal mean of the monthly maximum of daily snow water equivalent in mm\n"
+        metadata += "# tmax is the decadal mean of the monthly mean of daily maximum air temperature at 2m in degrees C\n"
+        metadata += "# tmin is the decadal mean of the monthly mean of daily minimum air temperature at 2m in degrees C\n"
+        filename_data_name = "Hydrology Model Outputs - Decadal Mean Values - "
+
+        return {
+            "csv_dicts": csv_dicts,
+            "fieldnames": fieldnames,
+            "metadata": metadata,
+            "filename_data_name": filename_data_name,
+        }
+
+    if endpoint == "hydrology_mmm":
+        coords = ["model", "scenario", "month", "variable"]
+        values = ["min", "mean", "max"]
+        fieldnames = coords + values
+        csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+        metadata = "# Hydrology model outputs for ten variables; minimum mean and maximum across all decades (1950-2099).\n"
+        metadata += "# model is the model the data is derived from\n"
+        metadata += "# scenario is the emissions scenario\n"
+        metadata += "# month is the month of year over which data are summarized\n"
+        metadata += "# variable is the hydrology variable name\n"
+        metadata += "# mean is the mean of all decadal mean values\n"
+        metadata += "# max is the maximum of all decadal mean values\n"
+        metadata += "# min is the minimum of all decadal mean values\n"
+        metadata += "# evap is the monthly sum of daily evapotranspiration in mm\n"
+        metadata += (
+            "# glacier_melt is the monthly sum of daily glacier ice melt in mm\n"
+        )
+        metadata += "# iwe is the monthly maximum of daily ice water equivalent in mm\n"
+        metadata += "# pcp is the monthly sum of daily precipitation in mm\n"
+        metadata += "# runoff is the monthly sum of daily surface runoff in mm\n"
+        metadata += (
+            "# sm1 is the monthly mean of daily soil moisture in layer 1 in mm\n"
+        )
+        metadata += (
+            "# sm2 is the monthly mean of daily soil moisture in layer 2 in mm\n"
+        )
+        metadata += (
+            "# sm3 is the monthly mean of daily soil moisture in layer 3 in mm\n"
+        )
+        metadata += "# snowmelt is the monthly sum of daily snowmelt in mm\n"
+        metadata += (
+            "# swe is the monthly maximum of daily snow water equivalent in mm\n"
+        )
+        metadata += "# tmax is the monthly mean of daily maximum air temperature at 2m in degrees C\n"
+        metadata += "# tmin is the monthly mean of daily minimum air temperature at 2m in degrees C\n"
+
+        filename_data_name = "Hydrology Model Outputs - Minimum, Mean, and Maximum Across All Decades 1950-2099 - "
+
+        return {
+            "csv_dicts": csv_dicts,
+            "fieldnames": fieldnames,
+            "metadata": metadata,
+            "filename_data_name": filename_data_name,
+        }
