@@ -77,6 +77,7 @@ def create_csv(
         "temperature_all",
         "precipitation_all",
         "proj_precip",
+        "tas2km",
     ]:
         properties = taspr_csv(data, endpoint)
     elif endpoint == "veg_type":
@@ -704,9 +705,29 @@ def taspr_csv(data, endpoint):
         metadata += "# pf_upper is the upper bound of the 95% confidence interval of the variable pf\n"
         filename_data_name = "Future Projections of Precipitation"
 
+    elif endpoint == "tas2km":
+        all_fields = []
+
+        coords = ["model", "scenario", "month", "year"]
+        values = ["tasmin", "tasmean", "tasmax"]
+        fieldnames = coords + values
+        all_fields += fieldnames
+        csv_dicts += build_csv_dicts(data["historical"], fieldnames, values=values)
+        csv_dicts += build_csv_dicts(data["projected"], fieldnames, values=values)
+
+        metadata = "# tasmin is the minimum temperature in degrees C\n"
+        metadata += "# tasmean is the mean temperature in degrees C\n"
+        metadata += "# tasmax is the maximum temperature in degrees C\n"
+
+        metadata = tas_metadata + metadata
+        filename_data_name = "Monthly Temperature"
+
     # Change "CRU_historical" scenario to just "Historical".
     for csv_dict in csv_dicts:
-        if endpoint != "proj_precip" and csv_dict["scenario"] == "CRU_historical":
+        if (
+            endpoint not in ["proj_precip", "tas2km"]
+            and csv_dict["scenario"] == "CRU_historical"
+        ):
             csv_dict["scenario"] = "Historical"
 
     return {

@@ -141,7 +141,7 @@ def get_dd_plate(var_ep, lat, lon):
     # Checks if error exists from fetching DD point
     if isinstance(all_data, tuple):
         # Returns error template that was generated for invalid request
-        return all_data[0]
+        return all_data
 
     historical_values = list(map(lambda x: x["dd"], all_data["ERA-Interim"].values()))
     summarized_data["historical"] = {
@@ -179,7 +179,7 @@ def get_dd_plate(var_ep, lat, lon):
     # Checks if error exists from preview CSV request
     if isinstance(preview, tuple):
         # Returns error template that was generated for invalid request
-        return preview[0]
+        return preview
 
     dd_csv = preview.data.decode("utf-8")
     first = "\n".join(dd_csv.split("\n")[3:9]) + "\n"

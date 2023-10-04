@@ -200,6 +200,27 @@
   </tfoot>
 </table>
 
+<h4>Monthly min, mean, and maximum temperature for each year (point query)</h4>
+
+<p>Query temperature min, mean, and max for all months and all years for historical and projected data.
+  Valid year ranges are between 1901&ndash;2015 for historical data and 2006&ndash;2100 for projected data.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Temperature point query for all months and years</td>
+      <td><a href="/tas2km/point/65.0628/-146.1627">/tas2km/point/65.0628/-146.1627</a></td>
+    </tr>
+  </tbody>
+</table>
+
 <h4>Yearly values within provided year range (point query)</h4>
 
 <p>
@@ -468,6 +489,90 @@
     ...
   },
   ...
+}
+</pre>
+
+<h4>Monthly min, mean, and maximum temperature for each year</h4>
+
+<p>Results from monthly min, mean, and maximum temperature</p>
+
+<pre>
+{
+  "historical": {
+    "CRU-TS": {
+      "historical": {
+        "April": {
+          "1901": {
+            "tasmax": "-0.5",
+            "tasmean": "-6.2",
+            "tasmin": "-12.2"
+          },
+          ...
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  "projected": {
+    "5ModelAvg": {
+      "rcp45": {
+        "April": {
+          "2006": {
+            "tasmax": "1.7",
+            "tasmean": "-4.4",
+            "tasmin": "-10.6"
+          },
+          ...
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+    historical: {
+      CRU-TS: {
+        historical: {
+          &lt;month&gt;: {
+            &lt;year&gt;: {
+              "tasmax": &lt;max tas value for the specified month during this year&gt;,
+              "tasmean": &lt;mean tas value for the specified month during this year&gt;,
+              "tasmin": &lt;min tas value for the specified month during this year&gt;;
+            },
+            ...
+          },
+          ...
+        },
+        ...
+      },
+      ...
+  },
+  projected: {
+    &lt;model&gt;: {
+      &lt;scenario&gt;: {
+        &lt;month&gt;: {
+          &lt;year&gt;: {
+            "tasmax": &lt;max tas value for the specified month during this year&gt;,
+            "tasmean": &lt;mean tas value for the specified month during this year&gt;,
+            "tasmin": &lt;min tas value for the specified month during this year&gt;;
+          },
+          ...
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
 }
 </pre>
 

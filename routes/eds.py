@@ -7,7 +7,7 @@ from flask import (
     jsonify,
 )
 import asyncio
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientResponseError, client_exceptions
 from fetch_data import make_get_request
 from . import routes
 
@@ -28,11 +28,26 @@ async def fetch_data(url):
         async with ClientSession() as session:
             results = await asyncio.create_task(make_get_request(url, session))
         return results
-    except:
+    except ClientResponseError as e:
         # If any of the URLs returns a status other than HTTP status 200,
-        # it will return a blank section of the JSON in the place of the
-        # ArcticEDS report section.
-        return dict()
+        # it will return the error given to determine what went wrong.
+        return e
+
+
+async def fetch_data_with_retry(url, max_retries=3):
+    for retry in range(max_retries):
+        response = await fetch_data(url)
+        # If the response is not a blank dictionary, return the response
+        if type(response) is dict and response != dict():
+            return response
+        elif type(response) is client_exceptions.ClientResponseError and (response.status != 400 and response.status != 404 and response != 422) and retry < max_retries - 1:
+            # Sleep for a moment before retrying the given endpoint
+            app.logger.warning(f"Retrying {url} after attempt {retry + 1}")
+            await asyncio.sleep(2)
+        else:
+            # If all retries are error codes, return the blank section
+            # to allow ArcticEDS to continue showing other sections.
+            return dict()
 
 
 async def run_fetch_all_eds(lat, lon):
@@ -80,7 +95,7 @@ async def run_fetch_all_eds(lat, lon):
         "proj_precip",
     ]
 
-    results = await asyncio.gather(*[fetch_data(url) for url in all_urls])
+    results = await asyncio.gather(*[fetch_data_with_retry(url) for url in all_urls])
 
     eds = dict()
     for index in range(len(results)):

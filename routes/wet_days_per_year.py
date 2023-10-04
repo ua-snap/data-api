@@ -343,6 +343,8 @@ def get_wet_days_per_year_plate(lat, lon):
     wdpy_plate = {}
 
     results = run_fetch_wet_days_per_year_point_data(lat, lon, "historical")
+    if isinstance(results, tuple):
+        return results
     wdpy_plate["historical"] = results["historical"]
 
     results = run_fetch_wet_days_per_year_point_data(

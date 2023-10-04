@@ -116,7 +116,7 @@ def eds_snow_data(lat, lon):
     summary = run_point_fetch_all_sfe(lat, lon, summarize=True)
     # Check for error response from summary response
     if isinstance(summary, tuple):
-        return summary[0]
+        return summary
 
     snow["summary"] = summary
 
@@ -124,7 +124,7 @@ def eds_snow_data(lat, lon):
     # Check for error responses in the preview
     if isinstance(preview, tuple):
         # Returns error template that was generated for invalid request
-        return preview[0]
+        return preview
 
     snow_csv = preview.data.decode("utf-8")
     first = "\n".join(snow_csv.split("\n")[3:9]) + "\n"
