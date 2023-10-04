@@ -5,7 +5,6 @@ import itertools
 from urllib.parse import quote
 import numpy as np
 import pandas as pd
-import json
 import xarray as xr
 from flask import (
     Blueprint,
