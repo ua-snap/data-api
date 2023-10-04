@@ -78,6 +78,7 @@ async def run_fetch_all_eds(lat, lon):
         f"{host}eds/wet_days_per_year/point/{lat}/{lon}",
         f"{host}elevation/point/{lat}/{lon}",
         f"{host}precipitation/frequency/point/{lat}/{lon}",
+        f"{host}eds/hydrology/{lat}/{lon}",
     ]
 
     all_keys = [
@@ -93,6 +94,7 @@ async def run_fetch_all_eds(lat, lon):
         "wet_days_per_year",
         "elevation",
         "precip_frequency",
+        "hydrology",
     ]
 
     results = await asyncio.gather(*[fetch_data_with_retry(url) for url in all_urls])

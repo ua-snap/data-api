@@ -5,6 +5,7 @@ from flask import (
     render_template,
     request,
     current_app as app,
+    jsonify
 )
 
 # local imports
@@ -220,7 +221,7 @@ def hydro_about():
 
 
 @routes.route("/hydrology/point/<lat>/<lon>")
-def run_get_hydrology_point_data(lat, lon):
+def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -233,7 +234,7 @@ def run_get_hydrology_point_data(lat, lon):
         )
 
     # validate request arguments if they exist; set summarize argument accordingly
-    if len(request.args) == 0:
+    if len(request.args) == 0 and (summarize is None and preview is None):
         try:
             point_pkg = run_fetch_hydrology_point_data(lat, lon)
             return postprocess(point_pkg, "hydrology")
@@ -264,8 +265,8 @@ def run_get_hydrology_point_data(lat, lon):
         else:
             return render_template("400/bad_request.html"), 400
 
-    elif "summarize" in request.args:
-        if request.args.get("summarize") == "mmm":
+    elif "summarize" in request.args or summarize:
+        if request.args.get("summarize") == "mmm" or summarize:
             try:
                 return run_fetch_hydrology_point_data_mmm(lat, lon)
             except Exception as exc:
@@ -275,8 +276,8 @@ def run_get_hydrology_point_data(lat, lon):
         else:
             return render_template("400/bad_request.html"), 400
 
-    elif "format" in request.args:
-        if request.args.get("format") == "csv":
+    elif "format" in request.args or preview:
+        if request.args.get("format") == "csv" or preview:
             try:
                 point_pkg = run_fetch_hydrology_point_data(lat, lon)
                 place_id = request.args.get("community")
@@ -285,6 +286,7 @@ def run_get_hydrology_point_data(lat, lon):
                         point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
                     )
                 else:
+                    print("Getting here")
                     return create_csv(
                         point_pkg, "hydrology", place_id=None, lat=lat, lon=lon
                     )
@@ -297,3 +299,30 @@ def run_get_hydrology_point_data(lat, lon):
 
     else:
         return render_template("400/bad_request.html"), 400
+
+
+@routes.route("/eds/hydrology/<lat>/<lon>")
+def eds_hydrology_data(lat, lon):
+    hydrology = dict()
+
+    summary = run_get_hydrology_point_data(lat, lon, summarize=True)
+    # Check for error response from summary response
+    if isinstance(summary, tuple):
+        return summary
+
+    hydrology["summary"] = summary
+
+    preview = run_get_hydrology_point_data(lat, lon, preview=True)
+    # Check for error responses in the preview
+    if isinstance(preview, tuple):
+        # Returns error template that was generated for invalid request
+        return preview
+
+    hydrology_csv = preview.data.decode("utf-8")
+    first = "\n".join(hydrology_csv.split("\n")[20:26]) + "\n"
+    last = "\n".join(hydrology_csv.split("\n")[-6:])
+
+    hydrology["preview"] = first + last
+
+    return jsonify(hydrology)
+
