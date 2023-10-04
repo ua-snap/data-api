@@ -1516,12 +1516,12 @@ def tas_2km_point_data_endpoint(lat, lon):
             422,
         )
 
-    # try:
-    point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
-    # except Exception as exc:
-    #     if hasattr(exc, "status") and exc.status == 404:
-    #         return render_template("404/no_data.html"), 404
-    #     return render_template("500/server_error.html"), 500
+    try:
+        point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
         point_pkg = nullify_and_prune(point_pkg, "tas2km")
