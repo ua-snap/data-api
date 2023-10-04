@@ -42,7 +42,7 @@ async def fetch_data_with_retry(url, max_retries=3):
             return response
         elif type(response) is client_exceptions.ClientResponseError and (response.status != 400 and response.status != 404 and response != 422) and retry < max_retries - 1:
             # Sleep for a moment before retrying the given endpoint
-            print(f"Retrying {url} after attempt {retry + 1}")
+            app.logger.warning(f"Retrying {url} after attempt {retry + 1}")
             await asyncio.sleep(2)
         else:
             # If all retries are error codes, return the blank section
