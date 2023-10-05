@@ -1,5 +1,8 @@
 import asyncio
+import io
 import numpy as np
+import xarray as xr
+from urllib.parse import quote
 from flask import (
     Blueprint,
     render_template,
@@ -8,11 +11,16 @@ from flask import (
 )
 
 # local imports
-from fetch_data import fetch_wcs_point_data
+from fetch_data import (
+    fetch_wcs_point_data,
+    get_poly_3338_bbox,
+    summarize_within_poly,
+)
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
+from generate_urls import generate_wcs_query_url
 from validate_data import *
 from postprocessing import postprocess
 from csv_functions import create_csv
@@ -83,6 +91,9 @@ dim_encodings = {
         12: "2070-2079",
         13: "2080-2089",
         14: "2090-2099",
+    },
+    "rounding": {
+        "all": 1,
     },
 }
 
@@ -212,6 +223,89 @@ def run_fetch_hydrology_point_data_mmm(lat, lon):
     return point_pkg_mmm
 
 
+def fetch_poly_bbox_netcdf(poly_id):
+    """Get data summary (e.g. zonal stats) of all variables in polygon.
+
+    Args:
+        poly_id (str or int): the unique `id` used to identify the Polygon for which to extract netCDF and compute the zonal stats.
+
+    Returns:
+        tuple of:
+        poly (geodataframe): geodataframe of the polygon
+        ds (netcdf): netcdf data of the coverage clipped to polygon bbox.
+
+    """
+    # get geodataframe of polygon bounding box, and create XY indices
+    poly = get_poly_3338_bbox(poly_id)
+    x = f"{poly.bounds[0]}:{poly.bounds[2]}"
+    y = f"{poly.bounds[1]}:{poly.bounds[3]}"
+    # create & run request string to return a smaller coverage encoded as netcdf
+    wcps_request_str = quote(
+        (
+            f"ProcessCoverages&query=for $c in ({hydrology_coverage_id}) "
+            f"return encode($c[X({x}), Y({y})],"
+            f'"application/netcdf")'
+        )
+    )
+    wcps_request_url = generate_wcs_query_url(wcps_request_str)
+    netcdf_bytes = asyncio.run(fetch_data([wcps_request_url]))
+    # create xarray.DataSet from bytestring
+    ds = xr.open_dataset(io.BytesIO(netcdf_bytes))
+
+    return poly, ds
+
+
+def run_fetch_hydrology_zonal_stats(poly_id):
+    # get poly gdf and xarray dataset
+    poly, ds = fetch_poly_bbox_netcdf(poly_id)
+
+    zonal_stats_results_dict = dict()
+
+    # summarize the dataset by polygon and store results in dictionary with varname keys
+    for var_coord in dim_encodings["varnames"].keys():
+        varname = dim_encodings["varnames"][var_coord]
+        var_zonal_mean_dict = summarize_within_poly(
+            ds=ds,
+            poly=poly,
+            dim_encodings=dim_encodings,
+            varname=varname,
+            roundkey="all",
+        )
+
+        zonal_stats_results_dict[varname] = var_zonal_mean_dict
+
+    # package zonal results dict with decoded coord values, using varnames to call aggregated values from zonal results dict
+    point_pkg = dict()
+    for model_coord in dim_encodings["models"].keys():
+        model_name = dim_encodings["models"][model_coord]
+        point_pkg[model_name] = dict()
+        for scenario_coord in dim_encodings["scenarios"].keys():
+            scenario_name = dim_encodings["scenarios"][scenario_coord]
+            point_pkg[model_name][scenario_name] = dict()
+            for month_coord in dim_encodings["months"].keys():
+                month_name = dim_encodings["months"][month_coord]
+                point_pkg[model_name][scenario_name][month_name] = dict()
+                for era_coord in dim_encodings["eras"].keys():
+                    era_name = dim_encodings["eras"][era_coord]
+                    point_pkg[model_name][scenario_name][month_name][era_name] = dict()
+                    for var_coord in dim_encodings["varnames"].keys():
+                        var_name = dim_encodings["varnames"][var_coord]
+                        value = zonal_stats_results_dict[var_name][model_name][
+                            scenario_name
+                        ][month_name][era_name]
+
+                        # reformat any NaN stats to string "nan" to avoid "is not valid JSON" error
+
+                        if np.isnan(value):
+                            value = "nan"
+
+                        point_pkg[model_name][scenario_name][month_name][era_name][
+                            var_name
+                        ] = value
+
+    return point_pkg
+
+
 @routes.route("/hydrology/")
 @routes.route("/hydrology/abstract/")
 @routes.route("/hydrology/point/")
@@ -297,3 +391,12 @@ def run_get_hydrology_point_data(lat, lon):
 
     else:
         return render_template("400/bad_request.html"), 400
+
+
+@routes.route("/hydrology/huc12/<huc12>")
+def run_get_hydrology_huc12_data(huc12):
+    # validate huc12 code and request args!
+
+    test_result = run_fetch_hydrology_zonal_stats(huc12)
+
+    return test_result
