@@ -707,9 +707,7 @@ def create_temperature_eds_summary(temp_json):
     )
     hist_monthly_mmm = pd.DataFrame(columns=["Month", "tasmean", "tasmax", "tasmin"])
 
-    all_monthly_means = []
-    all_monthly_maxes = []
-    all_monthly_mins = []
+    all_monthly_means = list()
 
     # Iterate through all months
     for month in hist_df.index:
@@ -718,9 +716,9 @@ def create_temperature_eds_summary(temp_json):
             monthly_data = hist_df.loc[month]
 
             # Initialize lists to store 'tasmean', 'tasmax', and 'tasmin' values for each year in the month
-            monthly_mean_values = []
-            monthly_max_values = []
-            monthly_min_values = []
+            monthly_mean_values = list()
+            monthly_max_values = list()
+            monthly_min_values = list()
 
             # Iterate through the year data within the month
             for year, data in monthly_data.items():
@@ -733,6 +731,7 @@ def create_temperature_eds_summary(temp_json):
 
             # Calculate the mean of 'tasmean', the maximum of 'tasmax', and the minimum of 'tasmin' for the month
             if monthly_mean_values:
+
                 monthly_mean = round(
                     sum(monthly_mean_values) / len(monthly_mean_values), 1
                 )
@@ -767,15 +766,29 @@ def create_temperature_eds_summary(temp_json):
             [hist_monthly_mmm, row_to_append], ignore_index=True
         )
 
-        # Append the monthly values to the aggregated lists
+        # Append the monthly mean values to generate all years worth of
+        # monthly values
         all_monthly_means.extend(monthly_mean_values)
-        all_monthly_maxes.extend(monthly_max_values)
-        all_monthly_mins.extend(monthly_min_values)
 
-    # Calculate the aggregated values for the "Annual" row
+    # Calculate the annual mean across all of the monthly means
     annual_mean = round(sum(all_monthly_means) / len(all_monthly_means), 1)
-    annual_max = max(all_monthly_maxes)
-    annual_min = min(all_monthly_mins)
+
+    # Generate annual means from the monthly means
+    annual_means = []
+
+    # There are 115 values (1901-2015) for each month
+    for year in range(0, 115):
+        yearly_values = []
+        for month in range(0,12):
+            # Index is how the data is ordered from the above code
+            # Each month has 115 years + the year we are currently on
+            index = (month * 115) + year
+            yearly_values.append(all_monthly_means[index])
+        # For this year, generate the annual mean
+        annual_means.append(round(sum(yearly_values) / len(yearly_values), 1))
+    # Find the minimum and maximum annual mean from all the historical years
+    annual_max = max(annual_means)
+    annual_min = min(annual_means)
 
     row_to_append = pd.DataFrame(
         {
@@ -807,17 +820,15 @@ def create_temperature_eds_summary(temp_json):
                 # Extract the relevant data for the current combination
                 projected_data = temp_json["projected"][model_option][rcp_option]
 
-                # Initialize lists to store 'tasmean', 'tasmax', and 'tasmin' values for the years of interest
-                all_monthly_mean_values = []
-                all_monthly_max_values = []
-                all_monthly_min_values = []
+                # Initialize list to store
+                all_monthly_mean_values = list()
 
                 # Iterate through all months
                 for month, year_data in projected_data.items():
                     # Initialize lists to store 'tasmean', 'tasmax', and 'tasmin' values for the years of interest
-                    monthly_mean_values = []
-                    monthly_max_values = []
-                    monthly_min_values = []
+                    monthly_mean_values = list()
+                    monthly_max_values = list()
+                    monthly_min_values = list()
 
                     # Iterate through the year data within the month
                     for year, data in year_data.items():
@@ -831,11 +842,11 @@ def create_temperature_eds_summary(temp_json):
                             if "tasmin" in data:
                                 monthly_min_values.append(pd.to_numeric(data["tasmin"]))
 
-                    if model_option == "5ModelAvg":
-                        # Append the monthly values to the aggregated lists
+                    # Only collect the monthly mean values for the 5 Model Average
+                    # and on the scenario RCP 8.5
+                    if model_option == "5ModelAvg" and rcp_option == "rcp85":
+                        # Append the monthly values to the list of annual values
                         all_monthly_mean_values.extend(monthly_mean_values)
-                        all_monthly_max_values.extend(monthly_max_values)
-                        all_monthly_min_values.extend(monthly_min_values)
 
                     if monthly_mean_values:
                         monthly_mean = round(
@@ -845,12 +856,12 @@ def create_temperature_eds_summary(temp_json):
                         monthly_mean = None
 
                     if monthly_max_values:
-                        monthly_max = max(monthly_max_values)
+                        monthly_max = max(monthly_mean_values)
                     else:
                         monthly_max = None
 
                     if monthly_min_values:
-                        monthly_min = min(monthly_min_values)
+                        monthly_min = min(monthly_mean_values)
                     else:
                         monthly_min = None
 
@@ -867,28 +878,38 @@ def create_temperature_eds_summary(temp_json):
                         [projected_monthly_mmm, row_to_append], ignore_index=True
                     )
 
-                # Calculate the aggregated values for the current combination
-                if all_monthly_mean_values:
-                    annual_mean = round(
-                        sum(all_monthly_mean_values) / len(all_monthly_mean_values), 1
-                    )
-                else:
-                    annual_mean = None
+                # If working on the 5 Model Average and RCP 8.5 scenario,
+                # generate the annual mean, min, and max
+                if model_option == "5ModelAvg" and rcp_option == "rcp85":
+                    if all_monthly_mean_values:
+                        annual_mean = round(
+                            sum(all_monthly_mean_values) / len(all_monthly_mean_values), 1
+                        )
+                        annual_means = []
+                        # Iterates through a 30-year era
+                        for year in years_of_interest:
+                            yearly_values = []
+                            for month in range(0, 12):
+                                # Index is a combination of 30 yearly values per month
+                                # and the year that it currently is. Since the year is
+                                # a value in the 2000s, we subtract the starting year to
+                                # have a valid value to increase the index by.
+                                index = (month * 30) + (year - years_of_interest[0])
+                                yearly_values.append(all_monthly_mean_values[index])
+                            # Get the annual mean for this given year in the era of interest
+                            annual_means.append(round(sum(yearly_values) / len(yearly_values), 1))
+                        # Set the annual minimum and maximum from the annual means
+                        annual_max = max(annual_means)
+                        annual_min = min(annual_means)
+                    else:
+                        annual_mean = None
+                        annual_max = None
+                        annual_min = None
 
-                if all_monthly_max_values:
-                    annual_max = max(all_monthly_max_values)
-                else:
-                    annual_max = None
 
-                if all_monthly_min_values:
-                    annual_min = min(all_monthly_min_values)
-                else:
-                    annual_min = None
-
-                if model_option == "5ModelAvg":
                     # Append the results to the projected_monthly_mmm DataFrame
-                    # only if the 5ModelAvg since we only want the annual values
-                    # from that model option.
+                    # only if the 5ModelAvg and RCP 8.5 since we only want the annual values
+                    # from that model and scenario option.
                     combination_label = f"{model_option}_{rcp_option}_Annual_{years_of_interest[0]}_{years_of_interest[-1]}"
                     row_to_append = pd.DataFrame(
                         {
