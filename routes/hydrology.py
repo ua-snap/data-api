@@ -85,6 +85,12 @@ dim_encodings = {
         13: "2080-2089",
         14: "2090-2099",
     },
+    "eds_eras": {
+        "historical": [0, 5],
+        "early_century": [6, 8],
+        "mid_century": [9, 11],
+        "late_century": [12, 14]
+    },
 }
 
 
@@ -140,13 +146,14 @@ def run_fetch_hydrology_point_data(lat, lon):
     return point_pkg
 
 
-def run_fetch_hydrology_point_data_mmm(lat, lon):
+def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
     """Fetch hydrology data for a
        given latitude and longitude, and summarize over eras.
 
     Args:
         lat (float): latitude
         lon (float): longitude
+        summarize (boolean): If running the summary for EDS, set to True
 
     Returns:
         JSON-like dict of data at provided latitude and
@@ -174,41 +181,126 @@ def run_fetch_hydrology_point_data_mmm(lat, lon):
 
                     values = list()
 
-                    for era_coord in dim_encodings["eras"].keys():
-                        era_name = dim_encodings["eras"][era_coord]
+                    if summarize:
+                        for era_title in dim_encodings["eds_eras"].keys():
+                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title] = dict()
+                            for era_coord in dim_encodings["eds_eras"][era_title]:
+                                era_name = dim_encodings["eras"][era_coord]
 
-                        values.append(
-                            float(
-                                point_pkg[model_name][scenario_name][month_name][
-                                    era_name
-                                ][var_name]
+                                values.append(
+                                    float(
+                                        point_pkg[model_name][scenario_name][month_name][
+                                            era_name
+                                        ][var_name]
+                                    )
+                                )
+
+                            min_value, mean_value, max_value = (
+                                min(values),
+                                round(np.nanmean(values), 2),
+                                max(values),
                             )
+
+                            if np.isnan(min_value):
+                                min_value = "nan"
+                            if np.isnan(mean_value):
+                                mean_value = "nan"
+                            if np.isnan(max_value):
+                                max_value = "nan"
+
+                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title][
+                                "min"
+                            ] = min_value
+                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title][
+                                "mean"
+                            ] = mean_value
+                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title][
+                                "max"
+                            ] = max_value
+
+                    else:
+                        for era_coord in dim_encodings["eras"].keys():
+                            era_name = dim_encodings["eras"][era_coord]
+
+                            values.append(
+                                float(
+                                    point_pkg[model_name][scenario_name][month_name][
+                                        era_name
+                                    ][var_name]
+                                )
+                            )
+
+                        min_value, mean_value, max_value = (
+                            min(values),
+                            round(np.nanmean(values), 2),
+                            max(values),
                         )
 
-                    min_value, mean_value, max_value = (
-                        min(values),
-                        round(np.nanmean(values), 2),
-                        max(values),
-                    )
+                        # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
 
-                    # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
+                        if np.isnan(min_value):
+                            min_value = "nan"
+                        if np.isnan(mean_value):
+                            mean_value = "nan"
+                        if np.isnan(max_value):
+                            max_value = "nan"
 
-                    if np.isnan(min_value):
-                        min_value = "nan"
-                    if np.isnan(mean_value):
-                        mean_value = "nan"
-                    if np.isnan(max_value):
-                        max_value = "nan"
+                        point_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                            "min"
+                        ] = min_value
+                        point_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                            "mean"
+                        ] = mean_value
+                        point_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                            "max"
+                        ] = max_value
 
-                    point_pkg_mmm[model_name][scenario_name][month_name][var_name][
-                        "min"
-                    ] = min_value
-                    point_pkg_mmm[model_name][scenario_name][month_name][var_name][
-                        "mean"
-                    ] = mean_value
-                    point_pkg_mmm[model_name][scenario_name][month_name][var_name][
-                        "max"
-                    ] = max_value
+            if summarize and scenario_name == 'rcp85':
+
+                point_pkg_mmm[model_name][scenario_name]['Annual'] = dict()
+                for era_title in dim_encodings["eds_eras"].keys():
+                    for var_coord in dim_encodings["varnames"].keys():
+                        var_name = dim_encodings["varnames"][var_coord]
+                        values = list()
+                        for month_coord in dim_encodings["months"].keys():
+                            month_name = dim_encodings["months"][month_coord]
+                            values.append(
+                                float(
+                                    point_pkg_mmm[model_name][scenario_name][month_name][
+                                        var_name
+                                    ][era_title]['mean']
+                                )
+                            )
+
+                        min_value, mean_value, max_value = (
+                            min(values),
+                            round(np.nanmean(values), 2),
+                            max(values),
+                        )
+
+                        # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
+
+                        if np.isnan(min_value):
+                            min_value = "nan"
+                        if np.isnan(mean_value):
+                            mean_value = "nan"
+                        if np.isnan(max_value):
+                            max_value = "nan"
+
+                        if var_name not in point_pkg_mmm[model_name][scenario_name]['Annual']:
+                            point_pkg_mmm[model_name][scenario_name]['Annual'][var_name] = dict()
+                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title] = dict()
+                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title][
+                            "min"
+                        ] = min_value
+                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title][
+                            "mean"
+                        ] = mean_value
+                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title][
+                            "max"
+                        ] = max_value
+
+
 
     return point_pkg_mmm
 
@@ -267,12 +359,12 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
 
     elif "summarize" in request.args or summarize:
         if request.args.get("summarize") == "mmm" or summarize:
-            try:
-                return run_fetch_hydrology_point_data_mmm(lat, lon)
-            except Exception as exc:
-                if hasattr(exc, "status") and exc.status == 404:
-                    return render_template("404/no_data.html"), 404
-                return render_template("500/server_error.html"), 500
+            # try:
+            return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
+            # except Exception as exc:
+            #     if hasattr(exc, "status") and exc.status == 404:
+            #         return render_template("404/no_data.html"), 404
+            #     return render_template("500/server_error.html"), 500
         else:
             return render_template("400/bad_request.html"), 400
 
@@ -286,7 +378,6 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                         point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
                     )
                 else:
-                    print("Getting here")
                     return create_csv(
                         point_pkg, "hydrology", place_id=None, lat=lat, lon=lon
                     )
