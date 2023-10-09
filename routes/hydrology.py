@@ -15,12 +15,13 @@ from fetch_data import (
     fetch_wcs_point_data,
     get_poly_3338_bbox,
     summarize_within_poly,
+    summarize_within_poly_sum,
 )
 from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from generate_urls import generate_wcs_query_url
+from generate_urls import generate_wcs_query_url, generate_wfs_intersection_url
 from validate_data import *
 from postprocessing import postprocess
 from csv_functions import create_csv
@@ -224,22 +225,23 @@ def run_fetch_hydrology_point_data_mmm(lat, lon):
 
 
 def fetch_poly_bbox_netcdf(poly_id):
-    """Get data summary (e.g. zonal stats) of all variables in polygon.
+    """Get hydrology coverage within bounding box of a polygon.
 
     Args:
-        poly_id (str or int): the unique `id` used to identify the Polygon for which to extract netCDF and compute the zonal stats.
+        poly_id: ID of the HUC polygon to use to extract netCDF data
 
     Returns:
         tuple of:
-        poly (geodataframe): geodataframe of the polygon
-        ds (netcdf): netcdf data of the coverage clipped to polygon bbox.
+            poly (geodataframe): geodataframe of HUC polygon
+            ds (xarray dataset): xarray dataset of the hydrology coverage clipped to HUC polygon bbox extent
 
     """
-    # get geodataframe of polygon bounding box, and create XY indices
+    # get polygon bounding box, and create XY indices
     poly = get_poly_3338_bbox(poly_id)
+
     x = f"{poly.bounds[0]}:{poly.bounds[2]}"
     y = f"{poly.bounds[1]}:{poly.bounds[3]}"
-    # create & run request string to return a smaller coverage encoded as netcdf
+    # create & run WCPS request that returns a smaller coverage encoded as netcdf
     wcps_request_str = quote(
         (
             f"ProcessCoverages&query=for $c in ({hydrology_coverage_id}) "
@@ -256,38 +258,65 @@ def fetch_poly_bbox_netcdf(poly_id):
 
 
 def run_fetch_hydrology_zonal_stats(poly_id):
+    """Get data summary (e.g. zonal mean or zonal sum) of all variables in a polygon.
+
+    Args:
+        poly_id: ID of the HUC polygon to use to extract netCDF data
+
+    Returns:
+        JSON-like dict of data for all variables, averaged over the HUC polygon.
+    """
     # get poly gdf and xarray dataset
     poly, ds = fetch_poly_bbox_netcdf(poly_id)
 
     zonal_stats_results_dict = dict()
 
     # summarize the dataset by polygon and store results in dictionary with varname keys
+    varnames = []
     for var_coord in dim_encodings["varnames"].keys():
-        varname = dim_encodings["varnames"][var_coord]
-        var_zonal_mean_dict = summarize_within_poly(
-            ds=ds,
-            poly=poly,
-            dim_encodings=dim_encodings,
-            varname=varname,
-            roundkey="all",
-        )
+        varnames.append(dim_encodings["varnames"][var_coord])
 
-        zonal_stats_results_dict[varname] = var_zonal_mean_dict
+    for varname in varnames:
+        # compute zonal mean for vars explicitly listed below
+        if varname in ["sm1", "sm2", "sm3", "iwe", "swe", "pcp", "tmin", "tmax"]:
+            print(varname)
+            var_zonal_mean_dict = summarize_within_poly(
+                ds=ds,
+                poly=poly,
+                dim_encodings=dim_encodings,
+                varname=varname,
+                roundkey="all",
+            )
 
-    # package zonal results dict with decoded coord values, using varnames to call aggregated values from zonal results dict
-    point_pkg = dict()
+            zonal_stats_results_dict[varname] = var_zonal_mean_dict
+
+        # compute zonal sum for vars explicitly listed below
+        elif varname in ["evap", "runoff", "glacier_melt", "snow_melt"]:
+            print(varname)
+            var_zonal_sum_dict = summarize_within_poly_sum(
+                ds=ds,
+                poly=poly,
+                dim_encodings=dim_encodings,
+                varname=varname,
+                roundkey="all",
+            )
+
+            zonal_stats_results_dict[varname] = var_zonal_sum_dict
+
+    # package zonal results dict with decoded coord values, using varnames to call aggregated values from zonal stats dicts
+    zonal_pkg = dict()
     for model_coord in dim_encodings["models"].keys():
         model_name = dim_encodings["models"][model_coord]
-        point_pkg[model_name] = dict()
+        zonal_pkg[model_name] = dict()
         for scenario_coord in dim_encodings["scenarios"].keys():
             scenario_name = dim_encodings["scenarios"][scenario_coord]
-            point_pkg[model_name][scenario_name] = dict()
+            zonal_pkg[model_name][scenario_name] = dict()
             for month_coord in dim_encodings["months"].keys():
                 month_name = dim_encodings["months"][month_coord]
-                point_pkg[model_name][scenario_name][month_name] = dict()
+                zonal_pkg[model_name][scenario_name][month_name] = dict()
                 for era_coord in dim_encodings["eras"].keys():
                     era_name = dim_encodings["eras"][era_coord]
-                    point_pkg[model_name][scenario_name][month_name][era_name] = dict()
+                    zonal_pkg[model_name][scenario_name][month_name][era_name] = dict()
                     for var_coord in dim_encodings["varnames"].keys():
                         var_name = dim_encodings["varnames"][var_coord]
                         value = zonal_stats_results_dict[var_name][model_name][
@@ -299,11 +328,81 @@ def run_fetch_hydrology_zonal_stats(poly_id):
                         if np.isnan(value):
                             value = "nan"
 
-                        point_pkg[model_name][scenario_name][month_name][era_name][
+                        zonal_pkg[model_name][scenario_name][month_name][era_name][
                             var_name
                         ] = value
 
-    return point_pkg
+    return zonal_pkg
+
+
+def run_fetch_hydrology_zonal_stats_mmm(poly_id):
+    """Get data summary (e.g. zonal mean or zonal sum) of all variables in a polygon, then summarize over eras.
+
+    Args:
+        poly_id: ID of the HUC polygon to use to extract netCDF data
+
+    Returns:
+        JSON-like dict of data for all variables; values are the means of previously aggregated (averaged or summed) values over the HUC polygon.
+    """
+    # get standard zonal stats package
+    zonal_pkg = run_fetch_hydrology_zonal_stats(poly_id)
+
+    # repackage zonal stats data with mmm values computed across eras
+    zonal_pkg_mmm = dict()
+    for model_coord in dim_encodings["models"].keys():
+        model_name = dim_encodings["models"][model_coord]
+        zonal_pkg_mmm[model_name] = dict()
+        for scenario_coord in dim_encodings["scenarios"].keys():
+            scenario_name = dim_encodings["scenarios"][scenario_coord]
+            zonal_pkg_mmm[model_name][scenario_name] = dict()
+            for month_coord in dim_encodings["months"].keys():
+                month_name = dim_encodings["months"][month_coord]
+                zonal_pkg_mmm[model_name][scenario_name][month_name] = dict()
+                for var_coord in dim_encodings["varnames"].keys():
+                    var_name = dim_encodings["varnames"][var_coord]
+                    zonal_pkg_mmm[model_name][scenario_name][month_name][
+                        var_name
+                    ] = dict()
+
+                    values = list()
+
+                    for era_coord in dim_encodings["eras"].keys():
+                        era_name = dim_encodings["eras"][era_coord]
+
+                        values.append(
+                            float(
+                                zonal_pkg[model_name][scenario_name][month_name][
+                                    era_name
+                                ][var_name]
+                            )
+                        )
+
+                    min_value, mean_value, max_value = (
+                        min(values),
+                        round(np.nanmean(values), 2),
+                        max(values),
+                    )
+
+                    # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
+
+                    if np.isnan(min_value):
+                        min_value = "nan"
+                    if np.isnan(mean_value):
+                        mean_value = "nan"
+                    if np.isnan(max_value):
+                        max_value = "nan"
+
+                    zonal_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                        "min"
+                    ] = min_value
+                    zonal_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                        "mean"
+                    ] = mean_value
+                    zonal_pkg_mmm[model_name][scenario_name][month_name][var_name][
+                        "max"
+                    ] = max_value
+
+    return zonal_pkg_mmm
 
 
 @routes.route("/hydrology/")
@@ -315,6 +414,16 @@ def hydro_about():
 
 @routes.route("/hydrology/point/<lat>/<lon>")
 def run_get_hydrology_point_data(lat, lon):
+    """Point data endpoint for hydrology data - returns a summary of data at the provided lat/lon coordinate.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of requested hydrology data.
+    """
+    # validate lat / lon
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -393,10 +502,120 @@ def run_get_hydrology_point_data(lat, lon):
         return render_template("400/bad_request.html"), 400
 
 
-@routes.route("/hydrology/huc12/<huc12>")
-def run_get_hydrology_huc12_data(huc12):
-    # validate huc12 code and request args!
+@routes.route("/hydrology/local/<lat>/<lon>")
+def run_get_hydrology_local_data(lat, lon):
+    """ "Local" endpoint for hydrology data - finds the HUC that intersects
+    the request lat/lon and returns a summary of data within that polygon.
 
-    test_result = run_fetch_hydrology_zonal_stats(huc12)
+    Args:
+        lat (float): latitude
+        lon (float): longitude
 
-    return test_result
+    Returns:
+        JSON-like dict of requested hydrology data.
+    """
+    # validate lat / lon
+    validation = validate_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+
+    # create request for vector features that intersect, and return all features
+    features = asyncio.run(fetch_data([generate_wfs_intersection_url(lat, lon)]))[
+        "features"
+    ]
+
+    if len(features) < 1:
+        return render_template("404/no_data.html"), 404
+
+    # check features for hucs and list them
+    huc = []
+    for feature in features:
+        if (feature["properties"]["type"] == "huc") & (
+            # huc8s:
+            # len(feature["properties"]["id"])== 8
+            # huc10s
+            len(feature["properties"]["id"])
+            == 10
+        ):
+            huc.append(feature)
+
+    if len(huc) < 1:
+        return render_template("404/no_data.html"), 404
+    if len(huc) > 1:
+        # condition is maybe not a server error, but if query returns more than one HUC8/10 than we likely have a problem with our HUC layer
+        return render_template("500/server_error.html"), 500
+
+    huc_id = huc[0]["properties"]["id"]
+
+    # validate request arguments if they exist
+    if len(request.args) == 0:
+        try:
+            zonal_pkg = run_fetch_hydrology_zonal_stats(int(huc_id))
+            return postprocess(zonal_pkg, "hydrology")
+
+        except Exception as exc:
+            if hasattr(exc, "status") and exc.status == 404:
+                return render_template("404/no_data.html"), 404
+            return render_template("500/server_error.html"), 500
+
+    elif all(key in request.args for key in ["summarize", "format"]):
+        if (request.args.get("summarize") == "mmm") & (
+            request.args.get("format") == "csv"
+        ):
+            try:
+                zonal_pkg = run_fetch_hydrology_zonal_stats_mmm(int(huc_id))
+                place_id = request.args.get("community")
+                if place_id:
+                    return create_csv(
+                        zonal_pkg, "hydrology_mmm", place_id=place_id, lat=lat, lon=lon
+                    )
+                else:
+                    return create_csv(zonal_pkg, "hydrology_mmm", lat=lat, lon=lon)
+            except Exception as exc:
+                if hasattr(exc, "status") and exc.status == 404:
+                    return render_template("404/no_data.html"), 404
+                return render_template("500/server_error.html"), 500
+
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    elif "summarize" in request.args:
+        if request.args.get("summarize") == "mmm":
+            try:
+                return run_fetch_hydrology_zonal_stats_mmm(int(huc_id))
+            except Exception as exc:
+                if hasattr(exc, "status") and exc.status == 404:
+                    return render_template("404/no_data.html"), 404
+                return render_template("500/server_error.html"), 500
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    elif "format" in request.args:
+        if request.args.get("format") == "csv":
+            try:
+                zonal_pkg = run_fetch_hydrology_zonal_stats(int(huc_id))
+                place_id = request.args.get("community")
+                if place_id:
+                    return create_csv(
+                        zonal_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
+                    )
+                else:
+                    return create_csv(
+                        zonal_pkg, "hydrology", place_id=None, lat=lat, lon=lon
+                    )
+            except Exception as exc:
+                if hasattr(exc, "status") and exc.status == 404:
+                    return render_template("404/no_data.html"), 404
+                return render_template("500/server_error.html"), 500
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    else:
+        return render_template("400/bad_request.html"), 400
