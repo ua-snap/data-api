@@ -1,5 +1,6 @@
 import asyncio
 import pandas as pd
+import numpy as np
 from urllib.parse import quote
 from flask import Blueprint, render_template, request, jsonify, Response
 
@@ -81,6 +82,56 @@ def package_obu_vector(obu_vector_resp):
     pfx = obu_vector_resp["features"][0]["properties"]["PFEXTENT"]
     di = {"pfx": pfx}
     return di
+
+
+def make_ncr_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation):
+    """Generate a WCPS query string specific the to GIPL 1 km coverage.
+
+    Arguments:
+        x -- (float) x-coordinate for the point query
+        y -- (float) y-coordinate for the point query
+        years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
+        model(int) - Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4
+        scenario(int) - Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
+        summary_operation -- (str) one of 'min', 'avg', or 'max'
+    Returns:
+        gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
+    """
+    gipl1km_wcps_str = quote(
+        (
+            f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
+            f"  return encode (coverage summary over $v variable(0:9)"
+            f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
+            f', "application/json")'
+        )
+    )
+    return gipl1km_wcps_str
+
+
+def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
+    """Package a min-mean-max summary of ten GIPL 1 km variables for a given year range and model type. Values are rounded to one decimal place because units are either meters or degrees C.
+
+    Arguments:
+        gipl1km_wcps_resp -- (list) nested 3-level list of the WCPS response values. The response order must be min-mean-max: [[min], [mean], [max]]
+
+    Returns:
+        gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
+    """
+    gipl1km_wcps_point_pkg = dict()
+    models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
+    for all_resp, model in zip(gipl1km_wcps_resp, models):
+        gipl1km_wcps_point_pkg[model] = dict()
+        scenarios = ["rcp45", "rcp85"]
+        for scenario_resp, scenario in zip(all_resp, scenarios):
+            gipl1km_wcps_point_pkg[model][scenario] = dict()
+            summary_methods = ["min", "mean", "max"]
+            for resp, stat_type in zip(scenario_resp, summary_methods):
+                gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
+                for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
+                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
+                        k
+                    ] = round(v, 1)
+    return gipl1km_wcps_point_pkg
 
 
 def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
@@ -303,19 +354,37 @@ def run_point_fetch_all_permafrost(lat, lon):
     return postprocess(data, "permafrost", titles)
 
 
-async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
+async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize, ncr):
     if all(val != None for val in [start_year, end_year, summarize]):
         wcps_response_data = list()
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
         )
-        for summary_operation in ["min", "avg", "max"]:
-            wcps_request_str = make_gipl1km_wcps_request_str(
-                x, y, timestring, summary_operation
-            )
-            wcps_response_data.append(
-                await fetch_data([generate_wcs_query_url(wcps_request_str)])
-            )
+
+        if ncr:
+            wcps_response_data = list()
+            for model_num in range(3):
+                model = list()
+                for scenario in range(2):
+                    scenario_data = list()
+                    for summary_operation in ["min", "avg", "max"]:
+                        wcps_request_str = make_ncr_gipl1km_wcps_request_str(
+                            x, y, timestring, model_num, scenario, summary_operation
+                        )
+                        scenario_data.append(
+                            await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                        )
+                    model.append(scenario_data)
+                wcps_response_data.append(model)
+
+        else:
+            for summary_operation in ["min", "avg", "max"]:
+                wcps_request_str = make_gipl1km_wcps_request_str(
+                    x, y, timestring, summary_operation
+                )
+                wcps_response_data.append(
+                    await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                )
 
         return wcps_response_data
 
@@ -353,7 +422,7 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize):
 
 
 async def run_fetch_gipl_1km_point_data(
-    lat, lon, start_year=None, end_year=None, summarize=None, preview=None
+    lat, lon, start_year=None, end_year=None, summarize=None, preview=None, ncr=False
 ):
     validation = validate_latlon(lat, lon)
     if validation == 400:
@@ -383,16 +452,17 @@ async def run_fetch_gipl_1km_point_data(
 
     try:
         gipl_1km_point_data = await asyncio.create_task(
-            fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize)
+            fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize, ncr)
         )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    if all(val != None for val in [start_year, end_year, summarize]):
+    if ncr is True and all(val != None for val in [start_year, end_year, summarize]):
+        gipl_1km_point_package = package_ncr_gipl1km_wcps_data(gipl_1km_point_data)
+    elif all(val != None for val in [start_year, end_year, summarize]):
         gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
-
     elif start_year is None and end_year is None and summarize is not None:
         gipl_1km_point_package = package_gipl1km_wcps_data(gipl_1km_point_data)
 
@@ -433,7 +503,7 @@ async def run_eds_preview(lat, lon):
     return results
 
 
-async def run_ncr_requests(lat, lon):
+async def run_ncr_requests(lat, lon, ncr):
     year_ranges = [
         {
             "start": 2021,
@@ -459,6 +529,7 @@ async def run_ncr_requests(lat, lon):
                     start_year=years["start"],
                     end_year=years["end"],
                     summarize="mmm",
+                    ncr=ncr,
                 )
             ),
         )
@@ -515,7 +586,7 @@ def permafrost_eds_request(lat, lon):
     permafrostData = dict()
 
     # Get the summary and preview data
-    summary = permafrost_ncr_request(lat, lon)
+    summary = permafrost_ncr_request(lat, lon, ncr=False)
 
     # Check for error response from summary response
     if isinstance(summary, tuple):
@@ -544,8 +615,8 @@ def permafrost_eds_request(lat, lon):
 
 
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
-def permafrost_ncr_request(lat, lon):
-    permafrostData = asyncio.run(run_ncr_requests(lat, lon))
+def permafrost_ncr_request(lat, lon, ncr=True):
+    permafrostData = asyncio.run(run_ncr_requests(lat, lon, ncr))
 
     # Return corresponding error page if any sub-request returns error.
     for value in permafrostData.values():
