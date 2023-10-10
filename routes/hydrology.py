@@ -250,7 +250,7 @@ def fetch_intersecting_huc(lat, lon):
         if (feature["properties"]["type"] == "huc") & (
             # huc8s:
             # len(feature["properties"]["id"])== 8
-            # huc10s
+            # huc10s:
             len(feature["properties"]["id"])
             == 10
         ):
