@@ -1,5 +1,6 @@
 import asyncio
 import pandas as pd
+import numpy as np
 from urllib.parse import quote
 from flask import Blueprint, render_template, request, jsonify, Response
 
@@ -126,9 +127,7 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
             summary_methods = ["min", "mean", "max"]
             for resp, stat_type in zip(scenario_resp, summary_methods):
                 gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
-                for k, v in zip(
-                    gipl1km_dim_encodings["variable"].values(), scenario_resp
-                ):
+                for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
                     gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
                         k
                     ] = round(v, 1)
@@ -363,16 +362,19 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize, ncr):
         )
 
         if ncr:
+            wcps_response_data = list()
             for model_num in range(3):
                 model = list()
                 for scenario in range(2):
+                    scenario_data = list()
                     for summary_operation in ["min", "avg", "max"]:
                         wcps_request_str = make_ncr_gipl1km_wcps_request_str(
                             x, y, timestring, model_num, scenario, summary_operation
                         )
-                    model.append(
-                        await fetch_data([generate_wcs_query_url(wcps_request_str)])
-                    )
+                        scenario_data.append(
+                            await fetch_data([generate_wcs_query_url(wcps_request_str)])
+                        )
+                    model.append(scenario_data)
                 wcps_response_data.append(model)
 
         else:
