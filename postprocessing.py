@@ -3,6 +3,7 @@ from flask import render_template
 nodata_values = {
     "beetles": [0],
     "default": [-9999],
+    "hydrology": [-9999, "nan"],
     "ncar12km_indicators": [-9999, -9999.0],
     "permafrost": [-9999, -9999.0],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
@@ -24,8 +25,8 @@ nodata_mappings = {
     "gipl_summary": [],
     "heating_degree_days": nodata_values["default"],
     "heating_degree_days_all": nodata_values["default"],
-    "hydrology": nodata_values["default"],
-    "hydrology_mmm": nodata_values["default"],
+    "hydrology": nodata_values["hydrology"],
+    "hydrology_mmm": nodata_values["hydrology"],
     "landfastice": [],
     "ncar12km_indicators": nodata_values["ncar12km_indicators"],
     "permafrost": nodata_values["permafrost"],

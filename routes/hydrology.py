@@ -1,12 +1,6 @@
 import asyncio
 import numpy as np
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    current_app as app,
-    jsonify
-)
+from flask import Blueprint, render_template, request, current_app as app, jsonify
 
 # local imports
 from fetch_data import fetch_wcs_point_data
@@ -89,7 +83,7 @@ dim_encodings = {
         "historical": [0, 5],
         "early_century": [6, 8],
         "mid_century": [9, 11],
-        "late_century": [12, 14]
+        "late_century": [12, 14],
     },
 }
 
@@ -184,7 +178,9 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                     if summarize:
                         for era_title in dim_encodings["eds_eras"].keys():
                             values = list()
-                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title] = dict()
+                            point_pkg_mmm[model_name][scenario_name][month_name][
+                                var_name
+                            ][era_title] = dict()
 
                             # Pull the list from dim_encodings representing the min and max
                             # era numbers for this era
@@ -194,9 +190,9 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
 
                                 values.append(
                                     float(
-                                        point_pkg[model_name][scenario_name][month_name][
-                                            era_name
-                                        ][var_name]
+                                        point_pkg[model_name][scenario_name][
+                                            month_name
+                                        ][era_name][var_name]
                                     )
                                 )
 
@@ -213,15 +209,15 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                             if np.isnan(max_value):
                                 max_value = "nan"
 
-                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title][
-                                "min"
-                            ] = min_value
-                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title][
-                                "mean"
-                            ] = mean_value
-                            point_pkg_mmm[model_name][scenario_name][month_name][var_name][era_title][
-                                "max"
-                            ] = max_value
+                            point_pkg_mmm[model_name][scenario_name][month_name][
+                                var_name
+                            ][era_title]["min"] = min_value
+                            point_pkg_mmm[model_name][scenario_name][month_name][
+                                var_name
+                            ][era_title]["mean"] = mean_value
+                            point_pkg_mmm[model_name][scenario_name][month_name][
+                                var_name
+                            ][era_title]["max"] = max_value
 
                     else:
                         # If we get here, we are going through the normal min-mean-max calculations over
@@ -266,7 +262,7 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
 
             # Generates the annual min-mean-max for ArcticEDS
             if summarize:
-                point_pkg_mmm[model_name][scenario_name]['Annual'] = dict()
+                point_pkg_mmm[model_name][scenario_name]["Annual"] = dict()
                 for era_title in dim_encodings["eds_eras"].keys():
                     for var_coord in dim_encodings["varnames"].keys():
                         var_name = dim_encodings["varnames"][var_coord]
@@ -278,9 +274,9 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                             month_name = dim_encodings["months"][month_coord]
                             values.append(
                                 float(
-                                    point_pkg_mmm[model_name][scenario_name][month_name][
-                                        var_name
-                                    ][era_title]['mean']
+                                    point_pkg_mmm[model_name][scenario_name][
+                                        month_name
+                                    ][var_name][era_title]["mean"]
                                 )
                             )
 
@@ -305,22 +301,27 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                         # For example, after running the historical era, if we didn't check for the
                         # existence of the var_name for the Annual key, it would erase the historical
                         # era and only the last era (late_century) would exist in this key-value pair.
-                        if var_name not in point_pkg_mmm[model_name][scenario_name]['Annual']:
-                            point_pkg_mmm[model_name][scenario_name]['Annual'][var_name] = dict()
+                        if (
+                            var_name
+                            not in point_pkg_mmm[model_name][scenario_name]["Annual"]
+                        ):
+                            point_pkg_mmm[model_name][scenario_name]["Annual"][
+                                var_name
+                            ] = dict()
 
-                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title] = dict()
+                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
+                            era_title
+                        ] = dict()
 
-                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title][
-                            "min"
-                        ] = min_value
-                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title][
-                            "mean"
-                        ] = mean_value
-                        point_pkg_mmm[model_name][scenario_name]['Annual'][var_name][era_title][
-                            "max"
-                        ] = max_value
-
-
+                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
+                            era_title
+                        ]["min"] = min_value
+                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
+                            era_title
+                        ]["mean"] = mean_value
+                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
+                            era_title
+                        ]["max"] = max_value
 
     return point_pkg_mmm
 
@@ -436,4 +437,3 @@ def eds_hydrology_data(lat, lon):
     hydrology["preview"] = first + last
 
     return jsonify(hydrology)
-
