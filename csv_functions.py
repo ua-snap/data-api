@@ -819,9 +819,9 @@ def hydrology_csv(data, endpoint):
         metadata += "# iwe is the decadal mean of the monthly maximum of daily ice water equivalent in mm\n"
         metadata += "# pcp is the decadal mean of the monthly sum of daily precipitation in mm\n"
         metadata += "# runoff is the decadal mean of the monthly sum of daily surface runoff in mm\n"
-        metadata += "# sm1 is the decadal mean of the monthly mean of daily soil moisture in layer 1 in mm\n"
-        metadata += "# sm2 is the decadal mean of the monthly mean of daily soil moisture in layer 2 in mm\n"
-        metadata += "# sm3 is the decadal mean of the monthly mean of daily soil moisture in layer 3 in mm\n"
+        metadata += "# sm1 is the decadal mean of the monthly mean of daily soil moisture in layer 1 (0-2cm depth) in mm\n"
+        metadata += "# sm2 is the decadal mean of the monthly mean of daily soil moisture in layer 2 (2-97cm depth) in mm\n"
+        metadata += "# sm3 is the decadal mean of the monthly mean of daily soil moisture in layer 3 (97-300cm depth) in mm\n"
         metadata += "# snowmelt is the decadal mean of the monthly sum of daily snowmelt in mm\n"
         metadata += "# swe is the decadal mean of the monthly maximum of daily snow water equivalent in mm\n"
         metadata += "# tmax is the decadal mean of the monthly mean of daily maximum air temperature at 2m in degrees C\n"
@@ -855,15 +855,9 @@ def hydrology_csv(data, endpoint):
         metadata += "# iwe is the monthly maximum of daily ice water equivalent in mm\n"
         metadata += "# pcp is the monthly sum of daily precipitation in mm\n"
         metadata += "# runoff is the monthly sum of daily surface runoff in mm\n"
-        metadata += (
-            "# sm1 is the monthly mean of daily soil moisture in layer 1 in mm\n"
-        )
-        metadata += (
-            "# sm2 is the monthly mean of daily soil moisture in layer 2 in mm\n"
-        )
-        metadata += (
-            "# sm3 is the monthly mean of daily soil moisture in layer 3 in mm\n"
-        )
+        metadata += "# sm1 is the monthly mean of daily soil moisture in layer 1 (0-2cm depth) in mm\n"
+        metadata += "# sm2 is the monthly mean of daily soil moisture in layer 2 (2-97cm depth) in mm\n"
+        metadata += "# sm3 is the monthly mean of daily soil moisture in layer 3 (97-300cm depth) in mm\n"
         metadata += "# snowmelt is the monthly sum of daily snowmelt in mm\n"
         metadata += (
             "# swe is the monthly maximum of daily snow water equivalent in mm\n"
@@ -913,9 +907,9 @@ def hydrology_csv(data, endpoint):
         metadata += "# iwe is zonal mean of the decadal mean of the monthly maximum of daily ice water equivalent in mm\n"
         metadata += "# pcp is zonal mean of the decadal mean of the monthly sum of daily precipitation in mm\n"
         metadata += "# runoff is zonal sum of the decadal mean of the monthly sum of daily surface runoff in mm\n"
-        metadata += "# sm1 is the zonal mean of the decadal mean of the monthly mean of daily soil moisture in layer 1 in mm\n"
-        metadata += "# sm2 is the zonal mean of the decadal mean of the monthly mean of daily soil moisture in layer 2 in mm\n"
-        metadata += "# sm3 is the zonal mean of the decadal mean of the monthly mean of daily soil moisture in layer 3 in mm\n"
+        metadata += "# sm1 is the zonal mean of the decadal mean of the monthly mean of daily soil moisture in layer 1 (0-2cm depth) in mm\n"
+        metadata += "# sm2 is the zonal mean of the decadal mean of the monthly mean of daily soil moisture in layer 2 (2-97cm depth) in mm\n"
+        metadata += "# sm3 is the zonal mean of the decadal mean of the monthly mean of daily soil moisture in layer 3 (97-300cm depth) in mm\n"
         metadata += "# snowmelt is zonal sum of the decadal mean of the monthly sum of daily snowmelt in mm\n"
         metadata += "# swe is the zonal mean of the decadal mean of the monthly maximum of daily snow water equivalent in mm\n"
         metadata += "# tmax is the zonal mean of the decadal mean of the monthly mean of daily maximum air temperature at 2m in degrees C\n"
@@ -954,9 +948,9 @@ def hydrology_csv(data, endpoint):
             "# pcp is the zonal mean of the monthly sum of daily precipitation in mm\n"
         )
         metadata += "# runoff is the zonal sum of the monthly sum of daily surface runoff in mm\n"
-        metadata += "# sm1 is the zonal mean of the monthly mean of daily soil moisture in layer 1 in mm\n"
-        metadata += "# sm2 is the zonal mean of the monthly mean of daily soil moisture in layer 2 in mm\n"
-        metadata += "# sm3 is the zonal mean of the monthly mean of daily soil moisture in layer 3 in mm\n"
+        metadata += "# sm1 is the zonal mean of the monthly mean of daily soil moisture in layer 1 (0-2cm depth) in mm\n"
+        metadata += "# sm2 is the zonal mean of the monthly mean of daily soil moisture in layer 2 (2-97cm depth) in mm\n"
+        metadata += "# sm3 is the zonal mean of the monthly mean of daily soil moisture in layer 3 (97-300cm depth) in mm\n"
         metadata += (
             "# snowmelt is the zonal sum of the monthly sum of daily snowmelt in mm\n"
         )
