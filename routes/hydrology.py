@@ -26,6 +26,7 @@ from validate_data import *
 from postprocessing import postprocess
 from csv_functions import create_csv
 from config import WEST_BBOX, EAST_BBOX
+
 from . import routes
 
 hydrology_api = Blueprint("hydrology_api", __name__)
@@ -224,6 +225,51 @@ def run_fetch_hydrology_point_data_mmm(lat, lon):
     return point_pkg_mmm
 
 
+def fetch_intersecting_huc(lat, lon):
+    """Given a valid lat/lon, get intersecting HUC polygon name and ID via WFS query.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        dict with keys "huc_id" and "huc_name"
+    """
+
+    # create request for vector features that intersect, and return all features
+    features = asyncio.run(fetch_data([generate_wfs_intersection_url(lat, lon)]))[
+        "features"
+    ]
+
+    if len(features) < 1:
+        return render_template("404/no_data.html"), 404
+
+    # check features for hucs and list them
+    huc = []
+    for feature in features:
+        if (feature["properties"]["type"] == "huc") & (
+            # huc8s:
+            # len(feature["properties"]["id"])== 8
+            # huc10s
+            len(feature["properties"]["id"])
+            == 10
+        ):
+            huc.append(feature)
+
+    if len(huc) < 1:
+        return render_template("404/no_data.html"), 404
+    if len(huc) > 1:
+        # condition is maybe not a server error, but if query returns more than one HUC8/10 than we likely have a problem with our HUC layer
+        return render_template("500/server_error.html"), 500
+
+    huc_dict = {
+        "huc_id": huc[0]["properties"]["id"],
+        "huc_name": huc[0]["properties"]["name"],
+    }
+
+    return huc_dict
+
+
 def fetch_poly_bbox_netcdf(poly_id):
     """Get hydrology coverage within bounding box of a polygon.
 
@@ -269,9 +315,8 @@ def run_fetch_hydrology_zonal_stats(poly_id):
     # get poly gdf and xarray dataset
     poly, ds = fetch_poly_bbox_netcdf(poly_id)
 
-    zonal_stats_results_dict = dict()
-
     # summarize the dataset by polygon and store results in dictionary with varname keys
+    zonal_stats_results_dict = dict()
     varnames = []
     for var_coord in dim_encodings["varnames"].keys():
         varnames.append(dim_encodings["varnames"][var_coord])
@@ -279,7 +324,6 @@ def run_fetch_hydrology_zonal_stats(poly_id):
     for varname in varnames:
         # compute zonal mean for vars explicitly listed below
         if varname in ["sm1", "sm2", "sm3", "iwe", "swe", "pcp", "tmin", "tmax"]:
-            print(varname)
             var_zonal_mean_dict = summarize_within_poly(
                 ds=ds,
                 poly=poly,
@@ -287,12 +331,10 @@ def run_fetch_hydrology_zonal_stats(poly_id):
                 varname=varname,
                 roundkey="all",
             )
-
             zonal_stats_results_dict[varname] = var_zonal_mean_dict
 
         # compute zonal sum for vars explicitly listed below
         elif varname in ["evap", "runoff", "glacier_melt", "snow_melt"]:
-            print(varname)
             var_zonal_sum_dict = summarize_within_poly_sum(
                 ds=ds,
                 poly=poly,
@@ -300,7 +342,6 @@ def run_fetch_hydrology_zonal_stats(poly_id):
                 varname=varname,
                 roundkey="all",
             )
-
             zonal_stats_results_dict[varname] = var_zonal_sum_dict
 
     # package zonal results dict with decoded coord values, using varnames to call aggregated values from zonal stats dicts
@@ -526,39 +567,15 @@ def run_get_hydrology_local_data(lat, lon):
             422,
         )
 
-    # create request for vector features that intersect, and return all features
-    features = asyncio.run(fetch_data([generate_wfs_intersection_url(lat, lon)]))[
-        "features"
-    ]
-
-    if len(features) < 1:
-        return render_template("404/no_data.html"), 404
-
-    # check features for hucs and list them
-    huc = []
-    for feature in features:
-        if (feature["properties"]["type"] == "huc") & (
-            # huc8s:
-            # len(feature["properties"]["id"])== 8
-            # huc10s
-            len(feature["properties"]["id"])
-            == 10
-        ):
-            huc.append(feature)
-
-    if len(huc) < 1:
-        return render_template("404/no_data.html"), 404
-    if len(huc) > 1:
-        # condition is maybe not a server error, but if query returns more than one HUC8/10 than we likely have a problem with our HUC layer
-        return render_template("500/server_error.html"), 500
-
-    huc_id = huc[0]["properties"]["id"]
+    # get intersecting huc code/name
+    huc_dict = fetch_intersecting_huc(lat, lon)
+    huc_id = huc_dict["huc_id"]
 
     # validate request arguments if they exist
     if len(request.args) == 0:
         try:
             zonal_pkg = run_fetch_hydrology_zonal_stats(int(huc_id))
-            return postprocess(zonal_pkg, "hydrology")
+            return postprocess(zonal_pkg, "hydrology_zonal")
 
         except Exception as exc:
             if hasattr(exc, "status") and exc.status == 404:
@@ -574,10 +591,20 @@ def run_get_hydrology_local_data(lat, lon):
                 place_id = request.args.get("community")
                 if place_id:
                     return create_csv(
-                        zonal_pkg, "hydrology_mmm", place_id=place_id, lat=lat, lon=lon
+                        zonal_pkg,
+                        "hydrology_mmm_zonal",
+                        place_id=place_id,
+                        lat=lat,
+                        lon=lon,
                     )
                 else:
-                    return create_csv(zonal_pkg, "hydrology_mmm", lat=lat, lon=lon)
+                    return create_csv(
+                        zonal_pkg,
+                        "hydrology_mmm_zonal",
+                        place_id=huc_id,
+                        lat=lat,
+                        lon=lon,
+                    )
             except Exception as exc:
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
@@ -589,7 +616,8 @@ def run_get_hydrology_local_data(lat, lon):
     elif "summarize" in request.args:
         if request.args.get("summarize") == "mmm":
             try:
-                return run_fetch_hydrology_zonal_stats_mmm(int(huc_id))
+                zonal_pkg = run_fetch_hydrology_zonal_stats_mmm(int(huc_id))
+                return postprocess(zonal_pkg, "hydrology_mmm_zonal")
             except Exception as exc:
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
@@ -604,11 +632,19 @@ def run_get_hydrology_local_data(lat, lon):
                 place_id = request.args.get("community")
                 if place_id:
                     return create_csv(
-                        zonal_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
+                        zonal_pkg,
+                        "hydrology_zonal",
+                        place_id=place_id,
+                        lat=lat,
+                        lon=lon,
                     )
                 else:
                     return create_csv(
-                        zonal_pkg, "hydrology", place_id=None, lat=lat, lon=lon
+                        zonal_pkg,
+                        "hydrology_zonal",
+                        place_id=huc_id,
+                        lat=lat,
+                        lon=lon,
                     )
             except Exception as exc:
                 if hasattr(exc, "status") and exc.status == 404:

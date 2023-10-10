@@ -60,7 +60,7 @@ def generate_wfs_huc12_intersection_url(lat, lon):
 def generate_wfs_intersection_url(lat, lon):
     wfs_url = (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries:all_areas&propertyName=(type,id)&outputFormat=application/json&cql_filter=INTERSECTS(the_geom, POINT({lon} {lat}))"
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=all_boundaries:all_areas&propertyName=(name,type,id)&outputFormat=application/json&cql_filter=INTERSECTS(the_geom, POINT({lon} {lat}))"
     )
     return wfs_url
 
