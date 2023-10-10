@@ -41,7 +41,51 @@
   <tfoot>
     <tr>
       <td colspan="2">
-        Min/mean/max summaries of each model/scenario across all decades are available by appending
+        Min/mean/max summaries of each model/scenario across all decades are
+        available by appending
+        <code>?summarize=mmm</code> to the URL. <br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?summarize=mmm&format=csv</code>).
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>All hydrologic variables (intersecting area query)</h4>
+<p>
+  Query hydrologic variables for all models and scenarios. Data is aggregated
+  from the pixels within the local HUC-10 polygon that intersects the supplied
+  point location. The aggregation method for each variable is specified below.
+  10-digit HUC shapefiles accessed at
+  <a href="https://datagateway.nrcs.usda.gov/"
+    >https://datagateway.nrcs.usda.gov/</a
+  >
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Intersecting area query of all variables</td>
+      <td>
+        <a href="/hydrology/local/65.4844/-145.4036"
+          >/hydrology/local/65.4844/-145.4036</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Min/mean/max summaries of each model/scenario across all decades are
+        available by appending
         <code>?summarize=mmm</code> to the URL. <br />
         CSV output is also available by appending <code>?format=csv</code> to
         the URL. <br />
@@ -100,9 +144,9 @@
           "iwe": &lt;monthly maximum of daily ice water equivalent, mm&gt;,
           "pcp": &lt;monthly sum of daily precipitation, mm&gt;,
           "runoff": &lt;monthly sum of daily surface runoff, mm&gt;,
-          "sm1": &lt;monthly mean of daily soil moisture in layer 1, mm&gt;,
-          "sm2": &lt;monthly mean of daily soil moisture in layer 2, mm&gt;,
-          "sm3": &lt;monthly mean of daily soil moisture in layer 3, mm&gt;,
+          "sm1": &lt;monthly mean of daily soil moisture in layer 1 (0-2cm depth), mm&gt;,
+          "sm2": &lt;monthly mean of daily soil moisture in layer 2 (2-97cm depth), mm&gt;,
+          "sm3": &lt;monthly mean of daily soil moisture in layer 3 (97-300cm depth), mm&gt;,
           "snow_melt": &lt;monthly sum of daily snowmelt, mm&gt;,
           "swe": &lt;monthly maximum of daily snow water equivalent, mm&gt;,
           "tmax": &lt;monthly mean of daily maximum air temperature at 2m, &deg;C&gt;,
@@ -121,6 +165,170 @@
 <h4>Min/mean/max summaries across all decades</h4>
 
 <p>Results from min/mean/max summary queries will look like this:</p>
+
+<pre>
+  {
+    "ACCESS1-3": {
+      "rcp45": {
+        "apr": {
+          "evap": {
+            "max": 13.0,
+            "mean": 0.5,
+            "min": -16.0
+          },
+          "glacier_melt": {
+            "max": 42090.0,
+            "mean": 4289.65,
+            "min": 0.0
+          },
+          "iwe": {
+            "max": 207495.0,
+            "mean": 151004.6,
+            "min": 64746.0
+          },
+          "pcp": {
+            "max": 749.0,
+            "mean": 219.32,
+            "min": 23.0
+          },
+          "runoff": {
+            "max": 1941.0,
+            "mean": 217.61,
+            "min": 0.0
+          },
+          "sm1": {
+            "max": 10.0,
+            "mean": 9.98,
+            "min": 9.0
+          },
+          "sm2": {
+            "max": 440.0,
+            "mean": 439.82,
+            "min": 408.0
+          },
+          "sm3": {
+            "max": 27.0,
+            "mean": 0.07,
+            "min": 0.0
+          },
+          "snow_melt": {
+            "max": 1943.0,
+            "mean": 217.74,
+            "min": 0.0
+          },
+          "swe": {
+            "max": 2090.0,
+            "mean": 957.38,
+            "min": 5.0
+          },
+          "tmax": {
+            "max": 20.4,
+            "mean": -3.74,
+            "min": -23.3
+          },
+          "tmin": {
+            "max": 5.7,
+            "mean": -15.39,
+            "min": -35.0
+          }
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;scenario&gt;: {
+      &lt;month&gt;: {
+        &lt;variable&gt;: {
+          "max": &lt;maxmimum values for variable across all decades&gt;,
+          "mean": &lt;mean values for variable across all decades&gt;,
+          "min": &lt;minimum values for variable across all decades&gt;
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h4>Aggregated decadal hydrology variables</h4>
+
+<p>Results from local queries will look like this:</p>
+
+<pre>
+  {
+    "ACCESS1-3": {
+      "rcp45": {
+        "apr": {
+          "1950-1959": {
+            "evap": "3",
+            "glacier_melt": "0",
+            "iwe": "131342",
+            "pcp": "120",
+            "runoff": "0",
+            "sm1": "10",
+            "sm2": "440",
+            "sm3": "0",
+            "snow_melt": "0",
+            "swe": "1348",
+            "tmax": "-6.5",
+            "tmin": "-20.7"
+          },
+          ...
+        },
+      ...
+    },
+    ...
+  },
+  ...
+},
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;scenario&gt;: {
+      &lt;month&gt;: {
+        &lt;decade&gt;: {
+          "evap": &lt;zonal sum of the monthly sum of daily evapotranspiration, mm&gt;,
+          "glacier_melt": &lt;zonal sum of the monthly sum of daily glacier ice melt, mm&gt;,
+          "iwe": &lt;zonal mean of the monthly maximum of daily ice water equivalent, mm&gt;,
+          "pcp": &lt;zonal mean of the monthly sum of daily precipitation, mm&gt;,
+          "runoff": &lt;zonal sum of the monthly sum of daily surface runoff, mm&gt;,
+          "sm1": &lt;zonal mean of the monthly mean of daily soil moisture in layer 1 (0-2cm depth), mm&gt;,
+          "sm2": &lt;zonal mean of the monthly mean of daily soil moisture in layer 2 (2-97cm depth), mm&gt;,
+          "sm3": &lt;zonal mean of the monthly mean of daily soil moisture in layer 3 (97-300cm depth), mm&gt;,
+          "snow_melt": &lt;zonal sum of the monthly sum of daily snowmelt, mm&gt;,
+          "swe": &lt;zonal mean of the monthly maximum of daily snow water equivalent, mm&gt;,
+          "tmax": &lt;zonal mean of the monthly mean of daily maximum air temperature at 2m, &deg;C&gt;,
+          "tmin": &lt;zonal mean of the monthly mean of daily minimum air temperature at 2m, &deg;C&gt;,
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h4>Aggregated min/mean/max summaries across all decades</h4>
+
+<p>Results from local min/mean/max summary queries will look like this:</p>
 
 <pre>
   {

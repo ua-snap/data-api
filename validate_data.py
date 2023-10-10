@@ -25,6 +25,10 @@ def place_name_and_type(place_id):
     if place_id.isdigit() and len(place_id) == 12:
         return None, "huc12"
 
+    # HUC10s
+    if place_id.isdigit() and len(place_id) == 10:
+        return None, "huc10"
+
     place = asyncio.run(
         fetch_data(
             [
