@@ -379,12 +379,12 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
 
     elif "summarize" in request.args or summarize:
         if request.args.get("summarize") == "mmm" or summarize:
-            # try:
-            return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
-            # except Exception as exc:
-            #     if hasattr(exc, "status") and exc.status == 404:
-            #         return render_template("404/no_data.html"), 404
-            #     return render_template("500/server_error.html"), 500
+            try:
+                return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
+            except Exception as exc:
+                if hasattr(exc, "status") and exc.status == 404:
+                    return render_template("404/no_data.html"), 404
+                return render_template("500/server_error.html"), 500
         else:
             return render_template("400/bad_request.html"), 400
 
