@@ -260,8 +260,61 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                             "max"
                         ] = max_value
 
-            # Generates the annual min-mean-max for ArcticEDS
+            # Generates the seasonal totals for NCR & annual min-mean-max for ArcticEDS
             if summarize:
+                # Generate seasonal min-mean-max for NCR
+                seasons = {
+                    "Spring": [0, 7, 8],
+                    "Summer": [1, 5, 6],
+                    "Fall": [9, 10, 11],
+                    "Winter": [2, 3, 4],
+                }
+                for season, season_months in seasons.items():
+                    point_pkg_mmm[model_name][scenario_name][season] = dict()
+                    for era_title in dim_encodings["eds_eras"].keys():
+                        for var_coord in dim_encodings["varnames"].keys():
+                            var_name = dim_encodings["varnames"][var_coord]
+                            values = list()
+
+                            # We have to pull the data in this way to ensure we are getting
+                            # the mean for each variable for each month.
+                            for month_coord in dim_encodings["months"].keys():
+                                if month_coord in season_months:
+                                    month_name = dim_encodings["months"][month_coord]
+                                    values.append(
+                                        float(
+                                            point_pkg_mmm[model_name][scenario_name][
+                                                month_name
+                                            ][var_name][era_title]["mean"]
+                                        )
+                                    )
+
+                            # Get the sum of the three months for the season
+                            total_value = round(np.sum(values), 2)
+
+                            # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
+                            if np.isnan(total_value):
+                                total_value = "nan"
+
+                            # This is required so that we don't overwrite the previous run for an era.
+                            # For example, after running the historical era, if we didn't check for the
+                            # existence of the var_name for the seasonal key, it would erase the historical
+                            # era and only the last era (late_century) would exist in this key-value pair.
+                            if (
+                                var_name
+                                not in point_pkg_mmm[model_name][scenario_name][season]
+                            ):
+                                point_pkg_mmm[model_name][scenario_name][season][
+                                    var_name
+                                ] = dict()
+
+                            point_pkg_mmm[model_name][scenario_name][season][var_name][
+                                era_title
+                            ] = dict()
+                            point_pkg_mmm[model_name][scenario_name][season][var_name][
+                                era_title
+                            ]["total"] = total_value
+
                 point_pkg_mmm[model_name][scenario_name]["Annual"] = dict()
                 for era_title in dim_encodings["eds_eras"].keys():
                     for var_coord in dim_encodings["varnames"].keys():
@@ -380,12 +433,12 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
 
     elif "summarize" in request.args or summarize:
         if request.args.get("summarize") == "mmm" or summarize:
-            try:
-                return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
-            except Exception as exc:
-                if hasattr(exc, "status") and exc.status == 404:
-                    return render_template("404/no_data.html"), 404
-                return render_template("500/server_error.html"), 500
+            # try:
+            return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
+            # except Exception as exc:
+            #     if hasattr(exc, "status") and exc.status == 404:
+            #         return render_template("404/no_data.html"), 404
+            #     return render_template("500/server_error.html"), 500
         else:
             return render_template("400/bad_request.html"), 400
 
@@ -414,6 +467,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
 
 
 @routes.route("/eds/hydrology/<lat>/<lon>")
+@routes.route("/eds/hydrology/point/<lat>/<lon>")
 def eds_hydrology_data(lat, lon):
     hydrology = dict()
 
