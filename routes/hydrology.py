@@ -290,7 +290,7 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                                     )
 
                             # Get the sum of the three months for the season
-                            total_value = round(np.sum(values), 2)
+                            total_value = round(np.sum(values), 0)
 
                             # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
                             if np.isnan(total_value):
