@@ -169,9 +169,6 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                 point_pkg_mmm[model_name][scenario_name][month_name] = dict()
                 for var_coord in dim_encodings["varnames"].keys():
                     var_name = dim_encodings["varnames"][var_coord]
-                    point_pkg_mmm[model_name][scenario_name][month_name][
-                        var_name
-                    ] = dict()
 
                     # If summarizing for ArcticEDS, we want to get the min-mean-max for each
                     # month for the given era i.e. 1950-2009 for historical period.
@@ -181,6 +178,9 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                             or var_name == "runoff"
                             or var_name == "sm1"
                         ):
+                            point_pkg_mmm[model_name][scenario_name][month_name][
+                                var_name
+                            ] = dict()
                             for era_title in dim_encodings["eds_eras"].keys():
                                 values = list()
                                 point_pkg_mmm[model_name][scenario_name][month_name][
@@ -225,6 +225,9 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                                 ][era_title]["max"] = max_value
 
                     else:
+                        point_pkg_mmm[model_name][scenario_name][month_name][
+                            var_name
+                        ] = dict()
                         # If we get here, we are going through the normal min-mean-max calculations over
                         # each and every era sequentially i.e. 1950-1959, 1960-1969, etc.
                         values = list()
