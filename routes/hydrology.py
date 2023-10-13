@@ -276,8 +276,8 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                             var_name = dim_encodings["varnames"][var_coord]
                             values = list()
 
-                            # We have to pull the data in this way to ensure we are getting
-                            # the mean for each variable for each month.
+                            # For each month in the season, grab the mean value for that
+                            # month for the given variable and era.
                             for month_coord in season_months:
                                 month_name = dim_encodings["months"][month_coord]
                                 values.append(
