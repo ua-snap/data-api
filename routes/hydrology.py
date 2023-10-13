@@ -169,57 +169,61 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                 point_pkg_mmm[model_name][scenario_name][month_name] = dict()
                 for var_coord in dim_encodings["varnames"].keys():
                     var_name = dim_encodings["varnames"][var_coord]
-                    point_pkg_mmm[model_name][scenario_name][month_name][
-                        var_name
-                    ] = dict()
 
                     # If summarizing for ArcticEDS, we want to get the min-mean-max for each
                     # month for the given era i.e. 1950-2009 for historical period.
                     if summarize:
-                        for era_title in dim_encodings["eds_eras"].keys():
-                            values = list()
+                        if var_name == "evap" or var_name == "runoff":
                             point_pkg_mmm[model_name][scenario_name][month_name][
                                 var_name
-                            ][era_title] = dict()
+                            ] = dict()
+                            for era_title in dim_encodings["eds_eras"].keys():
+                                values = list()
+                                point_pkg_mmm[model_name][scenario_name][month_name][
+                                    var_name
+                                ][era_title] = dict()
 
-                            # Pull the list from dim_encodings representing the min and max
-                            # era numbers for this era
-                            eds_eras = dim_encodings["eds_eras"][era_title]
-                            for era_coord in range(eds_eras[0], eds_eras[1] + 1):
-                                era_name = dim_encodings["eras"][era_coord]
+                                # Pull the list from dim_encodings representing the min and max
+                                # era numbers for this era
+                                eds_eras = dim_encodings["eds_eras"][era_title]
+                                for era_coord in range(eds_eras[0], eds_eras[1] + 1):
+                                    era_name = dim_encodings["eras"][era_coord]
 
-                                values.append(
-                                    float(
-                                        point_pkg[model_name][scenario_name][
-                                            month_name
-                                        ][era_name][var_name]
+                                    values.append(
+                                        float(
+                                            point_pkg[model_name][scenario_name][
+                                                month_name
+                                            ][era_name][var_name]
+                                        )
                                     )
+
+                                min_value, mean_value, max_value = (
+                                    min(values),
+                                    round(np.nanmean(values), 2),
+                                    max(values),
                                 )
 
-                            min_value, mean_value, max_value = (
-                                min(values),
-                                round(np.nanmean(values), 2),
-                                max(values),
-                            )
+                                if np.isnan(min_value):
+                                    min_value = "nan"
+                                if np.isnan(mean_value):
+                                    mean_value = "nan"
+                                if np.isnan(max_value):
+                                    max_value = "nan"
 
-                            if np.isnan(min_value):
-                                min_value = "nan"
-                            if np.isnan(mean_value):
-                                mean_value = "nan"
-                            if np.isnan(max_value):
-                                max_value = "nan"
-
-                            point_pkg_mmm[model_name][scenario_name][month_name][
-                                var_name
-                            ][era_title]["min"] = min_value
-                            point_pkg_mmm[model_name][scenario_name][month_name][
-                                var_name
-                            ][era_title]["mean"] = mean_value
-                            point_pkg_mmm[model_name][scenario_name][month_name][
-                                var_name
-                            ][era_title]["max"] = max_value
+                                point_pkg_mmm[model_name][scenario_name][month_name][
+                                    var_name
+                                ][era_title]["min"] = min_value
+                                point_pkg_mmm[model_name][scenario_name][month_name][
+                                    var_name
+                                ][era_title]["mean"] = mean_value
+                                point_pkg_mmm[model_name][scenario_name][month_name][
+                                    var_name
+                                ][era_title]["max"] = max_value
 
                     else:
+                        point_pkg_mmm[model_name][scenario_name][month_name][
+                            var_name
+                        ] = dict()
                         # If we get here, we are going through the normal min-mean-max calculations over
                         # each and every era sequentially i.e. 1950-1959, 1960-1969, etc.
                         values = list()
@@ -260,68 +264,126 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                             "max"
                         ] = max_value
 
-            # Generates the annual min-mean-max for ArcticEDS
+            # Generates the seasonal totals for NCR & annual min-mean-max for ArcticEDS
             if summarize:
+                # Generate seasonal totals for NCR
+                seasons = {
+                    "Spring": [0, 7, 8],
+                    "Summer": [1, 5, 6],
+                    "Fall": [9, 10, 11],
+                    "Winter": [2, 3, 4],
+                }
+                for season, season_months in seasons.items():
+                    point_pkg_mmm[model_name][scenario_name][season] = dict()
+                    for era_title in dim_encodings["eds_eras"].keys():
+                        for var_coord in dim_encodings["varnames"].keys():
+                            var_name = dim_encodings["varnames"][var_coord]
+                            if var_name == "evap" or var_name == "runoff":
+                                values = list()
+
+                                # For each month in the season, grab the mean value for that
+                                # month for the given variable and era.
+                                for month_coord in season_months:
+                                    month_name = dim_encodings["months"][month_coord]
+                                    values.append(
+                                        float(
+                                            point_pkg_mmm[model_name][scenario_name][
+                                                month_name
+                                            ][var_name][era_title]["mean"]
+                                        )
+                                    )
+
+                                # Get the sum of the three months for the season
+                                total_value = round(np.sum(values), 0)
+
+                                # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
+                                if np.isnan(total_value):
+                                    total_value = "nan"
+
+                                # This is required so that we don't overwrite the previous run for an era.
+                                # For example, after running the historical era, if we didn't check for the
+                                # existence of the var_name for the seasonal key, it would erase the historical
+                                # era and only the last era (late_century) would exist in this key-value pair.
+                                if (
+                                    var_name
+                                    not in point_pkg_mmm[model_name][scenario_name][
+                                        season
+                                    ]
+                                ):
+                                    point_pkg_mmm[model_name][scenario_name][season][
+                                        var_name
+                                    ] = dict()
+
+                                point_pkg_mmm[model_name][scenario_name][season][
+                                    var_name
+                                ][era_title] = dict()
+                                point_pkg_mmm[model_name][scenario_name][season][
+                                    var_name
+                                ][era_title]["total"] = total_value
+
                 point_pkg_mmm[model_name][scenario_name]["Annual"] = dict()
                 for era_title in dim_encodings["eds_eras"].keys():
                     for var_coord in dim_encodings["varnames"].keys():
                         var_name = dim_encodings["varnames"][var_coord]
-                        values = list()
+                        if var_name == "evap" or var_name == "runoff":
+                            values = list()
 
-                        # We have to pull the data in this way to ensure we are getting
-                        # the mean for each variable for each month.
-                        for month_coord in dim_encodings["months"].keys():
-                            month_name = dim_encodings["months"][month_coord]
-                            values.append(
-                                float(
-                                    point_pkg_mmm[model_name][scenario_name][
-                                        month_name
-                                    ][var_name][era_title]["mean"]
+                            # We have to pull the data in this way to ensure we are getting
+                            # the mean for each variable for each month.
+                            for month_coord in dim_encodings["months"].keys():
+                                month_name = dim_encodings["months"][month_coord]
+                                values.append(
+                                    float(
+                                        point_pkg_mmm[model_name][scenario_name][
+                                            month_name
+                                        ][var_name][era_title]["mean"]
+                                    )
                                 )
+
+                            # This will be the min, mean, and max taken from the mean monthly values
+                            # to find the min-mean-max of the annual values for a given time period such
+                            # as 1950-2009 for historical.
+                            min_value, mean_value, max_value = (
+                                min(values),
+                                round(np.nanmean(values), 2),
+                                max(values),
                             )
 
-                        # This will be the min, mean, and max taken from the mean monthly values
-                        # to find the min-mean-max of the annual values for a given time period such
-                        # as 1950-2009 for historical.
-                        min_value, mean_value, max_value = (
-                            min(values),
-                            round(np.nanmean(values), 2),
-                            max(values),
-                        )
+                            # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
+                            if np.isnan(min_value):
+                                min_value = "nan"
+                            if np.isnan(mean_value):
+                                mean_value = "nan"
+                            if np.isnan(max_value):
+                                max_value = "nan"
 
-                        # reformat NaN stats to string "nan" to avoid "is not valid JSON" error
-                        if np.isnan(min_value):
-                            min_value = "nan"
-                        if np.isnan(mean_value):
-                            mean_value = "nan"
-                        if np.isnan(max_value):
-                            max_value = "nan"
+                            # This is required so that we don't overwrite the previous run for an era.
+                            # For example, after running the historical era, if we didn't check for the
+                            # existence of the var_name for the Annual key, it would erase the historical
+                            # era and only the last era (late_century) would exist in this key-value pair.
+                            if (
+                                var_name
+                                not in point_pkg_mmm[model_name][scenario_name][
+                                    "Annual"
+                                ]
+                            ):
+                                point_pkg_mmm[model_name][scenario_name]["Annual"][
+                                    var_name
+                                ] = dict()
 
-                        # This is required so that we don't overwrite the previous run for an era.
-                        # For example, after running the historical era, if we didn't check for the
-                        # existence of the var_name for the Annual key, it would erase the historical
-                        # era and only the last era (late_century) would exist in this key-value pair.
-                        if (
-                            var_name
-                            not in point_pkg_mmm[model_name][scenario_name]["Annual"]
-                        ):
                             point_pkg_mmm[model_name][scenario_name]["Annual"][
                                 var_name
-                            ] = dict()
+                            ][era_title] = dict()
 
-                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
-                            era_title
-                        ] = dict()
-
-                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
-                            era_title
-                        ]["min"] = min_value
-                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
-                            era_title
-                        ]["mean"] = mean_value
-                        point_pkg_mmm[model_name][scenario_name]["Annual"][var_name][
-                            era_title
-                        ]["max"] = max_value
+                            point_pkg_mmm[model_name][scenario_name]["Annual"][
+                                var_name
+                            ][era_title]["min"] = min_value
+                            point_pkg_mmm[model_name][scenario_name]["Annual"][
+                                var_name
+                            ][era_title]["mean"] = mean_value
+                            point_pkg_mmm[model_name][scenario_name]["Annual"][
+                                var_name
+                            ][era_title]["max"] = max_value
 
     return point_pkg_mmm
 
@@ -414,6 +476,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
 
 
 @routes.route("/eds/hydrology/<lat>/<lon>")
+@routes.route("/eds/hydrology/point/<lat>/<lon>")
 def eds_hydrology_data(lat, lon):
     hydrology = dict()
 
