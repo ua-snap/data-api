@@ -262,7 +262,7 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
 
             # Generates the seasonal totals for NCR & annual min-mean-max for ArcticEDS
             if summarize:
-                # Generate seasonal min-mean-max for NCR
+                # Generate seasonal totals for NCR
                 seasons = {
                     "Spring": [0, 7, 8],
                     "Summer": [1, 5, 6],
@@ -278,16 +278,15 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
 
                             # We have to pull the data in this way to ensure we are getting
                             # the mean for each variable for each month.
-                            for month_coord in dim_encodings["months"].keys():
-                                if month_coord in season_months:
-                                    month_name = dim_encodings["months"][month_coord]
-                                    values.append(
-                                        float(
-                                            point_pkg_mmm[model_name][scenario_name][
-                                                month_name
-                                            ][var_name][era_title]["mean"]
-                                        )
+                            for month_coord in season_months:
+                                month_name = dim_encodings["months"][month_coord]
+                                values.append(
+                                    float(
+                                        point_pkg_mmm[model_name][scenario_name][
+                                            month_name
+                                        ][var_name][era_title]["mean"]
                                     )
+                                )
 
                             # Get the sum of the three months for the season
                             total_value = round(np.sum(values), 0)
