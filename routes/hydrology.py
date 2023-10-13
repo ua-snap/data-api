@@ -173,11 +173,7 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                     # If summarizing for ArcticEDS, we want to get the min-mean-max for each
                     # month for the given era i.e. 1950-2009 for historical period.
                     if summarize:
-                        if (
-                            var_name == "evap"
-                            or var_name == "runoff"
-                            or var_name == "sm1"
-                        ):
+                        if var_name == "evap" or var_name == "runoff":
                             point_pkg_mmm[model_name][scenario_name][month_name][
                                 var_name
                             ] = dict()
@@ -329,11 +325,7 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                 for era_title in dim_encodings["eds_eras"].keys():
                     for var_coord in dim_encodings["varnames"].keys():
                         var_name = dim_encodings["varnames"][var_coord]
-                        if (
-                            var_name == "evap"
-                            or var_name == "runoff"
-                            or var_name == "sm1"
-                        ):
+                        if var_name == "evap" or var_name == "runoff":
                             values = list()
 
                             # We have to pull the data in this way to ensure we are getting
