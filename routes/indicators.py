@@ -6,8 +6,7 @@ These endpoint(s) query a coverage containing summarized versions of the indicat
 import asyncio
 import numpy as np
 from math import floor
-from flask import Blueprint, render_template, request, Response
-from shapely.geometry import Point
+from flask import Blueprint, render_template
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -25,9 +24,7 @@ indicators_coverage_id = "ncar12km_indicators_era_summaries"
 # dim encodings for the NCAR 12km BCSD indicators coverage
 base_dim_encodings = asyncio.run(get_dim_encodings(indicators_coverage_id))
 
-#
 # Base indicators endpoint:
-#
 async def fetch_base_indicators_point_data(x, y):
     """Make the async request for indicator data for a range of years at a specified point
 
@@ -99,9 +96,8 @@ def run_fetch_base_indicators_point_data(lat, lon):
         JSON-like dict of requested ALFRESCO data
 
     Notes:
-        example request: http://localhost:5000/ TO-DO /point/65.0628/-146.1627
+        example request: http://localhost:5000/indicators/base/point/65.06/-146.16
     """
-
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -116,15 +112,15 @@ def run_fetch_base_indicators_point_data(lat, lon):
 
     try:
         point_data_list = asyncio.run(fetch_base_indicators_point_data(x=x, y=y))
+        results = package_base_indicators_data(point_data_list)
+        results = nullify_and_prune(results, "ncar12km_indicators")
+        return results
 
     except ValueError:
         return render_template("400/bad_request.html"), 400
-
-    results = package_base_indicators_data(point_data_list)
-
-    results = nullify_and_prune(results, "ncar12km_indicators")
-
-    return results
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
 
 
 def summarize_within_poly_marr(ds, poly_mask_arr, dim_encodings, bandname="Gray"):
