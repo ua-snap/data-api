@@ -305,14 +305,10 @@ def degree_days_csv(data, endpoint):
 
     if endpoint in ["heating_degree_days", "heating_degree_days_all"]:
         filename_data_name = "Heating Degree Days"
-        metadata = (
-            "# dd is the total annual degree days below 65°F for the specified model\n"
-        )
+        metadata = "# dd is the total annual degree days below 65 (deg F) for the specified model\n"
     elif endpoint in ["degree_days_below_zero", "degree_days_below_zero_all"]:
         filename_data_name = "Degree Days Below Zero"
-        metadata = (
-            "# dd is the total annual degree days below 0°F for the specified model\n"
-        )
+        metadata = "# dd is the total annual degree days below 0 (deg F) for the specified model\n"
     elif endpoint in ["thawing_index", "thawing_index_all"]:
         filename_data_name = "Thawing Index"
         metadata = "# dd is the total annual degree days above freezing for the specified model\n"
