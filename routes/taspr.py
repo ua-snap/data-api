@@ -731,7 +731,6 @@ def create_temperature_eds_summary(temp_json):
 
             # Calculate the mean of 'tasmean', the maximum of 'tasmax', and the minimum of 'tasmin' for the month
             if monthly_mean_values:
-
                 monthly_mean = round(
                     sum(monthly_mean_values) / len(monthly_mean_values), 1
                 )
@@ -779,7 +778,7 @@ def create_temperature_eds_summary(temp_json):
     # There are 115 values (1901-2015) for each month
     for year in range(0, 115):
         yearly_values = []
-        for month in range(0,12):
+        for month in range(0, 12):
             # Index is how the data is ordered from the above code
             # Each month has 115 years + the year we are currently on
             index = (month * 115) + year
@@ -883,7 +882,8 @@ def create_temperature_eds_summary(temp_json):
                 if model_option == "5ModelAvg" and rcp_option == "rcp85":
                     if all_monthly_mean_values:
                         annual_mean = round(
-                            sum(all_monthly_mean_values) / len(all_monthly_mean_values), 1
+                            sum(all_monthly_mean_values) / len(all_monthly_mean_values),
+                            1,
                         )
                         annual_means = []
                         # Iterates through a 30-year era
@@ -897,7 +897,9 @@ def create_temperature_eds_summary(temp_json):
                                 index = (month * 30) + (year - years_of_interest[0])
                                 yearly_values.append(all_monthly_mean_values[index])
                             # Get the annual mean for this given year in the era of interest
-                            annual_means.append(round(sum(yearly_values) / len(yearly_values), 1))
+                            annual_means.append(
+                                round(sum(yearly_values) / len(yearly_values), 1)
+                            )
                         # Set the annual minimum and maximum from the annual means
                         annual_max = max(annual_means)
                         annual_min = min(annual_means)
@@ -905,7 +907,6 @@ def create_temperature_eds_summary(temp_json):
                         annual_mean = None
                         annual_max = None
                         annual_min = None
-
 
                     # Append the results to the projected_monthly_mmm DataFrame
                     # only if the 5ModelAvg and RCP 8.5 since we only want the annual values
@@ -1252,13 +1253,15 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     return aggr_results
 
 
-def run_fetch_proj_precip_point_data(lat, lon):
+def run_fetch_proj_precip_point_data(lat, lon, csv=False):
     """Fetch projected precipitation data for a
        given latitude and longitude.
 
     Args:
         lat (float): latitude
         lon (float): longitude
+        csv (boolean): if csv is true, we change the intervals to
+                       exceedance_probability
 
     Returns:
         JSON-like dict of data at provided latitude and
@@ -1272,7 +1275,10 @@ def run_fetch_proj_precip_point_data(lat, lon):
     # these functions are hard-coded  with coord values for now
     point_pkg = dict()
     for interval in range(len(dot_dim_encodings["intervals"])):
-        interval_key = dot_dim_encodings["intervals"][interval]
+        if csv:
+            interval_key = 100 / int(dot_dim_encodings["intervals"][interval])
+        else:
+            interval_key = dot_dim_encodings["intervals"][interval]
         point_pkg[interval_key] = dict()
         for duration in range(len(dot_dim_encodings["durations"])):
             duration_key = dot_dim_encodings["durations"][duration]
@@ -1657,14 +1663,18 @@ def proj_precip_point(lat, lon):
             422,
         )
 
+    csv = False
+    if request.args.get("format") == "csv":
+        csv = True
+
     try:
-        point_pkg = run_fetch_proj_precip_point_data(lat, lon)
+        point_pkg = run_fetch_proj_precip_point_data(lat, lon, csv)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    if request.args.get("format") == "csv":
+    if csv:
         point_pkg = nullify_and_prune(point_pkg, "proj_precip")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
