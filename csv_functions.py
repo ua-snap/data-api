@@ -697,7 +697,7 @@ def taspr_csv(data, endpoint):
         values = ["pf", "pf_lower", "pf_upper"]
         fieldnames = coords + values
         csv_dicts = build_csv_dicts(data, fieldnames, values=values)
-        metadata = "# exceedance_probability is the annual exceedance probability\n"
+        metadata = "# exceedance_probability is the annual exceedance probability in percent\n"
         metadata += "# duration is the amount of time for the predicted amount of precipitation\n"
         metadata += "# model is the model the data is derived from\n"
         metadata += (
