@@ -69,7 +69,7 @@ def package_base_indicators_data(point_data_list):
                 # Skip impossible combinations of era and model.
                 if era == "historical" and model != "Daymet":
                     continue
-                if era != "historical" and model == "Daymet":
+                elif era != "historical" and model == "Daymet":
                     continue
                 di[indicator][era][model] = dict()
                 for si, stat_li in enumerate(scenario_li):
@@ -77,7 +77,7 @@ def package_base_indicators_data(point_data_list):
                     # Skip impossible combinations of era and scenario.
                     if era == "historical" and scenario != "historical":
                         continue
-                    if era != "historical" and scenario == "historical":
+                    elif era != "historical" and scenario == "historical":
                         continue
                     di[indicator][era][model][scenario] = dict()
                     for ti, value in enumerate(stat_li):
@@ -201,6 +201,29 @@ def summarize_within_poly_marr(ds, poly_mask_arr, dim_encodings, bandname="Gray"
             data[map_list[-1]] = result
         else:
             aggr_results[map_list[0]] = round(result, 4)
+
+    indicators = base_dim_encodings["indicator"].values()
+    eras = base_dim_encodings["era"].values()
+    models = base_dim_encodings["model"].values()
+    scenarios = base_dim_encodings["scenario"].values()
+
+    # Prune impossible (always nodata) historical/projected combos from results.
+    for indicator, era, model, scenario in itertools.product(
+        indicators, eras, models, scenarios
+    ):
+        if model in aggr_results[indicator][era]:
+            if scenario in aggr_results[indicator][era][model]:
+                # Remove impossible combinations of era and scenario.
+                if era == "historical" and scenario != "historical":
+                    del aggr_results[indicator][era][model][scenario]
+                elif era != "historical" and scenario == "historical":
+                    del aggr_results[indicator][era][model][scenario]
+            # Remove impossible combinations of era and model.
+            if era == "historical" and model != "Daymet":
+                del aggr_results[indicator][era][model]
+            elif era != "historical" and model == "Daymet":
+                del aggr_results[indicator][era][model]
+
     return aggr_results
 
 
@@ -261,5 +284,8 @@ def indicators_area_data_endpoint(var_id):
         return render_template("404/no_data.html"), 404
 
     indicators_pkg = postprocess(indicators_pkg, "ncar12km_indicators")
+
+    if request.args.get("format") == "csv":
+        return create_csv(indicators_pkg, "ncar12km_indicators", var_id)
 
     return indicators_pkg
