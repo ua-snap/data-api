@@ -59,6 +59,8 @@ def create_csv(
         properties = flammability_csv(data)
     elif endpoint in ["gipl", "gipl_summary"]:
         properties = gipl_csv(data, endpoint)
+    elif endpoint in ["ncar12km_indicators"]:
+        properties = ncar12km_indicators_csv(data)
     elif endpoint == "landfastice":
         properties = landfastice_csv(data)
     elif endpoint == "permafrost":
@@ -369,6 +371,40 @@ def gipl_csv(data, endpoint):
     else:
         metadata = "# GIPL model outputs for ten variables including mean annual ground temperature (deg C) at various depths below the surface as well as talik thickness (m) and depths of permafrost base and top (m)\n"
     filename_data_name = "GIPL 1 km Model Outputs"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def ncar12km_indicators_csv(data):
+    # Reorder eras so that midcentury rows appear before longterm rows in CSV.
+    reordered = {}
+    for indicator in data.keys():
+        reordered[indicator] = {}
+        for era in ["historical", "midcentury", "longterm"]:
+            if era in data[indicator].keys():
+                reordered[indicator][era] = data[indicator][era]
+
+    coords = ["indicator", "era", "model", "scenario"]
+    values = ["min", "mean", "max"]
+    fieldnames = coords + values
+    csv_dicts = build_csv_dicts(reordered, fieldnames, values=values)
+    metadata = "# cd is the Very Cold Day Threshold. Only 5 days in a year are colder than this.\n"
+    metadata += "# cdd are Consecutive Dry Days. This is the number of consecutive days with less than 1㎜ precipitation.\n"
+    metadata += "# csdi is the Cold Spell Duration Index. This is a cold spell metric: the number of cold days (<10th percentile) occurring in a row following an initial cold spell period of six days.\n"
+    metadata += "# cwd are Consecutive Wet Days. This is the number of consecutive days with more than 1㎜ precipitation.\n"
+    metadata += "# dw are Deep Winter Days. This is the number of days with mean temperature below -30 (deg C).\n"
+    metadata += "# hd is the Very Hot Day Threshold. Only 5 days in a year are warmer than this.\n"
+    metadata += "# r10mm are Heavy Precipitation Days. This is the number of individual days with 10㎜ or more precipitation.\n"
+    metadata += "# rx1day is the Maximum 1-day Precipitation. This is the maximum precipitation total for a single day in mm.\n"
+    metadata += "# rx5day is the Maximum 5-day Precipitation. This is the maximum precipitation total for a 5-day period in mm.\n"
+    metadata += "# su are Summer Days. This is the number of days with mean temperature above 25 (deg C).\n"
+    metadata += "# wsdi is the Warm Spell Duration Index. This is a heat wave metric: the number of hot days (>90th percentile) occurring in a row following an initial warm spell period of six days.\n"
+    filename_data_name = "Temperature & Precipitation Indicators"
 
     return {
         "csv_dicts": csv_dicts,
@@ -693,7 +729,9 @@ def taspr_csv(data, endpoint):
         values = ["pf", "pf_lower", "pf_upper"]
         fieldnames = coords + values
         csv_dicts = build_csv_dicts(data, fieldnames, values=values)
-        metadata = "# exceedance_probability is the annual exceedance probability in percent\n"
+        metadata = (
+            "# exceedance_probability is the annual exceedance probability in percent\n"
+        )
         metadata += "# duration is the amount of time for the predicted amount of precipitation\n"
         metadata += "# model is the model the data is derived from\n"
         metadata += (

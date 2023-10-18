@@ -6,7 +6,7 @@ These endpoint(s) query a coverage containing summarized versions of the indicat
 import asyncio
 import numpy as np
 from math import floor
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -14,6 +14,7 @@ from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
 from validate_request import validate_latlon, project_latlon, validate_var_id
 from postprocessing import nullify_and_prune, postprocess
+from csv_functions import create_csv
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -23,6 +24,7 @@ indicators_coverage_id = "ncar12km_indicators_era_summaries"
 
 # dim encodings for the NCAR 12km BCSD indicators coverage
 base_dim_encodings = asyncio.run(get_dim_encodings(indicators_coverage_id))
+
 
 # Base indicators endpoint:
 async def fetch_base_indicators_point_data(x, y):
@@ -64,9 +66,19 @@ def package_base_indicators_data(point_data_list):
             di[indicator][era] = dict()
             for mi, scenario_li in enumerate(model_li):
                 model = base_dim_encodings["model"][mi]
+                # Skip impossible combinations of era and model.
+                if era == "historical" and model != "Daymet":
+                    continue
+                if era != "historical" and model == "Daymet":
+                    continue
                 di[indicator][era][model] = dict()
                 for si, stat_li in enumerate(scenario_li):
                     scenario = base_dim_encodings["scenario"][si]
+                    # Skip impossible combinations of era and scenario.
+                    if era == "historical" and scenario != "historical":
+                        continue
+                    if era != "historical" and scenario == "historical":
+                        continue
                     di[indicator][era][model][scenario] = dict()
                     for ti, value in enumerate(stat_li):
                         stat = base_dim_encodings["stat"][ti]
@@ -114,6 +126,11 @@ def run_fetch_base_indicators_point_data(lat, lon):
         point_data_list = asyncio.run(fetch_base_indicators_point_data(x=x, y=y))
         results = package_base_indicators_data(point_data_list)
         results = nullify_and_prune(results, "ncar12km_indicators")
+
+        if request.args.get("format") == "csv":
+            place_id = request.args.get("community")
+            return create_csv(results, "ncar12km_indicators", place_id, lat, lon)
+
         return results
 
     except ValueError:
