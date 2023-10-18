@@ -1511,8 +1511,6 @@ def mmm_point_data_endpoint(
                 lon,
                 filename_prefix=filename_prefix,
             )
-        # elif preview:
-        #     return create_csv(point_pkg, var_ep + "_preview", place_id, lat, lon)
         else:
             return create_csv(point_pkg, var_ep + "_all", place_id, lat, lon)
 
