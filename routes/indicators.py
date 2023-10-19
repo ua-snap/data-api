@@ -96,6 +96,11 @@ def package_base_indicators_data(point_data_list):
     return di
 
 
+@routes.route("/indicators/")
+def about_indicators():
+    return render_template("documentation/indicators.html")
+
+
 @routes.route("/indicators/base/point/<lat>/<lon>")
 def run_fetch_base_indicators_point_data(lat, lon):
     """Query the NCAR 12km indicators_climatologies rasdaman coverage which contains indicators summarized over NCR time eras
