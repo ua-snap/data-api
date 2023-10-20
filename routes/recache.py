@@ -97,7 +97,7 @@ def get_all_route_endpoints(curr_route, curr_type):
 
 @routes.route("/recache/<limit>")
 @routes.route("/cache/<limit>")
-def recache(limit):
+def recache(limit=False):
     """Runs through all endpoints that we expect for our web applications.
     This function can be used to pre-populate our API cache.
      Args:
