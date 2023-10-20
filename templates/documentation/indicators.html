@@ -1,0 +1,182 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Climate Indicators</h2>
+
+<p>
+  These endpoints provide access to era-based summaries of the NCAR 12km climate indicators.
+  The eras for this dataset are historical (1980&ndash;2009), mid&ndash;century (2040&ndash;2069),
+  and late&ndash;century (2070&ndash;2099).
+</p>
+
+<p>
+  For more detailed information, see the links to academic references and
+  source datasets included at the bottom of this page.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>All climate indicator variables</h4>
+
+<p>
+  Query min-mean-max climate indicator variables for all models and scenarios.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Era-based min-mean-max for all climate indicator variables at a given latitude and longitude.</td>
+      <td>
+        <a href="/indicators/base/point/61.5/-147">/indicators/base/point/61.5/-147</a>
+      </td>
+    </tr>
+    <td>Era-based min-mean-max for all climate indicator variables for a specific area</td>
+    <td>
+      <a href="/indicators/base/area/1903040601">/indicators/base/area/1903040601</a>
+    </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from point and area queries will look like this:</p>
+
+<pre>
+{
+  "cd": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": -30.3,
+          "mean": -37.6,
+          "min": -45.2
+        },
+        longterm": {
+          "MRI-CGCM3": {
+            "rcp45": {
+              "max": -21.9,
+              "mean": -34.0,
+              "min": -42.2
+            },
+            "rcp85": {
+              "max": -27.2,
+              "mean": -33.4,
+              "min": -40.8
+            }
+          },
+          ...
+        },
+        ...
+      },
+    ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;variable&gt;: {
+    &lt;era&gt;: {
+      &lt;model&gt;: {
+        &lt;scenario&gt;: {
+          "max": &lt;maximum annual indicator value over summary era&gt;,
+          "mean": &lt;mean annual indicator value over summary era&gt;,
+          "min": &lt;minimum annual indicator value over summary era&gt;
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h3>Climate Indicator Information</h3>
+
+<h4>Below is the list of climate indicators that are found in this endpoint</h4>
+
+<p><strong>hd</strong>: “Hot day” threshold &mdash; the highest observed daily maximum 2 m air temperature such that
+  there are 5 other
+  observations equal to or greater than this value.</p>
+
+<p><strong>cd</strong>: “Cold day” threshold &mdash; the lowest observed daily minimum 2 m air temperature such that
+  there are 5 other
+  observations equal to or less than this value.</p>
+
+<p><strong>rx1day</strong>: Maximum 1&ndash;day precipitation</p>
+
+<p><strong>su</strong>: "Summer Days" &mdash; Annual number of days with maximum 2 m air temperature above 25 degrees C
+</p>
+
+<p><strong>dw</strong>: "Deep Winter days" &mdash; Annual number of days with minimum 2 m air temperature below -30
+  degrees C</p>
+
+<p><strong>wsdi</strong>: Warm Spell Duration Index &mdash; Annual count of occurrences of at least 5 consecutive days
+  with daily mean 2
+  m air temperature above 90th percentile of historical values for the date</p>
+
+<p><strong>cdsi</strong>: Cold Spell Duration Index &mdash; Same as WDSI, but for daily mean 2 m air temperature below
+  10th percentile
+</p>
+
+<p><strong>rx5day</strong>: Maximum 5&ndash;day precipitation</p>
+
+<p><strong>r10mm</strong>: Number of days with precipitation > 10 mm</p>
+
+<p><strong>cwd</strong>: Consecutive wet days &mdash; number of the most consecutive days with precipitation > 1 mm</p>
+
+<p><strong>cdd</strong>: Consecutive dry days &mdash; number of the most consecutive days with precipitation < 1 mm</p>
+    <h3>Source data
+    </h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Metadata & source data access</th>
+          <th>Academic reference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <a
+              href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/1c1de476-cc9d-4c7b-b8ab-25e8f68a317e">
+              Historical and projected climate indicators for Alaska at 12km
+            </a>
+          </td>
+          <td></td>
+        </tr>
+        <tr>
+          <td rowspan="2" style="vertical-align: middle; border-bottom: none">
+            New projections of 21st century climate and hydrology for Alaska and Hawaiʻi
+          </td>
+          <td>
+            Mizukami, N., Newman, A. J., Littell, J. S., Giambelluca, T. W., Wood, A. W., Gutmann, E. D., Hamman, J.
+            J., Gergel, D. R., Nijssen, B., Clark, M. P., and Arnold, J. R. (2022).
+            <a href="https://doi.org/10.1016/j.cliser.2022.100312">https://doi.org/10.1016/j.cliser.2022.100312</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    {% endblock %}
