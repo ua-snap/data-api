@@ -64,21 +64,21 @@ place_type_labels = {
 }
 
 cached_urls = [
-    "/alfresco/flammability/area/",
-    "/alfresco/flammability/point/",
-    "/alfresco/veg_type/area/",
-    "/alfresco/veg_type/point/",
-    "/beetles/area/",
-    "/beetles/point/",
     "/eds/all/",
-    "/elevation/area/",
+    "/alfresco/flammability/local/",
+    "/alfresco/veg_type/local/",
+    "/beetles/point/",
     "/elevation/point/",
-    "/taspr/area/",
     "/taspr/point/",
     "/indicators/base/point/",
-    "/indicators/base/area/",
     "/ncr/permafrost/point/",
     "/eds/hydrology/point/",
+    "/alfresco/flammability/area/",
+    "/alfresco/veg_type/area/",
+    "/beetles/area/",
+    "/elevation/area/",
+    "/taspr/area/",
+    "/indicators/base/area/",
 ]
 
 # Used for generating output for vector_data for /places/all
