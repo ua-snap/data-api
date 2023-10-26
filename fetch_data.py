@@ -152,7 +152,7 @@ def get_poly_3338_bbox(poly_id, crs=3338):
             fetch_data(
                 [
                     generate_wfs_places_url(
-                        "all_boundaries:all_areas", "the_geom", poly_id, "id"
+                        "playground:all_areas_test", "the_geom", poly_id, "id"
                     )
                 ]
             )
