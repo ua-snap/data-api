@@ -253,6 +253,8 @@ def package_dd_point_data(point_data, start_year=None, end_year=None):
                     year_index += 1
                 year += 1
 
+        point_pkg["units"] = dd_dim_encodings["units"]
+
     return point_pkg
 
 
