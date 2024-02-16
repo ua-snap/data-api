@@ -1,4 +1,5 @@
 """A module to generate specific request strings."""
+
 from collections import namedtuple
 from urllib.parse import quote
 
@@ -59,7 +60,13 @@ def generate_mmm_wcs_getcov_str(x, y, cov_id, model, scenario, encoding="json"):
 
 
 def generate_wcs_getcov_str(
-    x, y, cov_id, var_coord=None, time_slice=None, encoding="json"
+    x,
+    y,
+    cov_id,
+    var_coord=None,
+    time_slice=None,
+    encoding="json",
+    projection="EPSG:3338",
 ):
     """Generate a WCS GetCoverage request for fetching a
     subset of a coverage over X and Y axes.
@@ -90,11 +97,19 @@ def generate_wcs_getcov_str(
         time_slice_str = f"&SUBSET={time_axis}({slice_string})"
     else:
         time_slice_str = ""
-    wcs_getcov_str = (
-        f"GetCoverage&COVERAGEID={cov_id}"
-        f"&SUBSET=X({x})&SUBSET=Y({y}){var_subset_str}{time_slice_str}"
-        f"&FORMAT=application/{encoding}"
-    )
+
+    if projection == "EPSG:4326":
+        wcs_getcov_str = (
+            f"GetCoverage&COVERAGEID={cov_id}"
+            f"&SUBSET=lon({x})&SUBSET=lat({y}){var_subset_str}{time_slice_str}"
+            f"&FORMAT=application/{encoding}"
+        )
+    else:
+        wcs_getcov_str = (
+            f"GetCoverage&COVERAGEID={cov_id}"
+            f"&SUBSET=X({x})&SUBSET=Y({y}){var_subset_str}{time_slice_str}"
+            f"&FORMAT=application/{encoding}"
+        )
     return wcs_getcov_str
 
 

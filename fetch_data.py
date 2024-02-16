@@ -1,6 +1,7 @@
 """
 A module of data gathering functions for use across multiple endpoints.
 """
+
 import copy
 import io
 import itertools
