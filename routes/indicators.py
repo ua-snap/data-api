@@ -35,12 +35,25 @@ cmip6_dim_encodings = asyncio.run(get_dim_encodings(cmip6_indicators_coverage_id
 
 async def fetch_cmip6_indicators_point_data(lat, lon):
     """
-    TODO: Write the documentation for this function
+    Make an async request for CMIP6 indicator data for a range of models, scenarios, and years at a specified point
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        list of data results from each of historical and future data at a specified point
     """
+
+    # We must use EPSG:4326 for the CMIP6 indicators coverage to match the coverage projection
     wcs_str = generate_wcs_getcov_str(
         lon, lat, cov_id=cmip6_indicators_coverage_id, projection="EPSG:4326"
     )
+
+    # Generate the URL for the WCS query
     url = generate_wcs_query_url(wcs_str)
+
+    # Fetch the data
     point_data_list = await fetch_data([url])
 
     return point_data_list
@@ -68,11 +81,17 @@ async def fetch_base_indicators_point_data(x, y):
 
 def package_cmip6_indicators_data(point_data_list):
     """
-    TODO: Write the documentation for this function
+    Package the CMIP6 indicator values for a given query
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCPS query
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
     """
-    # base_dim_encodings
-    # TO-DO: is there a function for recursively populating a dict like this? If not there should be, this is how we package all of our data
     di = dict()
+
+    # Loop through point_data_list and populate di with the values
     for si, scenario_li in enumerate(point_data_list):
         scenario = cmip6_dim_encodings["scenario"][si]
         di[scenario] = dict()
@@ -80,13 +99,21 @@ def package_cmip6_indicators_data(point_data_list):
             model = cmip6_dim_encodings["model"][mi]
             di[scenario][model] = dict()
             for yi, year_li in enumerate(model_li):
+                # For the historical data, there are 165 years of data,
+                # for the future data, there are 96 years of data
                 if scenario == "historical":
+                    # The year values are 0-164, so we add 1850 to get the actual year
                     year = yi + 1850
+
+                    # If the year is greater than 2014, we break the loop since there is no more historical data
                     if year > 2014:
                         break
                 else:
+                    # The year values are 0-95, so we add 2015 to get the actual year
                     year = yi + 2015
-                    if year > 2110:
+
+                    # If the year is greater than 2100, we break the loop since there is no more future data
+                    if year > 2100:
                         break
                 di[scenario][model][year] = dict()
                 for vi, value in enumerate(year_li.split(" ")):
@@ -154,9 +181,20 @@ def about_indicators():
 @routes.route("/indicators/cmip6/point/<lat>/<lon>")
 def run_fetch_cmip6_indicators_point_data(lat, lon):
     """
-    TODO: Write the documentation for this function
+    Query the CMIP6 indicators coverage which contains indicators summarized over CMIP6 models, scenarios, and years
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of requested CMIP6 indicator data
+
+    Notes:
+        example request: http://localhost:5000/indicators/cmip6/point/65.06/-146.16
     """
 
+    # Validate the lat/lon values
     validation = validate_cmip6_indicators_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
