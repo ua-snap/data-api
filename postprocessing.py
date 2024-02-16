@@ -12,6 +12,7 @@ nodata_values = {
 
 nodata_mappings = {
     "beetles": nodata_values["beetles"],
+    "cmip6_indicators": nodata_values["ncar12km_indicators"],
     "crrel_gipl": nodata_values["default"],
     "degree_days_below_zero": nodata_values["default"],
     "degree_days_below_zero_all": nodata_values["default"],
