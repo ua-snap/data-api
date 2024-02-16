@@ -12,7 +12,12 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
-from validate_request import validate_latlon, project_latlon, validate_var_id
+from validate_request import (
+    validate_latlon,
+    validate_cmip6_indicators_latlon,
+    project_latlon,
+    validate_var_id,
+)
 from postprocessing import nullify_and_prune, postprocess
 from csv_functions import create_csv
 from . import routes
@@ -21,9 +26,24 @@ from config import WEST_BBOX, EAST_BBOX
 indicators_api = Blueprint("indicators_api", __name__)
 # Rasdaman targets
 indicators_coverage_id = "ncar12km_indicators_era_summaries"
+cmip6_indicators_coverage_id = "cmip6_indicators"
 
 # dim encodings for the NCAR 12km BCSD indicators coverage
 base_dim_encodings = asyncio.run(get_dim_encodings(indicators_coverage_id))
+cmip6_dim_encodings = asyncio.run(get_dim_encodings(cmip6_indicators_coverage_id))
+
+
+async def fetch_cmip6_indicators_point_data(lat, lon):
+    """
+    TODO: Write the documentation for this function
+    """
+    wcs_str = generate_wcs_getcov_str(
+        lon, lat, cov_id=cmip6_indicators_coverage_id, projection="EPSG:4326"
+    )
+    url = generate_wcs_query_url(wcs_str)
+    point_data_list = await fetch_data([url])
+
+    return point_data_list
 
 
 # Base indicators endpoint:
@@ -44,6 +64,36 @@ async def fetch_base_indicators_point_data(x, y):
     point_data_list = await fetch_data([url])
 
     return point_data_list
+
+
+def package_cmip6_indicators_data(point_data_list):
+    """
+    TODO: Write the documentation for this function
+    """
+    # base_dim_encodings
+    # TO-DO: is there a function for recursively populating a dict like this? If not there should be, this is how we package all of our data
+    di = dict()
+    for si, scenario_li in enumerate(point_data_list):
+        scenario = cmip6_dim_encodings["scenario"][si]
+        di[scenario] = dict()
+        for mi, model_li in enumerate(scenario_li):
+            model = cmip6_dim_encodings["model"][mi]
+            di[scenario][model] = dict()
+            for yi, year_li in enumerate(model_li):
+                if scenario == "historical":
+                    year = yi + 1850
+                    if year > 2014:
+                        break
+                else:
+                    year = yi + 2015
+                    if year > 2110:
+                        break
+                di[scenario][model][year] = dict()
+                for vi, value in enumerate(year_li.split(" ")):
+                    indicator = cmip6_dim_encodings["indicator"][vi]
+                    di[scenario][model][year][indicator] = value
+
+    return di
 
 
 def package_base_indicators_data(point_data_list):
@@ -99,6 +149,34 @@ def package_base_indicators_data(point_data_list):
 @routes.route("/indicators/")
 def about_indicators():
     return render_template("documentation/indicators.html")
+
+
+@routes.route("/indicators/cmip6/point/<lat>/<lon>")
+def run_fetch_cmip6_indicators_point_data(lat, lon):
+    """
+    TODO: Write the documentation for this function
+    """
+
+    validation = validate_cmip6_indicators_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+    try:
+        point_data_list = asyncio.run(fetch_cmip6_indicators_point_data(lat, lon))
+        results = package_cmip6_indicators_data(point_data_list)
+        return results
+
+    except ValueError:
+        return render_template("400/bad_request.html"), 400
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
 
 
 @routes.route("/indicators/base/point/<lat>/<lon>")

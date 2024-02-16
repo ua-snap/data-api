@@ -7,7 +7,7 @@ import asyncio
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
-from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
+from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX, INDICATORS_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 
@@ -52,6 +52,30 @@ def validate_seaice_latlon(lat, lon):
 
     # Validate against two different BBOXes to deal with antimeridian issues
     for bbox in [SEAICE_BBOX]:
+        valid_lat = bbox[1] <= lat_float <= bbox[3]
+        valid_lon = bbox[0] <= lon_float <= bbox[2]
+        if valid_lat and valid_lon:
+            return True
+
+    return 422
+
+
+def validate_cmip6_indicators_latlon(lat, lon):
+    """Validate the lat and lon values for Arctic CMIP6 indicator data.
+    Return True if valid or HTTP status code if validation failed
+    """
+    try:
+        lat_float = float(lat)
+        lon_float = float(lon)
+    except:
+        return 400  # HTTP status code
+    lat_in_world = -90 <= lat_float <= 90
+    lon_in_world = 0 <= lon_float <= 360
+    if not lat_in_world or not lon_in_world:
+        return 400  # HTTP status code
+
+    # Validate against two different BBOXes to deal with antimeridian issues
+    for bbox in [INDICATORS_BBOX]:
         valid_lat = bbox[1] <= lat_float <= bbox[3]
         valid_lon = bbox[0] <= lon_float <= bbox[2]
         if valid_lat and valid_lon:
