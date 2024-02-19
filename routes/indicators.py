@@ -5,7 +5,7 @@ These endpoint(s) query a coverage containing summarized versions of the indicat
 
 import asyncio
 import numpy as np
-from math import floor
+from math import floor, isnan
 from flask import Blueprint, render_template, request
 
 # local imports
@@ -118,7 +118,15 @@ def package_cmip6_indicators_data(point_data_list):
                 di[scenario][model][year] = dict()
                 for vi, value in enumerate(year_li.split(" ")):
                     indicator = cmip6_dim_encodings["indicator"][vi]
-                    di[scenario][model][year][indicator] = value
+
+                    if indicator == "rx1day":
+                        value = round(float(value), 1)
+                        if isnan(value):
+                            value = -9999
+                    # else:
+                    #     value = int(value)
+
+                    di[scenario][model][year][indicator] = int(value)
 
     return di
 
@@ -205,22 +213,22 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
             ),
             422,
         )
-    try:
-        point_data_list = asyncio.run(fetch_cmip6_indicators_point_data(lat, lon))
-        results = package_cmip6_indicators_data(point_data_list)
-        results = nullify_and_prune(results, "cmip6_indicators")
+    # try:
+    point_data_list = asyncio.run(fetch_cmip6_indicators_point_data(lat, lon))
+    results = package_cmip6_indicators_data(point_data_list)
+    results = nullify_and_prune(results, "cmip6_indicators")
 
-        if request.args.get("format") == "csv":
-            place_id = request.args.get("community")
-            return create_csv(results, "cmip6_indicators", place_id, lat, lon)
+    if request.args.get("format") == "csv":
+        place_id = request.args.get("community")
+        return create_csv(results, "cmip6_indicators", place_id, lat, lon)
 
-        return results
+    return results
 
-    except ValueError:
-        return render_template("400/bad_request.html"), 400
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
+    # except ValueError:
+    #     return render_template("400/bad_request.html"), 400
+    # except Exception as exc:
+    #     if hasattr(exc, "status") and exc.status == 404:
+    #         return render_template("404/no_data.html"), 404
 
 
 @routes.route("/indicators/base/point/<lat>/<lon>")
