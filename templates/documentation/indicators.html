@@ -14,7 +14,67 @@
 
 <h3>Service endpoints</h3>
 
-<h4>All climate indicator variables</h4>
+<h4>CMIP6 climate indicator variables</h4>
+
+<p>
+  Query CMIP6 climate indicator variables for all models and scenarios.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Annual mean values for all climate indicator variables at a given latitude and longitude.</td>
+      <td>
+        <a href="/indicators/cmip6/point/61.5/247">/indicators/cmip6/point/61.5/247</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Output</h4>
+
+<p>Results from point and area queries will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    EC-Earth3-Veg": {
+      "1850": {
+        "dw": 71,
+        "ftc": 23,
+        "rx1day": 9,
+        "su": 0
+      },
+      1851": {
+        "dw": 239,
+        "ftc": 0,
+        "rx1day": 7,
+        "su": 0
+      },
+      ...
+    },
+    ...
+  },
+...
+}
+
+</pre>
+
+<h4>NCAR climate indicator variables</h4>
 
 <p>
   Query min-mean-max climate indicator variables for all models and scenarios.
@@ -34,6 +94,7 @@
         <a href="/indicators/base/point/61.5/-147">/indicators/base/point/61.5/-147</a>
       </td>
     </tr>
+    <tr>
     <td>Era-based min-mean-max for all climate indicator variables for a specific area</td>
     <td>
       <a href="/indicators/base/area/1903040601">/indicators/base/area/1903040601</a>
@@ -50,7 +111,7 @@
   </tfoot>
 </table>
 
-<h3>Output</h3>
+<h4>Output</h4>
 
 <p>Results from point and area queries will look like this:</p>
 
