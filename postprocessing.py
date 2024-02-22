@@ -2,6 +2,7 @@ from flask import render_template
 
 nodata_values = {
     "beetles": [0],
+    "cmip6_indicators": [-9999, -9999.0],
     "default": [-9999],
     "hydrology": [-9999, "nan"],
     "ncar12km_indicators": [-9999, -9999.0],
@@ -16,7 +17,7 @@ nodata_mappings = {
     "air_thawing_index_Fdays": nodata_values["default"],
     "air_thawing_index_Fdays_all": nodata_values["default"],
     "beetles": nodata_values["beetles"],
-    "cmip6_indicators": nodata_values["ncar12km_indicators"],
+    "cmip6_indicators": nodata_values["cmip6_indicators"],
     "crrel_gipl": nodata_values["default"],
     "degree_days_below_zero_Fdays": nodata_values["default"],
     "degree_days_below_zero_Fdays_all": nodata_values["default"],
