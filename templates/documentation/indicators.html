@@ -2,7 +2,7 @@
 <h2>Climate Indicators</h2>
 
 <p>
-  These endpoints provide access to era-based summaries of the NCAR 12km climate indicators.
+  These endpoints provide access to yearly CMIP6 climate indicators and era-based summaries of the NCAR 12km climate indicators.
   The eras for this dataset are historical (1980&ndash;2009), mid&ndash;century (2040&ndash;2069),
   and late&ndash;century (2070&ndash;2099).
 </p>
@@ -17,7 +17,7 @@
 <h4>CMIP6 climate indicator variables</h4>
 
 <p>
-  Query CMIP6 climate indicator variables for all models and scenarios.
+  Query CMIP6 climate indicator variables for all models and scenarios. These indicators are defined <a href="#climate-indicators-information">below</a>.
 </p>
 
 <table class="endpoints">
@@ -29,7 +29,7 @@
   </thead>
   <tbody>
     <tr>
-      <td>Annual mean values for all climate indicator variables at a given latitude and longitude.</td>
+      <td>Yearly climate indicator values at a given latitude and longitude.</td>
       <td>
         <a href="/indicators/cmip6/point/61.5/247">/indicators/cmip6/point/61.5/247</a>
       </td>
@@ -77,7 +77,7 @@
 <h4>NCAR climate indicator variables</h4>
 
 <p>
-  Query min-mean-max climate indicator variables for all models and scenarios.
+  Query min-mean-max climate indicator variables for all models and scenarios. These indicators are defined <a href="#climate-indicators-information">below</a>.
 </p>
 
 <table class="endpoints">
@@ -172,7 +172,7 @@
 }
 </pre>
 
-<h3>Climate Indicator Information</h3>
+<h3 id="climate-indicators-information">Climate Indicator Information</h3>
 
 <h4>Below is the list of climate indicators that are found in this endpoint</h4>
 
