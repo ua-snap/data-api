@@ -293,7 +293,7 @@ def cmip6_indicators_csv(data):
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
     metadata = "# dw are Deep Winter Days. This is the number of days with minimum temperature below -30 (deg C).\n"
     metadata += "# ftc are Freeze-Thaw Days. This is defined as a day where maximum daily temperature is above 0°C a given threshold and minimum daily temperature is at or below 0°C.\n"
-    metadata += "# rx1day is the Maximum 1-day Precipitation. This is the maximum precipitation total for a single day in mm.\n"
+    metadata += "# rx1day is the Maximum 1-day Precipitation. This is the maximum precipitation total for a single calendar day in mm.\n"
     metadata += "# su are Summer Days. This is the number of days with maximum temperature above 25 (deg C).\n"
     filename_data_name = "CMIP6 Indicators"
 
