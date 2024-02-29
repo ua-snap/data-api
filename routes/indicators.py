@@ -98,23 +98,23 @@ def package_cmip6_indicators_data(point_data_list):
         for mi, model_li in enumerate(scenario_li):
             model = cmip6_dim_encodings["model"][mi]
             di[scenario][model] = dict()
+
             for yi, year_li in enumerate(model_li):
-                # For the historical data, there are 165 years of data,
-                # for the future data, there are 96 years of data
-                if scenario == "historical":
-                    # The year values are 0-164, so we add 1850 to get the actual year
-                    year = yi + 1850
+                year = yi + 1850
 
-                    # If the year is greater than 2014, we break the loop since there is no more historical data
-                    if year > 2014:
-                        break
-                else:
-                    # The year values are 0-95, so we add 2015 to get the actual year
-                    year = yi + 2015
+                # If the scenario is historical and the year is greater than 2014, we break the loop
+                # since there is no more historical data
+                if scenario == "historical" and year > 2014:
+                    break
 
-                    # If the year is greater than 2100, we break the loop since there is no more future data
-                    if year > 2100:
-                        break
+                # If the scenario is not historical and the year is less than 2015,
+                # we continue to the next iteration
+                if scenario != "historical" and year < 2015:
+                    continue
+
+                # If the year is greater than 2100, we break the loop since there is no more future data
+                if year > 2100:
+                    break
                 di[scenario][model][year] = dict()
                 for vi, value in enumerate(year_li.split(" ")):
                     indicator = cmip6_dim_encodings["indicator"][vi]
@@ -123,6 +123,9 @@ def package_cmip6_indicators_data(point_data_list):
                         value = round(float(value), 1)
                         if isnan(value):
                             value = -9999
+
+                    if value == "nan":
+                        value = -9999
 
                     di[scenario][model][year][indicator] = int(value)
 
