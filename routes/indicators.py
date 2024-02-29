@@ -79,6 +79,127 @@ async def fetch_base_indicators_point_data(x, y):
     return point_data_list
 
 
+def package_cmip6_indicators_era_data(point_data_list):
+    """
+    Package the CMIP6 indicator values into eras for a given query
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCPS query
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+    """
+    di = dict()
+
+    # Loop through point_data_list and populate di with the values
+    for si, scenario_li in enumerate(point_data_list):
+        scenario = cmip6_dim_encodings["scenario"][si]
+        di[scenario] = dict()
+        for mi, model_li in enumerate(scenario_li):
+            model = cmip6_dim_encodings["model"][mi]
+            di[scenario][model] = dict()
+            for era in ["historical", "midcentury", "longterm"]:
+                if (
+                    scenario == "historical"
+                    and era == "historical"
+                    or scenario != "historical"
+                    and era != "historical"
+                ):
+                    di[scenario][model][era] = dict()
+                    for yi, year_li in enumerate(model_li):
+                        year = yi + 1850
+
+                        # We don't need anything before 1950
+                        if year < 1950:
+                            continue
+
+                        # If the scenario is not historical and the year is less than 2015,
+                        # we continue to the next iteration
+                        if scenario != "historical" and year < 2040:
+                            continue
+
+                        # Check for a valid era combination before continuing to operate on the data
+                        if (
+                            (
+                                scenario == "historical"
+                                and era == "historical"
+                                and 1950 <= year <= 2009
+                            )
+                            or (
+                                scenario != "historical"
+                                and era == "midcentury"
+                                and 2040 <= year <= 2069
+                            )
+                            or (
+                                scenario != "historical"
+                                and era == "longterm"
+                                and 2070 <= year <= 2099
+                            )
+                        ):
+                            for vi, value in enumerate(year_li.split(" ")):
+                                indicator = cmip6_dim_encodings["indicator"][vi]
+
+                                if indicator == "rx1day":
+                                    value = round(float(value), 1)
+                                    if isnan(value):
+                                        continue
+                                if value == "nan":
+                                    continue
+
+                                # If the indicator is not in the dictionary, add it
+                                if indicator not in di[scenario][model][era]:
+                                    di[scenario][model][era][indicator] = dict()
+                                    di[scenario][model][era][indicator]["max"] = 0
+                                    di[scenario][model][era][indicator]["mean"] = 0
+                                    di[scenario][model][era][indicator]["min"] = 10000
+
+                                # If the value is greater than the max, set the max to the value
+                                if (
+                                    int(value)
+                                    > di[scenario][model][era][indicator]["max"]
+                                ):
+                                    di[scenario][model][era][indicator]["max"] = int(
+                                        value
+                                    )
+
+                                # If the value is less than the min, set the min to the value
+                                if (
+                                    int(value)
+                                    < di[scenario][model][era][indicator]["min"]
+                                ):
+                                    di[scenario][model][era][indicator]["min"] = int(
+                                        value
+                                    )
+
+                                # Add the value to the mean for the indicator for the given era
+                                di[scenario][model][era][indicator]["mean"] = di[
+                                    scenario
+                                ][model][era][indicator]["mean"] + int(value)
+
+                        # If the scenario is historical and the year is 2009, divide the mean by 60 years to get the average per year
+                        if era == "historical" and year == 2009:
+                            for indicator in di[scenario][model][era]:
+                                di[scenario][model][era][indicator]["mean"] = round(
+                                    di[scenario][model][era][indicator]["mean"] / 60, 1
+                                )
+                            break
+
+                        # If the scenario is not historical and the year is 2069 or 2099, divide the mean by 30 years to get the average per year
+                        if (
+                            era == "midcentury"
+                            and year == 2069
+                            or era == "longterm"
+                            and year == 2099
+                        ):
+                            for indicator in di[scenario][model][era]:
+                                di[scenario][model][era][indicator]["mean"] = round(
+                                    di[scenario][model][era][indicator]["mean"] / 30, 1
+                                )
+                            break
+
+    return di
+
+
 def package_cmip6_indicators_data(point_data_list):
     """
     Package the CMIP6 indicator values for a given query
@@ -216,7 +337,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
         )
     try:
         point_data_list = asyncio.run(fetch_cmip6_indicators_point_data(lat, lon))
-        results = package_cmip6_indicators_data(point_data_list)
+        results = package_cmip6_indicators_era_data(point_data_list)
         results = nullify_and_prune(results, "cmip6_indicators")
 
         if request.args.get("format") == "csv":
