@@ -189,7 +189,10 @@ def build_csv_dicts(packaged_data, package_coords, fill_di=None, values=None):
             previous_coord_breadcrumb = coord_breadcrumb
         for value in values:
             coords.append(value)
-            row_di[value] = get_from_dict(packaged_data, coords)
+            try:
+                row_di[value] = get_from_dict(packaged_data, coords)
+            except KeyError:
+                row_di[value] = None
             coords.pop()
         rows.append(row_di)
 
