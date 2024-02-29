@@ -337,7 +337,10 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
         )
     try:
         point_data_list = asyncio.run(fetch_cmip6_indicators_point_data(lat, lon))
-        results = package_cmip6_indicators_era_data(point_data_list)
+        if "summarize" in request.args and request.args.get("summarize") == "mmm":
+            results = package_cmip6_indicators_era_data(point_data_list)
+        else:
+            results = package_cmip6_indicators_data(point_data_list)
         results = nullify_and_prune(results, "cmip6_indicators")
 
         if request.args.get("format") == "csv":
