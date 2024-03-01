@@ -324,6 +324,10 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
         example request: http://localhost:5000/indicators/cmip6/point/65.06/-146.16
     """
 
+    # TODO: Remove this when new data is formatted with -180 to 180 for lon
+    if float(lon) < 0:
+        lon = float(lon) + 360
+
     # Validate the lat/lon values
     validation = validate_cmip6_indicators_latlon(lat, lon)
     if validation == 400:
