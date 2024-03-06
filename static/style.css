@@ -32,3 +32,8 @@ th.endpoint-url {
 table.data-source th {
 	white-space: nowrap;
 }
+
+#map {
+	height: 400px;
+	width: 400px;
+}
