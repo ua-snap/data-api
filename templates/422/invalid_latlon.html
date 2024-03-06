@@ -30,9 +30,7 @@
     var map = L.map('map', {zoomControl: false, scrollWheelZoom: false}).setView([61.0, -151.505], 5);
     map.attributionControl.setPrefix('');
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var southWest = L.latLng(51.3492, -187.5799),
         northEast = L.latLng(71.3694, -122.8098),
