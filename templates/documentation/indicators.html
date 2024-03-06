@@ -31,15 +31,17 @@
     <tr>
       <td>Yearly climate indicator values at a given latitude and longitude.</td>
       <td>
-        <a href="/indicators/cmip6/point/61.5/247">/indicators/cmip6/point/61.5/247</a>
+        <a href="/indicators/cmip6/point/61.5/-147">/indicators/cmip6/point/61.5/-147</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
       <td colspan="2">
+        Min/mean/max summaries of historical and projected data over 3 eras are available
+        by appending <code>?summarize=mmm</code> to the URL.<br />
         CSV output is also available by appending <code>?format=csv</code> to
-        the URL. <br />
+        the URL.
       </td>
     </tr>
   </tfoot>
@@ -72,6 +74,26 @@
 ...
 }
 
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;scenario&gt;: {
+    &lt;model&gt;: {
+      &lt;year&gt;: {
+        "dw": "Deep Winter days" &mdash; Annual number of days with minimum 2 m air temperature below -30 &deg;C,
+        "ftc": "Freeze-Thaw Cycle" &mdash; Annual number of days with a diurnal freeze-thaw cycle, where maximum daily temperatures are above 0 &deg;C and minimum daily temperatures are at or below 0 &deg;C,
+        "rx1day": Maximum 1&ndash;day precipitation,
+        "su": "Summer Days" &mdash; Annual number of days with maximum 2 m air temperature above 25 &deg;C
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
 </pre>
 
 <h4>NCAR climate indicator variables</h4>
