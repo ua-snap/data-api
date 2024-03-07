@@ -2,7 +2,7 @@
 <h2>Climate Indicators</h2>
 
 <p>
-  These endpoints provide access to era-based summaries of the NCAR 12km climate indicators.
+  These endpoints provide access to yearly CMIP6 climate indicators and era-based summaries of the NCAR 12km climate indicators.
   The eras for this dataset are historical (1980&ndash;2009), mid&ndash;century (2040&ndash;2069),
   and late&ndash;century (2070&ndash;2099).
 </p>
@@ -14,10 +14,92 @@
 
 <h3>Service endpoints</h3>
 
-<h4>All climate indicator variables</h4>
+<h4>CMIP6 climate indicator variables</h4>
 
 <p>
-  Query min-mean-max climate indicator variables for all models and scenarios.
+  Query CMIP6 climate indicator variables for all models and scenarios. These indicators are defined <a href="#climate-indicators-information">below</a>.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Yearly climate indicator values at a given latitude and longitude.</td>
+      <td>
+        <a href="/indicators/cmip6/point/61.5/-147">/indicators/cmip6/point/61.5/-147</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Min/mean/max summaries of historical and projected data over 3 eras are available
+        by appending <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Output</h4>
+
+<p>Results from point and area queries will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    EC-Earth3-Veg": {
+      "1850": {
+        "dw": 71,
+        "ftc": 23,
+        "rx1day": 9,
+        "su": 0
+      },
+      "1851": {
+        "dw": 239,
+        "ftc": 0,
+        "rx1day": 7,
+        "su": 0
+      },
+      ...
+    },
+    ...
+  },
+...
+}
+
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;scenario&gt;: {
+    &lt;model&gt;: {
+      &lt;year&gt;: {
+        "dw": "Deep Winter days" &mdash; Annual number of days with minimum 2 m air temperature below -30 &deg;C,
+        "ftc": "Freeze-Thaw Cycle" &mdash; Annual number of days with a diurnal freeze-thaw cycle, where maximum daily temperatures are above 0 &deg;C and minimum daily temperatures are at or below 0 &deg;C,
+        "rx1day": Maximum 1&ndash;day precipitation,
+        "su": "Summer Days" &mdash; Annual number of days with maximum 2 m air temperature above 25 &deg;C
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h4>NCAR climate indicator variables</h4>
+
+<p>
+  Query min-mean-max climate indicator variables for all models and scenarios. These indicators are defined <a href="#climate-indicators-information">below</a>.
 </p>
 
 <table class="endpoints">
@@ -34,6 +116,7 @@
         <a href="/indicators/base/point/61.5/-147">/indicators/base/point/61.5/-147</a>
       </td>
     </tr>
+    <tr>
     <td>Era-based min-mean-max for all climate indicator variables for a specific area</td>
     <td>
       <a href="/indicators/base/area/1903040601">/indicators/base/area/1903040601</a>
@@ -50,7 +133,7 @@
   </tfoot>
 </table>
 
-<h3>Output</h3>
+<h4>Output</h4>
 
 <p>Results from point and area queries will look like this:</p>
 
@@ -111,7 +194,7 @@
 }
 </pre>
 
-<h3>Climate Indicator Information</h3>
+<h3 id="climate-indicators-information">Climate Indicator Information</h3>
 
 <h4>Below is the list of climate indicators that are found in this endpoint</h4>
 

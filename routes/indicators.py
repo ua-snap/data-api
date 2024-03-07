@@ -5,14 +5,19 @@ These endpoint(s) query a coverage containing summarized versions of the indicat
 
 import asyncio
 import numpy as np
-from math import floor
+from math import floor, isnan
 from flask import Blueprint, render_template, request
 
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
-from validate_request import validate_latlon, project_latlon, validate_var_id
+from validate_request import (
+    validate_latlon,
+    validate_cmip6_indicators_latlon,
+    project_latlon,
+    validate_var_id,
+)
 from postprocessing import nullify_and_prune, postprocess
 from csv_functions import create_csv
 from . import routes
@@ -21,9 +26,37 @@ from config import WEST_BBOX, EAST_BBOX
 indicators_api = Blueprint("indicators_api", __name__)
 # Rasdaman targets
 indicators_coverage_id = "ncar12km_indicators_era_summaries"
+cmip6_indicators_coverage_id = "cmip6_indicators"
 
 # dim encodings for the NCAR 12km BCSD indicators coverage
 base_dim_encodings = asyncio.run(get_dim_encodings(indicators_coverage_id))
+cmip6_dim_encodings = asyncio.run(get_dim_encodings(cmip6_indicators_coverage_id))
+
+
+async def fetch_cmip6_indicators_point_data(lat, lon):
+    """
+    Make an async request for CMIP6 indicator data for a range of models, scenarios, and years at a specified point
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        list of data results from each of historical and future data at a specified point
+    """
+
+    # We must use EPSG:4326 for the CMIP6 indicators coverage to match the coverage projection
+    wcs_str = generate_wcs_getcov_str(
+        lon, lat, cov_id=cmip6_indicators_coverage_id, projection="EPSG:4326"
+    )
+
+    # Generate the URL for the WCS query
+    url = generate_wcs_query_url(wcs_str)
+
+    # Fetch the data
+    point_data_list = await fetch_data([url])
+
+    return point_data_list
 
 
 # Base indicators endpoint:
@@ -44,6 +77,180 @@ async def fetch_base_indicators_point_data(x, y):
     point_data_list = await fetch_data([url])
 
     return point_data_list
+
+
+def package_cmip6_indicators_era_data(point_data_list):
+    """
+    Package the CMIP6 indicator values into eras for a given query
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCPS query
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+    """
+    di = dict()
+
+    # Loop through point_data_list and populate di with the values
+    for si, scenario_li in enumerate(point_data_list):
+        scenario = cmip6_dim_encodings["scenario"][si]
+        di[scenario] = dict()
+        for mi, model_li in enumerate(scenario_li):
+            model = cmip6_dim_encodings["model"][mi]
+            di[scenario][model] = dict()
+            for era in ["historical", "midcentury", "longterm"]:
+                if (
+                    scenario == "historical"
+                    and era == "historical"
+                    or scenario != "historical"
+                    and era != "historical"
+                ):
+                    di[scenario][model][era] = dict()
+                    for yi, year_li in enumerate(model_li):
+                        year = yi + 1850
+
+                        # We don't need anything before 1950
+                        if year < 1950:
+                            continue
+
+                        # If the scenario is not historical and the year is less than 2015,
+                        # we continue to the next iteration
+                        if scenario != "historical" and year < 2040:
+                            continue
+
+                        # Check for a valid era combination before continuing to operate on the data
+                        if (
+                            (
+                                scenario == "historical"
+                                and era == "historical"
+                                and 1950 <= year <= 2009
+                            )
+                            or (
+                                scenario != "historical"
+                                and era == "midcentury"
+                                and 2040 <= year <= 2069
+                            )
+                            or (
+                                scenario != "historical"
+                                and era == "longterm"
+                                and 2070 <= year <= 2099
+                            )
+                        ):
+                            for vi, value in enumerate(year_li.split(" ")):
+                                indicator = cmip6_dim_encodings["indicator"][vi]
+
+                                if indicator == "rx1day":
+                                    value = round(float(value), 1)
+                                    if isnan(value):
+                                        continue
+                                if value == "nan":
+                                    continue
+
+                                # If the indicator is not in the dictionary, add it
+                                if indicator not in di[scenario][model][era]:
+                                    di[scenario][model][era][indicator] = dict()
+                                    di[scenario][model][era][indicator]["max"] = 0
+                                    di[scenario][model][era][indicator]["mean"] = 0
+                                    di[scenario][model][era][indicator]["min"] = 10000
+
+                                # If the value is greater than the max, set the max to the value
+                                if (
+                                    int(value)
+                                    > di[scenario][model][era][indicator]["max"]
+                                ):
+                                    di[scenario][model][era][indicator]["max"] = int(
+                                        value
+                                    )
+
+                                # If the value is less than the min, set the min to the value
+                                if (
+                                    int(value)
+                                    < di[scenario][model][era][indicator]["min"]
+                                ):
+                                    di[scenario][model][era][indicator]["min"] = int(
+                                        value
+                                    )
+
+                                # Add the value to the mean for the indicator for the given era
+                                di[scenario][model][era][indicator]["mean"] = di[
+                                    scenario
+                                ][model][era][indicator]["mean"] + int(value)
+
+                        # If the scenario is historical and the year is 2009, divide the mean by 60 years to get the average per year
+                        if era == "historical" and year == 2009:
+                            for indicator in di[scenario][model][era]:
+                                di[scenario][model][era][indicator]["mean"] = round(
+                                    di[scenario][model][era][indicator]["mean"] / 60, 1
+                                )
+                            break
+
+                        # If the scenario is not historical and the year is 2069 or 2099, divide the mean by 30 years to get the average per year
+                        if (
+                            era == "midcentury"
+                            and year == 2069
+                            or era == "longterm"
+                            and year == 2099
+                        ):
+                            for indicator in di[scenario][model][era]:
+                                di[scenario][model][era][indicator]["mean"] = round(
+                                    di[scenario][model][era][indicator]["mean"] / 30, 1
+                                )
+                            break
+
+    return di
+
+
+def package_cmip6_indicators_data(point_data_list):
+    """
+    Package the CMIP6 indicator values for a given query
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCPS query
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+    """
+    di = dict()
+
+    # Loop through point_data_list and populate di with the values
+    for si, scenario_li in enumerate(point_data_list):
+        scenario = cmip6_dim_encodings["scenario"][si]
+        di[scenario] = dict()
+        for mi, model_li in enumerate(scenario_li):
+            model = cmip6_dim_encodings["model"][mi]
+            di[scenario][model] = dict()
+
+            for yi, year_li in enumerate(model_li):
+                year = yi + 1850
+
+                # If the scenario is historical and the year is greater than 2014, we break the loop
+                # since there is no more historical data
+                if scenario == "historical" and year > 2014:
+                    break
+
+                # If the scenario is not historical and the year is less than 2015,
+                # we continue to the next iteration
+                if scenario != "historical" and year < 2015:
+                    continue
+
+                # If the year is greater than 2100, we break the loop since there is no more future data
+                if year > 2100:
+                    break
+                di[scenario][model][year] = dict()
+                for vi, value in enumerate(year_li.split(" ")):
+                    indicator = cmip6_dim_encodings["indicator"][vi]
+
+                    if indicator == "rx1day":
+                        value = round(float(value), 1)
+                        if isnan(value):
+                            value = -9999
+
+                    if value == "nan":
+                        value = -9999
+
+                    di[scenario][model][year][indicator] = int(value)
+
+    return di
 
 
 def package_base_indicators_data(point_data_list):
@@ -99,6 +306,58 @@ def package_base_indicators_data(point_data_list):
 @routes.route("/indicators/")
 def about_indicators():
     return render_template("documentation/indicators.html")
+
+
+@routes.route("/indicators/cmip6/point/<lat>/<lon>")
+def run_fetch_cmip6_indicators_point_data(lat, lon):
+    """
+    Query the CMIP6 indicators coverage which contains indicators summarized over CMIP6 models, scenarios, and years
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of requested CMIP6 indicator data
+
+    Notes:
+        example request: http://localhost:5000/indicators/cmip6/point/65.06/-146.16
+    """
+
+    # TODO: Remove this when new data is formatted with -180 to 180 for lon
+    if float(lon) < 0:
+        lon = float(lon) + 360
+
+    # Validate the lat/lon values
+    validation = validate_cmip6_indicators_latlon(lat, lon)
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
+    try:
+        point_data_list = asyncio.run(fetch_cmip6_indicators_point_data(lat, lon))
+        if "summarize" in request.args and request.args.get("summarize") == "mmm":
+            results = package_cmip6_indicators_era_data(point_data_list)
+        else:
+            results = package_cmip6_indicators_data(point_data_list)
+        results = nullify_and_prune(results, "cmip6_indicators")
+
+        if request.args.get("format") == "csv":
+            place_id = request.args.get("community")
+            return create_csv(results, "cmip6_indicators", place_id, lat, lon)
+
+        return results
+
+    except ValueError:
+        return render_template("400/bad_request.html"), 400
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
 
 
 @routes.route("/indicators/base/point/<lat>/<lon>")

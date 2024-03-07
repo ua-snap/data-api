@@ -44,6 +44,8 @@ def create_csv(
 
     if endpoint == "beetles":
         properties = beetles_csv(data)
+    if endpoint == "cmip6_indicators":
+        properties = cmip6_indicators_csv(data)
     elif endpoint in [
         "heating_degree_days",
         "degree_days_below_zero",
@@ -187,7 +189,10 @@ def build_csv_dicts(packaged_data, package_coords, fill_di=None, values=None):
             previous_coord_breadcrumb = coord_breadcrumb
         for value in values:
             coords.append(value)
-            row_di[value] = get_from_dict(packaged_data, coords)
+            try:
+                row_di[value] = get_from_dict(packaged_data, coords)
+            except KeyError:
+                row_di[value] = None
             coords.pop()
         rows.append(row_di)
 
@@ -274,6 +279,37 @@ def beetles_csv(data):
 
     filename_data_name = "Climate Protection from Spruce Beetles"
     metadata = "# Values shown are for climate-related protection level from spruce beetle spread in the area.\n"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def cmip6_indicators_csv(data):
+
+    if "summarize" in request.args and request.args.get("summarize") == "mmm":
+        coords = ["scenario", "model", "year", "variable"]
+        values = ["max", "mean", "min"]
+        fieldnames = coords + values
+        csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+        metadata = "# dw are Deep Winter Days. This is the number of days with minimum temperature below -30 (deg C).\n"
+        metadata += "# ftc are Freeze-Thaw Days. This is defined as a day where maximum daily temperature is above 0°C and minimum daily temperature is at or below 0°C.\n"
+        metadata += "# rx1day is the Maximum 1-day Precipitation. This is the maximum precipitation total for a single calendar day in mm.\n"
+        metadata += "# su are Summer Days. This is the number of days with maximum temperature above 25 (deg C).\n"
+        filename_data_name = "CMIP6 Indicators Era Summaries"
+    else:
+        coords = ["scenario", "model", "year"]
+        values = ["dw", "ftc", "rx1day", "su"]
+        fieldnames = coords + values
+        csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+        metadata = "# dw are Deep Winter Days. This is the number of days with minimum temperature below -30 (deg C).\n"
+        metadata += "# ftc are Freeze-Thaw Days. This is defined as a day where maximum daily temperature is above 0°C and minimum daily temperature is at or below 0°C.\n"
+        metadata += "# rx1day is the Maximum 1-day Precipitation. This is the maximum precipitation total for a single calendar day in mm.\n"
+        metadata += "# su are Summer Days. This is the number of days with maximum temperature above 25 (deg C).\n"
+        filename_data_name = "CMIP6 Indicators"
 
     return {
         "csv_dicts": csv_dicts,
