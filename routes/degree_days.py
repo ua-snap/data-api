@@ -5,10 +5,11 @@ from flask import (
     request,
     jsonify,
 )
+from urllib.parse import quote
 
 # local imports
 from generate_urls import generate_wcs_query_url
-from fetch_data import *
+from fetch_data import generate_wcs_getcov_str, get_dim_encodings, fetch_data
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
@@ -20,33 +21,57 @@ from . import routes
 
 degree_days_api = Blueprint("degree_days_api", __name__)
 
-# The heating_degree_days, degree_days_below_zero, thawing_index, and
-# freezing_index coverages all share the same dim_encodings
-dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days"))
+# all degree day coverages share common dim_encodings, so only fetch one
+dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days_Fdays"))
 
 var_ep_lu = {
-    "heating": {"cov_id_str": "heating_degree_days"},
-    "below_zero": {"cov_id_str": "degree_days_below_zero"},
-    "thawing_index": {"cov_id_str": "thawing_index"},
-    "freezing_index": {"cov_id_str": "freezing_index"},
+    "heating": {"cov_id_str": "heating_degree_days_Fdays"},
+    "below_zero": {"cov_id_str": "degree_days_below_zero_Fdays"},
+    "thawing_index": {"cov_id_str": "air_thawing_index_Fdays"},
+    "freezing_index": {"cov_id_str": "air_freezing_index_Fdays"},
 }
-
 var_label_lu = {
     "heating_degree_days": "Heating Degree Days",
     "degree_days_below_zero": "Degree Days Below Zero",
-    "thawing_index": "Thawing Index",
-    "freezing_index": "Freezing Index",
+    "thawing_index": "Air Thawing Index",
+    "freezing_index": "Air Freezing Index",
 }
-
 years_lu = {
-    "historical": {"min": 1980, "max": 2009},
-    "projected": {"min": 2006, "max": 2100},
+    "historical": {"min": 1980, "max": 2017},
+    "projected": {"min": 1950, "max": 2099},
+}
+mmm_lu = {
+    "historical": {"model": 8, "scenario": 0},
+    "projected": {"models": [0, 1, 2, 3, 4, 5, 6, 7, 9], "scenarios": [1, 2]},
+}
+n_results_lu = {
+    "historical": 1,
+    "projected": len(mmm_lu["projected"]["models"])
+    * len(mmm_lu["projected"]["scenarios"]),
 }
 
 
-def get_dd_wcps_request_str(x, y, cov_id, models, years, tempstat, encoding="json"):
-    """Generates a WCPS query specific to the
-    coverages used for the degree days min-mean-max.
+def make_time_slicer(min_year, max_year):
+    time_slicer = f"{min_year}:{max_year}"
+    return time_slicer
+
+
+def make_wcps_slicers(start_year, end_year):
+    pass
+
+
+def get_dd_wcps_request_str(
+    x,
+    y,
+    cov_id,
+    model_slice,
+    scenario_slice,
+    year_slice,
+    operation,
+    num_results,
+    encoding="json",
+):
+    """Generate WCPS query fragment specific to the degree days min-mean-max summarization.
 
     Args:
         x (float or str): x-coordinate for point query, or string
@@ -55,56 +80,218 @@ def get_dd_wcps_request_str(x, y, cov_id, models, years, tempstat, encoding="jso
         y (float or str): y-coordinate for point query, or string
             composed as "y1:y2" for bbox query, where y1 and y2 are
             lower and upper bounds of bbox
-        cov_id (str): Rasdaman coverage ID
-        models (str): Comma-separated numbers of requested models
-        years (str): Colon-separated full date-time i.e.
-            "\"2006-01-01T00:00:00.000Z\":\"2100-01-01T00:00:00.000Z\""
-        tempstat(int): Integer between 0-2 where:
-            - 0 = ddmax
-            - 1 = ddmean
-            - 2 = ddmin
-        encoding (str): currently supports either "json" or "netcdf"
-            for point or bbox queries, respectively
+        cov_id (str): rasdaman coverage ID
+        model_slice (str): like "3:3" for a single model
+        scenario_slice (str): like "1:2" for two scenarios
+        year_slice (str): like "1980:2017" for historical
+        operation (str): one of "min", "mean", or "max"
+        num_results (int): number of results to average over when operation is "mean"
+        encoding (str): one of "json" or "netcdf" for point or bbox queries, respectively
 
     Returns:
-        WCPS query to be included in generate_wcs_url()
+        (str) WCPS query fragment
     """
-    if tempstat == 0:
-        operation = "max"
-    elif tempstat == 2:
-        operation = "min"
-    else:
-        operation = "+"
-
-    if tempstat == 0 or tempstat == 2:
-        wcps_request_str = quote(
+    if operation == "mean":
+        wcps_str = quote(
             (
                 f"ProcessCoverages&query=for $c in ({cov_id}) "
-                f"let $a := {operation}(condense {operation} over $m model({models}) "
-                f"using $c[model($m),year({years}),X({x}),Y({y})] ) "
+                f"let $a := avg(condense + over $m model ({model_slice}), $s scenario ({scenario_slice}) "
+                f"using $c[model($m),scenario($s),year({year_slice}),X({x}),Y({y})] / {num_results} )"
                 f'return encode( $a, "application/{encoding}")'
             )
         )
-        return wcps_request_str
     else:
-        # Generates the mean across models
-
-        # For projected, 2 models
-        num_results = 2
-
-        # For historical, only a single model
-        if models == "0:0":
-            num_results = 1
-
-        wcps_request_str = quote(
+        wcps_str = quote(
             (
                 f"ProcessCoverages&query=for $c in ({cov_id}) "
-                f"let $a := avg(condense {operation} over $m model({models}) "
-                f"using $c[model($m),year({years}),X({x}),Y({y})] / {num_results} ) "
+                f"let $a := {operation}(condense {operation} over $m model({model_slice}), $s scenario ({scenario_slice}) "
+                f"using $c[model($m),scenario($s),year({year_slice}),X({x}),Y({y})] ) "
                 f'return encode( $a, "application/{encoding}")'
             )
         )
-        return wcps_request_str
+    return wcps_str
+
+
+# CP note: called by run_fetch...then point package. basic route
+async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
+    """Run the async degree days data request for a single point.
+
+    Args:
+        x (float): x-coordinate
+        y (float): y-coordinate
+        cov_id (str): heating_degree_days_Fdays, degree_days_below_zero_Fdays,
+            air_thawing_index_Fdays, or air_freezing_index_Fdays
+        start_year (int): start year for WCPS query or None
+        end_year (int): end year for WCPS query or None
+
+    Returns:
+        JSON-like dict of data at provided xy coordinate
+    """
+    point_data_list = []
+
+    if request.args.get("summarize") == "mmm":
+        # create axis coordinate slicers to insert in WCPS fragment
+        time_slicers = {}
+        model_slicers = {}
+        scenario_slicers = {}
+
+        if start_year is not None:
+            pass
+            # custom_slicer = make_time_slicer(start_year, end_year)
+            # time_slicers.update({"custom": custom_slicer})
+
+        #     # case where start and and year within historical
+        #     # case where only start within historical
+        #     # case where only end with historical
+        #     # case where neither within historical
+        else:
+            # historical and future slicing and summarization required
+            historical_slicer = make_time_slicer(
+                years_lu["historical"]["min"], years_lu["historical"]["max"]
+            )
+            time_slicers.update({"historical": historical_slicer})
+            model_slicers.update(
+                {
+                    "historical": f"{mmm_lu['historical']['model']}:{mmm_lu['historical']['model']}"
+                }
+            )
+            scenario_slicers.update(
+                {
+                    "historical": f"{mmm_lu['historical']['scenario']}:{mmm_lu['historical']['scenario']}"
+                }
+            )
+
+            future_slicer = make_time_slicer(
+                years_lu["projected"]["min"], years_lu["projected"]["max"]
+            )
+            time_slicers.update({"projected": future_slicer})
+            model_slicers.update(
+                {
+                    "projected": f"{mmm_lu['projected']['models'][0]}:{mmm_lu['projected']['models'][5]}"  # CP note: this is a hack, need to fix
+                }
+            )
+            scenario_slicers.update(
+                {
+                    "projected": f"{mmm_lu['projected']['scenarios'][0]}:{mmm_lu['projected']['scenarios'][1]}"
+                }  # this should be correct
+            )
+
+            # making three wcps requests, one each for min-mean-max
+            mmm_dispatch = {}
+            for stat_function in ["min", "mean", "max"]:
+                mmm_dispatch[stat_function] = {}
+                # each era will have different mmm wcps request parameters
+                for era in ["historical", "projected"]:
+                    mmm_dispatch[stat_function][era] = {}
+                    wcps_str = get_dd_wcps_request_str(
+                        x,
+                        y,
+                        cov_id,
+                        model_slicers[era],
+                        scenario_slicers[era],
+                        time_slicers[era],
+                        stat_function,
+                        n_results_lu[era],
+                    )
+
+                    wcps_url = generate_wcs_query_url(wcps_str)
+                    print(wcps_url)
+                    mmm_dispatch[stat_function][era]["wcps_url"] = wcps_url
+
+        # mmm_dispatch[stat_function][era]["wcps_response"] = (
+        #     await fetch_data([mmm_dispatch[stat_function][era]["wcps_url"]])
+        # )
+
+        # point_data_list.append(
+        #     mmm_dispatch[stat_function][era]["wcps_response"]
+        # )
+    else:
+        request_str = generate_wcs_getcov_str(x, y, cov_id)
+        wcs_query_url = generate_wcs_query_url(request_str)
+        point_data_list = await fetch_data([wcs_query_url])
+
+    return point_data_list
+
+
+def package_unabridged_response(nested_list, start_year=None, end_year=None):
+    """Convert nested list of unabridged degree days data to JSON-like dict."""
+
+    unabridged = {}
+
+    for model_index, model_data in enumerate(nested_list):
+        model_name = dd_dim_encodings["model"][model_index]
+        unabridged[model_name] = {}
+
+        for scenario_index, scenario_data in enumerate(model_data):
+            scenario_name = dd_dim_encodings["scenario"][scenario_index]
+            unabridged[model_name][scenario_name] = {}
+
+            for year_index, dd_value in enumerate(scenario_data):
+                year = 1950 + year_index
+                unabridged[model_name][scenario_name][year] = dd_value
+
+    return unabridged
+
+
+def package_distilled_response(point_data, start_year=None, end_year=None):
+    """Convert nested list of distilled (mean, min, max) degree days data to JSON-like dict."""
+
+    distilled = {}
+    if request.args.get("summarize") == "mmm":
+        # need to see how WCPS request changes, will pick up edits here
+        distilled["historical"] = {}
+        distilled["projected"] = {}
+
+        historical_max = round(point_data[0], 1)
+        historical_mean = round(point_data[1], 1)
+        historical_min = round(point_data[2], 1)
+        distilled["historical"]["ddmin"] = round(historical_min)
+        distilled["historical"]["ddmean"] = round(historical_mean)
+        distilled["historical"]["ddmax"] = round(historical_max)
+        projected_max = round(point_data[3], 1)
+        projected_mean = round(point_data[4], 1)
+        projected_min = round(point_data[5], 1)
+        distilled["projected"]["ddmin"] = round(projected_min)
+        distilled["projected"]["ddmean"] = round(projected_mean)
+        distilled["projected"]["ddmax"] = round(projected_max)
+    else:
+        # CP note: this function should only get called when the summary param is mmm
+        # so let's fail if this function gets called otherwise
+        assert request.args.get("summarize") == "mmm"
+    # else:
+    #     for mi, v_li in enumerate(point_data):  # (nested list with model at dim 0)
+    #         if mi == 0:
+    #             min_year = years_lu["historical"]["min"]
+    #             max_year = years_lu["historical"]["max"]
+    #             years = range(min_year, max_year + 1)
+    #         else:
+    #             min_year = years_lu["projected"]["min"]
+    #             max_year = years_lu["projected"]["max"]
+    #             years = range(min_year, max_year + 1)
+
+    #         model = dd_dim_encodings["model"][mi]
+    #         point_pkg[model] = {}
+
+    # Responses from Rasdaman include the same array length for both
+    # historical and projected data, representing every possible year
+    # (1979-2100). This means both the historical and projected data
+    # arrays include nodata years populated with 0s. The code below
+    # omits nodata gaps and makes sure the correct year is assigned to
+    # its corresponding data in the historical and projected data
+    # arrays.
+    # year = years_lu["historical"]["min"]
+    # year_index = 0
+    # if None in [start_year, end_year]:
+    #     start_year = years_lu["historical"]["min"]
+    #     end_year = years_lu["projected"]["max"]
+    # for value in v_li:
+    #     if year in years:
+    #         if year >= int(start_year) and year <= int(end_year):
+    #             point_pkg[model][years[year_index]] = {"dd": round(value)}
+    #         year_index += 1
+    #     year += 1
+
+    return distilled
 
 
 @routes.route("/degree_days/")
@@ -190,128 +377,6 @@ def get_dd_plate(var_ep, lat, lon):
     return jsonify(dd)
 
 
-def package_dd_point_data(point_data, start_year=None, end_year=None):
-    """Add JSON response data for heating_degree_days, below_zero_degree_days,
-    thawing_index, and freezing_index coverages
-
-    Args:
-        point_data (list): nested list containing JSON results of WCPS query
-
-    Returns:
-        JSON-like dict of query results
-    """
-    point_pkg = {}
-
-    if request.args.get("summarize") == "mmm":
-        historical_max = round(point_data[0], 1)
-        historical_mean = round(point_data[1], 1)
-        historical_min = round(point_data[2], 1)
-
-        point_pkg["historical"] = {}
-        point_pkg["historical"]["ddmin"] = round(historical_min)
-        point_pkg["historical"]["ddmean"] = round(historical_mean)
-        point_pkg["historical"]["ddmax"] = round(historical_max)
-
-        projected_max = round(point_data[3], 1)
-        projected_mean = round(point_data[4], 1)
-        projected_min = round(point_data[5], 1)
-
-        point_pkg["projected"] = {}
-        point_pkg["projected"]["ddmin"] = round(projected_min)
-        point_pkg["projected"]["ddmean"] = round(projected_mean)
-        point_pkg["projected"]["ddmax"] = round(projected_max)
-    else:
-        for mi, v_li in enumerate(point_data):  # (nested list with model at dim 0)
-            if mi == 0:
-                min_year = years_lu["historical"]["min"]
-                max_year = years_lu["historical"]["max"]
-                years = range(min_year, max_year + 1)
-            else:
-                min_year = years_lu["projected"]["min"]
-                max_year = years_lu["projected"]["max"]
-                years = range(min_year, max_year + 1)
-
-            model = dd_dim_encodings["model"][mi]
-            point_pkg[model] = {}
-
-            # Responses from Rasdaman include the same array length for both
-            # historical and projected data, representing every possible year
-            # (1979-2100). This means both the historical and projected data
-            # arrays include nodata years populated with 0s. The code below
-            # omits nodata gaps and makes sure the correct year is assigned to
-            # its corresponding data in the historical and projected data
-            # arrays.
-            year = years_lu["historical"]["min"]
-            year_index = 0
-            if None in [start_year, end_year]:
-                start_year = years_lu["historical"]["min"]
-                end_year = years_lu["projected"]["max"]
-            for value in v_li:
-                if year in years:
-                    if year >= int(start_year) and year <= int(end_year):
-                        point_pkg[model][years[year_index]] = {"dd": round(value)}
-                    year_index += 1
-                year += 1
-
-    return point_pkg
-
-
-async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
-    """Run the async degree days data request for a single point
-    and return data as json
-
-    Args:
-        lat (float): latitude
-        lon (float): longitude
-        cov_id (str): heating_degree_days, degree_days_below_zero,
-            thawing_index, or freezing_index
-        start_year (int): start year for WCPS query or None
-        end_year (int): end year for WCPS query or None
-
-    Returns:
-        JSON-like dict of data at provided latitude and longitude
-    """
-    point_data_list = []
-    if request.args.get("summarize") == "mmm":
-        min_year = years_lu["historical"]["min"]
-        max_year = years_lu["historical"]["max"]
-        timestring = (
-            f'"{min_year}-01-01T00:00:00.000Z":"{max_year}-01-01T00:00:00.000Z"'
-        )
-        if start_year is not None:
-            timestring = (
-                f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
-            )
-        for tempstat in range(0, 3):
-            request_str = get_dd_wcps_request_str(
-                x, y, cov_id, "0:0", timestring, tempstat
-            )
-            point_data_list.append(
-                await fetch_data([generate_wcs_query_url(request_str)])
-            )
-
-        min_year = years_lu["projected"]["min"]
-        max_year = years_lu["projected"]["max"]
-        timestring = (
-            f'"{min_year}-01-01T00:00:00.000Z":"{max_year}-01-01T00:00:00.000Z"'
-        )
-        if start_year is not None:
-            timestring = (
-                f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
-            )
-        for tempstat in range(0, 3):
-            request_str = get_dd_wcps_request_str(
-                x, y, cov_id, "1:2", timestring, tempstat
-            )
-            point_data_list.append(
-                await fetch_data([generate_wcs_query_url(request_str)])
-            )
-    else:
-        request_str = generate_wcs_getcov_str(x, y, cov_id)
-        point_data_list = await fetch_data([generate_wcs_query_url(request_str)])
-    return point_data_list
-
-
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>")
 @routes.route("/degree_days/<var_ep>/<lat>/<lon>/<start_year>/<end_year>")
 def run_fetch_dd_point_data(
@@ -364,18 +429,23 @@ def run_fetch_dd_point_data(
     else:
         return render_template("400/bad_request.html"), 400
 
-    point_pkg = package_dd_point_data(point_data_list, start_year, end_year)
+    # point_pkg = package_dd_point_data(point_data_list, start_year, end_year)
+    unabridged_package = package_unabridged_response(
+        point_data_list, start_year, end_year
+    )
 
-    if request.args.get("format") == "csv" or preview:
-        point_pkg = nullify_and_prune(point_pkg, cov_id_str)
-        if point_pkg in [{}, None, 0]:
-            return render_template("404/no_data.html"), 404
-        if request.args.get("summarize") == "mmm":
-            return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
-        else:
-            return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
+    # if request.args.get("format") == "csv" or preview:
+    #     point_pkg = nullify_and_prune(point_pkg, cov_id_str)
+    #     if point_pkg in [{}, None, 0]:
+    #         return render_template("404/no_data.html"), 404
+    #     if request.args.get("summarize") == "mmm":
+    #         return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
+    #     else:
+    #         return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
 
-    return postprocess(point_pkg, cov_id_str)
+    # return postprocess(point_pkg, cov_id_str)
+    return unabridged_package
+    # return {"a": 3442}
 
 
 def validate_years(start_year, end_year):
