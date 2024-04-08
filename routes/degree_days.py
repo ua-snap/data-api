@@ -15,7 +15,7 @@ from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from postprocessing import nullify_and_prune, postprocess
+from postprocessing import prune_nulls_with_max_intensity, postprocess
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
@@ -138,7 +138,7 @@ def get_dd_wcps_request_str(
 
 
 def package_unabridged_response(nested_list, start_year=None, end_year=None):
-    """Convert nested list of unabridged degree days data to JSON-like dict."""
+    """Convert nested list of unabridged degree day data to JSON-like dict."""
 
     unabridged = {}
 
@@ -152,43 +152,38 @@ def package_unabridged_response(nested_list, start_year=None, end_year=None):
 
             for year_index, dd_value in enumerate(scenario_data):
                 year = 1950 + year_index
-                unabridged[model_name][scenario_name][year] = dd_value
+                unabridged[model_name][scenario_name][year] = {}
+                unabridged[model_name][scenario_name][year]["dd"] = dd_value
 
     return unabridged
 
 
 def package_distilled_response(mmm_point_data, start_year=None, end_year=None):
     """Package min-mean-max degree days to labeled JSON-like dict."""
-    if request.args.get("summarize") == "mmm":
-        distilled = {}
-        distilled["historical"] = {}
-        distilled["projected"] = {}
+    distilled = {}
+    distilled["historical"] = {}
+    distilled["projected"] = {}
 
-        distilled["historical"]["ddmin"] = mmm_point_data["min"]["historical"][
-            "wcps_response"
-        ]
-        distilled["historical"]["ddmean"] = round(
-            mmm_point_data["mean"]["historical"]["wcps_response"]
-        )
-        distilled["historical"]["ddmax"] = mmm_point_data["max"]["historical"][
-            "wcps_response"
-        ]
+    distilled["historical"]["ddmin"] = mmm_point_data["min"]["historical"][
+        "wcps_response"
+    ]
+    distilled["historical"]["ddmean"] = round(
+        mmm_point_data["mean"]["historical"]["wcps_response"]
+    )
+    distilled["historical"]["ddmax"] = mmm_point_data["max"]["historical"][
+        "wcps_response"
+    ]
 
-        distilled["projected"]["ddmin"] = mmm_point_data["min"]["projected"][
-            "wcps_response"
-        ]
-        distilled["projected"]["ddmean"] = round(
-            mmm_point_data["mean"]["projected"]["wcps_response"]
-        )
-        distilled["projected"]["ddmax"] = mmm_point_data["max"]["projected"][
-            "wcps_response"
-        ]
-        return distilled
-
-    else:
-        # CP note: function should only get called when request is mmm
-        # so let's fail if this function gets called otherwise
-        assert request.args.get("summarize") == "mmm"
+    distilled["projected"]["ddmin"] = mmm_point_data["min"]["projected"][
+        "wcps_response"
+    ]
+    distilled["projected"]["ddmean"] = round(
+        mmm_point_data["mean"]["projected"]["wcps_response"]
+    )
+    distilled["projected"]["ddmax"] = mmm_point_data["max"]["projected"][
+        "wcps_response"
+    ]
+    return distilled
 
 
 async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
@@ -205,7 +200,6 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
     Returns:
         JSON-like dict of data at provided xy coordinate
     """
-    point_data_list = []
 
     if request.args.get("summarize") == "mmm":
         # create axis coordinate slicers to insert in WCPS fragment
@@ -218,10 +212,10 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
             # custom_slicer = make_time_slicer(start_year, end_year)
             # time_slicers.update({"custom": custom_slicer})
 
-        #     # case where start and and year within historical
-        #     # case where only start within historical
-        #     # case where only end with historical
-        #     # case where neither within historical
+            # case where start and and year within historical
+            # case where only start within historical
+            # case where only end with historical
+            # case where neither within historical
         else:
             # historical and future slicing and summarization required
             historical_slicer = make_time_slicer(
@@ -280,10 +274,10 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
                     )
         return mmm_dispatch
     else:
+        point_data_list = []
         request_str = generate_wcs_getcov_str(x, y, cov_id)
         wcs_query_url = generate_wcs_query_url(request_str)
         point_data_list = await fetch_data([wcs_query_url])
-
         return point_data_list
 
 
@@ -334,7 +328,7 @@ def run_fetch_dd_point_data(
     if var_ep in var_ep_lu.keys():
         cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
         try:
-            point_data_list = asyncio.run(
+            point_data = asyncio.run(
                 fetch_dd_point_data(x, y, cov_id_str, start_year, end_year)
             )
         except Exception as exc:
@@ -345,22 +339,21 @@ def run_fetch_dd_point_data(
         return render_template("400/bad_request.html"), 400
 
     if request.args.get("summarize") == "mmm":
-        dd_data_package = package_distilled_response(
-            point_data_list, start_year, end_year
-        )
+        dd_data_package = package_distilled_response(point_data, start_year, end_year)
     else:
-        dd_data_package = package_unabridged_response(
-            point_data_list, start_year, end_year
-        )
+        dd_data_package = package_unabridged_response(point_data, start_year, end_year)
 
-    # if request.args.get("format") == "csv" or preview:
-    #     point_pkg = nullify_and_prune(point_pkg, cov_id_str)
-    #     if point_pkg in [{}, None, 0]:
-    #         return render_template("404/no_data.html"), 404
-    #     if request.args.get("summarize") == "mmm":
-    #         return create_csv(point_pkg, cov_id_str, lat=lat, lon=lon)
-    #     else:
-    #         return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
+    if request.args.get("format") == "csv" or preview:
+
+        tidy_package = prune_nulls_with_max_intensity(
+            postprocess(dd_data_package, cov_id_str)
+        )
+        if tidy_package in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        if request.args.get("summarize") == "mmm":
+            return create_csv(tidy_package, cov_id_str, lat=lat, lon=lon)
+        else:
+            return create_csv(tidy_package, cov_id_str + "_all", lat=lat, lon=lon)
 
     return postprocess(dd_data_package, cov_id_str)
 
