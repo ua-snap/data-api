@@ -5,6 +5,7 @@ from flask import (
     request,
     jsonify,
 )
+import numpy as np
 from urllib.parse import quote
 
 # local imports
@@ -343,11 +344,11 @@ def run_fetch_dd_point_data(
     else:
         dd_data_package = package_unabridged_response(point_data, start_year, end_year)
 
-    if request.args.get("format") == "csv" or preview:
+    tidy_package = prune_nulls_with_max_intensity(
+        postprocess(dd_data_package, cov_id_str)
+    )
 
-        tidy_package = prune_nulls_with_max_intensity(
-            postprocess(dd_data_package, cov_id_str)
-        )
+    if request.args.get("format") == "csv" or preview:
         if tidy_package in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         if request.args.get("summarize") == "mmm":
@@ -355,14 +356,14 @@ def run_fetch_dd_point_data(
         else:
             return create_csv(tidy_package, cov_id_str + "_all", lat=lat, lon=lon)
 
-    return postprocess(dd_data_package, cov_id_str)
+    return tidy_package
 
 
 @routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")
 def get_dd_plate(var_ep, lat, lon):
     """
-    Endpoint for requesting all data required for the Heating Degree Days,
-    Below Zero Degree Days, Thawing Index, and Freezing Index in the
+    Endpoint for requesting all data required for Heating Degree Days,
+    Degree Days Below Zero, Air Thawing Index, and Air Freezing Index in the
     ArcticEDS client.
     Args:
         var_ep (str): heating, below_zero, thawing_index, or freezing_index
@@ -372,51 +373,54 @@ def get_dd_plate(var_ep, lat, lon):
         example request: http://localhost:5000/eds/degree_days/heating/65.0628/-146.1627
     """
     dd = dict()
-
-    summarized_data = {}
-    if "historical" not in summarized_data:
-        summarized_data["historical"] = {}
+    eras = [
+        {"start": 1980, "end": 2009},
+        {"start": 2010, "end": 2039},
+        {"start": 2040, "end": 2069},
+        {"start": 2070, "end": 2099},
+    ]
 
     all_data = run_fetch_dd_point_data(var_ep, lat, lon)
-
     # Checks if error exists from fetching DD point
     if isinstance(all_data, tuple):
         # Returns error template that was generated for invalid request
         return all_data
 
-    historical_values = list(map(lambda x: x["dd"], all_data["ERA-Interim"].values()))
+    summarized_data = {}
+    if "historical" not in summarized_data:
+        summarized_data["historical"] = {}
+
+    historical_values_to_summarize = []
+    for year, value in all_data["daymet"]["historical"].items():
+        if year >= eras[0]["start"] and year <= eras[0]["end"]:
+            historical_values_to_summarize.append(value["dd"])
     summarized_data["historical"] = {
-        "ddmax": max(historical_values),
-        "ddmean": round(np.mean(historical_values)),
-        "ddmin": min(historical_values),
+        "ddmax": max(historical_values_to_summarize),
+        "ddmean": round(np.mean(historical_values_to_summarize)),
+        "ddmin": min(historical_values_to_summarize),
     }
 
-    eras = [
-        {"start": 2010, "end": 2039},
-        {"start": 2040, "end": 2069},
-        {"start": 2070, "end": 2099},
-    ]
     models = list(all_data.keys())
-    models.remove("ERA-Interim")
-    for era in eras:
+    models.remove("daymet")
+    for era in eras[1:]:
         era_label = str(era["start"]) + "-" + str(era["end"])
         if era_label not in summarized_data:
             summarized_data[era_label] = {}
-        dd_values = []
-        for model in all_data.keys():
-            for year, value in all_data[model].items():
-                if year >= era["start"] and year <= era["end"]:
-                    dd_values.append(value["dd"])
-        summarized_data[era_label] = {
-            "ddmin": min(dd_values),
-            "ddmean": round(np.mean(dd_values)),
-            "ddmax": max(dd_values),
-        }
+            dd_values = []
+            for model in all_data.keys():
+                for scenario in all_data[model].keys():
+                    for year, value in all_data[model][scenario].items():
+                        if year >= era["start"] and year <= era["end"]:
+                            dd_values.append(value["dd"])
+            summarized_data[era_label] = {
+                "ddmin": min(dd_values),
+                "ddmean": round(np.mean(dd_values)),
+                "ddmax": max(dd_values),
+            }
 
     dd["summary"] = summarized_data
 
     preview = run_fetch_dd_point_data(var_ep, lat, lon, preview=True)
-
     # Checks if error exists from preview CSV request
     if isinstance(preview, tuple):
         # Returns error template that was generated for invalid request
@@ -425,7 +429,6 @@ def get_dd_plate(var_ep, lat, lon):
     dd_csv = preview.data.decode("utf-8")
     first = "\n".join(dd_csv.split("\n")[3:9]) + "\n"
     last = "\n".join(dd_csv.split("\n")[-6:])
-
     dd["preview"] = first + last
 
     return jsonify(dd)
