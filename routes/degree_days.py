@@ -41,8 +41,8 @@ years_lu = {
     "projected": {"min": 1950, "max": 2099},
 }
 mmm_lu = {
-    "historical": {"model": 8, "scenario": 0},
-    "projected": {"models": [0, 1, 2, 3, 4, 5, 6, 7, 9], "scenarios": [1, 2]},
+    "historical": {"model": 0, "scenario": 0},
+    "projected": {"models": [1, 2, 3, 4, 5, 6, 7, 8, 9], "scenarios": [1, 2]},
 }
 n_results_lu = {
     "historical": 1,
@@ -167,13 +167,13 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
             time_slicers.update({"projected": future_slicer})
             model_slicers.update(
                 {
-                    "projected": f"{mmm_lu['projected']['models'][0]}:{mmm_lu['projected']['models'][5]}"  # CP note: this is a hack, need to fix
+                    "projected": f"{min(mmm_lu['projected']['models'])}:{max(mmm_lu['projected']['models'])}"
                 }
             )
             scenario_slicers.update(
                 {
-                    "projected": f"{mmm_lu['projected']['scenarios'][0]}:{mmm_lu['projected']['scenarios'][1]}"
-                }  # this should be correct
+                    "projected": f"{min(mmm_lu['projected']['scenarios'])}:{max(mmm_lu['projected']['scenarios'])}"
+                }
             )
 
             # making three wcps requests, one each for min-mean-max
