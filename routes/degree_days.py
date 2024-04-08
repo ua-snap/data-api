@@ -362,8 +362,7 @@ def run_fetch_dd_point_data(
     #     else:
     #         return create_csv(point_pkg, cov_id_str + "_all", lat=lat, lon=lon)
 
-    # return postprocess(point_pkg, cov_id_str)
-    return dd_data_package
+    return postprocess(dd_data_package, cov_id_str)
 
 
 @routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")
