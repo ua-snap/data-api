@@ -14,7 +14,6 @@ from generate_requests import generate_wcs_getcov_str
 from fetch_data import *
 from validate_request import (
     validate_latlon,
-    validate_cmip6_indicators_latlon,
     project_latlon,
     validate_var_id,
 )
@@ -107,11 +106,7 @@ def package_cmip6_indicators_era_data(point_data_list):
                 ):
                     di[scenario][model][era] = dict()
                     for yi, year_li in enumerate(model_li):
-                        year = yi + 1850
-
-                        # We don't need anything before 1950
-                        if year < 1950:
-                            continue
+                        year = yi + 1950
 
                         # If the scenario is not historical and the year is less than 2015,
                         # we continue to the next iteration
@@ -221,7 +216,7 @@ def package_cmip6_indicators_data(point_data_list):
             di[scenario][model] = dict()
 
             for yi, year_li in enumerate(model_li):
-                year = yi + 1850
+                year = yi + 1950
 
                 # If the scenario is historical and the year is greater than 2014, we break the loop
                 # since there is no more historical data
@@ -324,12 +319,8 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
         example request: http://localhost:5000/indicators/cmip6/point/65.06/-146.16
     """
 
-    # TODO: Remove this when new data is formatted with -180 to 180 for lon
-    if float(lon) < 0:
-        lon = float(lon) + 360
-
     # Validate the lat/lon values
-    validation = validate_cmip6_indicators_latlon(lat, lon)
+    validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
