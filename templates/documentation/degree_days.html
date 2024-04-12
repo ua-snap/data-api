@@ -2,21 +2,30 @@
 <h2>Degree Days</h2>
 
 <p>
-  These endpoints provide access to historical and projected total annual cumulative degree days for several different
-  degree day thresholds at a resolution of 20km. Historical data were derived from the ERA-Interim dataset and are
-  available for years 1980&ndash;2009. Projections were derived from GFDL-CM3 and NCAR-CCSM4 model outputs under the RCP
-  8.5 emissions scenario and are available for years 2006&ndash;2100. Data can be accessed for individual years or for
-  minimum, mean, and maximum summaries across all historical or projected years.
+  These endpoints provide access to historical and modeled total annual
+  cumulative degree days for several different degree day thresholds at a
+  spatial resolution of 12 km. Historical data were derived from a Daymet
+  dataset and are available for years 1980&ndash;2017. Modeled data were derived
+  from bias corrected and downscaled CMIP5 climate models using RCP 4.5 and RCP
+  8.5 emissions scenarios. Model outputs are available for years
+  1950&ndash;2099. Data can be accessed for individual years or for minimum,
+  mean, and maximum summaries across all historical or modeled years.
 </p>
 
-<p>Links to an academic reference and source dataset are included at the bottom of this page.</p>
+<p>
+  Links to an academic reference and source dataset are included at the bottom
+  of this page.
+</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Degree days (point query)</h4>
 
-<p>Query degree days for all models and years. Included years are between 1980&ndash;2009 for historical
-  data and 2006&ndash;2100 for projected data.</p>
+<p>
+  Query degree days for all models, scenarios, and years. Included years are
+  between 1980&ndash;2017 for historical baseline data and 1950&ndash;2009 for
+  modeled data.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -28,32 +37,45 @@
   <tbody>
     <tr>
       <td>Degree days below 65&deg;F</td>
-      <td><a href="/degree_days/heating/65.0628/-146.1627">/degree_days/heating/65.0628/-146.1627</a>
+      <td>
+        <a href="/degree_days/heating/65.0628/-146.1627"
+          >/degree_days/heating/65.0628/-146.1627</a
+        >
       </td>
     </tr>
     <tr>
       <td>Degree days below 0&deg;F</td>
-      <td><a href="/degree_days/below_zero/65.0628/-146.1627">/degree_days/below_zero/65.0628/-146.1627</a>
+      <td>
+        <a href="/degree_days/below_zero/65.0628/-146.1627"
+          >/degree_days/below_zero/65.0628/-146.1627</a
+        >
       </td>
     </tr>
     <tr>
       <td>Degree days above 32&deg;F</td>
-      <td><a href="/degree_days/thawing_index/65.0628/-146.1627">/degree_days/thawing_index/65.0628/-146.1627</a>
+      <td>
+        <a href="/degree_days/thawing_index/65.0628/-146.1627"
+          >/degree_days/thawing_index/65.0628/-146.1627</a
+        >
       </td>
     </tr>
     <tr>
       <td>Degree days below 32&deg;F</td>
-      <td><a href="/degree_days/freezing_index/65.0628/-146.1627">/degree_days/freezing_index/65.0628/-146.1627</a>
+      <td>
+        <a href="/degree_days/freezing_index/65.0628/-146.1627"
+          >/degree_days/freezing_index/65.0628/-146.1627</a
+        >
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
       <td colspan="2">
-        Min/mean/max summaries of historical and projected years are available by appending
-        <code>?summarize=mmm</code> to the
-        URL.<br />
-        CSV output is also available by appending <code>?format=csv</code> to the URL.
+        Min/mean/max summaries of historical and modeled years are available by
+        appending
+        <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
       </td>
     </tr>
   </tfoot>
@@ -61,8 +83,11 @@
 
 <h4>Degree days across provided year range (point query)</h4>
 
-<p>Query degree days values for the specified year range. Valid year ranges are between 1980&ndash;2009 for historical
-  data and 2006&ndash;2100 for projected data.</p>
+<p>
+  Query degree days values for the specified year range. Valid year ranges are
+  between 1980&ndash;2017 for historical data and 1950&ndash;2099 for modeled
+  data.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -74,35 +99,44 @@
   <tbody>
     <tr>
       <td>Degree days below 65&deg;F within year range</td>
-      <td><a
-          href="/degree_days/heating/65.0628/-146.1627/1990/2080">/degree_days/heating/65.0628/-146.1627/1990/2080</a>
+      <td>
+        <a href="/degree_days/heating/65.0628/-146.1627/1990/2080"
+          >/degree_days/heating/65.0628/-146.1627/1990/2080</a
+        >
       </td>
     </tr>
     <tr>
       <td>Degree days below 0&deg;F within year range</td>
-      <td><a
-          href="/degree_days/below_zero/65.0628/-146.1627/1990/2080">/degree_days/below_zero/65.0628/-146.1627/1990/2080</a>
+      <td>
+        <a href="/degree_days/below_zero/65.0628/-146.1627/1990/2080"
+          >/degree_days/below_zero/65.0628/-146.1627/1990/2080</a
+        >
       </td>
     </tr>
     <tr>
       <td>Degree days above 32&deg;F within year range</td>
-      <td><a
-          href="/degree_days/thawing_index/65.0628/-146.1627/1990/2080">/degree_days/thawing_index/65.0628/-146.1627/1990/2080</a>
+      <td>
+        <a href="/degree_days/thawing_index/65.0628/-146.1627/1990/2080"
+          >/degree_days/thawing_index/65.0628/-146.1627/1990/2080</a
+        >
       </td>
     </tr>
     <tr>
       <td>Degree days below 32&deg;F within year range</td>
-      <td><a
-          href="/degree_days/freezing_index/65.0628/-146.1627/1990/2080">/degree_days/freezing_index/65.0628/-146.1627/1990/2080</a>
+      <td>
+        <a href="/degree_days/freezing_index/65.0628/-146.1627/1990/2080"
+          >/degree_days/freezing_index/65.0628/-146.1627/1990/2080</a
+        >
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
       <td colspan="2">
-        Min/mean/max summaries of historical and projected years are available by appending <code>?summarize=mmm</code>
-        to the URL.<br />
-        CSV output is also available by appending <code>?format=csv</code> to the URL.
+        Min/mean/max summaries of historical and projected years are available
+        by appending <code>?summarize=mmm</code> to the URL.<br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
       </td>
     </tr>
   </tfoot>
@@ -116,9 +150,12 @@
 
 <pre>
 {
-  "ERA-Interim": {
-    "1980": {
-      "dd:" 4802,
+  "daymet": {
+    "historical": {
+      "1980": {
+        "dd:" 15810,
+      },
+      ...
     },
     ...
   },
@@ -131,8 +168,11 @@
 <pre>
 {
   &lt;model&gt;: {
-    &lt;year&gt;: {
-      "dd": &lt;degree days value&gt;,
+    &lt;scenario&gt;: {
+      &lt;year&gt;: {
+        "dd": &lt;degree days value&gt;,
+      },
+    ...
     },
     ...
   },
@@ -142,14 +182,17 @@
 
 <h4>Min/mean/max summaries (point query)</h4>
 
-<p>Results from min/mean/max queries (using the <code>?summarize=mmm</code> URL parameter) will look like this:</p>
+<p>
+  Results from the default min/mean/max queries (using the
+  <code>?summarize=mmm</code> URL parameter) will look like this:
+</p>
 
 <pre>
 {
   "historical": {
-    "ddmax": 14972,
-    "ddmean": 13696,
-    "ddmin": 9357
+    "ddmax": 16197,
+    "ddmean": 14291,
+    "ddmin": 12627
   },
   ...
 }
@@ -160,16 +203,17 @@
 <pre>
 {
   &lt;"historical" or "projected"&gt;: {
-    "ddmax": &lt;max dd value across all models and years&gt;,
-    "ddmean": &lt;mean dd value across all models and years&gt;,
-    "ddmin": &lt;min dd value across all models and years&gt;
+    "ddmax": &lt;max dd value across all models, scenarios, and years&gt;,
+    "ddmean": &lt;mean dd value across all models, scenarios, and years&gt;,
+    "ddmin": &lt;min dd value across all models, scenarios, and years&gt;
   },
   ...
 }
 </pre>
 
 <h3>Source data</h3>
-<table class="data-source">
+
+<table>
   <thead>
     <tr>
       <th>Metadata & source data access</th>
@@ -178,10 +222,39 @@
   </thead>
   <tbody>
     <tr>
-      <td><a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/3d4cc2e2-5cfb-4fed-b397-06854edb747f">20km
-          annual degree day totals at multiple thresholds for Alaska, 1980-2100</a></td>
-      <td>Bieniek, P. A., Bhatt, U. S., Walsh, J. E., Rupp, T. S., Zhang, J., Krieger, J. R. & Lader, R. (2016).  Dynamical Downscaling of ERA-Interim Temperature and Precipitation for Alaska.  <i>Journal of Applied Meteorology and Climatology, 55</i>(03), 635&ndash;654.  <a href="https://doi.org/10.1175/JAMC-D-15-0153.1">https://doi.org/10.1175/JAMC-D-15-0153.1</a></td>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/f9831074-cd3f-4c06-8601-687bd2911b7e"
+        >
+          Degree Days: Freezing Index, Thawing Index, Heating Degree Days, and
+          Degree Days Below 0° F
+        </a>
+      </td>
+      <td></td>
+    </tr>
+    <tr>
+      <td rowspan="2" style="vertical-align: middle; border-bottom: none">
+        21st Century Hydrologic Projections for Alaska and Hawaiʻi
+      </td>
+      <td>
+        Mizukami, N., Newman, A. J., Wood, A. W., Gutmann, E. D., and Hamman, J.
+        J. (2022). Boulder, CO: UCAR/NCAR/RAL.
+        <a href="https://doi.org/10.5065/c3kn-2y77"
+          >https://doi.org/10.5065/c3kn-2y77</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Mizukami, N., Newman, A. J., Littell, J. S., Giambelluca, T. W., Wood,
+        A. W., Gutmann, E. D., Hamman, J. J., Gergel, D. R., Nijsenn, B., Clark,
+        M. P., and Arnold, J. R. (2022). New projections of 21st century climate
+        and hydrology for Alaska and Hawaiʻi. <i>Climate Services, 27</i>,
+        100312.
+        <a href="https://doi.org/10.1016/j.cliser.2022.100312"
+          >https://doi.org/10.1016/j.cliser.2022.100312</a
+        >
+      </td>
     </tr>
   </tbody>
 </table>

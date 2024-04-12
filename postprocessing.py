@@ -11,20 +11,22 @@ nodata_values = {
 }
 
 nodata_mappings = {
+    "air_freezing_index_Fdays": nodata_values["default"],
+    "air_freezing_index_Fdays_all": nodata_values["default"],
+    "air_thawing_index_Fdays": nodata_values["default"],
+    "air_thawing_index_Fdays_all": nodata_values["default"],
     "beetles": nodata_values["beetles"],
     "crrel_gipl": nodata_values["default"],
-    "degree_days_below_zero": nodata_values["default"],
-    "degree_days_below_zero_all": nodata_values["default"],
+    "degree_days_below_zero_Fdays": nodata_values["default"],
+    "degree_days_below_zero_Fdays_all": nodata_values["default"],
     "elevation": nodata_values["default"],
-    "freezing_index": nodata_values["default"],
-    "freezing_index_all": nodata_values["default"],
     "fire": nodata_values["default"],
     "flammability": nodata_values["default"],
     "geology": [],
     "gipl": [],
     "gipl_summary": [],
-    "heating_degree_days": nodata_values["default"],
-    "heating_degree_days_all": nodata_values["default"],
+    "heating_degree_days_Fdays": nodata_values["default"],
+    "heating_degree_days_Fdays_all": nodata_values["default"],
     "hydrology": nodata_values["hydrology"],
     "hydrology_mmm": nodata_values["hydrology"],
     "landfastice": [],
@@ -52,8 +54,6 @@ nodata_mappings = {
     "temperature_all": nodata_values["taspr"],
     "temperature_mmm": nodata_values["taspr"],
     "taspr": nodata_values["taspr"],
-    "thawing_index": nodata_values["default"],
-    "thawing_index_all": nodata_values["default"],
     "snow": nodata_values["default"],
     "seaice": nodata_values["seaice"],
     "veg_type": nodata_values["default"],
@@ -128,6 +128,24 @@ def prune_nodata_list(data):
                 pruned.append(pruned_value)
 
     return pruned
+
+
+def prune_nulls_with_max_intensity(data):
+    """
+    Recursively remove all None values from dicts and remove any empty dicts that remain.
+
+    In practice, this will trim keys with `null` values from the API response even in the case when a sibling key does have data.
+    """
+    if isinstance(data, dict):
+        return {
+            k: v
+            for k, v in (
+                (k, prune_nulls_with_max_intensity(v)) for k, v in data.items()
+            )
+            if v is not None
+        }
+    else:
+        return data
 
 
 def prune_nodata(data):

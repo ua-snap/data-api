@@ -45,14 +45,14 @@ def create_csv(
     if endpoint == "beetles":
         properties = beetles_csv(data)
     elif endpoint in [
-        "heating_degree_days",
-        "degree_days_below_zero",
-        "thawing_index",
-        "freezing_index",
-        "heating_degree_days_all",
-        "degree_days_below_zero_all",
-        "thawing_index_all",
-        "freezing_index_all",
+        "heating_degree_days_Fdays",
+        "degree_days_below_zero_Fdays",
+        "air_thawing_index_Fdays",
+        "air_freezing_index_Fdays",
+        "heating_degree_days_Fdays_all",
+        "degree_days_below_zero_Fdays_all",
+        "air_thawing_index_Fdays_all",
+        "air_freezing_index_Fdays_all",
     ]:
         properties = degree_days_csv(data, endpoint)
     elif endpoint == "flammability":
@@ -285,38 +285,41 @@ def beetles_csv(data):
 
 def degree_days_csv(data, endpoint):
     if endpoint in [
-        "heating_degree_days",
-        "degree_days_below_zero",
-        "thawing_index",
-        "freezing_index",
+        "heating_degree_days_Fdays",
+        "degree_days_below_zero_Fdays",
+        "air_thawing_index_Fdays",
+        "air_freezing_index_Fdays",
     ]:
-        coords = ["model"]
+        coords = ["model", "scenario"]
         values = ["ddmin", "ddmean", "ddmax"]
     elif endpoint in [
-        "heating_degree_days_all",
-        "degree_days_below_zero_all",
-        "thawing_index_all",
-        "freezing_index_all",
+        "heating_degree_days_Fdays_all",
+        "degree_days_below_zero_Fdays_all",
+        "air_thawing_index_Fdays_all",
+        "air_freezing_index_Fdays_all",
         "dd_preview",
     ]:
-        coords = ["model", "year"]
+        coords = ["model", "scenario", "year"]
         values = ["dd"]
 
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
 
-    if endpoint in ["heating_degree_days", "heating_degree_days_all"]:
+    if endpoint in ["heating_degree_days_Fdays", "heating_degree_days_Fdays_all"]:
         filename_data_name = "Heating Degree Days"
-        metadata = "# dd is the total annual degree days below 65 (deg F) for the specified model\n"
-    elif endpoint in ["degree_days_below_zero", "degree_days_below_zero_all"]:
+        metadata = "# dd is the cumulative annual degree days below 65 degrees F for the specified model and scenario\n"
+    elif endpoint in [
+        "degree_days_below_zero_Fdays",
+        "degree_days_below_zero_Fdays_all",
+    ]:
         filename_data_name = "Degree Days Below Zero"
-        metadata = "# dd is the total annual degree days below 0 (deg F) for the specified model\n"
-    elif endpoint in ["thawing_index", "thawing_index_all"]:
-        filename_data_name = "Thawing Index"
-        metadata = "# dd is the total annual degree days above freezing for the specified model\n"
-    elif endpoint in ["freezing_index", "freezing_index_all"]:
-        filename_data_name = "Freezing Index"
-        metadata = "# dd is the total annual degree days below freezing for the specified model\n"
+        metadata = "# dd is the cumulative annual degree days below 0 degrees F for the specified model and scenario\n"
+    elif endpoint in ["air_thawing_index_Fdays", "air_thawing_index_Fdays_all"]:
+        filename_data_name = "Air Thawing Index"
+        metadata = "# dd is the cumulative annual degree days above freezing for the specified model and scenario\n"
+    elif endpoint in ["air_freezing_index_Fdays", "air_freezing_index_Fdays_all"]:
+        filename_data_name = "Air Freezing Index"
+        metadata = "# dd is the cumulative annual degree days below freezing for the specified model and scenario\n"
 
     return {
         "csv_dicts": csv_dicts,
