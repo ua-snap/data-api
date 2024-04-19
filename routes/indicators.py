@@ -236,14 +236,14 @@ def package_cmip6_indicators_data(point_data_list):
                     indicator = cmip6_dim_encodings["indicator"][vi]
 
                     if indicator == "rx1day":
-                        value = round(float(value), 1)
+                        value = round(float(value), 3)
                         if isnan(value):
                             value = -9999
 
                     if value == "nan":
                         value = -9999
 
-                    di[scenario][model][year][indicator] = int(value)
+                    di[scenario][model][year][indicator] = value
 
     return di
 
