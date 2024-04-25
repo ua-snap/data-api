@@ -290,7 +290,7 @@ def degree_days_csv(data, endpoint):
         "air_thawing_index_Fdays",
         "air_freezing_index_Fdays",
     ]:
-        coords = ["model", "scenario"]
+        coords = ["model"]
         values = ["ddmin", "ddmean", "ddmax"]
     elif endpoint in [
         "heating_degree_days_Fdays_all",
