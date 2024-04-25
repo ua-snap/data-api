@@ -23,6 +23,9 @@ degree_days_api = Blueprint("degree_days_api", __name__)
 
 # all degree day coverages share common dim_encodings, so only fetch one
 dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days_Fdays"))
+# update the encoding for "historical" to be "modeled baseline"
+# this is to make the data better align with engineer expectations
+dd_dim_encodings["scenario"][0] = "modeled baseline"
 
 var_ep_lu = {
     "heating": {"cov_id_str": "heating_degree_days_Fdays"},
@@ -37,15 +40,15 @@ var_label_lu = {
     "freezing_index": "Air Freezing Index",
 }
 years_lu = {
-    "historical": {"min": 1980, "max": 2017},
+    "modeled baseline": {"min": 1980, "max": 2017},
     "projected": {"min": 1950, "max": 2099},
 }
 mmm_lu = {
-    "historical": {"model": 0, "scenario": 0},
+    "modeled baseline": {"model": 0, "scenario": 0},
     "projected": {"models": [1, 2, 3, 4, 5, 6, 7, 8, 9], "scenarios": [1, 2]},
 }
 n_results_lu = {
-    "historical": 1,
+    "modeled baseline": 1,
     "projected": len(mmm_lu["projected"]["models"])
     * len(mmm_lu["projected"]["scenarios"]),
 }
@@ -80,11 +83,12 @@ def validate_years(start_year, end_year):
     return True
 
 
-def within_historical(year):
-    # if year is within the historical range, return True
+def within_modeled_baseline(year):
+    # if year is within the modeled_baseline range, return True
     year = int(year)
     return (
-        year >= years_lu["historical"]["min"] and year <= years_lu["historical"]["max"]
+        year >= years_lu["modeled baseline"]["min"]
+        and year <= years_lu["modeled baseline"]["max"]
     )
 
 
@@ -105,12 +109,14 @@ def make_time_slicer(min_year, max_year):
 
 def daymet_slice():
     """Return coordinates to slice Daymet data from model axis."""
-    return f"{mmm_lu['historical']['model']}:{mmm_lu['historical']['model']}"
+    return (
+        f"{mmm_lu['modeled baseline']['model']}:{mmm_lu['modeled baseline']['model']}"
+    )
 
 
-def historical_scenario_slice():
-    """Return coordinates to slice `historical` data from scenario axis."""
-    return f"{mmm_lu['historical']['scenario']}:{mmm_lu['historical']['scenario']}"
+def modeled_baseline_scenario_slice():
+    """Return coordinates to slice `modeled_baseline` data from scenario axis."""
+    return f"{mmm_lu['modeled baseline']['scenario']}:{mmm_lu['modeled baseline']['scenario']}"
 
 
 def gcms_slice():
@@ -146,7 +152,7 @@ def get_dd_wcps_request_str(
         cov_id (str): rasdaman coverage ID
         model_slice (str): like "3:3" for a single model
         scenario_slice (str): like "1:2" for two scenarios
-        year_slice (str): like "1980:2017" for historical
+        year_slice (str): like "1980:2017" for modeled_baseline
         operation (str): one of "min", "mean", or "max"
         num_results (int): number of results to average over when operation is "mean"
         encoding (str): one of "json" or "netcdf" for point or bbox queries, respectively
@@ -226,33 +232,6 @@ def package_distilled_response(mmm_point_data, start_year=None, end_year=None):
         distilled[era]["ddmin"] = mmm_point_data["min"][era]["wcps_response"]
         distilled[era]["ddmean"] = round(mmm_point_data["mean"][era]["wcps_response"])
         distilled[era]["ddmax"] = mmm_point_data["max"][era]["wcps_response"]
-    # distilled["historical"]["ddmean"] = round(
-    #     mmm_point_data["mean"]["historical"]["wcps_response"]
-    # )
-    # distilled["historical"]["ddmax"] = mmm_point_data["max"]["historical"][
-    #     "wcps_response"
-    # distilled["historical"] = {}
-    # distilled["projected"] = {}
-
-    # distilled["historical"]["ddmin"] = mmm_point_data["min"]["historical"][
-    #     "wcps_response"
-    # ]
-    # distilled["historical"]["ddmean"] = round(
-    #     mmm_point_data["mean"]["historical"]["wcps_response"]
-    # )
-    # distilled["historical"]["ddmax"] = mmm_point_data["max"]["historical"][
-    #     "wcps_response"
-    # ]
-
-    # distilled["projected"]["ddmin"] = mmm_point_data["min"]["projected"][
-    #     "wcps_response"
-    # ]
-    # distilled["projected"]["ddmean"] = round(
-    #     mmm_point_data["mean"]["projected"]["wcps_response"]
-    # )
-    # distilled["projected"]["ddmax"] = mmm_point_data["max"]["projected"][
-    #     "wcps_response"
-    # ]
     return distilled
 
 
@@ -283,47 +262,53 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
             years_lu["projected"]["min"], years_lu["projected"]["max"]
         )
         time_slicers.update({"projected": future_slicer})
-        # historical slices
-        historical_slicer = make_time_slicer(
-            years_lu["historical"]["min"], years_lu["historical"]["max"]
+        # modeled_baseline slices
+        modeled_baseline_slicer = make_time_slicer(
+            years_lu["modeled baseline"]["min"], years_lu["modeled baseline"]["max"]
         )
-        time_slicers.update({"historical": historical_slicer})
-        model_slicers.update({"historical": daymet_slice()})
-        scenario_slicers.update({"historical": historical_scenario_slice()})
+        time_slicers.update({"modeled baseline": modeled_baseline_slicer})
+        model_slicers.update({"modeled baseline": daymet_slice()})
+        scenario_slicers.update({"modeled baseline": modeled_baseline_scenario_slice()})
 
         # modify slicers if start / end years provided
         if None not in [start_year, end_year]:
             custom_slicer = make_time_slicer(start_year, end_year)
             time_slicers.update({"projected": custom_slicer})
-            # handling historical slicers is a little more hairy
-            if within_historical(start_year) and within_historical(end_year):
-                # case where start and end year within historical range
-                historical_slicer = make_time_slicer(start_year, end_year)
-                time_slicers.update({"historical": historical_slicer})
-            elif within_historical(start_year) and not within_historical(end_year):
-                # case where only start year is within historical range
-                historical_slicer = make_time_slicer(
-                    start_year, years_lu["historical"]["max"]
+            # handling modeled_baseline slicers is a little more hairy
+            if within_modeled_baseline(start_year) and within_modeled_baseline(
+                end_year
+            ):
+                # case where start and end year within modeled_baseline range
+                modeled_baseline_slicer = make_time_slicer(start_year, end_year)
+                time_slicers.update({"modeled baseline": modeled_baseline_slicer})
+            elif within_modeled_baseline(start_year) and not within_modeled_baseline(
+                end_year
+            ):
+                # case where only start year is within modeled_baseline range
+                modeled_baseline_slicer = make_time_slicer(
+                    start_year, years_lu["modeled baseline"]["max"]
                 )
-                time_slicers.update({"historical": historical_slicer})
-            elif not within_historical(start_year) and within_historical(end_year):
-                # case where only end year is within historical range
-                historical_slicer = make_time_slicer(
-                    years_lu["historical"]["min"], end_year
+                time_slicers.update({"modeled baseline": modeled_baseline_slicer})
+            elif not within_modeled_baseline(start_year) and within_modeled_baseline(
+                end_year
+            ):
+                # case where only end year is within modeled_baseline range
+                modeled_baseline_slicer = make_time_slicer(
+                    years_lu["modeled baseline"]["min"], end_year
                 )
-                time_slicers.update({"historical": historical_slicer})
+                time_slicers.update({"modeled baseline": modeled_baseline_slicer})
             else:
-                # no need for historical slicers at all and we save on WCPS queries
-                del time_slicers["historical"]
-                del model_slicers["historical"]
-                del scenario_slicers["historical"]
+                # no need for modeled_baseline slicers at all and we save on WCPS queries
+                del time_slicers["modeled baseline"]
+                del model_slicers["modeled baseline"]
+                del scenario_slicers["modeled baseline"]
 
         # making three wcps requests, one each for min-mean-max
         mmm_dispatch = {}
         for stat_function in ["min", "mean", "max"]:
             mmm_dispatch[stat_function] = {}
             # each era will have different mmm wcps request parameters
-            for era in model_slicers.keys():  # ["historical", "projected"]:
+            for era in model_slicers.keys():
                 mmm_dispatch[stat_function][era] = {}
                 wcps_str = get_dd_wcps_request_str(
                     x,
@@ -461,17 +446,17 @@ def get_dd_plate(var_ep, lat, lon):
         return all_data
 
     summarized_data = {}
-    if "historical" not in summarized_data:
-        summarized_data["historical"] = {}
+    if "modeled baseline" not in summarized_data:
+        summarized_data["modeled baseline"] = {}
 
-    historical_values_to_summarize = []
-    for year, value in all_data["daymet"]["historical"].items():
+    modeled_baseline_values_to_summarize = []
+    for year, value in all_data["daymet"]["modeled baseline"].items():
         if year >= eras[0]["start"] and year <= eras[0]["end"]:
-            historical_values_to_summarize.append(value["dd"])
-    summarized_data["historical"] = {
-        "ddmax": max(historical_values_to_summarize),
-        "ddmean": round(np.mean(historical_values_to_summarize)),
-        "ddmin": min(historical_values_to_summarize),
+            modeled_baseline_values_to_summarize.append(value["dd"])
+    summarized_data["modeled baseline"] = {
+        "ddmax": max(modeled_baseline_values_to_summarize),
+        "ddmean": round(np.mean(modeled_baseline_values_to_summarize)),
+        "ddmin": min(modeled_baseline_values_to_summarize),
     }
 
     models = list(all_data.keys())

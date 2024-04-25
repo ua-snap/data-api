@@ -4,7 +4,7 @@
 <p>
   These endpoints provide access to historical and modeled total annual
   cumulative degree days for several different degree day thresholds at a
-  spatial resolution of 12 km. Historical data were derived from a Daymet
+  spatial resolution of 12 km. Modeled baseline data were derived from a Daymet
   dataset and are available for years 1980&ndash;2017. Modeled data were derived
   from bias corrected and downscaled CMIP5 climate models using RCP 4.5 and RCP
   8.5 emissions scenarios. Model outputs are available for years
@@ -23,8 +23,8 @@
 
 <p>
   Query degree days for all models, scenarios, and years. Included years are
-  between 1980&ndash;2017 for historical baseline data and 1950&ndash;2009 for
-  modeled data.
+  between 1980&ndash;2017 for modeled baseline baseline data and 1950&ndash;2009
+  for modeled data.
 </p>
 
 <table class="endpoints">
@@ -71,8 +71,8 @@
   <tfoot>
     <tr>
       <td colspan="2">
-        Min/mean/max summaries of historical and modeled years are available by
-        appending
+        Min/mean/max summaries of modeled baseline and modeled years are
+        available by appending
         <code>?summarize=mmm</code> to the URL.<br />
         CSV output is also available by appending <code>?format=csv</code> to
         the URL.
@@ -85,8 +85,8 @@
 
 <p>
   Query degree days values for the specified year range. Valid year ranges are
-  between 1980&ndash;2017 for historical data and 1950&ndash;2099 for modeled
-  data.
+  between 1980&ndash;2017 for modeled baseline data and 1950&ndash;2099 for
+  modeled data.
 </p>
 
 <table class="endpoints">
@@ -133,8 +133,8 @@
   <tfoot>
     <tr>
       <td colspan="2">
-        Min/mean/max summaries of historical and projected years are available
-        by appending <code>?summarize=mmm</code> to the URL.<br />
+        Min/mean/max summaries of modeled baseline and projected years are
+        available by appending <code>?summarize=mmm</code> to the URL.<br />
         CSV output is also available by appending <code>?format=csv</code> to
         the URL.
       </td>
@@ -151,7 +151,7 @@
 <pre>
 {
   "daymet": {
-    "historical": {
+    "modeled baseline": {
       "1980": {
         "dd:" 15810,
       },
@@ -189,7 +189,7 @@
 
 <pre>
 {
-  "historical": {
+  "modeled baseline": {
     "ddmax": 16197,
     "ddmean": 14291,
     "ddmin": 12627
@@ -202,7 +202,7 @@
 
 <pre>
 {
-  &lt;"historical" or "projected"&gt;: {
+  &lt;"modeled baseline" or "projected"&gt;: {
     "ddmax": &lt;max dd value across all models, scenarios, and years&gt;,
     "ddmean": &lt;mean dd value across all models, scenarios, and years&gt;,
     "ddmin": &lt;min dd value across all models, scenarios, and years&gt;
