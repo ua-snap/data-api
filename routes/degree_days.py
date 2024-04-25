@@ -23,9 +23,9 @@ degree_days_api = Blueprint("degree_days_api", __name__)
 
 # all degree day coverages share common dim_encodings, so only fetch one
 dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days_Fdays"))
-# update the encoding for "historical" to be "modeled baseline"
+# update the encoding for "historical" to be "modeled_baseline"
 # this is to make the data better align with engineer expectations
-dd_dim_encodings["scenario"][0] = "modeled baseline"
+dd_dim_encodings["scenario"][0] = "modeled_baseline"
 
 var_ep_lu = {
     "heating": {"cov_id_str": "heating_degree_days_Fdays"},
@@ -40,15 +40,15 @@ var_label_lu = {
     "freezing_index": "Air Freezing Index",
 }
 years_lu = {
-    "modeled baseline": {"min": 1980, "max": 2017},
+    "modeled_baseline": {"min": 1980, "max": 2017},
     "projected": {"min": 1950, "max": 2099},
 }
 mmm_lu = {
-    "modeled baseline": {"model": 0, "scenario": 0},
+    "modeled_baseline": {"model": 0, "scenario": 0},
     "projected": {"models": [1, 2, 3, 4, 5, 6, 7, 8, 9], "scenarios": [1, 2]},
 }
 n_results_lu = {
-    "modeled baseline": 1,
+    "modeled_baseline": 1,
     "projected": len(mmm_lu["projected"]["models"])
     * len(mmm_lu["projected"]["scenarios"]),
 }
@@ -87,8 +87,8 @@ def within_modeled_baseline(year):
     # if year is within the modeled_baseline range, return True
     year = int(year)
     return (
-        year >= years_lu["modeled baseline"]["min"]
-        and year <= years_lu["modeled baseline"]["max"]
+        year >= years_lu["modeled_baseline"]["min"]
+        and year <= years_lu["modeled_baseline"]["max"]
     )
 
 
@@ -110,13 +110,13 @@ def make_time_slicer(min_year, max_year):
 def daymet_slice():
     """Return coordinates to slice Daymet data from model axis."""
     return (
-        f"{mmm_lu['modeled baseline']['model']}:{mmm_lu['modeled baseline']['model']}"
+        f"{mmm_lu['modeled_baseline']['model']}:{mmm_lu['modeled_baseline']['model']}"
     )
 
 
 def modeled_baseline_scenario_slice():
     """Return coordinates to slice `modeled_baseline` data from scenario axis."""
-    return f"{mmm_lu['modeled baseline']['scenario']}:{mmm_lu['modeled baseline']['scenario']}"
+    return f"{mmm_lu['modeled_baseline']['scenario']}:{mmm_lu['modeled_baseline']['scenario']}"
 
 
 def gcms_slice():
@@ -264,11 +264,11 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
         time_slicers.update({"projected": future_slicer})
         # modeled_baseline slices
         modeled_baseline_slicer = make_time_slicer(
-            years_lu["modeled baseline"]["min"], years_lu["modeled baseline"]["max"]
+            years_lu["modeled_baseline"]["min"], years_lu["modeled_baseline"]["max"]
         )
-        time_slicers.update({"modeled baseline": modeled_baseline_slicer})
-        model_slicers.update({"modeled baseline": daymet_slice()})
-        scenario_slicers.update({"modeled baseline": modeled_baseline_scenario_slice()})
+        time_slicers.update({"modeled_baseline": modeled_baseline_slicer})
+        model_slicers.update({"modeled_baseline": daymet_slice()})
+        scenario_slicers.update({"modeled_baseline": modeled_baseline_scenario_slice()})
 
         # modify slicers if start / end years provided
         if None not in [start_year, end_year]:
@@ -280,28 +280,28 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
             ):
                 # case where start and end year within modeled_baseline range
                 modeled_baseline_slicer = make_time_slicer(start_year, end_year)
-                time_slicers.update({"modeled baseline": modeled_baseline_slicer})
+                time_slicers.update({"modeled_baseline": modeled_baseline_slicer})
             elif within_modeled_baseline(start_year) and not within_modeled_baseline(
                 end_year
             ):
                 # case where only start year is within modeled_baseline range
                 modeled_baseline_slicer = make_time_slicer(
-                    start_year, years_lu["modeled baseline"]["max"]
+                    start_year, years_lu["modeled_baseline"]["max"]
                 )
-                time_slicers.update({"modeled baseline": modeled_baseline_slicer})
+                time_slicers.update({"modeled_baseline": modeled_baseline_slicer})
             elif not within_modeled_baseline(start_year) and within_modeled_baseline(
                 end_year
             ):
                 # case where only end year is within modeled_baseline range
                 modeled_baseline_slicer = make_time_slicer(
-                    years_lu["modeled baseline"]["min"], end_year
+                    years_lu["modeled_baseline"]["min"], end_year
                 )
-                time_slicers.update({"modeled baseline": modeled_baseline_slicer})
+                time_slicers.update({"modeled_baseline": modeled_baseline_slicer})
             else:
                 # no need for modeled_baseline slicers at all and we save on WCPS queries
-                del time_slicers["modeled baseline"]
-                del model_slicers["modeled baseline"]
-                del scenario_slicers["modeled baseline"]
+                del time_slicers["modeled_baseline"]
+                del model_slicers["modeled_baseline"]
+                del scenario_slicers["modeled_baseline"]
 
         # making three wcps requests, one each for min-mean-max
         mmm_dispatch = {}
@@ -446,14 +446,14 @@ def get_dd_plate(var_ep, lat, lon):
         return all_data
 
     summarized_data = {}
-    if "modeled baseline" not in summarized_data:
-        summarized_data["modeled baseline"] = {}
+    if "modeled_baseline" not in summarized_data:
+        summarized_data["modeled_baseline"] = {}
 
     modeled_baseline_values_to_summarize = []
-    for year, value in all_data["daymet"]["modeled baseline"].items():
+    for year, value in all_data["daymet"]["modeled_baseline"].items():
         if year >= eras[0]["start"] and year <= eras[0]["end"]:
             modeled_baseline_values_to_summarize.append(value["dd"])
-    summarized_data["modeled baseline"] = {
+    summarized_data["modeled_baseline"] = {
         "ddmax": max(modeled_baseline_values_to_summarize),
         "ddmean": round(np.mean(modeled_baseline_values_to_summarize)),
         "ddmin": min(modeled_baseline_values_to_summarize),
