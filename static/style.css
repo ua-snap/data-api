@@ -37,3 +37,8 @@ table.data-source th {
 	height: 400px;
 	width: 400px;
 }
+
+.offline {
+	border: 0.1px solid #888;
+	background-color: #E7B69A;
+}
