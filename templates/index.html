@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} {% block content %} {% if not SITE_OFFLINE %}
 <h3>Introduction</h3>
 <p>
   Welcome to SNAP&rsquo;s data API, your gateway to seamless connectivity
@@ -59,4 +59,17 @@
   through this tool is available through the
   <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC by 4.0)</a>.
 </p>
+{% endif %}
+{% if SITE_OFFLINE %}
+<div class="offline">
+  <div class="px-3 py-3">
+    <h3 class="title is-3">SNAP Data API offline for maintenance</h3>
+    <div class="content is-size-4">
+      <p>
+        We&rsquo;re sorry!  The SNAP Data API is currently offline for system maintenance.  We&rsquo;re working to complete this maintenance and have the SNAP Data API back online as soon as possible, but we don&rsquo;t have an estimated time for completion.  Please check back soon, or reach out to us at <a href="mailto:uaf-snap-data-tools@alaska.edu">uaf-snap-data-tools@alaska.edu</a> with questions.
+      </p>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

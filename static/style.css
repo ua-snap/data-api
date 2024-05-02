@@ -37,3 +37,13 @@ table.data-source th {
 	height: 400px;
 	width: 400px;
 }
+
+.offline {
+	border: 0.1px solid #888;
+	min-height: 900px;
+	background-color: #E7B69A;
+	background-image: url('/static/vacation.jpg');
+	background-repeat: no-repeat;
+	background-position: bottom;
+	background-size: cover;
+}

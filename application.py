@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
+from config import SITE_OFFLINE
 
 from routes import *
 
@@ -30,7 +31,7 @@ def add_cache_control(response):
 @app.route("/")
 def index():
     """Render index page"""
-    return render_template("index.html")
+    return render_template("index.html", SITE_OFFLINE=SITE_OFFLINE)
 
 
 @app.route("/robots.txt")
