@@ -10,4 +10,8 @@ WEST_BBOX = [-180, 51.3492, -122.8098, 71.3694]
 EAST_BBOX = [172.4201, 51.3492, 180, 71.3694]
 SEAICE_BBOX = [-180, 30.98, 180, 90]
 WEB_APP_URL = os.getenv("WEB_APP_URL") or "https://northernclimatereports.org/"
-SITE_OFFLINE = os.getenv("SITE_OFFLINE").lower() == "true" or False
+
+if os.getenv("SITE_OFFLINE"):
+    SITE_OFFLINE = os.getenv("SITE_OFFLINE").lower() == "true"
+else:
+    SITE_OFFLINE = False
