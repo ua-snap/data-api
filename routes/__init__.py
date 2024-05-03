@@ -1,12 +1,12 @@
 import os
 from flask import Blueprint, redirect
+from config import SITE_OFFLINE
 
 routes = Blueprint("routes", __name__)
 
 
 def check_site_offline():
-    site_offline = os.environ.get("SITE_OFFLINE", "").lower() == "true"
-    if site_offline:
+    if SITE_OFFLINE:
         return redirect("/")
 
 
