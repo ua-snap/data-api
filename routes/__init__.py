@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, redirect, request
+from flask import Blueprint, redirect
 
 routes = Blueprint("routes", __name__)
 
