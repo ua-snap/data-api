@@ -1,6 +1,20 @@
-from flask import Blueprint
+import os
+from flask import Blueprint, redirect
+from config import SITE_OFFLINE
 
 routes = Blueprint("routes", __name__)
+
+
+def check_site_offline():
+    if SITE_OFFLINE:
+        return redirect("/")
+
+
+# Applies a decorator to all routes to check for the SITE_OFFLINE environment variable.
+@routes.before_request
+def enforce_site_offline():
+    return check_site_offline()
+
 
 from .fire import *
 from .permafrost import *
