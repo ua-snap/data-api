@@ -532,13 +532,13 @@ def package_mmm_point_data(point_data, cov_id, varname, start_year=None, end_yea
                             continue
                     point_pkg[dim_model][dim_scenario][str(year)] = dict()
                     if cov_id == "annual_precip_totals_mm":
-                        point_pkg[dim_model][dim_scenario][str(year)][
-                            "pr"
-                        ] = point_data[model][year_offset][scenario]
+                        point_pkg[dim_model][dim_scenario][str(year)]["pr"] = (
+                            point_data[model][year_offset][scenario]
+                        )
                     elif cov_id == "annual_mean_temp":
-                        point_pkg[dim_model][dim_scenario][str(year)][
-                            "tas"
-                        ] = point_data[model][year_offset][scenario]
+                        point_pkg[dim_model][dim_scenario][str(year)]["tas"] = (
+                            point_data[model][year_offset][scenario]
+                        )
                     else:
                         for variable in mmm_dim_encodings["tempstats"].keys():
                             dim_variable = mmm_dim_encodings["tempstats"][variable]
@@ -663,9 +663,11 @@ def package_ar5_point_data(point_data, varname):
                 for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                     scenario = dim_encodings["scenarios"][si]
                     point_data_pkg[decade][season][model][scenario] = {
-                        varname: None
-                        if value is None
-                        else round(value, dim_encodings["rounding"][varname])
+                        varname: (
+                            None
+                            if value is None
+                            else round(value, dim_encodings["rounding"][varname])
+                        )
                     }
 
     return point_data_pkg
@@ -693,9 +695,11 @@ def package_ar5_point_summary(point_data, varname):
             for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
                 scenario = dim_encodings["scenarios"][si]
                 point_data_pkg[season][model][scenario] = {
-                    varname: None
-                    if value is None
-                    else round(value, dim_encodings["rounding"][varname])
+                    varname: (
+                        None
+                        if value is None
+                        else round(value, dim_encodings["rounding"][varname])
+                    )
                 }
 
     return point_data_pkg
@@ -1293,9 +1297,9 @@ def run_fetch_proj_precip_point_data(lat, lon, csv=False):
                         " "
                     )
                     # Convert values to metric (millimeters) before returning them in the API
-                    point_pkg[interval_key][duration_key][model_key][era_key][
-                        "pf"
-                    ] = round((float(pf_data[0]) / 1000) * 25.4, 2)
+                    point_pkg[interval_key][duration_key][model_key][era_key]["pf"] = (
+                        round((float(pf_data[0]) / 1000) * 25.4, 2)
+                    )
                     point_pkg[interval_key][duration_key][model_key][era_key][
                         "pf_upper"
                     ] = round((float(pf_data[1]) / 1000) * 25.4, 2)
@@ -1559,14 +1563,14 @@ def tas_2km_point_data_endpoint(lat, lon):
     return postprocess(point_pkg, "tas2km")
 
 
-@routes.route("/<var_ep>/point/<lat>/<lon>")
-def point_data_endpoint(var_ep, lat, lon):
+@routes.route("/temperature/point/<lat>/<lon>")
+@routes.route("/precipitation/point/<lat>/<lon>")
+@routes.route("/taspr/point/<lat>/<lon>")
+def point_data_endpoint(lat, lon):
     """Point data endpoint. Fetch point data for
     specified var/lat/lon and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
         lat (float): latitude
         lon (float): longitude
 
@@ -1584,6 +1588,13 @@ def point_data_endpoint(var_ep, lat, lon):
             ),
             422,
         )
+
+    if "temperature" in request.path:
+        var_ep = "temperature"
+    elif "precipitation" in request.path:
+        var_ep = "precipitation"
+    else:
+        var_ep = "taspr"
 
     if var_ep in var_ep_lu.keys():
         point_pkg = run_fetch_var_point_data(var_ep, lat, lon)
@@ -1608,14 +1619,14 @@ def point_data_endpoint(var_ep, lat, lon):
     return postprocess(point_pkg, "taspr")
 
 
-@routes.route("/<var_ep>/area/<var_id>")
-def taspr_area_data_endpoint(var_ep, var_id):
+@routes.route("/temperature/area/<var_id>")
+@routes.route("/precipitation/area/<var_id>")
+@routes.route("/taspr/area/<var_id>")
+def taspr_area_data_endpoint(var_id):
     """Aggregation data endpoint. Fetch data within polygon area
     for specified variable and return JSON-like dict.
 
     Args:
-        var_ep (str): variable endpoint. Either taspr, temperature,
-            or precipitation
         var_id (str): ID for given polygon from polygon endpoint.
     Returns:
         poly_pkg (dict): zonal mean of variable(s) for AOI polygon
@@ -1629,6 +1640,13 @@ def taspr_area_data_endpoint(var_ep, var_id):
         return poly_type
 
     try:
+        if "temperature" in request.path:
+            var_ep = "temperature"
+        elif "precipitation" in request.path:
+            var_ep = "precipitation"
+        else:
+            var_ep = "taspr"
+
         if var_ep in var_ep_lu.keys():
             poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
         elif var_ep == "taspr":
