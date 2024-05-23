@@ -143,7 +143,6 @@ def run_fetch_fire(lat, lon):
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    print(results)
     landcover = package_landcover(results[0])
     firedanger = package_fire_danger(results[1])
     snow = package_snow(results[2])
