@@ -90,6 +90,8 @@ def create_csv(
         properties = wet_days_per_year_csv(data, endpoint)
     elif endpoint in ["hydrology", "hydrology_mmm"]:
         properties = hydrology_csv(data, endpoint)
+    elif endpoint == "demographics":
+        properties = demographics_csv(data)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -945,3 +947,6 @@ def hydrology_csv(data, endpoint):
             "metadata": metadata,
             "filename_data_name": filename_data_name,
         }
+
+def demographics_csv(data):
+    return data
