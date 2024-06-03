@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, Response, request
 import asyncio
+import json
 # import pandas as pd
 
 # local imports
@@ -38,15 +39,31 @@ def get_data_for_community(community):
     # Rename keys
     for c in [community, "US0", "AK0"]:
         fields_to_rename = [x for x in list(results[c].keys()) if x in list(demographics_fields.keys())]
-
         for field in fields_to_rename:
             results[c][demographics_fields[field]] = results[c].pop(field)
 
+    # Recreate the dicts in a better order for viewing (drops "id", "GEOID", and "areatype")
+    # convert to JSON object to preserve ordered output
+    fields = ["name", "comment", "total_population", "pct_under_18", "pct_65_plus", 
+    "pct_minority", "pct_african_american", "pct_amer_indian_ak_native", "pct_asian", "pct_hawaiian_pacislander", "pct_hispanic_latino", "pct_white", "pct_multi", "pct_other",
+    "pct_asthma", "pct_copd", "pct_diabetes", "pct_hd", "pct_kd", "pct_stroke",
+    "pct_w_disability", "moe_pct_w_disability", "pct_insured", "moe_pct_insured", "pct_uninsured", "moe_pct_uninsured",
+    "pct_no_bband", "pct_no_hsdiploma", "pct_below_150pov",
+    ]
+
+    reformatted_results = {}
+    for c in [community, "US0", "AK0"]:
+        reformatted_results[c] = {}
+        for field in fields:
+            reformatted_results[c][field] = results[c][field]
+
+    json_results = json.dumps(reformatted_results, indent = 4) 
+
     # Return CSV if requested
     if request.args.get("format") == "csv":
-         return create_csv(results, endpoint="demographics", place_id=community)
-
-    # Otherwise return results dict
-    return results
+         return create_csv(json_results, endpoint="demographics", place_id=community)
+    
+    # Otherwise return Flask JSON Response
+    return Response(response=json_results, status=200, mimetype="application/json")
 
 
