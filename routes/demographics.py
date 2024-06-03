@@ -11,6 +11,9 @@ from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 from csv_functions import create_csv
 
+@routes.route("/demographics/")
+def demographics_about():
+    return render_template("/documentation/demographics.html")
 
 @routes.route("/demographics/<community>")
 def get_data_for_community(community):
