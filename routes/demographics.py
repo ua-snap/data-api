@@ -88,7 +88,10 @@ def get_data_for_community(community):
 
     # Return CSV if requested
     if request.args.get("format") == "csv":
-         return create_csv(reformatted_results, endpoint="demographics", place_id=community)
+        if community != "all":
+            return create_csv(reformatted_results, endpoint="demographics", place_id=community)
+        else:
+            return create_csv(reformatted_results, endpoint="demographics", place_id=None)
     
     # Otherwise return Flask JSON Response
     json_results = json.dumps(reformatted_results, indent = 4)

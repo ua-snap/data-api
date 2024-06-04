@@ -107,6 +107,8 @@ def create_csv(
         filename += " for "
         if place_name is not None:
             filename += quote(place_name)
+        if endpoint == "demographics":
+            filename += quote("All communities in Alaska")
         else:
             filename += lat + ", " + lon
     filename += ".csv"
@@ -130,11 +132,13 @@ def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=
         Multiline metadata string
     """
     metadata = "# Location: "
-    if place_name is None:
+    if place_name is None and lat is not None and lon is not None:
         metadata += lat + " " + lon + "\n"
         # if lat and lon and type huc12, then it's a local / point-to-huc query
         if place_type == "huc12":
             metadata += "# Corresponding HUC12 code: " + place_id + "\n"
+    elif place_name is None and lat is None and lon is None:
+        metadata += "All communities Alaska\n" # this covers the demographic request for "all"
     elif place_type == "community":
         metadata += place_name + "\n"
     else:
