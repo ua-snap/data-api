@@ -60,13 +60,12 @@ def get_data_for_community(community):
         for field in fields:
             reformatted_results[c][field] = results[c][field]
 
-    json_results = json.dumps(reformatted_results, indent = 4) 
-
     # Return CSV if requested
     if request.args.get("format") == "csv":
-         return create_csv(json_results, endpoint="demographics", place_id=community)
+         return create_csv(reformatted_results, endpoint="demographics", place_id=community)
     
     # Otherwise return Flask JSON Response
+    json_results = json.dumps(reformatted_results, indent = 4)
     return Response(response=json_results, status=200, mimetype="application/json")
 
 

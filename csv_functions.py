@@ -949,4 +949,53 @@ def hydrology_csv(data, endpoint):
         }
 
 def demographics_csv(data):
-    return data
+    coords = ["id"]
+    values = [
+        "name", "comment", "total_population", "pct_under_18", "pct_65_plus", 
+        "pct_minority", "pct_african_american", "pct_amer_indian_ak_native", "pct_asian", "pct_hawaiian_pacislander", "pct_hispanic_latino", "pct_white", "pct_multi", "pct_other",
+        "pct_asthma", "pct_copd", "pct_diabetes", "pct_hd", "pct_kd", "pct_stroke",
+        "pct_w_disability", "moe_pct_w_disability", "pct_insured", "moe_pct_insured", "pct_uninsured", "moe_pct_uninsured",
+        "pct_no_bband", "pct_no_hsdiploma", "pct_below_150pov",
+    ]
+    fieldnames = coords + values
+    csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+
+    metadata = "# Demographic data for individual communities plus the state of Alaska and United States\n"
+    metadata += "# name is the community name\n"
+    metadata += "# comment is the comment regarding data source\n"
+    metadata += "# total_population is the total population of community\n"
+    metadata += "# pct_under_18 is the percentage of population under age 18\n"
+    metadata += "# pct_65_plus is the percentage of population age 65 and older\n"
+    metadata += "# pct_minority is the percentage of population of racial or ethnic minority status\n"
+    metadata += "# pct_african_american is the percentage of population African American\n"
+    metadata += "# pct_amer_indian_ak_native is the percentage of population American Indian or Alaska Native\n"
+    metadata += "# pct_asian is the percentage of population Asian\n"
+    metadata += "# pct_hawaiian_pacislander is the percentage of population Native Hawaiian and Pacific Islander\n"
+    metadata += "# pct_hispanic_latino is the percentage of population Hispanic or Latino\n"
+    metadata += "# pct_white is the percentage of population White\n"
+    metadata += "# pct_multi is the percentage of population two or more races\n"
+    metadata += "# pct_other is the percentage of population other race\n"
+    metadata += "# pct_asthma is the percentage of of adults aged >=18 years with current asthma\n"
+    metadata += "# pct_copd is the percentage of of adults aged >=18 years with chronic obstructive pulmonary disease\n"
+    metadata += "# pct_diabetes is the percentage of of adults aged >=18 years with diagnosed diabetes\n"
+    metadata += "# pct_hd is the percentage of of adults aged >=18 years with coronary heart disease\n"
+    metadata += "# pct_kd is the percentage of of adults aged >=18 years with chronic kidney disease\n"
+    metadata += "# pct_stroke is the percentage of of adults aged >=18 years with stroke\n"
+    metadata += "# pct_w_disability is the percentage of population with a disability\n"
+    metadata += "# moe_pct_w_disability is the margin of error for percentage of population with a disability\n"
+    metadata += "# pct_insured is the percentage of population with health insurance\n"
+    metadata += "# moe_pct_insured is the margin of error percentage of population with health insurance\n"
+    metadata += "# pct_uninsured is the percentage of population without health insurance\n"
+    metadata += "# moe_pct_uninsured is the margin of error percentage of population without health insurance\n"
+    metadata += "# pct_no_bband is the percentage of households with no broadband internet subscription\n"
+    metadata += "# pct_no_hsdiploma is the percentage of adults aged >=25 years with no high school diploma\n"
+    metadata += "# pct_below_150pov is the percentage of population living below 150% of the poverty level\n"
+
+    filename_data_name = "Demographic Data - "
+
+    return {
+            "csv_dicts": csv_dicts,
+            "fieldnames": fieldnames,
+            "metadata": metadata,
+            "filename_data_name": filename_data_name,
+        }
