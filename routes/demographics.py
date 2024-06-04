@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, Response, request
+from flask import render_template, Response, request
 import asyncio
 import json
-# import pandas as pd
+import requests
 
 # local imports
 from . import routes
@@ -10,6 +10,20 @@ from luts import demographics_fields
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 from csv_functions import create_csv
+
+def validate_community_id(community):
+    """Function to confirm that the input community ID is valid.
+    Args:
+           community (string): A community ID from route input
+    Returns:
+            Boolean : True means the community ID is valid, False means it is not valid
+    """
+    url = generate_wfs_places_url("demographics:demographics", filter=community, filter_type="id")
+    with requests.get(url) as r:
+        if r.json()['features'] == []:
+            return False
+        else: return True
+
 
 @routes.route("/demographics/")
 def demographics_about():
@@ -29,6 +43,10 @@ def get_data_for_community(community):
        Notes:
            example: http://localhost:5000/demographics/AK15
     """
+    # Validate community ID; if not valid, return an error
+    if not validate_community_id(community):
+        return render_template("400/bad_request.html"), 400
+
     # List URLs
     urls = []
     for c in [community, "US0", "AK0"]:
