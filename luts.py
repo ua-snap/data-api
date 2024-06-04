@@ -28,7 +28,7 @@ landcover_names = {
 }
 smokey_bear_names = {
     1: "Low",
-    2: "Medium",
+    2: "Moderate",
     3: "High",
     4: "Very High",
     5: "Extreme",

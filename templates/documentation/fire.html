@@ -11,6 +11,7 @@
     <li>Land cover types from 2015 were provided by the North American Land Change Monitoring System at a resolution of 30m.</li>
     <li>Historical fires from 1940&ndash;2021 were provided by the Alaska Interagency Coordination Center (AICC).</li>
     <li>Flammability projections are summarized across years 2000&ndash;2099 and were provided by ALFRESCO model outputs, simulated with the CRU TS 4.0 dataset (2000&ndash;2015) and NCAR-CCSM4 model outputs using the RCP 8.5 emissions scenario (2016&ndash;2099).</li>
+    <li>PM2.5 Concentration are model forecasts run by NASA once every 6 hours and available from the <a href="https://gmao.gsfc.nasa.gov/GMAO_products/NRT_products.php">GMAO GEOS NRT Data Products webpage</a>.  AQI is derived from these data once per day, using the 0th hour PM2.5 concentration.</li>
   </ul>
 </p>
 
@@ -47,6 +48,22 @@
 
 <pre>
 {
+  "aqi_12": {
+    "aqi": 14,
+    "pm25_conc": 3
+  },
+  "aqi_24": {
+    "aqi": 10,
+    "pm25_conc": 2
+  },
+  "aqi_48": {
+    "aqi": 15,
+    "pm25_conc": 4
+  },
+  "aqi_6": {
+    "aqi": 6,
+    "pm25_conc": 1
+  },
   "cfd": {
     "code": 1,
     "color": "#2b83ba",
@@ -78,6 +95,22 @@
 
 <pre>
 {
+  "aqi_12": {
+    "aqi": &lt;numeric air quality index value&gt;,
+    "pm25_conc": &lt;numeric PM2.5 concentration in &micro;g/m&sup3;&gt;
+  },
+  "aqi_24": {
+    "aqi": &lt;numeric air quality index value&gt;,
+    "pm25_conc": &lt;numeric PM2.5 concentration in &micro;g/m&sup3;&gt;
+  },
+  "aqi_48": {
+    "aqi": &lt;numeric air quality index value&gt;,
+    "pm25_conc": &lt;numeric PM2.5 concentration in &micro;g/m&sup3;&gt;
+  },
+  "aqi_6": {
+    "aqi": &lt;numeric air quality index value&gt;,
+    "pm25_conc": &lt;numeric PM2.5 concentration in &micro;g/m&sup3;&gt;
+  },
   "cfd": {
     "code": &lt;numeric fire danger rating, range 1 through 5&gt;,
     "color": &lt;hex color code to visualize fire danger&gt;,
@@ -145,7 +178,12 @@
           href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/eeaaca2c-0280-4226-b126-fda42a2b6214">Flammability</a>
       </td>
       <td>Johnstone, J. F., Rupp, T. S., Olson, M. A., & Verbyla, D. L. (2011). Modeling impacts of fire severity on successional trajectories and future fire behavior in Alaskan boreal forests. <i>Landscape Ecology, 26</i>(4), 487&ndash;500. <a href="https://doi.org/10.1007/s10980-011-9574-6">https://doi.org/10.1007/s10980-011-9574-6</a></td>
-      
+    </tr>
+    <tr>
+      <td><a href="https://gmao.gsfc.nasa.gov/GMAO_products/NRT_products.php">
+          PM2.5 Concentration and AQI
+      </a></td>
+      <td>The GEOS data used in this project have been provided by the Global Modeling and Assimilation Office (GMAO) at NASA Goddard Space Flight Center through the online data portal in the NASA Center for Climate Simulation.</td>
     </tr>
   </tbody>
 </table>

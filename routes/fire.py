@@ -19,8 +19,24 @@ wms_targets = [
     "spruceadj_3338",
     "snow_cover_3338",
     "alfresco_relative_flammability_NCAR-CCSM4_rcp85_2000_2099",
+    "aqi_forecast_6_hrs",
+    "aqi_forecast_12_hrs",
+    "aqi_forecast_24_hrs",
+    "aqi_forecast_48_hrs",
 ]
 wfs_targets = {"historical_fire_perimiters": "NAME,FIREYEAR"}
+
+
+def package_aqi_forecast(aqi_forecast_resp):
+    """Package AQI forecast data in dict"""
+    if aqi_forecast_resp["features"] == []:
+        return None
+    pm25_conc = aqi_forecast_resp["features"][0]["properties"]["PM2.5_Concentration"]
+    aqi = aqi_forecast_resp["features"][0]["properties"]["AQI"]
+    if pm25_conc is None or aqi is None:
+        return None
+    di = {"pm25_conc": round(pm25_conc), "aqi": round(aqi)}
+    return di
 
 
 def package_fire_history(fihist_resp):
@@ -131,13 +147,21 @@ def run_fetch_fire(lat, lon):
     firedanger = package_fire_danger(results[1])
     snow = package_snow(results[2])
     relflammability = package_flammability(results[3])
-    firehist = package_fire_history(results[4])
+    aqi_forecast_6_hrs = package_aqi_forecast(results[4])
+    aqi_forecast_12_hrs = package_aqi_forecast(results[5])
+    aqi_forecast_24_hrs = package_aqi_forecast(results[6])
+    aqi_forecast_48_hrs = package_aqi_forecast(results[7])
+    firehist = package_fire_history(results[8])
 
     data = {
         "lc": landcover,
         "is_snow": snow,
         "cfd": firedanger,
         "hist_fire": firehist,
+        "aqi_6": aqi_forecast_6_hrs,
+        "aqi_12": aqi_forecast_12_hrs,
+        "aqi_24": aqi_forecast_24_hrs,
+        "aqi_48": aqi_forecast_48_hrs,
         "prf": relflammability,
     }
 
