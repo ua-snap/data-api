@@ -73,7 +73,7 @@ def get_data_for_community(community):
 
     # Recreate the dicts in a better order for viewing (drops "id", "GEOID", and "areatype")
     # convert to JSON object to preserve ordered output
-    fields = ["name", "comment", "total_population", "pct_under_18", "pct_65_plus", 
+    fields = ["name", "comment", "total_population", "pct_under_18", "pct_under_5", "pct_65_plus", 
     "pct_minority", "pct_african_american", "pct_amer_indian_ak_native", "pct_asian", "pct_hawaiian_pacislander", "pct_hispanic_latino", "pct_white", "pct_multi", "pct_other",
     "pct_asthma", "pct_copd", "pct_diabetes", "pct_hd", "pct_kd", "pct_stroke",
     "pct_w_disability", "moe_pct_w_disability", "pct_insured", "moe_pct_insured", "pct_uninsured", "moe_pct_uninsured",

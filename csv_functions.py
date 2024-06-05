@@ -107,7 +107,7 @@ def create_csv(
         filename += " for "
         if place_name is not None:
             filename += quote(place_name)
-        if endpoint == "demographics":
+        elif endpoint == "demographics":
             filename += quote("All communities in Alaska")
         else:
             filename += lat + ", " + lon
@@ -955,7 +955,7 @@ def hydrology_csv(data, endpoint):
 def demographics_csv(data):
     coords = ["id"]
     values = [
-        "name", "comment", "total_population", "pct_under_18", "pct_65_plus", 
+        "name", "comment", "total_population", "pct_under_18", "pct_under_5", "pct_65_plus", 
         "pct_minority", "pct_african_american", "pct_amer_indian_ak_native", "pct_asian", "pct_hawaiian_pacislander", "pct_hispanic_latino", "pct_white", "pct_multi", "pct_other",
         "pct_asthma", "pct_copd", "pct_diabetes", "pct_hd", "pct_kd", "pct_stroke",
         "pct_w_disability", "moe_pct_w_disability", "pct_insured", "moe_pct_insured", "pct_uninsured", "moe_pct_uninsured",
@@ -969,6 +969,7 @@ def demographics_csv(data):
     metadata += "# comment is the comment regarding data source\n"
     metadata += "# total_population is the total population of community\n"
     metadata += "# pct_under_18 is the percentage of population under age 18\n"
+    metadata += "# pct_under_5 is the percentage of population under age 5\n"
     metadata += "# pct_65_plus is the percentage of population age 65 and older\n"
     metadata += "# pct_minority is the percentage of population of racial or ethnic minority status\n"
     metadata += "# pct_african_american is the percentage of population African American\n"

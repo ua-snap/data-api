@@ -111,7 +111,7 @@ areas_near = {
     "protected_area": "protected_areas_near",
 }
 
-# table to decode field names for demographic data
+# table to decode field names for demographic data from GeoServer
 # fields that were not truncated do not appear here
 # see data dictionary in the repo for more info: https://github.com/ua-snap/epa-justice/blob/main/README.md
 demographics_fields = {
@@ -130,7 +130,7 @@ demographics_fields = {
     "pct_no_bba": "pct_no_bband",
     "pct_no_hsd": "pct_no_hsdiploma",
     "pct_under_": "pct_under_18",
-    "":"pct_under_5", # TODO: add truncated dict key when GeoServer demographics file is updated!
+    "pct_unde_1": "pct_under_5",
     "pct_uninsu": "pct_uninsured",
     "pct_w_disa": "pct_w_disability",
     "total_popu": "total_population",
