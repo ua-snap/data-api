@@ -18,7 +18,6 @@ def validate_community_id(community):
     Returns:
             Tuple of boolean and list: for boolean, True means the community ID is valid and False means it is not valid; list is all valid community IDs
     """
-    #url = generate_wfs_places_url("demographics:demographics", filter=community, filter_type="id")
     community_ids = []
     url = generate_wfs_places_url("demographics:demographics", properties="id")
     with requests.get(url) as r:
