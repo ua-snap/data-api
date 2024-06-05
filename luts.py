@@ -110,3 +110,28 @@ areas_near = {
     "huc": "hucs_near",
     "protected_area": "protected_areas_near",
 }
+
+# table to decode field names for demographic data from GeoServer
+# fields that were not truncated do not appear here
+# see data dictionary in the repo for more info: https://github.com/ua-snap/epa-justice/blob/main/README.md
+demographics_fields = {
+    "moe_pct_in": "moe_pct_insured",
+    "moe_pct_un": "moe_pct_uninsured",
+    "moe_pct_w_": "moe_pct_w_disability",
+    "pct_65_plu": "pct_65_plus",
+    "pct_africa": "pct_african_american",
+    "pct_amer_i": "pct_amer_indian_ak_native",
+    "pct_below_": "pct_below_150pov",
+    "pct_diabet": "pct_diabetes",
+    "pct_hawaii": "pct_hawaiian_pacislander",
+    "pct_hispan": "pct_hispanic_latino",
+    "pct_insure": "pct_insured",
+    "pct_minori": "pct_minority",
+    "pct_no_bba": "pct_no_bband",
+    "pct_no_hsd": "pct_no_hsdiploma",
+    "pct_under_": "pct_under_18",
+    "pct_unde_1": "pct_under_5",
+    "pct_uninsu": "pct_uninsured",
+    "pct_w_disa": "pct_w_disability",
+    "total_popu": "total_population",
+}

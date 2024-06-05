@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Demographics</h2>
+
+<p>
+  The endpoints here provide access to demographic data derived from the 2020 US Census Demographics and 
+  Housing Characteristics File (DHC), the 2017&ndash;2021 US Census American Community Survey (ACS) 5-year dataset,
+   the 2023 CDC PLACES dataset, and the 2017&ndash;2021 CDC Social Determinants of Health (SDOH) dataset. 
+   Data is returned for individual Alaskan communities, and also includes contextual data for the state of
+    Alaska and the United States.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Available Places</h4>
+
+<p>Query a community by ID from the options at <a href="https://earthmaps.io/places/communities">earthmaps.io/places/communities</a>.</p> 
+<p>Get data for all available Alaskan communities by using <code>all</code> as the community ID.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Demographic data by community</td>
+      <td><a href="/demographics/AK15">/demographics/AK15</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Community query</h4>
+
+<p>Results from community queries will look like this:</p>
+
+<pre>
+{
+  ...
+  "AK15": {
+    "name": "Anchorage",
+    "comment": "Data represent information from nearest borough (Anchorage Municipality), which includes Municipality of Anchorage and Anchorage.",
+    "total_population": 291247,
+    "pct_under_18": 23.46,
+    "pct_under_5": 6.43,
+    "pct_65_plus": 12.41,
+    "pct_minority": 43.9,
+    "pct_african_american": 4.73,
+    "pct_amer_indian_ak_native": 7.72,
+    "pct_asian": 9.37,
+    "pct_hawaiian_pacislander": 3.38,
+    "pct_hispanic_latino": 9.08,
+    "pct_white": 54.33,
+    "pct_multi": 10.74,
+    "pct_other": 0.66,
+    "pct_asthma": 9.4,
+    "pct_copd": 5.3,
+    "pct_diabetes": 7.9,
+    "pct_hd": 4.7,
+    "pct_kd": 2.6,
+    "pct_stroke": 2.6,
+    "pct_w_disability": 11.2,
+    "moe_pct_w_disability": 0.6,
+    "pct_insured": 89.4,
+    "moe_pct_insured": 0.7,
+    "pct_uninsured": 10.6,
+    "moe_pct_uninsured": 0.7,
+    "pct_no_bband": 7.3,
+    "pct_no_hsdiploma": 5.8,
+    "pct_below_150pov": 15.1
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+    "ID": &lt;community ID&gt;: {
+        "name": &lt;community name&gt;,
+        "comment": &lt;comments regarding data source&gt;,
+        "total_population": &lt;total population of community&gt;,
+        "pct_under_18": &lt;percentage of population under age 18&gt;,
+        "pct_under_5": &lt;percentage of population under age 5&gt;,
+        "pct_65_plus": &lt;percentage of population age 65 and older&gt;,
+        "pct_minority": &lt;percentage of population of racial or ethnic minority status&gt;,
+        "pct_african_american": &lt;percentage of population African American&gt;,
+        "pct_amer_indian_ak_native": &lt;percentage of population American Indian or Alaska Native&gt;,
+        "pct_asian": &lt;percentage of population Asian&gt;,
+        "pct_hawaiian_pacislander": &lt;percentage of population Native Hawaiian and Pacific Islander&gt;,
+        "pct_hispanic_latino": &lt;percentage of population Hispanic or Latino&gt;,
+        "pct_white": &lt;percentage of population White&gt;,
+        "pct_multi": &lt;percentage of population two or more races&gt;,
+        "pct_other": &lt;percentage of population other race&gt;,
+        "pct_asthma": &lt;percentage of of adults aged >=18 years with current asthma&gt;,
+        "pct_copd": &lt;percentage of of adults aged >=18 years with chronic obstructive pulmonary disease&gt;,
+        "pct_diabetes": &lt;percentage of of adults aged >=18 years with diagnosed diabetes&gt;,
+        "pct_hd": &lt;percentage of of adults aged >=18 years with coronary heart disease&gt;,
+        "pct_kd": &lt;percentage of of adults aged >=18 years with chronic kidney disease&gt;,
+        "pct_stroke": &lt;percentage of of adults aged >=18 years with stroke&gt;,
+        "pct_w_disability": &lt;percentage of population with a disability&gt;,
+        "moe_pct_w_disability": &lt;margin of error for percentage of population with a disability&gt;,
+        "pct_insured": &lt;percentage of population with health insurance&gt;,
+        "moe_pct_insured": &lt;margin of error percentage of population with health insurance&gt;,
+        "pct_uninsured": &lt;percentage of population without health insurance&gt;,
+        "moe_pct_uninsured": &lt;margin of error percentage of population without health insurance&gt;,
+        "pct_no_bband": &lt;percentage of households with no broadband internet subscription&gt;,
+        "pct_no_hsdiploma": &lt;percentage of adults aged >=25 years with no high school diploma&gt;,
+        "pct_below_150pov": &lt;percentage of population living below 150% of the poverty level&gt;
+    },
+    ...
+    }
+</pre>
+
+<h3>Source data</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Dataset source</th>
+            <th>Citation</th>
+            <th>Variables derived from dataset</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>2020 US Census Demographics and Housing Characteristics File (DHC)</td>
+            <td>U.S. Census Bureau (2020). Demographics and Housing Characteristics File. 
+                Accessed May 2024, from <a href="https://www.census.gov/data/tables/2023/dec/2020-census-dhc.html">https://www.census.gov/data/tables/2023/dec/2020-census-dhc.html</a></td>
+            <td>
+                <code>total_population</code>, 
+                <code>pct_under_18</code>,
+                <code>pct_under_5</code>,
+                <code>pct_65_plus</code>, 
+                <code>pct_african_american</code>, 
+                <code>pct_amer_indian_ak_native</code>, 
+                <code>pct_asian</code>, 
+                <code>pct_hawaiian_pacislander</code>, 
+                <code>pct_hispanic_latino</code>, 
+                <code>pct_white</code>, 
+                <code>pct_multi</code>,
+                <code>pct_other</code>
+            </td>
+        </tr>
+        <tr>
+            <td>2017-2021 US Census American Community Survey (ACS) 5-year dataset</td>
+            <td>U.S. Census Bureau (2021). 2017-2021 American Community Survey 5-year estimates. 
+                Accessed May 2024, from <a href="https://www.census.gov/programs-surveys/acs/data.html">https://www.census.gov/programs-surveys/acs/data.html</a></td>
+            <td>
+                <code>pct_w_disability</code>, 
+                <code>moe_pct_w_disability</code>, 
+                <code>pct_insured</code>, 
+                <code>moe_pct_insured</code>, 
+                <code>pct_uninsured</code>, 
+                <code>moe_pct_uninsured</code>
+            </td>
+        </tr>
+        <tr>
+            <td>2023 CDC PLACES dataset</td>
+            <td>PLACES. Centers for Disease Control and Prevention. 
+                Accessed May 2024, from <a href="https://www.cdc.gov/places">https://www.cdc.gov/places</a></td>
+            <td> 
+                <code>pct_asthma</code>, 
+                <code>pct_copd</code>, 
+                <code>pct_diabetes</code>, 
+                <code>pct_hd</code>, 
+                <code>pct_kd</code>, 
+                <code>pct_stroke</code>
+            </td>
+        </tr>
+        <tr>
+            <td>2017-2021 CDC Social Determinants of Health (SDOH) dataset</td>
+            <td>Healthy People 2030, U.S. Department of Health and Human Services, Office of Disease Prevention and Health Promotion. 
+                Accessed May 2024, from <a href="https://health.gov/healthypeople/objectives-and-data/social-determinants-health">https://health.gov/healthypeople/objectives-and-data/social-determinants-health</a></td>
+            <td> 
+                <code>pct_no_bband</code>, 
+                <code>pct_no_hsdiploma</code>, 
+                <code>pct_below_150pov</code>, 
+                <code>pct_minority</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}
