@@ -80,3 +80,9 @@ def generate_wms_and_wfs_query_urls(wms, wms_base, wfs, wfs_base):
     for veclyr in wfs:
         urls.append(wfs_base.format(veclyr, wfs[veclyr]))
     return urls
+
+
+def generate_wfs_species_huc12_intersection_url(lat, lon):
+    """Generate WFS query URL to retrieve species data HUC12."""
+    wfs_url = (GS_BASE_URL + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=species:huc12_species&propertyName=(HUC_12)&outputFormat=application/json&cql_filter=INTERSECTS(the_geom, POINT({lon} {lat}))")
+    return wfs_url

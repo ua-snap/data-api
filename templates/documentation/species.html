@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Species</h2>
+
+<p>
+  The endpoints here provide access to modeled species distribution data. 
+</p>
+
+<p>These data were modeled using Hydrologic Unit (Level 12), or HUC-12, polygons as the spatial unit of analysis. 
+    Querying a point will return data for the closest HUC-12 polygon used in the dataset.
+  </p>
+
+<p>
+    See the <a href="https://catalog.snap.uaf.edu/geonetwork">LINK TO GEONETWORK PAGE
+      page</a> for more information. Links to academic references are included at the bottom of this page.</p>
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Intersecting area query</h4>
+
+<p>Query data derived for a point location specified by latitude and longitude, 
+    and return the modeled species distribution data from the HUC-12 polygon that 
+    intersects the supplied point location.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Species data intersecting area query</td>
+      <td><a href="/species/65.24/-142.22">/species/65.24/-142.22</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Intersecting area query</h4>
+
+<p>Results from intersecting area queries will look like this:</p>
+
+<pre>
+    {
+        "amphibians": [
+          [
+            "Wood Frog",
+            "Lithobates sylvaticus"
+          ],
+          ...
+        ],
+        "birds": [
+          [
+            "Alder Flycatcher",
+            "Empidonax alnorum"
+          ],
+          ...
+          [
+            "Yellow Warbler",
+            "Setophaga petechia"
+          ]
+        ],
+        "mammals": [
+          [
+            "Arctic Ground Squirrel",
+            "Urocitellus parryii"
+          ],
+          ...
+          [
+            "Tundra Shrew",
+            "Sorex tundrensis"
+          ]
+        ],
+        "total_sgcn_species": "92"
+      }
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+    "amphibians" : &lt;list of tuples containing common and scientific names of amphibian species&gt;,
+    "birds" : &lt;list of tuples containing common and scientific names of bird species&gt;,
+    "mammals" : &lt;list of tuples containing common and scientific names of mammal species&gt;,
+    "total_sgcn_species" : &lt;count of all SGCN species&gt;,
+    }
+</pre>
+
+<h3>Source data</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Dataset source</th>
+            <th>Citation</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Insert data source title here.</td>
+            <td>Insert citation (w/ link) here.</td>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}
