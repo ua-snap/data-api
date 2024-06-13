@@ -60,14 +60,20 @@ def fetch_species_data_by_lat_lon(lat, lon):
 
     for index_, row in df.iterrows():
         if row.type == "birds":
-            birds_list.append([row['common_name'], row['scientific_name']])
+            birds_list.append({"common_name" : row['common_name'],
+                               "scientific_name" : row['scientific_name'],
+                               })
         if row.type == "mammals":
-            mammals_list.append([row['common_name'], row['scientific_name']])
+            mammals_list.append({"common_name" : row['common_name'],
+                               "scientific_name" : row['scientific_name'],
+                               })
         if row.type == "amphibians":
-            amphibians_list.append([row['common_name'], row['scientific_name']])
+            amphibians_list.append({"common_name" : row['common_name'],
+                               "scientific_name" : row['scientific_name'],
+                               })
 
     results = {
-            "total_sgcn_species" : str(len(df)),
+            "total_sgcn_species" : len(df),
             "birds" : birds_list,
             "mammals" : mammals_list,
             "amphibians" : amphibians_list

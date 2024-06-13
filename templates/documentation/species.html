@@ -52,35 +52,27 @@
 <pre>
     {
         "amphibians": [
-          [
-            "Wood Frog",
-            "Lithobates sylvaticus"
-          ],
+          {
+            "common_name" : "Wood Frog",
+            "scientific_name" : "Lithobates sylvaticus"
+          },
           ...
         ],
         "birds": [
-          [
-            "Alder Flycatcher",
-            "Empidonax alnorum"
-          ],
+          {
+            "common_name" : "Alder Flycatcher",
+            "scientific_name" : "Empidonax alnorum"
+          },
           ...
-          [
-            "Yellow Warbler",
-            "Setophaga petechia"
-          ]
         ],
         "mammals": [
-          [
-            "Arctic Ground Squirrel",
-            "Urocitellus parryii"
-          ],
+          {
+            "common_name" : "Arctic Ground Squirrel",
+            "scientific_name" : "Urocitellus parryii"
+          },
           ...
-          [
-            "Tundra Shrew",
-            "Sorex tundrensis"
-          ]
         ],
-        "total_sgcn_species": "92"
+        "total_sgcn_species": 92
       }
 </pre>
 
@@ -88,9 +80,9 @@
 
 <pre>
 {
-    "amphibians" : &lt;list of tuples containing common and scientific names of amphibian species&gt;,
-    "birds" : &lt;list of tuples containing common and scientific names of bird species&gt;,
-    "mammals" : &lt;list of tuples containing common and scientific names of mammal species&gt;,
+    "amphibians" : &lt;list of dictionaries containing common and scientific names of amphibian species&gt;,
+    "birds" : &lt;list of dictionaries containing common and scientific names of bird species&gt;,
+    "mammals" : &lt;list of dictionaries containing common and scientific names of mammal species&gt;,
     "total_sgcn_species" : &lt;count of all SGCN species&gt;,
     }
 </pre>
