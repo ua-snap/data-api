@@ -62,6 +62,7 @@ nodata_mappings = {
     "wet_days_per_year": nodata_values["default"],
     "wet_days_per_year_all": nodata_values["default"],
     "demographics": nodata_values["default"],
+    "species": nodata_values["default"],
 }
 
 
