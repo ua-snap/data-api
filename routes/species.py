@@ -25,6 +25,7 @@ def fetch_species_data_by_lat_lon(lat, lon):
         JSON-like dict of species by type. The dictionary does not include reference
         to outdated HUC12 ID that was used to query species dataset."""
 
+    # validate lat/lon coords
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -36,14 +37,17 @@ def fetch_species_data_by_lat_lon(lat, lon):
             422,
         )
     
+    # get species-specific HUC12
     with requests.get(generate_wfs_species_huc12_intersection_url(lat, lon)) as r:
         if len(r.json()['features']) < 1:
             return render_template("404/no_data.html"), 404
         else:
             huc12 = r.json()['features'][0]['properties']['HUC_12']
 
+    # create empty dataframe to populate
     df = pd.DataFrame(columns=["HUC_12", "type", "species_id", "common_name", "scientific_name"])
     
+    # get species data using HUC12 (non-spatial query) and populate dataframe
     with requests.get(generate_wfs_places_url("species:huc12_species_lookup", filter_type="HUC_12", filter=huc12)) as r:
         for feature in r.json()["features"]:
             row_dict = {"HUC_12" : [feature["properties"]["HUC_12"]],
@@ -54,36 +58,36 @@ def fetch_species_data_by_lat_lon(lat, lon):
             }
             df = pd.concat([df, pd.DataFrame(row_dict)], ignore_index=True)
 
-    birds_list = []
-    mammals_list = []
-    amphibians_list = []
+    # populate results dict
+    results = []
 
     for index_, row in df.iterrows():
         if row.type == "birds":
-            birds_list.append({"common_name" : row['common_name'],
-                               "scientific_name" : row['scientific_name'],
-                               })
+            results.append({
+                "type" : "bird",
+                "common_name" : row['common_name'],
+                "scientific_name" : row['scientific_name'],
+                })
         if row.type == "mammals":
-            mammals_list.append({"common_name" : row['common_name'],
-                               "scientific_name" : row['scientific_name'],
-                               })
+            results.append({
+                "type" : "mammal",
+                "common_name" : row['common_name'],
+                "scientific_name" : row['scientific_name'],
+                })
         if row.type == "amphibians":
-            amphibians_list.append({"common_name" : row['common_name'],
-                               "scientific_name" : row['scientific_name'],
-                               })
-
-    results = {
-            "total_sgcn_species" : len(df),
-            "birds" : birds_list,
-            "mammals" : mammals_list,
-            "amphibians" : amphibians_list
-        }
+            results.append({
+                "type" : "amphibian",
+                "common_name" : row['common_name'],
+                "scientific_name" : row['scientific_name'],
+                })
     
-    # TODO: add CSV explort
-    # if request.args.get("format") == "csv":
-    #     return create_csv(......)
-
-    return results
+    # return CSV if requested
+    if request.args.get("format") == "csv":
+        return create_csv(results, endpoint="species", lat=lat, lon=lon)
+    
+    # otherwise return Flask JSON response
+    json_results = json.dumps(results, indent = 4)
+    return Response(response=json_results, status=200, mimetype="application/json")
 
 
 @routes.route("/species/")

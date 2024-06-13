@@ -92,6 +92,8 @@ def create_csv(
         properties = hydrology_csv(data, endpoint)
     elif endpoint == "demographics":
         properties = demographics_csv(data)
+    elif endpoint == "species":
+        properties = species_csv(data)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -1004,3 +1006,24 @@ def demographics_csv(data):
             "metadata": metadata,
             "filename_data_name": filename_data_name,
         }
+
+
+def species_csv(data):
+    # coords = ["species" , "type", "common_name", "scientific_name"]
+    # values = ["birds", "mammals", "amphibians"]
+    # fieldnames = coords + values
+    # csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+
+    metadata = "# Species of Greatest Conservation Need (SGCN) presence data modeled for HUC12 polygons\n"
+    metadata += "# type is the general species category\n"
+    metadata += "# common_name is the common name of the species\n"
+    metadata += "# scientific_name is the scientific name of the species\n"
+
+    filename_data_name = "Species Data - "
+
+    return {
+                "csv_dicts": data,
+                "fieldnames": ["type", "common_name", "scientific_name"],
+                "metadata": metadata,
+                "filename_data_name": filename_data_name,
+            }
