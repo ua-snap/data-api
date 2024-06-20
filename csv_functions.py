@@ -44,7 +44,7 @@ def create_csv(
 
     if endpoint == "beetles":
         properties = beetles_csv(data)
-    if endpoint == "cmip6_indicators":
+    elif endpoint == "cmip6_indicators":
         properties = cmip6_indicators_csv(data)
     elif endpoint in [
         "heating_degree_days_Fdays",
