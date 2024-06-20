@@ -52,15 +52,18 @@ snow_status = {
 
 place_type_labels = {
     "huc": "HUC",
+    "yt_watershed": "Yukon Watershed",
     "protected_area": "Protected Area",
     "borough": "Borough",
     "census_area": "Census Area",
     "fire_zone": "Fire Management Unit",
+    "yt_fire_district": "Yukon Fire District",
     "corporation": "Corporation",
     "climate_division": "Climate Division",
     "ethnolinguistic_region": "Ethnolinguistic Region",
     "first_nation": "Canadian First Nation",
     "game_management_unit": "Game Management Unit",
+    "yt_game_management_subzone": "Yukon Game Management Subzone",
 }
 
 cached_urls = [
@@ -85,12 +88,15 @@ cached_urls = [
 all_jsons = [
     "communities",
     "hucs",
+    "yt_watersheds",
     "protected_areas",
     "corporations",
     "climate_divisions",
     "ethnolinguistic_regions",
     "fire_zones",
+    "yt_fire_districts",
     "game_management_units",
+    "yt_game_management_subzones",
     "first_nations",
     "boroughs",
     "census_areas",
@@ -105,9 +111,12 @@ areas_near = {
     "corporation": "corporations_near",
     "ethnolinguistic_region": "ethnolinguistic_regions_near",
     "fire_zone": "fire_management_units_near",
+    "yt_fire_district": "yt_fire_districts_near",
     "game_management_unit": "game_management_units_near",
+    "yt_game_management_subzone": "yt_game_management_subzones_near",
     "first_nation": "ca_first_nations_near",
     "huc": "hucs_near",
+    "yt_watershed": "yt_watersheds_near",
     "protected_area": "protected_areas_near",
 }
 
