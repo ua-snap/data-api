@@ -114,13 +114,9 @@ def fire_about():
 
 
 @routes.route("/fire/point/<lat>/<lon>")
-@routes.route("/fire/point/<lat>/<lon>/<geometry>")
-def run_fetch_fire(lat, lon, geometry=False):
+def run_fetch_fire(lat, lon):
     """Run the async requesting and return data
     example request: http://localhost:5000/%F0%9F%94%A5/65.0628/-146.1627
-
-    If the geometry of nearby fires is desired, the geometry parameter should be set to a value such as True.
-    example request: http://localhost:5000/%F0%9F%94%A5/65.0628/-146.1627/True
     """
     validation = validate_latlon(lat, lon)
     if validation == 400:
@@ -132,35 +128,34 @@ def run_fetch_fire(lat, lon, geometry=False):
             ),
             422,
         )
-    # verify that lat/lon are present
     try:
         results = asyncio.run(
             fetch_data_api(
                 GS_BASE_URL, "alaska_wildfires", wms_targets, wfs_targets, lat, lon
             )
         )
-        if geometry:
-            fire_points = asyncio.run(
-                fetch_data(
-                    [
-                        generate_wfs_search_url(
-                            "alaska_wildfires:fire_points", lat, lon, nearby_fires=True
-                        )
-                    ]
-                )
+
+        fire_points = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_search_url(
+                        "alaska_wildfires:fire_points", lat, lon, nearby_fires=True
+                    )
+                ]
             )
-            fire_polygons = asyncio.run(
-                fetch_data(
-                    [
-                        generate_wfs_search_url(
-                            "alaska_wildfires:fire_polygons",
-                            lat,
-                            lon,
-                            nearby_fires=True,
-                        )
-                    ]
-                )
+        )
+        fire_polygons = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_search_url(
+                        "alaska_wildfires:fire_polygons",
+                        lat,
+                        lon,
+                        nearby_fires=True,
+                    )
+                ]
             )
+        )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
@@ -186,10 +181,8 @@ def run_fetch_fire(lat, lon, geometry=False):
         "aqi_24": aqi_forecast_24_hrs,
         "aqi_48": aqi_forecast_48_hrs,
         "prf": relflammability,
+        "fire_points": fire_points["features"],
+        "fire_polygons": fire_polygons["features"],
     }
-
-    if geometry:
-        data["fire_points"] = fire_points["features"]
-        data["fire_polygons"] = fire_polygons["features"]
 
     return postprocess(data, "fire")
