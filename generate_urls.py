@@ -25,10 +25,27 @@ def generate_base_wfs_url(backend, workspace, lat, lon):
     return wfs_base
 
 
-def generate_wfs_search_url(workspace, lat, lon, hucs_pa_only=False):
+def generate_wfs_search_url(
+    workspace, lat, lon, hucs_pa_only=False, nearby_fires=False
+):
+    """
+    Generate a WFS URL for searching for nearby features which is what is used by the NCR for
+    finding nearby communities + polygon features, and the AFE for finding nearby active fires
+    using the site's search interface.
+
+    Args:
+        workspace (str): the Geoserver workspace name to search in such as "all_boundaries:all_communities"
+        lat (float): latitude of the requested point
+        lon (float): longitude of the requested point
+        hucs_pa_only (bool): whether to search only for HUCs and protected areas
+        nearby_fires (bool): whether to search for nearby fires (uses 1.0 statute mile radius instead of 0.7)
+    """
+    distance = "0.7"
+    if nearby_fires:
+        distance = "1.0"
     wfs_url = (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName={workspace}&outputFormat=application/json&cql_filter=DWithin(the_geom, POINT({lon} {lat}), 0.7, statute miles)"
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName={workspace}&outputFormat=application/json&cql_filter=DWithin(the_geom, POINT({lon} {lat}), {distance}, statute miles)"
     )
     if hucs_pa_only:
         wfs_url += "AND (type='huc' OR type='protected_area')"
