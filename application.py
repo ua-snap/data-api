@@ -24,7 +24,6 @@ def get_service_categories():
         ("Degree Days", "/degree_days"),
         ("Digital Elevation Models (DEMs)", "/elevation"),
         ("Flammability and Vegetation Type (ALFRESCO)", "/alfresco"),
-        ("Geology", "/geology"),
         ("Hydrology", "/hydrology"),
         ("Landfast Sea Ice", "/landfastice"),
         ("Permafrost", "/permafrost"),
