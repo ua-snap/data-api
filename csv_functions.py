@@ -511,9 +511,6 @@ def permafrost_csv(data, source_metadata):
     metadata += "# permafrost base is the lower boundary of the permafrost below the surface in meters\n"
     metadata += "# permafrost top is the upper boundary of the permafrost below the surface in meters\n"
     metadata += "# talikthickness is the thickness of the perennially unfrozen ground occurring in permafrost terrain in meters\n"
-    metadata += "# ice is the estimated ground ice volume\n"
-    metadata += "# pfx is the permafrost extent\n"
-
     metadata += "# gipl is the Geophysical Institute's Permafrost Laboratory\n"
 
     all_fields = []
