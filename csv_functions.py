@@ -504,9 +504,6 @@ def permafrost_csv(data, source_metadata):
                 "talikthickness",
             ],
         },
-        "jorg": {"coords": ["source"], "values": ["ice", "pfx"]},
-        "obu_magt": {"coords": ["source"], "values": ["year", "depth", "temp"]},
-        "obupfx": {"coords": ["source"], "values": ["pfx"]},
     }
 
     metadata = "# magt*m is the mean annual ground temperature at a given depth (* meters) in degrees Celsius\n"
