@@ -110,7 +110,7 @@ def create_csv(
         elif endpoint == "demographics":
             filename += quote("All communities in Alaska")
         else:
-            filename += lat + ", " + lon
+            filename += lat + " " + lon
     filename += ".csv"
     properties["filename"] = filename
 
