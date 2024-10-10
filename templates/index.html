@@ -18,59 +18,58 @@
   <a href="https://github.com/ua-snap/data-api">GitHub</a>. Instructions on how
   to use each data endpoint is given below.
 </p>
+<!-- 
+The service categories are now defined in the application.py in the get_service_categories function. 
+They are alphebetized by category name and passed to this file.
+-->
 <h4>Service categories</h4>
 <ul>
-  <li><a href="/indicators">Climate Indicators</a></li>
-  <li><a href="/beetles">Climate Protection from Spruce Beetles</a></li>
-  <li><a href="/degree_days">Degree Days</a></li>
-  <li><a href="/elevation">Digital Elevation Models (DEMs)</a></li>
-  <li><a href="/alfresco">Flammability and Vegetation Type (ALFRESCO)</a></li>
-  <li><a href="/geology">Geology</a></li>
-  <li><a href="/hydrology">Hydrology</a></li>
-  <li><a href="/landfastice">Landfast Sea Ice</a></li>
-  <li><a href="/permafrost">Permafrost</a></li>
-  <li><a href="/boundary">Physical and Administrative Boundary Polygons</a></li>
-  <li><a href="/physiography">Physiography</a></li>
-  <li><a href="/seaice">Sea Ice Concentration</a></li>
-  <li><a href="/snow">Snowfall Equivalent</a></li>
-  <li><a href="/taspr">Temperature and Precipitation</a></li>
-  <li><a href="/wet_days_per_year">Wet Days Per Year</a></li>
-  <li><a href="/fire">Wildfire</a></li>
-  <li><a href="/demographics">Demographics</a></li>
+  {% for category, url in service_categories %}
+  <li><a href="{{ url }}">{{ category }}</a></li>
+  {% endfor %}
 </ul>
 <h4>Rasdaman raster database</h4>
 <p>
   This tool uses the
-  <a href="http://www.rasdaman.org/">rasdaman</a> array database
-  management system. This technology enables our team to store,
-  analyze and visualize the 5+ TB of climate data that are presented
-  through this interface. We wish to thank the rasdaman project and
-  team for their inspiration and support, and for providing this
-  important innovation in data technology.
+  <a href="http://www.rasdaman.org/">rasdaman</a> array database management
+  system. This technology enables our team to store, analyze and visualize the
+  5+ TB of climate data that are presented through this interface. We wish to
+  thank the rasdaman project and team for their inspiration and support, and for
+  providing this important innovation in data technology.
 </p>
-<blockquote> Peter Baumann, email: p.baumann@jacobs-university.de, & website:
-  rasdaman.org. (2018). rasdaman - raster data manager (9.5.0).
-  Zenodo.
-  <a href="https://doi.org/10.5281/zenodo.1163021">https://doi.org/10.5281/zenodo.1163021</a>
+<blockquote>
+  Peter Baumann, email: p.baumann@jacobs-university.de, & website: rasdaman.org.
+  (2018). rasdaman - raster data manager (9.5.0). Zenodo.
+  <a href="https://doi.org/10.5281/zenodo.1163021"
+    >https://doi.org/10.5281/zenodo.1163021</a
+  >
 </blockquote>
 
 <h4>License</h4>
 <p>
-  Unless otherwise specified by source providers, all data available
-  through this tool is available through the
-  <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC by 4.0)</a>.
+  Unless otherwise specified by source providers, all data available through
+  this tool is available through the
+  <a href="https://creativecommons.org/licenses/by/4.0/"
+    >Creative Commons Attribution 4.0 International (CC by 4.0)</a
+  >.
 </p>
-{% endif %}
-{% if SITE_OFFLINE %}
+{% endif %} {% if SITE_OFFLINE %}
 <div class="offline">
   <div class="px-3 py-3">
     <h3 class="title is-3">SNAP Data API offline for maintenance</h3>
     <div class="content is-size-4">
       <p>
-        We&rsquo;re sorry!  The SNAP Data API is currently offline for system maintenance.  We&rsquo;re working to complete this maintenance and have the SNAP Data API back online as soon as possible, but we don&rsquo;t have an estimated time for completion.  Please check back soon, or reach out to us at <a href="mailto:uaf-snap-data-tools@alaska.edu">uaf-snap-data-tools@alaska.edu</a> with questions.
+        We&rsquo;re sorry! The SNAP Data API is currently offline for system
+        maintenance. We&rsquo;re working to complete this maintenance and have
+        the SNAP Data API back online as soon as possible, but we don&rsquo;t
+        have an estimated time for completion. Please check back soon, or reach
+        out to us at
+        <a href="mailto:uaf-snap-data-tools@alaska.edu"
+          >uaf-snap-data-tools@alaska.edu</a
+        >
+        with questions.
       </p>
     </div>
   </div>
 </div>
-{% endif %}
-{% endblock %}
+{% endif %} {% endblock %}
