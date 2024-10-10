@@ -24,7 +24,6 @@ nodata_mappings = {
     "elevation": nodata_values["default"],
     "fire": nodata_values["default"],
     "flammability": nodata_values["default"],
-    "geology": [],
     "gipl": [],
     "gipl_summary": [],
     "heating_degree_days_Fdays": nodata_values["default"],

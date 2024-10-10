@@ -40,7 +40,11 @@ async def fetch_data_with_retry(url, max_retries=3):
         # If the response is not a blank dictionary, return the response
         if type(response) is dict and response != dict():
             return response
-        elif type(response) is client_exceptions.ClientResponseError and (response.status != 400 and response.status != 404 and response != 422) and retry < max_retries - 1:
+        elif (
+            type(response) is client_exceptions.ClientResponseError
+            and (response.status != 400 and response.status != 404 and response != 422)
+            and retry < max_retries - 1
+        ):
             # Sleep for a moment before retrying the given endpoint
             app.logger.warning(f"Retrying {url} after attempt {retry + 1}")
             await asyncio.sleep(2)
@@ -72,7 +76,6 @@ async def run_fetch_all_eds(lat, lon):
         f"{host}eds/degree_days/freezing_index/{lat}/{lon}",
         f"{host}eds/degree_days/heating/{lat}/{lon}",
         f"{host}eds/degree_days/thawing_index/{lat}/{lon}",
-        f"{host}geology/point/{lat}/{lon}",
         f"{host}physiography/point/{lat}/{lon}",
         f"{host}eds/permafrost/{lat}/{lon}",
         f"{host}eds/wet_days_per_year/point/{lat}/{lon}",
@@ -88,7 +91,6 @@ async def run_fetch_all_eds(lat, lon):
         "freezing_index",
         "heating_degree_days",
         "thawing_index",
-        "geology",
         "physiography",
         "permafrost",
         "wet_days_per_year",
