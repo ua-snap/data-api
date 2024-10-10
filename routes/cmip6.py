@@ -55,7 +55,7 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None):
     return point_data_list
 
 
-def package_cmip6_monthly_data(point_data_list, var_id):
+def package_cmip6_monthly_data(point_data_list, var_id=None):
     """
     Package the CMIP6 monthly values into human-readable JSON format
 
@@ -67,34 +67,36 @@ def package_cmip6_monthly_data(point_data_list, var_id):
     """
     di = dict()
 
-    for mi, model_li in enumerate(point_data_list):
-        model = dim_encodings["model"][mi]
-        di[model] = dict()
-        for si, scenario_li in enumerate(model_li):
-            scenario = dim_encodings["scenario"][si]
-            di[model][scenario] = dict()
+    # Nest point_data_list one level deeper if var_id is specified.
+    # This keeps the nesting level the same for all cases.
+    if var_id != None:
+        point_data_list = [point_data_list]
 
-            # Create an array of every month since January 1950 in the format "YYYY-MM"
-            months = [
-                f"{year}-{str(month).zfill(2)}"
-                for year in range(1950, 2100 + 1)
-                for month in range(1, 13)
-            ]
+    for var_coord, var_li in enumerate(point_data_list):
+        if var_id != None:
+            varname = var_id
+        else:
+            varname = dim_encodings["varname"][var_coord]
+        for mi, model_li in enumerate(var_li):
+            model = dim_encodings["model"][mi]
+            if model not in di:
+                di[model] = dict()
+            for si, scenario_li in enumerate(model_li):
+                scenario = dim_encodings["scenario"][si]
+                if scenario not in di[model]:
+                    di[model][scenario] = dict()
 
-            for moi, month_li in enumerate(months):
-                month = months[moi]
-                di[model][scenario][month] = dict()
+                # Create an array of every month since January 1950 in the format "YYYY-MM"
+                months = [
+                    f"{year}-{str(month).zfill(2)}"
+                    for year in range(1950, 2100 + 1)
+                    for month in range(1, 13)
+                ]
 
-                if var_id != None:
-                    values = [scenario_li[moi]]
-                else:
-                    values = scenario_li[moi].split(" ")
-
-                for vi, value in enumerate(values):
-                    if var_id != None:
-                        varname = var_id
-                    else:
-                        varname = varnames[vi]
+                for soi, value in enumerate(scenario_li):
+                    month = months[soi]
+                    if month not in di[model][scenario]:
+                        di[model][scenario][month] = dict()
 
                     # The "ts" variable is still in Kelvin in the Rasdaman coverage.
                     # Convert this to Celsius. All other temperature variables have
