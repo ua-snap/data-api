@@ -5,7 +5,8 @@ from flask import (
 )
 
 # local imports
-from fetch_data import fetch_data_api
+from fetch_data import fetch_data, fetch_data_api
+from generate_urls import generate_wfs_search_url
 from validate_request import validate_latlon
 from postprocessing import nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
@@ -107,15 +108,11 @@ def package_landcover(landcover_resp):
 
 @routes.route("/fire/")
 @routes.route("/fire/abstract/")
-@routes.route("/wildfire/")
-@routes.route("/wildfire/abstract/")
-@routes.route("/wildfire/point/")
 @routes.route("/fire/point/")
 def fire_about():
     return render_template("documentation/fire.html")
 
 
-@routes.route("/wildfire/point/<lat>/<lon>")
 @routes.route("/fire/point/<lat>/<lon>")
 def run_fetch_fire(lat, lon):
     """Run the async requesting and return data
@@ -131,11 +128,32 @@ def run_fetch_fire(lat, lon):
             ),
             422,
         )
-    # verify that lat/lon are present
     try:
         results = asyncio.run(
             fetch_data_api(
                 GS_BASE_URL, "alaska_wildfires", wms_targets, wfs_targets, lat, lon
+            )
+        )
+
+        fire_points = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_search_url(
+                        "alaska_wildfires:fire_points", lat, lon, nearby_fires=True
+                    )
+                ]
+            )
+        )
+        fire_polygons = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_search_url(
+                        "alaska_wildfires:fire_polygons",
+                        lat,
+                        lon,
+                        nearby_fires=True,
+                    )
+                ]
             )
         )
     except Exception as exc:
@@ -163,6 +181,8 @@ def run_fetch_fire(lat, lon):
         "aqi_24": aqi_forecast_24_hrs,
         "aqi_48": aqi_forecast_48_hrs,
         "prf": relflammability,
+        "fire_points": fire_points["features"],
+        "fire_polygons": fire_polygons["features"],
     }
 
     return postprocess(data, "fire")
