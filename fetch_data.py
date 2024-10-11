@@ -11,6 +11,8 @@ import asyncio
 import numpy as np
 import xarray as xr
 import geopandas as gpd
+import json
+import re
 from collections import defaultdict
 from functools import reduce
 from lxml import etree as ET
@@ -99,7 +101,15 @@ async def make_get_request(url, session):
 
     # way of auto-detecting encoding from URL
     if "application/json" in url:
-        data = await resp.json()
+        # If response has nans, attempting to parse as JSON will fail.
+        # If this happens, replace nans with -9999 and try again.
+        try:
+            data = await resp.json()
+        except json.JSONDecodeError as e:
+            content = await resp.read()
+            json_str = content.decode("utf-8")
+            json_str = replace_nans(json_str)
+            data = json.loads(json_str)
     elif "application/netcdf" in url:
         data = await resp.read()
     elif "GeoTIFF" in url:
@@ -556,3 +566,17 @@ def deepflatten(iterable, depth=None, types=None, ignore=None):
                 yield x
             else:
                 yield from deepflatten(x, depth - 1, types, ignore)
+
+def replace_nans(json_str):
+    """Replace nan values in a JSON string with -9999 to allow for parsing.
+
+    Arguments:
+        json_str -- the unparsed JSON string
+
+    Returns:
+        the JSON string with 'nan' values replaced with -9999
+    """
+    # Match only nans that have these characters on either side of them: ,[]
+    # This is to prevent matches against strings that contain 'nan' within them.
+    json_str = re.sub(r'(?<=[,\[\]])nan(?=[,\[\]])', '-9999', json_str)
+    return json_str

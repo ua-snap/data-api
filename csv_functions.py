@@ -14,6 +14,7 @@ def create_csv(
     lon=None,
     source_metadata=None,
     filename_prefix=None,
+    vars=None,
 ):
     """Create a CSV for any supported data set
     Args:
@@ -46,6 +47,8 @@ def create_csv(
         properties = beetles_csv(data)
     elif endpoint == "cmip6_indicators":
         properties = cmip6_indicators_csv(data)
+    elif endpoint == "cmip6_monthly":
+        properties = cmip6_monthly_csv(data, vars)
     elif endpoint in [
         "heating_degree_days_Fdays",
         "degree_days_below_zero_Fdays",
@@ -317,6 +320,74 @@ def cmip6_indicators_csv(data):
         metadata += "# rx1day is the Maximum 1-day Precipitation. This is the maximum precipitation total for a single calendar day in mm.\n"
         metadata += "# su are Summer Days. This is the number of days with maximum temperature above 25 (deg C).\n"
         filename_data_name = "CMIP6 Indicators"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def cmip6_monthly_csv(data, vars=None):
+    metadata_variables = {
+        "clt": "# clt is the mean monthly cloud area fraction as a percentage.\n",
+        "evspsbl": "# evspsbl is the total monthly evaporation (including sublimation and transpiration) in kg/m²/s.\n",
+        "hfls": "# hfls is the mean monthly surface upward latent heat flux in W/m².\n",
+        "hfss": "# hfss is the mean monthly surface upward sensible heat flux in W/m².\n",
+        "pr": "# pr is the total monthly precipitation in mm.\n",
+        "psl": "# psl is the mean monthly sea level pressure in Pa.\n",
+        "rlds": "# rlds is the mean monthly surface downwelling longwave flux in the air in W/m².\n",
+        "rsds": "# rsds is the mean monthly surface downwelling shortwave flux in the air in W/m².\n",
+        "sfcWind": "# sfcWind is the mean near surface wind speed in m/s.\n",
+        "tas": "# tas is the mean monthly temperature in deg C.\n",
+        "tasmax": "# tasmax is the maximum monthly temperature in deg C.\n",
+        "tasmin": "# tasmin is the mimimum monthly temperature in deg C.\n",
+        "ts": "# ts is the mean monthly surface temperature in deg C.\n",
+        "uas": "# uas is the mean monthly near surface eastward wind in m/s.\n",
+        "vas": "# vas is the mean monthly near surface northward wind in m/s.\n",
+    }
+
+    coords = ["model", "scenario", "month"]
+
+    if vars is not None:
+        values = vars
+    else:
+        values = list(metadata_variables.keys())
+
+    fieldnames = coords + values
+    csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+
+    metadata = ""
+    for variable in values:
+        metadata += metadata_variables[variable]
+
+    # This dictionary contains the variable pairs that would append to the file name if selected.
+    # This is most likely to happen when the user is downloading the CSV from ARDAC.
+    cmip6_variable_groups = {
+        "Temperature": {"tas", "tasmin", "tasmax"},
+        "Precipitation": {"pr"},
+        "Wind": {"sfcWind", "uas", "vas"},
+        "Oceanography": {"psl", "ts"},
+        "Evaporation": {"evspsbl"},
+        "Solar Radiation & Cloud Cover": {"rsds", "rlds", "hfss", "hfls", "clt"},
+    }
+
+    cmip6_variable_name = None
+
+    # This checks if the variables going into the CSV are a part of the CMIP6 variable groups.
+    # The set of variables must match the required variables exactly or else the default name is used.
+    for name, required_vars in cmip6_variable_groups.items():
+        if required_vars == set(vars):
+            cmip6_variable_name = name
+            break
+
+    # File name is "CMIP6 Monthly" by default.
+    filename_data_name = (
+        f"CMIP6 Monthly {cmip6_variable_name}"
+        if cmip6_variable_name
+        else "CMIP6 Monthly"
+    )
 
     return {
         "csv_dicts": csv_dicts,
