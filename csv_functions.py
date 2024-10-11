@@ -362,7 +362,32 @@ def cmip6_monthly_csv(data, vars=None):
     for variable in values:
         metadata += metadata_variables[variable]
 
-    filename_data_name = "CMIP6 Monthly"
+    # This dictionary contains the variable pairs that would append to the file name if selected.
+    # This is most likely to happen when the user is downloading the CSV from ARDAC.
+    cmip6_variable_groups = {
+        "Temperature": {"tas", "tasmin", "tasmax"},
+        "Precipitation": {"pr"},
+        "Wind": {"sfcWind", "uas", "vas"},
+        "Oceanography": {"psl", "ts"},
+        "Evaporation": {"evspsbl"},
+        "Solar Radiation & Cloud Cover": {"rsds", "rlds", "hfss", "hfls", "clt"},
+    }
+
+    cmip6_variable_name = None
+
+    # This checks if the variables going into the CSV are a part of the CMIP6 variable groups.
+    # The set of variables must match the required variables exactly or else the default name is used.
+    for name, required_vars in cmip6_variable_groups.items():
+        if required_vars == set(vars):
+            cmip6_variable_name = name
+            break
+
+    # File name is "CMIP6 Monthly" by default.
+    filename_data_name = (
+        f"CMIP6 Monthly {cmip6_variable_name}"
+        if cmip6_variable_name
+        else "CMIP6 Monthly"
+    )
 
     return {
         "csv_dicts": csv_dicts,
