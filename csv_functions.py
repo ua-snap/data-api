@@ -338,9 +338,7 @@ def cmip6_monthly_csv(data, vars=None):
         "pr": "# pr is the total monthly precipitation in mm.\n",
         "psl": "# psl is the mean monthly sea level pressure in Pa.\n",
         "rlds": "# rlds is the mean monthly surface downwelling longwave flux in the air in W/m².\n",
-        "rls": "# rls is the mean monthly surface net downward longwave flux in W/m².\n",
         "rsds": "# rsds is the mean monthly surface downwelling shortwave flux in the air in W/m².\n",
-        "rss": "# rss is the mean monthly surface net downward shortwave flux in W/m².\n",
         "sfcWind": "# sfcWind is the mean near surface wind speed in m/s.\n",
         "tas": "# tas is the mean monthly temperature in deg C.\n",
         "tasmax": "# tasmax is the maximum monthly temperature in deg C.\n",
@@ -355,13 +353,13 @@ def cmip6_monthly_csv(data, vars=None):
     if vars is not None:
         values = vars
     else:
-        values = metadata_variables.keys()
+        values = list(metadata_variables.keys())
 
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
 
     metadata = ""
-    for variable in vars:
+    for variable in values:
         metadata += metadata_variables[variable]
 
     filename_data_name = "CMIP6 Monthly"

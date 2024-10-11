@@ -149,6 +149,8 @@ def run_fetch_cmip6_monthly_point_data(lat, lon):
             for var_id in vars:
                 if var_id not in varnames.values():
                     return render_template("400/bad_request.html"), 400
+        else:
+            vars = None
 
         if var_parameter:
             results = {}
