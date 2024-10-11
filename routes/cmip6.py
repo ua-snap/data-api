@@ -1,16 +1,12 @@
 import asyncio
-import numpy as np
-from math import floor, isnan
 from flask import Blueprint, render_template, request
 
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import *
+from fetch_data import fetch_data, get_dim_encodings
 from validate_request import (
     validate_latlon,
-    project_latlon,
-    validate_var_id,
 )
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
