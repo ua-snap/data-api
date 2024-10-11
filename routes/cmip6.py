@@ -102,7 +102,7 @@ def package_cmip6_monthly_data(point_data_list, var_id=None):
 
                     # Evaporation has very tiny values.
                     if varname == "evspsbl":
-                        precision = 7
+                        precision = 8
                     else:
                         precision = 2
 
