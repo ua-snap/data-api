@@ -20,7 +20,6 @@ from .fire import *
 from .permafrost import *
 from .seaice import *
 from .taspr import *
-from .geology import *
 from .physiography import *
 from .boundary import *
 from .vectordata import *
