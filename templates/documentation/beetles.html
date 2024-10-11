@@ -1,24 +1,32 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h2>Climate Protection from Spruce Beetles</h2>
 
 <p>
-  The endpoints here provide access to modeled climate-related protections against spruce beetle population at a
-  resolution of approximately 12km. Historical data are summarized across years 1988-2017 and were modeled using the
-  Daymet dataset. Projections are summarized across 30-year eras from 2010&ndash;2099 and were modeled with NCAR-CCSM4,
-  GFDL-ESM2M, HadGEM2-ES, and MRI-CGCM3 model outputs under the RCP 4.5 and RCP 8.5 emissions scenarios.
+  The endpoints here provide access to modeled climate-related protections
+  against spruce beetle population at a resolution of approximately 12km.
+  Historical data are summarized across years 1988-2017 and were modeled using
+  the Daymet dataset. Projections are summarized across 30-year eras from
+  2010&ndash;2099 and were modeled with NCAR-CCSM4, GFDL-ESM2M, HadGEM2-ES, and
+  MRI-CGCM3 model outputs under the RCP 4.5 and RCP 8.5 emissions scenarios.
 </p>
 
 <p>
-  See the <a href="https://uaf-snap.org/project/modeling-spruce-bark-beetle-outbreaks-in-a-warming-climate/">Modeling
-    Spruce Bark Beetle Outbreaks in a Warming Climate project page</a> for more information.
+  See the
+  <a
+    href="https://uaf-snap.org/project/modeling-spruce-bark-beetle-outbreaks-in-a-warming-climate/"
+    >Modeling Spruce Bark Beetle Outbreaks in a Warming Climate project page</a
+  >
+  for more information.
 </p>
 
 <h3>Service endpoints</h3>
 
 <h4>Point query</h4>
 
-<p>Query modeled climate protection from spruce beetles for a single point specified by latitude and longitude.</p>
+<p>
+  Query modeled climate protection from spruce beetles for a single point
+  specified by latitude and longitude.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -30,20 +38,28 @@
   <tbody>
     <tr>
       <td>Climate protection from spruce beetles point query</td>
-      <td><a href="/beetles/point/64.88/-147.29">/beetles/point/64.88/-147.29</a></td>
+      <td>
+        <a href="/beetles/point/64.88/-147.29">/beetles/point/64.88/-147.29</a>
+      </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
 
 <h4>Area query</h4>
 
-<p>Query modeled climate protection from spruce beetles for a specific <a href="/places/all">area of interest polygon
-    ID</a> and provides the mode of the returned AOI.</p>
+<p>
+  Query modeled climate protection from spruce beetles for a specific
+  <a href="/places/all">area of interest polygon ID</a> and provides the mode of
+  the returned AOI.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -60,7 +76,10 @@
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
@@ -112,7 +131,6 @@
   ...
 }
 </pre>
-
 
 <h4>Area query</h4>
 <p>Results from area queries will look like this:</p>
@@ -172,4 +190,32 @@
   ...
 }
 </pre>
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Project information</th>
+      <th>Source data access</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a
+          href="https://uaf-snap.org/project/modeling-spruce-bark-beetle-outbreaks-in-a-warming-climate/"
+          >Modeling Spruce Bark Beetle Outbreaks in a Warming Climate</a
+        >
+      </td>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/090daa3e-b1f1-4dc5-81f2-b7817bd011ee"
+          >Historical and projected climatic protection from spruce beetle
+          infestation in Alaska, 1988-2099</a
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>
 {% endblock %}

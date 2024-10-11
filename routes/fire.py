@@ -24,7 +24,7 @@ wms_targets = [
     "aqi_forecast_24_hrs",
     "aqi_forecast_48_hrs",
 ]
-wfs_targets = {"historical_fire_perimiters": "NAME,FIREYEAR"}
+wfs_targets = {"historical_fire_perimeters": "NAME,FIREYEAR"}
 
 
 def package_aqi_forecast(aqi_forecast_resp):

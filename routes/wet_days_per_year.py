@@ -350,16 +350,22 @@ def get_wet_days_per_year_plate(lat, lon):
     results = run_fetch_wet_days_per_year_point_data(
         lat, lon, "projected", start_year="2010", end_year="2039"
     )
+    if isinstance(results, tuple):
+        return results
     wdpy_plate["2010-2039"] = results["projected"]
 
     results = run_fetch_wet_days_per_year_point_data(
         lat, lon, "projected", start_year="2040", end_year="2069"
     )
+    if isinstance(results, tuple):
+        return results
     wdpy_plate["2040-2069"] = results["projected"]
 
     results = run_fetch_wet_days_per_year_point_data(
         lat, lon, "projected", start_year="2070", end_year="2099"
     )
+    if isinstance(results, tuple):
+        return results
     wdpy_plate["2070-2099"] = results["projected"]
 
     return jsonify(wdpy_plate)
