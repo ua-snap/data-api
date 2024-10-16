@@ -275,7 +275,12 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
-        return render_template("422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX), 422
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
 
     # Requests for HUC12s that intersect
     huc12_features = asyncio.run(
