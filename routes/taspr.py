@@ -1491,8 +1491,11 @@ def mmm_point_data_endpoint(
     # validate request args explicitly before fetching data
     if len(request.args) == 0:
         pass  # no additional request args will be passed to the run_fetch_mmm_point_data function
-    # if there are request args, validate them
-    elif all(key in request.args for key in ["summarize", "format"]):
+    else:
+        # if there are request args, validate them
+        for key in request.args:
+            if key not in ["summarize", "format"]:
+                return render_template("400/bad_request.html"), 400
         if "summarize" in request.args:
             if request.args.get("summarize") == "mmm":
                 pass
@@ -1503,9 +1506,6 @@ def mmm_point_data_endpoint(
                 pass
             else:
                 return render_template("400/bad_request.html"), 400
-        # valid args for both mmm & csv, OK to continue to run_fetch_mmm_point_data
-    else:
-        return render_template("400/bad_request.html"), 400
 
     try:
         point_pkg = run_fetch_mmm_point_data(
@@ -1589,10 +1589,10 @@ def tas_2km_point_data_endpoint(lat, lon):
     if len(request.args) == 0:
         pass
     # if there are request args, validate them
-    elif all(key in request.args for key in ["format"]):
-        pass
     else:
-        return render_template("400/bad_request.html"), 400
+        for key in request.args:
+            if key not in ["format"]:
+                return render_template("400/bad_request.html"), 400
 
     try:
         point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
@@ -1645,10 +1645,10 @@ def point_data_endpoint(lat, lon):
     if len(request.args) == 0:
         pass
     # if there are request args, validate them
-    elif all(key in request.args for key in ["format"]):
-        pass
     else:
-        return render_template("400/bad_request.html"), 400
+        for key in request.args:
+            if key not in ["format"]:
+                return render_template("400/bad_request.html"), 400
 
     if "temperature" in request.path:
         var_ep = "temperature"
@@ -1725,10 +1725,10 @@ def taspr_area_data_endpoint(var_id):
     if len(request.args) == 0:
         pass
     # if there are request args, validate them
-    elif all(key in request.args for key in ["format"]):
-        pass
     else:
-        return render_template("400/bad_request.html"), 400
+        for key in request.args:
+            if key not in ["format"]:
+                return render_template("400/bad_request.html"), 400
 
     if "format" in request.args:
         if request.args.get("format") == "csv":
@@ -1759,10 +1759,10 @@ def proj_precip_point(lat, lon):
     if len(request.args) == 0:
         pass
     # if there are request args, validate them
-    elif all(key in request.args for key in ["format"]):
-        pass
     else:
-        return render_template("400/bad_request.html"), 400
+        for key in request.args:
+            if key not in ["format"]:
+                return render_template("400/bad_request.html"), 400
 
     csv = False
     if "format" in request.args:
