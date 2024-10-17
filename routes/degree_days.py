@@ -398,24 +398,78 @@ def run_fetch_dd_point_data(
     else:
         return render_template("400/bad_request.html"), 400
 
-    if request.args.get("summarize") == "mmm":
-        dd_data_package = package_distilled_response(point_data, start_year, end_year)
-    else:
+    # validate additional args explicitly
+
+    # if preview, return unabridged tidy package as CSV
+    # the preview arg is only used for CSV generation and should never occur with additional request args
+    if preview:
         dd_data_package = package_unabridged_response(point_data, start_year, end_year)
-
-    tidy_package = prune_nulls_with_max_intensity(
-        postprocess(dd_data_package, cov_id_str)
-    )
-
-    if request.args.get("format") == "csv" or preview:
+        tidy_package = prune_nulls_with_max_intensity(
+            postprocess(dd_data_package, cov_id_str)
+        )
         if tidy_package in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        if request.args.get("summarize") == "mmm":
-            return create_csv(tidy_package, cov_id_str, lat=lat, lon=lon)
         else:
-            return create_csv(tidy_package, cov_id_str + "_all", lat=lat, lon=lon)
+            return create_csv(tidy_package, cov_id_str, lat=lat, lon=lon)
 
-    return tidy_package
+    # if no request args, return unabridged tidy package
+    elif len(request.args) == 0:
+        dd_data_package = package_unabridged_response(point_data, start_year, end_year)
+        tidy_package = prune_nulls_with_max_intensity(
+            postprocess(dd_data_package, cov_id_str)
+        )
+        return tidy_package
+
+    # if valid args for both mmm & csv, make distilled tidy package and return as CSV
+    elif all(key in request.args for key in ["summarize", "format"]):
+        if (request.args.get("summarize") == "mmm") & (
+            request.args.get("format") == "csv"
+        ):
+            dd_data_package = package_distilled_response(
+                point_data, start_year, end_year
+            )
+            tidy_package = prune_nulls_with_max_intensity(
+                postprocess(dd_data_package, cov_id_str)
+            )
+            if tidy_package in [{}, None, 0]:
+                return render_template("404/no_data.html"), 404
+            else:
+                return create_csv(tidy_package, cov_id_str, lat=lat, lon=lon)
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    # if valid args for only mmm, return distilled tidy package
+    elif "summarize" in request.args:
+        if request.args.get("summarize") == "mmm":
+            dd_data_package = package_distilled_response(
+                point_data, start_year, end_year
+            )
+            tidy_package = prune_nulls_with_max_intensity(
+                postprocess(dd_data_package, cov_id_str)
+            )
+            return tidy_package
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    # if valid args for only csv, return unabridged tidy package as CSV
+    elif "format" in request.args:
+        if request.args.get("format") == "csv":
+            dd_data_package = package_unabridged_response(
+                point_data, start_year, end_year
+            )
+            tidy_package = prune_nulls_with_max_intensity(
+                postprocess(dd_data_package, cov_id_str)
+            )
+            if tidy_package in [{}, None, 0]:
+                return render_template("404/no_data.html"), 404
+            else:
+                return create_csv(tidy_package, cov_id_str, lat=lat, lon=lon)
+        else:
+            return render_template("400/bad_request.html"), 400
+
+    # if args were > 0 but not valid, return 400
+    else:
+        return render_template("400/bad_request.html"), 400
 
 
 @routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")
