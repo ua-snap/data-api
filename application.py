@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 from config import SITE_OFFLINE
+from marshmallow import Schema, fields, validate
 
 from routes import *
 
@@ -45,6 +46,25 @@ def inject_date():
     """
     year = datetime.now().year
     return dict(year=year)
+
+
+@app.before_request
+def validate_get_params():
+    class QueryParamsSchema(Schema):
+        format = fields.Str(validate=validate.OneOf(["csv"]), required=False)
+        summarize = fields.Str(validate=validate.OneOf(["mmm"]), required=False)
+
+        # Make sure "vars" parameter is only lowercase letters and commas, and
+        # less than 100 characters long.
+        vars = fields.Str(
+            validate=lambda str: bool(re.match(r"^[a-z,]*$", str)) and len(str) < 100,
+            required=False,
+        )
+
+    schema = QueryParamsSchema()
+    errors = schema.validate(request.args)
+    if errors:
+        return render_template("422/invalid_get_parameter.html"), 422
 
 
 @app.after_request
