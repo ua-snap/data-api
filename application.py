@@ -57,7 +57,8 @@ def validate_get_params():
         # Make sure "vars" parameter is only lowercase letters and commas, and
         # less than 100 characters long.
         vars = fields.Str(
-            validate=lambda str: bool(re.match(r"^[a-z,]*$", str)) and len(str) < 100,
+            validate=lambda str: bool(re.match(r"^[A-Za-z,]*$", str))
+            and len(str) < 100,
             required=False,
         )
 
