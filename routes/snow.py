@@ -162,8 +162,6 @@ def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
         )
     x, y = project_latlon(lat, lon, 3338)
 
-    # validate args explicitly
-
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, sfe_coverage_id))
         # if summarize or preview, return either mmm summary or CSV
@@ -186,23 +184,16 @@ def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
             point_pkg = package_sfe_data(rasdaman_response)
             return postprocess(point_pkg, "snow")
 
-        # if there are request args, validate them
-        elif all(key in request.args for key in ["summarize", "format"]):
-            pass
-        else:
+        # if args exist, check if they are allowed
+        allowed_args = ["summarize", "format"]
+        if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
-
-        # if valid args for only mmm, return distilled tidy package
-        if "summarize" in request.args:
-            if request.args.get("summarize") == "mmm":
+        else:
+            # if args exist and are allowed, return the appropriate response
+            if "summarize" in request.args:
                 point_pkg = summarize_mmm_sfe(package_sfe_data(rasdaman_response))
                 return postprocess(point_pkg, "snow")
-            else:
-                return render_template("400/bad_request.html"), 400
-
-        # if valid args for only csv, return unsummarized CSV
-        if "format" in request.args:
-            if request.args.get("format") == "csv":
+            elif "format" in request.args:
                 try:
                     point_pkg = package_sfe_data(rasdaman_response)
                     point_pkg = nullify_and_prune(point_pkg, "snow")
@@ -211,8 +202,6 @@ def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
                     return create_csv(point_pkg, "snow", lat=lat, lon=lon)
                 except KeyError:
                     return render_template("400/bad_request.html"), 400
-            else:
-                return render_template("400/bad_request.html"), 400
 
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
