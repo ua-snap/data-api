@@ -21,6 +21,7 @@ geos = "*"
 rtree = "*"
 pygeos = "*"
 lxml = "*"
+marshmallow = "*"
 
 [dev-packages]
 black = "*"
