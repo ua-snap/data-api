@@ -225,15 +225,18 @@ def write_csv(properties):
     writer = csv.DictWriter(output, fieldnames=properties["fieldnames"])
     writer.writeheader()
     writer.writerows(properties["csv_dicts"])
+
+    filename = urllib.parse.quote(properties["filename"])
+
     response = Response(
         output.getvalue(),
         mimetype="text/csv",
         headers={
             "Content-Type": "text/csv; charset=utf-8",
             "Content-Disposition": "attachment; filename="
-            + properties["filename"]
+            + filename
             + "; filename*=utf-8''"
-            + properties["filename"],
+            + filename,
         },
     )
     return response
