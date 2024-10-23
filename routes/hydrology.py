@@ -420,7 +420,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
             return render_template("500/server_error.html"), 500
 
     # if args exist, check if they are allowed
-    allowed_args = ["summarize", "format"]
+    allowed_args = ["summarize", "format", "community"]
     if not all(key in allowed_args for key in request.args.keys()):
         return render_template("400/bad_request.html"), 400
     else:

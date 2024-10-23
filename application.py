@@ -54,10 +54,17 @@ def validate_get_params():
         format = fields.Str(validate=validate.OneOf(["csv"]), required=False)
         summarize = fields.Str(validate=validate.OneOf(["mmm"]), required=False)
 
-        # Make sure "vars" parameter is only lowercase letters and commas, and
-        # less than 100 characters long.
+        # Make sure "community" parameter is only uppercase letters and
+        # numbers, and less than or equal to 10 characters long.
+        community = fields.Str(
+            validate=lambda str: bool(re.match(r"^[A-Z0-9]{0,10}$", str)),
+            required=False,
+        )
+
+        # Make sure "vars" parameter is only letters and commas, and less than
+        # or equal to 100 characters long.
         vars = fields.Str(
-            validate=lambda str: bool(re.match(r"^[A-Za-z,]*$", str))
+            validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,100}$", str))
             and len(str) < 100,
             required=False,
         )

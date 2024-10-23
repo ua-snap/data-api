@@ -1493,7 +1493,7 @@ def mmm_point_data_endpoint(
         pass  # no additional request args will be passed to the run_fetch_mmm_point_data function
     else:
         # if args exist, check if they are allowed
-        allowed_args = ["summarize", "format"]
+        allowed_args = ["summarize", "format", "community"]
         if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
         else:
@@ -1581,7 +1581,7 @@ def tas_2km_point_data_endpoint(lat, lon):
         pass
     else:
         # if args exist, check if they are allowed
-        allowed_args = ["format"]
+        allowed_args = ["format", "community"]
         if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
 
@@ -1634,7 +1634,7 @@ def point_data_endpoint(lat, lon):
         pass
     else:
         # if args exist, check if they are allowed
-        allowed_args = ["format"]
+        allowed_args = ["format", "community"]
         if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
 
@@ -1711,7 +1711,7 @@ def taspr_area_data_endpoint(var_id):
         pass
     else:
         # if args exist, check if they are allowed
-        allowed_args = ["format"]
+        allowed_args = ["format", "community"]
         if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
 
@@ -1742,7 +1742,7 @@ def proj_precip_point(lat, lon):
         pass
     else:
         # if args exist, check if they are allowed
-        allowed_args = ["format"]
+        allowed_args = ["format", "community"]
         if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
 

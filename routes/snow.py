@@ -185,7 +185,7 @@ def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
             return postprocess(point_pkg, "snow")
 
         # if args exist, check if they are allowed
-        allowed_args = ["summarize", "format"]
+        allowed_args = ["summarize", "format", "community"]
         if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
         else:
