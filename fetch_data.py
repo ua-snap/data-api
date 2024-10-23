@@ -444,8 +444,10 @@ def parse_meta_xml_str(meta_xml_str):
     """
     xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
     meta_tree = ET.XML(xml_bytes)
-    encoding_el = meta_tree.findall(".//Encoding")[0]
-
+    try:
+        encoding_el = meta_tree.findall(".//Encoding")[0]
+    except IndexError:
+        encoding_el = meta_tree.findall(".//ras:Encoding", meta_tree.nsmap)[0]
     dim_encodings = {}
     for dim in encoding_el.iter():
         if not dim.text.isspace():
@@ -567,6 +569,7 @@ def deepflatten(iterable, depth=None, types=None, ignore=None):
             else:
                 yield from deepflatten(x, depth - 1, types, ignore)
 
+
 def replace_nans(json_str):
     """Replace nan values in a JSON string with -9999 to allow for parsing.
 
@@ -578,5 +581,5 @@ def replace_nans(json_str):
     """
     # Match only nans that have these characters on either side of them: ,[]
     # This is to prevent matches against strings that contain 'nan' within them.
-    json_str = re.sub(r'(?<=[,\[\]])nan(?=[,\[\]])', '-9999', json_str)
+    json_str = re.sub(r"(?<=[,\[\]])nan(?=[,\[\]])", "-9999", json_str)
     return json_str
