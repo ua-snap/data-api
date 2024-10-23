@@ -15,7 +15,7 @@ from config import WEST_BBOX, EAST_BBOX
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly"
+cmip6_monthly_coverage_id = "cmip6_monthly_crstephenson"
 dim_encodings = asyncio.run(get_dim_encodings(cmip6_monthly_coverage_id))
 varnames = dim_encodings["varname"]
 
