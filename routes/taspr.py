@@ -1514,9 +1514,19 @@ def mmm_point_data_endpoint(
                 lat,
                 lon,
                 filename_prefix=filename_prefix,
+                start_year=start_year,
+                end_year=end_year,
             )
         else:
-            return create_csv(point_pkg, var_ep + "_all", place_id, lat, lon)
+            return create_csv(
+                point_pkg,
+                var_ep + "_all",
+                place_id,
+                lat,
+                lon,
+                start_year=start_year,
+                end_year=end_year,
+            )
 
     return postprocess(point_pkg, "taspr")
 

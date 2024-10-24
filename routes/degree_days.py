@@ -413,7 +413,14 @@ def run_fetch_dd_point_data(
         if request.args.get("summarize") == "mmm":
             return create_csv(tidy_package, cov_id_str, lat=lat, lon=lon)
         else:
-            return create_csv(tidy_package, cov_id_str + "_all", lat=lat, lon=lon)
+            return create_csv(
+                tidy_package,
+                cov_id_str + "_all",
+                lat=lat,
+                lon=lon,
+                start_year=start_year,
+                end_year=end_year,
+            )
 
     return tidy_package
 
