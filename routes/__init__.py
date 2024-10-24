@@ -36,3 +36,4 @@ from .indicators import *
 from .hydrology import *
 from .demographics import *
 from .cmip6 import *
+from .conus_hydrology import *
