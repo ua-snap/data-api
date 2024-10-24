@@ -161,24 +161,48 @@ def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
             422,
         )
     x, y = project_latlon(lat, lon, 3338)
+
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, sfe_coverage_id))
-        if request.args.get("summarize") == "mmm" or summarize:
+        # if summarize or preview, return either mmm summary or CSV
+        # the preview and summary args should be mutually exclusive, and should never occur with additional request args
+        if summarize:
             point_pkg = summarize_mmm_sfe(package_sfe_data(rasdaman_response))
-        else:
-            point_pkg = package_sfe_data(rasdaman_response)
-        try:
-            if not request.args.get("summarize") == "mmm" and (
-                request.args.get("format") == "csv" or preview
-            ):
+            return postprocess(point_pkg, "snow")
+        if preview:
+            try:
+                point_pkg = package_sfe_data(rasdaman_response)
                 point_pkg = nullify_and_prune(point_pkg, "snow")
                 if point_pkg in [{}, None, 0]:
                     return render_template("404/no_data.html"), 404
                 return create_csv(point_pkg, "snow", lat=lat, lon=lon)
-            else:
-                return postprocess(point_pkg, "snow")
-        except KeyError:
+            except KeyError:
+                return render_template("400/bad_request.html"), 400
+
+        # if no request args, return unsummarized data package
+        if len(request.args) == 0:
+            point_pkg = package_sfe_data(rasdaman_response)
+            return postprocess(point_pkg, "snow")
+
+        # if args exist, check if they are allowed
+        allowed_args = ["summarize", "format", "community"]
+        if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
+        else:
+            # if args exist and are allowed, return the appropriate response
+            if "summarize" in request.args:
+                point_pkg = summarize_mmm_sfe(package_sfe_data(rasdaman_response))
+                return postprocess(point_pkg, "snow")
+            elif "format" in request.args:
+                try:
+                    point_pkg = package_sfe_data(rasdaman_response)
+                    point_pkg = nullify_and_prune(point_pkg, "snow")
+                    if point_pkg in [{}, None, 0]:
+                        return render_template("404/no_data.html"), 404
+                    return create_csv(point_pkg, "snow", lat=lat, lon=lon)
+                except KeyError:
+                    return render_template("400/bad_request.html"), 400
+
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
