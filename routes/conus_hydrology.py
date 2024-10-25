@@ -1,8 +1,11 @@
 # import asyncio
 # import numpy as np
+import xarray as xr
+import io
 import geopandas as gpd
 import requests
 import json
+import xml.etree.ElementTree as ET
 from flask import (
     Blueprint,
     Response,
@@ -14,6 +17,7 @@ from flask import (
 
 # local imports
 from generate_urls import generate_wfs_huc6_intersection_url
+from generate_requests import generate_conus_hydrology_wcs_str
 
 # from fetch_data import fetch_wcs_point_data
 from validate_request import validate_latlon
@@ -23,12 +27,8 @@ from validate_request import validate_latlon
 # from validate_data import *
 # from postprocessing import postprocess
 # from csv_functions import create_csv
-from config import CONUS_BBOX, GS_BASE_URL
+from config import CONUS_BBOX, GS_BASE_URL, RAS_BASE_URL
 from . import routes
-
-conus_hydrology_coverage_id = "conus_hydro_segments_crstephenson"
-# TODO: change this to 'Rasdaman Encoding' once coverage is updated
-encoding_attr = "Encoding"
 
 
 def get_huc_from_lat_lon(lat, lon):
@@ -53,6 +53,10 @@ def get_huc_from_lat_lon(lat, lon):
             except:
                 print("Unable to decode as JSON, got raw text:\n", r.text)
                 return render_template("500/server_error.html"), 500
+
+    # save json to test size of return
+    with open("/home/jdpaul3/huc6.json", "w", encoding="utf-8") as f:
+        json.dump(r_json, f, ensure_ascii=False, indent=4)
 
     # create a valid geodataframe from the features
     # CRS is hardcoded to EPSG:4269!
@@ -106,6 +110,10 @@ def get_bbox_features_and_clip(huc6_gdf):
                 print("Unable to decode as JSON, got raw text:\n", r.text)
                 return render_template("500/server_error.html"), 500
 
+    # save json to test size of return
+    with open("/home/jdpaul3/segments.json", "w", encoding="utf-8") as f:
+        json.dump(r_json, f, ensure_ascii=False, indent=4)
+
     # create a valid geodataframe from the features and clip the features to the polygon
     # CRS is hardcoded to EPSG:5070!
     bbox_gdf = gpd.GeoDataFrame.from_features(r_json["features"], crs="EPSG:5070")
@@ -144,7 +152,7 @@ def build_data_dict(huc, huc_segments):
         segment_dict = dict(
             {
                 "name": row.GNIS_NAME,
-                "stats": dict({}),
+                "data_by_model": dict({}),
                 "geojson": geojson,
             }
         )
@@ -154,24 +162,101 @@ def build_data_dict(huc, huc_segments):
     return data_dict
 
 
-def fetch_hydrology_data(geom_ids, segment_names):
+def fetch_hydrology_data(cov_id, vars, lc, model, scenario, era):
     """
-    Function to fetch hydrology data from the geoserver.
+    Function to fetch hydrology data from Rasdaman.
     Args:
-        geom_ids (list): List of geometry IDs (integers)
-        segment_names (list): List of segment names
+        coverage_id (str): Coverage ID for the hydrology data
+        encoding_attr (str): Attribute name that holds dictionary of Rasdaman encodings
+        vars (list): a list of variable names (e.g. ['dh3', 'dh15'])
+        lc (str): Land cover type (dynamic or static)
+        model (str): Model name (e.g. CCSM4)
+        scenario (str): Scenario name (e.g. historical)
+        era (str): Era name (e.g. 1976_2005)
     Returns:
-        Dictionary with segment name and hydrology statistics for each geom_id
+        Xarray dataset with hydrological stats for the requested var/lc/model/scenario/era combination
     """
-    # like this:
-    stats_dict = {
-        123456: {
-            "name": "Stream ABC",
-            "stats": {"stat1": 0.5, "stat2": 0.1, "stat3": 0.3},
-        }
-    }
+    lc_, model_, scenario_, era_ = encode_parameters(cov_id, lc, model, scenario, era)
+    # TODO: use RAS_BASE_URL config env variable instead of hardcoded URL
+    url = "https://zeus.snap.uaf.edu/rasdaman/" + generate_conus_hydrology_wcs_str(
+        cov_id, vars, lc_, model_, scenario_, era_
+    )
 
-    return stats_dict
+    with requests.get(url, verify=False) as r:
+        if r.status_code != 200:
+            return render_template("500/server_error.html"), 500
+        ds = xr.open_dataset(io.BytesIO(r.content))
+
+    # save nc to test size of return
+    ds.to_netcdf("/home/jdpaul3/stats.nc", engine="h5netcdf")
+
+    return ds
+
+
+def encode_parameters(cov_id, lc, model, scenario, era):
+    """
+    Function to encode the parameters for the Rasdaman request.
+    Searches the XML response from the DescribeCoverage request for the encodings metadata and
+    returns the dictionary of encodings. Encodes the input parameters to integers for the WCS request.
+    Args:
+        lc (str): Land cover type (dynamic or static)
+        model (str): Model name (e.g. CCSM4)
+        scenario (str): Scenario name (e.g. historical)
+        era (str): Era name (e.g. 1976_2005)
+    Returns:
+        Tuple of encoded parameters (integers) for Rasdaman request"""
+    # TODO: change this to 'Rasdaman Encoding' once coverage is updated
+    encoding_attr = "Encoding"
+    url = f"https://zeus.snap.uaf.edu/rasdaman/ows?&SERVICE=WCS&VERSION=2.1.0&REQUEST=DescribeCoverage&COVERAGEID={cov_id}&outputType=GeneralGridCoverage"
+    with requests.get(url, verify=False) as r:
+        if r.status_code != 200:
+            return render_template("500/server_error.html"), 500
+        tree = ET.ElementTree(ET.fromstring(r.content))
+
+    xml_search_string = str(".//{http://www.rasdaman.org}" + encoding_attr)
+    encoding_dict_str = tree.findall(xml_search_string)[0].text
+    encoding_dict = eval(encoding_dict_str)
+
+    lc_ = encoding_dict["lc"][lc]
+    model_ = encoding_dict["model"][model]
+    scenario_ = encoding_dict["scenario"][scenario]
+    era_ = encoding_dict["era"][era]
+
+    return lc_, model_, scenario_, era_
+
+
+def populate_stats(data_dict, stats_ds, lc, model, scenario, era):
+    """
+    Function to populate the data dictionary with the hydrology statistics.
+    Args:
+        data_dict (dict): Dictionary with geometry IDs, segment names, feature geometries, and empty stats dict
+        stats_ds (Xarray dataset): Xarray dataset with hydrological stats for the requested var/lc/model/scenario/era combination
+    Returns:
+        Updated dictionary with the hydrology statistics
+    """
+
+    # subset the dataset using segment ids from the huc6 data dictionary
+    huc6_ds = stats_ds.sel(
+        geom_id=stats_ds.geom_id.isin(list(data_dict["segments"].keys()))
+    )
+
+    huc6_df = huc6_ds.to_dataframe().reset_index()
+    # TODO: make sure dtype is correct here if coverage is updated to ints
+    huc6_df["geom_id"] = huc6_df["geom_id"].astype(int)
+
+    # find the segment ID in the dataframe and populate the stats dict
+    for segment_id in list(data_dict["segments"].keys()):
+        segment_stats = huc6_df[huc6_df["geom_id"] == int(segment_id)]
+        segment_stats = segment_stats.drop(columns=["geom_id"])
+        data_dict["segments"][segment_id]["data_by_model"] = {
+            model: {
+                lc: {
+                    scenario: {era: {"stats": segment_stats.to_dict(orient="records")}}
+                }
+            }
+        }
+
+    return data_dict
 
 
 @routes.route("/conus_hydrology/")
@@ -209,11 +294,58 @@ def run_get_conus_hydrology_point_data(lat, lon):
 
     # build a dictionary with geometry IDs, segment names, and feature geometries
     huc6_data_dict = build_data_dict(huc, huc_segments)
-    print(huc6_data_dict)
 
-    # get the hydrology statistics for geom_ids and populate the dictionary
-    # huc6_data_dict = fetch_hydrology_data(huc6_data_dict)
+    # define the coverage and slice of data we want to get
+    cov_id = "conus_hydro_segments_crstephenson"
+    # TODO: handle this via additional input parameters to the function, or maybe some GET args?
+    # TODO: handle multiple models, eras, etc.
+    # TODO: validate input args against metadata in actual Rasdaman dataset
+    vars, lc, model, scenario, era = (
+        # all available stat vars
+        [
+            "dh3",
+            "dh15",
+            "dl3",
+            "dl16",
+            "fh1",
+            "fl1",
+            "fl3",
+            "ma12",
+            "ma13",
+            "ma14",
+            "ma15",
+            "ma16",
+            "ma17",
+            "ma18",
+            "ma19",
+            "ma20",
+            "ma21",
+            "ma22",
+            "ma23",
+            "ra1",
+            "ra3",
+            "th1",
+            "tl1",
+        ],
+        # smaller subset of stat vars for testing
+        # ["dh3", "dh15", "ra1", "ra3", "ma12", "ma13"],
+        "dynamic",
+        "CCSM4",
+        "historical",
+        "1976_2005",
+    )
+
+    # get the hydrology statistics from rasdaman
+    stats_ds = fetch_hydrology_data(cov_id, vars, lc, model, scenario, era)
+
+    # populate the stats in the data dictionary with the hydrology statistics
+    huc6_data_dict = populate_stats(huc6_data_dict, stats_ds, lc, model, scenario, era)
 
     # return Flask JSON Response
     json_results = json.dumps(huc6_data_dict, indent=4)
+
+    # save json to test size of return
+    with open("/home/jdpaul3/result.json", "w", encoding="utf-8") as f:
+        json.dump(json_results, f, ensure_ascii=False, indent=4)
+
     return Response(response=json_results, status=200, mimetype="application/json")
