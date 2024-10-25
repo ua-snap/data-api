@@ -2,7 +2,15 @@
 # import numpy as np
 import geopandas as gpd
 import requests
-from flask import render_template, request, current_app as app, jsonify
+import json
+from flask import (
+    Blueprint,
+    Response,
+    render_template,
+    request,
+    current_app as app,
+    jsonify,
+)
 
 # local imports
 from generate_urls import generate_wfs_huc6_intersection_url
@@ -51,9 +59,7 @@ def get_huc_from_lat_lon(lat, lon):
     huc6_gdf = gpd.GeoDataFrame.from_features(r_json["features"], crs="EPSG:4269")
     huc6_gdf["geometry"] = huc6_gdf["geometry"].make_valid()
 
-    return huc6_gdf.iloc[
-        0
-    ]  # there should only ever be one polygon, but return only the first feature just to be sure
+    return huc6_gdf
 
 
 def get_bbox_features_and_clip(huc6_gdf):
@@ -64,6 +70,8 @@ def get_bbox_features_and_clip(huc6_gdf):
     Returns:
         GeoDataFrame containing the clipped features
     """
+    # get the bounding box in correct CRS
+    huc6_gdf = huc6_gdf.to_crs("EPSG:5070")
     xmin, ymin, xmax, ymax = huc6_gdf.bounds.values[0]
 
     # build the bbox string, double checking that the xmin/xmax values are in the correct order
@@ -117,14 +125,28 @@ def build_data_dict(huc, huc_segments):
     Returns:
         Dictionary with geometry IDs, segment names, and feature geometries
     """
-    data_dict = {"huc6": huc["huc6"], "name": huc["name"], "segments": {}}
+    data_dict = dict({"huc6": huc["huc6"], "name": huc["name"], "segments": dict({})})
 
     # add the geometry ID, segment name, and feature geometry to the dictionary
     # also add an empty stats dict to populate later
-    for id, name, geom in zip(
-        huc_segments["seg_id_nat"], huc_segments["GNIS_NAME"], huc_segments["geometry"]
-    ):
-        data_dict["segments"][id] = {"name": name, "geometry": geom, "stats": {}}
+
+    for idx, row in huc_segments.iterrows():
+
+        geojson = (
+            huc_segments[["seg_id_nat", "GNIS_NAME", "geometry"]]
+            .loc[idx]
+            .to_json(default_handler=str)
+        )
+
+        segment_dict = dict(
+            {
+                "name": row.GNIS_NAME,
+                "stats": dict({}),
+                "geojson": geojson,
+            }
+        )
+
+        data_dict["segments"][row.seg_id_nat] = segment_dict
 
     return data_dict
 
@@ -149,6 +171,11 @@ def fetch_hydrology_data(geom_ids, segment_names):
     return stats_dict
 
 
+@routes.route("/conus_hydrology/")
+def conus_hydrology_about():
+    return render_template("/documentation/conus_hydrology.html")
+
+
 @routes.route("/conus_hydrology/point/<lat>/<lon>")
 def run_get_conus_hydrology_point_data(lat, lon):
     """
@@ -162,7 +189,7 @@ def run_get_conus_hydrology_point_data(lat, lon):
     Notes:
            example: http://localhost:5000/conus_hydrology/point/39.8283,-98.5795
     """
-    validation = validate_latlon(lat, lon)
+    validation = validate_latlon(lat, lon, conus=True)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
@@ -181,8 +208,9 @@ def run_get_conus_hydrology_point_data(lat, lon):
     huc6_data_dict = build_data_dict(huc, huc_segments)
 
     # get the hydrology statistics for geom_ids and populate the dictionary
-    huc6_data_dict = fetch_hydrology_data(huc6_data_dict)
+    # huc6_data_dict = fetch_hydrology_data(huc6_data_dict)
 
-    # build huc6 dict
-
-    return None
+    # TODO: figure out why this fails!
+    # return Flask JSON Response
+    json_results = json.dumps(huc6_data_dict, indent=4)
+    return Response(response=json_results, status=200, mimetype="application/json")

@@ -81,7 +81,7 @@ def generate_wfs_huc12_intersection_url(lat, lon):
 def generate_wfs_huc6_intersection_url(lat, lon):
     wfs_url = (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_huc6&propertyName=(name,huc6)&outputFormat=application/json&cql_filter=INTERSECTS(the_geom, POINT({lon} {lat}))"
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_huc6&outputFormat=application/json&cql_filter=INTERSECTS(the_geom, POINT({lon} {lat}))"
     )
     return wfs_url
 

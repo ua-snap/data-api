@@ -35,6 +35,7 @@ def get_service_categories():
         ("Wet Days Per Year", "/wet_days_per_year"),
         ("Wildfire", "/fire"),
         ("Demographics", "/demographics"),
+        ("CONUS Hydrology", "/conus_hydrology"),
     ]
 
 
