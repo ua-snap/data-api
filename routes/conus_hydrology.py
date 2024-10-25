@@ -125,7 +125,10 @@ def build_data_dict(huc, huc_segments):
     Returns:
         Dictionary with geometry IDs, segment names, and feature geometries
     """
-    data_dict = dict({"huc6": huc["huc6"], "name": huc["name"], "segments": dict({})})
+
+    data_dict = dict(
+        {"huc6": huc.huc6.loc[0], "name": huc.name.loc[0], "segments": dict({})}
+    )
 
     # add the geometry ID, segment name, and feature geometry to the dictionary
     # also add an empty stats dict to populate later
@@ -187,7 +190,7 @@ def run_get_conus_hydrology_point_data(lat, lon):
         JSON-like output of hydrology statistics for HUC surrounding the point.
 
     Notes:
-           example: http://localhost:5000/conus_hydrology/point/39.8283,-98.5795
+           example: http://localhost:5000/conus_hydrology/point/39.828/-98.5795
     """
     validation = validate_latlon(lat, lon, conus=True)
     if validation == 400:
@@ -206,11 +209,11 @@ def run_get_conus_hydrology_point_data(lat, lon):
 
     # build a dictionary with geometry IDs, segment names, and feature geometries
     huc6_data_dict = build_data_dict(huc, huc_segments)
+    print(huc6_data_dict)
 
     # get the hydrology statistics for geom_ids and populate the dictionary
     # huc6_data_dict = fetch_hydrology_data(huc6_data_dict)
 
-    # TODO: figure out why this fails!
     # return Flask JSON Response
     json_results = json.dumps(huc6_data_dict, indent=4)
     return Response(response=json_results, status=200, mimetype="application/json")
