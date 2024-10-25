@@ -47,8 +47,6 @@ def create_csv(
     properties = {}
 
     data = nullify_and_prune(data, endpoint)
-    # if request.args.get("summarize") == "mmm":
-    #     return render_template("400/bad_request.html"), 400
     if data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
 
