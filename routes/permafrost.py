@@ -8,7 +8,7 @@ from generate_urls import generate_wcs_query_url
 from validate_data import place_name_and_type
 from fetch_data import (
     fetch_data,
-    fetch_data_api,
+    fetch_geoserver_data,
     fetch_wcs_point_data,
     get_dim_encodings,
     generate_wcs_getcov_str,
@@ -334,7 +334,7 @@ def run_point_fetch_all_permafrost(lat, lon):
         )
 
     gs_results = asyncio.run(
-        fetch_data_api(
+        fetch_geoserver_data(
             GS_BASE_URL, "permafrost_beta", wms_targets, wfs_targets, lat, lon
         )
     )

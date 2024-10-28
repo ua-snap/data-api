@@ -5,7 +5,7 @@ from flask import (
 )
 
 # local imports
-from fetch_data import fetch_data_api
+from fetch_data import fetch_geoserver_data
 from validate_request import validate_latlon
 from postprocessing import postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
@@ -53,7 +53,7 @@ def run_fetch_physiography(lat, lon):
     # verify that lat/lon are present
     try:
         results = asyncio.run(
-            fetch_data_api(
+            fetch_geoserver_data(
                 GS_BASE_URL, "physiography", wms_targets, wfs_targets, lat, lon
             )
         )

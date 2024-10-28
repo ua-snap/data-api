@@ -74,7 +74,7 @@ async def fetch_layer_data(url, session, encoding="json"):
     return data
 
 
-async def fetch_data_api(backend, workspace, wms_targets, wfs_targets, lat, lon):
+async def fetch_geoserver_data(backend, workspace, wms_targets, wfs_targets, lat, lon):
     """Generic Data API for GeoServer queries - gather all async requests
     for specified data layers in a GeoServer workspace."""
     base_wms_url = generate_base_wms_url(backend, workspace, lat, lon)

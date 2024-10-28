@@ -5,7 +5,7 @@ from flask import (
 )
 
 # local imports
-from fetch_data import fetch_data, fetch_data_api
+from fetch_data import fetch_data, fetch_geoserver_data
 from generate_urls import generate_wfs_search_url
 from validate_request import validate_latlon
 from postprocessing import nullify_nodata, postprocess
@@ -130,7 +130,7 @@ def run_fetch_fire(lat, lon):
         )
     try:
         results = asyncio.run(
-            fetch_data_api(
+            fetch_geoserver_data(
                 GS_BASE_URL, "alaska_wildfires", wms_targets, wfs_targets, lat, lon
             )
         )
