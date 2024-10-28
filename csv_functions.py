@@ -109,13 +109,13 @@ def create_csv(
     if not endpoint.startswith("places_"):
         filename += " for "
         if place_name is not None:
-            filename += quote(place_name)
+            filename += place_name
         elif endpoint == "demographics":
-            filename += quote("All communities in Alaska")
+            filename += "All communities in Alaska"
         else:
             filename += lat + " " + lon
     filename += ".csv"
-    properties["filename"] = filename
+    properties["filename"] = quote(filename)
 
     return write_csv(properties)
 
@@ -226,17 +226,15 @@ def write_csv(properties):
     writer.writeheader()
     writer.writerows(properties["csv_dicts"])
 
-    filename = urllib.parse.quote(properties["filename"])
-
     response = Response(
         output.getvalue(),
         mimetype="text/csv",
         headers={
             "Content-Type": "text/csv; charset=utf-8",
             "Content-Disposition": "attachment; filename="
-            + filename
+            + properties["filename"]
             + "; filename*=utf-8''"
-            + filename,
+            + properties["filename"],
         },
     )
     return response
