@@ -19,10 +19,15 @@ from lxml import etree as ET
 from aiohttp import ClientSession
 from flask import current_app as app
 from rasterstats import zonal_stats
-from config import RAS_BASE_URL, WEB_APP_URL
-from generate_requests import *
-from generate_urls import *
-from luts import place_type_labels
+from config import RAS_BASE_URL
+from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
+from generate_urls import (
+    generate_wcs_query_url,
+    generate_base_wms_url,
+    generate_base_wfs_url,
+    generate_wms_and_wfs_query_urls,
+    generate_wfs_places_url,
+)
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
@@ -567,6 +572,7 @@ def deepflatten(iterable, depth=None, types=None, ignore=None):
             else:
                 yield from deepflatten(x, depth - 1, types, ignore)
 
+
 def replace_nans(json_str):
     """Replace nan values in a JSON string with -9999 to allow for parsing.
 
@@ -578,5 +584,5 @@ def replace_nans(json_str):
     """
     # Match only nans that have these characters on either side of them: ,[]
     # This is to prevent matches against strings that contain 'nan' within them.
-    json_str = re.sub(r'(?<=[,\[\]])nan(?=[,\[\]])', '-9999', json_str)
+    json_str = re.sub(r"(?<=[,\[\]])nan(?=[,\[\]])", "-9999", json_str)
     return json_str

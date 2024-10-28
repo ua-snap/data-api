@@ -4,8 +4,14 @@ from flask import Blueprint, render_template, request
 
 # local imports
 from generate_urls import generate_wcs_query_url
-from generate_requests import *
-from fetch_data import *
+from generate_requests import generate_netcdf_wcs_getcov_str
+from fetch_data import (
+    fetch_bbox_netcdf_list,
+    fetch_wcs_point_data,
+    zonal_stats,
+    itertools,
+    get_poly_3338_bbox,
+)
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
@@ -82,9 +88,9 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
     for sni in range(len(beetle_resp[0][0][0])):
         snowpack = dim_encodings["snowpack"][sni]
         di["1988-2017"]["Daymet"]["Historical"][snowpack] = dict()
-        di["1988-2017"]["Daymet"]["Historical"][snowpack][
-            "climate-protection"
-        ] = dim_encodings["climate_protection"][int(beetle_resp[0][0][0][sni])]
+        di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = (
+            dim_encodings["climate_protection"][int(beetle_resp[0][0][0][sni])]
+        )
         if beetle_percents is not None:
             # This conditional will check to see if all percentages are 0% meaning that there is no data.
             # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
@@ -127,9 +133,9 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
                 for sni, risk_level in enumerate(sn_li):
                     snowpack = dim_encodings["snowpack"][sni]
                     di[era][model][scenario][snowpack] = dict()
-                    di[era][model][scenario][snowpack][
-                        "climate-protection"
-                    ] = dim_encodings["climate_protection"][int(risk_level)]
+                    di[era][model][scenario][snowpack]["climate-protection"] = (
+                        dim_encodings["climate_protection"][int(risk_level)]
+                    )
                     if beetle_percents is not None:
                         # This conditional will check to see if all percentages are 0% meaning that there is no data.
                         # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
@@ -255,9 +261,9 @@ def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
                     # If the mode is 1 above, it will take the count for all 1's
                     # and divide that by the total size of the array to get the
                     # percentage of the area that is low risk
-                    return_percentages[era][model][scenario][snowpack][
-                        int(mode)
-                    ] = round(mode_count / len(rm_nan_slice) * 100)
+                    return_percentages[era][model][scenario][snowpack][int(mode)] = (
+                        round(mode_count / len(rm_nan_slice) * 100)
+                    )
 
                     # If the uniques variable has more than one value, we need to
                     # check to see if this value should actually be the mode of the

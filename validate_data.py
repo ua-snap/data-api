@@ -1,9 +1,7 @@
 """A module to validate fetched data values."""
+
 import asyncio
-from config import RAS_BASE_URL, WEB_APP_URL
-from generate_requests import *
-from generate_urls import *
-from luts import place_type_labels
+from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 
 

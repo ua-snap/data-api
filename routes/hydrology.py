@@ -8,7 +8,6 @@ from validate_request import (
     validate_latlon,
     project_latlon,
 )
-from validate_data import *
 from postprocessing import postprocess
 from csv_functions import create_csv
 from config import WEST_BBOX, EAST_BBOX

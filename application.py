@@ -3,7 +3,7 @@ from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 from config import SITE_OFFLINE
 
-from routes import *
+from routes import routes, request
 
 # Elastic Beanstalk wants `application` to be present.
 application = app = Flask(__name__)

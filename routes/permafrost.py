@@ -1,13 +1,20 @@
 import asyncio
 import pandas as pd
-import numpy as np
 from urllib.parse import quote
 from flask import Blueprint, render_template, request, jsonify, Response
 
 # local imports
 from generate_urls import generate_wcs_query_url
-from fetch_data import *
-from csv_functions import create_csv
+from validate_data import place_name_and_type
+from fetch_data import (
+    fetch_data,
+    fetch_data_api,
+    fetch_wcs_point_data,
+    get_dim_encodings,
+    generate_wcs_getcov_str,
+    deepflatten,
+)
+from csv_functions import csv_metadata, create_csv
 
 from validate_request import (
     validate_latlon,
@@ -49,9 +56,9 @@ def package_obu_magt(obu_magt_resp):
         return None
     depth = "Top of Permafrost"
     year = "2000-2016"
-    titles[
-        "obu_magt"
-    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (deg C)"
+    titles["obu_magt"] = (
+        f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (deg C)"
+    )
     temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
     if temp is None:
         return None
