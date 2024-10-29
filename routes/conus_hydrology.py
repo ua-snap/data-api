@@ -1,7 +1,10 @@
 import requests
 import io
+import numpy as np
 import xarray as xr
 import json
+import geopandas as gpd
+import xml.etree.ElementTree as ET
 from flask import (
     Blueprint,
     Response,
@@ -12,10 +15,13 @@ from flask import (
 )
 
 from generate_requests import generate_conus_hydrology_wcs_str
+from generate_urls import generate_wfs_conus_hydrology_url
 from config import RAS_BASE_URL
 from . import routes
 
 cov_id = "conus_hydro_segments_crstephenson"
+# TODO: change to "Rasdaman Encoding" to disambiguate from the encoding attribute in the netCDF file
+encoding_attr = "Encoding"
 
 
 def fetch_hydrology_data(cov_id, geom_id):
@@ -40,53 +46,40 @@ def fetch_hydrology_data(cov_id, geom_id):
     return ds
 
 
-# might use the code below if we want to request only subsets of the datacube; right now we are requesting the entire contents for the geom ID
-# def encode_parameters(cov_id, encoding_attr, lc, model, scenario, era):
-#     """
-#     Function to encode the parameters for the Rasdaman request.
-#     Searches the XML response from the DescribeCoverage request for the encodings metadata and
-#     returns the dictionary of encodings. Encodes the input parameters to integers for the WCS request.
-#     Args:
-#         cov_id (str): Coverage ID for the hydrology data
-#         encoding_attr (str): Attribute name that holds dictionary of Rasdaman encodings
-#         lc (str): Land cover type (dynamic or static)
-#         model (str): Model name (e.g. CCSM4)
-#         scenario (str): Scenario name (e.g. historical)
-#         era (str): Era name (e.g. 1976_2005)
-#     Returns:
-#         Tuple of encoded parameters (integers) for Rasdaman request"""
+def build_decode_dicts(ds, encoding_attr):
+    """
+    Function to build decoding dictionaries.
+    Searches the XML response from the DescribeCoverage request for the encodings metadata and
+    returns the dictionary of encodings. Reverses the dictionary of encodingsd so we can decodes
+    and return dimensions as strings.
+    Args:
+        ds (xarray dataset): Dataset with hydrological stats for the geom ID
+        encoding_attr (str): Attribute name for the encoding dictionary in the XML response
+    Returns:
+        Decoded data dictionary with human-readable keys."""
 
-#     url = RAS_BASE_URL + f"ows?&SERVICE=WCS&VERSION=2.1.0&REQUEST=DescribeCoverage&COVERAGEID={cov_id}&outputType=GeneralGridCoverage"
-#     with requests.get(url, verify=False) as r:
-#         if r.status_code != 200:
-#             return render_template("500/server_error.html"), 500
-#         tree = ET.ElementTree(ET.fromstring(r.content))
+    url = (
+        RAS_BASE_URL
+        + f"ows?&SERVICE=WCS&VERSION=2.1.0&REQUEST=DescribeCoverage&COVERAGEID={cov_id}&outputType=GeneralGridCoverage"
+    )
+    with requests.get(url, verify=False) as r:
+        if r.status_code != 200:
+            return render_template("500/server_error.html"), 500
+        tree = ET.ElementTree(ET.fromstring(r.content))
 
-#     xml_search_string = str(".//{http://www.rasdaman.org}" + encoding_attr)
-#     encoding_dict_str = tree.findall(xml_search_string)[0].text
-#     encoding_dict = eval(encoding_dict_str)
+    xml_search_string = str(".//{http://www.rasdaman.org}" + encoding_attr)
+    encoding_dict_str = tree.findall(xml_search_string)[0].text
+    encoding_dict = eval(encoding_dict_str)
 
-#     if lc is not None:
-#         lc_ = encoding_dict["lc"][lc]
-#     else:
-#         lc_ = None
+    # for each dimension, reverse the encoding dictionary to decode the keys
+    # also convert to float, since this is the dtype of the encoded values in the datacube
+    # TODO: fix netCDF encoding to use integers instead of floats!
+    lc_dict = {float(v): k for k, v in encoding_dict["lc"].items()}
+    model_dict = {float(v): k for k, v in encoding_dict["model"].items()}
+    scenario_dict = {float(v): k for k, v in encoding_dict["scenario"].items()}
+    era_dict = {float(v): k for k, v in encoding_dict["era"].items()}
 
-#     if model is not None:
-#         model_ = encoding_dict["model"][model]
-#     else:
-#         model_ = None
-
-#     if scenario is not None:
-#         scenario_ = encoding_dict["scenario"][scenario]
-#     else:
-#         scenario_ = None
-
-#     if era is not None:
-#         era_ = encoding_dict["era"][era]
-#     else:
-#         era_ = None
-
-#     return lc_, model_, scenario_, era_
+    return lc_dict, model_dict, scenario_dict, era_dict
 
 
 def build_dict_and_populate_stats(geom_id, ds):
@@ -101,6 +94,8 @@ def build_dict_and_populate_stats(geom_id, ds):
         Data dictionary with the hydrology stats populated.
     """
 
+    lc_dict, model_dict, scenario_dict, era_dict = build_decode_dicts(ds, encoding_attr)
+
     data_dict = {
         geom_id: {"name": None, "centroid_lat": None, "centroid_lon": None, "stats": {}}
     }
@@ -108,48 +103,99 @@ def build_dict_and_populate_stats(geom_id, ds):
     # get the stats from the dataset for each landcover, model, scenario, era, and variable.
     vars = list(ds.data_vars)
     for lc in ds.lc.values:
-        data_dict[geom_id]["stats"][lc] = {}
+        data_dict[geom_id]["stats"][lc_dict[lc]] = {}
         for model in ds.model.values:
-            data_dict[geom_id]["stats"][lc][model] = {}
+            data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]] = {}
             for scenario in ds.scenario.values:
-                data_dict[geom_id]["stats"][lc][model][scenario] = {}
-                for era in ds.era.values:
-                    data_dict[geom_id]["stats"][lc][model][scenario][era] = {}
-                    stats_dict = {}
-                    for var in vars:
-                        stat_value = float(
-                            ds[var].sel(lc=lc, model=model, scenario=scenario, era=era)
-                        )
-                        stats_dict[var] = stat_value
-                        data_dict[geom_id]["stats"][lc][model][scenario][
-                            era
-                        ] = stats_dict
+                data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                    scenario_dict[scenario]
+                ] = {}
+                # if scenario is historical, get only the first era values (all others are null)
+                if scenario_dict[scenario] == "historical":
+                    for era in ds.era.values[:1]:
+                        data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                            scenario_dict[scenario]
+                        ][era_dict[era]] = {}
+                        stats_dict = {}
+                        for var in vars:
+                            stat_value = float(
+                                ds[var].sel(
+                                    lc=lc, model=model, scenario=scenario, era=era
+                                )
+                            )
 
-    data_dict = encode_data_dict(data_dict, ds)
+                            if np.isnan(stat_value):
+                                stat_value = None
+
+                            stats_dict[var] = stat_value
+
+                            data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                                scenario_dict[scenario]
+                            ][era_dict[era]] = stats_dict
+                # if scenario is not historical, get all era values except the first (which is null)
+                else:
+                    for era in ds.era.values[1:]:
+                        data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                            scenario_dict[scenario]
+                        ][era_dict[era]] = {}
+                        stats_dict = {}
+                        for var in vars:
+                            stat_value = float(
+                                ds[var].sel(
+                                    lc=lc, model=model, scenario=scenario, era=era
+                                )
+                            )
+
+                            if np.isnan(stat_value):
+                                stat_value = None
+
+                            stats_dict[var] = stat_value
+                            data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                                scenario_dict[scenario]
+                            ][era_dict[era]] = stats_dict
 
     return data_dict
 
 
-# def populate_attributes(geom_id, data_dict):
-#    for idx, row in huc_segments.iterrows():
+def get_features_and_populate_attributes(data_dict):
+    """Function to populate the data dictionary with the attributes from the vector data.
+    Args:
+        data_dict (dict): Data dictionary with the hydrology stats populated
+    Returns:
+        Data dictionary with the vector attributes populated."""
+    for geom_id in data_dict.keys():
+        url = generate_wfs_conus_hydrology_url(geom_id)
 
-#         geojson = (
-#             huc_segments[["seg_id_nat", "GNIS_NAME", "geometry"]]
-#             .loc[idx]
-#             .to_json(default_handler=str)
-#         )
+        # get the features
+        with requests.get(
+            url, verify=False
+        ) as r:  # verify=False is necessary for dev version of Geoserver
+            if r.status_code != 200:
+                return render_template("500/server_error.html"), 500
+            else:
+                try:
+                    r_json = r.json()
+                except:
+                    print("Unable to decode as JSON, got raw text:\n", r.text)
+                    return render_template("500/server_error.html"), 500
 
-#         segment_dict = dict(
-#             {
-#                 "name": row.GNIS_NAME,
-#                 "data_by_model": dict({}),
-#                 "geojson": geojson,
-#             }
-#         )
+        # save json to test size of return
+        with open("/home/jdpaul3/segments.json", "w", encoding="utf-8") as f:
+            json.dump(r_json, f, ensure_ascii=False, indent=4)
 
-#         data_dict["segments"][row.seg_id_nat] = segment_dict
+        # create a valid geodataframe from the features and find a representation point on the line segment
+        # CRS is hardcoded to EPSG:5070!
+        seg_gdf = gpd.GeoDataFrame.from_features(r_json["features"], crs="EPSG:5070")
+        seg_gdf["geometry"] = seg_gdf["geometry"].make_valid()
 
-#     return data_dict
+        rep_x_coord = seg_gdf.loc[0].geometry.representative_point().x
+        rep_y_coord = seg_gdf.loc[0].geometry.representative_point().y
+
+        data_dict[geom_id]["name"] = seg_gdf.loc[0].GNIS_NAME
+        data_dict[geom_id]["latitude"] = rep_y_coord
+        data_dict[geom_id]["longitude"] = rep_x_coord
+
+    return data_dict
 
 
 @routes.route("/conus_hydrology/")
@@ -161,28 +207,12 @@ def conus_hydrology_about():
 def run_get_conus_hydrology_point_data(geom_id):
     """
     Function to fetch hydrology data from Rasdaman for a single geometry ID.
-    Additional reguest arguments can be made for land cover type, model, scenario, era, and variables.
-    For example: /conus_hydrology/12345?lc=dynamic&model=CCSM4&scenario=historical&era=1976_2005&vars=dh3,dh15
+    Example URL: http://localhost:5000/conus_hydrology/1000
     Args:
         geom_id (str): Geometry ID for the hydrology data
     Returns:
         JSON response with hydrological stats for the requested geom ID.
     """
-    # might incorporate the code below if we want to field GET requests for further subsetting of the datacube
-    # sort through request arguments and assign to variables, if they exist
-    # if request.args.get("lc"):
-    #     lc = request.args.get("lc")
-    # if request.args.get("model"):
-    #     model = request.args.get("model")
-    # if request.args.get("scenario"):
-    #     scenario = request.args.get("scenario")
-    # if request.args.get("era"):
-    #     era = request.args.get("era")
-    # if request.args.get("vars"):
-    #     if len(request.args.get("vars").split(",")) > 1:
-    #         vars = request.args.get("vars").split(",")
-    #     else:
-    #         vars = [request.args.get("vars")]
 
     ds = fetch_hydrology_data(cov_id, geom_id)
     # save nc to test size of return
@@ -192,9 +222,9 @@ def run_get_conus_hydrology_point_data(geom_id):
     data_dict = build_dict_and_populate_stats(geom_id, ds)
 
     # populate attributes from vector data
-    # data_dict = populate_attributes(geom_id, data_dict)
+    data_dict = get_features_and_populate_attributes(data_dict)
 
-    # return Flask JSON Response
+    # convert to JSON
     json_results = json.dumps(data_dict, indent=4)
 
     # save json to test size of return

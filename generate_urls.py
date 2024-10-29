@@ -42,10 +42,10 @@ def generate_wfs_search_url(
     """
     distance = "0.7"
     if nearby_fires:
-        ''' 
+        """
         GeoServer only supports degrees, so this is a query for ~70 mile radius.
         https://gis.stackexchange.com/questions/132251/dwithin-wfs-filter-is-not-working
-       '''
+        """
         distance = "1.0"
     wfs_url = (
         GS_BASE_URL
@@ -101,3 +101,11 @@ def generate_wms_and_wfs_query_urls(wms, wms_base, wfs, wfs_base):
     for veclyr in wfs:
         urls.append(wfs_base.format(veclyr, wfs[veclyr]))
     return urls
+
+
+def generate_wfs_conus_hydrology_url(geom_id):
+    wfs_url = (
+        GS_BASE_URL
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg&propertyName=(GNIS_NAME,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={geom_id})"
+    )
+    return wfs_url
