@@ -49,9 +49,9 @@ def package_obu_magt(obu_magt_resp):
         return None
     depth = "Top of Permafrost"
     year = "2000-2016"
-    titles[
-        "obu_magt"
-    ] = f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (deg C)"
+    titles["obu_magt"] = (
+        f"Obu et al. (2018) {year} Mean Annual {depth} Ground Temperature (deg C)"
+    )
     temp = obu_magt_resp["features"][0]["properties"]["GRAY_INDEX"]
     if temp is None:
         return None
@@ -478,8 +478,22 @@ async def run_fetch_gipl_1km_point_data(
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
         if summarize is not None:
-            return create_csv(point_pkg, "gipl_summary", lat=lat, lon=lon)
-        return create_csv(point_pkg, "gipl", lat=lat, lon=lon)
+            return create_csv(
+                point_pkg,
+                "gipl_summary",
+                lat=lat,
+                lon=lon,
+                start_year=start_year,
+                end_year=end_year,
+            )
+        return create_csv(
+            point_pkg,
+            "gipl",
+            lat=lat,
+            lon=lon,
+            start_year=start_year,
+            end_year=end_year,
+        )
     return postprocess(gipl_1km_point_package, "crrel_gipl")
 
 
