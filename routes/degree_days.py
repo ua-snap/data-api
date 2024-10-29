@@ -407,8 +407,6 @@ def run_fetch_dd_point_data(
         )
         if tidy_package in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-        else:
-            return create_csv(tidy_package, cov_id_str + "_all", lat=lat, lon=lon)
 
     # if no request args, return unabridged tidy package
     if len(request.args) == 0:
@@ -434,7 +432,14 @@ def run_fetch_dd_point_data(
             if tidy_package in [{}, None, 0]:
                 return render_template("404/no_data.html"), 404
             else:
-                return create_csv(tidy_package, cov_id_str, lat=lat, lon=lon)
+                return create_csv(
+                    tidy_package,
+                    cov_id_str,
+                    lat=lat,
+                    lon=lon,
+                    start_year=start_year,
+                    end_year=end_year,
+                )
         elif "summarize" in request.args:
             dd_data_package = package_distilled_response(
                 point_data, start_year, end_year
@@ -453,7 +458,14 @@ def run_fetch_dd_point_data(
             if tidy_package in [{}, None, 0]:
                 return render_template("404/no_data.html"), 404
             else:
-                return create_csv(tidy_package, cov_id_str + "_all", lat=lat, lon=lon)
+                return create_csv(
+                    tidy_package,
+                    cov_id_str + "_all",
+                    lat=lat,
+                    lon=lon,
+                    start_year=start_year,
+                    end_year=end_year,
+                )
 
 
 @routes.route("/eds/degree_days/<var_ep>/<lat>/<lon>")

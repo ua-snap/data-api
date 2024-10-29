@@ -15,6 +15,8 @@ def create_csv(
     source_metadata=None,
     filename_prefix=None,
     vars=None,
+    start_year=None,
+    end_year=None,
 ):
     """Create a CSV for any supported data set
     Args:
@@ -25,6 +27,9 @@ def create_csv(
         lon: longitude for points or None for polygons
         source_metadata: optional metadata to credit data sources
         filename_prefix: optional filename prefix (a month, for example)
+        vars: optional list of variables to include in CSV
+        start_year: optional start year for CSV
+        end_year: optional end year for CSV
     Returns:
         CSV Response
     """
@@ -33,7 +38,9 @@ def create_csv(
     place_name, place_type = place_name_and_type(place_id)
 
     if not endpoint.startswith("places_"):
-        metadata = csv_metadata(place_name, place_id, place_type, lat, lon)
+        metadata = csv_metadata(
+            place_name, place_id, place_type, lat, lon, start_year, end_year
+        )
     else:
         metadata = ""
 
@@ -106,6 +113,8 @@ def create_csv(
     if filename_prefix is not None:
         filename += filename_prefix + " "
     filename += properties["filename_data_name"]
+    if start_year is not None and end_year is not None:
+        filename += " (" + start_year + " - " + end_year + ")"
     if not endpoint.startswith("places_"):
         filename += " for "
         if place_name is not None:
@@ -120,7 +129,15 @@ def create_csv(
     return write_csv(properties)
 
 
-def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=None):
+def csv_metadata(
+    place_name=None,
+    place_id=None,
+    place_type=None,
+    lat=None,
+    lon=None,
+    start_year=None,
+    end_year=None,
+):
     """
     Creates metadata string to add to beginning of CSV file.
 
@@ -130,6 +147,8 @@ def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=
         place_type (str): point or area
         lat: latitude for points or None for polygons
         lon: longitude for points or None for polygons
+        start_year: optional start year for CSV
+        end_year: optional end year for CSV
 
     Returns:
         Multiline metadata string
@@ -148,6 +167,9 @@ def csv_metadata(place_name=None, place_id=None, place_type=None, lat=None, lon=
         metadata += place_name + "\n"
     else:
         metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
+
+    if start_year is not None and end_year is not None:
+        metadata += "# Time range: (" + start_year + " - " + end_year + ")\n"
 
     metadata += (
         "# View a report for this location at https://earthmaps.io"
