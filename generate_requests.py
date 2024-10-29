@@ -196,3 +196,33 @@ def generate_netcdf_average_wcps_str(bbox_bounds, generate_average_wcps_str_kwar
         **generate_average_wcps_str_kwargs,
     )
     return netcdf_avg_wcps_str
+
+
+def generate_conus_hydrology_wcs_str(
+    cov_id, geom_id, lc=None, model=None, scenario=None, era=None, vars=None
+):
+    # lc, model, scenario, and era arguments must already be encoded to integers before building the request string
+    # TODO: Add support for multiple models, scenarios, and eras etc.
+
+    request_string = f"/ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&"
+    request_string += f"COVERAGEID={cov_id}&"
+    request_string += f"SUBSET=geom_id({geom_id})&"
+
+    if lc is not None:
+        request_string += f"SUBSET=lc({lc})&"
+    if model is not None:
+        request_string += f"SUBSET=model({model})&"
+    if scenario is not None:
+        request_string += f"SUBSET=scenario({scenario})&"
+    if era is not None:
+        request_string += f"SUBSET=era({era})&"
+    if vars is not None:
+        if len(vars) == 1:
+            var_string = vars[0]
+        else:
+            var_string = ",".join(vars)
+        request_string += f"RANGESUBSET={var_string}&"
+
+    request_string += f"FORMAT=application/netcdf"
+
+    return request_string
