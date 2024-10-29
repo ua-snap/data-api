@@ -56,6 +56,7 @@ def get_service_categories():
         ("Wildfire", "/fire"),
         ("WRF Dynamically Downscaled ERA5 Reanalysis", "/era5wrf"),
         ("Demographics", "/demographics"),
+        ("CONUS Hydrology", "/conus_hydrology"),
         ("CMIP6 Fire Weather Indices", "/fire_weather"),
     ]
 
@@ -131,9 +132,7 @@ def validate_get_params():
             Raises: ValidationError: when `value` not a valid vars string
             """
             # 200 is arbitrary, but endpoints (e.g., era5wrf) have many vars
-            climate_var_regex = re.compile(
-                r"^(?=.{1,200}$)[A-Za-z0-9,_]+$"
-            )
+            climate_var_regex = re.compile(r"^(?=.{1,200}$)[A-Za-z0-9,_]+$")
             if not climate_var_regex.match(value):
                 raise ValidationError("Invalid var(s) provided.")
             return True
