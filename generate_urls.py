@@ -101,6 +101,14 @@ def generate_wms_and_wfs_query_urls(wms, wms_base, wfs, wfs_base):
     return urls
 
 
+def generate_wfs_conus_hydrology_url(geom_id):
+    wfs_url = (
+        GS_BASE_URL
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg&propertyName=(GNIS_NAME,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={geom_id})"
+    )
+    return wfs_url
+
+
 def generate_describe_coverage_url(describe_coverage_str):
     """Generate a WCPS describe() URL from a query string.
 
