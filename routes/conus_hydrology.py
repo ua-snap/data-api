@@ -97,7 +97,7 @@ def build_dict_and_populate_stats(geom_id, ds):
     lc_dict, model_dict, scenario_dict, era_dict = build_decode_dicts(ds, encoding_attr)
 
     data_dict = {
-        geom_id: {"name": None, "centroid_lat": None, "centroid_lon": None, "stats": {}}
+        geom_id: {"name": None, "latitude": None, "longitude": None, "stats": {}}
     }
 
     # get the stats from the dataset for each landcover, model, scenario, era, and variable.
@@ -229,6 +229,6 @@ def run_get_conus_hydrology_point_data(geom_id):
 
     # save json to test size of return
     with open("/home/jdpaul3/result.json", "w", encoding="utf-8") as f:
-        json.dump(json_results, f, ensure_ascii=False, indent=4)
+        json.dump(json_results, f)
 
     return Response(json_results, mimetype="application/json")
