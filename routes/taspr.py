@@ -1427,7 +1427,7 @@ def get_precipitation_plate(lat, lon):
             # Returns error template that was generated for invalid request
             return response
 
-    no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[3:])
+    no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[4:])
     no_header = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
 
     pr["preview"] = no_metadata + no_header
@@ -1488,6 +1488,16 @@ def mmm_point_data_endpoint(
         if validation == 400:
             return render_template("400/bad_request.html"), 400
 
+    # validate request args before fetching data
+    if len(request.args) == 0:
+        pass  # no additional request args will be passed to the run_fetch_mmm_point_data function
+    else:
+        # if args exist, check if they are allowed
+        allowed_args = ["summarize", "format", "community"]
+        if not all(key in allowed_args for key in request.args.keys()):
+            return render_template("400/bad_request.html"), 400
+
+    # if args exist and are allowed, return the appropriate response
     try:
         point_pkg = run_fetch_mmm_point_data(
             var_ep, lat, lon, cov_id, start_year, end_year
@@ -1496,6 +1506,37 @@ def mmm_point_data_endpoint(
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
+
+    # if preview, return as CSV
+    # the preview arg is only used for CSV generation and should never occur with additional request args
+    if preview:
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        place_id = request.args.get("community")
+        month_labels = {"jan": "January", "july": "July"}
+        if month is not None:
+            filename_prefix = month_labels[month]
+            return create_csv(
+                point_pkg,
+                var_ep + "_mmm",
+                place_id,
+                lat,
+                lon,
+                filename_prefix=filename_prefix,
+                start_year=start_year,
+                end_year=end_year,
+            )
+        else:
+            return create_csv(
+                point_pkg,
+                var_ep + "_all",
+                place_id,
+                lat,
+                lon,
+                start_year=start_year,
+                end_year=end_year,
+            )
 
     if not request.args.get("summarize") == "mmm" and (
         request.args.get("format") == "csv" or preview
@@ -1555,6 +1596,15 @@ def tas_2km_point_data_endpoint(lat, lon):
             422,
         )
 
+    # validate request args before fetching data
+    if len(request.args) == 0:
+        pass
+    else:
+        # if args exist, check if they are allowed
+        allowed_args = ["format", "community"]
+        if not all(key in allowed_args for key in request.args.keys()):
+            return render_template("400/bad_request.html"), 400
+
     try:
         point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
     except Exception as exc:
@@ -1562,7 +1612,7 @@ def tas_2km_point_data_endpoint(lat, lon):
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    if request.args.get("format") == "csv":
+    if "format" in request.args:
         point_pkg = nullify_and_prune(point_pkg, "tas2km")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
@@ -1599,6 +1649,15 @@ def point_data_endpoint(lat, lon):
             422,
         )
 
+    # validate request args before fetching data
+    if len(request.args) == 0:
+        pass
+    else:
+        # if args exist, check if they are allowed
+        allowed_args = ["format", "community"]
+        if not all(key in allowed_args for key in request.args.keys()):
+            return render_template("400/bad_request.html"), 400
+
     if "temperature" in request.path:
         var_ep = "temperature"
     elif "precipitation" in request.path:
@@ -1618,7 +1677,7 @@ def point_data_endpoint(lat, lon):
     else:
         return render_template("400/bad_request.html"), 400
 
-    if request.args.get("format") == "csv":
+    if "format" in request.args:
         point_pkg = nullify_and_prune(point_pkg, "taspr")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
@@ -1667,7 +1726,16 @@ def taspr_area_data_endpoint(var_id):
     except:
         return render_template("422/invalid_area.html"), 422
 
-    if request.args.get("format") == "csv":
+    # validate request args before fetching data
+    if len(request.args) == 0:
+        pass
+    else:
+        # if args exist, check if they are allowed
+        allowed_args = ["format", "community"]
+        if not all(key in allowed_args for key in request.args.keys()):
+            return render_template("400/bad_request.html"), 400
+
+    if "format" in request.args:
         poly_pkg = nullify_and_prune(poly_pkg, "taspr")
         if poly_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
@@ -1689,9 +1757,19 @@ def proj_precip_point(lat, lon):
             422,
         )
 
-    csv = False
-    if request.args.get("format") == "csv":
+    # validate request args before fetching data
+    if len(request.args) == 0:
+        pass
+    else:
+        # if args exist, check if they are allowed
+        allowed_args = ["format", "community"]
+        if not all(key in allowed_args for key in request.args.keys()):
+            return render_template("400/bad_request.html"), 400
+
+    if "format" in request.args:
         csv = True
+    else:
+        csv = False
 
     try:
         point_pkg = run_fetch_proj_precip_point_data(lat, lon, csv)
@@ -1700,11 +1778,10 @@ def proj_precip_point(lat, lon):
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    if csv:
+    if "format" in request.args:
         point_pkg = nullify_and_prune(point_pkg, "proj_precip")
         if point_pkg in [{}, None, 0]:
             return render_template("404/no_data.html"), 404
-
         place_id = request.args.get("community")
         return create_csv(point_pkg, "proj_precip", place_id, lat, lon)
 

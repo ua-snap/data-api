@@ -619,7 +619,7 @@ def permafrost_eds_request(lat, lon):
 
     preview_string = [r.data.decode("utf-8") for r in preview]
 
-    preview_past = preview_string[0].split("\n")[3:9]
+    preview_past = preview_string[0].split("\n")[4:10]
     preview_future = preview_string[1].split("\n")[-6:]
     permafrostData["preview"] = (
         "\n".join(preview_past) + "\n" + "\n".join(preview_future)

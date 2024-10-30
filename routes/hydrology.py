@@ -408,7 +408,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
             422,
         )
 
-    # validate request arguments if they exist; set summarize argument accordingly
+    # validate request arguments if they exist, otherwise run the fetch
     if len(request.args) == 0 and (summarize is None and preview is None):
         try:
             point_pkg = run_fetch_hydrology_point_data(lat, lon)
@@ -419,10 +419,13 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                 return render_template("404/no_data.html"), 404
             return render_template("500/server_error.html"), 500
 
-    elif all(key in request.args for key in ["summarize", "format"]):
-        if (request.args.get("summarize") == "mmm") & (
-            request.args.get("format") == "csv"
-        ):
+    # if args exist, check if they are allowed
+    allowed_args = ["summarize", "format", "community"]
+    if not all(key in allowed_args for key in request.args.keys()):
+        return render_template("400/bad_request.html"), 400
+    else:
+        # if args exist and are allowed, return the appropriate response
+        if ("summarize" in request.args) and ("format" in request.args):
             try:
                 point_pkg = run_fetch_hydrology_point_data_mmm(lat, lon)
                 place_id = request.args.get("community")
@@ -437,22 +440,15 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                     return render_template("404/no_data.html"), 404
                 return render_template("500/server_error.html"), 500
 
-        else:
-            return render_template("400/bad_request.html"), 400
-
-    elif "summarize" in request.args or summarize:
-        if request.args.get("summarize") == "mmm" or summarize:
+        elif "summarize" in request.args or summarize:
             try:
                 return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
             except Exception as exc:
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
                 return render_template("500/server_error.html"), 500
-        else:
-            return render_template("400/bad_request.html"), 400
 
-    elif "format" in request.args or preview:
-        if request.args.get("format") == "csv" or preview:
+        elif "format" in request.args or preview:
             try:
                 point_pkg = run_fetch_hydrology_point_data(lat, lon)
                 place_id = request.args.get("community")
@@ -468,11 +464,6 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
                 return render_template("500/server_error.html"), 500
-        else:
-            return render_template("400/bad_request.html"), 400
-
-    else:
-        return render_template("400/bad_request.html"), 400
 
 
 @routes.route("/eds/hydrology/<lat>/<lon>")
