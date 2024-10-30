@@ -1427,7 +1427,7 @@ def get_precipitation_plate(lat, lon):
             # Returns error template that was generated for invalid request
             return response
 
-    no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[3:])
+    no_metadata = "\n".join(first.data.decode("utf-8").split("\n")[4:])
     no_header = "\n".join(last.data.decode("utf-8").split("\n")[-6:])
 
     pr["preview"] = no_metadata + no_header
@@ -1496,80 +1496,80 @@ def mmm_point_data_endpoint(
         allowed_args = ["summarize", "format", "community"]
         if not all(key in allowed_args for key in request.args.keys()):
             return render_template("400/bad_request.html"), 400
+
+    # if args exist and are allowed, return the appropriate response
+    try:
+        point_pkg = run_fetch_mmm_point_data(
+            var_ep, lat, lon, cov_id, start_year, end_year
+        )
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    # if preview, return as CSV
+    # the preview arg is only used for CSV generation and should never occur with additional request args
+    if preview:
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        place_id = request.args.get("community")
+        month_labels = {"jan": "January", "july": "July"}
+        if month is not None:
+            filename_prefix = month_labels[month]
+            return create_csv(
+                point_pkg,
+                var_ep + "_mmm",
+                place_id,
+                lat,
+                lon,
+                filename_prefix=filename_prefix,
+                start_year=start_year,
+                end_year=end_year,
+            )
         else:
-            # if args exist and are allowed, return the appropriate response
-            try:
-                point_pkg = run_fetch_mmm_point_data(
-                    var_ep, lat, lon, cov_id, start_year, end_year
-                )
-            except Exception as exc:
-                if hasattr(exc, "status") and exc.status == 404:
-                    return render_template("404/no_data.html"), 404
-                return render_template("500/server_error.html"), 500
+            return create_csv(
+                point_pkg,
+                var_ep + "_all",
+                place_id,
+                lat,
+                lon,
+                start_year=start_year,
+                end_year=end_year,
+            )
 
-            # if preview, return as CSV
-            # the preview arg is only used for CSV generation and should never occur with additional request args
-            if preview:
-                point_pkg = nullify_and_prune(point_pkg, "taspr")
-                if point_pkg in [{}, None, 0]:
-                    return render_template("404/no_data.html"), 404
-                place_id = request.args.get("community")
-                month_labels = {"jan": "January", "july": "July"}
-                if month is not None:
-                    filename_prefix = month_labels[month]
-                    return create_csv(
-                        point_pkg,
-                        var_ep + "_mmm",
-                        place_id,
-                        lat,
-                        lon,
-                        filename_prefix=filename_prefix,
-                        start_year=start_year,
-                        end_year=end_year,
-                    )
-                else:
-                    return create_csv(
-                        point_pkg,
-                        var_ep + "_all",
-                        place_id,
-                        lat,
-                        lon,
-                        start_year=start_year,
-                        end_year=end_year,
-                    )
+    if not request.args.get("summarize") == "mmm" and (
+        request.args.get("format") == "csv" or preview
+    ):
+        point_pkg = nullify_and_prune(point_pkg, "taspr")
+        if point_pkg in [{}, None, 0]:
+            return render_template("404/no_data.html"), 404
+        place_id = request.args.get("community")
+        month_labels = {"jan": "January", "july": "July"}
+        if month is not None:
+            filename_prefix = month_labels[month]
+            return create_csv(
+                point_pkg,
+                var_ep + "_mmm",
+                place_id,
+                lat,
+                lon,
+                filename_prefix=filename_prefix,
+                start_year=start_year,
+                end_year=end_year,
+            )
+        else:
+            return create_csv(
+                point_pkg,
+                var_ep + "_all",
+                place_id,
+                lat,
+                lon,
+                start_year=start_year,
+                end_year=end_year,
+            )
 
-            if not request.args.get("summarize") == "mmm" and (
-                request.args.get("format") == "csv" or preview
-            ):
-                point_pkg = nullify_and_prune(point_pkg, "taspr")
-                if point_pkg in [{}, None, 0]:
-                    return render_template("404/no_data.html"), 404
-                place_id = request.args.get("community")
-                month_labels = {"jan": "January", "july": "July"}
-                if month is not None:
-                    filename_prefix = month_labels[month]
-                    return create_csv(
-                        point_pkg,
-                        var_ep + "_mmm",
-                        place_id,
-                        lat,
-                        lon,
-                        filename_prefix=filename_prefix,
-                        start_year=start_year,
-                        end_year=end_year,
-                    )
-                else:
-                    return create_csv(
-                        point_pkg,
-                        var_ep + "_all",
-                        place_id,
-                        lat,
-                        lon,
-                        start_year=start_year,
-                        end_year=end_year,
-                    )
-
-            return postprocess(point_pkg, "taspr")
+    return postprocess(point_pkg, "taspr")
 
 
 @routes.route("/tas2km/point/<lat>/<lon>")
