@@ -114,7 +114,7 @@ def create_csv(
         filename += filename_prefix + " "
     filename += properties["filename_data_name"]
     if start_year is not None and end_year is not None:
-        filename += " (" + start_year + " - " + end_year + ")"
+        filename += f" ({start_year} - {end_year})"
     if not endpoint.startswith("places_"):
         filename += " for "
         if place_name is not None:
@@ -169,7 +169,7 @@ def csv_metadata(
         metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
 
     if start_year is not None and end_year is not None:
-        metadata += "# Time range: (" + start_year + " - " + end_year + ")\n"
+        metadata += f"# Time range: ({start_year} - {end_year})\n"
 
     metadata += (
         "# View a report for this location at https://earthmaps.io"
