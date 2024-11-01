@@ -9,9 +9,17 @@ from flask import (
 )
 
 # local imports
-from generate_requests import *
+from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersection_url
-from fetch_data import *
+from fetch_data import (
+    fetch_bbox_netcdf_list,
+    fetch_data,
+    get_dim_encodings,
+    zonal_stats,
+    generate_nested_dict,
+    get_from_dict,
+    get_poly_3338_bbox,
+)
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,

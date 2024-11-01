@@ -6,7 +6,7 @@ import rasterio as rio
 from generate_requests import generate_wcs_getcov_str, get_wcs_xy_str_from_bbox_bounds
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
-    fetch_data_api,
+    fetch_geoserver_data,
     fetch_bbox_geotiff_from_gs,
     geotiff_zonal_stats,
     get_poly_3338_bbox,
@@ -89,7 +89,7 @@ def run_fetch_elevation(lat, lon):
         )
     try:
         results = asyncio.run(
-            fetch_data_api(GS_BASE_URL, "dem", wms_targets, wfs_targets, lat, lon)
+            fetch_geoserver_data(GS_BASE_URL, "dem", wms_targets, wfs_targets, lat, lon)
         )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:

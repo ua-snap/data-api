@@ -30,7 +30,6 @@ from validate_request import (
     validate_var_id,
     validate_year,
 )
-from validate_data import *
 from postprocessing import (
     nullify_and_prune,
     postprocess,

@@ -4,7 +4,7 @@ from flask_cors import CORS
 from config import SITE_OFFLINE
 from marshmallow import Schema, fields, validate
 
-from routes import *
+from routes import routes, request
 
 # Elastic Beanstalk wants `application` to be present.
 application = app = Flask(__name__)

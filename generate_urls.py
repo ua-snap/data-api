@@ -1,8 +1,5 @@
 """A module to generate query URLs"""
 
-import asyncio
-from aiohttp import ClientSession
-import urllib.parse
 from config import RAS_BASE_URL, GS_BASE_URL
 from luts import bbox_offset
 
@@ -42,10 +39,10 @@ def generate_wfs_search_url(
     """
     distance = "0.7"
     if nearby_fires:
-        ''' 
+        """
         GeoServer only supports degrees, so this is a query for ~70 mile radius.
         https://gis.stackexchange.com/questions/132251/dwithin-wfs-filter-is-not-working
-       '''
+        """
         distance = "1.0"
     wfs_url = (
         GS_BASE_URL

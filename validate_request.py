@@ -7,7 +7,7 @@ import asyncio
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
-from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX, INDICATORS_BBOX
+from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 
