@@ -2,14 +2,16 @@ from flask import render_template, Response, request
 import asyncio
 import json
 import requests
+import pandas as pd
 
 # local imports
 from . import routes
-from luts import demographics_fields
+from luts import demographics_fields, demographics_descriptions
 
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 from csv_functions import create_csv
+
 
 def validate_community_id(community):
     """Function to confirm that the input community ID is valid.
@@ -21,16 +23,18 @@ def validate_community_id(community):
     community_ids = []
     url = generate_wfs_places_url("demographics:demographics", properties="id")
     with requests.get(url) as r:
-        for feature in r.json()['features']:
-            community_ids.append(feature['properties']['id'])
+        for feature in r.json()["features"]:
+            community_ids.append(feature["properties"]["id"])
     if community in community_ids:
         return True, community_ids
-    else: 
+    else:
         return False, community_ids
+
 
 @routes.route("/demographics/")
 def demographics_about():
     return render_template("/documentation/demographics.html")
+
 
 @routes.route("/demographics/<community>")
 def get_data_for_community(community):
@@ -48,7 +52,8 @@ def get_data_for_community(community):
     """
     # Validate community ID; if not valid, return an error
     validation, community_ids = validate_community_id(community)
-    if community == 'all': pass
+    if community == "all":
+        pass
     elif not validation:
         return render_template("400/bad_request.html"), 400
     else:
@@ -57,7 +62,11 @@ def get_data_for_community(community):
     # List URLs
     urls = []
     for c in community_ids:
-        urls.append(generate_wfs_places_url("demographics:demographics", filter=c, filter_type="id"))
+        urls.append(
+            generate_wfs_places_url(
+                "demographics:demographics", filter=c, filter_type="id"
+            )
+        )
 
     # Requests the Geoserver WFS URLs and extracts property values to a dict
     results = {}
@@ -66,17 +75,45 @@ def get_data_for_community(community):
 
     # Rename keys
     for c in community_ids:
-        fields_to_rename = [x for x in list(results[c].keys()) if x in list(demographics_fields.keys())]
+        fields_to_rename = [
+            x for x in list(results[c].keys()) if x in list(demographics_fields.keys())
+        ]
         for field in fields_to_rename:
             results[c][demographics_fields[field]] = results[c].pop(field)
 
     # Recreate the dicts in a better order for viewing (drops "id", "GEOID", and "areatype")
     # convert to JSON object to preserve ordered output
-    fields = ["name", "comment", "total_population", "pct_under_18", "pct_under_5", "pct_65_plus", 
-    "pct_minority", "pct_african_american", "pct_amer_indian_ak_native", "pct_asian", "pct_hawaiian_pacislander", "pct_hispanic_latino", "pct_white", "pct_multi", "pct_other",
-    "pct_asthma", "pct_copd", "pct_diabetes", "pct_hd", "pct_kd", "pct_stroke",
-    "pct_w_disability", "moe_pct_w_disability", "pct_insured", "moe_pct_insured", "pct_uninsured", "moe_pct_uninsured",
-    "pct_no_bband", "pct_no_hsdiploma", "pct_below_150pov",
+    fields = [
+        "name",
+        "comment",
+        "total_population",
+        "pct_under_18",
+        "pct_under_5",
+        "pct_65_plus",
+        "pct_minority",
+        "pct_african_american",
+        "pct_amer_indian_ak_native",
+        "pct_asian",
+        "pct_hawaiian_pacislander",
+        "pct_hispanic_latino",
+        "pct_white",
+        "pct_multi",
+        "pct_other",
+        "pct_asthma",
+        "pct_copd",
+        "pct_diabetes",
+        "pct_hd",
+        "pct_kd",
+        "pct_stroke",
+        "pct_w_disability",
+        "moe_pct_w_disability",
+        "pct_insured",
+        "moe_pct_insured",
+        "pct_uninsured",
+        "moe_pct_uninsured",
+        "pct_no_bband",
+        "pct_no_hsdiploma",
+        "pct_below_150pov",
     ]
 
     reformatted_results = {}
@@ -87,13 +124,25 @@ def get_data_for_community(community):
 
     # Return CSV if requested
     if request.args.get("format") == "csv":
+        # reformat to long format dataframe and add descriptions
+        rows = []
+        for id in reformatted_results.keys():
+            row = reformatted_results[id]
+            rows.append(row)
+        df = pd.DataFrame(rows).set_index("name").T
+        transposed_results = df.to_dict(orient="index")
+        for key in transposed_results:
+            transposed_results[key]["description"] = demographics_descriptions[key]
+
         if community != "all":
-            return create_csv(reformatted_results, endpoint="demographics", place_id=community)
+            return create_csv(
+                transposed_results, endpoint="demographics", place_id=community
+            )
         else:
-            return create_csv(reformatted_results, endpoint="demographics", place_id=None)
-    
+            return create_csv(
+                transposed_results, endpoint="demographics", place_id=None
+            )
+
     # Otherwise return Flask JSON Response
-    json_results = json.dumps(reformatted_results, indent = 4)
+    json_results = json.dumps(reformatted_results, indent=4)
     return Response(response=json_results, status=200, mimetype="application/json")
-
-

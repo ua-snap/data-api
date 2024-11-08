@@ -1,4 +1,5 @@
 """Module for look-up-table like objects"""
+
 import os
 
 host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
@@ -134,4 +135,37 @@ demographics_fields = {
     "pct_uninsu": "pct_uninsured",
     "pct_w_disa": "pct_w_disability",
     "total_popu": "total_population",
+}
+
+demographics_descriptions = {
+    "name": "name is the community name",
+    "comment": "comment is the comment regarding data source; data for some communities may be aggregated from multiple census data geometries or may be derived from a census data geometry with a name that differs from the community name",
+    "total_population": "total_population is the total population of community as reported in the Census Demographic and Housing Characteristics Survey for 2020",
+    "pct_under_18": "pct_under_18 is the percentage of population under age 18; this value was calculated by summing the population count of multiple sex by age categories reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that sum as a percentage of the total population",
+    "pct_under_5": "pct_under_5 is the percentage of population under age 5; this value was calculated by summing the population count of multiple sex by age categories reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that sum as a percentage of the total population",
+    "pct_65_plus": "pct_65_plus is the percentage of population age 65 and older; this value was calculated by summing the population count of multiple sex by age categories reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that sum as a percentage of the total population",
+    "pct_minority": "pct_minority is the percentage of population of racial or ethnic minority status as reported in the CDC Social Determinants of Health survey for years 2017-2021",
+    "pct_african_american": "pct_african_american is the percentage of population that is African American; this value was calculated by taking the population count of African Americans as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_amer_indian_ak_native": "pct_amer_indian_ak_native is the percentage of population that is American Indian or Alaska Native; this value was calculated by taking the population count of American Indians or Alaska Natives as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_asian": "pct_asian is the percentage of population that is Asian; this value was calculated by taking the population count of Asians as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_hawaiian_pacislander": "pct_hawaiian_pacislander is the percentage of population that is Native Hawaiian and Pacific Islander; this value was calculated by taking the population count of Native Hawaiians and Pacific Islanders as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_hispanic_latino": "pct_hispanic_latino is the percentage of population that is Hispanic or Latino; this value was calculated by taking the population count of Hispanics or Latinos as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_white": "pct_white is the percentage of population that is White; this value was calculated by taking the population count of Whites as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_multi": "pct_multi is the percentage of population that is two or more races; this value was calculated by taking the population count of two or more races as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_other": "pct_other is the percentage of population that is other race; this value was calculated by taking the population count of other races as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
+    "pct_asthma": "pct_asthma is the percentage of of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
+    "pct_copd": "pct_copd is the percentage of of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
+    "pct_diabetes": "pct_diabetes is the percentage of of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
+    "pct_hd": "pct_hd is the percentage of of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
+    "pct_kd": "pct_kd is the percentage of of adults aged >=18 years with chronic kidney disease as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
+    "pct_stroke": "pct_stroke is the percentage of of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
+    "pct_w_disability": "pct_w_disability is the percentage of population with a disability as reported in the Census American Community Survey 5-year survey for years 2018-2022",
+    "moe_pct_w_disability": "moe_pct_w_disability is the margin of error for percentage of population with a disability as reported in the Census American Community Survey 5-year survey for years 2018-2022",
+    "pct_insured": "pct_insured is the percentage of population with health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
+    "moe_pct_insured": "moe_pct_insured is the margin of error percentage of population with health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
+    "pct_uninsured": "pct_uninsured is the percentage of population without health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
+    "moe_pct_uninsured": "moe_pct_uninsured is the margin of error percentage of population without health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
+    "pct_no_bband": "pct_no_bband is the percentage of households with no broadband internet subscription as reported in the CDC Social Determinants of Health survey for years 2017-2021",
+    "pct_no_hsdiploma": "pct_no_hsdiploma is the percentage of adults aged >=25 years with no high school diploma as reported in the CDC Social Determinants of Health survey for years 2017-2021",
+    "pct_below_150pov": "pct_below_150pov is the percentage of population living below 150% of the poverty level as reported in the CDC Social Determinants of Health survey for years 2017-2021",
 }
