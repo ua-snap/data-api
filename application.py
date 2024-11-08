@@ -3,6 +3,7 @@ from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 from config import SITE_OFFLINE
 from marshmallow import Schema, fields, validate
+import re
 
 from routes import routes, request
 
