@@ -20,13 +20,18 @@ from aiohttp import ClientSession
 from flask import current_app as app
 from rasterstats import zonal_stats
 from config import RAS_BASE_URL
-from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
+from generate_requests import (
+    generate_wcs_getcov_str,
+    generate_netcdf_wcs_getcov_str,
+    generate_wcps_describe_coverage_str,
+)
 from generate_urls import (
     generate_wcs_query_url,
     generate_base_wms_url,
     generate_base_wfs_url,
     generate_wms_and_wfs_query_urls,
     generate_wfs_places_url,
+    generate_describe_coverage_url,
 )
 
 
@@ -586,3 +591,18 @@ def replace_nans(json_str):
     # This is to prevent matches against strings that contain 'nan' within them.
     json_str = re.sub(r"(?<=[,\[\]])nan(?=[,\[\]])", "-9999", json_str)
     return json_str
+
+
+async def describe_via_wcps(cov_id):
+    """Get the metadata in JSON format via a WCPS describe() query request.
+
+    Args:
+        cov_id (str): rasdaman coverage ID
+
+    Returns:
+        json_description (dict): coverage description in JSON format
+    """
+    req_str = generate_wcps_describe_coverage_str(cov_id)
+    req_url = generate_describe_coverage_url(req_str)
+    json_description = await fetch_data([req_url])
+    return json_description
