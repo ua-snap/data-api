@@ -158,3 +158,95 @@ def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):
         projected_coords = (x1, y1, x2, y2)
 
     return projected_coords
+
+
+def get_x_y_axes(coverage_metadata):
+    """Extract the X and Y axes from the coverage metadata.
+
+    We're doing this because we won't always know the axis ordering and posiition that come from Rasdaman. They are usually the last two axes, but their exact numbering might depend on on how many axes the coverage has. So we can iterate through the axes and find the ones with the axisLabel "X" and "Y" and grab them with `next()`.
+
+    Args:
+        coverage_metadata (dict): JSON-like dictionary containing coverage metadata
+
+    Returns:
+        tuple: A tuple containing the X and Y axes metadata
+    """
+    try:
+        x_axis = next(
+            axis
+            for axis in coverage_metadata["domainSet"]["generalGrid"]["axis"]
+            if axis["axisLabel"] == "X"
+        )
+        y_axis = next(
+            axis
+            for axis in coverage_metadata["domainSet"]["generalGrid"]["axis"]
+            if axis["axisLabel"] == "Y"
+        )
+        return x_axis, y_axis
+    except (KeyError, StopIteration):
+        raise ValueError("Unexpected coverage metadata: 'X' or 'Y' axis not found")
+
+
+def validate_xy_in_coverage_extent(x, y, coverage_metadata):
+    """Validate if the x and y coordinates are within the bounding box of the coverage.
+
+    Args:
+        x (float): x-coordinate
+        y (float): y-coordinate
+        coverage_metadata (dict): JSON-like dictionary containing coverage metadata
+
+    Returns:
+        bool: True if the coordinates are within the bounding box, False otherwise
+    """
+    try:
+        x_axis, y_axis = get_x_y_axes(coverage_metadata)
+
+        x_in_bounds = x_axis["lowerBound"] <= x <= x_axis["upperBound"]
+        y_in_bounds = y_axis["lowerBound"] <= y <= y_axis["upperBound"]
+
+        return x_in_bounds and y_in_bounds
+    except ValueError:
+        return False
+
+
+def construct_latlon_bbox_from_coverage_bounds(coverage_metadata):
+    """Construct a bounding box from the coverage metadata.
+
+    We use this to trigger a 422 error if the user's lat/lon is outside the coverage bounds and avoid polluting the config with hardcoded bounding boxes for each coverage.
+
+    Args:
+        coverage_metadata (dict): JSON-like dictionary containing coverage metadata
+
+    Returns:
+        tuple: A tuple containing the bounding box (xmin, ymin, xmax, ymax)
+    """
+    try:
+        x_axis, y_axis = get_x_y_axes(coverage_metadata)
+        # bbox order is like this [lon min, lat min, lon max, lat max]
+        bbox = (
+            x_axis["lowerBound"],
+            y_axis["lowerBound"],
+            x_axis["upperBound"],
+            y_axis["upperBound"],
+        )
+        return bbox
+    except ValueError:
+        raise ValueError("Invalid coverage metadata: 'X' or 'Y' axis not found")
+
+
+def validate_latlon_in_bboxes(lat, lon, bboxes):
+    """Validate if the lat and lon are within the bounding boxes.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+        bboxes (list): list of bounding boxes in the format [xmin, ymin, xmax, ymax]
+    Returns:
+        bool: True if the coordinates are within the bounding boxes, else 422
+    """
+    for bbox in bboxes:
+        valid_lat = bbox[1] <= lat <= bbox[3]
+        valid_lon = bbox[0] <= lon <= bbox[2]
+        if valid_lat and valid_lon:
+            return True
+    return 422
