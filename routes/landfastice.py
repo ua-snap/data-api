@@ -9,52 +9,65 @@ from flask import (
 # local imports
 from fetch_data import (
     fetch_wcs_point_data,
-    get_dim_encodings,
+    describe_via_wcps,
 )
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
     project_latlon,
+    validate_xy_in_coverage_extent,
 )
 from postprocessing import postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
 landfastice_api = Blueprint("landfastice_api", __name__)
-landfastice_coverage_id = "landfast_sea_ice_extent"
-landfastice_encodings = asyncio.run(
-    get_dim_encodings(
-        landfastice_coverage_id, scrape=("time", "gmlrgrid:coefficients", 1)
-    )
-)
+
+beaufort_daily_slie_id = "ardac_beaufort_daily_slie"
+chukchi_daily_slie_id = "ardac_chukchi_daily_slie"
+# get the description of coverages from rasdaman
+beaufort_meta = asyncio.run(describe_via_wcps(beaufort_daily_slie_id))
+chukchi_meta = asyncio.run(describe_via_wcps(chukchi_daily_slie_id))
 
 
-def generate_time_index():
-    """Generate a Pythonic time index for a single October-July ice season.
+def generate_time_index_from_coverage_metadata(meta):
+    """Generate a pandas DatetimeIndex from the ansi (i.e. time) axis coordinates in the coverage description metadata.
+
+    Args:
+        meta (dict): JSON-like dictionary containing coverage metadata
 
     Returns:
-        dt_range (pandas DatetimeIndex): a time index with daily frequency
+        pd.DatetimeIndex: corresponding to the ansi (i.e. time) axis coordinates
     """
+    try:
+        # we won't always know the axis positioning / ordering
+        ansi_axis = next(
+            axis
+            for axis in meta["domainSet"]["generalGrid"]["axis"]
+            if axis["axisLabel"] == "ansi"
+        )
+        # this is a list of dates formatted like "1996-11-03T00:00:00.000Z"
+        ansi_coordinates = ansi_axis["coordinate"]
+        date_index = pd.DatetimeIndex(ansi_coordinates)
+        return date_index
 
-    timestamps = [x[1:-2] for x in landfastice_encodings["time"].split(" ")]
-    date_index = pd.DatetimeIndex(timestamps)
-    return date_index
+    except (KeyError, StopIteration):
+        raise ValueError("Unexpected coverage metadata: 'ansi' axis not found")
 
 
-def package_landfastice_data(landfastice_resp):
-    """Package landfast ice extent data into a nested JSON-like dict.
+def package_landfastice_data(landfastice_resp, meta):
+    """Package landfast ice extent data into a JSON-like dict.
 
     Arguments:
-        time_index (pandas DateRange object) -- a time index with daily frequency
         landfastice_resp (list) -- the response from the WCS GetCoverage request
 
     Returns:
         di (dict) -- a dict where the key is a single date and the value is the landfast ice status (1 indicates landfast ice is present)
     """
-    time_index = generate_time_index()
+    time_index = generate_time_index_from_coverage_metadata(meta)
     di = {}
-    for t, x in zip(list(time_index), landfastice_resp):
-        di[t.date().strftime("%m-%d-%Y")] = x
+    for dt, ice_value in zip(list(time_index), landfastice_resp):
+        di[dt.date().strftime("%m-%d-%Y")] = ice_value
     return di
 
 
@@ -67,7 +80,7 @@ def about_landfastice():
 
 @routes.route("/landfastice/point/<lat>/<lon>/")
 def run_point_fetch_all_landfastice(lat, lon):
-    """Run the async request for all landfast ice extent data at a single point.
+    """Run the async request for all landfast ice data at a single point.
     Args:
         lat (float): latitude
         lon (float): longitude
@@ -78,23 +91,28 @@ def run_point_fetch_all_landfastice(lat, lon):
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
-    if validation == 422:
-        return (
-            render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
-            ),
-            422,
-        )
+
     x, y = project_latlon(lat, lon, 3338)
-    try:
-        rasdaman_response = asyncio.run(
-            fetch_wcs_point_data(x, y, landfastice_coverage_id)
-        )
-        landfastice_time_series = package_landfastice_data(rasdaman_response)
-        if request.args.get("format") == "csv":
-            return create_csv(landfastice_time_series, "landfastice", lat=lat, lon=lon)
-        return postprocess(landfastice_time_series, "landfastice")
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
+
+    if validate_xy_in_coverage_extent(x, y, beaufort_meta):
+        target_coverage = beaufort_daily_slie_id
+        target_meta = beaufort_meta
+    elif validate_xy_in_coverage_extent(x, y, chukchi_meta):
+        target_coverage = chukchi_daily_slie_id
+        target_meta = chukchi_meta
+    else:
+        return "out of coverage"
+        # return render_template("422/invalid"), 422
+        # maybe return 422 invalid lat-lon instead?
+
+    # try:
+    rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, target_coverage))
+    landfastice_time_series = package_landfastice_data(rasdaman_response, target_meta)
+    postprocessed = postprocess(landfastice_time_series, "landfast_sea_ice")
+    if request.args.get("format") == "csv":
+        return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
+    return postprocessed
+    # except Exception as exc:
+    #     if hasattr(exc, "status") and exc.status == 404:
+    #         return render_template("404/no_data.html"), 404
+    #     return render_template("500/server_error.html"), 500
