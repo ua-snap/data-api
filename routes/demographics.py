@@ -52,9 +52,7 @@ def get_data_for_community(community):
     """
     # Validate community ID; if not valid, return an error
     validation, community_ids = validate_community_id(community)
-    if community == "all":
-        pass
-    elif not validation:
+    if not validation:
         return render_template("400/bad_request.html"), 400
     else:
         community_ids = [community, "US0", "AK0"]
