@@ -71,7 +71,7 @@ def find_via_gs(lat, lon):
 
     # WFS request to Geoserver for all polygon areas.
     nearby_areas = asyncio.run(
-        fetch_data([generate_wfs_search_url("all_boundaries:all_areas", lat, lon)])
+        fetch_data([generate_wfs_search_url("playground:all_areas_test5", lat, lon)])
     )["features"]
 
     # Create the JSON section for each of the area types.
@@ -126,7 +126,11 @@ def get_total_bounds(nearby_areas, communities=None):
     areas_gdf = gpd.GeoDataFrame.from_features(nearby_areas)
 
     # Make a new GeoPandas GeoDataFrome which contains only the HUCs and protected areas
-    huc_pa_gdf = areas_gdf[areas_gdf["type"].isin(["huc", "protected_area"])].copy()
+    huc_pa_gdf = areas_gdf[
+        areas_gdf["type"].isin(
+            ["huc", "protected_area", "yt_watershed", "yt_game_management_zone"]
+        )
+    ].copy()
 
     # If there were any nearby communities, we want to ensure our
     # bounding box includes them.
@@ -227,7 +231,7 @@ def get_json_for_type(type, recurse=False):
                 fetch_data(
                     [
                         generate_wfs_places_url(
-                            "all_boundaries:all_areas", "id,name,type,area_type", type
+                            "playground:all_areas_test5", "id,name,type,area_type", type
                         )
                     ]
                 )
