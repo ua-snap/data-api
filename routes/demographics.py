@@ -157,14 +157,9 @@ def get_data_for_community(community):
         for key in transposed_results:
             transposed_results[key]["description"] = demographics_descriptions[key]
 
-        if community != "all":
-            return create_csv(
-                transposed_results, endpoint="demographics", place_id=community
-            )
-        else:
-            return create_csv(
-                transposed_results, endpoint="demographics", place_id=None
-            )
+        return create_csv(
+            transposed_results, endpoint="demographics", place_id=community
+        )
 
     # Otherwise return Flask JSON Response
     json_results = json.dumps(reformatted_results, indent=4)

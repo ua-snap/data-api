@@ -5,7 +5,7 @@ import io
 from urllib.parse import quote
 from postprocessing import nullify_and_prune
 from fetch_data import extract_nested_dict_keys, get_from_dict
-from luts import place_type_labels
+from luts import place_type_labels, demographics_order
 from validate_data import place_name_and_type
 from datetime import datetime
 
@@ -1055,17 +1055,23 @@ def demographics_csv(data):
                 value_cols.append(subkey)
     value_cols = list(set(value_cols)) + ["description"]
 
-    coords = list(data.keys())
     values = value_cols
     fieldnames = ["variable"] + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+
+    # order CSV dicts to match NCR data display order in the luts.py demographics_order list
+    ordered_csv_dicts = []
+    for key in demographics_order:
+        for csv_dict in csv_dicts:
+            if csv_dict["variable"] == key:
+                ordered_csv_dicts.append(csv_dict)
 
     metadata = "# Demographic data for individual communities plus the state of Alaska and United States.\n"
 
     filename_data_name = "Demographic Data - "
 
     return {
-        "csv_dicts": csv_dicts,
+        "csv_dicts": ordered_csv_dicts,
         "fieldnames": fieldnames,
         "metadata": metadata,
         "filename_data_name": filename_data_name,
