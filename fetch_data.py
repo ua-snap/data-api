@@ -101,7 +101,9 @@ async def make_get_request(url, session):
         Query result, deocded differently depending on encoding argument.
     """
     cache_header = {"Cache-Control": "max-age=7776000"}
-    resp = await session.request(method="GET", url=url, headers=cache_header)
+    resp = await session.request(
+        method="GET", url=url, headers=cache_header, verify_ssl=False
+    )
     resp.raise_for_status()
 
     # way of auto-detecting encoding from URL

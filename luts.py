@@ -270,4 +270,6 @@ demographics_order = [
     "moe_pct_insured",
     "pct_uninsured",
     "moe_pct_uninsured",
+    # etc
+    "comment",
 ]
