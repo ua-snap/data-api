@@ -1,6 +1,5 @@
 """
-A module to validate latitude and longitude, contains
-other functions that could be used across multiple endpoints.
+A module to validate request parameters such as latitude and longitude for use across multiple endpoints.
 """
 
 import asyncio
@@ -10,6 +9,28 @@ import numpy as np
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
+
+
+def latlon_is_numeric_and_in_geodetic_range(lat, lon):
+    """Validate that the lat and lon values are numeric and within the decimal degree boundaries of +- 90 (lat) and +- 180 (lon).
+
+    Args:
+        lat (int or float): latitude
+        lon (int or float): longitude
+
+    Returns:
+        True if valid, or HTTP 400 status code if validation failed
+    """
+    try:
+        lat_float = float(lat)
+        lon_float = float(lon)
+    except:
+        return 400
+    lat_in_world = -90 <= lat_float <= 90
+    lon_in_world = -180 <= lon_float <= 180
+    if not lat_in_world or not lon_in_world:
+        return 400
+    return True
 
 
 def validate_latlon(lat, lon):
@@ -218,32 +239,50 @@ def construct_latlon_bbox_from_coverage_bounds(coverage_metadata):
         coverage_metadata (dict): JSON-like dictionary containing coverage metadata
 
     Returns:
-        tuple: A tuple containing the bounding box (xmin, ymin, xmax, ymax)
+        list: containing the bounding box [lon_min, lat_min, lon_max, lat_max]
     """
     try:
-        x_axis, y_axis = get_x_y_axes(coverage_metadata)
-        # bbox order is like this [lon min, lat min, lon max, lat max]
-        bbox = (
-            x_axis["lowerBound"],
-            y_axis["lowerBound"],
-            x_axis["upperBound"],
-            y_axis["upperBound"],
+        transformer = Transformer.from_crs(
+            coverage_metadata["envelope"]["srsName"].split("/")[-1], 4326
         )
+    except KeyError:
+        raise ValueError(
+            "Unexpected coverage metadata: Could not parse CRS via `srsName` key."
+        )
+    try:
+        x_axis, y_axis = get_x_y_axes(coverage_metadata)
+        # CP note: seems like the tuple unpacking should be reversed, but I'm matching the coordinate ordering of the example BBOXES in config.py
+        lat_min, lon_min = transformer.transform(
+            x_axis["lowerBound"], y_axis["lowerBound"]
+        )
+        lat_max, lon_max = transformer.transform(
+            x_axis["upperBound"], y_axis["upperBound"]
+        )
+        bbox = [
+            round(lon_min, 4),
+            round(lat_min, 4),
+            round(lon_max, 4),
+            round(lat_max, 4),
+        ]
         return bbox
     except ValueError:
-        raise ValueError("Invalid coverage metadata: 'X' or 'Y' axis not found")
+        raise ValueError(
+            "Unexpected coverage metadata: lower or upper spatial bounds not found."
+        )
 
 
 def validate_latlon_in_bboxes(lat, lon, bboxes):
-    """Validate if the lat and lon are within the bounding boxes.
+    """Validate if a lat and lon are within a list of bounding boxes.
 
     Args:
         lat (float): latitude
         lon (float): longitude
-        bboxes (list): list of bounding boxes in the format [xmin, ymin, xmax, ymax]
+        bboxes (list): list of bounding boxes in the format [lon_min, lat_min, lon_max, lat_max]
     Returns:
         bool: True if the coordinates are within the bounding boxes, else 422
     """
+    lat = float(lat)
+    lon = float(lon)
     for bbox in bboxes:
         valid_lat = bbox[1] <= lat <= bbox[3]
         valid_lon = bbox[0] <= lon <= bbox[2]
