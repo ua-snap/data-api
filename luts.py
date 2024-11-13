@@ -113,7 +113,7 @@ areas_near = {
 }
 
 # table to decode field names for demographic data from GeoServer
-# fields that were not truncated do not appear here
+# NOTE: fields that were not truncated do not appear here!
 # see data dictionary in the repo for more info: https://github.com/ua-snap/epa-justice/blob/main/README.md
 demographics_fields = {
     "moe_pct_in": "moe_pct_insured",
@@ -134,8 +134,28 @@ demographics_fields = {
     "pct_unde_1": "pct_under_5",
     "pct_uninsu": "pct_uninsured",
     "pct_w_disa": "pct_w_disability",
+    "pct_foodst": "pct_foodstamps",
+    "pct_crowdi": "pct_crowding",
+    "pct_single": "pct_single_parent",
+    "pct_unempl": "pct_unemployed",
     "total_popu": "total_population",
+    # the fields below are low and high confidence intervals (95% CI values)
+    "pct_asth_1": "pct_asthma_low",
+    "pct_asth_2": "pct_asthma_high",
+    "pct_copd_l": "pct_copd_low",
+    "pct_copd_h": "pct_copd_high",
+    "pct_diab_1": "pct_diabetes_low",
+    "pct_diab_2": "pct_diabetes_high",
+    "pct_emos_1": "pct_emospt_low",
+    "pct_emos_2": "pct_emospt_high",
+    "pct_food_1": "pct_foodstamps_low",
+    "pct_food_2": "pct_foodstamps_high",
+    "pct_mh_hig": "pct_mh_high",
+    "pct_hd_hig": "pct_hd_high",
+    "pct_stro_1": "pct_stroke_low",
+    "pct_stro_2": "pct_stroke_high",
 }
+
 
 demographics_descriptions = {
     "name": "name is the community name",
@@ -153,12 +173,30 @@ demographics_descriptions = {
     "pct_white": "pct_white is the percentage of population that is White; this value was calculated by taking the population count of Whites as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
     "pct_multi": "pct_multi is the percentage of population that is two or more races; this value was calculated by taking the population count of two or more races as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
     "pct_other": "pct_other is the percentage of population that is other race; this value was calculated by taking the population count of other races as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_asthma": "pct_asthma is the percentage of of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
-    "pct_copd": "pct_copd is the percentage of of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
-    "pct_diabetes": "pct_diabetes is the percentage of of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
-    "pct_hd": "pct_hd is the percentage of of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
-    "pct_kd": "pct_kd is the percentage of of adults aged >=18 years with chronic kidney disease as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
-    "pct_stroke": "pct_stroke is the percentage of of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2023; this value is a crude prevalence rate",
+    "pct_asthma": "pct_asthma is the percentage of of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
+    "pct_asthma_low": "pct_asthma_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2024",
+    "pct_asthma_high": "pct_asthma_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2024",
+    "pct_copd": "pct_copd is the percentage of of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
+    "pct_copd_low": "pct_copd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2024",
+    "pct_copd_high": "pct_copd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2024",
+    "pct_diabetes": "pct_diabetes is the percentage of of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
+    "pct_diabetes_low": "pct_diabetes_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2024",
+    "pct_diabetes_high": "pct_diabetes_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2024",
+    "pct_hd": "pct_hd is the percentage of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
+    "pct_hd_low": "pct_hd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2024",
+    "pct_hd_high": "pct_hd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2024",
+    "pct_mh": "pct_mh is the percentage of adults aged >=18 years with frequent mental distress as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
+    "pct_mh_low": "pct_mh_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with frequent mental distress as reported in the CDC PLACES survey for 2024",
+    "pct_mh_high": "pct_mh_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with frequent mental distress as reported in the CDC PLACES survey for 2024",
+    "pct_stroke": "pct_stroke is the percentage of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
+    "pct_stroke_low": "pct_stroke_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2024",
+    "pct_stroke_high": "pct_stroke_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2024",
+    "pct_emospt": "pct_emospt is the percentage of adults aged >=18 years with lack of social and emotional support as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
+    "pct_emospt_low": "pct_emospt_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with lack of social and emotional support as reported in the CDC PLACES survey for 2024",
+    "pct_emospt_high": "pct_emospt_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with lack of social and emotional support as reported in the CDC PLACES survey for 2024",
+    "pct_foodstamps": "pct_foodstamps is the percentage of adults aged >=18 years that received food stamps in the past 12 months as reported in the CDC PLACES survey for 2024",
+    "pct_foodstamps_low": "pct_foodstamps_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months as reported in the CDC PLACES survey for 2024",
+    "pct_foodstamps_high": "pct_foodstamps_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months as reported in the CDC PLACES survey for 2024",
     "pct_w_disability": "pct_w_disability is the percentage of population with a disability as reported in the Census American Community Survey 5-year survey for years 2018-2022",
     "moe_pct_w_disability": "moe_pct_w_disability is the margin of error for percentage of population with a disability as reported in the Census American Community Survey 5-year survey for years 2018-2022",
     "pct_insured": "pct_insured is the percentage of population with health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
