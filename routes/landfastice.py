@@ -13,19 +13,21 @@ from fetch_data import (
 )
 from csv_functions import create_csv
 from validate_request import (
-    validate_latlon,
+    latlon_is_numeric_and_in_geodetic_range,
+    construct_latlon_bbox_from_coverage_bounds,
+    validate_latlon_in_bboxes,
     project_latlon,
     validate_xy_in_coverage_extent,
 )
 from postprocessing import postprocess
 from . import routes
-from config import WEST_BBOX, EAST_BBOX
 
+# the following are declared globally because we only need to fetch metadata once
+# and we need to do it no matter what to determine if requests are even valid and to
+# know what coverage to query
 landfastice_api = Blueprint("landfastice_api", __name__)
-
 beaufort_daily_slie_id = "ardac_beaufort_daily_slie"
 chukchi_daily_slie_id = "ardac_chukchi_daily_slie"
-# get the description of coverages from rasdaman
 beaufort_meta = asyncio.run(describe_via_wcps(beaufort_daily_slie_id))
 chukchi_meta = asyncio.run(describe_via_wcps(chukchi_daily_slie_id))
 
@@ -88,12 +90,24 @@ def run_point_fetch_all_landfastice(lat, lon):
     Returns:
         JSON-like dict of landfast ice extent data
     """
-    validation = validate_latlon(lat, lon)
+    # ensure the coordinates are numeric and in +/- 90, +/- 180 range
+    validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
-
+    # now, we can construct the bboxes to check if the point is within the specific coverage extents
+    beaufort_bbox = construct_latlon_bbox_from_coverage_bounds(beaufort_meta)
+    chukchi_bbox = construct_latlon_bbox_from_coverage_bounds(chukchi_meta)
+    within_bounds = validate_latlon_in_bboxes(lat, lon, [beaufort_bbox, chukchi_bbox])
+    if within_bounds == 422:
+        return (
+            render_template(
+                "422/invalid_latlon_outside_coverage.html",
+                bboxes=[beaufort_bbox, chukchi_bbox],
+            ),
+            422,
+        )
+    # next, we project the lat lon and determine which coverage to query
     x, y = project_latlon(lat, lon, 3338)
-
     if validate_xy_in_coverage_extent(x, y, beaufort_meta):
         target_coverage = beaufort_daily_slie_id
         target_meta = beaufort_meta
@@ -101,18 +115,18 @@ def run_point_fetch_all_landfastice(lat, lon):
         target_coverage = chukchi_daily_slie_id
         target_meta = chukchi_meta
     else:
-        return "out of coverage"
-        # return render_template("422/invalid"), 422
-        # maybe return 422 invalid lat-lon instead?
-
-    # try:
-    rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, target_coverage))
-    landfastice_time_series = package_landfastice_data(rasdaman_response, target_meta)
-    postprocessed = postprocess(landfastice_time_series, "landfast_sea_ice")
-    if request.args.get("format") == "csv":
-        return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
-    return postprocessed
-    # except Exception as exc:
-    #     if hasattr(exc, "status") and exc.status == 404:
-    #         return render_template("404/no_data.html"), 404
-    #     return render_template("500/server_error.html"), 500
+        # this should never happen, because we already establish that the point is syntactically valid and within the bounds of at least one bounding box
+        return render_template("500/server_error.html"), 500
+    try:
+        rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, target_coverage))
+        landfastice_time_series = package_landfastice_data(
+            rasdaman_response, target_meta
+        )
+        postprocessed = postprocess(landfastice_time_series, "landfast_sea_ice")
+        if request.args.get("format") == "csv":
+            return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
+        return postprocessed
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
