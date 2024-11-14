@@ -147,7 +147,7 @@ def get_data_for_community(community):
         reformatted_results[community]["total_population"]
         - reformatted_results[community]["pct_under_18"]
     ) < 50:
-        return "{'error': 'adult population < 50 people, no data returned'}", 403
+        return render_template("/403/pop_under_50.html"), 403
 
     # Return CSV if requested
     if request.args.get("format") == "csv":
