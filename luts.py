@@ -215,6 +215,8 @@ demographics_descriptions = {
 
 # order of fields for demographics CSV (should match presentation of fields in NCR)
 demographics_order = [
+    # etc
+    "comment",
     # population
     "total_population",
     # age by category
@@ -270,6 +272,4 @@ demographics_order = [
     "moe_pct_insured",
     "pct_uninsured",
     "moe_pct_uninsured",
-    # etc
-    "comment",
 ]
