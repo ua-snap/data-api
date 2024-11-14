@@ -143,8 +143,11 @@ def get_data_for_community(community):
             reformatted_results[c][field] = results[c][field]
 
     # apply population threshold
-    if reformatted_results[community]["total_population"] < 50:
-        return "{'error': 'community population <50 people, no data returned'}", 403
+    if (
+        reformatted_results[community]["total_population"]
+        - reformatted_results[community]["pct_under_18"]
+    ) < 50:
+        return "{'error': 'adult population < 50 people, no data returned'}", 403
 
     # Return CSV if requested
     if request.args.get("format") == "csv":
