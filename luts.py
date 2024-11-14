@@ -202,7 +202,7 @@ demographics_descriptions = {
     "pct_insured": "pct_insured is the percentage of population with health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
     "moe_pct_insured": "moe_pct_insured is the margin of error percentage of population with health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
     "pct_uninsured": "pct_uninsured is the percentage of population without health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
-    "moe_pct_uninsured": "moe_pct_uninsured is the margin of error percentage of population without health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
+    "moe_pct_uninsured": "moe_pct_uninsured is the margin of error for percentage of population without health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
     "pct_no_bband": "pct_no_bband is the percentage of households with no broadband internet subscription as reported in the CDC Social Determinants of Health survey for years 2017-2021",
     "pct_no_hsdiploma": "pct_no_hsdiploma is the percentage of adults aged >=25 years with no high school diploma as reported in the CDC Social Determinants of Health survey for years 2017-2021",
     "pct_below_150pov": "pct_below_150pov is the percentage of population living below 150% of the poverty level as reported in the CDC Social Determinants of Health survey for years 2017-2021",
