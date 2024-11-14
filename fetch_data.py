@@ -102,7 +102,7 @@ async def make_get_request(url, session):
     """
     cache_header = {"Cache-Control": "max-age=7776000"}
     resp = await session.request(
-        method="GET", url=url, headers=cache_header, verify_ssl=False
+        method="GET", url=url, headers=cache_header, verify_ssl=True
     )
     resp.raise_for_status()
 

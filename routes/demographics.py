@@ -22,7 +22,7 @@ def validate_community_id(community):
     """
     community_ids = []
     url = generate_wfs_places_url("demographics:demographics", properties="id")
-    with requests.get(url, verify=False) as r:
+    with requests.get(url, verify=True) as r:
         for feature in r.json()["features"]:
             community_ids.append(feature["properties"]["id"])
     if community in community_ids:
