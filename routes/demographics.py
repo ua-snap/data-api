@@ -133,6 +133,7 @@ def get_data_for_community(community):
         "pct_crowding",
         "pct_single_parent",
         "pct_unemployed",
+        "pct_hcost",
     ]
 
     reformatted_results = {}
