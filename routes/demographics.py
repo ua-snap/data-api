@@ -157,7 +157,11 @@ def get_data_for_community(community):
             row = reformatted_results[id]
             rows.append(row)
         df = pd.DataFrame(rows).set_index("name").T
+        # move Alaska column to second to last position and United States columns to the last position
+        df.insert(len(df.columns) - 1, "Alaska", df.pop("Alaska"))
+        df.insert(len(df.columns) - 1, "United States", df.pop("United States"))
         transposed_results = df.to_dict(orient="index")
+
         for key in transposed_results:
             transposed_results[key]["description"] = demographics_descriptions[key]
 
