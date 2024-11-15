@@ -142,13 +142,13 @@ def get_data_for_community(community):
         for field in fields:
             reformatted_results[c][field] = results[c][field]
 
-    totalPopulation = reformatted_results[community]["total_population"]
-    percentUnder18 = reformatted_results[community]["pct_under_18"]
-    populationUnder18 = totalPopulation * (percentUnder18 / 100)
-    adultPopulation = round(totalPopulation - populationUnder18)
+    total_population = reformatted_results[community]["total_population"]
+    percent_under_18 = reformatted_results[community]["pct_under_18"]
+    population_under_18 = total_population * (percent_under_18 / 100)
+    adult_population = round(total_population - population_under_18)
 
     # apply population threshold
-    if adultPopulation < 50:
+    if adult_population < 50:
         return render_template("/403/pop_under_50.html"), 403
 
     # Return CSV if requested
