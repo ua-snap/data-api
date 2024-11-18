@@ -142,6 +142,12 @@ def get_data_for_community(community):
         for field in fields:
             reformatted_results[c][field] = results[c][field]
 
+    # for each community in the results, round any float values to 1 decimal place
+    for i in reformatted_results.items():
+        for k, v in i[1].items():
+            if isinstance(v, float):
+                reformatted_results[i[0]][k] = round(v, 1)
+
     # apply population threshold
     if (
         reformatted_results[community]["total_population"]
