@@ -147,12 +147,12 @@ def get_data_for_community(community):
         for k, v in i[1].items():
             if isinstance(v, float):
                 reformatted_results[i[0]][k] = round(v, 1)
+    
+    # apply population threshold
     total_population = reformatted_results[community]["total_population"]
     percent_under_18 = reformatted_results[community]["pct_under_18"]
     population_under_18 = total_population * (percent_under_18 / 100)
     adult_population = round(total_population - population_under_18)
-
-    # apply population threshold
     if adult_population < 50:
         return render_template("/403/pop_under_50.html"), 403
 
