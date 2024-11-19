@@ -12,7 +12,7 @@ from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 
 
-def validate_latlon(lat, lon):
+def validate_latlon(lat, lon, bbox=None):
     """Validate the lat and lon values.
     Return True if valid or HTTP status code if validation failed
     """
@@ -26,8 +26,14 @@ def validate_latlon(lat, lon):
     if not lat_in_world or not lon_in_world:
         return 400  # HTTP status code
 
+    # Use bbox if provided, otherwise default to WEST_BBOX and EAST_BBOX
+    if bbox:
+        bboxes = [bbox]
+    else:
+        bboxes = [WEST_BBOX, EAST_BBOX]
+
     # Validate against two different BBOXes to deal with antimeridian issues
-    for bbox in [WEST_BBOX, EAST_BBOX]:
+    for bbox in bboxes:
         valid_lat = bbox[1] <= lat_float <= bbox[3]
         valid_lon = bbox[0] <= lon_float <= bbox[2]
         if valid_lat and valid_lon:

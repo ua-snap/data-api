@@ -29,7 +29,7 @@ from validate_request import (
 from postprocessing import nullify_and_prune, postprocess
 from csv_functions import create_csv
 from . import routes
-from config import WEST_BBOX, EAST_BBOX
+from config import WEST_BBOX, EAST_BBOX, CMIP6_BBOX
 
 indicators_api = Blueprint("indicators_api", __name__)
 # Rasdaman targets
@@ -329,14 +329,12 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
     """
 
     # Validate the lat/lon values
-    validation = validate_latlon(lat, lon)
+    validation = validate_latlon(lat, lon, CMIP6_BBOX)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
         return (
-            render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
-            ),
+            render_template("422/invalid_cmip6_latlon.html", bbox=CMIP6_BBOX),
             422,
         )
     try:
