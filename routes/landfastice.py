@@ -96,7 +96,7 @@ def run_point_fetch_all_landfastice(lat, lon):
     validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
-    # now, we can construct the bboxes to check if the point is within the specific coverage extents
+    # now construct bboxes to check if the point is within any coverage extent
     beaufort_bbox = construct_latlon_bbox_from_coverage_bounds(beaufort_meta)
     chukchi_bbox = construct_latlon_bbox_from_coverage_bounds(chukchi_meta)
     within_bounds = validate_latlon_in_bboxes(lat, lon, [beaufort_bbox, chukchi_bbox])
@@ -110,10 +110,12 @@ def run_point_fetch_all_landfastice(lat, lon):
         )
     # next, project the lat lon and determine which coverage to query
     x, y = project_latlon(lat, lon, 3338)
+
     if validate_xy_in_coverage_extent(x, y, beaufort_meta):
         target_coverage = beaufort_daily_slie_id
         target_meta = beaufort_meta
-    elif validate_xy_in_coverage_extent(x, y, chukchi_meta):
+    elif validate_xy_in_coverage_extent(x, y, chukchi_meta, tolerance=5000):
+        # tolerance of 5 km for the Chukchi Sea region because it at the edge of the bounds for the 3338 projetion system
         target_coverage = chukchi_daily_slie_id
         target_meta = chukchi_meta
     else:
