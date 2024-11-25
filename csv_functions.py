@@ -77,8 +77,8 @@ def create_csv(
         properties = gipl_csv(data, endpoint)
     elif endpoint in ["ncar12km_indicators"]:
         properties = ncar12km_indicators_csv(data)
-    elif endpoint == "landfastice":
-        properties = landfastice_csv(data)
+    elif endpoint == "landfast_sea_ice":
+        properties = landfast_sea_ice_csv(data)
     elif endpoint == "permafrost":
         properties = permafrost_csv(data, source_metadata)
     elif endpoint.startswith("places_"):
@@ -558,18 +558,16 @@ def ncar12km_indicators_csv(data):
     }
 
 
-def landfastice_csv(data):
+def landfast_sea_ice_csv(data):
     # Reformat data to nesting structure expected by other CSV functions.
     for key, value in data.items():
-        data[key] = {"status": value}
+        data[key] = {"value": value}
     coords = ["date"]
-    values = ["status"]
+    values = ["value"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
-    metadata = (
-        "# Landfast Ice Status: A 0 value indicates absence and 1 indicates presence.\n"
-    )
-    filename_data_name = "Landfast Ice Extent"
+    metadata = "# Landfast Sea Ice Value Key: 0: Open ocean or non-landfast sea ice; 128: Land; 255: Landfast Sea Ice\n"
+    filename_data_name = "Landfast Sea Ice"
 
     return {
         "csv_dicts": csv_dicts,

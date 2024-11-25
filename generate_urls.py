@@ -98,3 +98,14 @@ def generate_wms_and_wfs_query_urls(wms, wms_base, wfs, wfs_base):
     for veclyr in wfs:
         urls.append(wfs_base.format(veclyr, wfs[veclyr]))
     return urls
+
+
+def generate_describe_coverage_url(describe_coverage_str):
+    """Generate a WCPS describe() URL from a query string.
+
+    Args:
+        describe_coverage_str (str): encoded WCPS describe() query string
+    Returns:
+        URL for a WCPS describe() request
+    """
+    return f"{RAS_BASE_URL}/ows?&SERVICE=WCS&VERSION=2.1.0&REQUEST=ProcessCoverages&query={describe_coverage_str}"
