@@ -1,4 +1,5 @@
 import asyncio
+
 import pandas as pd
 from flask import (
     Blueprint,
@@ -7,11 +8,7 @@ from flask import (
 )
 
 # local imports
-from fetch_data import (
-    fetch_wcs_point_data,
-    describe_via_wcps,
-)
-from csv_functions import create_csv
+from . import routes
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
@@ -19,12 +16,15 @@ from validate_request import (
     project_latlon,
     validate_xy_in_coverage_extent,
 )
+from fetch_data import (
+    fetch_wcs_point_data,
+    describe_via_wcps,
+)
 from postprocessing import postprocess
-from . import routes
+from csv_functions import create_csv
 
-# the following are declared globally because we only need to fetch metadata once
-# and we need to do it no matter what to determine if requests are even valid and to
-# know what coverage to query
+# following are global because we only need to fetch metadata once
+# but must do it to determine request are validity and what coverage to query
 landfastice_api = Blueprint("landfastice_api", __name__)
 beaufort_daily_slie_id = "ardac_beaufort_daily_slie"
 chukchi_daily_slie_id = "ardac_chukchi_daily_slie"
@@ -34,6 +34,8 @@ chukchi_meta = asyncio.run(describe_via_wcps(chukchi_daily_slie_id))
 
 def generate_time_index_from_coverage_metadata(meta):
     """Generate a pandas DatetimeIndex from the ansi (i.e. time) axis coordinates in the coverage description metadata.
+
+    CP Note: this function would be a good candidate to move to a utility module, as it is not necessarily specific to landfast ice data. This could be used to package and OGC coverage with an ansi axis where you'd like to get the full temporal extent for packaging.
 
     Args:
         meta (dict): JSON-like dictionary containing coverage metadata
@@ -64,12 +66,12 @@ def package_landfastice_data(landfastice_resp, meta):
         landfastice_resp (list) -- the response from the WCS GetCoverage request
 
     Returns:
-        di (dict) -- a dict where the key is a single date and the value is the landfast ice status (1 indicates landfast ice is present)
+        di (dict) -- a dict where the key is a single date and the value is the landfast ice status (255 = landfast ice is present, 0 = absence)
     """
     time_index = generate_time_index_from_coverage_metadata(meta)
     di = {}
     for dt, ice_value in zip(list(time_index), landfastice_resp):
-        di[dt.date().strftime("%m-%d-%Y")] = ice_value
+        di[dt.date().strftime("%Y-%m-%d")] = ice_value
     return di
 
 
@@ -106,7 +108,7 @@ def run_point_fetch_all_landfastice(lat, lon):
             ),
             422,
         )
-    # next, we project the lat lon and determine which coverage to query
+    # next, project the lat lon and determine which coverage to query
     x, y = project_latlon(lat, lon, 3338)
     if validate_xy_in_coverage_extent(x, y, beaufort_meta):
         target_coverage = beaufort_daily_slie_id
@@ -115,7 +117,7 @@ def run_point_fetch_all_landfastice(lat, lon):
         target_coverage = chukchi_daily_slie_id
         target_meta = chukchi_meta
     else:
-        # this should never happen, because we already establish that the point is syntactically valid and within the bounds of at least one bounding box
+        # this should never happen, because we already establish the point is syntactically valid and within the bounds of at least one bounding box
         return render_template("500/server_error.html"), 500
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, target_coverage))
