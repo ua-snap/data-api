@@ -115,7 +115,7 @@ def run_point_fetch_all_landfastice(lat, lon):
         target_coverage = beaufort_daily_slie_id
         target_meta = beaufort_meta
     elif validate_xy_in_coverage_extent(x, y, chukchi_meta, tolerance=5000):
-        # tolerance of 5 km for the Chukchi Sea region because it at the edge of the bounds for the 3338 projetion system
+        # tolerance of 5 km for the Chukchi Sea region because it at the edge of the bounds for the 3338 projection system
         target_coverage = chukchi_daily_slie_id
         target_meta = chukchi_meta
     else:
