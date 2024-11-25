@@ -208,24 +208,30 @@ def get_x_y_axes(coverage_metadata):
         raise ValueError("Unexpected coverage metadata: 'X' or 'Y' axis not found")
 
 
-def validate_xy_in_coverage_extent(x, y, coverage_metadata):
+def validate_xy_in_coverage_extent(x, y, coverage_metadata, tolerance=None):
     """Validate if the x and y coordinates are within the bounding box of the coverage.
 
     Args:
         x (float): x-coordinate
         y (float): y-coordinate
         coverage_metadata (dict): JSON-like dictionary containing coverage metadata
+        tolerance (float): Optional tolerance to expand the bounding box, will be in units native to the coverage, e.g. meters for EPSG:3338. This parameter is included to hedge against the edge: query locations where the query is within the geographic bounding box, but not the projected bounding box due to distortion at the edges of conical projections.
 
     Returns:
         bool: True if the coordinates are within the bounding box, False otherwise
     """
     try:
         x_axis, y_axis = get_x_y_axes(coverage_metadata)
+        if tolerance:
+            x_axis["lowerBound"] -= tolerance
+            x_axis["upperBound"] += tolerance
+            y_axis["lowerBound"] -= tolerance
+            y_axis["upperBound"] += tolerance
 
         x_in_bounds = x_axis["lowerBound"] <= x <= x_axis["upperBound"]
         y_in_bounds = y_axis["lowerBound"] <= y <= y_axis["upperBound"]
-
         return x_in_bounds and y_in_bounds
+
     except ValueError:
         return False
 
