@@ -184,7 +184,7 @@ def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):
 def get_x_y_axes(coverage_metadata):
     """Extract the X and Y axes from the coverage metadata.
 
-    We're doing this because we won't always know the axis ordering and posiition that come from Rasdaman. They are usually the last two axes, but their exact numbering might depend on on how many axes the coverage has. So we can iterate through the axes and find the ones with the axisLabel "X" and "Y" and grab them with `next()`.
+    We're doing this because we won't always know the axis ordering and position that come from Rasdaman. They are usually the last two axes, but their exact numbering might depend on on how many axes the coverage has. So we can iterate through the axes and find the ones with the axisLabel "X" and "Y" and grab them with `next()`.
 
     Args:
         coverage_metadata (dict): JSON-like dictionary containing coverage metadata
