@@ -11,7 +11,7 @@ from validate_request import (
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
-from config import WEST_BBOX, EAST_BBOX
+from config import CMIP6_BBOX
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
@@ -127,14 +127,12 @@ def run_fetch_cmip6_monthly_point_data(lat, lon):
         example request: http://localhost:5000/cmip6/point/65.06/-146.16?vars=tas,pr
     """
     # Validate the lat/lon values
-    validation = validate_latlon(lat, lon)
+    validation = validate_latlon(lat, lon, CMIP6_BBOX)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
         return (
-            render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
-            ),
+            render_template("422/invalid_cmip6_latlon.html", bbox=CMIP6_BBOX),
             422,
         )
     try:
