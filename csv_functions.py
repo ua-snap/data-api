@@ -1051,9 +1051,9 @@ def demographics_csv(data):
     value_cols = []
     for key in data.keys():
         for subkey in data[key].keys():
-            if subkey != "description":
+            if subkey != "description" and subkey != "source":
                 value_cols.append(subkey)
-    value_cols = list(set(value_cols)) + ["description"]
+    value_cols = list(set(value_cols)) + ["description", "source"]
 
     values = value_cols
     fieldnames = ["variable"] + values
