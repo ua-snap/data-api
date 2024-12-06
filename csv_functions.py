@@ -1066,9 +1066,9 @@ def demographics_csv(data):
             if csv_dict["variable"] == key:
                 ordered_csv_dicts.append(csv_dict)
 
-    metadata = "# Demographic data for individual communities plus the state of Alaska and United States.\n"
+    metadata = "# Demographic and health data for individual communities plus the state of Alaska and United States.\n"
 
-    filename_data_name = "Demographic Data - "
+    filename_data_name = "Demographic and Health Data - "
 
     return {
         "csv_dicts": ordered_csv_dicts,
