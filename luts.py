@@ -269,7 +269,7 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_mh": {
-        "description": "pct_mh is the percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days); this value is a crude prevalence rate.",
+        "description": "pct_mh is the percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days); this value is a crude prevalence rate",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_mh_low": {
@@ -281,7 +281,7 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_stroke": {
-        "description": "pct_stroke is the percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke; this value is a crude prevalence rate.",
+        "description": "pct_stroke is the percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke; this value is a crude prevalence rate",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_stroke_low": {
