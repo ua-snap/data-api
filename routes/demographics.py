@@ -147,7 +147,7 @@ def get_data_for_community(community):
         for k, v in i[1].items():
             if isinstance(v, float):
                 reformatted_results[i[0]][k] = round(v, 1)
-    
+
     # apply population threshold
     total_population = reformatted_results[community]["total_population"]
     percent_under_18 = reformatted_results[community]["pct_under_18"]
@@ -170,7 +170,10 @@ def get_data_for_community(community):
         transposed_results = df.to_dict(orient="index")
 
         for key in transposed_results:
-            transposed_results[key]["description"] = demographics_descriptions[key]
+            transposed_results[key]["description"] = demographics_descriptions[key][
+                "description"
+            ]
+            transposed_results[key]["source"] = demographics_descriptions[key]["source"]
 
         return create_csv(
             transposed_results, endpoint="demographics", place_id=community
