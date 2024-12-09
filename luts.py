@@ -221,7 +221,7 @@ demographics_descriptions = {
     },
     # health conditions
     "pct_asthma": {
-        "description": "pct_asthma is the percentage of of adults aged >=18 years who report being diagnosed with and currently having asthma; this value is a crude prevalence rate",
+        "description": "pct_asthma is the percentage of adults aged >=18 years who report being diagnosed with and currently having asthma; this value is a crude prevalence rate",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_asthma_low": {
@@ -233,7 +233,7 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_copd": {
-        "description": "pct_copd is the percentage of of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
+        "description": "pct_copd is the percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_copd_low": {
@@ -245,7 +245,7 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_diabetes": {
-        "description": "pct_diabetes is the percentage of of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes); this value is a crude prevalence rate",
+        "description": "pct_diabetes is the percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes); this value is a crude prevalence rate",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_diabetes_low": {
