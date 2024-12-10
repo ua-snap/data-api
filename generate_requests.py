@@ -196,3 +196,17 @@ def generate_netcdf_average_wcps_str(bbox_bounds, generate_average_wcps_str_kwar
         **generate_average_wcps_str_kwargs,
     )
     return netcdf_avg_wcps_str
+
+
+def generate_wcps_describe_coverage_str(cov_id):
+    """Generate a WCPS DescribeCoverage request for a given coverage.
+
+    The describe() operation returns a description of the coverage equivalent to a WCS DescribeCoverage request, and the output adheres to the same WCS schema, but we're able to get it in JSON format instead of only XML, GML, or string.
+
+    Args:
+        cov_id (str): rasdaman coverage ID
+    Returns:
+        describe_coverage_str (str): encoded WCPS string fragment to append to a query URL
+    """
+    query_str = f'for $c in ({cov_id}) return describe($c, "application/json", "outputType=GeneralGridCoverage")'
+    return quote(query_str)
