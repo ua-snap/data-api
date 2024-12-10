@@ -70,6 +70,11 @@ def validate_get_params():
             required=False,
         )
 
+        tags = fields.Str(
+            validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,50}$", str)),
+            required=False,
+        )
+
     schema = QueryParamsSchema()
     errors = schema.validate(request.args)
     if errors:

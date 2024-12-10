@@ -51,12 +51,11 @@ def find_via_gs(lat, lon):
 
     # WFS request to Geoserver for all communities.
     communities_json = asyncio.run(
-        fetch_data(
-            [generate_wfs_search_url("all_boundaries:all_communities", lat, lon)]
-        )
+        fetch_data([generate_wfs_search_url("playground:tagged_communities", lat, lon)])
     )
 
     nearby_communities = communities_json["features"]
+    filtered_communities = filter_by_tag(nearby_communities)
 
     # Dictionary containing all the communities and
     # polygon areas by the end of this function.
@@ -66,8 +65,8 @@ def find_via_gs(lat, lon):
     # For each returned community, grab its name,
     # alternate name, id, lat, lon, and type. They are all
     # found within the properties of the returned JSON.
-    for i in range(len(nearby_communities)):
-        proximal_di["communities"][i] = nearby_communities[i]["properties"]
+    for i in range(len(filtered_communities)):
+        proximal_di["communities"][i] = filtered_communities[i]["properties"]
 
     # WFS request to Geoserver for all polygon areas.
     nearby_areas = asyncio.run(
@@ -89,7 +88,7 @@ def find_via_gs(lat, lon):
 
     # Check to see if any communities were found around the point chosen
     communities_found = (
-        nearby_communities if communities_json["numberMatched"] > 0 else None
+        filtered_communities if communities_json["numberMatched"] > 0 else None
     )
 
     # Get the total bounds for the communities, HUCs, and protected areas only
@@ -165,6 +164,35 @@ def gather_nearby_area(nearby_area):
     return curr_di
 
 
+def filter_by_tag(communities):
+    """
+    Filters communities by tags if tags are provided in the request.
+
+    Args:
+        communities: All communities returned from the WFS request.
+
+    Returns:
+        Communities with the tags provided in the request, with the tags removed
+        from the output after filtering.
+    """
+    if request.args.get("tags"):
+        tags = request.args.get("tags").split(",")
+        filtered_communities = []
+        for community in communities:
+            community_added = False
+            for tag in tags:
+                if not community_added:
+                    if tag in community["properties"]["tags"]:
+                        # Remove tags property from output
+                        del community["properties"]["tags"]
+
+                        filtered_communities.append(community)
+                        community_added = True
+        return filtered_communities
+    else:
+        return communities
+
+
 @routes.route("/places/<type>")
 def get_json_for_type(type, recurse=False):
     """
@@ -207,17 +235,19 @@ def get_json_for_type(type, recurse=False):
                 fetch_data(
                     [
                         generate_wfs_places_url(
-                            "all_boundaries:all_communities",
-                            "name,alt_name,id,region,country,type,latitude,longitude",
+                            "playground:tagged_communities",
+                            "name,alt_name,id,region,country,type,latitude,longitude,tags",
                         )
                     ]
                 )
             )["features"]
 
+            filtered_communities = filter_by_tag(all_communities)
+
             # For each feature, put the properties (name, id, etc.) into the
             # list for creation of a JSON object to be returned.
-            for i in range(len(all_communities)):
-                js_list.append(all_communities[i]["properties"])
+            for i in range(len(filtered_communities)):
+                js_list.append(filtered_communities[i]["properties"])
         else:
             # Remove the 's' at the end of the type
             type = type[:-1]
