@@ -182,7 +182,8 @@ def filter_by_tag(communities):
             community_added = False
             for tag in tags:
                 if not community_added:
-                    if tag in community["properties"]["tags"]:
+                    community_tags = community["properties"]["tags"].split(",")
+                    if tag in community_tags:
                         # Remove tags property from output
                         del community["properties"]["tags"]
 
