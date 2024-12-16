@@ -215,7 +215,7 @@ def validate_xy_in_coverage_extent(x, y, coverage_metadata, tolerance=None):
         x (float): x-coordinate
         y (float): y-coordinate
         coverage_metadata (dict): JSON-like dictionary containing coverage metadata
-        tolerance (float): Optional tolerance to expand the bounding box, will be in units native to the coverage, e.g. meters for EPSG:3338. This parameter is included to hedge against the edge: query locations where the query is within the geographic bounding box, but not the projected bounding box due to distortion at the edges of conical projections.
+        tolerance (float): Optional tolerance to expand the bounding box, will be in units native to the coverage, e.g. meters for EPSG:3338. This parameter is included to hedge against the edge: query locations where the query is within the geographic bounding box, but not the projected bounding box due to distortion at the edges of conical projections. Without this, users may experience errors because it is possible for a geographic point to be within the geographic bounding box, but the same point, projected, to be outside the projected bounding box.
 
     Returns:
         bool: True if the coordinates are within the bounding box, False otherwise
