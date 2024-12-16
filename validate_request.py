@@ -208,25 +208,39 @@ def get_x_y_axes(coverage_metadata):
         raise ValueError("Unexpected coverage metadata: 'X' or 'Y' axis not found")
 
 
-def validate_xy_in_coverage_extent(x, y, coverage_metadata, tolerance=None):
+def validate_xy_in_coverage_extent(
+    x,
+    y,
+    coverage_metadata,
+    east_tolerance=None,
+    west_tolerance=None,
+    north_tolerance=None,
+    south_tolerance=None,
+):
     """Validate if the x and y coordinates are within the bounding box of the coverage.
 
     Args:
         x (float): x-coordinate
         y (float): y-coordinate
         coverage_metadata (dict): JSON-like dictionary containing coverage metadata
-        tolerance (float): Optional tolerance to expand the bounding box, will be in units native to the coverage, e.g. meters for EPSG:3338. This parameter is included to hedge against the edge: query locations where the query is within the geographic bounding box, but not the projected bounding box due to distortion at the edges of conical projections. Without this, users may experience errors because it is possible for a geographic point to be within the geographic bounding box, but the same point, projected, to be outside the projected bounding box.
+        east_tolerance (float): Optional tolerance to expand the bounding box to the east, will be in units native to the coverage, e.g. meters for EPSG:3338. This parameter is included to hedge against the edge: query locations where the query is within the geographic bounding box, but not the projected bounding box due to distortion at the edges of conical projections. Without this, users may experience errors because it is possible for a geographic point to be within the geographic bounding box, but the same point, projected, to be outside the projected bounding box.
+        west_tolerance (float): Optional tolerance to expand the bounding box to the west
+        north_tolerance (float): Optional tolerance to expand the bounding box to the north
+        south_tolerance (float): Optional tolerance to expand the bounding box to the south
 
     Returns:
         bool: True if the coordinates are within the bounding box, False otherwise
     """
     try:
         x_axis, y_axis = get_x_y_axes(coverage_metadata)
-        if tolerance:
-            x_axis["lowerBound"] -= tolerance
-            x_axis["upperBound"] += tolerance
-            y_axis["lowerBound"] -= tolerance
-            y_axis["upperBound"] += tolerance
+        if west_tolerance:
+            x_axis["lowerBound"] -= west_tolerance
+        if east_tolerance:
+            x_axis["upperBound"] += east_tolerance
+        if north_tolerance:
+            y_axis["upperBound"] += north_tolerance
+        if south_tolerance:
+            y_axis["upperBound"] -= south_tolerance
 
         x_in_bounds = x_axis["lowerBound"] <= x <= x_axis["upperBound"]
         y_in_bounds = y_axis["lowerBound"] <= y <= y_axis["upperBound"]

@@ -110,10 +110,14 @@ def run_point_fetch_all_landfastice(lat, lon):
     # next, project the lat lon and determine which coverage to query
     x, y = project_latlon(lat, lon, 3338)
     # 10 km buffer query for locations at edges of the 3338 projection
-    if validate_xy_in_coverage_extent(x, y, beaufort_meta, tolerance=10000):
+    if validate_xy_in_coverage_extent(
+        x, y, beaufort_meta, east_tolerance=10000, north_tolerance=10000
+    ):
         target_coverage = beaufort_daily_slie_id
         target_meta = beaufort_meta
-    elif validate_xy_in_coverage_extent(x, y, chukchi_meta, tolerance=10000):
+    elif validate_xy_in_coverage_extent(
+        x, y, chukchi_meta, west_tolerance=10000, north_tolerance=10000
+    ):
         target_coverage = chukchi_daily_slie_id
         target_meta = chukchi_meta
     else:
