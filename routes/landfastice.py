@@ -20,11 +20,11 @@ from fetch_data import (
     fetch_wcs_point_data,
     describe_via_wcps,
 )
-from postprocessing import postprocess
+from postprocessing import prune_nulls_with_max_intensity, postprocess
 from csv_functions import create_csv
 
 # following are global because we only need to fetch metadata once
-# but must do it to determine request are validity and what coverage to query
+# but must do it to determine request validity and what coverage to query
 landfastice_api = Blueprint("landfastice_api", __name__)
 beaufort_daily_slie_id = "ardac_beaufort_daily_slie"
 chukchi_daily_slie_id = "ardac_chukchi_daily_slie"
@@ -35,7 +35,7 @@ chukchi_meta = asyncio.run(describe_via_wcps(chukchi_daily_slie_id))
 def generate_time_index_from_coverage_metadata(meta):
     """Generate a pandas DatetimeIndex from the ansi (i.e. time) axis coordinates in the coverage description metadata.
 
-    CP Note: this function would be a good candidate to move to a utility module, as it is not necessarily specific to landfast ice data. This could be used to package and OGC coverage with an ansi axis where you'd like to get the full temporal extent for packaging.
+    CP Note: function is a good candidate to move to a utility module, as it is not necessarily specific to landfast ice data. It could be used to package any OGC coverage with an `ansi` axis where the full temporal range is desired for packaging.
 
     Args:
         meta (dict): JSON-like dictionary containing coverage metadata
@@ -54,7 +54,6 @@ def generate_time_index_from_coverage_metadata(meta):
         ansi_coordinates = ansi_axis["coordinate"]
         date_index = pd.DatetimeIndex(ansi_coordinates)
         return date_index
-
     except (KeyError, StopIteration):
         raise ValueError("Unexpected coverage metadata: 'ansi' axis not found")
 
@@ -125,7 +124,9 @@ def run_point_fetch_all_landfastice(lat, lon):
         landfastice_time_series = package_landfastice_data(
             rasdaman_response, target_meta
         )
-        postprocessed = postprocess(landfastice_time_series, "landfast_sea_ice")
+        postprocessed = prune_nulls_with_max_intensity(
+            postprocess(landfastice_time_series, "landfast_sea_ice")
+        )
         if request.args.get("format") == "csv":
             return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
         return postprocessed
@@ -133,12 +134,3 @@ def run_point_fetch_all_landfastice(lat, lon):
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
-
-
-##
-# rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, target_coverage))
-# landfastice_time_series = package_landfastice_data(rasdaman_response, target_meta)
-# postprocessed = postprocess(landfastice_time_series, "landfast_sea_ice")
-# if request.args.get("format") == "csv":
-#     return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
-# return postprocessed
