@@ -110,12 +110,11 @@ def run_point_fetch_all_landfastice(lat, lon):
         )
     # next, project the lat lon and determine which coverage to query
     x, y = project_latlon(lat, lon, 3338)
-
-    if validate_xy_in_coverage_extent(x, y, beaufort_meta):
+    # 10 km buffer query for locations at edges of the 3338 projection
+    if validate_xy_in_coverage_extent(x, y, beaufort_meta, tolerance=10000):
         target_coverage = beaufort_daily_slie_id
         target_meta = beaufort_meta
-    elif validate_xy_in_coverage_extent(x, y, chukchi_meta, tolerance=5000):
-        # tolerance of 5 km for the Chukchi Sea region because it at the edge of the bounds for the 3338 projection system
+    elif validate_xy_in_coverage_extent(x, y, chukchi_meta, tolerance=10000):
         target_coverage = chukchi_daily_slie_id
         target_meta = chukchi_meta
     else:
@@ -134,3 +133,12 @@ def run_point_fetch_all_landfastice(lat, lon):
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
+
+
+##
+# rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, target_coverage))
+# landfastice_time_series = package_landfastice_data(rasdaman_response, target_meta)
+# postprocessed = postprocess(landfastice_time_series, "landfast_sea_ice")
+# if request.args.get("format") == "csv":
+#     return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
+# return postprocessed
