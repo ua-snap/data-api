@@ -2,19 +2,21 @@
 <h2>Landfast Sea Ice Extent</h2>
 
 <p>
-  This endpoint provides access to daily landfast ice extent information for the Alaska coastline at a resolution of
-  100m. Daily data are available from October 1996 &ndash; April 2008. Data were provided by Mahoney et al.
+  This endpoint provides access to daily landfast sea ice extent data at a
+  spatial resolution of 100 m. Data are available October 1996 &ndash; July 2023
+  for the Beaufort Sea region and the Chukchi Sea region.
 </p>
 
-<p>
-  A link to an academic reference is included at the bottom of this page.
-</p>
+<p>Links to academic references are included at the bottom of this page.</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Point query</h4>
 
-<p>Query the daily landfast ice extent for a single point specified by latitude and longitude.</p>
+<p>
+  Query the daily landfast sea ice extent for a single point specified by
+  latitude and longitude.
+</p>
 
 <table class="endpoints">
   <thead>
@@ -26,13 +28,19 @@
   <tbody>
     <tr>
       <td>Landfast sea ice extent point query</td>
-      <td><a href="/landfastice/point/70.6123/-149.8869">/landfastice/point/70.6123/-149.8869</a>
+      <td>
+        <a href="/landfastice/point/70.6123/-149.8869"
+          >/landfastice/point/70.6123/-149.8869</a
+        >
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
     </tr>
   </tfoot>
 </table>
@@ -43,19 +51,13 @@
 
 <pre>
 {
-  "01-01-1997": null,
-  "01-01-1998": null,
-  "01-01-1999": null,
-  "01-01-2000": 1,
-  "01-01-2001": 1,
-  "01-01-2002": 1,
-  "01-01-2003": 1,
-  "01-01-2004": 1,
-  "01-01-2005": 1,
-  "01-01-2006": 1,
-  "01-01-2007": 1,
-  "01-01-2008": null,
+  "1996-10-27": 255,
+  "1996-10-28": 255,
+  "1996-10-29": 255,
   ...
+  "2023-07-29": 0,
+  "2023-07-30": 0,
+  "2023-07-31": 0,
 }
 </pre>
 
@@ -63,7 +65,7 @@
 
 <pre>
 {
-  "&lt;month&gt;-&lt;day&gt;-&lt;year&gt;": &lt;landfast ice presence (1) or absence (null) for a specific date in the time series&gt;,
+  "&lt;year&gt;-&lt;month&gt;-&lt;day&gt;": &lt;landfast ice presence (255) or absence (0) or grid cell classified as land (128) for a specific date in the time series&gt;,
   ...
 }
 </pre>
@@ -73,21 +75,109 @@
 <table>
   <thead>
     <tr>
-      <th>Dataset information</th>
-      <th>Paper</th>
+      <th>Metadata & source data access</th>
+      <th>Academic references</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Landfast sea ice</td>
-      <td><a href="https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1029/2006JC003559">Link</a></td>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/5adee563-786d-4b54-bbec-56dea055ec9a"
+          >Beaufort Sea Landfast Sea Ice: Daily Seaward Landfast Ice Edge (SLIE)
+          Extent October 1996 &ndash; July 2023</a
+        >
+      </td>
+      <td>
+        Mahoney, A., Eicken, H., Shapiro, L., & Graves, A. (2005). Defining and
+        locating the seaward landfast ice edge in northern Alaska. In 18th
+        International Conference on Port and Ocean Engineering under Arctic
+        Conditions (POAC’05), Potsdam, NY (pp. 991-1001).
+        <a
+          href="https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=a5467a7bbec6a6e31e9898f89041fbb5378a26c2"
+          >https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=a5467a7bbec6a6e31e9898f89041fbb5378a26c2</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/a6323019-0023-4e0d-98dc-a01b13bb7114"
+          >Chukchi Sea Landfast Sea Ice: Daily Seaward Landfast Ice Edge (SLIE)
+          Extent October 1996 &ndash; July 2023</a
+        >
+      </td>
+      <td>
+        Eicken, H., L. Shapiro, A. G. Gaylord, A. Mahoney, and P. Cotter. 2006.
+        Mapping and Characterization of Recurring Spring Leads and Landfast Ice
+        in the Beaufort and Chukchi Seas. Final Report, Minerals Management
+        Service OCS Study MMS 2005-068.
+        <a
+          href="https://www.boem.gov/sites/default/files/boem-newsroom/Library/Publications/2012/BOEM-2012-067.pdf"
+          >https://www.boem.gov/sites/default/files/boem-newsroom/Library/Publications/2012/BOEM-2012-067.pdf</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        Mahoney, A., Eicken, H., Gaylord, A. G., and Shapiro, L. (2007), Alaska
+        landfast sea ice: Links with bathymetry and atmospheric circulation, J.
+        Geophys. Res., 112, C02001, doi:10.1029/2006JC003559.
+        <a href="https://doi.org/10.1029/2006JC003559"
+          >https://doi.org/10.1029/2006JC003559</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        Eicken, H., L. Shapiro, A. G. Gaylord, A. Mahoney, and P. W. Cotter.
+        2009. Recurring Spring Leads and Landfast Ice in the Beaufort and
+        Chukchi Seas, 1993-2004, Version 1. Boulder, Colorado USA. NSIDC:
+        National Snow and Ice Data Center. doi:
+        <a href="https://doi.org/10.7265/N5SB43P0"
+          >https://doi.org/10.7265/N5SB43P0</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        Mahoney, A. R., Eicken, H., Gaylord, A. G., & Gens, R. (2014). Landfast
+        sea ice extent in the Chukchi and Beaufort Seas: The annual cycle and
+        decadal variability. Cold Regions Science and Technology, 103, 41-56.
+        <a href="https://doi.org/10.1016/j.coldregions.2014.03.003"
+          >https://doi.org/10.1016/j.coldregions.2014.03.003</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        Mahoney, A. R. (2018), Landfast Sea Ice in a Changing Arctic, in Arctic
+        Report Card 2018, edited by E. Osborne, J. A. Richter-Menge and M. O.
+        Jeffries.
+        <a
+          href="https://arctic.noaa.gov/Report-Card/Report-Card-2018/ArtMID/7878/ArticleID/788/Landfast-Sea-Ice-in-a-Changing-Arctic"
+          >https://arctic.noaa.gov/Report-Card/Report-Card-2018/ArtMID/7878/ArticleID/788/Landfast-Sea-Ice-in-a-Changing-Arctic</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>
+        Einhorn, A. H. (2024). Continuous Landfast Ice Climatology from
+        1996-2023 and Interferometric Classification of Landfast Ice Stability
+        Along the Outer Alaska Continental Shelf (Master's thesis, University of
+        Alaska Fairbanks).
+        <a
+          href="http://uaf.idm.oclc.org/login?url=https://www.proquest.com/dissertations-theses/continuous-landfast-ice-climatology-1996-2023/docview/3092562275/se-2?accountid=14470"
+          >http://uaf.idm.oclc.org/login?url=https://www.proquest.com/dissertations-theses/continuous-landfast-ice-climatology-1996-2023/docview/3092562275/se-2?accountid=14470</a
+        >
+      </td>
     </tr>
   </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="3"></td>
-    </tr>
-  </tfoot>
 </table>
 
 {% endblock %}
