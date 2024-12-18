@@ -27,7 +27,7 @@ def place_name_and_type(place_id):
         fetch_data(
             [
                 generate_wfs_places_url(
-                    "playground:all_areas_test5", "name,alt_name,type", place_id, "id"
+                    "all_boundaries:all_areas", "name,alt_name,type", place_id, "id"
                 )
             ]
         )
