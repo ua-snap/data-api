@@ -13,18 +13,19 @@ from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import (
     fetch_data,
-    get_dim_encodings,
     fetch_bbox_data,
     get_poly_3338_bbox,
     get_poly_mask_arr,
     get_from_dict,
     generate_nested_dict,
     itertools,
+    describe_via_wcps,
 )
 from validate_request import (
     validate_latlon,
     project_latlon,
     validate_var_id,
+    get_coverage_encodings,
 )
 from postprocessing import nullify_and_prune, postprocess
 from csv_functions import create_csv
@@ -36,9 +37,21 @@ indicators_api = Blueprint("indicators_api", __name__)
 indicators_coverage_id = "ncar12km_indicators_era_summaries"
 cmip6_indicators_coverage_id = "cmip6_indicators"
 
-# dim encodings for the NCAR 12km BCSD indicators coverage
-base_dim_encodings = asyncio.run(get_dim_encodings(indicators_coverage_id))
-cmip6_dim_encodings = asyncio.run(get_dim_encodings(cmip6_indicators_coverage_id))
+
+async def get_ncar12km_metadata():
+    """Get the coverage metadata and encodings for NCAR 12km indicators coverage"""
+    metadata = await describe_via_wcps(indicators_coverage_id)
+    return get_coverage_encodings(metadata)
+
+
+async def get_cmip6_metadata():
+    """Get the coverage metadata and encodings for CMIP6 indicators coverage"""
+    metadata = await describe_via_wcps(cmip6_indicators_coverage_id)
+    return get_coverage_encodings(metadata)
+
+
+base_dim_encodings = asyncio.run(get_ncar12km_metadata())
+cmip6_dim_encodings = asyncio.run(get_cmip6_metadata())
 
 
 async def fetch_cmip6_indicators_point_data(lat, lon):
