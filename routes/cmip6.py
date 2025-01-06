@@ -14,12 +14,11 @@ from config import WEST_BBOX, EAST_BBOX
 cmip6_api = Blueprint("cmip6_api", __name__)
 
 cmip6_monthly_coverage_id = "cmip6_monthly"
-dim_encodings = asyncio.run(get_dim_encodings(cmip6_monthly_coverage_id))
 
 
 async def get_cmip6_metadata():
     """Get the coverage metadata and encodings for CMIP6 monthly coverage"""
-    metadata = await describe_via_wcps("cmip6_monthly")
+    metadata = await describe_via_wcps(cmip6_monthly_coverage_id)
     return get_coverage_encodings(metadata)
 
 
