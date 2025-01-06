@@ -1,6 +1,7 @@
 import asyncio
-import pandas as pd
 from urllib.parse import quote
+
+import pandas as pd
 from flask import Blueprint, render_template, request, jsonify, Response
 
 # local imports
@@ -10,28 +11,33 @@ from fetch_data import (
     fetch_data,
     fetch_geoserver_data,
     fetch_wcs_point_data,
-    get_dim_encodings,
     generate_wcs_getcov_str,
     deepflatten,
+    describe_via_wcps,
 )
-from csv_functions import csv_metadata, create_csv
-
 from validate_request import (
     validate_latlon,
     project_latlon,
+    get_coverage_encodings,
 )
+from csv_functions import csv_metadata, create_csv
 from postprocessing import nullify_and_prune, nullify_nodata, postprocess
 from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 
-# rasdaman coverage
+permafrost_api = Blueprint("permafrost_api", __name__)
 gipl_1km_coverage_id = "crrel_gipl_outputs"
 
-gipl1km_dim_encodings = asyncio.run(
-    get_dim_encodings(gipl_1km_coverage_id, scrape=("time", "gmlrgrid:coefficients", 4))
-)
 
-permafrost_api = Blueprint("permafrost_api", __name__)
+async def get_gipl_metadata():
+    """Get the coverage metadata and encodings for GIPL 1km coverage"""
+    metadata = await describe_via_wcps(gipl_1km_coverage_id)
+    return metadata
+
+
+gipl1km_metadata = asyncio.run(get_gipl_metadata())
+gipl1km_dim_encodings = get_coverage_encodings(gipl1km_metadata)
+
 
 # geoserver layers
 wms_targets = [
@@ -184,13 +190,19 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
 
 
 def generate_gipl1km_time_index():
-    """Generate a time index for annual GIPL 1km outputs.
+    """Generate a time index for annual GIPL model outputs.
 
     Returns:
-        dt_range (pandas DatetimeIndex): a time index with annual frequency
+        date_index (pd.DatetimeIndex): a time index with annual frequency
     """
-    timestamps = [x[1:-2] for x in gipl1km_dim_encodings["time"].split(" ")]
-    date_index = pd.DatetimeIndex(timestamps)
+    # CP note: manually fetching the time index from metadata here because this wasn't ingested as an "ansi" axis in Rasdaman - 3 is the index for the time axis
+    year_start = gipl1km_metadata["envelope"]["axis"][3]["lowerBound"]
+    year_stop = gipl1km_metadata["envelope"]["axis"][3]["upperBound"]
+    date_index = pd.date_range(
+        start=pd.Timestamp(year_start.split("T")[0]),
+        end=pd.Timestamp(year_stop.split("T")[0]),
+        freq="AS",
+    )
     return date_index
 
 
