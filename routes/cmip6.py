@@ -4,10 +4,8 @@ from flask import Blueprint, render_template, request
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import fetch_data, get_dim_encodings
-from validate_request import (
-    validate_latlon,
-)
+from fetch_data import fetch_data, get_dim_encodings, describe_via_wcps
+from validate_request import validate_latlon, get_coverage_encodings
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
@@ -17,6 +15,15 @@ cmip6_api = Blueprint("cmip6_api", __name__)
 
 cmip6_monthly_coverage_id = "cmip6_monthly"
 dim_encodings = asyncio.run(get_dim_encodings(cmip6_monthly_coverage_id))
+
+
+async def get_cmip6_metadata():
+    """Get the coverage metadata and encodings for CMIP6 monthly coverage"""
+    metadata = await describe_via_wcps("cmip6_monthly")
+    return get_coverage_encodings(metadata)
+
+
+dim_encodings = asyncio.run(get_cmip6_metadata())
 varnames = dim_encodings["varname"]
 
 
