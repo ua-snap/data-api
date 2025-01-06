@@ -39,7 +39,6 @@ async def get_wet_days_metadata():
 
 
 wet_days_per_year_dim_encodings = asyncio.run(get_wet_days_metadata())
-print(wet_days_per_year_dim_encodings)
 
 # default to min-max temporal range of coverage
 years_lu = {
