@@ -490,33 +490,6 @@ def get_xml_content(meta_xml_str, tag, occurrence=1):
     return tag_content
 
 
-async def get_dim_encodings(cov_id, scrape=None):
-    """Get the dimension encodings that map integer values to descriptive strings from a
-    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We handle exceptions where the coverage we are requesting encodings from does not exist on the backend to prevent Rasdaman work from blocking API development. We can use the same request to scrape various other parts of the DescribeCoverage XML response, but this optional.
-
-    Args:
-        cov_id (str): ID of the rasdaman coverage
-        scrape (3-tuple): (description (str), tag to scrape between (str), and the occurrence (int) of the tag to search for)
-
-    Returns:
-        dim_encodings (nested dict): a lookup where coverage axis names are keys that store dicts of integer-keyed categories.
-    """
-    meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
-    try:
-        meta_xml_str = await fetch_data([meta_url])
-        dim_encodings = parse_meta_xml_str(meta_xml_str)
-        if scrape is not None:
-            scrape_desc, scrape_tag, occurrence = scrape
-            dim_encodings[scrape_desc] = get_xml_content(
-                meta_xml_str, scrape_tag, occurrence
-            )
-        return dim_encodings
-    except:
-        print(
-            f"Warning: Coverage '{cov_id}' is missing from the Rasdaman server {RAS_BASE_URL} you are using."
-        )
-
-
 def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
     """Extract keys of nested dictionary to list of tuples
 
