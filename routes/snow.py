@@ -1,13 +1,15 @@
 import asyncio
+
 import numpy as np
 from flask import Blueprint, render_template, request, jsonify
 
 # local imports
 from fetch_data import (
     fetch_wcs_point_data,
-    get_dim_encodings,
     deepflatten,
+    describe_via_wcps,
 )
+from validate_request import get_coverage_encodings
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
@@ -18,8 +20,13 @@ from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
 snow_api = Blueprint("snow_api", __name__)
-# rasdaman targets
 sfe_coverage_id = "mean_annual_snowfall_mm"
+
+
+async def get_snow_metadata():
+    """Get the coverage metadata and encodings for snow coverage"""
+    metadata = await describe_via_wcps(sfe_coverage_id)
+    return get_coverage_encodings(metadata)
 
 
 def package_sfe_data(sfe_resp):
@@ -32,7 +39,7 @@ def package_sfe_data(sfe_resp):
         di -- a nested dictionary of all SFE values
     """
     # intialize the output dict
-    sfe_encodings = asyncio.run(get_dim_encodings(sfe_coverage_id))
+    sfe_encodings = asyncio.run(get_snow_metadata())
     models = list(sfe_encodings["model"].values())
     scenarios = list(sfe_encodings["scenario"].values())
     decades = list(sfe_encodings["decade"].values())

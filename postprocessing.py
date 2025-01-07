@@ -2,7 +2,7 @@ from flask import render_template
 
 nodata_values = {
     "beetles": [0],
-    "cmip6_indicators": [-9999, -9999.0],
+    "cmip6_indicators": [-9999, -9999.0, "null"],
     "cmip6_monthly": [-9999, -9999.0, "nan"],
     "default": [-9999],
     "hydrology": [-9999, "nan"],

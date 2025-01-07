@@ -1,4 +1,6 @@
 import asyncio
+import ast
+
 from flask import (
     Blueprint,
     render_template,
@@ -9,12 +11,17 @@ from urllib.parse import quote
 
 # local imports
 from generate_urls import generate_wcs_query_url
-from fetch_data import fetch_data, get_dim_encodings, generate_wcs_getcov_str
-from csv_functions import create_csv
+from fetch_data import (
+    fetch_data,
+    generate_wcs_getcov_str,
+    describe_via_wcps,
+)
 from validate_request import (
     validate_latlon,
     project_latlon,
+    get_coverage_encodings,
 )
+from csv_functions import create_csv
 from postprocessing import (
     nullify_and_prune,
     postprocess,
@@ -23,7 +30,15 @@ from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
 wet_days_per_year_api = Blueprint("wet_days_per_year_api", __name__)
-wet_days_per_year_dim_encodings = asyncio.run(get_dim_encodings("wet_days_per_year"))
+
+
+async def get_wet_days_metadata():
+    """Get the coverage metadata and encodings for wet days per year coverage"""
+    metadata = await describe_via_wcps("wet_days_per_year")
+    return get_coverage_encodings(metadata)
+
+
+wet_days_per_year_dim_encodings = asyncio.run(get_wet_days_metadata())
 
 # default to min-max temporal range of coverage
 years_lu = {
@@ -151,8 +166,10 @@ def package_wet_days_per_year_point_data(point_data, horp):
                 max_year = years_lu["projected"]["max"]
                 years = range(min_year, max_year + 1)
 
-            model = wet_days_per_year_dim_encodings["model"][mi]
-            point_pkg[model] = {}
+            # rasdaman returns the model encodings as strings which is a mess we unravel here
+            model_ = ast.literal_eval(wet_days_per_year_dim_encodings["model"])
+            model_name = model_[str(mi)]
+            point_pkg[model_name] = {}
 
             # Responses from Rasdaman include the same array length for both
             # historical and projected data, representing every possible year
@@ -165,7 +182,7 @@ def package_wet_days_per_year_point_data(point_data, horp):
             year_index = 0
             for value in v_li:
                 if year in years:
-                    point_pkg[model][years[year_index]] = {"wdpy": round(value)}
+                    point_pkg[model_name][years[year_index]] = {"wdpy": round(value)}
                     year_index += 1
                 year += 1
     else:

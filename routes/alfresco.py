@@ -14,12 +14,13 @@ from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersectio
 from fetch_data import (
     fetch_bbox_netcdf_list,
     fetch_data,
-    get_dim_encodings,
     zonal_stats,
     generate_nested_dict,
     get_from_dict,
     get_poly_3338_bbox,
+    describe_via_wcps,
 )
+from validate_request import get_coverage_encodings
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
@@ -30,12 +31,24 @@ from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
 alfresco_api = Blueprint("alfresco_api", __name__)
-flammability_dim_encodings = asyncio.run(
-    get_dim_encodings("alfresco_relative_flammability_30yr")
-)
-veg_type_dim_encodings = asyncio.run(
-    get_dim_encodings("alfresco_vegetation_type_percentage")
-)
+
+
+async def get_alfresco_metadata():
+    """Get the coverage metadata and encodings for ALFRESCO coverages"""
+    flam_metadata = await describe_via_wcps("alfresco_relative_flammability_30yr")
+    veg_metadata = await describe_via_wcps("alfresco_vegetation_type_percentage")
+
+    return {
+        "flammability": get_coverage_encodings(flam_metadata),
+        "veg_type": get_coverage_encodings(veg_metadata),
+    }
+
+
+# Initialize the encodings asynchronously
+encodings = asyncio.run(get_alfresco_metadata())
+flammability_dim_encodings = encodings["flammability"]
+veg_type_dim_encodings = encodings["veg_type"]
+
 var_ep_lu = {
     "flammability": {"cov_id_str": "alfresco_relative_flammability_30yr"},
     "veg_type": {

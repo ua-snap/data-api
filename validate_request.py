@@ -3,9 +3,12 @@ A module to validate request parameters such as latitude and longitude for use a
 """
 
 import asyncio
+import ast
+
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
+
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
@@ -309,3 +312,56 @@ def validate_latlon_in_bboxes(lat, lon, bboxes):
         if valid_lat and valid_lon:
             return True
     return 422
+
+
+def get_coverage_encodings(coverage_metadata):
+    """Extract the encoding dictionary from a coverage's metadata obtained via describe_via_wcps.
+
+    This function extracts the "Encoding" component from a coverage's metadata, which typically matches the integer values used for axis labels and positions to descriptive strings (e.g., mapping coordinate values to model names, scenarios, variables, etc.)
+    Args:
+        coverage_metadata (dict): JSON-like dictionary containing coverage metadata from describe_via_wcps()
+
+    Returns:
+        dict: A dictionary mapping axis names to their encoding dictionaries. Each encoding dictionary maps integer values to their descriptive strings.
+
+    Raises:
+        ValueError: If the coverage metadata doesn't contain the expected encoding information
+
+    Example:
+        >>> metadata = await describe_via_wcps("alfresco_relative_flammability_30yr")
+        >>> encodings = get_coverage_encodings(metadata)
+        >>> print(encodings)
+        {
+            'era': {0: '1950-1979', 1: '1980-2008', ...},
+            'model': {0: 'MODEL-SPINUP', 2: 'GFDL-CM3', ...},
+            'scenario': {0: 'historical', 1: 'rcp45', ...}
+        }
+    """
+    try:
+        # encoding **should** be in the metadata in zeroth slice
+        metadata = coverage_metadata.get("metadata", {})
+        slices = metadata.get("slices", {}).get("slice", [])
+
+        if not slices:
+            raise ValueError("No slices found in coverage metadata")
+
+        # get encoding string from first slice (all slices contain the same encoding)
+        encoding_str = slices[0].get("Encoding")
+
+        if not encoding_str:
+            raise ValueError("No encoding information found in coverage metadata")
+
+        # convert the string representation of dict to actual dict
+        try:
+            encodings = ast.literal_eval(encoding_str)
+        except (SyntaxError, ValueError) as e:
+            raise ValueError(f"Failed to parse encoding string: {str(e)}")
+        # convert string keys to ints
+        for dim in encodings:
+            if isinstance(encodings[dim], dict):
+                encodings[dim] = {int(k): v for k, v in encodings[dim].items()}
+
+        return encodings
+
+    except (KeyError, TypeError) as e:
+        raise ValueError(f"Invalid coverage metadata format: {str(e)}")
