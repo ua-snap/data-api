@@ -15,7 +15,6 @@ import json
 import re
 from collections import defaultdict
 from functools import reduce
-from lxml import etree as ET
 from aiohttp import ClientSession
 from flask import current_app as app
 from rasterstats import zonal_stats
