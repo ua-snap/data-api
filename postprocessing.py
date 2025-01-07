@@ -36,7 +36,7 @@ nodata_mappings = {
     "landfast_sea_ice": nodata_values["landfast_sea_ice"],
     "ncar12km_indicators": nodata_values["ncar12km_indicators"],
     "permafrost": nodata_values["permafrost"],
-    "physiography": [],
+    "ecoregions": [],
     "places_all": [],
     "places_communities": [],
     "places_huc": [],
