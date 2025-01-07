@@ -18,7 +18,6 @@ from functools import reduce
 from aiohttp import ClientSession
 from flask import current_app as app
 from rasterstats import zonal_stats
-from config import RAS_BASE_URL
 from generate_requests import (
     generate_wcs_getcov_str,
     generate_netcdf_wcs_getcov_str,
