@@ -317,7 +317,7 @@ def validate_latlon_in_bboxes(lat, lon, bboxes):
 def get_coverage_encodings(coverage_metadata):
     """Extract the encoding dictionary from a coverage's metadata obtained via describe_via_wcps.
 
-    This function extracts the "Encoding" component from a coverage's metadata, which maps typically matches the integer values used for axis labels and positions to descriptive strings (e.g., mapping coordinate values to model names, scenarios, variables, etc.)
+    This function extracts the "Encoding" component from a coverage's metadata, which typically matches the integer values used for axis labels and positions to descriptive strings (e.g., mapping coordinate values to model names, scenarios, variables, etc.)
     Args:
         coverage_metadata (dict): JSON-like dictionary containing coverage metadata from describe_via_wcps()
 
