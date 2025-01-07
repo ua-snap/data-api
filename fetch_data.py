@@ -444,52 +444,6 @@ def get_from_dict(data_dict, map_list):
     return reduce(operator.getitem, map_list, data_dict)
 
 
-def parse_meta_xml_str(meta_xml_str):
-    """Parse the DescribeCoverage request to get the XML and
-    restructure the block called "Encoding" to a dict.
-
-    Arguments:
-        meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
-
-    Returns:
-        dim_encodings (dict): lookup table to match data axes or parameters to integer encodings, e.g., '2': 'GFDL-CM3'
-    """
-    xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
-    meta_tree = ET.XML(xml_bytes)
-    encoding_el = meta_tree.findall(".//Encoding")[0]
-
-    dim_encodings = {}
-    for dim in encoding_el.iter():
-        if not dim.text.isspace():
-            encoding_di = eval(dim.text)
-            for key, value in encoding_di.items():
-                if isinstance(value, dict):
-                    dim_encodings[key] = {int(k): v for k, v in value.items()}
-                else:
-                    dim_encodings[dim.tag] = {int(k): v for k, v in encoding_di.items()}
-    return dim_encodings
-
-
-def get_xml_content(meta_xml_str, tag, occurrence=1):
-    """Get content of XML element. Use this function to retrieve time axis values that are not encapsulated by a dictionary and/or are not within the metadata 'Encoding' block.
-
-    Arguments:
-        meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
-        tag (str): the xml element that encapsulates the desired content, e.g., 'gmlrgrid:coefficients'
-        occurrence (int): the occurrence of the tag to parse. some tags are repeated several times in the XML response
-
-    Returns:
-        tag_content (str): content of the provided XML tag
-    """
-    xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
-    meta_tree = ET.XML(xml_bytes)
-    matches = []
-    for match in meta_tree.findall(f".//{tag}", meta_tree.nsmap):
-        matches.append(match.text)
-    tag_content = matches[occurrence - 1]
-    return tag_content
-
-
 def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
     """Extract keys of nested dictionary to list of tuples
 
