@@ -39,9 +39,9 @@ Example Precipitation Query:
 - http://localhost:5000/precipitation/point/65.028/-146.1627
 - http://localhost:5000/precipitation/point/62.906/-148.345
 
-Example Physiography Query
+Example Ecoregions Query
 
-- http://localhost:5000/physiography/point/64.606/-147.345
+- http://localhost:5000/ecoregions/point/64.606/-147.345
 
 ## Updating Production API + Varnish Cache
 
