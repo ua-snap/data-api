@@ -54,7 +54,7 @@ def run_fetch_ecoregions(lat, lon):
     try:
         results = asyncio.run(
             fetch_geoserver_data(
-                GS_BASE_URL, "ecoregions", wms_targets, wfs_targets, lat, lon
+                GS_BASE_URL, "physiography", wms_targets, wfs_targets, lat, lon
             )
         )
     except Exception as exc:
