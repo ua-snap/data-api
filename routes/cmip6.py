@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, request
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import fetch_data, get_dim_encodings, describe_via_wcps
+from fetch_data import fetch_data, describe_via_wcps
 from validate_request import validate_latlon, get_coverage_encodings
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
