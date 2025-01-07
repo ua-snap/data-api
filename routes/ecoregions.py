@@ -18,7 +18,7 @@ wfs_targets = {"ak_level3_ecoregions": "ECOREGION"}
 
 
 def package_epaecoreg(eco_resp):
-    """Package physiography data in dict"""
+    """Package ecoregions data in dict"""
     title = "EPA Level III Ecoregions of Alaska"
     if eco_resp[0]["features"] == []:
         return None
