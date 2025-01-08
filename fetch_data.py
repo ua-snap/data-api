@@ -15,18 +15,21 @@ import json
 import re
 from collections import defaultdict
 from functools import reduce
-from lxml import etree as ET
 from aiohttp import ClientSession
 from flask import current_app as app
 from rasterstats import zonal_stats
-from config import RAS_BASE_URL
-from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
+from generate_requests import (
+    generate_wcs_getcov_str,
+    generate_netcdf_wcs_getcov_str,
+    generate_wcps_describe_coverage_str,
+)
 from generate_urls import (
     generate_wcs_query_url,
     generate_base_wms_url,
     generate_base_wfs_url,
     generate_wms_and_wfs_query_urls,
     generate_wfs_places_url,
+    generate_describe_coverage_url,
 )
 
 
@@ -439,79 +442,6 @@ def get_from_dict(data_dict, map_list):
     return reduce(operator.getitem, map_list, data_dict)
 
 
-def parse_meta_xml_str(meta_xml_str):
-    """Parse the DescribeCoverage request to get the XML and
-    restructure the block called "Encoding" to a dict.
-
-    Arguments:
-        meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
-
-    Returns:
-        dim_encodings (dict): lookup table to match data axes or parameters to integer encodings, e.g., '2': 'GFDL-CM3'
-    """
-    xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
-    meta_tree = ET.XML(xml_bytes)
-    encoding_el = meta_tree.findall(".//Encoding")[0]
-
-    dim_encodings = {}
-    for dim in encoding_el.iter():
-        if not dim.text.isspace():
-            encoding_di = eval(dim.text)
-            for key, value in encoding_di.items():
-                if isinstance(value, dict):
-                    dim_encodings[key] = {int(k): v for k, v in value.items()}
-                else:
-                    dim_encodings[dim.tag] = {int(k): v for k, v in encoding_di.items()}
-    return dim_encodings
-
-
-def get_xml_content(meta_xml_str, tag, occurrence=1):
-    """Get content of XML element. Use this function to retrieve time axis values that are not encapsulated by a dictionary and/or are not within the metadata 'Encoding' block.
-
-    Arguments:
-        meta_xml_str (str): string representation of the byte XML response from the WCS DescribeCoverage request
-        tag (str): the xml element that encapsulates the desired content, e.g., 'gmlrgrid:coefficients'
-        occurrence (int): the occurrence of the tag to parse. some tags are repeated several times in the XML response
-
-    Returns:
-        tag_content (str): content of the provided XML tag
-    """
-    xml_bytes = bytes(bytearray(meta_xml_str, encoding="utf-8"))
-    meta_tree = ET.XML(xml_bytes)
-    matches = []
-    for match in meta_tree.findall(f".//{tag}", meta_tree.nsmap):
-        matches.append(match.text)
-    tag_content = matches[occurrence - 1]
-    return tag_content
-
-
-async def get_dim_encodings(cov_id, scrape=None):
-    """Get the dimension encodings that map integer values to descriptive strings from a
-    Rasdaman coverage that stores the encodings in a metadata "encodings" attribute. We handle exceptions where the coverage we are requesting encodings from does not exist on the backend to prevent Rasdaman work from blocking API development. We can use the same request to scrape various other parts of the DescribeCoverage XML response, but this optional.
-
-    Args:
-        cov_id (str): ID of the rasdaman coverage
-        scrape (3-tuple): (description (str), tag to scrape between (str), and the occurrence (int) of the tag to search for)
-
-    Returns:
-        dim_encodings (nested dict): a lookup where coverage axis names are keys that store dicts of integer-keyed categories.
-    """
-    meta_url = generate_wcs_query_url(f"DescribeCoverage&COVERAGEID={cov_id}")
-    try:
-        meta_xml_str = await fetch_data([meta_url])
-        dim_encodings = parse_meta_xml_str(meta_xml_str)
-        if scrape is not None:
-            scrape_desc, scrape_tag, occurrence = scrape
-            dim_encodings[scrape_desc] = get_xml_content(
-                meta_xml_str, scrape_tag, occurrence
-            )
-        return dim_encodings
-    except:
-        print(
-            f"Warning: Coverage '{cov_id}' is missing from the Rasdaman server {RAS_BASE_URL} you are using."
-        )
-
-
 def extract_nested_dict_keys(dict_, result_list=None, in_line_list=None):
     """Extract keys of nested dictionary to list of tuples
 
@@ -588,3 +518,18 @@ def replace_nans(json_str):
     # This is to prevent matches against strings that contain 'nan' within them.
     json_str = re.sub(r"(?<=[,\[\]])nan(?=[,\[\]])", "-9999", json_str)
     return json_str
+
+
+async def describe_via_wcps(cov_id):
+    """Get the metadata in JSON format via a WCPS describe() query request.
+
+    Args:
+        cov_id (str): rasdaman coverage ID
+
+    Returns:
+        json_description (dict): coverage description in JSON format
+    """
+    req_str = generate_wcps_describe_coverage_str(cov_id)
+    req_url = generate_describe_coverage_url(req_str)
+    json_description = await fetch_data([req_url])
+    return json_description

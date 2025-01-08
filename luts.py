@@ -53,15 +53,18 @@ snow_status = {
 
 place_type_labels = {
     "huc": "HUC",
+    "yt_watershed": "Yukon Watershed",
     "protected_area": "Protected Area",
     "borough": "Borough",
     "census_area": "Census Area",
     "fire_zone": "Fire Management Unit",
+    "yt_fire_district": "Yukon Fire District",
     "corporation": "Corporation",
     "climate_division": "Climate Division",
     "ethnolinguistic_region": "Ethnolinguistic Region",
     "first_nation": "Canadian First Nation",
     "game_management_unit": "Game Management Unit",
+    "yt_game_management_subzone": "Yukon Game Management Subzone",
 }
 
 cached_urls = [
@@ -86,12 +89,15 @@ cached_urls = [
 all_jsons = [
     "communities",
     "hucs",
+    "yt_watersheds",
     "protected_areas",
     "corporations",
     "climate_divisions",
     "ethnolinguistic_regions",
     "fire_zones",
+    "yt_fire_districts",
     "game_management_units",
+    "yt_game_management_subzones",
     "first_nations",
     "boroughs",
     "census_areas",
@@ -106,9 +112,12 @@ areas_near = {
     "corporation": "corporations_near",
     "ethnolinguistic_region": "ethnolinguistic_regions_near",
     "fire_zone": "fire_management_units_near",
+    "yt_fire_district": "yt_fire_districts_near",
     "game_management_unit": "game_management_units_near",
+    "yt_game_management_subzone": "yt_game_management_subzones_near",
     "first_nation": "ca_first_nations_near",
     "huc": "hucs_near",
+    "yt_watershed": "yt_watersheds_near",
     "protected_area": "protected_areas_near",
 }
 
@@ -158,58 +167,217 @@ demographics_fields = {
 
 
 demographics_descriptions = {
-    "name": "name is the community name",
-    "comment": "comment is the comment regarding data source; data for some communities may be aggregated from multiple census data geometries or may be derived from a census data geometry with a name that differs from the community name",
-    "total_population": "total_population is the total population of community as reported in the Census Demographic and Housing Characteristics Survey for 2020",
-    "pct_under_18": "pct_under_18 is the percentage of population under age 18; this value was calculated by summing the population count of multiple sex by age categories reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that sum as a percentage of the total population",
-    "pct_under_5": "pct_under_5 is the percentage of population under age 5; this value was calculated by summing the population count of multiple sex by age categories reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that sum as a percentage of the total population",
-    "pct_65_plus": "pct_65_plus is the percentage of population age 65 and older; this value was calculated by summing the population count of multiple sex by age categories reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that sum as a percentage of the total population",
-    "pct_minority": "pct_minority is the percentage of population of racial or ethnic minority status as reported in the CDC Social Determinants of Health survey for years 2017-2021",
-    "pct_african_american": "pct_african_american is the percentage of population that is African American; this value was calculated by taking the population count of African Americans as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_amer_indian_ak_native": "pct_amer_indian_ak_native is the percentage of population that is American Indian or Alaska Native; this value was calculated by taking the population count of American Indians or Alaska Natives as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_asian": "pct_asian is the percentage of population that is Asian; this value was calculated by taking the population count of Asians as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_hawaiian_pacislander": "pct_hawaiian_pacislander is the percentage of population that is Native Hawaiian and Pacific Islander; this value was calculated by taking the population count of Native Hawaiians and Pacific Islanders as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_hispanic_latino": "pct_hispanic_latino is the percentage of population that is Hispanic or Latino; this value was calculated by taking the population count of Hispanics or Latinos as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_white": "pct_white is the percentage of population that is White; this value was calculated by taking the population count of Whites as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_multi": "pct_multi is the percentage of population that is two or more races; this value was calculated by taking the population count of two or more races as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_other": "pct_other is the percentage of population that is other race; this value was calculated by taking the population count of other races as reported in the Census Demographic and Housing Characteristics Survey for 2020 and expressing that count as a percentage of the total population",
-    "pct_asthma": "pct_asthma is the percentage of of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
-    "pct_asthma_low": "pct_asthma_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2024",
-    "pct_asthma_high": "pct_asthma_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with current asthma as reported in the CDC PLACES survey for 2024",
-    "pct_copd": "pct_copd is the percentage of of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
-    "pct_copd_low": "pct_copd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2024",
-    "pct_copd_high": "pct_copd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease as reported in the CDC PLACES survey for 2024",
-    "pct_diabetes": "pct_diabetes is the percentage of of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
-    "pct_diabetes_low": "pct_diabetes_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2024",
-    "pct_diabetes_high": "pct_diabetes_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes as reported in the CDC PLACES survey for 2024",
-    "pct_hd": "pct_hd is the percentage of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
-    "pct_hd_low": "pct_hd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2024",
-    "pct_hd_high": "pct_hd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with coronary heart disease as reported in the CDC PLACES survey for 2024",
-    "pct_mh": "pct_mh is the percentage of adults aged >=18 years with frequent mental distress as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
-    "pct_mh_low": "pct_mh_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with frequent mental distress as reported in the CDC PLACES survey for 2024",
-    "pct_mh_high": "pct_mh_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with frequent mental distress as reported in the CDC PLACES survey for 2024",
-    "pct_stroke": "pct_stroke is the percentage of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
-    "pct_stroke_low": "pct_stroke_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2024",
-    "pct_stroke_high": "pct_stroke_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with stroke as reported in the CDC PLACES survey for 2024",
-    "pct_emospt": "pct_emospt is the percentage of adults aged >=18 years with lack of social and emotional support as reported in the CDC PLACES survey for 2024; this value is a crude prevalence rate",
-    "pct_emospt_low": "pct_emospt_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years with lack of social and emotional support as reported in the CDC PLACES survey for 2024",
-    "pct_emospt_high": "pct_emospt_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years with lack of social and emotional support as reported in the CDC PLACES survey for 2024",
-    "pct_foodstamps": "pct_foodstamps is the percentage of adults aged >=18 years that received food stamps in the past 12 months as reported in the CDC PLACES survey for 2024",
-    "pct_foodstamps_low": "pct_foodstamps_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months as reported in the CDC PLACES survey for 2024",
-    "pct_foodstamps_high": "pct_foodstamps_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months as reported in the CDC PLACES survey for 2024",
-    "pct_w_disability": "pct_w_disability is the percentage of population with a disability as reported in the Census American Community Survey 5-year survey for years 2018-2022",
-    "moe_pct_w_disability": "moe_pct_w_disability is the margin of error for percentage of population with a disability as reported in the Census American Community Survey 5-year survey for years 2018-2022",
-    "pct_insured": "pct_insured is the percentage of population with health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
-    "moe_pct_insured": "moe_pct_insured is the margin of error for percentage of population with health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
-    "pct_uninsured": "pct_uninsured is the percentage of population without health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
-    "moe_pct_uninsured": "moe_pct_uninsured is the margin of error for percentage of population without health insurance as reported in the Census American Community Survey 5-year survey for years 2018-2022",
-    "pct_no_bband": "pct_no_bband is the percentage of households with no broadband internet subscription as reported in the CDC Social Determinants of Health survey for years 2017-2021",
-    "pct_no_hsdiploma": "pct_no_hsdiploma is the percentage of adults aged >=25 years with no high school diploma as reported in the CDC Social Determinants of Health survey for years 2017-2021",
-    "pct_below_150pov": "pct_below_150pov is the percentage of population living below 150% of the poverty level as reported in the CDC Social Determinants of Health survey for years 2017-2021",
-    "pct_crowding": "pct_crowding is the percentage of households with crowding as reported in the CDC Social Determinants of Health survey for years 2017-2021",
-    "pct_hcost": "pct_hcost is the percentage of households with housing cost burden as reported in the CDC Social Determinants of Health survey for years 2017-2021",
-    "pct_unemployed": "pct_unemployed is the percentage of population that is unemployed among people 16 years or older in the labor force as reported in the CDC Social Determinants of Health survey for years 2017-2021",
-    "pct_single_parent": "pct_single_parent is the percentage of single parent households as reported in the CDC Social Determinants of Health survey for years 2017-2021",
+    # population, age, and race
+    "name": {
+        "description": "",
+        "source": "",
+    },
+    "comment": {
+        "description": "",
+        "source": "",
+    },
+    "total_population": {
+        "description": "total_population is the total population of the community",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_under_18": {
+        "description": "pct_under_18 is the percentage of the population under age 18; this value was calculated by summing the population count of multiple sex by age categories and expressing that sum as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_under_5": {
+        "description": "pct_under_5 is the percentage of the population under age 5; this value was calculated by summing the population count of multiple sex by age categories and expressing that sum as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_65_plus": {
+        "description": "pct_65_plus is the percentage of the population age 65 and older; this value was calculated by summing the population count of multiple sex by age categories and expressing that sum as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_minority": {
+        "description": "pct_minority is the percentage of the population of racial or ethnic minority status (including individuals who identified as any of the following: Hispanic or Latino (any race); Black and African American, non-Hispanic; American Indian and Alaska Native, non-Hispanic; Asian, non-Hispanic; Native Hawaiian and Other Pacific Islander, non-Hispanic; Two or More Races, non-Hispanic; Other Races, non-Hispanic)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_african_american": {
+        "description": "pct_african_american is the percentage of the population that is African American; this value was calculated by taking the population count of African Americans and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_amer_indian_ak_native": {
+        "description": "pct_amer_indian_ak_native is the percentage of the population that is American Indian or Alaska Native; this value was calculated by taking the population count of American Indians or Alaska Natives and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_asian": {
+        "description": "pct_asian is the percentage of the population that is Asian; this value was calculated by taking the population count of Asians and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_hawaiian_pacislander": {
+        "description": "pct_hawaiian_pacislander is the percentage of the population that is Native Hawaiian and Pacific Islander; this value was calculated by taking the population count of Native Hawaiians and Pacific Islanders and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_hispanic_latino": {
+        "description": "pct_hispanic_latino is the percentage of the population that is Hispanic or Latino; this value was calculated by taking the population count of Hispanics or Latinos and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_white": {
+        "description": "pct_white is the percentage of the population that is White; this value was calculated by taking the population count of Whites and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_multi": {
+        "description": "pct_multi is the percentage of the population that is two or more races; this value was calculated by taking the population count of two or more races and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    "pct_other": {
+        "description": "pct_other is the percentage of the population that is other race; this value was calculated by taking the population count of other races and expressing that count as a percentage of the total population",
+        "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
+    },
+    # health conditions
+    "pct_asthma": {
+        "description": "pct_asthma is the percentage of adults aged >=18 years who report being diagnosed with and currently having asthma; this value is a crude prevalence rate",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_asthma_low": {
+        "description": "pct_asthma_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with and currently having asthma",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_asthma_high": {
+        "description": "pct_asthma_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with and currently having asthma",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_copd": {
+        "description": "pct_copd is the percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_copd_low": {
+        "description": "pct_copd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_copd_high": {
+        "description": "pct_copd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_diabetes": {
+        "description": "pct_diabetes is the percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes); this value is a crude prevalence rate",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_diabetes_low": {
+        "description": "pct_diabetes_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes)",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_diabetes_high": {
+        "description": "pct_diabetes_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes)",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_hd": {
+        "description": "pct_hd is the percentage of adults aged >=18 years who report being diagnosed with coronary heart disease; this value is a crude prevalence rate",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_hd_low": {
+        "description": "pct_hd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with coronary heart disease",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_hd_high": {
+        "description": "pct_hd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with coronary heart disease",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_mh": {
+        "description": "pct_mh is the percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days); this value is a crude prevalence rate",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_mh_low": {
+        "description": "pct_mh_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days)",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_mh_high": {
+        "description": "pct_mh_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days)",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_stroke": {
+        "description": "pct_stroke is the percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke; this value is a crude prevalence rate",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_stroke_low": {
+        "description": "pct_stroke_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_stroke_high": {
+        "description": "pct_stroke_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_emospt": {
+        "description": "pct_emospt is the percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed); this value is a crude prevalence rate",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_emospt_low": {
+        "description": "pct_emospt_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed)",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_emospt_high": {
+        "description": "pct_emospt_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed)",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    # social determinants of health
+    "pct_foodstamps": {
+        "description": "pct_foodstamps is the percentage of adults aged >=18 years that received food stamps in the past 12 months",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_foodstamps_low": {
+        "description": "pct_foodstamps_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_foodstamps_high": {
+        "description": "pct_foodstamps_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months",
+        "source": "CDC PLACES dataset for 2024",
+    },
+    "pct_w_disability": {
+        "description": "pct_w_disability is the percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "moe_pct_w_disability": {
+        "description": "moe_pct_w_disability is the margin of error for the percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "pct_insured": {
+        "description": "pct_insured is the percentage of the population with health insurance",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "moe_pct_insured": {
+        "description": "moe_pct_insured is the margin of error for percentage of the population with health insurance",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "pct_uninsured": {
+        "description": "pct_uninsured is the percentage of the population without health insurance",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "moe_pct_uninsured": {
+        "description": "moe_pct_uninsured is the margin of error for percentage of the population without health insurance",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "pct_no_bband": {
+        "description": "pct_no_bband is the percentage of households with no broadband internet subscription",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_no_hsdiploma": {
+        "description": "pct_no_hsdiploma is the percentage of adults aged >=25 years with no high school diploma",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_below_150pov": {
+        "description": "pct_below_150pov is the percentage of population living below 150% of the federal poverty threshold",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_crowding": {
+        "description": "pct_crowding is the percentage of households with 'crowding' (occupied housing units with 1.01 to 1.50 and 1.51 or more occupants per room)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_hcost": {
+        "description": "pct_hcost is the percentage of households with 'housing cost burden' (households with annual income less than $75,000 that spend 30% or more of their household income on housing)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_unemployed": {
+        "description": "pct_unemployed is the percentage of the population >= 16 years in the civilian labor force who are unemployed (jobless but are available to work and have actively looked for work in the past 4 weeks)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_single_parent": {
+        "description": "pct_single_parent is the percentage of single parent households (households with a male or female householder with no spouse or partner present with children of the householder)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
 }
 
 

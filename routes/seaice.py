@@ -40,7 +40,9 @@ def package_seaice_data(seaice_resp):
     # and sets the value of the percentage for each month to the returned value or 0.
     for i in range(len(seaice_resp)):
         di[f"{1850 + floor(i / 12)}-{str((i%12) + 1).zfill(2)}"] = (
-            seaice_resp[i] if seaice_resp[i] <= 100 else 0
+            seaice_resp[i]
+            if (seaice_resp[i] is not None and seaice_resp[i] <= 100)
+            else 0
         )
 
     return di

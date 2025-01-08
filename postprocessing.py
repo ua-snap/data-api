@@ -2,7 +2,7 @@ from flask import render_template
 
 nodata_values = {
     "beetles": [0],
-    "cmip6_indicators": [-9999, -9999.0],
+    "cmip6_indicators": [-9999, -9999.0, "null"],
     "cmip6_monthly": [-9999, -9999.0, "nan"],
     "default": [-9999],
     "hydrology": [-9999, "nan"],
@@ -10,6 +10,7 @@ nodata_values = {
     "permafrost": [-9999, -9999.0],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
     "seaice": [120, 253, 254, 255],
+    "landfast_sea_ice": [32, 64, 111],
 }
 
 nodata_mappings = {
@@ -32,10 +33,10 @@ nodata_mappings = {
     "heating_degree_days_Fdays_all": nodata_values["default"],
     "hydrology": nodata_values["hydrology"],
     "hydrology_mmm": nodata_values["hydrology"],
-    "landfastice": [],
+    "landfast_sea_ice": nodata_values["landfast_sea_ice"],
     "ncar12km_indicators": nodata_values["ncar12km_indicators"],
     "permafrost": nodata_values["permafrost"],
-    "physiography": [],
+    "ecoregions": [],
     "places_all": [],
     "places_communities": [],
     "places_huc": [],

@@ -1,12 +1,17 @@
 import asyncio
+
 import numpy as np
 from flask import Blueprint, render_template, request, current_app as app, jsonify
 
 # local imports
-from fetch_data import fetch_wcs_point_data
+from fetch_data import (
+    fetch_wcs_point_data,
+    describe_via_wcps,
+)
 from validate_request import (
     validate_latlon,
     project_latlon,
+    get_coverage_encodings,
 )
 from postprocessing import postprocess
 from csv_functions import create_csv
@@ -16,88 +21,40 @@ from . import routes
 hydrology_api = Blueprint("hydrology_api", __name__)
 hydrology_coverage_id = "hydrology"
 
-dim_encodings = {
-    "varnames": {
-        0: "evap",
-        1: "glacier_melt",
-        2: "iwe",
-        3: "pcp",
-        4: "runoff",
-        5: "sm1",
-        6: "sm2",
-        7: "sm3",
-        8: "snow_melt",
-        9: "swe",
-        10: "tmax",
-        11: "tmin",
-    },
-    "models": {
-        0: "ACCESS1-3",
-        1: "CCSM4",
-        2: "CSIRO-Mk3-6-0",
-        3: "CanESM2",
-        4: "GFDL-ESM2M",
-        5: "HadGEM2-ES",
-        6: "MIROC5",
-        7: "MPI-ESM-MR",
-        8: "MRI-CGCM3",
-        9: "inmcm4",
-    },
-    "scenarios": {
-        0: "rcp45",
-        1: "rcp85",
-    },
-    "months": {
-        0: "apr",
-        1: "aug",
-        2: "dec",
-        3: "feb",
-        4: "jan",
-        5: "jul",
-        6: "jun",
-        7: "mar",
-        8: "may",
-        9: "nov",
-        10: "oct",
-        11: "sep",
-    },
-    "eras": {
-        0: "1950-1959",
-        1: "1960-1969",
-        2: "1970-1979",
-        3: "1980-1989",
-        4: "1990-1999",
-        5: "2000-2009",
-        6: "2010-2019",
-        7: "2020-2029",
-        8: "2030-2039",
-        9: "2040-2049",
-        10: "2050-2059",
-        11: "2060-2069",
-        12: "2070-2079",
-        13: "2080-2089",
-        14: "2090-2099",
-    },
-    "eds_eras": {
-        "historical": [0, 5],
-        "early_century": [6, 8],
-        "mid_century": [9, 11],
-        "late_century": [12, 14],
-    },
+
+async def get_hydrology_metadata():
+    """Get the coverage metadata and encodings for hydrology coverage"""
+    metadata = await describe_via_wcps(hydrology_coverage_id)
+    return metadata
+
+
+hydrology_meta = asyncio.run(get_hydrology_metadata())
+hydro_dim_encodings = get_coverage_encodings(hydrology_meta)
+
+# default to min-max temporal range of coverage
+years_lu = {
+    "historical": {"min": 1950, "max": 2009},
+    "projected": {"min": 2006, "max": 2100},
+}
+
+# hard-coded eras for Arctic-EDS client
+eds_eras_meta = {
+    "historical": [0, 5],
+    "early_century": [6, 8],
+    "mid_century": [9, 11],
+    "late_century": [12, 14],
 }
 
 
 def run_fetch_hydrology_point_data(lat, lon):
-    """Fetch all hydrology data for a
-       given latitude and longitude.
+    """Fetch all hydrology data for a given latitude and longitude.
 
     Args:
         lat (float): latitude
         lon (float): longitude
 
     Returns:
-        JSON-like dict of data at provided latitude and
-        longitude for all variables
+        JSON-like dict of data at provided latitude and longitude for all variables
     """
     x, y = project_latlon(lat, lon, 3338)
 
@@ -110,24 +67,28 @@ def run_fetch_hydrology_point_data(lat, lon):
         )
     )
 
-    # package point data with decoded coord values (names)
     point_pkg = dict()
-    for model_coord in dim_encodings["models"].keys():
-        model_name = dim_encodings["models"][model_coord]
+    for model_coord in hydro_dim_encodings["model"].keys():
+        model_name = hydro_dim_encodings["model"][model_coord]
         point_pkg[model_name] = dict()
-        for scenario_coord in dim_encodings["scenarios"].keys():
-            scenario_name = dim_encodings["scenarios"][scenario_coord]
+
+        for scenario_coord in hydro_dim_encodings["scenario"].keys():
+            scenario_name = hydro_dim_encodings["scenario"][scenario_coord]
             point_pkg[model_name][scenario_name] = dict()
-            for month_coord in dim_encodings["months"].keys():
-                month_name = dim_encodings["months"][month_coord]
+
+            for month_coord in hydro_dim_encodings["month"].keys():
+                month_name = hydro_dim_encodings["month"][month_coord]
                 point_pkg[model_name][scenario_name][month_name] = dict()
-                for era_coord in dim_encodings["eras"].keys():
-                    era_name = dim_encodings["eras"][era_coord]
+
+                for era_coord in hydro_dim_encodings["era"].keys():
+                    era_name = hydro_dim_encodings["era"][era_coord]
                     point_pkg[model_name][scenario_name][month_name][era_name] = dict()
-                    for var_coord in dim_encodings["varnames"].keys():
-                        var_name = dim_encodings["varnames"][var_coord]
+
+                    for var_coord, var_name in enumerate(
+                        hydrology_meta["rangeType"]["field"]
+                    ):
                         point_pkg[model_name][scenario_name][month_name][era_name][
-                            var_name
+                            var_name["name"]
                         ] = rasdaman_response[model_coord][scenario_coord][month_coord][
                             era_coord
                         ].split(
@@ -157,36 +118,39 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
 
     # repackage point data with mmm values computed across eras
     point_pkg_mmm = dict()
-    for model_coord in dim_encodings["models"].keys():
-        model_name = dim_encodings["models"][model_coord]
+    for model_coord in hydro_dim_encodings["model"].keys():
+        model_name = hydro_dim_encodings["model"][model_coord]
         point_pkg_mmm[model_name] = dict()
-        for scenario_coord in dim_encodings["scenarios"].keys():
-            scenario_name = dim_encodings["scenarios"][scenario_coord]
+        for scenario_coord in hydro_dim_encodings["scenario"].keys():
+            scenario_name = hydro_dim_encodings["scenario"][scenario_coord]
             point_pkg_mmm[model_name][scenario_name] = dict()
-            for month_coord in dim_encodings["months"].keys():
-                month_name = dim_encodings["months"][month_coord]
+            for month_coord in hydro_dim_encodings["month"].keys():
+                month_name = hydro_dim_encodings["month"][month_coord]
                 point_pkg_mmm[model_name][scenario_name][month_name] = dict()
-                for var_coord in dim_encodings["varnames"].keys():
-                    var_name = dim_encodings["varnames"][var_coord]
+                for var_coord, var_name in enumerate(
+                    hydrology_meta["rangeType"]["field"]
+                ):
+                    var_name = var_name["name"]
 
-                    # If summarizing for ArcticEDS, we want to get the min-mean-max for each
-                    # month for the given era i.e. 1950-2009 for historical period.
+                    # If summarizing for ArcticEDS, we want the min-mean-max for each month for the given era. i.e. 1950-2009 for historical.
                     if summarize:
                         if var_name == "evap" or var_name == "runoff":
                             point_pkg_mmm[model_name][scenario_name][month_name][
                                 var_name
                             ] = dict()
-                            for era_title in dim_encodings["eds_eras"].keys():
+
+                            for era_title in eds_eras_meta.keys():
                                 values = list()
                                 point_pkg_mmm[model_name][scenario_name][month_name][
                                     var_name
                                 ][era_title] = dict()
+                                # get list representing the min/max era numbers
+                                eds_eras_coords = eds_eras_meta[era_title]
 
-                                # Pull the list from dim_encodings representing the min and max
-                                # era numbers for this era
-                                eds_eras = dim_encodings["eds_eras"][era_title]
-                                for era_coord in range(eds_eras[0], eds_eras[1] + 1):
-                                    era_name = dim_encodings["eras"][era_coord]
+                                for era_coord in range(
+                                    eds_eras_coords[0], eds_eras_coords[1] + 1
+                                ):
+                                    era_name = hydro_dim_encodings["era"][era_coord]
 
                                     values.append(
                                         float(
@@ -227,8 +191,8 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                         # each and every era sequentially i.e. 1950-1959, 1960-1969, etc.
                         values = list()
 
-                        for era_coord in dim_encodings["eras"].keys():
-                            era_name = dim_encodings["eras"][era_coord]
+                        for era_coord in hydro_dim_encodings["era"].keys():
+                            era_name = hydro_dim_encodings["era"][era_coord]
 
                             values.append(
                                 float(
@@ -274,16 +238,19 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                 }
                 for season, season_months in seasons.items():
                     point_pkg_mmm[model_name][scenario_name][season] = dict()
-                    for era_title in dim_encodings["eds_eras"].keys():
-                        for var_coord in dim_encodings["varnames"].keys():
-                            var_name = dim_encodings["varnames"][var_coord]
+                    for era_title in eds_eras_meta.keys():
+                        for var_coord, var_name in enumerate(
+                            hydrology_meta["rangeType"]["field"]
+                        ):
+                            var_name = var_name["name"]
                             if var_name == "evap" or var_name == "runoff":
                                 values = list()
 
-                                # For each month in the season, grab the mean value for that
-                                # month for the given variable and era.
+                                # For each month in the season, grab the mean value for that month for the given variable and era.
                                 for month_coord in season_months:
-                                    month_name = dim_encodings["months"][month_coord]
+                                    month_name = hydro_dim_encodings["month"][
+                                        month_coord
+                                    ]
                                     values.append(
                                         float(
                                             point_pkg_mmm[model_name][scenario_name][
@@ -321,16 +288,17 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                                 ][era_title]["total"] = total_value
 
                 point_pkg_mmm[model_name][scenario_name]["Annual"] = dict()
-                for era_title in dim_encodings["eds_eras"].keys():
-                    for var_coord in dim_encodings["varnames"].keys():
-                        var_name = dim_encodings["varnames"][var_coord]
+                for era_title in eds_eras_meta.keys():
+                    for var_coord, var_name in enumerate(
+                        hydrology_meta["rangeType"]["field"]
+                    ):
+                        var_name = var_name["name"]
                         if var_name == "evap" or var_name == "runoff":
                             values = list()
 
-                            # We have to pull the data in this way to ensure we are getting
-                            # the mean for each variable for each month.
-                            for month_coord in dim_encodings["months"].keys():
-                                month_name = dim_encodings["months"][month_coord]
+                            # We have to pull the data in this way to ensure we are getting the mean for each variable for each month.
+                            for month_coord in hydro_dim_encodings["month"].keys():
+                                month_name = hydro_dim_encodings["month"][month_coord]
                                 values.append(
                                     float(
                                         point_pkg_mmm[model_name][scenario_name][
@@ -339,9 +307,7 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
                                     )
                                 )
 
-                            # This will be the min, mean, and max taken from the mean monthly values
-                            # to find the min-mean-max of the annual values for a given time period such
-                            # as 1950-2009 for historical.
+                            # This will be the min, mean, and max taken from the mean monthly values to find the min-mean-max of the annual values for a given time period such as 1950-2009 for historical.
                             min_value, mean_value, max_value = (
                                 min(values),
                                 round(np.nanmean(values), 2),
@@ -412,7 +378,6 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
         try:
             point_pkg = run_fetch_hydrology_point_data(lat, lon)
             return postprocess(point_pkg, "hydrology")
-
         except Exception as exc:
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404

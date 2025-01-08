@@ -30,7 +30,7 @@ def get_service_categories():
         ("Landfast Sea Ice", "/landfastice"),
         ("Permafrost", "/permafrost"),
         ("Physical and Administrative Boundary Polygons", "/boundary"),
-        ("Physiography", "/physiography"),
+        ("Ecoregions", "/ecoregions"),
         ("Sea Ice Concentration", "/seaice"),
         ("Snowfall Equivalent", "/snow"),
         ("Temperature and Precipitation", "/taspr"),

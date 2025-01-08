@@ -127,7 +127,11 @@ def get_total_bounds(nearby_areas, communities=None):
     areas_gdf = gpd.GeoDataFrame.from_features(nearby_areas)
 
     # Make a new GeoPandas GeoDataFrome which contains only the HUCs and protected areas
-    huc_pa_gdf = areas_gdf[areas_gdf["type"].isin(["huc", "protected_area"])].copy()
+    huc_pa_gdf = areas_gdf[
+        areas_gdf["type"].isin(
+            ["huc", "protected_area", "yt_watershed", "yt_game_management_zone"]
+        )
+    ].copy()
 
     # If there were any nearby communities, we want to ensure our
     # bounding box includes them.

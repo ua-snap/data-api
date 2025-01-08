@@ -9,7 +9,12 @@ import numpy as np
 from urllib.parse import quote
 
 from generate_urls import generate_wcs_query_url
-from fetch_data import generate_wcs_getcov_str, get_dim_encodings, fetch_data
+from fetch_data import (
+    generate_wcs_getcov_str,
+    fetch_data,
+    describe_via_wcps,
+)
+from validate_request import get_coverage_encodings
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
@@ -21,11 +26,22 @@ from . import routes
 
 degree_days_api = Blueprint("degree_days_api", __name__)
 
-# all degree day coverages share common dim_encodings, so only fetch one
-dd_dim_encodings = asyncio.run(get_dim_encodings("heating_degree_days_Fdays"))
-# update the encoding for "historical" to be "modeled_baseline"
-# this is to make the data better align with engineer expectations
-dd_dim_encodings["scenario"][0] = "modeled_baseline"
+
+async def get_degree_days_metadata():
+    """Get the coverage metadata and encodings for degree days coverages.
+
+    We only need to fetch one coverage's metadata since they share common encodings.
+    """
+    metadata = await describe_via_wcps("heating_degree_days_Fdays")
+    encodings = get_coverage_encodings(metadata)
+    # Update the encoding for "historical" to be "modeled_baseline"
+    # This is to make the data better align with engineer expectations
+    encodings["scenario"][0] = "modeled_baseline"
+    return encodings
+
+
+# Initialize the encodings asynchronously
+dd_dim_encodings = asyncio.run(get_degree_days_metadata())
 
 var_ep_lu = {
     "heating": {"cov_id_str": "heating_degree_days_Fdays"},
