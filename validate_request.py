@@ -365,3 +365,38 @@ def get_coverage_encodings(coverage_metadata):
 
     except (KeyError, TypeError) as e:
         raise ValueError(f"Invalid coverage metadata format: {str(e)}")
+
+
+def get_axis_encodings(coverage_axis_metadata):
+    """
+    Get axis encodings from the JSON output describing a coverage.
+
+    Args:
+        coverage_axis_metadata (dict): JSON-like dictionary containing the coverage axes description.
+
+    Returns:
+        dict: A dictionary where each axis (key) maps to its respective coordinates (value).
+
+    Raises:
+        ValueError: If required information is missing in the JSON data.
+    """
+    try:
+        # Navigate to the generalGrid section which contains the axis encodings
+        domain_set = coverage_axis_metadata.get("domainSet", {})
+        general_grid = domain_set.get("generalGrid", {})
+        axes = general_grid.get("axis", [])
+
+        # Extract encodings for each axis
+        encodings = {}
+        for axis in axes:
+            axis_label = axis.get("axisLabel")
+            coordinates = axis.get("coordinate", [])
+            if axis_label and coordinates:
+                encodings[axis_label] = coordinates
+
+        if not encodings:
+            raise ValueError("No axis encodings found in the coverage metadata.")
+        return encodings
+
+    except (KeyError, TypeError) as e:
+        raise ValueError(f"Invalid coverage metadata format: {str(e)}")

@@ -9,12 +9,15 @@ from flask import (
 # local imports
 from fetch_data import (
     fetch_wcs_point_data,
+    describe_via_wcps,
 )
 from csv_functions import create_csv
 from validate_request import (
     validate_seaice_latlon,
     project_latlon,
+    get_axis_encodings,
 )
+from validate_data import validate_seaice_timestring
 from postprocessing import postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
@@ -22,6 +25,12 @@ from config import WEST_BBOX, EAST_BBOX
 seaice_api = Blueprint("seaice_api", __name__)
 # Rasdaman targets
 seaice_coverage_id = "hsia_arctic_production"
+
+
+async def get_seaice_metadata():
+    """Get the coverage metadata and encodings for HSIA seaice coverage"""
+    metadata = await describe_via_wcps(seaice_coverage_id)
+    return get_axis_encodings(metadata)
 
 
 def package_seaice_data(seaice_resp):
@@ -91,4 +100,24 @@ def run_point_fetch_all_seaice(lat, lon):
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+@routes.route("/seaice/enddate/")
+def seaice_enddate():
+    """Get the latest date of sea ice concentration data available in the Rasdaman server.
+    Args:
+        None
+
+    Returns:
+        JSON-like dict of the latest year and month of sea ice concentration data
+
+    """
+    hsia_encodings = asyncio.run(get_seaice_metadata())
+    latest_date = hsia_encodings["ansi"][-1]
+
+    try:
+        valid_date = validate_seaice_timestring(latest_date)
+        return {"year": valid_date.year, "month": valid_date.month}
+    except Exception:
         return render_template("500/server_error.html"), 500
