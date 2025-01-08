@@ -119,7 +119,5 @@ def seaice_enddate():
     try:
         valid_date = validate_seaice_timestring(latest_date)
         return {"year": valid_date.year, "month": valid_date.month}
-    except ValueError as e:
-        print(e)
-        # Defaults to known good data if the latest date is invalid
-        return {"year": 2024, "month": 6}
+    except Exception as exc:
+        return render_template("500/server_error.html"), 500
