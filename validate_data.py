@@ -1,6 +1,7 @@
 """A module to validate fetched data values."""
 
 import asyncio
+from datetime import datetime
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 
@@ -59,3 +60,22 @@ def place_name_and_type(place_id):
             return full_place, place["type"]
 
     return None, None
+
+
+def validate_seaice_timestring(timestring):
+    """
+    Validate the timestring for the seaice coverage.
+
+    Args:
+        timestring (str): the timestring to validate
+
+    Returns:
+        datetime object of the timestring
+    """
+    try:
+        parsed_date = datetime.strptime(timestring, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return parsed_date
+    except ValueError:
+        raise ValueError(
+            "The timestring is not in the expected format for the seaice coverage: (YYYY-MM-DDTHH:MM:SS.sssZ)"
+        )
