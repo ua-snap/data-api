@@ -51,7 +51,9 @@ def find_via_gs(lat, lon):
 
     # WFS request to Geoserver for all communities.
     communities_json = asyncio.run(
-        fetch_data([generate_wfs_search_url("playground:tagged_communities", lat, lon)])
+        fetch_data(
+            [generate_wfs_search_url("all_boundaries:all_communities", lat, lon)]
+        )
     )
 
     nearby_communities = communities_json["features"]
@@ -236,7 +238,7 @@ def get_json_for_type(type, recurse=False):
                 fetch_data(
                     [
                         generate_wfs_places_url(
-                            "playground:tagged_communities",
+                            "all_boundaries:all_communities",
                             "name,alt_name,id,region,country,type,latitude,longitude,tags",
                         )
                     ]

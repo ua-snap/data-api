@@ -43,7 +43,7 @@ def place_name_and_type(place_id):
             fetch_data(
                 [
                     generate_wfs_places_url(
-                        "playground:tagged_communities",
+                        "all_boundaries:all_communities",
                         "name,alt_name,type",
                         place_id,
                         "id",
