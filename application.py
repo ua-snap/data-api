@@ -21,6 +21,7 @@ def get_service_categories():
     will be passed to the index.html template.
     """
     return [
+        ("CMIP6", "/cmip6"),
         ("Climate Indicators", "/indicators"),
         ("Climate Protection from Spruce Beetles", "/beetles"),
         ("Degree Days", "/degree_days"),
