@@ -1,11 +1,10 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Climate Indicators</h2>
+<h2>CMIP6</h2>
 
 <p>
-  These endpoints provide access to yearly CMIP6 climate indicators and
-  era-based summaries of the NCAR 12km climate indicators. The eras for this
-  dataset are historical (1980&ndash;2009), mid&ndash;century (2040&ndash;2069),
-  and late&ndash;century (2070&ndash;2099).
+  These endpoints provide access to monthly data for select CMIP6 variables, models, and scenarios.
+  Read more about our CMIP6 subset <a href="https://arcticdatascience.org/item/story-arctic-climate-data-node">here</a>.
+  This dataset covers years 1950&ndash;2100 and is pan-Arctic in extent.
 </p>
 
 <p>
@@ -15,11 +14,11 @@
 
 <h3>Service endpoints</h3>
 
-<h4>CMIP6 climate indicator variables</h4>
+<h4>CMIP6 monthly data</h4>
 
 <p>
-  Query CMIP6 climate indicator variables for all models and scenarios. These
-  indicators are defined <a href="#climate-indicators-information">below</a>.
+  Query CMIP6 variables for all models and scenarios. These
+  variables are defined <a href="#cmip6-variable-information">below</a>.
 </p>
 
 <table class="endpoints">
@@ -32,11 +31,11 @@
   <tbody>
     <tr>
       <td>
-        Yearly climate indicator values at a given latitude and longitude.
+        Monthly values at a given latitude and longitude.
       </td>
       <td>
-        <a href="/indicators/cmip6/point/61.5/-147"
-          >/indicators/cmip6/point/61.5/-147</a
+        <a href="/cmip6/point/61.5/-147"
+          >/cmip6/point/61.5/-147</a
         >
       </td>
     </tr>
@@ -44,10 +43,9 @@
   <tfoot>
     <tr>
       <td colspan="2">
-        Min/mean/max summaries of historical and projected data over 3 eras are
-        available by appending <code>?summarize=mmm</code> to the URL.<br />
-        CSV output is also available by appending <code>?format=csv</code> to
-        the URL.
+        The list of variables can be limited by appending <code>?vars=&lt;var_id&gt;</code> to the URL.<br />
+        Multiple variables can be requested by appending a comma-separated string like <code>?vars=&lt;var_id_1&gt;,&lt;var_id_2&gt;</code>.<br />
+        CSV output is also available by appending <code>?format=csv</code> to the URL.
       </td>
     </tr>
   </tfoot>
@@ -106,8 +104,8 @@
 
 <p>
   Query min-mean-max climate indicator variables for all models and scenarios.
-  These indicators are defined
-  <a href="#climate-indicators-information">below</a>.
+  These variables are defined
+  <a href="#cmip6-variable-information">below</a>.
 </p>
 
 <table class="endpoints">
@@ -212,9 +210,9 @@
 }
 </pre>
 
-<h3 id="climate-indicators-information">Climate Indicator Information</h3>
+<h3 id="cmip6-variable-information">CMIP6 Variable Information</h3>
 
-<h4>Below is the list of climate indicators that are found in this endpoint</h4>
+<h4>Below is the list of CMIP6 variables that are found in this endpoint</h4>
 
 <p>
   <strong>hd</strong>: “Hot day” threshold &mdash; the highest observed daily
