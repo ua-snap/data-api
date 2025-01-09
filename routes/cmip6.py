@@ -13,20 +13,20 @@ from config import WEST_BBOX, EAST_BBOX
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly"
+cmip6_monthly_coverage_id = "cmip6_monthly"#_cryo_test"
 
 
 async def get_cmip6_metadata():
     """Get the coverage metadata and encodings for CMIP6 monthly coverage"""
     metadata = await describe_via_wcps(cmip6_monthly_coverage_id)
+
     return get_coverage_encodings(metadata)
 
 
 dim_encodings = asyncio.run(get_cmip6_metadata())
 varnames = dim_encodings["varname"]
 
-
-async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None):
+async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=None):
     """
     Make an async request for CMIP6 monthly data for a range of models, scenarios, and years at a specified point
 
@@ -34,6 +34,7 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None):
         lat (float): latitude
         lon (float): longitude
         var_coord (int): variable coordinate from dim_encoding, if specified
+        time_slice (str): time slice for the data request, if specified
 
     Returns:
         list of data results from each of historical and future data at a specified point
@@ -46,10 +47,13 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None):
         cov_id=cmip6_monthly_coverage_id,
         projection="EPSG:4326",
         var_coord=var_coord,
+        time_slice=time_slice,
     )
 
     # Generate the URL for the WCS query
     url = generate_wcs_query_url(wcs_str)
+
+    print(url)
 
     # Fetch the data
     point_data_list = await fetch_data([url])
@@ -57,12 +61,15 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None):
     return point_data_list
 
 
-def package_cmip6_monthly_data(point_data_list, var_id=None):
+def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, end_year=None):
     """
     Package the CMIP6 monthly values into human-readable JSON format
 
     Args:
         point_data_list (list): nested list of data from Rasdaman WCPS query
+        var_id (str): variable name, if specified
+        start_year (int): optional start year for WCPS query
+        end_year (int): optional end year for WCPS query
 
     Returns:
         di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
@@ -88,12 +95,20 @@ def package_cmip6_monthly_data(point_data_list, var_id=None):
                 if scenario not in di[model]:
                     di[model][scenario] = dict()
 
-                # Create an array of every month since January 1950 in the format "YYYY-MM"
-                months = [
-                    f"{year}-{str(month).zfill(2)}"
-                    for year in range(1950, 2100 + 1)
-                    for month in range(1, 13)
-                ]
+                # Create an array of every month between start and end year in the format "YYYY-MM"
+                # if no start or end year given, use 1950 and 2100
+                if None in [start_year, end_year]:
+                    months = [
+                        f"{year}-{str(month).zfill(2)}"
+                        for year in range(1950, 2100 + 1)
+                        for month in range(1, 13)
+                    ]
+                else:
+                    months = [
+                        f"{year}-{str(month).zfill(2)}"
+                        for year in range(int(start_year), int(end_year) + 1)
+                        for month in range(1, 13)
+                    ]
 
                 for soi, value in enumerate(scenario_li):
                     month = months[soi]
@@ -118,20 +133,46 @@ def package_cmip6_monthly_data(point_data_list, var_id=None):
 
 
 @routes.route("/cmip6/point/<lat>/<lon>")
-def run_fetch_cmip6_monthly_point_data(lat, lon):
+@routes.route("/cmip6/point/<lat>/<lon>/<start_year>/<end_year>")
+def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None):
     """
     Query the CMIP6 monthly coverage
 
     Args:
         lat (float): latitude
         lon (float): longitude
+        start_year (int): optional start year for WCPS query
+        end_year (int): optional end year for WCPS query
 
     Returns:
         JSON-like dict of requested CMIP6 monthly data
 
     Notes:
-        example request: http://localhost:5000/cmip6/point/65.06/-146.16?vars=tas,pr
+        example request (all variables): http://localhost:5000/cmip6/point/65.06/-146.16
+        example request (select variables): http://localhost:5000/cmip6/point/65.06/-146.16?vars=tas,pr
+        example request (all variables, select years): http://localhost:5000/cmip6/point/65.06/-146.16/2000/2005
+
     """
+    # Validate the start and end years
+    if None in [start_year, end_year]:
+        time_slice_ansi = None
+    elif None not in [start_year, end_year]:
+        if int(start_year) >= 1950 and int(end_year) <= 2100:
+            start_year_ansi = f"{start_year}-01-15T12:00:00.000Z"
+            end_year_ansi = f"{end_year}-12-15T12:00:00.000Z"
+            time_slice_ansi = ("ansi", f'"{start_year_ansi}","{end_year_ansi}"')
+        else:
+            return (
+                render_template(
+                    "422/invalid_year.html",
+                    start_year=start_year,
+                    end_year=end_year,
+                    min_year=1950,
+                    max_year=2100,
+                ),
+                422,
+            )
+
     # Validate the lat/lon values
     validation = validate_latlon(lat, lon)
     if validation == 400:
@@ -161,9 +202,9 @@ def run_fetch_cmip6_monthly_point_data(lat, lon):
                     key for key, value in varnames.items() if value == var_id
                 )
                 point_data_list = asyncio.run(
-                    fetch_cmip6_monthly_point_data(lat, lon, var_coord)
+                    fetch_cmip6_monthly_point_data(lat, lon, var_coord, time_slice=time_slice_ansi)
                 )
-                new_results = package_cmip6_monthly_data(point_data_list, var_id)
+                new_results = package_cmip6_monthly_data(point_data_list, var_id, start_year, end_year)
                 for model, scenarios in new_results.items():
                     results.setdefault(model, {})
                     for scenario, months in scenarios.items():
@@ -172,8 +213,8 @@ def run_fetch_cmip6_monthly_point_data(lat, lon):
                             results[model][scenario].setdefault(month, {})
                             results[model][scenario][month].update(variables)
         else:
-            point_data_list = asyncio.run(fetch_cmip6_monthly_point_data(lat, lon))
-            results = package_cmip6_monthly_data(point_data_list)
+            point_data_list = asyncio.run(fetch_cmip6_monthly_point_data(lat, lon, time_slice=time_slice_ansi))
+            results = package_cmip6_monthly_data(point_data_list, start_year=start_year, end_year=end_year)
 
         results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_monthly"))
 
