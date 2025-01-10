@@ -26,6 +26,8 @@ async def get_cmip6_metadata():
 dim_encodings = asyncio.run(get_cmip6_metadata())
 varnames = dim_encodings["varname"]
 
+print(varnames)
+
 async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=None):
     """
     Make an async request for CMIP6 monthly data for a range of models, scenarios, and years at a specified point
