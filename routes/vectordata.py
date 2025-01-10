@@ -243,7 +243,7 @@ def get_json_for_type(type, recurse=False):
                     [
                         generate_wfs_places_url(
                             "all_boundaries:all_communities",
-                            "name,alt_name,id,region,country,type,latitude,longitude,tags",
+                            "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lati,ocean_long",
                         )
                     ]
                 )
