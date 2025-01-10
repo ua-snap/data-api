@@ -160,6 +160,43 @@ def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, en
 
                     di[model][scenario][month][varname] = round(float(value), precision)
 
+    # Responses from Rasdaman include the same array length for both
+    # historical and projected data, representing every possible year
+    # in the request. This means both the historical and projected data
+    # arrays may include nodata years populated with 0s if the year range
+    # spans 2014 -2015 (2014 is the last year for historical data, and 
+    # 2015 is the first year of projected data). 
+                    
+    # The code below replaces 0s with -9999 for nodata years depending on year. 
+    # If the scenario is historical and the year is greater than 2014, 
+    # all 0 values are replaced with -9999 and will be pruned from the response.
+    # If the scenario is not historical, and the year is less than 2015,
+    # all 0 values are replaced with -9999 and will be pruned from the response.
+                    
+    for model, scenarios in di.items():
+        for scenario, months in scenarios.items():
+            for month, variables in months.items():
+                for variable, value in variables.items():
+                    if scenario == "historical" and int(month[:4]) > 2014:
+                        if value == 0:
+                            di[model][scenario][month][variable] = -9999
+                    elif scenario != "historical" and int(month[:4]) < 2015:
+                        if value == 0:
+                            di[model][scenario][month][variable] = -9999
+    
+    # We can also see entire nodata years in the projected data if a specific
+    # scenario did not include data for a particular variable. 
+    # For example, try the URL below and examine the "HadGEM3-GC31-MM" model response:
+    # http://127.0.0.1:5000/cmip6/point/61.5/-147/2014/2015?vars=pr                        
+                            
+    # This is a difficult issue to solve, as we can't safely replace all 0s with -9999
+    # because in some variables, that might actually be reasonable data.
+    # For example, snow depth or sea ice concentration may really be 0 in all
+    # months for a particular year!
+                            
+    # TODO: find the best approach for handling nodata years in projected data.
+    # The brute force approach (replacing all 0s with -9999) is not safe for all variables.
+
     return di
 
 
