@@ -5,11 +5,11 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import fetch_data, describe_via_wcps
-from validate_request import validate_latlon, get_coverage_encodings
+from validate_request import validate_cmip6_latlon, get_coverage_encodings
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
-from config import WEST_BBOX, EAST_BBOX
+from config import CMIP6_BBOX
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
@@ -247,13 +247,13 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
             )
 
     # Validate the lat/lon values
-    validation = validate_latlon(lat, lon)
+    validation = validate_cmip6_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
         return (
             render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+                "422/invalid_latlon_outside_coverage.html", bboxes=[CMIP6_BBOX]
             ),
             422,
         )
