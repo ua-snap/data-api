@@ -13,7 +13,7 @@ from config import WEST_BBOX, EAST_BBOX
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly"#_cryo_test"
+cmip6_monthly_coverage_id = "cmip6_monthly_cryo_test"
 
 
 async def get_cmip6_metadata():
@@ -24,9 +24,20 @@ async def get_cmip6_metadata():
 
 
 dim_encodings = asyncio.run(get_cmip6_metadata())
+
+# TODO: fix cryo coverage so we can delete this line below
+# temporary fix for "dictionary inside a string" issue
+for dim, value in dim_encodings.items():
+    if isinstance(value, str):
+        dim_encodings[dim] = eval(value)
+    else: pass
+
+# TODO: fix cryo coverage so we can delete this line below
+# print to terminal to check for "dictionary inside a string" issue
+print(dim_encodings)
+
 varnames = dim_encodings["varname"]
 
-print(varnames)
 
 async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=None):
     """
@@ -54,8 +65,6 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=No
 
     # Generate the URL for the WCS query
     url = generate_wcs_query_url(wcs_str)
-
-    print(url)
 
     # Fetch the data
     point_data_list = await fetch_data([url])
@@ -87,12 +96,27 @@ def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, en
         if var_id != None:
             varname = var_id
         else:
+
+            # TODO: fix cryo coverage so we can delete this line below
+            # temporary fix for "string key" issue
+            var_coord = str(var_coord)
             varname = dim_encodings["varname"][var_coord]
+            
         for mi, model_li in enumerate(var_li):
+
+            # TODO: fix cryo coverage so we can delete this line below
+            # temporary fix for "string key" issue
+            mi = str(mi)
+
             model = dim_encodings["model"][mi]
             if model not in di:
                 di[model] = dict()
             for si, scenario_li in enumerate(model_li):
+
+                # TODO: fix cryo coverage so we can delete this line below
+                # temporary fix for "string key" issue
+                si = str(si)
+
                 scenario = dim_encodings["scenario"][si]
                 if scenario not in di[model]:
                     di[model][scenario] = dict()
@@ -113,6 +137,11 @@ def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, en
                     ]
 
                 for soi, value in enumerate(scenario_li):
+
+                    # replace NaN values (None) with -9999
+                    if value is None:
+                        value = -9999
+
                     month = months[soi]
                     if month not in di[model][scenario]:
                         di[model][scenario][month] = dict()
@@ -211,6 +240,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                 point_data_list = asyncio.run(
                     fetch_cmip6_monthly_point_data(lat, lon, var_coord, time_slice=time_slice_ansi)
                 )
+
                 new_results = package_cmip6_monthly_data(point_data_list, var_id, start_year, end_year)
                 for model, scenarios in new_results.items():
                     results.setdefault(model, {})
@@ -221,6 +251,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                             results[model][scenario][month].update(variables)
         else:
             point_data_list = asyncio.run(fetch_cmip6_monthly_point_data(lat, lon, time_slice=time_slice_ansi))
+
             results = package_cmip6_monthly_data(point_data_list, start_year=start_year, end_year=end_year)
 
         results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_monthly"))
@@ -230,8 +261,11 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
             return create_csv(results, "cmip6_monthly", place_id, lat, lon, vars=vars)
 
         return results
+
     except ValueError:
         return render_template("400/bad_request.html"), 400
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
+    
+    
