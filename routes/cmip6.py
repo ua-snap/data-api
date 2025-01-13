@@ -6,7 +6,12 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import fetch_data, describe_via_wcps
-from validate_request import validate_cmip6_latlon, get_coverage_encodings
+from validate_request import (
+    latlon_is_numeric_and_in_geodetic_range,
+    get_coverage_encodings,
+    construct_latlon_bbox_from_coverage_bounds,
+    validate_latlon_in_bboxes,
+)
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
@@ -249,13 +254,15 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
             )
 
     # Validate the lat/lon values
-    validation = validate_cmip6_latlon(lat, lon)
+    validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
-    if validation == 422:
+    cmip6_bbox = construct_latlon_bbox_from_coverage_bounds(metadata)
+    within_bounds = validate_latlon_in_bboxes(lat, lon, [cmip6_bbox])
+    if within_bounds == 422:
         return (
             render_template(
-                "422/invalid_latlon_outside_coverage.html", bboxes=[CMIP6_BBOX]
+                "422/invalid_latlon_outside_coverage.html", bboxes=[cmip6_bbox]
             ),
             422,
         )
@@ -314,3 +321,4 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
