@@ -10,7 +10,6 @@ from validate_request import validate_cmip6_latlon, get_coverage_encodings
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
-from config import CMIP6_BBOX
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
@@ -31,7 +30,8 @@ dim_encodings = asyncio.run(get_cmip6_metadata())
 for dim, value in dim_encodings.items():
     if isinstance(value, str):
         dim_encodings[dim] = ast.literal_eval(value)
-    else: pass
+    else:
+        pass
 
 # TODO: fix cryo coverage so we can delete this line below
 # print to terminal to check for "dictionary inside a string" issue
@@ -73,7 +73,9 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=No
     return point_data_list
 
 
-def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, end_year=None):
+def package_cmip6_monthly_data(
+    point_data_list, var_id=None, start_year=None, end_year=None
+):
     """
     Package the CMIP6 monthly values into human-readable JSON format
 
@@ -102,7 +104,7 @@ def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, en
             # temporary fix for "string key" issue
             var_coord = str(var_coord)
             varname = dim_encodings["varname"][var_coord]
-            
+
         for mi, model_li in enumerate(var_li):
 
             # TODO: fix cryo coverage so we can delete this line below
@@ -165,15 +167,15 @@ def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, en
     # historical and projected data, representing every possible year
     # in the request. This means both the historical and projected data
     # arrays may include nodata years populated with 0s if the year range
-    # spans 2014 -2015 (2014 is the last year for historical data, and 
-    # 2015 is the first year of projected data). 
-                    
-    # The code below replaces 0s with -9999 for nodata years depending on year. 
-    # If the scenario is historical and the year is greater than 2014, 
+    # spans 2014 -2015 (2014 is the last year for historical data, and
+    # 2015 is the first year of projected data).
+
+    # The code below replaces 0s with -9999 for nodata years depending on year.
+    # If the scenario is historical and the year is greater than 2014,
     # all 0 values are replaced with -9999 and will be pruned from the response.
     # If the scenario is not historical, and the year is less than 2015,
     # all 0 values are replaced with -9999 and will be pruned from the response.
-                    
+
     for model, scenarios in di.items():
         for scenario, months in scenarios.items():
             for month, variables in months.items():
@@ -184,17 +186,17 @@ def package_cmip6_monthly_data(point_data_list, var_id=None, start_year=None, en
                     elif scenario != "historical" and int(month[:4]) < 2015:
                         if value == 0:
                             di[model][scenario][month][variable] = -9999
-    
+
     # We can also see entire nodata years in the projected data if a specific
-    # scenario did not include data for a particular variable. 
+    # scenario did not include data for a particular variable.
     # For example, try the URL below and examine the "HadGEM3-GC31-MM" model response:
-    # http://127.0.0.1:5000/cmip6/point/61.5/-147/2014/2015?vars=pr                        
-                            
+    # http://127.0.0.1:5000/cmip6/point/61.5/-147/2014/2015?vars=pr
+
     # This is a difficult issue to solve, as we can't safely replace all 0s with -9999
     # because in some variables, that might actually be reasonable data.
     # For example, snow depth or sea ice concentration may really be 0 in all
     # months for a particular year!
-                            
+
     # TODO: find the best approach for handling nodata years in projected data.
     # The brute force approach (replacing all 0s with -9999) is not safe for all variables.
 
@@ -276,10 +278,14 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                     key for key, value in varnames.items() if value == var_id
                 )
                 point_data_list = asyncio.run(
-                    fetch_cmip6_monthly_point_data(lat, lon, var_coord, time_slice=time_slice_ansi)
+                    fetch_cmip6_monthly_point_data(
+                        lat, lon, var_coord, time_slice=time_slice_ansi
+                    )
                 )
 
-                new_results = package_cmip6_monthly_data(point_data_list, var_id, start_year, end_year)
+                new_results = package_cmip6_monthly_data(
+                    point_data_list, var_id, start_year, end_year
+                )
                 for model, scenarios in new_results.items():
                     results.setdefault(model, {})
                     for scenario, months in scenarios.items():
@@ -288,9 +294,13 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                             results[model][scenario].setdefault(month, {})
                             results[model][scenario][month].update(variables)
         else:
-            point_data_list = asyncio.run(fetch_cmip6_monthly_point_data(lat, lon, time_slice=time_slice_ansi))
+            point_data_list = asyncio.run(
+                fetch_cmip6_monthly_point_data(lat, lon, time_slice=time_slice_ansi)
+            )
 
-            results = package_cmip6_monthly_data(point_data_list, start_year=start_year, end_year=end_year)
+            results = package_cmip6_monthly_data(
+                point_data_list, start_year=start_year, end_year=end_year
+            )
 
         results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_monthly"))
 
@@ -305,5 +315,3 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
-    
-    
