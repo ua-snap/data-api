@@ -1,4 +1,5 @@
 import asyncio
+import ast
 from flask import Blueprint, render_template, request
 
 # local imports
@@ -29,7 +30,7 @@ dim_encodings = asyncio.run(get_cmip6_metadata())
 # temporary fix for "dictionary inside a string" issue
 for dim, value in dim_encodings.items():
     if isinstance(value, str):
-        dim_encodings[dim] = eval(value)
+        dim_encodings[dim] = ast.literal_eval(value)
     else: pass
 
 # TODO: fix cryo coverage so we can delete this line below
