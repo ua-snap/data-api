@@ -66,6 +66,8 @@
 
 <p>Results from point queries will look like this:</p>
 
+<!-- TODO: [After SWE units are changed to mm, regenerate the example values below from the demo coordinates!] -->
+
 <pre>
     {
         "CESM2": {
@@ -82,7 +84,7 @@
               "rsds": 14.36,
               "sfcWind": 3.43,
               "snd": 1.85,
-              "snw": 525.12,
+              "swe": 525.12,
               "tas": -15.23,
               "ts": -17.3
             },
@@ -98,7 +100,7 @@
               "rsds": 40.72,
               "sfcWind": 3.13,
               "snd": 2.14,
-              "snw": 627.79,
+              "swe": 627.79,
               "tas": -12.7,
               "ts": -14.04
             },
@@ -171,7 +173,7 @@
   <strong>snd</strong>: Snow depth &mdash; mean thickness of snow in the land portion of the grid cell, in meters; averaged over the entire land portion, including the snow-free fraction.
 </p>
 <p>
-  <strong>snw</strong>: Snowfall &mdash; The mass of surface snow on the land portion of the grid cell divided by the land area in the grid cell, in kg m-2.
+  <strong>swe</strong>: Snow water equivalent &mdash; The volume of the snowpack expressed as the equivalent depth of liquid water on the surface, in mm.
 </p>
 <p>
   <strong>tas</strong>: Near surface air temperature &mdash; mean near-surface (usually, 2 meter) air temperature, in degrees K.  
