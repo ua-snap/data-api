@@ -19,12 +19,11 @@ cmip6_monthly_coverage_id = "cmip6_monthly_cryo_test"
 async def get_cmip6_metadata():
     """Get the coverage metadata and encodings for CMIP6 monthly coverage"""
     metadata = await describe_via_wcps(cmip6_monthly_coverage_id)
+    return metadata
 
-    return get_coverage_encodings(metadata)
 
-
-dim_encodings = asyncio.run(get_cmip6_metadata())
-
+metadata = asyncio.run(get_cmip6_metadata())
+dim_encodings = get_coverage_encodings(metadata)
 # TODO: fix cryo coverage so we can delete this line below
 # temporary fix for "dictionary inside a string" issue
 for dim, value in dim_encodings.items():
