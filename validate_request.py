@@ -9,7 +9,7 @@ from flask import render_template
 from pyproj import Transformer
 import numpy as np
 
-from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX, CMIP6_BBOX
+from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 
@@ -52,30 +52,6 @@ def validate_latlon(lat, lon):
 
     # Validate against two different BBOXes to deal with antimeridian issues
     for bbox in [WEST_BBOX, EAST_BBOX]:
-        valid_lat = bbox[1] <= lat_float <= bbox[3]
-        valid_lon = bbox[0] <= lon_float <= bbox[2]
-        if valid_lat and valid_lon:
-            return True
-
-    return 422
-
-
-def validate_cmip6_latlon(lat, lon):
-    """Validate the lat and lon values.
-    Return True if valid or HTTP status code if validation failed
-    """
-    try:
-        lat_float = float(lat)
-        lon_float = float(lon)
-    except:
-        return 400  # HTTP status code
-    lat_in_world = -90 <= lat_float <= 90
-    lon_in_world = -180 <= lon_float <= 180
-    if not lat_in_world or not lon_in_world:
-        return 400  # HTTP status code
-
-    # Validate against pan-Arctic BBOX
-    for bbox in [CMIP6_BBOX]:
         valid_lat = bbox[1] <= lat_float <= bbox[3]
         valid_lon = bbox[0] <= lon_float <= bbox[2]
         if valid_lat and valid_lon:
@@ -211,7 +187,7 @@ def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):
 def get_x_y_axes(coverage_metadata):
     """Extract the X and Y axes from the coverage metadata.
 
-    We're doing this because we won't always know the axis ordering and position that come from Rasdaman. They are usually the last two axes, but their exact numbering might depend on on how many axes the coverage has. So we can iterate through the axes and find the ones with the axisLabel "X" and "Y" and grab them with `next()`.
+    We're doing this because we won't always know the axis ordering and position that come from Rasdaman. They are usually the last two axes, but their exact numbering might depend on on how many axes the coverage has. So we can iterate through the axes and find the ones with the axisLabel "X" and "Y" or "lon" and "lat" and grab them with `next()`.
 
     Args:
         coverage_metadata (dict): JSON-like dictionary containing coverage metadata
@@ -219,17 +195,20 @@ def get_x_y_axes(coverage_metadata):
     Returns:
         tuple: A tuple containing the X and Y axes metadata
     """
+    # CP note: you'll notice that we reverse the order of the return when lat-lon labels are found - this is a follow-on impact of how coordinate transformers work when we don't specify the ordering, e.g., always x-y
     try:
         x_axis = next(
             axis
             for axis in coverage_metadata["domainSet"]["generalGrid"]["axis"]
-            if axis["axisLabel"] == "X"
+            if axis["axisLabel"] == "X" or axis["axisLabel"] == "lon"
         )
         y_axis = next(
             axis
             for axis in coverage_metadata["domainSet"]["generalGrid"]["axis"]
-            if axis["axisLabel"] == "Y"
+            if axis["axisLabel"] == "Y" or axis["axisLabel"] == "lat"
         )
+        if x_axis["axisLabel"] == "lon" and y_axis["axisLabel"] == "lat":
+            return y_axis, x_axis
         return x_axis, y_axis
     except (KeyError, StopIteration):
         raise ValueError("Unexpected coverage metadata: 'X' or 'Y' axis not found")
