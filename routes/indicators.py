@@ -382,7 +382,7 @@ def run_fetch_base_indicators_point_data(lat, lon):
         lon (float): longitude
 
     Returns:
-        JSON-like dict of requested ALFRESCO data
+        JSON-like dict of requested data
 
     Notes:
         example request: http://localhost:5000/indicators/base/point/65.06/-146.16
