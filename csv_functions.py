@@ -369,7 +369,7 @@ def cmip6_monthly_csv(data, vars=None):
         "rsds": "# rsds is the mean monthly surface downwelling shortwave flux in the air in W/m².\n",
         "sfcWind": "# sfcWind is the mean near surface wind speed in m/s.\n",
         "siconc": "# siconc is the sea ice concentration or the percentage of grid cell covered by sea ice.\n",
-        "swe": "# swe is the snow water equivalent - The volume of the snowpack expressed as the equivalent depth of liquid water on the surface, in mm.\n",
+        "swe": "# swe is the snow water equivalent - The volume of the snowpack expressed as the equivalent depth of liquid water on the surface in mm.\n",
         "tas": "# tas is the mean monthly temperature in deg C.\n",
         "tasmax": "# tasmax is the maximum monthly temperature in deg C.\n",
         "tasmin": "# tasmin is the mimimum monthly temperature in deg C.\n",
