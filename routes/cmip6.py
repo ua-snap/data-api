@@ -37,10 +37,6 @@ for dim, value in dim_encodings.items():
     else:
         pass
 
-# TODO: fix cryo coverage so we can delete this line below
-# print to terminal to check for "dictionary inside a string" issue
-# print(dim_encodings)
-
 varnames = dim_encodings["varname"]
 
 
@@ -326,7 +322,16 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
 
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
-            return create_csv(results, "cmip6_monthly", place_id, lat, lon, vars=vars, start_year=start_year, end_year=end_year)
+            return create_csv(
+                results,
+                "cmip6_monthly",
+                place_id,
+                lat,
+                lon,
+                vars=vars,
+                start_year=start_year,
+                end_year=end_year,
+            )
 
         return results
 
