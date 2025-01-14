@@ -66,15 +66,13 @@
 
 <p>Results from point queries will look like this:</p>
 
-<!-- TODO: [After SWE units are changed to mm, regenerate the example values below from the demo coordinates!] -->
-
 <pre>
     {
         "CESM2": {
           "historical": {
             "1950-01": {
               "clt": 76.84,
-              "evspsbl": -5.3e-7,
+              "evspsbl": -5.3e-07,
               "hfls": -1.5,
               "hfss": -18.73,
               "pr": 94.92,
@@ -83,14 +81,13 @@
               "rlds": 217.55,
               "rsds": 14.36,
               "sfcWind": 3.43,
-              "snd": 1.85,
               "swe": 525.12,
               "tas": -15.23,
               "ts": -17.3
             },
             "1950-02": {
               "clt": 93.58,
-              "evspsbl": -2.7e-7,
+              "evspsbl": -2.7e-07,
               "hfls": -0.81,
               "hfss": -9.39,
               "pr": 96.64,
@@ -99,7 +96,6 @@
               "rlds": 235.57,
               "rsds": 40.72,
               "sfcWind": 3.13,
-              "snd": 2.14,
               "swe": 627.79,
               "tas": -12.7,
               "ts": -14.04
@@ -134,64 +130,61 @@
 
 <h3 id="cmip6-variable-information">CMIP6 Variable Information</h3>
 
-<h4>Below is the list of CMIP6 variables that are found in this endpoint</h4>
+<h4>Below is the list of CMIP6 variables that are found in this endpoint. For complete variable definitions, see the official CMIP6 documentation <a href="https://wcrp-cmip.org/cmip-model-and-experiment-documentation/">here</a>.</h4>
 
 <p>
-  <strong>clt</strong>: Cloud area fraction &mdash; Total cloud area fraction (reported as a percentage) for the whole atmospheric column, as seen from the surface or the top of the atmosphere; includes both large-scale and convective clouds.
+  <strong>clt</strong>: Cloud area fraction (%)
 </p>
 <p>
-  <strong>evspsbl</strong>: Evaporation, including sublimation and transpiration &mdash; Evaporation at surface (also known as evapotranspiration) in kg m-2 s-1; flux of water into the atmosphere due to conversion of both liquid and solid phases to vapor (from underlying surface and vegetation).
+  <strong>evspsbl</strong>: Evaporation, including sublimation and transpiration (kg/m<sup>2</sup>s)
 </p>
 <p>
-  <strong>hfls</strong>: Surface upward latent heat flux &mdash; The surface latent heat flux in W m-2; is the exchange of heat between the surface and the air on account of evaporation (including sublimation).
+  <strong>hfls</strong>: Surface upward latent heat flux (W/m<sup>2</sup>)
 </p>
 <p>
-  <strong>hfss</strong>: Surface upward sensible heat flux &mdash; The surface sensible heat flux in W m-2; also called turbulent heat flux, is the exchange of heat between the surface and the air by motion of air.
+  <strong>hfss</strong>: Surface upward sensible heat flux (W/m<sup>2</sup>)
 </p>
 <p>
-  <strong>pr</strong>: Precipitation &mdash; Total precipitation kg m-2 s-1; includes both liquid and solid phases.
+  <strong>pr</strong>: Precipitation, including both liquid and solid phases (kg/m<sup>2</sup>s)
 </p>
 <p>
-  <strong>prsn</strong>: Precipitation as snow &mdash; Precipitation as snow at surface in kg m-2 s-1; includes precipitation of all forms of water in the solid phase. 
+  <strong>prsn</strong>: Precipitation as snow, including all forms of water in the solid phase (kg/m<sup>2</sup>s)
 </p>
 <p>
-  <strong>psl</strong>: Sea level pressure &mdash; Sea level pressure in Pa.
+  <strong>psl</strong>: Sea level pressure (Pa)
 </p>
 <p>
-  <strong>rlds</strong>: Surface downwelling longwave radiation &mdash; Downwelling longwave radiation from the lower boundary of the atmosphere in W m-2.
+  <strong>rlds</strong>: Surface downwelling longwave radiation (W/m<sup>2</sup>)
 </p>
 <p>
-  <strong>rsds</strong>: Surface downwelling shortwave radiation &mdash; Surface solar irradiance in W m-2, for UV calculations.
+  <strong>rsds</strong>: Surface downwelling shortwave radiation (W/m<sup>2</sup>)
 </p>
 <p>
-  <strong>sfcWind</strong>: Surface wind &mdash; near-surface (usually, 10 meters) wind speed, in m s-1.
+  <strong>sfcWind</strong>: Surface wind speed (m/s)
 </p>
 <p>
-  <strong>siconc</strong>: Sea ice concentration &mdash; Percentage of grid cell covered by sea ice.
+  <strong>siconc</strong>: Sea ice concentration (%)
 </p>
 <p>
-  <strong>snd</strong>: Snow depth &mdash; mean thickness of snow in the land portion of the grid cell, in meters; averaged over the entire land portion, including the snow-free fraction.
+  <strong>swe</strong>: Snow water equivalent (mm)
 </p>
 <p>
-  <strong>swe</strong>: Snow water equivalent &mdash; The volume of the snowpack expressed as the equivalent depth of liquid water on the surface, in mm.
+  <strong>tas</strong>: Near surface air temperature (&deg;C)
 </p>
 <p>
-  <strong>tas</strong>: Near surface air temperature &mdash; mean near-surface (usually, 2 meter) air temperature, in degrees K.  
+  <strong>tasmax</strong>: Maximum near surface air temperature (&deg;C)
 </p>
 <p>
-  <strong>tasmax</strong>: Maximum near surface air temperature &mdash; maxmimum near-surface (usually, 2 meter) air temperature, in degrees K.
+  <strong>tasmin</strong>: Minimum near surface air temperature (&deg;C)
 </p>
 <p>
-  <strong>tasmin</strong>: Minimum near surface air temperature &mdash; minimum near-surface (usually, 2 meter) air temperature, in degrees K.
+  <strong>ts</strong>: Surface air temperature (&deg;C)
 </p>
 <p>
-  <strong>ts</strong>: Surface air temperature &mdash; Temperature of the lower boundary of the atmosphere, in degrees K.
+  <strong>uas</strong>: Near-surface eastward wind (m/s)
 </p>
 <p>
-  <strong>uas</strong>: Near-surface eastward wind &mdash; Eastward component of the near-surface (usually, 10 meters) wind, in m s-1.
-</p>
-<p>
-  <strong>vas</strong>: Near-surface northward wind &mdash; Northward component of the near-surface (usually, 10 meters) wind, in m s-1.
+  <strong>vas</strong>: Near-surface northward wind (m/s)
 </p>
 
 
