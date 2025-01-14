@@ -23,6 +23,9 @@ from fetch_data import (
 )
 from validate_request import (
     validate_latlon,
+    latlon_is_numeric_and_in_geodetic_range,
+    construct_latlon_bbox_from_coverage_bounds,
+    validate_latlon_in_bboxes,
     project_latlon,
     validate_var_id,
     get_coverage_encodings,
@@ -47,11 +50,12 @@ async def get_ncar12km_metadata():
 async def get_cmip6_metadata():
     """Get the coverage metadata and encodings for CMIP6 indicators coverage"""
     metadata = await describe_via_wcps(cmip6_indicators_coverage_id)
-    return get_coverage_encodings(metadata)
+    return metadata
 
 
 base_dim_encodings = asyncio.run(get_ncar12km_metadata())
-cmip6_dim_encodings = asyncio.run(get_cmip6_metadata())
+cmip6_metadata = asyncio.run(get_cmip6_metadata())
+cmip6_dim_encodings = get_coverage_encodings(cmip6_metadata)
 
 
 async def fetch_cmip6_indicators_point_data(lat, lon):
@@ -342,13 +346,15 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
     """
 
     # Validate the lat/lon values
-    validation = validate_latlon(lat, lon)
+    validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
-    if validation == 422:
+    cmip6_bbox = construct_latlon_bbox_from_coverage_bounds(cmip6_metadata)
+    within_bounds = validate_latlon_in_bboxes(lat, lon, [cmip6_bbox])
+    if within_bounds == 422:
         return (
             render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+                "422/invalid_latlon_outside_coverage.html", bboxes=[cmip6_bbox]
             ),
             422,
         )
@@ -371,6 +377,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
 
 @routes.route("/indicators/base/point/<lat>/<lon>")
@@ -382,7 +389,7 @@ def run_fetch_base_indicators_point_data(lat, lon):
         lon (float): longitude
 
     Returns:
-        JSON-like dict of requested ALFRESCO data
+        JSON-like dict of requested data
 
     Notes:
         example request: http://localhost:5000/indicators/base/point/65.06/-146.16
