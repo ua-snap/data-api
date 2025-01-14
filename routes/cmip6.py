@@ -39,7 +39,7 @@ for dim, value in dim_encodings.items():
 
 # TODO: fix cryo coverage so we can delete this line below
 # print to terminal to check for "dictionary inside a string" issue
-print(dim_encodings)
+# print(dim_encodings)
 
 varnames = dim_encodings["varname"]
 
@@ -310,9 +310,23 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
 
         results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_monthly"))
 
+        # if no specific var(s) requested, find all unique vars in the results after pruning
+        # we need to pass this list explicitly to create_csv since land- or sea-only variables may be missing
+        if vars is None:
+            vars = []
+            for model in results:
+                for scenario in results[model]:
+                    for month in results[model][scenario]:
+                        for var in results[model][scenario][month]:
+                            # append only if not already in list
+                            if var not in vars:
+                                vars.append(var)
+
+        print(f"Results limited to {vars}")
+
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
-            return create_csv(results, "cmip6_monthly", place_id, lat, lon, vars=vars)
+            return create_csv(results, "cmip6_monthly", place_id, lat, lon, vars=vars, start_year=start_year, end_year=end_year)
 
         return results
 
