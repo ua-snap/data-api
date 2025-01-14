@@ -18,7 +18,7 @@ from . import routes
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly_cryo_test"
+cmip6_monthly_coverage_id = "cmip6_monthly"
 
 
 async def get_cmip6_metadata():
