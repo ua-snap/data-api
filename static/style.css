@@ -33,6 +33,14 @@ table.data-source th {
 	white-space: nowrap;
 }
 
+dt {
+	font-weight: 600;
+}
+
+dd {
+	margin-bottom: 1.25rem;
+}
+
 #map {
 	height: 400px;
 	width: 400px;
