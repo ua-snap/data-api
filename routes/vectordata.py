@@ -176,7 +176,7 @@ def filter_by_tag(communities, taglist=None):
 
     Args:
         communities: All communities returned from the WFS request.
-
+        taglist: A list of tags to filter the communities by.
     Returns:
         Communities with the tags provided in the request, with the tags removed
         from the output after filtering.
