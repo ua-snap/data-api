@@ -2,12 +2,22 @@ from flask import Blueprint, current_app as app, Response
 import asyncio
 import json
 import requests
+import time
+import logging
 from . import routes
 from luts import host, cached_urls
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
+from .vectordata import filter_by_tag
 
 recache_api = Blueprint("recache_api", __name__)
+
+logging.basicConfig(
+    filename="output.log",  # File to write logs to
+    filemode="a",  # Append mode
+    level=logging.INFO,  # Logging level
+    format="%(asctime)s - %(levelname)s - %(message)s",  # Log message format
+)
 
 
 def all_routes():
@@ -54,15 +64,19 @@ def get_endpoint(curr_route, curr_type, place):
     else:
         url = host + curr_route + str(place["id"])
 
+    start_time = time.time()
+    logging.info(f"Requesting URL: {url}")
     # Collects returned status from GET request
     status = requests.get(url)
+    logging.info(f"Response Status: {status.status_code}")
+    logging.info(f"Time to get {url} endpoint: {time.time() - start_time:.2f} seconds")
 
     # Logs the status and URL if the HTTP status code != 200
     if status.status_code != 200:
         log_error(url, status.status_code)
 
 
-def get_all_route_endpoints(curr_route, curr_type):
+def get_all_route_endpoints(curr_route, curr_type, tag=None):
     """Generates all possible endpoints given a particular route & type
 
     Args:
@@ -80,19 +94,24 @@ def get_all_route_endpoints(curr_route, curr_type):
                 [
                     generate_wfs_places_url(
                         "all_boundaries:all_communities",
-                        "latitude,longitude",
+                        "name,latitude,longitude,tags",
                     )
                 ]
             )
         )["features"]
+        places = filter_by_tag(places, tag)
     else:
         places = asyncio.run(
             fetch_data([generate_wfs_places_url("all_boundaries:all_areas", "id")])
         )["features"]
 
     # For each JSON item in the JSON object array
+    start_time = time.time()
     for place in places:
         get_endpoint(curr_route, curr_type, place["properties"])
+    logging.info(
+        f"Time to get all {curr_type} endpoints for {curr_route}: {time.time() - start_time:.2f} seconds"
+    )
 
 
 @routes.route("/recache/<limit>")
@@ -110,16 +129,19 @@ def recache(limit=False):
         routes = cached_urls
     else:
         routes = all_routes()
+    full_time = time.time()
     for route in routes:
-        if (
-            route.find("point") != -1
-            or route.find("local") != -1
-            or route.find("all") != -1
-        ) and (route.find("lat") == -1):
-            get_all_route_endpoints(route, "community")
+        if (route.find("point") != -1 or route.find("local") != -1) and (
+            route.find("lat") == -1
+        ):
+            get_all_route_endpoints(route, "community", ["eds,ncr"])
+        elif route.find("all") != -1 and (route.find("lat") == -1):
+            get_all_route_endpoints(route, "community", ["eds"])
         elif route.find("area") != -1 and route.find("var_id") == -1:
             get_all_route_endpoints(route, "area")
 
+    end_time = time.time()
+    logging.info("Time to fully recache: " + str(end_time - full_time))
     return Response(
         response=json.dumps(routes), status=200, mimetype="application/json"
     )
