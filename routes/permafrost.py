@@ -1,5 +1,6 @@
 import asyncio
 from urllib.parse import quote
+import json
 
 import pandas as pd
 from flask import Blueprint, render_template, request, jsonify, Response
@@ -37,6 +38,18 @@ async def get_gipl_metadata():
 
 gipl1km_metadata = asyncio.run(get_gipl_metadata())
 gipl1km_dim_encodings = get_coverage_encodings(gipl1km_metadata)
+if type(gipl1km_dim_encodings["model"]) == str:
+    gipl1km_dim_encodings["model"] = json.loads(
+        gipl1km_dim_encodings["model"].replace("'", '"')
+    )
+if type(gipl1km_dim_encodings["scenario"]) == str:
+    gipl1km_dim_encodings["scenario"] = json.loads(
+        gipl1km_dim_encodings["scenario"].replace("'", '"')
+    )
+if type(gipl1km_dim_encodings["variable"]) == str:
+    gipl1km_dim_encodings["variable"] = json.loads(
+        gipl1km_dim_encodings["variable"].replace("'", '"')
+    )
 
 
 # geoserver layers
@@ -183,7 +196,10 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
     for summary_op_resp, stat_type in zip(gipl1km_wcps_resp, ["min", "mean", "max"]):
         gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"] = dict()
 
-        for k, v in zip(gipl1km_dim_encodings["variable"].values(), summary_op_resp):
+        for k, v in zip(
+            gipl1km_dim_encodings["variable"].values(),
+            summary_op_resp,
+        ):
             gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
 
     return gipl1km_wcps_point_pkg
@@ -551,7 +567,6 @@ async def run_ncr_requests(lat, lon, ncr):
             "end": 2099,
         },
     ]
-
     tasks = []
     for years in year_ranges:
         tasks.append(
