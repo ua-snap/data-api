@@ -200,7 +200,8 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
             gipl1km_dim_encodings["variable"].values(),
             summary_op_resp,
         ):
-            gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
+            if v is not None:
+                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
 
     return gipl1km_wcps_point_pkg
 
