@@ -134,8 +134,8 @@ def recache(limit=False):
         if (route.find("point") != -1 or route.find("local") != -1) and (
             route.find("lat") == -1
         ):
-            get_all_route_endpoints(route, "community", ["eds,ncr"])
-        elif route.find("all") != -1 and (route.find("lat") == -1):
+            get_all_route_endpoints(route, "community", ["ncr"])
+        elif route.find("eds") != -1 and (route.find("lat") == -1):
             get_all_route_endpoints(route, "community", ["eds"])
         elif route.find("area") != -1 and route.find("var_id") == -1:
             get_all_route_endpoints(route, "area")

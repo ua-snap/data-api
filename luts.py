@@ -68,10 +68,13 @@ place_type_labels = {
 }
 
 cached_urls = [
+    "/eds/permafrost/",
     "/eds/all/",
+    "/taspr/area/",
+    "/indicators/base/area/",
+    "/beetles/point/",
     "/alfresco/flammability/local/",
     "/alfresco/veg_type/local/",
-    "/beetles/point/",
     "/elevation/point/",
     "/taspr/point/",
     "/indicators/base/point/",
@@ -81,8 +84,6 @@ cached_urls = [
     "/alfresco/veg_type/area/",
     "/beetles/area/",
     "/elevation/area/",
-    "/taspr/area/",
-    "/indicators/base/area/",
 ]
 
 # Used for generating output for vector_data for /places/all
