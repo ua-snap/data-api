@@ -1,10 +1,7 @@
 import asyncio
 from urllib.parse import quote
-<<<<<<< HEAD
 import json
-=======
 import ast
->>>>>>> 2ae2bfc (Fixes permafrost coverage when data is all no data.)
 
 import pandas as pd
 from flask import Blueprint, render_template, request, jsonify, Response
