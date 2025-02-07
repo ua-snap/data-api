@@ -1,6 +1,7 @@
 import asyncio
 from urllib.parse import quote
 import json
+import ast
 
 import pandas as pd
 from flask import Blueprint, render_template, request, jsonify, Response
@@ -153,10 +154,24 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
             summary_methods = ["min", "mean", "max"]
             for resp, stat_type in zip(scenario_resp, summary_methods):
                 gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
-                for k, v in zip(gipl1km_dim_encodings["variable"].values(), resp):
-                    gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
-                        k
-                    ] = round(v, 1)
+                # Check if gipl1km_dim_encodings["variable"] is a string
+                variable_encodings = gipl1km_dim_encodings["variable"]
+                if isinstance(variable_encodings, str):
+                    try:
+                        variable_encodings = ast.literal_eval(variable_encodings)
+                    except (SyntaxError, ValueError) as e:
+                        raise ValueError(f"Failed to parse encoding string: {str(e)}")
+
+                # Now iterate over the variable_encodings dictionary
+                for k, v in zip(variable_encodings.values(), resp):
+                    if v is None:
+                        gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
+                            k
+                        ] = None
+                    else:
+                        gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
+                            k
+                        ] = round(v, 1)
     return gipl1km_wcps_point_pkg
 
 
