@@ -4,8 +4,8 @@ Configuration common to multiple routes.
 
 import os
 
-GS_BASE_URL = os.getenv("API_GS_BASE_URL") or "https://gs.mapventure.org/geoserver/"
-RAS_BASE_URL = os.getenv("API_RAS_BASE_URL") or "https://apollo.snap.uaf.edu/rasdaman/"
+GS_BASE_URL = os.getenv("API_GS_BASE_URL") or "https://gs.earthmaps.io/geoserver/"
+RAS_BASE_URL = os.getenv("API_RAS_BASE_URL") or "https://zeus.snap.uaf.edu/rasdaman/"
 WEST_BBOX = [-180, 51.3492, -122.8098, 71.3694]
 EAST_BBOX = [172.4201, 51.3492, 180, 71.3694]
 SEAICE_BBOX = [-180, 30.98, 180, 90]
