@@ -88,9 +88,12 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
     for sni in range(len(beetle_resp[0][0][0])):
         snowpack = dim_encodings["snowpack"][sni]
         di["1988-2017"]["Daymet"]["Historical"][snowpack] = dict()
-        di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = (
-            dim_encodings["climate_protection"][int(beetle_resp[0][0][0][sni])]
-        )
+        if beetle_resp[0][0][0][sni] is not None:
+            di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = (
+                dim_encodings["climate_protection"][int(beetle_resp[0][0][0][sni])]
+            )
+        else:
+            di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = 0
         if beetle_percents is not None:
             # This conditional will check to see if all percentages are 0% meaning that there is no data.
             # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
@@ -133,9 +136,12 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
                 for sni, risk_level in enumerate(sn_li):
                     snowpack = dim_encodings["snowpack"][sni]
                     di[era][model][scenario][snowpack] = dict()
-                    di[era][model][scenario][snowpack]["climate-protection"] = (
-                        dim_encodings["climate_protection"][int(risk_level)]
-                    )
+                    if risk_level is not None:
+                        di[era][model][scenario][snowpack]["climate-protection"] = (
+                            dim_encodings["climate_protection"][int(risk_level)]
+                        )
+                    else:
+                        di[era][model][scenario][snowpack]["climate-protection"] = 0
                     if beetle_percents is not None:
                         # This conditional will check to see if all percentages are 0% meaning that there is no data.
                         # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
