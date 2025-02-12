@@ -9,7 +9,7 @@
 
 <h4>Available places</h4>
 
-<p>Query to see a list of available communities and named places by type.</p>
+<p>Query to see a list of all available communities and named places.</p>
 
 <table class="endpoints">
   <thead>
@@ -26,10 +26,22 @@
   </tbody>
   <tfoot>
     <tr>
-      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.<br />
+    Append <code>?country=&lt;country_id&gt;</code> to the URL to filter by country. See the table below for available countries and their corresponding <code>&lt;country_id&gt;</country_id></code> values.<br />
+    Chaining of multiple arguments is supported (e.g., <code>?country=US&format=csv</code>).</td>
     </tr>
   </tfoot>
 </table>
+
+<h4>Available countries</h4>
+
+<dl>
+  <dt>United States</dt>
+  <dd><code>US</code></dd>
+  <dt>Canada</dt>
+  <dd><code>CA</code>
+</dl>
+
 
 
 {% endblock %}
