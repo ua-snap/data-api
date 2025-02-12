@@ -1,0 +1,35 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Communities and Named Places Data</h2>
+<p>
+  These endpoints provide access to a common set of communities and named places, and their respective point locations, used across SNAP tools
+  and data.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Available places</h4>
+
+<p>Query to see a list of available communities and named places by type.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>All available places of interest</td>
+      <td><a href="/places/all">/places/all</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+
+{% endblock %}

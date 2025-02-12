@@ -1,15 +1,15 @@
 {% extends 'base.html' %} {% block content %}
-<h2>Boundary Data</h2>
+<h2>Physiographic and Administrative Boundary Data</h2>
 <p>
-  These endpoints provide access to a common set of areas, and their respective boundary data, used across SNAP tools
+  These endpoints provide access to a common set of areas, and their respective polygons, used across SNAP tools
   and data.
 </p>
 
 <h3>Service endpoints</h3>
 
-<h4>Available places</h4>
+<h4>Available areas</h4>
 
-<p>Query a list of community or areas of interest by type.</p>
+<p>Query to see a list of available areas by type.</p>
 
 <table class="endpoints">
   <thead>
@@ -23,11 +23,6 @@
       <td>All available areas of interest</td>
       <td><a href="/places/all">/places/all</a></td>
     </tr>
-    <tr>
-      <td>Communities</td>
-      <td><a href="/places/communities">/places/communities</a></td>
-    </tr>
-    <tr>
       <td>Hydrological unit codes (HUCs)</td>
       <td><a href="/places/hucs">/places/hucs</a></td>
     </tr>
@@ -90,6 +85,11 @@
     <tr>
       <td>Polygon of a HUC-8</td>
       <td><a href="/boundary/area/19070506">/boundary/area/19070506</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Polygon of a HUC-10</td>
+      <td><a href="/boundary/area/1901010301">/boundary/area/1901010301</a>
       </td>
     </tr>
     <tr>

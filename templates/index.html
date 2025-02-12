@@ -19,10 +19,16 @@
   to use each data endpoint are given below.
 </p>
 <!-- 
-The service categories are now defined in the application.py in the get_service_categories function. 
+The service categories are defined in the application.py in the get_service_categories and get_geospatial_categories functions. 
 They are alphabetized by category name and passed to this file.
 -->
-<h4>Service categories</h4>
+<h4>Geospatial units</h4>
+<ul>
+  {% for category, url in geospatial_categories %}
+  <li><a href="{{ url }}">{{ category }}</a></li>
+  {% endfor %}
+</ul>
+<h4>Data categories</h4>
 <ul>
   {% for category, url in service_categories %}
   <li><a href="{{ url }}">{{ category }}</a></li>
