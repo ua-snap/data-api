@@ -48,7 +48,7 @@ def get_geospatial_categories():
     return [
         ("Physiographic and Administrative Boundaries (Polygons)", "/boundary"),
         ("Communities and Places (Points)", "/places"),
-        ("Ecoregions", "/ecoregions"),
+        # ("Ecoregions", "/ecoregions"),
     ]
 
 
