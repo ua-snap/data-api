@@ -19,7 +19,13 @@ from csv_functions import create_csv
 data_api = Blueprint("data_api", __name__)
 
 
-@routes.route("/places/search/<lat>/<lon>")
+@routes.route("/places/")
+@routes.route("/places/abstract/")
+def places_about():
+    return render_template("documentation/places.html")
+
+
+@routes.route("/places/search/<lat>/<lon>/")
 def find_via_gs(lat, lon):
     """
      GET function to search for nearby communities and polygon areas
@@ -200,7 +206,8 @@ def filter_by_tag(communities):
         return communities
 
 
-@routes.route("/places/<type>")
+@routes.route("/places/<type>/")
+@routes.route("/areas/<type>/")  # new route!
 def get_json_for_type(type, recurse=False):
     """
     GET function to pull JSON files

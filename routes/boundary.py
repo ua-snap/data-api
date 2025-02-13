@@ -16,11 +16,14 @@ boundary_api = Blueprint("boundary_api", __name__)
 @routes.route("/boundary/")
 @routes.route("/boundary/abstract/")
 @routes.route("/boundary/area/")
+@routes.route("/areas/")  # new route!
+@routes.route("/areas/abstract/")  # new route!
 def boundary_about():
     return render_template("documentation/boundary.html")
 
 
-@routes.route("/boundary/area/<var_id>")
+@routes.route("/boundary/areas/<var_id>/")
+@routes.route("/geojson/<var_id>/")  # new route!
 def run_fetch_area_poly(var_id):
     """Run async requesting for a climate division polygon.
 
@@ -32,7 +35,6 @@ def run_fetch_area_poly(var_id):
 
     example: http://localhost:5000/boundary/climatedivisision/CD2
     """
-
     poly_type = validate_var_id(var_id)
 
     # This is only ever true when it is returning an error template
