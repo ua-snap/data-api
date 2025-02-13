@@ -89,6 +89,12 @@ def validate_get_params():
             required=False,
         )
 
+        # Make sure "country" parameter is only 2 uppercase letters
+        country = fields.Str(
+            validate=lambda str: bool(re.match(r"^[A-Z]{2}$", str)),
+            required=False,
+        )
+
     schema = QueryParamsSchema()
     errors = schema.validate(request.args)
     if errors:

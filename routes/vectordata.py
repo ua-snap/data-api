@@ -261,7 +261,14 @@ def get_json_for_type(type, recurse=False):
             # For each feature, put the properties (name, id, etc.) into the
             # list for creation of a JSON object to be returned.
             for i in range(len(filtered_communities)):
-                js_list.append(filtered_communities[i]["properties"])
+                # if request args include country, drop all communities not in that country
+                if request.args.get("country"):
+                    if filtered_communities[i]["properties"][
+                        "country"
+                    ] == request.args.get("country"):
+                        js_list.append(filtered_communities[i]["properties"])
+                    # TODO: add a meaningful error message if country is not found
+
         else:
             # Remove the 's' at the end of the type
             type = type[:-1]
