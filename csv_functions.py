@@ -542,12 +542,12 @@ def ncar12km_indicators_csv(data):
     values = ["min", "mean", "max"]
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(reordered, fieldnames, values=values)
-    metadata = "# cd is the Very Cold Day Threshold. Only 5 days in a year are colder than this.\n"
+    metadata = "# cd is the Very Cold Day Threshold (deg C). Only 5 days in a year are colder than this.\n"
     metadata += "# cdd are Consecutive Dry Days. This is the number of consecutive days with less than 1mm precipitation.\n"
     metadata += "# csdi is the Cold Spell Duration Index. This is a cold spell metric: the number of cold days (<10th percentile) occurring in a row following an initial cold spell period of six days.\n"
     metadata += "# cwd are Consecutive Wet Days. This is the number of consecutive days with more than 1mm precipitation.\n"
     metadata += "# dw are Deep Winter Days. This is the number of days with mean temperature below -30 (deg C).\n"
-    metadata += "# hd is the Very Hot Day Threshold. Only 5 days in a year are warmer than this.\n"
+    metadata += "# hd is the Very Hot Day Threshold (deg C). Only 5 days in a year are warmer than this.\n"
     metadata += "# r10mm are Heavy Precipitation Days. This is the number of individual days with 10mm or more precipitation.\n"
     metadata += "# rx1day is the Maximum 1-day Precipitation. This is the maximum precipitation total for a single day in mm.\n"
     metadata += "# rx5day is the Maximum 5-day Precipitation. This is the maximum precipitation total for a 5-day period in mm.\n"
