@@ -207,7 +207,6 @@ def filter_by_tag(communities):
 
 
 @routes.route("/places/<type>/")  # old route so apps still work
-@routes.route("/areas/<type>/")  # new route described in html documentation
 def get_json_for_type(type, recurse=False):
     """
     GET function to pull JSON files
@@ -261,14 +260,7 @@ def get_json_for_type(type, recurse=False):
             # For each feature, put the properties (name, id, etc.) into the
             # list for creation of a JSON object to be returned.
             for i in range(len(filtered_communities)):
-                # if request args include country, drop all communities not in that country
-                if request.args.get("country"):
-                    if filtered_communities[i]["properties"][
-                        "country"
-                    ] == request.args.get("country"):
-                        js_list.append(filtered_communities[i]["properties"])
-
-                    # TODO: add a meaningful error message if country is not found
+                js_list.append(filtered_communities[i]["properties"])
 
         else:
             # Remove the 's' at the end of the type
@@ -295,6 +287,137 @@ def get_json_for_type(type, recurse=False):
                 else:
                     del all_areas[ai]["properties"]["area_type"]
                     js_list.append(all_areas[ai]["properties"])
+
+        # Creates JSON object from created list
+        js = json.dumps(js_list)
+
+    if recurse:
+        return js
+
+    if request.args.get("format") == "csv":
+        return create_csv(json.loads(js), "places_" + type)
+
+    # Returns Flask JSON Response
+    return Response(response=js, status=200, mimetype="application/json")
+
+
+
+@routes.route("/points/")  # new route described in html documentation
+def get_json_for_communities():
+    """
+    GET function to pull JSON files
+       Args:
+           None
+
+       Returns:
+           JSON-formatted output of all communities.
+
+       Notes:
+           example: http://localhost:5000/points
+    """
+
+    js_list = list()
+    # Requests the Geoserver WFS URL for gathering all the communities
+    all_communities = asyncio.run(
+        fetch_data(
+            [
+                generate_wfs_places_url(
+                    "all_boundaries:all_communities",
+                    "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+                )
+            ]
+        )
+    )["features"]
+
+    filtered_communities = filter_by_tag(all_communities)
+
+    # For each feature, put the properties (name, id, etc.) into the
+    # list for creation of a JSON object to be returned.
+    for i in range(len(filtered_communities)):
+        # if request args include country, drop all communities not in that country
+        if request.args.get("country"):
+            try:
+                if filtered_communities[i]["properties"][
+                    "country"
+                ] == request.args.get("country"):
+                    js_list.append(filtered_communities[i]["properties"])
+            except:
+            # return 400 if country is not a valid country code
+                return render_template("400/bad_request.html"), 400
+        else:
+            js_list.append(filtered_communities[i]["properties"])
+
+
+    # Creates JSON object from created list
+    js = json.dumps(js_list)
+
+    if request.args.get("format") == "csv":
+        return create_csv(json.loads(js), "places_" + type)
+
+    # Returns Flask JSON Response
+    return Response(response=js, status=200, mimetype="application/json")
+
+
+@routes.route("/areas/<type>/")  # new route described in html documentation
+def get_area_for_type(type, recurse=False):
+    """
+    GET function to pull JSON files
+       Args:
+           type (string): Any of the below types:
+               [hucs, corporations, climate_divisions,
+                ethnolinguistic_regions, game_management_units, fire_zones,
+                first_nations, boroughs, census_areas, protected_areas, all]
+           recurse (boolean): Defaults to False. Being True
+               causes the function to be recursive to allow for
+               the same function to collect all the possible JSONs.
+
+       Returns:
+           JSON-formatted output of a specific area type of all areas.
+
+       Notes:
+           example: http://localhost:5000/areas/hucs
+    """
+    if type == "all":
+        json_list = list()
+
+        # Loops through all the different types for search field (minus communities)
+        all_jsons.remove("communities")
+        for curr_type in all_jsons:
+            # Gets the JSON for the current type
+            curr_js = get_json_for_type(curr_type, recurse=True)
+
+            # Adds the returned JSON to a list
+            json_list.extend(json.loads(curr_js))
+
+        # Dumps the list of JSON into the returned js object
+        js = json.dumps(json_list)
+
+    else:
+        js_list = list()
+        # Remove the 's' at the end of the type
+        type = type[:-1]
+
+        # Requests the Geoserver WFS URL for gathering all the polygon areas
+        all_areas = asyncio.run(
+            fetch_data(
+                [
+                    generate_wfs_places_url(
+                        "all_boundaries:all_areas", "id,name,type,area_type", type
+                    )
+                ]
+            )
+        )["features"]
+
+        # For each feature, put the properties (name, id, type) into the
+        # list for creation of a JSON object to be returned.
+        for ai in range(len(all_areas)):
+            # If this area is a protected_area, keep area_type in
+            # returned output.
+            if all_areas[ai]["properties"]["area_type"] != "":
+                js_list.append(all_areas[ai]["properties"])
+            else:
+                del all_areas[ai]["properties"]["area_type"]
+                js_list.append(all_areas[ai]["properties"])
 
         # Creates JSON object from created list
         js = json.dumps(js_list)
