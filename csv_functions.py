@@ -689,6 +689,12 @@ def places_csv(data, endpoint):
         filename_data_name = "Places (Census Areas)"
     elif endpoint == "places_protected_area":
         filename_data_name = "Places (Protected Areas)"
+    elif endpoint == "places_yt_fire_district":
+        filename_data_name = "Places (Yukon Fire Districts)"
+    elif endpoint == "places_yt_game_management_subzone":
+        filename_data_name = "Places (Yukon Game Management Subzones)"
+    elif endpoint == "places_yt_watershed":
+        filename_data_name = "Places (Yukon Watersheds)"
 
     return {
         "csv_dicts": csv_dicts,
