@@ -206,8 +206,8 @@ def filter_by_tag(communities):
         return communities
 
 
-@routes.route("/places/<type>/")
-@routes.route("/areas/<type>/")  # new route!
+@routes.route("/places/<type>/")  # old route so apps still work
+@routes.route("/areas/<type>/")  # new route described in html documentation
 def get_json_for_type(type, recurse=False):
     """
     GET function to pull JSON files
@@ -267,6 +267,7 @@ def get_json_for_type(type, recurse=False):
                         "country"
                     ] == request.args.get("country"):
                         js_list.append(filtered_communities[i]["properties"])
+
                     # TODO: add a meaningful error message if country is not found
 
         else:

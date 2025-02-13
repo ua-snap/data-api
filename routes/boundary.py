@@ -13,17 +13,17 @@ from . import routes
 boundary_api = Blueprint("boundary_api", __name__)
 
 
-@routes.route("/boundary/")
-@routes.route("/boundary/abstract/")
-@routes.route("/boundary/area/")
-@routes.route("/areas/")  # new route!
-@routes.route("/areas/abstract/")  # new route!
+@routes.route("/boundary/")  # old route so apps still work
+@routes.route("/boundary/abstract/")  # old route so apps still work
+@routes.route("/boundary/area/")  # old route so apps still work
+@routes.route("/areas/")  # new route described in html documentation
+@routes.route("/areas/abstract/")  # new route described in html documentation
 def boundary_about():
     return render_template("documentation/boundary.html")
 
 
-@routes.route("/boundary/areas/<var_id>/")
-@routes.route("/geojson/<var_id>/")  # new route!
+@routes.route("/boundary/areas/<var_id>/")  # old route so apps still work
+@routes.route("/geojson/<var_id>/")  # new route described in html documentation
 def run_fetch_area_poly(var_id):
     """Run async requesting for a climate division polygon.
 
