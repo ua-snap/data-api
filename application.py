@@ -16,7 +16,7 @@ app.register_blueprint(routes)
 
 def get_service_categories():
     """
-    This is the new location for the service_categories on the main page.
+    This is the location for the service_categories on the main page.
     This will function will be called on the default route and the list
     will be passed to the index.html template.
     """
@@ -30,14 +30,27 @@ def get_service_categories():
         ("Hydrology", "/hydrology"),
         ("Landfast Sea Ice", "/landfastice"),
         ("Permafrost", "/permafrost"),
-        ("Physical and Administrative Boundary Polygons", "/boundary"),
-        ("Ecoregions", "/ecoregions"),
+        # ("Physical and Administrative Boundary Polygons", "/boundary"),
+        # ("Ecoregions", "/ecoregions"),
         ("Sea Ice Concentration", "/seaice"),
         ("Snowfall Equivalent", "/snow"),
         ("Temperature and Precipitation", "/taspr"),
         ("Wet Days Per Year", "/wet_days_per_year"),
         ("Wildfire", "/fire"),
         ("Demographics", "/demographics"),
+    ]
+
+
+def get_geospatial_categories():
+    """
+    This is the location for the geospatial_categories on the main page.
+    This will function will be called on the default route and the list
+    will be passed to the index.html template.
+    """
+    return [
+        ("Communities, Places, and Areas of Interest", "/places"),
+        ("GeoJSON Polygon Data", "/boundary"),
+        # ("Ecoregions", "/ecoregions"),
     ]
 
 
@@ -96,8 +109,12 @@ def index():
     """Render index page"""
     # Sort the service categories by category name
     service_categories = sorted(get_service_categories(), key=lambda x: x[0])
+    geospatial_categories = sorted(get_geospatial_categories(), key=lambda x: x[0])
     return render_template(
-        "index.html", service_categories=service_categories, SITE_OFFLINE=SITE_OFFLINE
+        "index.html",
+        service_categories=service_categories,
+        geospatial_categories=geospatial_categories,
+        SITE_OFFLINE=SITE_OFFLINE,
     )
 
 
