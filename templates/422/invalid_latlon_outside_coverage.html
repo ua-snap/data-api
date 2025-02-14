@@ -13,11 +13,11 @@
 {% for bbox in bboxes %}
 <h4 class="mt-4">Bounding box {{ loop.index }}:</h4>
 <p>
-  <strong>Latitude:</strong> <code>{{ bbox[1] }}</code> to
+  <span class="has-text-weight-bold">Latitude:</span> <code>{{ bbox[1] }}</code> to
   <code>{{ bbox[3] }}</code>
 </p>
 <p>
-  <strong>Longitude:</strong> <code>{{ bbox[0] }}</code> to
+  <span class="has-text-weight-bold">Longitude:</span> <code>{{ bbox[0] }}</code> to
   <code>{{ bbox[2] }}</code>
 </p>
 {% endfor %}
