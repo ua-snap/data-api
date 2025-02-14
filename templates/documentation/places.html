@@ -1,0 +1,139 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Places Data</h2>
+<p>
+  These endpoints provide access to a common set of communities and areas used across SNAP tools
+  and data.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Available places</h4>
+
+<p>Query a list of community or areas of interest by type.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>All available areas of interest</td>
+      <td><a href="/places/all">/places/all</a></td>
+    </tr>
+    <tr>
+      <td>Communities</td>
+      <td><a href="/places/communities">/places/communities</a></td>
+    </tr>
+    <tr>
+      <td>Hydrological unit codes (HUCs)</td>
+      <td><a href="/places/hucs">/places/hucs</a></td>
+    </tr>
+    <tr>
+      <td>Alaska, British Columbia, or Yukon protected areas</td>
+      <td><a href="/places/protected_areas">/places/protected_areas</a></td>
+    </tr>
+    <tr>
+      <td>Alaska Native corporations</td>
+      <td><a href="/places/corporations">/places/corporations</a></td>
+    </tr>
+    <tr>
+      <td>Alaska climate divisions</td>
+      <td><a href="/places/climate_divisions">/places/climate_divisions</a></td>
+    </tr>
+    <tr>
+      <td>Fire management zones</td>
+      <td><a href="/places/fire_zones">/places/fire_zones</a></td>
+    </tr>
+    <tr>
+      <td>Alaska ethnolinguistic regions</td>
+      <td><a href="/places/ethnolinguistic_regions">/places/ethnolinguistic_regions</a></td>
+    </tr>
+    <tr>
+      <td>Alaska boroughs (county equivalent)</td>
+      <td><a href="/places/boroughs">/places/boroughs</a></td>
+    </tr>
+    <tr>
+      <td>Alaska census areas for the Unorganized Borough</td>
+      <td><a href="/places/census_areas">/places/census_areas</a></td>
+    </tr>
+    <tr>
+      <td>Game management units</td>
+      <td><a href="/places/game_management_units">/places/game_management_units</a></td>
+    </tr>
+    <tr>
+      <td>First nations</td>
+      <td><a href="/places/first_nations">/places/first_nations</a></td>
+    </tr>
+    <tr>
+      <td>Yukon fire districts</td>
+      <td><a href="/places/yt_fire_districts">/places/yt_fire_districts</a></td>
+    </tr>
+    <tr>
+      <td>Yukon game management subzones</td>
+      <td><a href="/places/yt_game_management_subzones">/places/yt_game_management_subzones</a></td>
+    </tr>
+    <tr>
+      <td>Yukon watersheds</td>
+      <td><a href="/places/yt_watersheds">/places/yt_watersheds</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="min-width: 30%;">Metadata & source data access</th>
+      <th>Citation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Fire_Districts/">
+          Yukon Fire Districts
+        </a>
+      </td>
+      <td>GeoYukon, Government of Yukon.
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Fire_Districts/">
+          https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Fire_Districts/
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Game_Management_Areas_250k/">
+          Yukon Game Management Subzones
+        </a>
+      </td>
+      <td>GeoYukon, Government of Yukon.
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Game_Management_Areas_250k/">
+          https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Game_Management_Areas_250k/
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://open.canada.ca/data/en/dataset/a4b190fe-e090-4e6d-881e-b87956c07977">
+          Yukon Watersheds
+        </a>
+      </td>
+      <td>National Hydro Network (NHN) - GeoBase Series, Natural Resources Canada.<br />
+        <a href="https://open.canada.ca/data/en/dataset/a4b190fe-e090-4e6d-881e-b87956c07977">
+          https://open.canada.ca/data/en/dataset/a4b190fe-e090-4e6d-881e-b87956c07977
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}
