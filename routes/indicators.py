@@ -380,7 +380,12 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
         return render_template("500/server_error.html"), 500
 
 
-@routes.route("/indicators/base/point/<lat>/<lon>")
+@routes.route(
+    "/indicators/base/point/<lat>/<lon>"
+)  # original route, kept for backwards compatibility
+@routes.route(
+    "/indicators/cmip5/point/<lat>/<lon>/"
+)  # new route, matches API documentation
 def run_fetch_base_indicators_point_data(lat, lon):
     """Query the NCAR 12km indicators_climatologies rasdaman coverage which contains indicators summarized over NCR time eras
 
@@ -540,7 +545,12 @@ def run_aggregate_var_polygon(poly_id):
     return aggr_results
 
 
-@routes.route("/indicators/base/area/<var_id>")
+@routes.route(
+    "/indicators/base/area/<var_id>"
+)  # original route, kept for backwards compatibility
+@routes.route(
+    "/indicators/cmip5/area/<var_id>/"
+)  # new route, matches API documentation
 def indicators_area_data_endpoint(var_id):
     """Area aggregation data endpoint. Fetch data within polygon area for specified variable and return JSON-like dict.
 
