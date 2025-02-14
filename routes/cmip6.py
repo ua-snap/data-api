@@ -208,6 +208,11 @@ def cmip6_about():
     return render_template("/documentation/cmip6.html")
 
 
+@routes.route("/cmip6/references")
+def cmip6_references():
+    return render_template("/documentation/cmip6_refs.html")
+
+
 @routes.route("/cmip6/point/<lat>/<lon>")
 @routes.route("/cmip6/point/<lat>/<lon>/<start_year>/<end_year>")
 def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None):
