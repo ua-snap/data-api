@@ -384,7 +384,12 @@ def run_fetch_dd_point_data(
     Returns:
         JSON-like dict of requested degree day data
     """
-    validation = validate_latlon(lat, lon)
+    if var_ep in var_ep_lu.keys():
+        cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
+    else:
+        return render_template("400/bad_request.html"), 400
+
+    validation = validate_latlon(lat, lon, cov_id_str, [cov_id_str])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:
@@ -394,6 +399,11 @@ def run_fetch_dd_point_data(
             ),
             422,
         )
+    elif validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     x, y = project_latlon(lat, lon, 3338)
 
     if None not in [start_year, end_year]:
@@ -401,18 +411,14 @@ def run_fetch_dd_point_data(
         if valid_year is not True:
             return valid_year
 
-    if var_ep in var_ep_lu.keys():
-        cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
-        try:
-            point_data = asyncio.run(
-                fetch_dd_point_data(x, y, cov_id_str, start_year, end_year)
-            )
-        except Exception as exc:
-            if hasattr(exc, "status") and exc.status == 404:
-                return render_template("404/no_data.html"), 404
-            return render_template("500/server_error.html"), 500
-    else:
-        return render_template("400/bad_request.html"), 400
+    try:
+        point_data = asyncio.run(
+            fetch_dd_point_data(x, y, cov_id_str, start_year, end_year)
+        )
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
     # if preview, return unabridged tidy package as CSV
     # the preview arg is only used for CSV generation and should never occur with additional request args
