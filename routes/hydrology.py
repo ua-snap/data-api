@@ -362,9 +362,14 @@ def hydro_about():
 
 @routes.route("/hydrology/point/<lat>/<lon>")
 def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
-    validation = validate_latlon(lat, lon)
+    validation = validate_latlon(lat, lon, [hydrology_coverage_id])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(
