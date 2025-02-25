@@ -1073,9 +1073,6 @@ def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, start_year, end_year):
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
-    if validate_latlon(lat, lon) is not True:
-        return None
-
     x, y = project_latlon(lat, lon, 3338)
 
     point_data_list = asyncio.run(
@@ -1092,7 +1089,7 @@ def run_fetch_mmm_point_data(var_ep, lat, lon, cov_id, start_year, end_year):
     return point_pkg
 
 
-async def run_fetch_tas_2km_point_data(lat, lon):
+async def run_fetch_tas_2km_point_data(lat, lon, coverages):
     """Run the async tas/pr data requesting for a single point
     and return data as json
 
@@ -1103,16 +1100,11 @@ async def run_fetch_tas_2km_point_data(lat, lon):
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
-    if validate_latlon(lat, lon) is not True:
-        return None
-
     x, y = project_latlon(lat, lon, 3338)
 
     tasks = []
-    for coverage in ["historical", "projected"]:
-        tasks.append(
-            asyncio.create_task(fetch_wcs_point_data(x, y, f"tas_2km_{coverage}"))
-        )
+    for coverage in coverages:
+        tasks.append(asyncio.create_task(fetch_wcs_point_data(x, y, coverage)))
     results = await asyncio.gather(*tasks)
 
     point_pkg = package_tas_2km_point_data(results)
@@ -1133,8 +1125,7 @@ def run_fetch_var_point_data(var_ep, lat, lon):
     Returns:
         JSON-like dict of data at provided latitude and longitude
     """
-    if validate_latlon(lat, lon) is not True:
-        return None
+    cov_ids, summary_decades = make_fetch_args()
 
     varname = var_ep_lu[var_ep]
     # get the coordinate value for the specified variable
@@ -1150,7 +1141,6 @@ def run_fetch_var_point_data(var_ep, lat, lon):
     # order of listing: CRU (1950-2009), AR5 2040-2069 summary,
     #     AR5 2070-2099 summary, AR5 seasonal data
     # query CRU baseline summary
-    cov_ids, summary_decades = make_fetch_args()
     point_data_list = asyncio.run(
         fetch_point_data(x, y, var_coord, cov_ids, summary_decades)
     )
@@ -1456,17 +1446,6 @@ def mmm_point_data_endpoint(
         example request: http://localhost:5000/jan/65.0628/-146.1627
     """
 
-    validation = validate_latlon(lat, lon)
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    if validation == 422:
-        return (
-            render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
-            ),
-            422,
-        )
-
     if month is not None:
         if month == "jan":
             cov_id = "jan_min_max_mean_temp"
@@ -1486,6 +1465,22 @@ def mmm_point_data_endpoint(
         validation = validate_year(start_year, end_year)
         if validation == 400:
             return render_template("400/bad_request.html"), 400
+
+    validation = validate_latlon(lat, lon, [cov_id])
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
+    if validation == 422:
+        return (
+            render_template(
+                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+            ),
+            422,
+        )
 
     # validate request args before fetching data
     if len(request.args) == 0:
@@ -1584,9 +1579,15 @@ def tas_2km_point_data_endpoint(lat, lon):
         example request: http://localhost:5000/tas2km/point/65.0628/-146.1627
     """
 
-    validation = validate_latlon(lat, lon)
+    coverages = ["tas_2km_historical", "tas_2km_projected"]
+    validation = validate_latlon(lat, lon, coverages)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(
@@ -1605,7 +1606,7 @@ def tas_2km_point_data_endpoint(lat, lon):
             return render_template("400/bad_request.html"), 400
 
     try:
-        point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon))
+        point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon, coverages))
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
@@ -1637,9 +1638,15 @@ def point_data_endpoint(lat, lon):
         example request: http://localhost:5000/temperature/point/65.0628/-146.1627
     """
 
-    validation = validate_latlon(lat, lon)
+    cov_ids, _ = make_fetch_args()
+    validation = validate_latlon(lat, lon, cov_ids)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(
@@ -1745,9 +1752,14 @@ def taspr_area_data_endpoint(var_id):
 
 @routes.route("/precipitation/frequency/point/<lat>/<lon>")
 def proj_precip_point(lat, lon):
-    validation = validate_latlon(lat, lon)
+    validation = validate_latlon(lat, lon, [dot_precip_coverage_id])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(

@@ -74,9 +74,14 @@ def run_point_fetch_all_seaice(lat, lon):
     Returns:
         JSON-like dict of sea ice concentration data
     """
-    validation = validate_seaice_latlon(lat, lon)
+    validation = validate_seaice_latlon(lat, lon, [seaice_coverage_id])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(

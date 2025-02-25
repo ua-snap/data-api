@@ -157,9 +157,14 @@ def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
     Returns:
         JSON-like dict of SFE data
     """
-    validation = validate_latlon(lat, lon)
+    validation = validate_latlon(lat, lon, [sfe_coverage_id])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(

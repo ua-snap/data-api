@@ -12,29 +12,25 @@ import numpy as np
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
-from luts import nodata_mappings
+from luts import projections
 
 import rasterio
-from rasterio.warp import transform
 
 
 def check_geotiffs(lat, lon, coverages):
-    extracted_value = None
-    extracted_coverage = None
     for coverage in coverages:
         reference_geotiff = "geotiffs/" + coverage + ".tif"
         with rasterio.open(reference_geotiff) as dataset:
-            x, y = project_latlon(lat, lon, 3338)
+            if coverage in projections:
+                crs = projections[coverage]
+            else:
+                crs = "EPSG:3338"
+            x, y = project_latlon(lat, lon, crs)
             row, col = dataset.index(x, y)
             if 0 <= row < dataset.height and 0 <= col < dataset.width:
-                extracted_value = dataset.read(1)[row, col]
-                extracted_coverage = coverage
-    if (
-        extracted_value == None
-        or extracted_value in nodata_mappings[extracted_coverage]
-    ):
-        return 404
-    return True
+                if dataset.read(1)[row, col] == 1:
+                    return True
+    return 404
 
 
 def latlon_is_numeric_and_in_geodetic_range(lat, lon):
@@ -90,7 +86,7 @@ def validate_latlon(lat, lon, coverages=[]):
     return True
 
 
-def validate_seaice_latlon(lat, lon):
+def validate_seaice_latlon(lat, lon, coverages):
     """Validate the lat and lon values for pan arctic sea ice.
     Return True if valid or HTTP status code if validation failed
     """
@@ -105,13 +101,20 @@ def validate_seaice_latlon(lat, lon):
         return 400  # HTTP status code
 
     # Validate against two different BBOXes to deal with antimeridian issues
+    within_a_bbox = False
     for bbox in [SEAICE_BBOX]:
         valid_lat = bbox[1] <= lat_float <= bbox[3]
         valid_lon = bbox[0] <= lon_float <= bbox[2]
         if valid_lat and valid_lon:
-            return True
+            within_a_bbox = True
 
-    return 422
+    if not within_a_bbox:
+        return 422
+
+    if len(coverages) > 0:
+        return check_geotiffs(lat, lon, coverages)
+
+    return True
 
 
 def validate_bbox(lat1, lon1, lat2, lon2):
@@ -327,7 +330,7 @@ def construct_latlon_bbox_from_coverage_bounds(coverage_metadata):
         )
 
 
-def validate_latlon_in_bboxes(lat, lon, bboxes, endpoint=None, coverages=[]):
+def validate_latlon_in_bboxes(lat, lon, bboxes, coverages=[]):
     """Validate if a lat and lon are within a list of bounding boxes.
 
     Args:
@@ -350,8 +353,8 @@ def validate_latlon_in_bboxes(lat, lon, bboxes, endpoint=None, coverages=[]):
     if not within_a_bbox:
         return 422
 
-    if endpoint and len(coverages) > 0:
-        return check_geotiffs(lat, lon, endpoint, coverages)
+    if len(coverages) > 0:
+        return check_geotiffs(lat, lon, coverages)
 
     return True
 

@@ -389,7 +389,7 @@ def run_fetch_dd_point_data(
     else:
         return render_template("400/bad_request.html"), 400
 
-    validation = validate_latlon(lat, lon, cov_id_str, [cov_id_str])
+    validation = validate_latlon(lat, lon, [cov_id_str])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 422:

@@ -6,6 +6,13 @@ host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
 bbox_offset = 0.000000001
 
+# Coverages with non-EPSG:3338 projections
+projections = {
+    "cmip6_indicators": "EPSG:4326",
+    "cmip6_monthly": "EPSG:4326",
+    "hsia_arctic_production": "EPSG:3572",
+}
+
 nodata_values = {
     "beetles": [0],
     "cmip6_indicators": [-9999, -9999.0, "null"],

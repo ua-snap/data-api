@@ -475,9 +475,14 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize, ncr):
 async def run_fetch_gipl_1km_point_data(
     lat, lon, start_year=None, end_year=None, summarize=None, preview=None, ncr=False
 ):
-    validation = validate_latlon(lat, lon)
+    validation = validate_latlon(lat, lon, coverages=[gipl_1km_coverage_id])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(
