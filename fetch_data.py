@@ -147,6 +147,7 @@ async def fetch_data(urls):
         Results of query(ies) as either bytes or json
     """
     if len(urls) == 1:
+        print(urls)
         async with ClientSession() as session:
             results = await asyncio.create_task(make_get_request(urls[0], session))
     else:
@@ -173,7 +174,8 @@ def get_poly_3338_bbox(poly_id, crs=3338):
             fetch_data(
                 [
                     generate_wfs_places_url(
-                        "all_boundaries:all_areas", "the_geom", poly_id, "id"
+                        "playground:all_areas", "the_geom", poly_id, "id"
+                        #"all_boundaries:all_areas", "the_geom", poly_id, "id"
                     )
                 ]
             )
