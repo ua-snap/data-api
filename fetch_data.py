@@ -169,43 +169,25 @@ def get_poly_3338_bbox(poly_id, crs=3338):
         Includes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
         polygon. Format is (xmin, ymin, xmax, ymax).
     """
-    try:
-        geometry = asyncio.run(
-            fetch_data(
-                [
-                    generate_wfs_places_url(
-                        "playground:all_areas", "the_geom", poly_id, "id"
-                        #"all_boundaries:all_areas", "the_geom", poly_id, "id"
-                    )
-                ]
-            )
+    geometry = asyncio.run(
+        fetch_data(
+            [
+                generate_wfs_places_url(
+                    "playground:all_areas",
+                    "the_geom",
+                    poly_id,
+                    "id",
+                    # "all_boundaries:all_areas", "the_geom", poly_id, "id"
+                )
+            ]
         )
-        if crs == 3338:
-            poly_gdf = (
-                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
-            )
-            poly = poly_gdf.iloc[0]["geometry"]
-        else:
-            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
-        return poly
-    except:
-        geometry = asyncio.run(
-            fetch_data(
-                [
-                    generate_wfs_places_url(
-                        "all_boundaries:ak_huc12", "the_geom", poly_id, "id"
-                    )
-                ]
-            )
-        )
-        if crs == 3338:
-            poly_gdf = (
-                gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
-            )
-            poly = poly_gdf.iloc[0]["geometry"]
-        else:
-            poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
-        return poly
+    )
+    if crs == 3338:
+        poly_gdf = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+        poly = poly_gdf.iloc[0]["geometry"]
+    else:
+        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+    return poly
 
 
 async def fetch_bbox_geotiff_from_gs(url):
