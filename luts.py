@@ -65,6 +65,7 @@ place_type_labels = {
     "first_nation": "Canadian First Nation",
     "game_management_unit": "Game Management Unit",
     "yt_game_management_subzone": "Yukon Game Management Subzone",
+    "ecoregion": "Ecoregion",
 }
 
 cached_urls = [
@@ -101,6 +102,7 @@ all_jsons = [
     "first_nations",
     "boroughs",
     "census_areas",
+    "ecoregions",
 ]
 
 # Look-up table for expected value for the NCR application.

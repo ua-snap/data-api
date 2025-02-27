@@ -695,6 +695,8 @@ def places_csv(data, endpoint):
         filename_data_name = "Places (Yukon Game Management Subzones)"
     elif endpoint == "places_yt_watershed":
         filename_data_name = "Places (Yukon Watersheds)"
+    elif endpoint == "places_ecoregion":
+        filename_data_name = "Places (Ecoregions)"
 
     return {
         "csv_dicts": csv_dicts,
