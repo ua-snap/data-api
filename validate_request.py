@@ -4,14 +4,46 @@ A module to validate request parameters such as latitude and longitude for use a
 
 import asyncio
 import ast
+import json
 
 from flask import render_template
 from pyproj import Transformer
+from shapely.geometry import Point, Polygon
+
 import numpy as np
 
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
+
+
+def point_in_polygon(lat, lon, polygon_coords, crs):
+    x, y = project_latlon(lat, lon, crs)
+    point = Point(x, y)
+    polygon = Polygon(polygon_coords)
+    return polygon.contains(point)
+
+
+def check_geojson(lat, lon, coverages):
+    for coverage in coverages:
+        geojson_file = "geojson/" + coverage + ".geojson"
+        with open(geojson_file) as f:
+            geojson = json.load(f)
+            crs = geojson["crs"]["properties"]["name"]
+            for feature in geojson["features"]:
+                if feature["geometry"]["type"] == "Polygon":
+                    if point_in_polygon(
+                        lat,
+                        lon,
+                        feature["geometry"]["coordinates"][0],
+                        crs,
+                    ):
+                        return True
+                elif feature["geometry"]["type"] == "MultiPolygon":
+                    for polygon in feature["geometry"]["coordinates"]:
+                        if point_in_polygon(lat, lon, polygon[0], crs):
+                            return True
+        return 404
 
 
 def latlon_is_numeric_and_in_geodetic_range(lat, lon):
@@ -36,7 +68,7 @@ def latlon_is_numeric_and_in_geodetic_range(lat, lon):
     return True
 
 
-def validate_latlon(lat, lon):
+def validate_latlon(lat, lon, coverages=[]):
     """Validate the lat and lon values.
     Return True if valid or HTTP status code if validation failed
     """
@@ -51,13 +83,20 @@ def validate_latlon(lat, lon):
         return 400  # HTTP status code
 
     # Validate against two different BBOXes to deal with antimeridian issues
+    within_a_bbox = False
     for bbox in [WEST_BBOX, EAST_BBOX]:
         valid_lat = bbox[1] <= lat_float <= bbox[3]
         valid_lon = bbox[0] <= lon_float <= bbox[2]
         if valid_lat and valid_lon:
-            return True
+            within_a_bbox = True
 
-    return 422
+    if not within_a_bbox:
+        return 422
+
+    if len(coverages) > 0:
+        return check_geojson(lat, lon, coverages)
+
+    return True
 
 
 def validate_seaice_latlon(lat, lon):
@@ -297,7 +336,7 @@ def construct_latlon_bbox_from_coverage_bounds(coverage_metadata):
         )
 
 
-def validate_latlon_in_bboxes(lat, lon, bboxes):
+def validate_latlon_in_bboxes(lat, lon, bboxes, coverages=[]):
     """Validate if a lat and lon are within a list of bounding boxes.
 
     Args:
@@ -309,12 +348,21 @@ def validate_latlon_in_bboxes(lat, lon, bboxes):
     """
     lat = float(lat)
     lon = float(lon)
+
+    within_a_bbox = False
     for bbox in bboxes:
         valid_lat = bbox[1] <= lat <= bbox[3]
         valid_lon = bbox[0] <= lon <= bbox[2]
-        if valid_lat and valid_lon:
-            return True
-    return 422
+        if valid_lat or valid_lon:
+            within_a_bbox = True
+
+    if not within_a_bbox:
+        return 422
+
+    if len(coverages) > 0:
+        return check_geojson(lat, lon, coverages)
+
+    return True
 
 
 def get_coverage_encodings(coverage_metadata):
