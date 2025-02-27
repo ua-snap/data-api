@@ -1,71 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.3/css/bulma.min.css">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.3/css/bulma.min.css"
+    />
     <!-- include our stylesheet after so we can override Bulma -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <title>Alaska + Arctic Geospatial Data API</title>
-</head>
+  </head>
 
-<body data-theme="light">
+  <body data-theme="light">
     <div class="headerbanner">
-        University of Alaska Fairbanks • Scenarios Network for Alaska + Arctic Planning
+      University of Alaska Fairbanks • Scenarios Network for Alaska + Arctic
+      Planning
     </div>
     <div class="container">
-        <section class="section">
-            <h1 class="title is-3">Alaska + Arctic Geospatial Data API</h1>
-            <h2 class="subtitle is-4">Built by the Scenarios Network for Alaska + Arctic Planning</h2>
-        </section>
-        <section class="section">
-            <div class="content">
-                {% block content %}{% endblock %}
-            </div>
-        </section>
+      <section class="section">
+        <h1 class="title is-3">Alaska + Arctic Geospatial Data API</h1>
+        <h2 class="subtitle is-4">
+          Built by the Scenarios Network for Alaska + Arctic Planning
+        </h2>
+      </section>
+      <section class="section">
+        <div class="content">{% block content %}{% endblock %}</div>
+      </section>
     </div>
     <footer class="footer">
-        <div class="container">
-            <section class="section">
-                <div class="content">
-                    <p>
-                        This API was developed by the
-                        <a href="https://www.snap.uaf.edu/" title="👍">Scenarios Network for Alaska and Arctic Planning</a>, a
-                        research group in the
-                        <a href="https://uaf-iarc.org/">International Arctic Research Center</a>
-                        at the
-                        <a href="https://uaf.edu/uaf/">University of Alaska Fairbanks</a>.
-                    </p>
-                    <p>
-                        Please contact
-                        <a href="mailto:uaf-snap-data-tools@alaska.edu">uaf-snap-data-tools@alaska.edu</a>
-                        if you have questions or would like to provide feedback for this
-                        API.
-                        <a href="https://uaf-snap.org/tools-overview/">Visit the SNAP Climate + Weather Tools page</a>
-                        to see our full suite of interactive web tools, some of which use this API.
-                    </p>
-                    <p>
-                        UA is committed to providing accessible websites.
-                        <a href="https://www.alaska.edu/webaccessibility/">Learn more about UA's notice of web
-                            accessibility.</a>
-                        If we can help you access this website’s content,
-                        <a href="mailto:uaf-snap-data-tools@alaska.edu">please email us at uaf-snap-data-tools@alaska.edu</a>.
-                    </p>
-                    <p>
-                        UA is an affirmative action/equal opportunity employer, educational institution and provider and prohibits illegal discrimination against any individual: <a href="http://www.alaska.edu/nondiscrimination">http://www.alaska.edu/nondiscrimination</a>
-                    </p>
-                    <p>
-                        <a href="https://www.alaska.edu/records/records/compliance/gdpr/ua-privacy-statement/">Privacy
-                            Statement</a>
-                    </p>
-                    <p>
-                        Copyright &copy; {{ year }} University of Alaska Fairbanks. All
-                        rights reserved.
-                    </p>
-                </div>
-            </section>
-        </div>
+      <div class="container">
+        <section class="section">
+          <div class="content">
+            <p>
+              This API was developed by the
+              <a href="https://www.snap.uaf.edu/" title="👍"
+                >Scenarios Network for Alaska and Arctic Planning</a
+              >, a research group in the
+              <a href="https://uaf-iarc.org/"
+                >International Arctic Research Center</a
+              >
+              at the
+              <a href="https://uaf.edu/uaf/">University of Alaska Fairbanks</a>.
+            </p>
+            <p>
+              Please contact
+              <a href="mailto:uaf-snap-data-tools@alaska.edu"
+                >uaf-snap-data-tools@alaska.edu</a
+              >
+              if you have questions or would like to provide feedback for this
+              API.
+              <a href="https://uaf-snap.org/tools-overview/"
+                >Visit the SNAP Climate + Weather Tools page</a
+              >
+              to see our full suite of interactive web tools, some of which use
+              this API.
+            </p>
+            <p>
+              UA is committed to providing accessible websites.
+              <a href="https://www.alaska.edu/webaccessibility/"
+                >Learn more about UA's notice of web accessibility.</a
+              >
+              If we can help you access this website’s content,
+              <a href="mailto:uaf-snap-data-tools@alaska.edu"
+                >please email us at uaf-snap-data-tools@alaska.edu</a
+              >.
+            </p>
+            <p>
+              The <a href="www.alaska.edu">University of Alaska</a> is an Equal
+              Opportunity/Equal Access Employer and Educational Institution. The
+              University is committed to a
+              <a href="https://www.alaska.edu/nondiscrimination/"
+                >policy of non-discrimination</a
+              >
+              against individuals on the basis of any legally protected status.
+            </p>
+            <p>
+              Copyright &copy; {{ year }} University of Alaska Fairbanks. All
+              rights reserved.
+            </p>
+          </div>
+        </section>
+      </div>
     </footer>
-</body>
-
+  </body>
 </html>
