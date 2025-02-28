@@ -99,7 +99,7 @@ def validate_latlon(lat, lon, coverages=[]):
     return True
 
 
-def validate_seaice_latlon(lat, lon):
+def validate_seaice_latlon(lat, lon, coverages):
     """Validate the lat and lon values for pan arctic sea ice.
     Return True if valid or HTTP status code if validation failed
     """
@@ -114,13 +114,20 @@ def validate_seaice_latlon(lat, lon):
         return 400  # HTTP status code
 
     # Validate against two different BBOXes to deal with antimeridian issues
+    within_a_bbox = False
     for bbox in [SEAICE_BBOX]:
         valid_lat = bbox[1] <= lat_float <= bbox[3]
         valid_lon = bbox[0] <= lon_float <= bbox[2]
         if valid_lat and valid_lon:
-            return True
+            within_a_bbox = True
 
-    return 422
+    if not within_a_bbox:
+        return 422
+
+    if len(coverages) > 0:
+        return check_geojson(lat, lon, coverages)
+
+    return True
 
 
 def validate_bbox(lat1, lon1, lat2, lon2):

@@ -1469,6 +1469,11 @@ def mmm_point_data_endpoint(
     validation = validate_latlon(lat, lon, [cov_id])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(

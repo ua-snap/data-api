@@ -353,6 +353,11 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
     within_bounds = validate_latlon_in_bboxes(
         lat, lon, [cmip6_bbox], [cmip6_indicators_coverage_id]
     )
+    if within_bounds == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if within_bounds == 422:
         return (
             render_template(
@@ -399,6 +404,11 @@ def run_fetch_base_indicators_point_data(lat, lon):
     validation = validate_latlon(lat, lon, [indicators_coverage_id])
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if validation == 422:
         return (
             render_template(
