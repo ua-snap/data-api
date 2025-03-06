@@ -264,7 +264,9 @@ def get_json_for_type(type, recurse=False):
                 fetch_data(
                     [
                         generate_wfs_places_url(
-                            "all_boundaries:all_areas", "id,name,type,area_type", type
+                            "all_boundaries:all_areas",
+                            "id,name,type,area_type",
+                            type,
                         )
                     ]
                 )
