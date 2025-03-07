@@ -20,15 +20,14 @@ def place_name_and_type(place_id):
     if place_id is None:
         return None, None
 
-    # HUC12s, not getting names from them below
-    if place_id.isdigit() and len(place_id) == 12:
-        return None, "huc12"
-
     place = asyncio.run(
         fetch_data(
             [
                 generate_wfs_places_url(
-                    "all_boundaries:all_areas", "name,alt_name,type", place_id, "id"
+                    "all_boundaries:all_areas",
+                    "name,alt_name,type",
+                    place_id,
+                    "id",
                 )
             ]
         )

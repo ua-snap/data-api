@@ -1,0 +1,294 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Places Data</h2>
+<p>
+  These endpoints provide access to a common set of communities and areas used across SNAP tools
+  and data.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Available places</h4>
+
+<p>Query a list of point locations or areas of interest by type.</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>All available areas of interest</td>
+      <td><a href="/places/all">/places/all</a></td>
+    </tr>
+    <tr>
+      <td>Communities</td>
+      <td><a href="/places/communities">/places/communities</a></td>
+    </tr>
+    <tr>
+      <td>Hydrological unit codes (HUCs), levels 8, 10, and 12</td>
+      <td><a href="/places/hucs">/places/hucs</a></td>
+    </tr>
+    <tr>
+      <td>Alaska, British Columbia, or Yukon protected areas</td>
+      <td><a href="/places/protected_areas">/places/protected_areas</a></td>
+    </tr>
+    <tr>
+      <td>Alaska Native corporations</td>
+      <td><a href="/places/corporations">/places/corporations</a></td>
+    </tr>
+    <tr>
+      <td>Alaska climate divisions</td>
+      <td><a href="/places/climate_divisions">/places/climate_divisions</a></td>
+    </tr>
+    <tr>
+        <td>Alaska EPA Level III Ecoregions</td>
+        <td><a href="/places/ecoregions">/places/ecoregions</a></td>
+      </tr>
+    <tr>
+      <td>Fire management zones</td>
+      <td><a href="/places/fire_zones">/places/fire_zones</a></td>
+    </tr>
+    <tr>
+      <td>Alaska ethnolinguistic regions</td>
+      <td><a href="/places/ethnolinguistic_regions">/places/ethnolinguistic_regions</a></td>
+    </tr>
+    <tr>
+      <td>Alaska boroughs (county equivalent)</td>
+      <td><a href="/places/boroughs">/places/boroughs</a></td>
+    </tr>
+    <tr>
+      <td>Alaska census areas for the Unorganized Borough</td>
+      <td><a href="/places/census_areas">/places/census_areas</a></td>
+    </tr>
+    <tr>
+      <td>Game management units</td>
+      <td><a href="/places/game_management_units">/places/game_management_units</a></td>
+    </tr>
+    <tr>
+      <td>First nations</td>
+      <td><a href="/places/first_nations">/places/first_nations</a></td>
+    </tr>
+    <tr>
+      <td>Yukon fire districts</td>
+      <td><a href="/places/yt_fire_districts">/places/yt_fire_districts</a></td>
+    </tr>
+    <tr>
+      <td>Yukon game management subzones</td>
+      <td><a href="/places/yt_game_management_subzones">/places/yt_game_management_subzones</a></td>
+    </tr>
+    <tr>
+      <td>Yukon watersheds</td>
+      <td><a href="/places/yt_watersheds">/places/yt_watersheds</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">CSV output is also available by appending <code>?format=csv</code> to the URL.</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th style="min-width: 30%;">Metadata & source data access</th>
+      <th>Citation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+        <td rowspan=2>
+            <a href="https://uaf-snap.org/">
+                Communities
+            </a>
+        </td>
+        <td>SNAP (Scenarios Network for Alaska and Arctic Planning).
+            <a href="https://uaf-snap.org/">
+                https://uaf-snap.org/
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td>"Alaska Native Place Names", Alaska Native Language Archive, University of Alaska Fairbanks.
+          <a href="https://www.uaf.edu/anla/collections/map/names/">
+            https://www.uaf.edu/anla/collections/map/names/
+          </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.usgs.gov/national-hydrography/watershed-boundary-dataset">
+          Hydrological unit codes (HUCs)
+        </a>
+      </td>
+      <td>U.S. Geological Survey Watershed Boundary Dataset (HUC-8 and HUC-10 processed 9/8/2020, HUC-12 processed 3/6/2023). 
+        <a href="https://www.usgs.gov/national-hydrography/watershed-boundary-dataset">
+            https://www.usgs.gov/national-hydrography/watershed-boundary-dataset
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="http://www.cec.org/mapmonday/north-american-protected-areas/">
+          Alaska, British Columbia, or Yukon protected areas
+        </a>
+      </td>
+      <td>Commission for Environmental Cooperation, North American Protected Areas.
+        <a href="http://www.cec.org/mapmonday/north-american-protected-areas/">
+          http://www.cec.org/mapmonday/north-american-protected-areas/
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://statewide-geoportal-1-soa-dnr.hub.arcgis.com/maps/DCCED::ancsa-status/about">
+          Alaska Native corporations
+        </a>
+      </td>
+      <td>State of Alaska Geoportal.
+        <a href="https://statewide-geoportal-1-soa-dnr.hub.arcgis.com/maps/DCCED::ancsa-status/about">
+          https://statewide-geoportal-1-soa-dnr.hub.arcgis.com/maps/DCCED::ancsa-status/about
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.ncei.noaa.gov/pub/data/cirs/climdiv/">
+          Alaska climate divisions
+        </a>
+      </td>
+      <td>National Centers for Environmental Information, National Oceanic and Atmospheric Administration.
+        <a href="https://www.ncei.noaa.gov/pub/data/cirs/climdiv/">
+            https://www.ncei.noaa.gov/pub/data/cirs/climdiv/
+        </a>
+      </td>
+    </tr>
+    <tr>
+        <td>
+          <a href="https://www.epa.gov/eco-research/level-iii-and-iv-ecoregions-state">
+            Alaska EPA Level III Ecoregions
+          </a>
+        </td>
+        <td>EPA Level III Ecoregions.
+          <a href="https://www.epa.gov/eco-research/level-iii-and-iv-ecoregions-state">
+              https://www.epa.gov/eco-research/level-iii-and-iv-ecoregions-state
+          </a>
+        </td>
+      </tr>
+    <tr>
+      <td>
+        <a href="https://fire.ak.blm.gov/predsvcs/maps.php">
+          Fire management zones
+        </a>
+      </td>
+      <td>Alaska Interagency Coordination Center.
+        <a href="https://fire.ak.blm.gov/predsvcs/maps.php">
+            https://fire.ak.blm.gov/predsvcs/maps.php
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://www.uaf.edu/anla/record.php?identifier=G961K2010">
+          Alaska ethnolinguistic regions
+        </a>
+      </td>
+      <td>"Indigenous Peoples and Languages of Alaska", Alaska Native Language Archive, University of Alaska Fairbanks.
+        <a href="https://www.uaf.edu/anla/record.php?identifier=G961K2010">
+            https://www.uaf.edu/anla/record.php?identifier=G961K2010
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://gis.data.alaska.gov/datasets/DCCED::alaska-borough-and-census-area-boundaries/about">
+          Alaska boroughs (county equivalent)
+        </a>
+      </td>
+      <td>State of Alaska Geoportal.
+        <a href="https://gis.data.alaska.gov/datasets/DCCED::alaska-borough-and-census-area-boundaries/about">
+            https://gis.data.alaska.gov/datasets/DCCED::alaska-borough-and-census-area-boundaries/about
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://gis.data.alaska.gov/datasets/DCCED::alaska-borough-and-census-area-boundaries/about">
+          Alaska census areas for the Unorganized Borough
+        </a>
+      </td>
+      <td>State of Alaska Geoportal.
+        <a href="https://gis.data.alaska.gov/datasets/DCCED::alaska-borough-and-census-area-boundaries/about">
+            https://gis.data.alaska.gov/datasets/DCCED::alaska-borough-and-census-area-boundaries/about
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://tbd.com">
+          Game management units
+        </a>
+      </td>
+      <td>State of Alaska Geoportal.
+        <a href="https://gis.data.alaska.gov/datasets/adfg::game-management-units-subunits/about">
+            https://gis.data.alaska.gov/datasets/adfg::game-management-units-subunits/about
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://map-data.service.yukon.ca/GeoYukon/First_Nations/First_Nation_Settlement_Lands_Surveyed/">
+          First nations
+        </a>
+      </td>
+      <td>GeoYukon, Government of Yukon.
+        <a href="https://map-data.service.yukon.ca/GeoYukon/First_Nations/First_Nation_Settlement_Lands_Surveyed/">
+            https://map-data.service.yukon.ca/GeoYukon/First_Nations/First_Nation_Settlement_Lands_Surveyed/
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Fire_Districts/">
+          Yukon Fire Districts
+        </a>
+      </td>
+      <td>GeoYukon, Government of Yukon.
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Fire_Districts/">
+          https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Fire_Districts/
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Game_Management_Areas_250k/">
+          Yukon Game Management Subzones
+        </a>
+      </td>
+      <td>GeoYukon, Government of Yukon.
+        <a href="https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Game_Management_Areas_250k/">
+          https://map-data.service.yukon.ca/GeoYukon/Administrative_Boundaries/Game_Management_Areas_250k/
+        </a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="https://open.canada.ca/data/en/dataset/a4b190fe-e090-4e6d-881e-b87956c07977">
+          Yukon Watersheds
+        </a>
+      </td>
+      <td>National Hydro Network (NHN) - GeoBase Series, Natural Resources Canada.<br />
+        <a href="https://open.canada.ca/data/en/dataset/a4b190fe-e090-4e6d-881e-b87956c07977">
+          https://open.canada.ca/data/en/dataset/a4b190fe-e090-4e6d-881e-b87956c07977
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}

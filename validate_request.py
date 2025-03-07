@@ -174,21 +174,9 @@ def validate_var_id(var_id):
 
     if var_id_check["numberMatched"] > 0:
         return var_id_check["features"][0]["properties"]["type"]
+
     else:
-        # Search for HUC12 ID if not found in other areas
-        var_id_check = asyncio.run(
-            fetch_data(
-                [
-                    generate_wfs_places_url(
-                        "all_boundaries:ak_huc12", "type", var_id, "id"
-                    )
-                ]
-            )
-        )
-        if var_id_check["numberMatched"] > 0:
-            return "huc12"
-        else:
-            return render_template("422/invalid_area.html"), 400
+        return render_template("422/invalid_area.html"), 400
 
 
 def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):
