@@ -4,6 +4,8 @@ A module to validate request parameters such as latitude and longitude for use a
 
 import asyncio
 import ast
+import rasterio
+import os.path
 
 from flask import render_template
 from pyproj import Transformer
@@ -14,22 +16,41 @@ from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 from luts import projections
 
-import rasterio
-
 
 def check_geotiffs(lat, lon, coverages):
+    """Load a binary GeoTIFF mask corresponding to the coverage(s) requested, then use this to check if lat/lon has data available.
+
+    Args:
+        lat (int or float): latitude
+        lon (int or float): longitude
+        coverages (list): list of coverages to check for data availability
+
+    Returns:
+        True if valid, or HTTP 404 status code if no data was found
+    """
     for coverage in coverages:
         reference_geotiff = "geotiffs/" + coverage + ".tif"
-        with rasterio.open(reference_geotiff) as dataset:
-            if coverage in projections:
-                crs = projections[coverage]
-            else:
-                crs = "EPSG:3338"
-            x, y = project_latlon(lat, lon, crs)
-            row, col = dataset.index(x, y)
-            if 0 <= row < dataset.height and 0 <= col < dataset.width:
-                if dataset.read(1)[row, col] == 1:
-                    return True
+
+        # Do not perform GeoTIFF check if the file does not exist.
+        if not os.path.isfile(reference_geotiff):
+            return True
+
+        # Do not perform GeoTIFF check if the file does not open properly.
+        # This seems safer than the alternative of hiding data due to a corrupt file.
+        try:
+            with rasterio.open(reference_geotiff) as dataset:
+                if coverage in projections:
+                    crs = projections[coverage]
+                else:
+                    crs = "EPSG:3338"
+                x, y = project_latlon(lat, lon, crs)
+                row, col = dataset.index(x, y)
+                if 0 <= row < dataset.height and 0 <= col < dataset.width:
+                    if dataset.read(1)[row, col] == 1:
+                        return True
+        except:
+            return True
+
     return 404
 
 
