@@ -14,7 +14,7 @@ import numpy as np
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
-from luts import projections
+from luts import geotiff_projections
 
 
 def check_geotiffs(lat, lon, coverages):
@@ -39,8 +39,8 @@ def check_geotiffs(lat, lon, coverages):
         # This seems safer than the alternative of hiding data due to a corrupt file.
         try:
             with rasterio.open(reference_geotiff) as dataset:
-                if coverage in projections:
-                    crs = projections[coverage]
+                if coverage in geotiff_projections:
+                    crs = geotiff_projections[coverage]
                 else:
                     crs = "EPSG:3338"
                 x, y = project_latlon(lat, lon, crs)
