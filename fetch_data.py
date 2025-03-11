@@ -321,14 +321,14 @@ def rasterize_polygon(da_i, x_dim, y_dim, polygon):
         da_i (xarray.DataArray): xarray data array, probably interpolated
         x_dim (str): name of the x dimension
         y_dim (str): name of the y dimension
-        polygon (GeoDataFrame): geodataframe with a single polygon to rasterize. Must be in the same CRS as the dataset.
+        polygon (shapely.Polygon): polygon to rasterize. Must be in the same CRS as the dataset.
     Returns:
         rasterized_polygon_array (numpy.ndarray): 2D numpy array with the rasterized polygon
     """
 
     rasterized_polygon_array = rasterize(
         [
-            (polygon.geometry.iloc[0].geoms[0], 1)
+            (polygon.geoms[0], 1)
         ],  # allows for multipolygon geometries, but will only capture the first polygon
         out_shape=(
             da_i[y_dim].values.shape[0],
@@ -354,7 +354,8 @@ def calculate_zonal_stats(da_i, poly_array):
     """
     zonal_stats = {}
 
-    values = da_i.values[poly_array == 1].tolist()
+    arr = da_i.values
+    values = arr[poly_array == 1].tolist()
 
     if values:
         zonal_stats["mean"] = np.nanmean(values)
@@ -371,7 +372,7 @@ def interpolate_and_compute_zonal_stats(
 ):
     """Interpolate a dataset to a higher resolution and compute polygon zonal statistics for a single variable.
     Args:
-        polygon (GeoDataFrame): geodataframe with a single polygon to rasterize. Must be in the same CRS as the dataset.
+        polygon (shapely.Polygon): polygon to compute zonal statistics for. Must be in the same CRS as the dataset.
         dataset (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
         var_name (str): name of the variable to interpolate. Default is "Gray", the default name used when ingesting into Rasdaman.
         x_dim (str): name of the x dimension. Default is "X".
