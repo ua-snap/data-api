@@ -163,11 +163,11 @@ async def fetch_data(urls):
 
 
 def get_poly(poly_id, crs=3338):
-    """Get the Polygon Object corresponding to the ID from GeoServer. Forces EPSG 3338 if CRS not specified.
+    """Get the GeoDataFrame corresponding to the polygon ID from GeoServer. Forces EPSG 3338 if CRS not specified.
     Args:
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
-        poly (shapely.Polygon): Polygon object used to summarize data within.
+        poly (GeoDataFrame): GeoDataFrame of the polygon
     """
     geometry = asyncio.run(
         fetch_data(
@@ -182,8 +182,8 @@ def get_poly(poly_id, crs=3338):
         )
     )
     if crs == 3338:
-        poly_gdf = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
-        poly = poly_gdf.iloc[0]["geometry"]
+        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+        # poly = poly_gdf.iloc[0]["geometry"]
     else:
         poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
     return poly
@@ -287,7 +287,8 @@ def get_scale_factor(grid_cell_area, polygon_area):
     c = -24
     h = 1
 
-    return int(np.ceil(hyp_function(x, m, b, c, h)))
+    scale_factor = np.ceil(hyp_function(x, m, b, c, h))[0]
+    return int(scale_factor)
 
 
 def interpolate(ds, var_name, x_dim, y_dim, scale_factor, method):
@@ -311,6 +312,7 @@ def interpolate(ds, var_name, x_dim, y_dim, scale_factor, method):
     new_lat = np.linspace(ds[Y][0].item(), ds[Y][-1].item(), ds.sizes[Y] * scale_factor)
 
     da_i = ds[var_name].interp(method=method, coords={X: new_lon, Y: new_lat})
+    da_i = da_i.rio.set_spatial_dims(x_dim, y_dim, inplace=True)
 
     return da_i
 
@@ -325,11 +327,8 @@ def rasterize_polygon(da_i, x_dim, y_dim, polygon):
     Returns:
         rasterized_polygon_array (numpy.ndarray): 2D numpy array with the rasterized polygon
     """
-
     rasterized_polygon_array = rasterize(
-        [
-            (polygon.geoms[0], 1)
-        ],  # allows for multipolygon geometries, but will only capture the first polygon
+        [(polygon.geometry.iloc[0], 1)],
         out_shape=(
             da_i[y_dim].values.shape[0],
             da_i[x_dim].values.shape[0],
@@ -344,7 +343,7 @@ def rasterize_polygon(da_i, x_dim, y_dim, polygon):
     return rasterized_polygon_array
 
 
-def calculate_zonal_stats(da_i, poly_array):
+def calculate_zonal_stats(da_i, polygon_array):
     """Calculate zonal statistics for an xarray data array and a rasterized polygon array of the same shape.
     Args:
         da_i (xarray.DataArray): xarray data array, probably interpolated
@@ -354,8 +353,9 @@ def calculate_zonal_stats(da_i, poly_array):
     """
     zonal_stats = {}
 
-    arr = da_i.values
-    values = arr[poly_array == 1].tolist()
+    # transpose to match numpy array YX order and get values that overlap the polygon
+    arr = da_i.transpose("Y", "X").values
+    values = arr[polygon_array == 1].tolist()
 
     if values:
         zonal_stats["mean"] = np.nanmean(values)
@@ -380,16 +380,19 @@ def interpolate_and_compute_zonal_stats(
     Returns:
         zonal_stats_dict (dict): dictionary of zonal statistics
     """
+    # confirm spatial info
+    dataset.rio.set_spatial_dims(x_dim, y_dim)
+    dataset.rio.write_crs("EPSG:3338", inplace=True)
 
     # calculate the scale factor, assuming square pixels and projection in meters
-    dataset.rio.set_spatial_dims(x_dim, y_dim)
     spatial_resolution = dataset.rio.resolution()
-    grid_cell_area_m2 = spatial_resolution[0] * spatial_resolution[1]
+    grid_cell_area_m2 = abs(spatial_resolution[0]) * abs(spatial_resolution[1])
     polygon_area_m2 = polygon.area
     scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
 
     # interpolate the dataset and rasterize the polygon
     da_i = interpolate(dataset, var_name, x_dim, y_dim, scale_factor, method="nearest")
+
     rasterized_polygon_array = rasterize_polygon(da_i, x_dim, y_dim, polygon)
 
     # calculate zonal statistics

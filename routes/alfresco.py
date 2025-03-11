@@ -34,32 +34,32 @@ from . import routes
 alfresco_api = Blueprint("alfresco_api", __name__)
 
 var_ep_lu = {
-    "flammability": {"cov_id_str": "alfresco_relative_flammability_30yr"},
+    "flammability": {
+        "cov_id_str": "alfresco_relative_flammability_30yr",
+        "bandname": "Gray",
+        "label": "Flammability",
+    },
     "veg_type": {
         "cov_id_str": "alfresco_vegetation_type_percentage",
+        "bandname": "Gray",
+        "label": "Vegetation Type",
     },
 }
-var_label_lu = {
-    "flammability": "Flammability",
-    "veg_type": "Vegetation Type",
-}
 
 
-async def get_alfresco_metadata():
-    """Get the coverage metadata and encodings for ALFRESCO coverages"""
+async def get_alfresco_metadata(var_ep_lu):
+    """Get the coverage metadata and encodings for ALFRESCO coverages and populate the lookup."""
     flam_metadata = await describe_via_wcps(var_ep_lu["flammability"]["cov_id_str"])
     veg_metadata = await describe_via_wcps(var_ep_lu["veg_type"]["cov_id_str"])
 
-    return {
-        "flammability": get_coverage_encodings(flam_metadata),
-        "veg_type": get_coverage_encodings(veg_metadata),
-    }
+    var_ep_lu["flammability"]["dim_encodings"] = get_coverage_encodings(flam_metadata)
+    var_ep_lu["veg_type"]["dim_encodings"] = get_coverage_encodings(veg_metadata)
+
+    return var_ep_lu
 
 
-# Initialize the encodings asynchronously
-encodings = asyncio.run(get_alfresco_metadata())
-flammability_dim_encodings = encodings["flammability"]
-veg_type_dim_encodings = encodings["veg_type"]
+# Populate the encodings
+var_ep_lu = asyncio.run(get_alfresco_metadata(var_ep_lu))
 
 
 async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
@@ -69,121 +69,122 @@ async def fetch_alf_bbox_data(bbox_bounds, cov_id_str):
         bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
         cov_id_str (str): shared portion of coverage_ids to query
     Returns:
-
+        bbox_ds (xarray.DataSet): xarray dataset with the data for the bbox
     """
     # set up WCS request strings
     request_strs = []
     request_strs.append(generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id_str))
     urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
     bbox_ds_list = await fetch_bbox_netcdf_list(urls)
-    bbox_ds = bbox_ds_list[0]  # there is only ever one dataset in the list
+    bbox_ds = bbox_ds_list[
+        0
+    ]  # there is only ever one dataset in the list for this endpoint
     return bbox_ds
 
+    # def get_poly_mask_arr(ds, poly, bandname):
+    #     """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid
+    #     zonal summary across results from multiple WCS requests for the same bbox. Wrapper for
+    #     rasterstats zonal_stats().
 
-# def get_poly_mask_arr(ds, poly, bandname):
-#     """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid
-#     zonal summary across results from multiple WCS requests for the same bbox. Wrapper for
-#     rasterstats zonal_stats().
+    #     Args:
+    #         ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+    #         poly (shapely.Polygon): polygon to create mask from
+    #         bandname (str): name of the DataArray containing the data
 
-#     Args:
-#         ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
-#         poly (shapely.Polygon): polygon to create mask from
-#         bandname (str): name of the DataArray containing the data
+    #     Returns:
+    #         cropped_poly_mask (numpy.ma.core.MaskedArra): a masked array masking the cells
+    #             intersecting the polygon of interest, cropped to the right shape
+    #     """
+    #     # need a data layer of same x/y shape just for running a zonal stats
+    #     xy_shape = ds[bandname].values.shape[-2:]
+    #     data_arr = np.zeros(xy_shape)
+    #     # get affine transform from the xarray.DataSet
+    #     ds.rio.set_spatial_dims("X", "Y")
+    #     transform = ds.rio.transform()
+    #     poly_mask_arr = zonal_stats(
+    #         poly,
+    #         data_arr,
+    #         affine=transform,
+    #         nodata=np.nan,
+    #         stats=["mean"],
+    #         raster_out=True,
+    #     )[0]["mini_raster_array"]
+    #     cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
+    #     return cropped_poly_mask
 
-#     Returns:
-#         cropped_poly_mask (numpy.ma.core.MaskedArra): a masked array masking the cells
-#             intersecting the polygon of interest, cropped to the right shape
-#     """
-#     # need a data layer of same x/y shape just for running a zonal stats
-#     xy_shape = ds[bandname].values.shape[-2:]
-#     data_arr = np.zeros(xy_shape)
-#     # get affine transform from the xarray.DataSet
-#     ds.rio.set_spatial_dims("X", "Y")
-#     transform = ds.rio.transform()
-#     poly_mask_arr = zonal_stats(
-#         poly,
-#         data_arr,
-#         affine=transform,
-#         nodata=np.nan,
-#         stats=["mean"],
-#         raster_out=True,
-#     )[0]["mini_raster_array"]
-#     cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
-#     return cropped_poly_mask
+    # def summarize_within_poly_marr(
+    #     ds, poly_mask_arr, dim_encodings, bandname="Gray", var_ep="Gray"
+    # ):
+    #     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
+    #     Return the results as a nested dict.
 
+    #     NOTE - This is a candidate for de-duplication! Only defining here because some
+    #     things are out-of-sync with existing ways of doing things (e.g., key names
+    #     in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
 
-# def summarize_within_poly_marr(
-#     ds, poly_mask_arr, dim_encodings, bandname="Gray", var_ep="Gray"
-# ):
-#     """Summarize a single Data Variable of a xarray.DataSet within a polygon.
-#     Return the results as a nested dict.
+    #     Args:
+    #         ds (xarray.DataSet): DataSet with "Gray" as variable of
+    #             interest
+    #         poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
+    #             the polygon of interest
+    #         dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the
+    #             data and map integer data coordinates to models, scenarios, variables, etc.
+    #         bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
+    #             the name is not given at ingest
+    #         var_ep (str): variable (flammability or veg_type)
 
-#     NOTE - This is a candidate for de-duplication! Only defining here because some
-#     things are out-of-sync with existing ways of doing things (e.g., key names
-#     in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
+    #     Returns:
+    #         Nested dict of results for all non-X/Y axis combinations,
+    #     """
+    #     # will actually operate on underlying DataArray
 
-#     Args:
-#         ds (xarray.DataSet): DataSet with "Gray" as variable of
-#             interest
-#         poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting
-#             the polygon of interest
-#         dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the
-#             data and map integer data coordinates to models, scenarios, variables, etc.
-#         bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where
-#             the name is not given at ingest
-#         var_ep (str): variable (flammability or veg_type)
+    #     da = ds[bandname]
+    #     # get axis (dimension) names and make list of all coordinate combinations
+    #     all_dims = da.dims
+    #     dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
+    #     iter_coords = list(
+    #         itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
+    #     )
 
-#     Returns:
-#         Nested dict of results for all non-X/Y axis combinations,
-#     """
-#     # will actually operate on underlying DataArray
+    #     # generate all combinations of decoded coordinate values
+    #     dim_combos = []
+    #     for coords in iter_coords:
+    #         map_list = [
+    #             dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+    #         ]
+    #         dim_combos.append(map_list)
+    #     aggr_results = generate_nested_dict(dim_combos)
 
-#     da = ds[bandname]
-#     # get axis (dimension) names and make list of all coordinate combinations
-#     all_dims = da.dims
-#     dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-#     iter_coords = list(
-#         itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-#     )
+    #     data_arr = []
+    #     for coords in iter_coords:
+    #         sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+    #         data_arr.append(da.sel(sel_di).values)
+    #     data_arr = np.array(data_arr)
 
-#     # generate all combinations of decoded coordinate values
-#     dim_combos = []
-#     for coords in iter_coords:
-#         map_list = [
-#             dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-#         ]
-#         dim_combos.append(map_list)
-#     aggr_results = generate_nested_dict(dim_combos)
+    #     # need to transpose the 2D spatial slices if X is the "rows" dimension
+    #     if all_dims.index("X") < all_dims.index("Y"):
+    #         data_arr = data_arr.transpose(0, 2, 1)
 
-#     data_arr = []
-#     for coords in iter_coords:
-#         sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-#         data_arr.append(da.sel(sel_di).values)
-#     data_arr = np.array(data_arr)
+    #     data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
+    #     data_arr[data_arr_mask] = np.nan
+    #     results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
 
-#     # need to transpose the 2D spatial slices if X is the "rows" dimension
-#     if all_dims.index("X") < all_dims.index("Y"):
-#         data_arr = data_arr.transpose(0, 2, 1)
-
-#     data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
-#     data_arr[data_arr_mask] = np.nan
-#     results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-
-#     for map_list, result in zip(dim_combos, results):
-#         if len(map_list) > 1:
-#             data = get_from_dict(aggr_results, map_list[:-1])
-#             if var_ep == "flammability":
-#                 result = round(result, 4)
-#             elif var_ep == "veg_type":
-#                 result = round(result * 100, 2)
-#             data[map_list[-1]] = result
-#         else:
-#             aggr_results[map_list[0]] = round(result, 4)
-#     return aggr_results
+    #     for map_list, result in zip(dim_combos, results):
+    #         if len(map_list) > 1:
+    #             data = get_from_dict(aggr_results, map_list[:-1])
+    #             if var_ep == "flammability":
+    #                 result = round(result, 4)
+    #             elif var_ep == "veg_type":
+    #                 result = round(result * 100, 2)
+    #             data[map_list[-1]] = result
+    #         else:
+    #             aggr_results[map_list[0]] = round(result, 4)
+    #     return aggr_results
 
 
 def run_aggregate_var_polygon(var_ep, poly_id):
-    """Get data summary (e.g. zonal mean) of single variable in polygon.
+    """Get data summary (e.g. zonal mean) of single variable in polygon. Fetches data on
+    the individual instances of the singular dimension combinations.
 
     Args:
         var_ep (str): variable endpoint (one of "flammability" or "veg_type")
@@ -191,21 +192,42 @@ def run_aggregate_var_polygon(var_ep, poly_id):
             e.g. the HUC 8 geodataframe for watershed polygons
         poly_id (str or int): the unique `id` used to identify the Polygon
             for which to compute the zonal mean.
-
     Returns:
         aggr_results (dict): data representing zonal means within the polygon.
-
-    Notes:
-        Fetches data on the individual instances of the singular dimension combinations. Consider
-            validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly(poly_id)
+    polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
-    ds = asyncio.run(fetch_alf_bbox_data(poly.bounds, cov_id_str))
+    bandname = var_ep_lu[var_ep]["bandname"]
+    ds = asyncio.run(fetch_alf_bbox_data(polygon.total_bounds, cov_id_str))
 
-    # TEST the new function
-    # zonal_stats_dict = interpolate_and_compute_zonal_stats(poly, ds_list[0])
-    # print(zonal_stats_dict)
+    # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
+    # and create a dict to hold the results for each combo
+    all_dims = ds[bandname].dims
+    dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
+    dim_encodings = var_ep_lu[var_ep]["dim_encodings"]
+    iter_coords = list(itertools.product(*[list(ds[dim].values) for dim in dimnames]))
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
+    aggr_results = generate_nested_dict(dim_combos)
+
+    # select the dim combo from the dataset and calculate zonal stats, adding to the results dict
+    for coords, dim_combo in zip(iter_coords, dim_combos):
+        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        combo_ds = ds.sel(sel_di)
+        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(polygon, combo_ds)
+        result = combo_zonal_stats_dict["mean"]
+        if var_ep == "flammability":
+            result = round(result, 4)
+        elif var_ep == "veg_type":
+            result = round(result * 100, 2)
+        # use the dim_combo to index into the results dict (era, model, scenario)
+        aggr_results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = result
+
+    print(aggr_results)
 
     # return zonal_stats_dict
 
@@ -213,9 +235,6 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     #  for all data layers (avoids computing spatial transform for each layer)
     # bandname = "Gray"
     # poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
-
-    # TODO: use the new function to get the zonal stats
-    # loop thru encodings and get the zonal stats for each
 
     # average over the following decades / time periods
     # aggr_results = {}
