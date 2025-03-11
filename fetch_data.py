@@ -10,6 +10,9 @@ import time
 import asyncio
 import numpy as np
 import xarray as xr
+import rasterio
+import rioxarray
+from rasterio.features import rasterize
 import geopandas as gpd
 import json
 import re
@@ -17,6 +20,7 @@ from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
 from flask import current_app as app
+
 from rasterstats import zonal_stats
 from generate_requests import (
     generate_wcs_getcov_str,
@@ -158,15 +162,12 @@ async def fetch_data(urls):
     return results
 
 
-def get_poly_3338_bbox(poly_id, crs=3338):
-    """Get the Polygon Object corresponding to the ID from GeoServer
-
+def get_poly(poly_id, crs=3338):
+    """Get the Polygon Object corresponding to the ID from GeoServer. Forces EPSG 3338 if CRS not specified.
     Args:
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
         poly (shapely.Polygon): Polygon object used to summarize data within.
-        Includes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
-        polygon. Format is (xmin, ymin, xmax, ymax).
     """
     geometry = asyncio.run(
         fetch_data(
@@ -184,7 +185,7 @@ def get_poly_3338_bbox(poly_id, crs=3338):
         poly_gdf = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
         poly = poly_gdf.iloc[0]["geometry"]
     else:
-        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
     return poly
 
 
@@ -265,6 +266,135 @@ async def fetch_bbox_data(bbox_bounds, cov_id_str):
     urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
     bbox_ds_list = await fetch_bbox_netcdf_list(urls)
     return bbox_ds_list
+
+
+def get_scale_factor(grid_cell_area, polygon_area):
+    """Calculate the scale factor for a given grid cell area and polygon area. Inputs must be in the same units.
+    Args:
+        grid_cell_area (float): area of a grid cell
+        polygon_area (float): area of a polygon
+    Returns:
+        int: scale factor, rounded up to the nearest integer
+    """
+
+    def hyp_function(x, m, b, c, h):
+        y = (m * x + b) / (x - c) + h
+        return y
+
+    x = polygon_area / grid_cell_area
+    m = 0
+    b = 350
+    c = -24
+    h = 1
+
+    return int(np.ceil(hyp_function(x, m, b, c, h)))
+
+
+def interpolate(ds, var_name, x_dim, y_dim, scale_factor, method):
+    """Interpolate the array for a single variable from an xarray dataset to a higher resolution.
+
+    Args:
+        ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+        var_name (str): name of the variable to interpolate
+        x_dim (str): name of the x dimension
+        y_dim (str): name of the y dimension
+        scale_factor (int): multiplier to increase the resolution by
+        method (str): method to use for interpolation
+
+    Returns:
+        ds_new (xarray.DataArray): xarray data array interpolated to higher resolution
+    """
+    X = x_dim
+    Y = y_dim
+
+    new_lon = np.linspace(ds[X][0].item(), ds[X][-1].item(), ds.sizes[X] * scale_factor)
+    new_lat = np.linspace(ds[Y][0].item(), ds[Y][-1].item(), ds.sizes[Y] * scale_factor)
+
+    da_i = ds[var_name].interp(method=method, coords={X: new_lon, Y: new_lat})
+
+    return da_i
+
+
+def rasterize_polygon(da_i, x_dim, y_dim, polygon):
+    """Rasterize a polygon to the same shape as the dataset.
+    Args:
+        da_i (xarray.DataArray): xarray data array, probably interpolated
+        x_dim (str): name of the x dimension
+        y_dim (str): name of the y dimension
+        polygon (GeoDataFrame): geodataframe with a single polygon to rasterize. Must be in the same CRS as the dataset.
+    Returns:
+        rasterized_polygon_array (numpy.ndarray): 2D numpy array with the rasterized polygon
+    """
+
+    rasterized_polygon_array = rasterize(
+        [
+            (polygon.geometry.iloc[0].geoms[0], 1)
+        ],  # allows for multipolygon geometries, but will only capture the first polygon
+        out_shape=(
+            da_i[y_dim].values.shape[0],
+            da_i[x_dim].values.shape[0],
+        ),  # must be YX order for numpy array!
+        transform=da_i.rio.transform(
+            recalc=True
+        ),  # must recalc since we interpolated, otherwise the old stored transform is used and rasterized polygon is not aligned
+        fill=0,
+        all_touched=False,
+    )
+
+    return rasterized_polygon_array
+
+
+def calculate_zonal_stats(da_i, poly_array):
+    """Calculate zonal statistics for an xarray data array and a rasterized polygon array of the same shape.
+    Args:
+        da_i (xarray.DataArray): xarray data array, probably interpolated
+        poly_array (numpy.ndarray): 2D numpy array with the rasterized polygon
+    Returns:
+        zonal_stats (dict): dictionary of zonal statistics
+    """
+    zonal_stats = {}
+
+    values = da_i.values[poly_array == 1].tolist()
+
+    if values:
+        zonal_stats["mean"] = np.nanmean(values)
+        zonal_stats["count"] = len(values)
+    else:
+        zonal_stats["mean"] = np.nan
+        zonal_stats["count"] = 0
+
+    return zonal_stats
+
+
+def interpolate_and_compute_zonal_stats(
+    polygon, dataset, var_name="Gray", x_dim="X", y_dim="Y"
+):
+    """Interpolate a dataset to a higher resolution and compute polygon zonal statistics for a single variable.
+    Args:
+        polygon (GeoDataFrame): geodataframe with a single polygon to rasterize. Must be in the same CRS as the dataset.
+        dataset (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+        var_name (str): name of the variable to interpolate. Default is "Gray", the default name used when ingesting into Rasdaman.
+        x_dim (str): name of the x dimension. Default is "X".
+        y_dim (str): name of the y dimension. Default is "Y".
+    Returns:
+        zonal_stats_dict (dict): dictionary of zonal statistics
+    """
+
+    # calculate the scale factor, assuming square pixels and projection in meters
+    dataset.rio.set_spatial_dims(x_dim, y_dim)
+    spatial_resolution = dataset.rio.resolution()
+    grid_cell_area_m2 = spatial_resolution[0] * spatial_resolution[1]
+    polygon_area_m2 = polygon.area
+    scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
+
+    # interpolate the dataset and rasterize the polygon
+    da_i = interpolate(dataset, var_name, x_dim, y_dim, scale_factor, method="nearest")
+    rasterized_polygon_array = rasterize_polygon(da_i, x_dim, y_dim, polygon)
+
+    # calculate zonal statistics
+    zonal_stats_dict = calculate_zonal_stats(da_i, rasterized_polygon_array)
+
+    return zonal_stats_dict
 
 
 def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gray"):

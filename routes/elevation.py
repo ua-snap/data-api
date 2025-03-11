@@ -9,7 +9,7 @@ from fetch_data import (
     fetch_geoserver_data,
     fetch_bbox_geotiff_from_gs,
     geotiff_zonal_stats,
-    get_poly_3338_bbox,
+    get_poly,
 )
 from validate_request import (
     validate_latlon,
@@ -117,7 +117,7 @@ def run_area_fetch_all_elevation(var_id):
         return poly_type
 
     try:
-        poly = get_poly_3338_bbox(var_id)
+        poly = get_poly(var_id)
     except:
         return render_template("422/invalid_area.html"), 422
 

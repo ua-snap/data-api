@@ -14,7 +14,7 @@ from generate_requests import generate_wcs_getcov_str
 from fetch_data import (
     fetch_data,
     fetch_bbox_data,
-    get_poly_3338_bbox,
+    get_poly,
     get_poly_mask_arr,
     get_from_dict,
     generate_nested_dict,
@@ -528,7 +528,7 @@ def run_aggregate_var_polygon(poly_id):
     Notes:
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly_3338_bbox(poly_id)
+    poly = get_poly(poly_id)
 
     ds_list = asyncio.run(fetch_bbox_data(poly.bounds, indicators_coverage_id))
 

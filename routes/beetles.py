@@ -10,7 +10,7 @@ from fetch_data import (
     fetch_wcs_point_data,
     zonal_stats,
     itertools,
-    get_poly_3338_bbox,
+    get_poly,
 )
 from csv_functions import create_csv
 from validate_request import (
@@ -335,7 +335,7 @@ def run_aggregate_var_polygon(poly_id):
     Notes:
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly_3338_bbox(poly_id)
+    poly = get_poly(poly_id)
 
     ds_list = asyncio.run(fetch_beetles_bbox_data(poly.bounds, beetle_coverage_id))
 

@@ -14,11 +14,12 @@ from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersectio
 from fetch_data import (
     fetch_bbox_netcdf_list,
     fetch_data,
-    zonal_stats,
+    # zonal_stats,
     generate_nested_dict,
     get_from_dict,
-    get_poly_3338_bbox,
+    get_poly,
     describe_via_wcps,
+    interpolate_and_compute_zonal_stats,
 )
 from validate_request import get_coverage_encodings
 from csv_functions import create_csv
@@ -199,9 +200,15 @@ def run_aggregate_var_polygon(var_ep, poly_id):
         Fetches data on the individual instances of the singular dimension combinations. Consider
             validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly_3338_bbox(poly_id)
+    poly = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     ds_list = asyncio.run(fetch_alf_bbox_data(poly.bounds, cov_id_str))
+
+    # TEST the new function
+    zonal_stats_dict = interpolate_and_compute_zonal_stats(poly, ds_list[0])
+    print(zonal_stats_dict)
+
+    return zonal_stats_dict
 
     # get the polygon mask array for rapidly aggregating within the polygon
     #  for all data layers (avoids computing spatial transform for each layer)
@@ -352,6 +359,9 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
     # This is only ever true when it is returning an error template
     if type(poly_type) is tuple:
         return poly_type
+
+    # TEST the new function
+    return run_aggregate_var_polygon(var_ep, var_id)
 
     try:
         poly_pkg = run_aggregate_var_polygon(var_ep, var_id)

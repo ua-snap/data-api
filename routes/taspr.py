@@ -22,7 +22,7 @@ from fetch_data import (
     fetch_wcs_point_data,
     get_from_dict,
     summarize_within_poly,
-    get_poly_3338_bbox,
+    get_poly,
 )
 from validate_request import (
     validate_latlon,
@@ -1215,7 +1215,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     Notes:
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
-    poly = get_poly_3338_bbox(poly_id)
+    poly = get_poly(poly_id)
     # mapping between coordinate values (ints) and variable names (strs)
     varname = var_ep_lu[var_ep]
     var_coord = list(dim_encodings["varnames"].keys())[
