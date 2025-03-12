@@ -1,7 +1,6 @@
 import asyncio
 import itertools
 import geopandas as gpd
-import numpy as np
 from flask import (
     Blueprint,
     render_template,
@@ -14,9 +13,7 @@ from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersectio
 from fetch_data import (
     fetch_bbox_netcdf_list,
     fetch_data,
-    # zonal_stats,
     generate_nested_dict,
-    get_from_dict,
     get_poly,
     describe_via_wcps,
     interpolate_and_compute_zonal_stats,
