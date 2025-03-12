@@ -9,6 +9,7 @@ from fetch_data import (
     fetch_bbox_netcdf_list,
     fetch_wcs_point_data,
     describe_via_wcps,
+    generate_nested_dict,
     # zonal_stats,
     itertools,
     get_poly,
@@ -31,13 +32,22 @@ var_ep_lu = {
         "cov_id_str": "beetle_risk",
         "dim_encodings": None,  # populated below
         "bandname": "Gray",
-        "label": None,
+        "label": None,  # TODO: remove if not used
     },
 }
 
-var_ep_lu["dim_encodings"] = (
-    get_coverage_encodings(describe_via_wcps(var_ep_lu["beetles"]["cov_id_str"])),
-)
+
+async def get_beetles_metadata(var_ep_lu):
+    """Get the coverage metadata and encodings for ALFRESCO coverages and populate the lookup."""
+    beetles_metadata = await describe_via_wcps(var_ep_lu["beetles"]["cov_id_str"])
+    var_ep_lu["beetles"]["dim_encodings"] = get_coverage_encodings(beetles_metadata)
+
+    return var_ep_lu
+
+
+# Populate the encodings
+var_ep_lu = asyncio.run(get_beetles_metadata(var_ep_lu))
+
 
 # dim_encodings = {
 #     "model": {
@@ -354,16 +364,31 @@ def run_aggregate_var_polygon(poly_id):
         Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
     polygon = get_poly(poly_id)
-    ds = asyncio.run(fetch_beetles_bbox_data(polygon.total_bounds, beetle_coverage_id))
+    bandname = var_ep_lu["beetles"]["bandname"]
+    ds = asyncio.run(
+        fetch_beetles_bbox_data(
+            polygon.total_bounds, var_ep_lu["beetles"]["cov_id_str"]
+        )
+    )
 
-    # poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
-    # agg_results, risk_percentages = summarize_within_poly_marr(
-    #     ds_list[-1], poly_mask_arr, bandname
-    # )
+    # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
+    # and create a dict to hold the results for each combo
+    all_dims = ds[bandname].dims
+    dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
+    dim_encodings = var_ep_lu["beetles"]["dim_encodings"]
+    iter_coords = list(itertools.product(*[list(ds[dim].values) for dim in dimnames]))
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
+    aggr_results = generate_nested_dict(dim_combos)
 
-    package_beetle_data(agg_results, risk_percentages)
+    print(aggr_results)
+    # package_beetle_data(agg_results, risk_percentages)
 
-    return
+    return aggr_results
 
 
 @routes.route("/beetles/")
@@ -397,7 +422,9 @@ def run_point_fetch_all_beetles(lat, lon):
     x, y = project_latlon(lat, lon, 3338)
 
     try:
-        rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, beetle_coverage_id))
+        rasdaman_response = asyncio.run(
+            fetch_wcs_point_data(x, y, var_ep_lu["beetles"]["cov_id_str"])
+        )
         climate_protection = postprocess(
             package_beetle_data(rasdaman_response), "beetles"
         )
@@ -406,7 +433,10 @@ def run_point_fetch_all_beetles(lat, lon):
                 # Returns errors if any are generated
                 return climate_protection
             # Returns CSV for download
+
+            # TODO: remove line below if place_id is not needed
             place_id = request.args.get("community")
+
             return create_csv(climate_protection, "beetles", lat=lat, lon=lon)
         # Returns beetle risk levels
         return climate_protection
@@ -429,7 +459,6 @@ def beetle_area_data_endpoint(var_id):
     """
 
     poly_type = validate_var_id(var_id)
-
     # This is only ever true when it is returning an error template
     if type(poly_type) is tuple:
         return poly_type
