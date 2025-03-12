@@ -10,7 +10,7 @@ from fetch_data import (
     fetch_wcs_point_data,
     describe_via_wcps,
     generate_nested_dict,
-    # zonal_stats,
+    interpolate_and_compute_zonal_stats,
     itertools,
     get_poly,
 )
@@ -21,7 +21,11 @@ from validate_request import (
     validate_var_id,
     get_coverage_encodings,
 )
-from postprocessing import nullify_and_prune, postprocess
+from postprocessing import (
+    postprocess,
+    nullify_and_prune,
+    prune_nulls_with_max_intensity,
+)
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
@@ -32,7 +36,6 @@ var_ep_lu = {
         "cov_id_str": "beetle_risk",
         "dim_encodings": None,  # populated below
         "bandname": "Gray",
-        "label": None,  # TODO: remove if not used
     },
 }
 
@@ -48,29 +51,25 @@ async def get_beetles_metadata(var_ep_lu):
 # Populate the encodings
 var_ep_lu = asyncio.run(get_beetles_metadata(var_ep_lu))
 
+# capitalize "daymet" and "historical" in the dim_encodings dict
+var_ep_lu["beetles"]["dim_encodings"]["model"][0] = "Daymet"
+var_ep_lu["beetles"]["dim_encodings"]["scenario"][0] = "Historical"
 
-# dim_encodings = {
-#     "model": {
-#         0: "NCAR-CCSM4",
-#         1: "GFDL-ESM2M",
-#         2: "HadGEM2-ES",
-#         3: "MRI-CGCM3",
-#     },
-#     "scenario": {
-#         0: "rcp45",
-#         1: "rcp85",
-#     },
-#     "era": {
-#         0: "2010-2039",
-#         1: "2040-2069",
-#         2: "2070-2099",
-#     },
-#     "snowpack": {0: "low", 1: "medium"},
-#     # The 0 in climate_protection represents NO DATA in this context,
-#     # but needs to remain as 0 to allow for the pruning function
-#     # to correctly identify it as unrepresented space in the model.
-#     "climate_protection": {0: 0, 1: "high", 2: "minimal", 3: "none"},
-# }
+# dict to map the "risk level" integer values of the data to the "protection level" strings
+protection_levels_dict = {
+    1.0: {
+        "pct_label": "percent-high-protection",
+        "protection_level": "high",
+    },
+    2.0: {
+        "pct_label": "percent-minimal-protection",
+        "protection_level": "minimal",
+    },
+    3.0: {
+        "pct_label": "percent-no-protection",
+        "protection_level": "none",
+    },
+}
 
 
 async def fetch_beetles_bbox_data(bbox_bounds, cov_id_str):
@@ -95,111 +94,111 @@ async def fetch_beetles_bbox_data(bbox_bounds, cov_id_str):
     return bbox_ds
 
 
-def package_beetle_data(beetle_resp, beetle_percents=None):
-    """Package the beetle risk data into a nested JSON-like dict.
+# def package_beetle_data(beetle_resp, beetle_percents=None):
+#     """Package the beetle risk data into a nested JSON-like dict.
 
-    Arguments:
-        beetle_resp -- the response(s) from the WCS GetCoverage request(s).
+#     Arguments:
+#         beetle_resp -- the response(s) from the WCS GetCoverage request(s).
 
-    Returns:
-        di -- a nested dictionary of all beetle risk values
-    """
-    dim_encodings = var_ep_lu["dim_encodings"]
+#     Returns:
+#         di -- a nested dictionary of all beetle risk values
+#     """
+#     dim_encodings = var_ep_lu["dim_encodings"]
 
-    # initialize the output dict
-    di = dict()
+#     # initialize the output dict
+#     di = dict()
 
-    # Gather historical risk levels
-    di["1988-2017"] = dict()
-    di["1988-2017"]["Daymet"] = dict()
-    di["1988-2017"]["Daymet"]["Historical"] = dict()
-    for sni in range(len(beetle_resp[0][0][0])):
-        snowpack = dim_encodings["snowpack"][sni]
-        di["1988-2017"]["Daymet"]["Historical"][snowpack] = dict()
-        if beetle_resp[0][0][0][sni] is not None:
-            di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = (
-                dim_encodings["climate_protection"][int(beetle_resp[0][0][0][sni])]
-            )
-        else:
-            di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = 0
-        if beetle_percents is not None:
-            # This conditional will check to see if all percentages are 0% meaning that there is no data.
-            # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
-            # sets this place as No data available
-            if (
-                beetle_percents[0][0][0][sni][1] == 0.0
-                and beetle_percents[0][0][0][sni][2] == 0.0
-                and beetle_percents[0][0][0][sni][3] == 0.0
-            ):
-                di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                    "percent-high-protection"
-                ] = 0
-                di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                    "percent-minimal-protection"
-                ] = 0
-                di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                    "percent-no-protection"
-                ] = 0
-            else:
-                di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                    "percent-high-protection"
-                ] = beetle_percents[0][0][0][sni][1]
-                di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                    "percent-minimal-protection"
-                ] = beetle_percents[0][0][0][sni][2]
-                di["1988-2017"]["Daymet"]["Historical"][snowpack][
-                    "percent-no-protection"
-                ] = beetle_percents[0][0][0][sni][3]
+#     # Gather historical risk levels
+#     di["1988-2017"] = dict()
+#     di["1988-2017"]["Daymet"] = dict()
+#     di["1988-2017"]["Daymet"]["Historical"] = dict()
+#     for sni in range(len(beetle_resp[0][0][0])):
+#         snowpack = dim_encodings["snowpack"][sni]
+#         di["1988-2017"]["Daymet"]["Historical"][snowpack] = dict()
+#         if beetle_resp[0][0][0][sni] is not None:
+#             di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = (
+#                 dim_encodings["climate_protection"][int(beetle_resp[0][0][0][sni])]
+#             )
+#         else:
+#             di["1988-2017"]["Daymet"]["Historical"][snowpack]["climate-protection"] = 0
+#         if beetle_percents is not None:
+#             # This conditional will check to see if all percentages are 0% meaning that there is no data.
+#             # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
+#             # sets this place as No data available
+#             if (
+#                 beetle_percents[0][0][0][sni][1] == 0.0
+#                 and beetle_percents[0][0][0][sni][2] == 0.0
+#                 and beetle_percents[0][0][0][sni][3] == 0.0
+#             ):
+#                 di["1988-2017"]["Daymet"]["Historical"][snowpack][
+#                     "percent-high-protection"
+#                 ] = 0
+#                 di["1988-2017"]["Daymet"]["Historical"][snowpack][
+#                     "percent-minimal-protection"
+#                 ] = 0
+#                 di["1988-2017"]["Daymet"]["Historical"][snowpack][
+#                     "percent-no-protection"
+#                 ] = 0
+#             else:
+#                 di["1988-2017"]["Daymet"]["Historical"][snowpack][
+#                     "percent-high-protection"
+#                 ] = beetle_percents[0][0][0][sni][1]
+#                 di["1988-2017"]["Daymet"]["Historical"][snowpack][
+#                     "percent-minimal-protection"
+#                 ] = beetle_percents[0][0][0][sni][2]
+#                 di["1988-2017"]["Daymet"]["Historical"][snowpack][
+#                     "percent-no-protection"
+#                 ] = beetle_percents[0][0][0][sni][3]
 
-    # Gather predicted risk levels for future eras
-    for ei, mod_li in enumerate(beetle_resp[1:]):
-        era = dim_encodings["era"][ei]
-        di[era] = dict()
-        for mi, sc_li in enumerate(mod_li[1:]):
-            model = dim_encodings["model"][mi]
-            di[era][model] = dict()
-            for si, sn_li in enumerate(sc_li[1:]):
-                scenario = dim_encodings["scenario"][si]
-                di[era][model][scenario] = dict()
-                for sni, risk_level in enumerate(sn_li):
-                    snowpack = dim_encodings["snowpack"][sni]
-                    di[era][model][scenario][snowpack] = dict()
-                    if risk_level is not None:
-                        di[era][model][scenario][snowpack]["climate-protection"] = (
-                            dim_encodings["climate_protection"][int(risk_level)]
-                        )
-                    else:
-                        di[era][model][scenario][snowpack]["climate-protection"] = 0
-                    if beetle_percents is not None:
-                        # This conditional will check to see if all percentages are 0% meaning that there is no data.
-                        # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
-                        # sets this place as No data available
-                        if (
-                            beetle_percents[ei + 1][mi + 1][si + 1][sni][1] == 0.0
-                            and beetle_percents[ei + 1][mi + 1][si + 1][sni][2] == 0.0
-                            and beetle_percents[ei + 1][mi + 1][si + 1][sni][3] == 0.0
-                        ):
-                            di[era][model][scenario][snowpack][
-                                "percent-high-protection"
-                            ] = 0
-                            di[era][model][scenario][snowpack][
-                                "percent-minimal-protection"
-                            ] = 0
-                            di[era][model][scenario][snowpack][
-                                "percent-no-protection"
-                            ] = 0
-                        else:
-                            di[era][model][scenario][snowpack][
-                                "percent-high-protection"
-                            ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
-                            di[era][model][scenario][snowpack][
-                                "percent-minimal-protection"
-                            ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
-                            di[era][model][scenario][snowpack][
-                                "percent-no-protection"
-                            ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][3]
+#     # Gather predicted risk levels for future eras
+#     for ei, mod_li in enumerate(beetle_resp[1:]):
+#         era = dim_encodings["era"][ei]
+#         di[era] = dict()
+#         for mi, sc_li in enumerate(mod_li[1:]):
+#             model = dim_encodings["model"][mi]
+#             di[era][model] = dict()
+#             for si, sn_li in enumerate(sc_li[1:]):
+#                 scenario = dim_encodings["scenario"][si]
+#                 di[era][model][scenario] = dict()
+#                 for sni, risk_level in enumerate(sn_li):
+#                     snowpack = dim_encodings["snowpack"][sni]
+#                     di[era][model][scenario][snowpack] = dict()
+#                     if risk_level is not None:
+#                         di[era][model][scenario][snowpack]["climate-protection"] = (
+#                             dim_encodings["climate_protection"][int(risk_level)]
+#                         )
+#                     else:
+#                         di[era][model][scenario][snowpack]["climate-protection"] = 0
+#                     if beetle_percents is not None:
+#                         # This conditional will check to see if all percentages are 0% meaning that there is no data.
+#                         # We must set the returned data dictionary values explicitly to 0 to ensure the pruning function
+#                         # sets this place as No data available
+#                         if (
+#                             beetle_percents[ei + 1][mi + 1][si + 1][sni][1] == 0.0
+#                             and beetle_percents[ei + 1][mi + 1][si + 1][sni][2] == 0.0
+#                             and beetle_percents[ei + 1][mi + 1][si + 1][sni][3] == 0.0
+#                         ):
+#                             di[era][model][scenario][snowpack][
+#                                 "percent-high-protection"
+#                             ] = 0
+#                             di[era][model][scenario][snowpack][
+#                                 "percent-minimal-protection"
+#                             ] = 0
+#                             di[era][model][scenario][snowpack][
+#                                 "percent-no-protection"
+#                             ] = 0
+#                         else:
+#                             di[era][model][scenario][snowpack][
+#                                 "percent-high-protection"
+#                             ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][1]
+#                             di[era][model][scenario][snowpack][
+#                                 "percent-minimal-protection"
+#                             ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][2]
+#                             di[era][model][scenario][snowpack][
+#                                 "percent-no-protection"
+#                             ] = beetle_percents[ei + 1][mi + 1][si + 1][sni][3]
 
-    return di
+#     return di
 
 
 # def summarize_within_poly_marr(ds, poly_mask_arr, bandname="Gray"):
@@ -352,16 +351,12 @@ def package_beetle_data(beetle_resp, beetle_percents=None):
 
 
 def run_aggregate_var_polygon(poly_id):
-    """Get data summary (e.g. zonal mean) of single variable in polygon.
-
+    """Get data summary (e.g. zonal mean) of single variable in polygon. Fetches data on
+    the individual instances of the singular dimension combinations.
     Args:
-        poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
-
+        poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal stats.
     Returns:
-        aggr_results (dict): data representing zonal means within the polygon.
-
-    Notes:
-        Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
+        aggr_results (dict): data representing zonal stats within the polygon.
     """
     polygon = get_poly(poly_id)
     bandname = var_ep_lu["beetles"]["bandname"]
@@ -385,8 +380,49 @@ def run_aggregate_var_polygon(poly_id):
         dim_combos.append(map_list)
     aggr_results = generate_nested_dict(dim_combos)
 
-    print(aggr_results)
-    # package_beetle_data(agg_results, risk_percentages)
+    # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
+    for coords, dim_combo in zip(iter_coords, dim_combos):
+
+        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        combo_ds = ds.sel(sel_di)
+        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(polygon, combo_ds)
+        vals_counts_dict = combo_zonal_stats_dict["unique_values_and_counts"]
+
+        # if nan is the only value in the subset, send null results for this dimension combo (will get pruned)
+        if len(vals_counts_dict) == 1 and np.isnan(list(vals_counts_dict.keys())).any():
+            results = None
+
+        # otherwise, populate results dict using only non-nan values
+        # with the counts from vals_counts_dict expressed as percentages
+        else:
+            results = dict()
+            non_nan_vals_counts_dict = {
+                k: v for k, v in vals_counts_dict.items() if np.isnan(k) == False
+            }
+            total_cells = sum(non_nan_vals_counts_dict.values())
+
+            for key in non_nan_vals_counts_dict:
+                results[key] = round(non_nan_vals_counts_dict[key] / total_cells * 100)
+
+            # if any protection levels were not found in the polygon area, set the percentages to 0
+            for level in protection_levels_dict.keys():
+                if level not in results.keys():
+                    results[level] = 0
+
+            # get the climate protection level to the protection level with the highest percentage
+            highest_pct_key = max(results, key=results.get)
+
+            # replace the results keys with the full string from the protection_levels_dict
+            for key in results.keys():
+                results[protection_levels_dict[key]["pct_label"]] = results.pop(key)
+
+            # and finally add the protection level to the results dict
+            results["climate-protection"] = protection_levels_dict[highest_pct_key][
+                "protection_level"
+            ]
+
+        # use the dim_combo to index into the results dict (era, model, scenario, snowpack)
+        aggr_results[dim_combo[0]][dim_combo[1]][dim_combo[2]][dim_combo[3]] = results
 
     return aggr_results
 
@@ -469,10 +505,12 @@ def beetle_area_data_endpoint(var_id):
         return render_template("422/invalid_area.html"), 422
 
     climate_protection = nullify_and_prune(climate_protection, "beetles")
+    climate_protection = prune_nulls_with_max_intensity(climate_protection)
+
     if climate_protection in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
 
     if request.args.get("format") == "csv":
         return create_csv(climate_protection, "beetles", var_id)
 
-    return postprocess(climate_protection, "beetles")
+    return climate_protection

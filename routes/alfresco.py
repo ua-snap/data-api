@@ -92,7 +92,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
         poly_id (str or int): the unique `id` used to identify the Polygon
             for which to compute the zonal mean.
     Returns:
-        aggr_results (dict): data representing zonal means within the polygon.
+        aggr_results (dict): data representing zonal stats within the polygon.
     """
     polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]

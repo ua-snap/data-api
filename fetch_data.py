@@ -361,18 +361,15 @@ def calculate_zonal_stats(da_i, polygon_array):
         zonal_stats["count"] = len(values)
         zonal_stats["mean"] = np.nanmean(values)
 
-        # mode is currently used for beetles data, which is categorical
+        # the following stat can be used to compute a mode
+        # mode is not computed here because same datasets (e.g. beetles) need to drop nan values first
         unique_vals, counts = np.unique(values, return_counts=True)
-        zonal_stats["unique_value_and_count"] = dict(zip(unique_vals, counts))
-        zonal_stats["mode"] = np.argwhere(
-            counts == np.max(counts)
-        )  # this is returned as a list since there is a possibility of >1 mode
+        zonal_stats["unique_values_and_counts"] = dict(zip(unique_vals, counts))
 
     else:
         zonal_stats["count"] = 0
         zonal_stats["mean"] = np.nan
-        zonal_stats["unique_value_and_count"] = None
-        zonal_stats["mode"] = np.nan
+        zonal_stats["unique_values_and_counts"] = {}
 
     return zonal_stats
 
