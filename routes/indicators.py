@@ -77,6 +77,23 @@ async def get_indicators_metadata():
 var_ep_lu, cmip5_metadata, cmip6_metadata = asyncio.run(get_indicators_metadata())
 
 
+# define eras used in cmip6 mmm summary operation
+cmip6_eras = {
+    "historical": {
+        "start": 1950,
+        "end": 2009,
+    },
+    "midcentury": {
+        "start": 2040,
+        "end": 2069,
+    },
+    "longterm": {
+        "start": 2070,
+        "end": 2099,
+    },
+}
+
+
 async def fetch_indicators_point_data(lat, lon, cov_id_str, proj_str):
     """Make an async request for indicator data for a range of models, scenarios, and years at a specified point
     Args:
@@ -139,174 +156,174 @@ async def fetch_indicators_point_data(lat, lon, cov_id_str, proj_str):
 #     return point_data_list
 
 
-def package_cmip6_indicators_era_data(point_data_list):
-    """
-    Package the CMIP6 indicator values into eras for a given query
+# def package_cmip6_indicators_era_data(point_data_list):
+#     """
+#     Package the CMIP6 indicator values into eras for a given query
 
-    Args:
-        point_data_list (list): nested list of data from Rasdaman WCPS query
+#     Args:
+#         point_data_list (list): nested list of data from Rasdaman WCPS query
 
-    Returns:
-        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
-    """
-    di = dict()
+#     Returns:
+#         di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+#     """
+#     di = dict()
 
-    # Loop through point_data_list and populate di with the values
-    for si, scenario_li in enumerate(point_data_list):
-        scenario = cmip6_dim_encodings["scenario"][si]
-        di[scenario] = dict()
-        for mi, model_li in enumerate(scenario_li):
-            model = cmip6_dim_encodings["model"][mi]
-            di[scenario][model] = dict()
-            for era in ["historical", "midcentury", "longterm"]:
-                if (
-                    scenario == "historical"
-                    and era == "historical"
-                    or scenario != "historical"
-                    and era != "historical"
-                ):
-                    di[scenario][model][era] = dict()
-                    for yi, year_li in enumerate(model_li):
-                        year = yi + 1950
+#     # Loop through point_data_list and populate di with the values
+#     for si, scenario_li in enumerate(point_data_list):
+#         scenario = cmip6_dim_encodings["scenario"][si]
+#         di[scenario] = dict()
+#         for mi, model_li in enumerate(scenario_li):
+#             model = cmip6_dim_encodings["model"][mi]
+#             di[scenario][model] = dict()
+#             for era in ["historical", "midcentury", "longterm"]:
+#                 if (
+#                     scenario == "historical"
+#                     and era == "historical"
+#                     or scenario != "historical"
+#                     and era != "historical"
+#                 ):
+#                     di[scenario][model][era] = dict()
+#                     for yi, year_li in enumerate(model_li):
+#                         year = yi + 1950
 
-                        # If the scenario is not historical and the year is less than 2015,
-                        # we continue to the next iteration
-                        if scenario != "historical" and year < 2040:
-                            continue
+#                         # If the scenario is not historical and the year is less than 2015,
+#                         # we continue to the next iteration
+#                         if scenario != "historical" and year < 2040:
+#                             continue
 
-                        # Check for a valid era combination before continuing to operate on the data
-                        if (
-                            (
-                                scenario == "historical"
-                                and era == "historical"
-                                and 1950 <= year <= 2009
-                            )
-                            or (
-                                scenario != "historical"
-                                and era == "midcentury"
-                                and 2040 <= year <= 2069
-                            )
-                            or (
-                                scenario != "historical"
-                                and era == "longterm"
-                                and 2070 <= year <= 2099
-                            )
-                        ):
-                            for vi, value in enumerate(year_li.split(" ")):
-                                indicator = cmip6_dim_encodings["indicator"][vi]
+#                         # Check for a valid era combination before continuing to operate on the data
+#                         if (
+#                             (
+#                                 scenario == "historical"
+#                                 and era == "historical"
+#                                 and 1950 <= year <= 2009
+#                             )
+#                             or (
+#                                 scenario != "historical"
+#                                 and era == "midcentury"
+#                                 and 2040 <= year <= 2069
+#                             )
+#                             or (
+#                                 scenario != "historical"
+#                                 and era == "longterm"
+#                                 and 2070 <= year <= 2099
+#                             )
+#                         ):
+#                             for vi, value in enumerate(year_li.split(" ")):
+#                                 indicator = cmip6_dim_encodings["indicator"][vi]
 
-                                if indicator == "rx1day":
-                                    value = round(float(value), 1)
-                                    if isnan(value):
-                                        continue
-                                if value == "nan":
-                                    continue
+#                                 if indicator == "rx1day":
+#                                     value = round(float(value), 1)
+#                                     if isnan(value):
+#                                         continue
+#                                 if value == "nan":
+#                                     continue
 
-                                # If the indicator is not in the dictionary, add it
-                                if indicator not in di[scenario][model][era]:
-                                    di[scenario][model][era][indicator] = dict()
-                                    di[scenario][model][era][indicator]["max"] = 0
-                                    di[scenario][model][era][indicator]["mean"] = 0
-                                    di[scenario][model][era][indicator]["min"] = 10000
+#                                 # If the indicator is not in the dictionary, add it
+#                                 if indicator not in di[scenario][model][era]:
+#                                     di[scenario][model][era][indicator] = dict()
+#                                     di[scenario][model][era][indicator]["max"] = 0
+#                                     di[scenario][model][era][indicator]["mean"] = 0
+#                                     di[scenario][model][era][indicator]["min"] = 10000
 
-                                # If the value is greater than the max, set the max to the value
-                                if (
-                                    int(value)
-                                    > di[scenario][model][era][indicator]["max"]
-                                ):
-                                    di[scenario][model][era][indicator]["max"] = int(
-                                        value
-                                    )
+#                                 # If the value is greater than the max, set the max to the value
+#                                 if (
+#                                     int(value)
+#                                     > di[scenario][model][era][indicator]["max"]
+#                                 ):
+#                                     di[scenario][model][era][indicator]["max"] = int(
+#                                         value
+#                                     )
 
-                                # If the value is less than the min, set the min to the value
-                                if (
-                                    int(value)
-                                    < di[scenario][model][era][indicator]["min"]
-                                ):
-                                    di[scenario][model][era][indicator]["min"] = int(
-                                        value
-                                    )
+#                                 # If the value is less than the min, set the min to the value
+#                                 if (
+#                                     int(value)
+#                                     < di[scenario][model][era][indicator]["min"]
+#                                 ):
+#                                     di[scenario][model][era][indicator]["min"] = int(
+#                                         value
+#                                     )
 
-                                # Add the value to the mean for the indicator for the given era
-                                di[scenario][model][era][indicator]["mean"] = di[
-                                    scenario
-                                ][model][era][indicator]["mean"] + int(value)
+#                                 # Add the value to the mean for the indicator for the given era
+#                                 di[scenario][model][era][indicator]["mean"] = di[
+#                                     scenario
+#                                 ][model][era][indicator]["mean"] + int(value)
 
-                        # If the scenario is historical and the year is 2009, divide the mean by 60 years to get the average per year
-                        if era == "historical" and year == 2009:
-                            for indicator in di[scenario][model][era]:
-                                di[scenario][model][era][indicator]["mean"] = round(
-                                    di[scenario][model][era][indicator]["mean"] / 60, 1
-                                )
-                            break
+#                         # If the scenario is historical and the year is 2009, divide the mean by 60 years to get the average per year
+#                         if era == "historical" and year == 2009:
+#                             for indicator in di[scenario][model][era]:
+#                                 di[scenario][model][era][indicator]["mean"] = round(
+#                                     di[scenario][model][era][indicator]["mean"] / 60, 1
+#                                 )
+#                             break
 
-                        # If the scenario is not historical and the year is 2069 or 2099, divide the mean by 30 years to get the average per year
-                        if (
-                            era == "midcentury"
-                            and year == 2069
-                            or era == "longterm"
-                            and year == 2099
-                        ):
-                            for indicator in di[scenario][model][era]:
-                                di[scenario][model][era][indicator]["mean"] = round(
-                                    di[scenario][model][era][indicator]["mean"] / 30, 1
-                                )
-                            break
+#                         # If the scenario is not historical and the year is 2069 or 2099, divide the mean by 30 years to get the average per year
+#                         if (
+#                             era == "midcentury"
+#                             and year == 2069
+#                             or era == "longterm"
+#                             and year == 2099
+#                         ):
+#                             for indicator in di[scenario][model][era]:
+#                                 di[scenario][model][era][indicator]["mean"] = round(
+#                                     di[scenario][model][era][indicator]["mean"] / 30, 1
+#                                 )
+#                             break
 
-    return di
+#     return di
 
 
-def package_cmip6_indicators_data(point_data_list):
-    """
-    Package the CMIP6 indicator values for a given query
+# def package_cmip6_indicators_data(point_data_list):
+#     """
+#     Package the CMIP6 indicator values for a given query
 
-    Args:
-        point_data_list (list): nested list of data from Rasdaman WCPS query
+#     Args:
+#         point_data_list (list): nested list of data from Rasdaman WCPS query
 
-    Returns:
-        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
-    """
-    di = dict()
+#     Returns:
+#         di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+#     """
+#     di = dict()
 
-    # Loop through point_data_list and populate di with the values
-    for si, scenario_li in enumerate(point_data_list):
-        scenario = cmip6_dim_encodings["scenario"][si]
-        di[scenario] = dict()
-        for mi, model_li in enumerate(scenario_li):
-            model = cmip6_dim_encodings["model"][mi]
-            di[scenario][model] = dict()
+#     # Loop through point_data_list and populate di with the values
+#     for si, scenario_li in enumerate(point_data_list):
+#         scenario = cmip6_dim_encodings["scenario"][si]
+#         di[scenario] = dict()
+#         for mi, model_li in enumerate(scenario_li):
+#             model = cmip6_dim_encodings["model"][mi]
+#             di[scenario][model] = dict()
 
-            for yi, year_li in enumerate(model_li):
-                year = yi + 1950
+#             for yi, year_li in enumerate(model_li):
+#                 year = yi + 1950
 
-                # If the scenario is historical and the year is greater than 2014, we break the loop
-                # since there is no more historical data
-                if scenario == "historical" and year > 2014:
-                    break
+#                 # If the scenario is historical and the year is greater than 2014, we break the loop
+#                 # since there is no more historical data
+#                 if scenario == "historical" and year > 2014:
+#                     break
 
-                # If the scenario is not historical and the year is less than 2015,
-                # we continue to the next iteration
-                if scenario != "historical" and year < 2015:
-                    continue
+#                 # If the scenario is not historical and the year is less than 2015,
+#                 # we continue to the next iteration
+#                 if scenario != "historical" and year < 2015:
+#                     continue
 
-                # If the year is greater than 2100, we break the loop since there is no more future data
-                if year > 2100:
-                    break
-                di[scenario][model][year] = dict()
-                for vi, value in enumerate(year_li.split(" ")):
-                    indicator = cmip6_dim_encodings["indicator"][vi]
+#                 # If the year is greater than 2100, we break the loop since there is no more future data
+#                 if year > 2100:
+#                     break
+#                 di[scenario][model][year] = dict()
+#                 for vi, value in enumerate(year_li.split(" ")):
+#                     indicator = cmip6_dim_encodings["indicator"][vi]
 
-                    if indicator == "rx1day":
-                        value = round(float(value), 3)
-                        if isnan(value):
-                            value = -9999
+#                     if indicator == "rx1day":
+#                         value = round(float(value), 3)
+#                         if isnan(value):
+#                             value = -9999
 
-                    if value == "nan":
-                        value = -9999
+#                     if value == "nan":
+#                         value = -9999
 
-                    di[scenario][model][year][indicator] = value
+#                     di[scenario][model][year][indicator] = value
 
-    return di
+#     return di
 
 
 # def package_cmip5_indicators_data(point_data_list):
@@ -432,29 +449,84 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
                 float(value) if value not in ["nan", "null"] else -9999
                 for value in indicator_values
             ]
+
+            # if all values are -9999, remove this year from the results
+            if all([value == -9999 for value in indicator_values]):
+                results[dim_combo[0]][dim_combo[1]].pop(dim_combo[2])
+                continue
+
             indicator_dict = dict()
             for indicator_name, indicator_value in zip(
                 var_ep_lu["cmip6_indicators"]["bandnames"], indicator_values
             ):
                 indicator_dict[indicator_name] = indicator_value
 
-            # TODO: figure out how to prune empty years!
-            # if all values are -9999, remove this year from the results
-            # if all([value == -9999 for value in indicator_values]):
-            #     results[dim_combo[0]][dim_combo[1]][dim_combo[2]].pop()
-            #     continue
-
             results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
 
         results = nullify_and_prune(results, "cmip6_indicators")
 
-        return results
-
         if "summarize" in request.args and request.args.get("summarize") == "mmm":
-            results = package_cmip6_indicators_era_data(point_data_list)
-        else:
-            results = package_cmip6_indicators_data(point_data_list)
-        results = nullify_and_prune(results, "cmip6_indicators")
+            era_values = dict()
+            for era in cmip6_eras:
+                era_values[era] = dict()
+                for scenario in results:
+                    # remove impossible combinations of scenario and era
+                    if scenario == "historical" and era != "historical":
+                        continue
+                    if scenario != "historical" and era == "historical":
+                        continue
+                    for model in results[scenario]:
+                        # check for an empty dict (means the scenario is missing for this model), if so, skip to the next model
+                        if not results[scenario][model]:
+                            continue
+                        for year in results[scenario][model]:
+                            if (
+                                int(year) < cmip6_eras[era]["start"]
+                                or int(year) > cmip6_eras[era]["end"]
+                            ):  # remove unwanted years
+                                continue
+                            for indicator in results[scenario][model][year]:
+                                if indicator not in era_values[era]:
+                                    era_values[era][indicator] = []
+                                if results[scenario][model][year][indicator] not in [
+                                    -9999,
+                                    "nan",
+                                    "null",
+                                    None,
+                                ]:
+                                    era_values[era][indicator].append(
+                                        results[scenario][model][year][indicator]
+                                    )
+            for era in era_values:
+                results[scenario][model][era] = dict()
+                for indicator in era_values[era]:
+                    # if list of values is not empty, compute min, mean, and max
+                    if era_values[era][indicator]:
+                        era_indicator_mmm = {
+                            "min": round(np.nanmin(era_values[era][indicator]), 1),
+                            "mean": round(np.nanmean(era_values[era][indicator]), 1),
+                            "max": round(np.nanmax(era_values[era][indicator]), 1),
+                        }
+                    else:
+                        era_indicator_mmm = {
+                            "min": -9999,
+                            "mean": -9999,
+                            "max": -9999,
+                        }
+                    results[scenario][model][era][indicator] = era_indicator_mmm
+
+            print(results)
+
+            # TODO: make this work!!!
+            # remove the individual years from the results dict
+            for scenario in results:
+                for model in results[scenario]:
+                    results[scenario][model] = {
+                        era: results[scenario][model][era]
+                        for era in list(cmip6_eras.keys())
+                    }
+
+            print(results)
 
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
