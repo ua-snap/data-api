@@ -461,21 +461,43 @@ def run_point_fetch_all_beetles(lat, lon):
         rasdaman_response = asyncio.run(
             fetch_wcs_point_data(x, y, var_ep_lu["beetles"]["cov_id_str"])
         )
-        climate_protection = postprocess(
-            package_beetle_data(rasdaman_response), "beetles"
+
+        # using the dimension names and dim_encodings, create the nested dict structure
+        dimnames = ["era", "model", "scenario", "snowpack"]
+        dim_encodings = var_ep_lu["beetles"]["dim_encodings"]
+
+        dim_combos = []
+        iter_coords = list(
+            itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
         )
+        for coords in iter_coords:
+            map_list = [
+                dim_encodings[dimname][coord]
+                for coord, dimname in zip(coords, dimnames)
+            ]
+            dim_combos.append(map_list)
+        results = generate_nested_dict(dim_combos)
+
+        # populate the results dict with the fetched data
+        for coords, dim_combo in zip(iter_coords, dim_combos):
+            # use the coords to index into the rasdaman response
+            risk_level = rasdaman_response[coords[0]][coords[1]][coords[2]][coords[3]]
+            if risk_level is not None:
+                results[dim_combo[0]][dim_combo[1]][dim_combo[2]][dim_combo[3]] = {
+                    "climate-protection": int(risk_level)
+                }
+
+        # climate_protection = postprocess(
+        #     package_beetle_data(rasdaman_response), "beetles"
+        # )
         if request.args.get("format") == "csv":
-            if type(climate_protection) is not dict:
+            if type(results) is not dict:
                 # Returns errors if any are generated
-                return climate_protection
+                return results
             # Returns CSV for download
-
-            # TODO: remove line below if place_id is not needed
-            place_id = request.args.get("community")
-
-            return create_csv(climate_protection, "beetles", lat=lat, lon=lon)
+            return create_csv(results, "beetles", lat=lat, lon=lon)
         # Returns beetle risk levels
-        return climate_protection
+        return results
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
