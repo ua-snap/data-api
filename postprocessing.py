@@ -6,7 +6,7 @@ nodata_values = {
     "cmip6_monthly": [-9999, -9999.0, "nan"],
     "default": [-9999],
     "hydrology": [-9999, "nan"],
-    "ncar12km_indicators": [-9999, -9999.0],
+    "ncar12km_indicators": [-9999, -9999.0, "null"],
     "permafrost": [-9999, -9999.0],
     "taspr": [-9999, -9.223372e18, -9.223372036854776e18],
     "seaice": [120, 253, 254, 255],

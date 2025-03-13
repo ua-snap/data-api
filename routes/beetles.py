@@ -205,8 +205,13 @@ def run_point_fetch_all_beetles(lat, lon):
         )
 
         # using the dimension names and dim_encodings, create the nested dict to hold results
-        dimnames = ["era", "model", "scenario", "snowpack"]
         dim_encodings = var_ep_lu["beetles"]["dim_encodings"]
+        dimnames = [
+            "era",
+            "model",
+            "scenario",
+            "snowpack",
+        ]  # we could get these directly from the encodings, but the encodings dict includes "risk" dimension which is actually not present in the coverage ... so we define it explicitly here
         dim_combos = []
         iter_coords = list(
             itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
