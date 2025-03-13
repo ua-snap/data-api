@@ -34,7 +34,8 @@ var_ep_lu = {
     "beetles": {
         "cov_id_str": "beetle_risk",
         "dim_encodings": None,  # populated below
-        "bandname": "Gray",
+        "bandnames": ["Gray"],
+        "label": None,
     },
 }
 
@@ -101,7 +102,7 @@ def run_aggregate_var_polygon(poly_id):
         aggr_results (dict): data representing zonal stats within the polygon.
     """
     polygon = get_poly(poly_id)
-    bandname = var_ep_lu["beetles"]["bandname"]
+    bandname = var_ep_lu["beetles"]["bandnames"][0]
     ds = asyncio.run(
         fetch_beetles_bbox_data(
             polygon.total_bounds, var_ep_lu["beetles"]["cov_id_str"]

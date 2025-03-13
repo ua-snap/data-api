@@ -34,13 +34,13 @@ var_ep_lu = {
     "flammability": {
         "cov_id_str": "alfresco_relative_flammability_30yr",
         "dim_encodings": None,  # populated below
-        "bandname": "Gray",
+        "bandnames": ["Gray"],
         "label": "Flammability",
     },
     "veg_type": {
         "cov_id_str": "alfresco_vegetation_type_percentage",
         "dim_encodings": None,  # populated below
-        "bandname": "Gray",
+        "bandnames": ["Gray"],
         "label": "Vegetation Type",
     },
 }
@@ -96,7 +96,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     """
     polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
-    bandname = var_ep_lu[var_ep]["bandname"]
+    bandname = var_ep_lu[var_ep]["bandnames"][0]
     ds = asyncio.run(fetch_alf_bbox_data(polygon.total_bounds, cov_id_str))
 
     # get all combinations of non-XY dimensions in the dataset and their corresponding encodings

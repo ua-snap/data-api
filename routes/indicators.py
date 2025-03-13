@@ -36,26 +36,40 @@ from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
 indicators_api = Blueprint("indicators_api", __name__)
-# Rasdaman targets
-indicators_coverage_id = "ncar12km_indicators_era_summaries"
+
+var_ep_lu = {
+    "cmip5_indicators": {
+        "cov_id_str": "ncar12km_indicators_era_summaries",
+        "dim_encodings": None,  # populated below
+        "bandnames": ["Gray"],
+        "label": None,
+    },
+    "cmip6_indicators": {
+        "cov_id_str": "cmip6_indicators",
+        "dim_encodings": None,  # populated below
+        "bandnames": ["dw", "ftc", "rx1day", "su"],
+        "label": None,
+    },
+}
+
+cmip5_indicators_coverage_id = "ncar12km_indicators_era_summaries"
 cmip6_indicators_coverage_id = "cmip6_indicators"
 
 
-async def get_ncar12km_metadata():
+async def get_cmip5_metadata():
     """Get the coverage metadata and encodings for NCAR 12km indicators coverage"""
-    metadata = await describe_via_wcps(indicators_coverage_id)
+    metadata = await describe_via_wcps(cmip5_indicators_coverage_id)
     return get_coverage_encodings(metadata)
 
 
 async def get_cmip6_metadata():
     """Get the coverage metadata and encodings for CMIP6 indicators coverage"""
     metadata = await describe_via_wcps(cmip6_indicators_coverage_id)
-    return metadata
+    return get_coverage_encodings(metadata)
 
 
-base_dim_encodings = asyncio.run(get_ncar12km_metadata())
-cmip6_metadata = asyncio.run(get_cmip6_metadata())
-cmip6_dim_encodings = get_coverage_encodings(cmip6_metadata)
+cmip5_dim_encodings = asyncio.run(get_cmip5_metadata())
+cmip6_dim_encodings = asyncio.run(get_cmip6_metadata())
 
 
 async def fetch_cmip6_indicators_point_data(lat, lon):
@@ -75,17 +89,14 @@ async def fetch_cmip6_indicators_point_data(lat, lon):
         lon, lat, cov_id=cmip6_indicators_coverage_id, projection="EPSG:4326"
     )
 
-    # Generate the URL for the WCS query
     url = generate_wcs_query_url(wcs_str)
-
-    # Fetch the data
     point_data_list = await fetch_data([url])
 
     return point_data_list
 
 
 # Base indicators endpoint:
-async def fetch_base_indicators_point_data(x, y):
+async def fetch_cmip5_indicators_point_data(x, y):
     """Make the async request for indicator data for a range of years at a specified point
 
     Args:
@@ -96,7 +107,7 @@ async def fetch_base_indicators_point_data(x, y):
         list of data results from each of historical and future coverages
     """
     wcs_str = generate_wcs_getcov_str(
-        x, y, cov_id=indicators_coverage_id, time_slice=("era", "0,2")
+        x, y, cov_id=cmip5_indicators_coverage_id, time_slice=("era", "0,2")
     )
     url = generate_wcs_query_url(wcs_str)
     point_data_list = await fetch_data([url])
@@ -274,7 +285,7 @@ def package_cmip6_indicators_data(point_data_list):
     return di
 
 
-def package_base_indicators_data(point_data_list):
+def package_cmip5_indicators_data(point_data_list):
     """Package the indicator values for a given query
 
     Args:
@@ -287,13 +298,13 @@ def package_base_indicators_data(point_data_list):
     # TO-DO: is there a function for recursively populating a dict like this? If not there should be, this is how we package all of our data
     di = dict()
     for vi, era_li in enumerate(point_data_list):
-        indicator = base_dim_encodings["indicator"][vi]
+        indicator = cmip5_dim_encodings["indicator"][vi]
         di[indicator] = dict()
         for ei, model_li in enumerate(era_li):
-            era = base_dim_encodings["era"][ei]
+            era = cmip5_dim_encodings["era"][ei]
             di[indicator][era] = dict()
             for mi, scenario_li in enumerate(model_li):
-                model = base_dim_encodings["model"][mi]
+                model = cmip5_dim_encodings["model"][mi]
                 # Skip impossible combinations of era and model.
                 if era == "historical" and model != "Daymet":
                     continue
@@ -301,7 +312,7 @@ def package_base_indicators_data(point_data_list):
                     continue
                 di[indicator][era][model] = dict()
                 for si, stat_li in enumerate(scenario_li):
-                    scenario = base_dim_encodings["scenario"][si]
+                    scenario = cmip5_dim_encodings["scenario"][si]
                     # Skip impossible combinations of era and scenario.
                     if era == "historical" and scenario != "historical":
                         continue
@@ -309,7 +320,7 @@ def package_base_indicators_data(point_data_list):
                         continue
                     di[indicator][era][model][scenario] = dict()
                     for ti, value in enumerate(stat_li):
-                        stat = base_dim_encodings["stat"][ti]
+                        stat = cmip5_dim_encodings["stat"][ti]
                         di[indicator][era][model][scenario][stat] = (
                             value
                             if (
@@ -412,8 +423,8 @@ def run_fetch_base_indicators_point_data(lat, lon):
     x, y = project_latlon(lat, lon, 3338)
 
     try:
-        point_data_list = asyncio.run(fetch_base_indicators_point_data(x=x, y=y))
-        results = package_base_indicators_data(point_data_list)
+        point_data_list = asyncio.run(fetch_cmip5_indicators_point_data(x=x, y=y))
+        results = package_cmip5_indicators_data(point_data_list)
         results = nullify_and_prune(results, "ncar12km_indicators")
 
         if request.args.get("format") == "csv":
@@ -491,10 +502,10 @@ def summarize_within_poly_marr(ds, poly_mask_arr, dim_encodings, bandname="Gray"
         else:
             aggr_results[map_list[0]] = round(result, 4)
 
-    indicators = base_dim_encodings["indicator"].values()
-    eras = base_dim_encodings["era"].values()
-    models = base_dim_encodings["model"].values()
-    scenarios = base_dim_encodings["scenario"].values()
+    indicators = cmip5_dim_encodings["indicator"].values()
+    eras = cmip5_dim_encodings["era"].values()
+    models = cmip5_dim_encodings["model"].values()
+    scenarios = cmip5_dim_encodings["scenario"].values()
 
     # Prune impossible (always nodata) historical/projected combos from results.
     for indicator, era, model, scenario in itertools.product(
@@ -530,13 +541,13 @@ def run_aggregate_var_polygon(poly_id):
     """
     poly = get_poly(poly_id)
 
-    ds_list = asyncio.run(fetch_bbox_data(poly.bounds, indicators_coverage_id))
+    ds_list = asyncio.run(fetch_bbox_data(poly.bounds, cmip5_indicators_coverage_id))
 
     bandname = "Gray"
     poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
 
     aggr_results = summarize_within_poly_marr(
-        ds_list[-1], poly_mask_arr, base_dim_encodings, bandname
+        ds_list[-1], poly_mask_arr, cmip5_dim_encodings, bandname
     )
 
     for era, summaries in aggr_results.items():
