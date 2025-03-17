@@ -87,8 +87,6 @@ def run_aggregate_var_polygon(var_ep, poly_id):
 
     Args:
         var_ep (str): variable endpoint (one of "flammability" or "veg_type")
-            poly_gdf (GeoDataFrame): the object from which to fetch the polygon,
-            e.g. the HUC 8 geodataframe for watershed polygons
         poly_id (str or int): the unique `id` used to identify the Polygon
             for which to compute the zonal mean.
     Returns:

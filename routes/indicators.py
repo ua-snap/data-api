@@ -1,8 +1,10 @@
 """Endpoints for climate indicators
 
-These endpoint(s) query a coverage containing summarized versions of the indicators dataset created from the 12km NCAR dataset. The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now (i.e., url suffix: /indicators/base).
+These endpoint(s) query a coverage containing summarized versions of the indicators dataset created from the 12km NCAR dataset.
+The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now (i.e., url suffix: /indicators/base).
 """
 
+import json
 import asyncio
 import numpy as np
 from math import floor, isnan
@@ -10,12 +12,13 @@ from flask import Blueprint, render_template, request
 
 # local imports
 from generate_urls import generate_wcs_query_url
-from generate_requests import generate_wcs_getcov_str
+from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
     fetch_data,
     fetch_bbox_data,
+    fetch_bbox_netcdf_list,
     get_poly,
-    get_poly_mask_arr,
+    interpolate_and_compute_zonal_stats,
     get_from_dict,
     generate_nested_dict,
     itertools,
@@ -110,270 +113,322 @@ async def fetch_indicators_point_data(lat, lon, cov_id_str, proj_str):
     return point_data_list
 
 
-# async def fetch_cmip6_indicators_point_data(lat, lon):
-#     """
-#     Make an async request for CMIP6 indicator data for a range of models, scenarios, and years at a specified point
+async def fetch_indicators_bbox_data(bbox_bounds, cov_id_str):
+    """Make the async request for the data at the specified point for a specific coverage
 
-#     Args:
-#         lat (float): latitude
-#         lon (float): longitude
-
-#     Returns:
-#         list of data results from each of historical and future data at a specified point
-#     """
-
-#     # We must use EPSG:4326 for the CMIP6 indicators coverage to match the coverage projection
-#     wcs_str = generate_wcs_getcov_str(
-#         lon,
-#         lat,
-#         cov_id=var_ep_lu["cmip5_indicators"]["cov_id_str"],
-#         projection="EPSG:4326",
-#     )
-
-#     url = generate_wcs_query_url(wcs_str)
-#     point_data_list = await fetch_data([url])
-
-#     return point_data_list
+    Args:
+        bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
+        cov_id_str (str): shared portion of coverage_ids to query
+    Returns:
+        bbox_ds (xarray.DataSet): xarray dataset with the data for the bbox
+    """
+    # set up WCS request strings
+    request_strs = []
+    request_strs.append(generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id_str))
+    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
+    bbox_ds_list = await fetch_bbox_netcdf_list(urls)
+    bbox_ds = bbox_ds_list[
+        0
+    ]  # there is only ever one dataset in the list for this endpoint
+    return bbox_ds
 
 
-# # Base indicators endpoint:
-# async def fetch_cmip5_indicators_point_data(x, y):
-#     """Make the async request for indicator data for a range of years at a specified point
+def package_cmip5_point_data(rasdaman_response):
+    # using the dimension names and dim_encodings, create the nested dict to hold results
+    dim_encodings = var_ep_lu["cmip5_indicators"]["dim_encodings"]
+    # we could get dimension names directly from the encodings, but they would be in the wrong order .... so we define explicitly here
+    dimnames = [
+        "indicator",
+        "era",
+        "model",
+        "scenario",
+        "stat",
+    ]
+    dim_combos = []
+    iter_coords = list(
+        itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
+    )
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
+    results = generate_nested_dict(dim_combos)
 
-#     Args:
-#         x (float):
-#         y (float):
+    # populate the results dict with the fetched data
+    # using the coords to index into the rasdaman response
+    for coords, dim_combo in zip(iter_coords, dim_combos):
 
-#     Returns:
-#         list of data results from each of historical and future coverages
-#     """
-#     wcs_str = generate_wcs_getcov_str(
-#         x, y, cov_id=cmip5_indicators_coverage_id, time_slice=("era", "0,2")
-#     )
-#     url = generate_wcs_query_url(wcs_str)
-#     point_data_list = await fetch_data([url])
+        # check for impossible combinations of model and scenario, leaving these unpopulated (will be pruned)
+        if dim_combo[1] == "historical" and dim_combo[2] != "Daymet":
+            continue
+        if dim_combo[1] != "historical" and dim_combo[2] == "Daymet":
+            continue
+        if dim_combo[2] == "Daymet" and dim_combo[3] != "historical":
+            continue
+        if dim_combo[2] != "Daymet" and dim_combo[3] == "historical":
+            continue
 
-#     return point_data_list
+        stat_value = rasdaman_response[coords[0]][coords[1]][coords[2]][coords[3]][
+            coords[4]
+        ]
+        if isnan(stat_value):
+            stat_value = -9999
 
+        # round the values for certain indicators
+        stat_value = (
+            stat_value
+            if (
+                dim_combo[0] == "hd"
+                or dim_combo[0] == "cd"
+                or dim_combo[0] == "rx1day"
+                or dim_combo[0] == "rx5day"
+            )
+            else floor(stat_value)
+        )
 
-# def package_cmip6_indicators_era_data(point_data_list):
-#     """
-#     Package the CMIP6 indicator values into eras for a given query
+        results[dim_combo[0]][dim_combo[1]][dim_combo[2]][dim_combo[3]][
+            dim_combo[4]
+        ] = stat_value
 
-#     Args:
-#         point_data_list (list): nested list of data from Rasdaman WCPS query
-
-#     Returns:
-#         di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
-#     """
-#     di = dict()
-
-#     # Loop through point_data_list and populate di with the values
-#     for si, scenario_li in enumerate(point_data_list):
-#         scenario = cmip6_dim_encodings["scenario"][si]
-#         di[scenario] = dict()
-#         for mi, model_li in enumerate(scenario_li):
-#             model = cmip6_dim_encodings["model"][mi]
-#             di[scenario][model] = dict()
-#             for era in ["historical", "midcentury", "longterm"]:
-#                 if (
-#                     scenario == "historical"
-#                     and era == "historical"
-#                     or scenario != "historical"
-#                     and era != "historical"
-#                 ):
-#                     di[scenario][model][era] = dict()
-#                     for yi, year_li in enumerate(model_li):
-#                         year = yi + 1950
-
-#                         # If the scenario is not historical and the year is less than 2015,
-#                         # we continue to the next iteration
-#                         if scenario != "historical" and year < 2040:
-#                             continue
-
-#                         # Check for a valid era combination before continuing to operate on the data
-#                         if (
-#                             (
-#                                 scenario == "historical"
-#                                 and era == "historical"
-#                                 and 1950 <= year <= 2009
-#                             )
-#                             or (
-#                                 scenario != "historical"
-#                                 and era == "midcentury"
-#                                 and 2040 <= year <= 2069
-#                             )
-#                             or (
-#                                 scenario != "historical"
-#                                 and era == "longterm"
-#                                 and 2070 <= year <= 2099
-#                             )
-#                         ):
-#                             for vi, value in enumerate(year_li.split(" ")):
-#                                 indicator = cmip6_dim_encodings["indicator"][vi]
-
-#                                 if indicator == "rx1day":
-#                                     value = round(float(value), 1)
-#                                     if isnan(value):
-#                                         continue
-#                                 if value == "nan":
-#                                     continue
-
-#                                 # If the indicator is not in the dictionary, add it
-#                                 if indicator not in di[scenario][model][era]:
-#                                     di[scenario][model][era][indicator] = dict()
-#                                     di[scenario][model][era][indicator]["max"] = 0
-#                                     di[scenario][model][era][indicator]["mean"] = 0
-#                                     di[scenario][model][era][indicator]["min"] = 10000
-
-#                                 # If the value is greater than the max, set the max to the value
-#                                 if (
-#                                     int(value)
-#                                     > di[scenario][model][era][indicator]["max"]
-#                                 ):
-#                                     di[scenario][model][era][indicator]["max"] = int(
-#                                         value
-#                                     )
-
-#                                 # If the value is less than the min, set the min to the value
-#                                 if (
-#                                     int(value)
-#                                     < di[scenario][model][era][indicator]["min"]
-#                                 ):
-#                                     di[scenario][model][era][indicator]["min"] = int(
-#                                         value
-#                                     )
-
-#                                 # Add the value to the mean for the indicator for the given era
-#                                 di[scenario][model][era][indicator]["mean"] = di[
-#                                     scenario
-#                                 ][model][era][indicator]["mean"] + int(value)
-
-#                         # If the scenario is historical and the year is 2009, divide the mean by 60 years to get the average per year
-#                         if era == "historical" and year == 2009:
-#                             for indicator in di[scenario][model][era]:
-#                                 di[scenario][model][era][indicator]["mean"] = round(
-#                                     di[scenario][model][era][indicator]["mean"] / 60, 1
-#                                 )
-#                             break
-
-#                         # If the scenario is not historical and the year is 2069 or 2099, divide the mean by 30 years to get the average per year
-#                         if (
-#                             era == "midcentury"
-#                             and year == 2069
-#                             or era == "longterm"
-#                             and year == 2099
-#                         ):
-#                             for indicator in di[scenario][model][era]:
-#                                 di[scenario][model][era][indicator]["mean"] = round(
-#                                     di[scenario][model][era][indicator]["mean"] / 30, 1
-#                                 )
-#                             break
-
-#     return di
+    results = nullify_and_prune(results, "ncar12km_indicators")
+    results = prune_nulls_with_max_intensity(results)
+    return results
 
 
-# def package_cmip6_indicators_data(point_data_list):
-#     """
-#     Package the CMIP6 indicator values for a given query
+def run_aggregate_var_polygon(poly_id, var_ep):
+    """Get data summary (e.g. zonal mean) of single variable in polygon. Fetches data on
+    the individual instances of the singular dimension combinations.
 
-#     Args:
-#         point_data_list (list): nested list of data from Rasdaman WCPS query
+    Args:
+        var_ep (str): variable endpoint (one of "cmip5_indicators" or "cmip6_indicators")
+        poly_id (str or int): the unique `id` used to identify the Polygon
+            for which to compute the zonal mean.
+    Returns:
+        aggr_results (dict): data representing zonal stats within the polygon.
+    NOTE: "cmip6_indicators" is not yet implemented. That coverage uses "lat" and "lon" dimensions
+            and has multiple band names...will require a different approach!
+    """
+    polygon = get_poly(poly_id)
+    cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
+    bandname = var_ep_lu[var_ep]["bandnames"][0]
 
-#     Returns:
-#         di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
-#     """
-#     di = dict()
+    ds = asyncio.run(fetch_indicators_bbox_data(polygon.total_bounds, cov_id_str))
 
-#     # Loop through point_data_list and populate di with the values
-#     for si, scenario_li in enumerate(point_data_list):
-#         scenario = cmip6_dim_encodings["scenario"][si]
-#         di[scenario] = dict()
-#         for mi, model_li in enumerate(scenario_li):
-#             model = cmip6_dim_encodings["model"][mi]
-#             di[scenario][model] = dict()
+    # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
+    # and create a dict to hold the results for each combo
+    all_dims = ds[bandname].dims
+    dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
+    dim_encodings = var_ep_lu[var_ep]["dim_encodings"]
+    iter_coords = list(itertools.product(*[list(ds[dim].values) for dim in dimnames]))
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
+    aggr_results = generate_nested_dict(dim_combos)
 
-#             for yi, year_li in enumerate(model_li):
-#                 year = yi + 1950
+    # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
+    for coords, dim_combo in zip(iter_coords, dim_combos):
 
-#                 # If the scenario is historical and the year is greater than 2014, we break the loop
-#                 # since there is no more historical data
-#                 if scenario == "historical" and year > 2014:
-#                     break
+        # check for impossible combinations of model and scenario, leaving these unpopulated (will be pruned)
+        if dim_combo[1] == "historical" and dim_combo[2] != "Daymet":
+            continue
+        if dim_combo[1] != "historical" and dim_combo[2] == "Daymet":
+            continue
+        if dim_combo[2] == "Daymet" and dim_combo[3] != "historical":
+            continue
+        if dim_combo[2] != "Daymet" and dim_combo[3] == "historical":
+            continue
 
-#                 # If the scenario is not historical and the year is less than 2015,
-#                 # we continue to the next iteration
-#                 if scenario != "historical" and year < 2015:
-#                     continue
+        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        combo_ds = ds.sel(sel_di)
+        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(polygon, combo_ds)
 
-#                 # If the year is greater than 2100, we break the loop since there is no more future data
-#                 if year > 2100:
-#                     break
-#                 di[scenario][model][year] = dict()
-#                 for vi, value in enumerate(year_li.split(" ")):
-#                     indicator = cmip6_dim_encodings["indicator"][vi]
+        # determine the result based on the requested statistic (min, mean, max)
+        if dim_combo[4] == "min":
+            result = floor(combo_zonal_stats_dict["min"])
+        elif dim_combo[4] == "mean":
+            result = round(combo_zonal_stats_dict["mean"], 1)
+        elif dim_combo[4] == "max":
+            result = np.ceil(combo_zonal_stats_dict["max"])
 
-#                     if indicator == "rx1day":
-#                         value = round(float(value), 3)
-#                         if isnan(value):
-#                             value = -9999
+        # use the dim_combo to index into the results dict (indicator, era, model, scenario, stat)
+        aggr_results[dim_combo[0]][dim_combo[1]][dim_combo[2]][dim_combo[3]][
+            dim_combo[4]
+        ] = result
 
-#                     if value == "nan":
-#                         value = -9999
+    # remove null values from the results dict
+    aggr_results = nullify_and_prune(aggr_results, "ncar12km_indicators")
+    aggr_results = prune_nulls_with_max_intensity(aggr_results)
 
-#                     di[scenario][model][year][indicator] = value
-
-#     return di
+    return aggr_results
 
 
-# def package_cmip5_indicators_data(point_data_list):
-#     """Package the indicator values for a given query
+def remove_invalid_dim_combos(aggr_results):
+    """Remove invalid dimension combinations from the results dict.
+    Args:
+        aggr_results (dict): the results dict containing the zonal stats for each dimension combination.
+    Returns:
+        aggr_results (dict): the results dict with invalid dimension combinations removed.
+    """
+    aggr_results_pruned = aggr_results.copy()
 
-#     Args:
-#         point_data_list (list): nested list of data from Rasdaman WCPS query
+    for indicator in aggr_results:
+        for era in aggr_results[indicator]:
+            for model in aggr_results[indicator][era]:
+                for scenario in aggr_results[indicator][era][model]:
+                    if aggr_results[indicator][era][model][scenario] in [{}, None]:
+                        del aggr_results_pruned[indicator][era][model][scenario]
+                if aggr_results[indicator][era][model] in [{}, None]:
+                    del aggr_results_pruned[indicator][era][model]
 
-#     Returns:
-#         di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
-#     """
-#     # base_dim_encodings
-#     # TO-DO: is there a function for recursively populating a dict like this? If not there should be, this is how we package all of our data
-#     di = dict()
-#     for vi, era_li in enumerate(point_data_list):
-#         indicator = cmip5_dim_encodings["indicator"][vi]
-#         di[indicator] = dict()
-#         for ei, model_li in enumerate(era_li):
-#             era = cmip5_dim_encodings["era"][ei]
-#             di[indicator][era] = dict()
-#             for mi, scenario_li in enumerate(model_li):
-#                 model = cmip5_dim_encodings["model"][mi]
-#                 # Skip impossible combinations of era and model.
-#                 if era == "historical" and model != "Daymet":
-#                     continue
-#                 elif era != "historical" and model == "Daymet":
-#                     continue
-#                 di[indicator][era][model] = dict()
-#                 for si, stat_li in enumerate(scenario_li):
-#                     scenario = cmip5_dim_encodings["scenario"][si]
-#                     # Skip impossible combinations of era and scenario.
-#                     if era == "historical" and scenario != "historical":
-#                         continue
-#                     elif era != "historical" and scenario == "historical":
-#                         continue
-#                     di[indicator][era][model][scenario] = dict()
-#                     for ti, value in enumerate(stat_li):
-#                         stat = cmip5_dim_encodings["stat"][ti]
-#                         di[indicator][era][model][scenario][stat] = (
-#                             value
-#                             if (
-#                                 indicator == "hd"
-#                                 or indicator == "cd"
-#                                 or indicator == "rx1day"
-#                                 or indicator == "rx5day"
-#                             )
-#                             else floor(value)
-#                         )
+    return aggr_results_pruned
 
-#     return di
+
+def package_cmip6_point_data(rasdaman_response):
+    # using the dimension names and dim_encodings, create the nested dict to hold results
+    dim_encodings = var_ep_lu["cmip6_indicators"]["dim_encodings"]
+    # there is a year dimension, but its not represented in the encodings dict, so we need to add the year dimension manually
+    dim_encodings["year"] = {int(i - 1950): str(i) for i in range(1950, 2101)}
+    # we could dimension names directly from the encodings, but they would be in the wrong order
+    # and also contain the band names ("indicator" key) which is not actually a dimension .... so we define explicitly here
+    dimnames = [
+        "scenario",
+        "model",
+        "year",
+    ]
+    dim_combos = []
+    iter_coords = list(
+        itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
+    )
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
+        ]
+        dim_combos.append(map_list)
+
+    results = generate_nested_dict(dim_combos)
+
+    # populate the results dict with the fetched data
+    # using the coords to index into the rasdaman response
+    for coords, dim_combo in zip(iter_coords, dim_combos):
+        indicator_values = rasdaman_response[coords[0]][coords[1]][coords[2]]
+
+        # split the string of values into a list of strings
+        indicator_values = indicator_values.split(" ")
+        # then replace the items with floats, unless "nan" or "null" in which case we use -9999
+        indicator_values = [
+            float(value) if value not in ["nan", "null"] else -9999
+            for value in indicator_values
+        ]
+
+        # if all values are -9999, remove this year from the results
+        if all([value == -9999 for value in indicator_values]):
+            results[dim_combo[0]][dim_combo[1]].pop(dim_combo[2])
+            continue
+
+        indicator_dict = dict()
+        for indicator_name, indicator_value in zip(
+            var_ep_lu["cmip6_indicators"]["bandnames"], indicator_values
+        ):
+            indicator_dict[indicator_name] = indicator_value
+
+        results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
+
+    return nullify_and_prune(results, "cmip6_indicators")
+
+
+def summarize_cmip6_mmm(results):
+    for era in cmip6_eras:
+        for scenario in results:
+            # remove impossible combinations of scenario and era
+            if scenario == "historical" and era != "historical":
+                continue
+            if scenario != "historical" and era == "historical":
+                continue
+            for model in results[scenario]:
+
+                # check for an empty dict (means the scenario is missing for this model), if so, skip to the next model
+                if results[scenario][model] in [{}, None]:
+                    continue
+
+                # set up a dict to hold the values for this model/scenario/era
+                model_scenario_era_values = dict()
+                model_scenario_era_values[era] = dict()
+
+                for year in results[scenario][model]:
+                    # skip era results already saved in the dict
+                    if year in cmip6_eras:
+                        continue
+                    if (
+                        int(year) < cmip6_eras[era]["start"]
+                        or int(year) > cmip6_eras[era]["end"]
+                    ):  # remove unwanted years
+                        continue
+                    for indicator in results[scenario][model][year]:
+                        # if the indicator is not in the dict, add it
+                        if indicator not in model_scenario_era_values[era]:
+                            model_scenario_era_values[era][indicator] = []
+                        # if the value is not -9999, "nan", "null", or None, add it to the values list
+                        if results[scenario][model][year][indicator] not in [
+                            -9999,
+                            "nan",
+                            "null",
+                            None,
+                        ]:
+                            model_scenario_era_values[era][indicator].append(
+                                results[scenario][model][year][indicator]
+                            )
+
+                # compute stats for each indicator for this model/scenario/era
+                for era in model_scenario_era_values:
+                    results[scenario][model][era] = dict()
+                    for indicator in model_scenario_era_values[era]:
+                        # if list of values is not empty, compute min, mean, and max
+                        if model_scenario_era_values[era][indicator]:
+                            era_indicator_mmm = {
+                                "min": round(
+                                    np.nanmin(
+                                        model_scenario_era_values[era][indicator]
+                                    ),
+                                    1,
+                                ),
+                                "mean": round(
+                                    np.nanmean(
+                                        model_scenario_era_values[era][indicator]
+                                    ),
+                                    1,
+                                ),
+                                "max": round(
+                                    np.nanmax(
+                                        model_scenario_era_values[era][indicator]
+                                    ),
+                                    1,
+                                ),
+                            }
+                        # if list of values is empty, set min, mean, and max to -9999
+                        else:
+                            era_indicator_mmm = {
+                                "min": -9999,
+                                "mean": -9999,
+                                "max": -9999,
+                            }
+                        # save results in the results dict
+                        results[scenario][model][era][indicator] = era_indicator_mmm
+
+    # prune the results dict to remove any empty dicts (i.e. models/scenarios/eras with no data)
+    for scenario in results:
+        for model in results[scenario]:
+            if results[scenario][model]:
+                results[scenario][model] = {
+                    era: results[scenario][model][era]
+                    for era in results[scenario][model]
+                    if era in cmip6_eras.keys()
+                }
+
+    return results
 
 
 @routes.route("/indicators/")
@@ -416,118 +471,11 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
                 lat, lon, var_ep_lu["cmip6_indicators"]["cov_id_str"], "EPSG:4326"
             )
         )
-        # using the dimension names and dim_encodings, create the nested dict to hold results
-        dim_encodings = var_ep_lu["cmip6_indicators"]["dim_encodings"]
-        # there is a year dimension, but its not represented in the encodings dict, so we need to add the year dimension manually
-        dim_encodings["year"] = {int(i - 1950): str(i) for i in range(1950, 2101)}
-        dimnames = [
-            "scenario",
-            "model",
-            "year",
-        ]  # we could get these directly from the encodings, but they would be in the wrong order and also contain the band names ("indicator" key) which is not actually a dimension .... so we define explicitly here
-        dim_combos = []
-        iter_coords = list(
-            itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
-        )
-        for coords in iter_coords:
-            map_list = [
-                dim_encodings[dimname][coord]
-                for coord, dimname in zip(coords, dimnames)
-            ]
-            dim_combos.append(map_list)
-        results = generate_nested_dict(dim_combos)
 
-        # populate the results dict with the fetched data
-        # using the coords to index into the rasdaman response
-        for coords, dim_combo in zip(iter_coords, dim_combos):
-            indicator_values = rasdaman_response[coords[0]][coords[1]][coords[2]]
-
-            # split the string of values into a list of strings
-            indicator_values = indicator_values.split(" ")
-            # then replace the items with floats, unless "nan" or "null" in which case we use -9999
-            indicator_values = [
-                float(value) if value not in ["nan", "null"] else -9999
-                for value in indicator_values
-            ]
-
-            # if all values are -9999, remove this year from the results
-            if all([value == -9999 for value in indicator_values]):
-                results[dim_combo[0]][dim_combo[1]].pop(dim_combo[2])
-                continue
-
-            indicator_dict = dict()
-            for indicator_name, indicator_value in zip(
-                var_ep_lu["cmip6_indicators"]["bandnames"], indicator_values
-            ):
-                indicator_dict[indicator_name] = indicator_value
-
-            results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
-
-        results = nullify_and_prune(results, "cmip6_indicators")
+        results = package_cmip6_point_data(rasdaman_response)
 
         if "summarize" in request.args and request.args.get("summarize") == "mmm":
-            era_values = dict()
-            for era in cmip6_eras:
-                era_values[era] = dict()
-                for scenario in results:
-                    # remove impossible combinations of scenario and era
-                    if scenario == "historical" and era != "historical":
-                        continue
-                    if scenario != "historical" and era == "historical":
-                        continue
-                    for model in results[scenario]:
-                        # check for an empty dict (means the scenario is missing for this model), if so, skip to the next model
-                        if not results[scenario][model]:
-                            continue
-                        for year in results[scenario][model]:
-                            if (
-                                int(year) < cmip6_eras[era]["start"]
-                                or int(year) > cmip6_eras[era]["end"]
-                            ):  # remove unwanted years
-                                continue
-                            for indicator in results[scenario][model][year]:
-                                if indicator not in era_values[era]:
-                                    era_values[era][indicator] = []
-                                if results[scenario][model][year][indicator] not in [
-                                    -9999,
-                                    "nan",
-                                    "null",
-                                    None,
-                                ]:
-                                    era_values[era][indicator].append(
-                                        results[scenario][model][year][indicator]
-                                    )
-            for era in era_values:
-                results[scenario][model][era] = dict()
-                for indicator in era_values[era]:
-                    # if list of values is not empty, compute min, mean, and max
-                    if era_values[era][indicator]:
-                        era_indicator_mmm = {
-                            "min": round(np.nanmin(era_values[era][indicator]), 1),
-                            "mean": round(np.nanmean(era_values[era][indicator]), 1),
-                            "max": round(np.nanmax(era_values[era][indicator]), 1),
-                        }
-                    else:
-                        era_indicator_mmm = {
-                            "min": -9999,
-                            "mean": -9999,
-                            "max": -9999,
-                        }
-                    results[scenario][model][era][indicator] = era_indicator_mmm
-
-            print(results)
-
-            # TODO: make this work!!!
-            # remove the individual years from the results dict
-            for scenario in results:
-                for model in results[scenario]:
-                    results[scenario][model] = {
-                        era: results[scenario][model][era]
-                        for era in list(cmip6_eras.keys())
-                    }
-
-            print(results)
-
+            results = summarize_cmip6_mmm(results)
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
             return create_csv(results, "cmip6_indicators", place_id, lat, lon)
@@ -580,65 +528,7 @@ def run_fetch_cmip5_indicators_point_data(lat, lon):
             )
         )
 
-        # using the dimension names and dim_encodings, create the nested dict to hold results
-        dim_encodings = var_ep_lu["cmip5_indicators"]["dim_encodings"]
-        dimnames = [
-            "indicator",
-            "era",
-            "model",
-            "scenario",
-            "stat",
-        ]  # we could get these directly from the encodings, but they would be in the wrong order .... so we define explicitly here
-        dim_combos = []
-        iter_coords = list(
-            itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
-        )
-        for coords in iter_coords:
-            map_list = [
-                dim_encodings[dimname][coord]
-                for coord, dimname in zip(coords, dimnames)
-            ]
-            dim_combos.append(map_list)
-        results = generate_nested_dict(dim_combos)
-
-        # populate the results dict with the fetched data
-        # using the coords to index into the rasdaman response
-        for coords, dim_combo in zip(iter_coords, dim_combos):
-
-            # check for impossible combinations of model and scenario, leaving these unpopulated (will be pruned)
-            if dim_combo[1] == "historical" and dim_combo[2] != "Daymet":
-                continue
-            if dim_combo[1] != "historical" and dim_combo[2] == "Daymet":
-                continue
-            if dim_combo[2] == "Daymet" and dim_combo[3] != "historical":
-                continue
-            if dim_combo[2] != "Daymet" and dim_combo[3] == "historical":
-                continue
-
-            stat_value = rasdaman_response[coords[0]][coords[1]][coords[2]][coords[3]][
-                coords[4]
-            ]
-            if isnan(stat_value):
-                stat_value = -9999
-
-            # round the values for certain indicators
-            stat_value = (
-                stat_value
-                if (
-                    dim_combo[0] == "hd"
-                    or dim_combo[0] == "cd"
-                    or dim_combo[0] == "rx1day"
-                    or dim_combo[0] == "rx5day"
-                )
-                else floor(stat_value)
-            )
-
-            results[dim_combo[0]][dim_combo[1]][dim_combo[2]][dim_combo[3]][
-                dim_combo[4]
-            ] = stat_value
-
-        results = nullify_and_prune(results, "ncar12km_indicators")
-        results = prune_nulls_with_max_intensity(results)
+        results = package_cmip5_point_data(rasdaman_response)
 
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
@@ -651,122 +541,6 @@ def run_fetch_cmip5_indicators_point_data(lat, lon):
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
-
-
-# def summarize_within_poly_marr(ds, poly_mask_arr, dim_encodings, bandname="Gray"):
-#     """Summarize a single Data Variable of a xarray.DataSet within a polygon. Return the results as a nested dict.
-
-#     NOTE - This is a candidate for de-duplication! Only defining here because some
-#     things are out-of-sync with existing ways of doing things (e.g., key names
-#     in dim_encodings dicts in other endpoints are not equal to axis names in coverages)
-
-#     Args:
-#         ds (xarray.DataSet): DataSet with "Gray" as variable of interest
-#         poly_mask_arr (numpy.ma.core.MaskedArra): a masked array masking the cells intersecting the polygon of interest
-#         dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the data and map integer data coordinates to models, scenarios, variables, etc.
-#         bandname (str): name of variable in ds, defaults to "Gray" for rasdaman coverages where the name is not given at ingest
-
-#     Returns:
-#         Nested dict of results for all non-X/Y axis combinations,
-#     """
-#     # will actually operate on underlying DataArray
-
-#     da = ds[bandname]
-#     # get axis (dimension) names and make list of all coordinate combinations
-#     all_dims = da.dims
-#     dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-#     iter_coords = list(
-#         itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-#     )
-
-#     # generate all combinations of decoded coordinate values
-#     dim_combos = []
-#     for coords in iter_coords:
-#         map_list = [
-#             dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-#         ]
-#         dim_combos.append(map_list)
-#     aggr_results = generate_nested_dict(dim_combos)
-
-#     data_arr = []
-#     for coords in iter_coords:
-#         sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-#         data_arr.append(da.sel(sel_di).values)
-#     data_arr = np.array(data_arr)
-
-#     # need to transpose the 2D spatial slices if X is the "rows" dimension
-#     if all_dims.index("X") < all_dims.index("Y"):
-#         data_arr = data_arr.transpose(0, 2, 1)
-
-#     data_arr_mask = np.broadcast_to(poly_mask_arr.mask, data_arr.shape)
-#     data_arr[data_arr_mask] = np.nan
-#     results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-#     results[np.isnan(results)] = -9999
-
-#     for map_list, result in zip(dim_combos, results):
-#         if len(map_list) > 1:
-#             data = get_from_dict(aggr_results, map_list[:-1])
-#             result = (
-#                 round(result, 1)
-#                 if map_list[0] in ["hd", "cd", "rx1day", "rx5day"]
-#                 else floor(result)
-#             )
-#             data[map_list[-1]] = result
-#         else:
-#             aggr_results[map_list[0]] = round(result, 4)
-
-#     indicators = cmip5_dim_encodings["indicator"].values()
-#     eras = cmip5_dim_encodings["era"].values()
-#     models = cmip5_dim_encodings["model"].values()
-#     scenarios = cmip5_dim_encodings["scenario"].values()
-
-#     # Prune impossible (always nodata) historical/projected combos from results.
-#     for indicator, era, model, scenario in itertools.product(
-#         indicators, eras, models, scenarios
-#     ):
-#         if model in aggr_results[indicator][era]:
-#             if scenario in aggr_results[indicator][era][model]:
-#                 # Remove impossible combinations of era and scenario.
-#                 if era == "historical" and scenario != "historical":
-#                     del aggr_results[indicator][era][model][scenario]
-#                 elif era != "historical" and scenario == "historical":
-#                     del aggr_results[indicator][era][model][scenario]
-#             # Remove impossible combinations of era and model.
-#             if era == "historical" and model != "Daymet":
-#                 del aggr_results[indicator][era][model]
-#             elif era != "historical" and model == "Daymet":
-#                 del aggr_results[indicator][era][model]
-
-#     return aggr_results
-
-
-def run_aggregate_var_polygon(poly_id):
-    """Get data summary (e.g. zonal mean) of single variable in polygon.
-
-    Args:
-        poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
-
-    Returns:
-        aggr_results (dict): data representing zonal means within the polygon.
-
-    Notes:
-        Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
-    """
-    poly = get_poly(poly_id)
-
-    ds_list = asyncio.run(fetch_bbox_data(poly.bounds, cmip5_indicators_coverage_id))
-
-    bandname = "Gray"
-    poly_mask_arr = get_poly_mask_arr(ds_list[0], poly, bandname)
-
-    aggr_results = summarize_within_poly_marr(
-        ds_list[-1], poly_mask_arr, cmip5_dim_encodings, bandname
-    )
-
-    for era, summaries in aggr_results.items():
-        aggr_results[era] = summaries
-
-    return aggr_results
 
 
 @routes.route(
@@ -784,7 +558,6 @@ def get_cmip5_indicators_area_data(var_id):
         poly_pkg (dict): zonal mode of indicator summary results for AOI polygon
 
     """
-
     poly_type = validate_var_id(var_id)
 
     # This is only ever true when it is returning an error template
@@ -792,18 +565,17 @@ def get_cmip5_indicators_area_data(var_id):
         return poly_type
 
     try:
-        indicators_pkg = run_aggregate_var_polygon(var_id)
+        aggr_results = run_aggregate_var_polygon(var_id, "cmip5_indicators")
+
     except:
         return render_template("422/invalid_area.html"), 422
 
-    indicators_pkg = run_aggregate_var_polygon(var_id)
-
-    if indicators_pkg in [{}, None, 0]:
+    if aggr_results in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
 
-    indicators_pkg = postprocess(indicators_pkg, "ncar12km_indicators")
+    aggr_results = postprocess(aggr_results, "ncar12km_indicators")
 
     if request.args.get("format") == "csv":
-        return create_csv(indicators_pkg, "ncar12km_indicators", var_id)
+        return create_csv(aggr_results, "ncar12km_indicators", var_id)
 
-    return indicators_pkg
+    return aggr_results

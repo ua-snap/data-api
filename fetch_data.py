@@ -163,7 +163,8 @@ async def fetch_data(urls):
 
 
 def get_poly(poly_id, crs=3338):
-    """Get the GeoDataFrame corresponding to the polygon ID from GeoServer. Forces EPSG 3338 if CRS not specified.
+    """Get the GeoDataFrame corresponding to the polygon ID from GeoServer.
+    Assumes GeoServer polygon is in EPSG:4326; returns in EPSG:3338 if CRS is not specified.
     Args:
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
@@ -181,11 +182,9 @@ def get_poly(poly_id, crs=3338):
             ]
         )
     )
-    if crs == 3338:
-        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
-        # poly = poly_gdf.iloc[0]["geometry"]
-    else:
-        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+
+    poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+
     return poly
 
 
@@ -360,7 +359,8 @@ def calculate_zonal_stats(da_i, polygon_array):
     if values:
         zonal_stats["count"] = len(values)
         zonal_stats["mean"] = np.nanmean(values)
-
+        zonal_stats["min"] = np.nanmin(values)
+        zonal_stats["max"] = np.nanmax(values)
         # the following stat can be used to compute a mode
         # mode is not computed here because same datasets (e.g. beetles) need to drop nan values first
         unique_vals, counts = np.unique(values, return_counts=True)
@@ -369,6 +369,8 @@ def calculate_zonal_stats(da_i, polygon_array):
     else:
         zonal_stats["count"] = 0
         zonal_stats["mean"] = np.nan
+        zonal_stats["min"] = np.nan
+        zonal_stats["max"] = np.nan
         zonal_stats["unique_values_and_counts"] = {}
 
     return zonal_stats
