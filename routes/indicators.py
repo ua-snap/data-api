@@ -15,11 +15,9 @@ from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
     fetch_data,
-    fetch_bbox_data,
     fetch_bbox_netcdf_list,
     get_poly,
     interpolate_and_compute_zonal_stats,
-    get_from_dict,
     generate_nested_dict,
     itertools,
     describe_via_wcps,
@@ -476,6 +474,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
 
         if "summarize" in request.args and request.args.get("summarize") == "mmm":
             results = summarize_cmip6_mmm(results)
+
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
             return create_csv(results, "cmip6_indicators", place_id, lat, lon)
