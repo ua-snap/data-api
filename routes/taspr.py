@@ -133,11 +133,11 @@ dot_precip_coverage_id = "dot_precip"
 # lookup tables derived from the IEM rasdaman ingest luts.py
 # pay attention to any changes with ingest and change here as needed
 dim_encodings = {
-    "varnames": {
+    "varname": {
         0: "pr",
         1: "tas",
     },
-    "decades": {
+    "decade": {
         0: "2010_2019",
         1: "2020_2029",
         2: "2030_2039",
@@ -148,37 +148,23 @@ dim_encodings = {
         7: "2080_2089",
         8: "2090_2099",
     },
-    "months": {
-        0: "Jan",
-        1: "Feb",
-        2: "Mar",
-        3: "Apr",
-        4: "May",
-        5: "Jun",
-        6: "Jul",
-        7: "Aug",
-        8: "Sep",
-        9: "Oct",
-        10: "Nov",
-        11: "Dec",
-    },
-    "models": {
+    "model": {
         0: "5modelAvg",
         1: "CCSM4",
         2: "MRI-CGCM3",
     },
-    "scenarios": {
+    "scenario": {
         0: "rcp45",
         1: "rcp60",
         2: "rcp85",
     },
-    "seasons": {
+    "season": {
         0: "DJF",
         1: "JJA",
         2: "MAM",
         3: "SON",
     },
-    "stats": {
+    "stat": {
         0: "hi_std",
         1: "lo_std",
         2: "max",
@@ -614,12 +600,12 @@ def package_cru_point_data(point_data, varname):
     point_data_pkg = {}
     # hard-code summary period for CRU
     for si, s_li in enumerate(point_data):  # (nested list with varname at dim 0)
-        season = dim_encodings["seasons"][si]
+        season = dim_encodings["season"][si]
         model = "CRU-TS40"
         scenario = "CRU_historical"
         point_data_pkg[season] = {model: {scenario: {varname: {}}}}
         for si, value in enumerate(s_li):  # (nested list with statistic at dim 0)
-            stat = dim_encodings["stats"][si]
+            stat = dim_encodings["stat"][si]
             if value is None:
                 point_data_pkg[season][model][scenario][varname][stat] = None
             else:
@@ -649,18 +635,18 @@ def package_ar5_point_data(point_data, varname):
     # having that mapping tracked somewhere such that it is
     # imported to help prevent breakage.
     for di, m_li in enumerate(point_data):  # (nested list with month at dim 0)
-        decade = dim_encodings["decades"][di]
+        decade = dim_encodings["decade"][di]
         point_data_pkg[decade] = {}
         for ai, mod_li in enumerate(m_li):  # (nested list with model at dim 0)
-            season = dim_encodings["seasons"][ai]
+            season = dim_encodings["season"][ai]
             point_data_pkg[decade][season] = {}
             for mod_i, s_li in enumerate(
                 mod_li
             ):  # (nested list with scenario at dim 0)
-                model = dim_encodings["models"][mod_i]
+                model = dim_encodings["model"][mod_i]
                 point_data_pkg[decade][season][model] = {}
                 for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
-                    scenario = dim_encodings["scenarios"][si]
+                    scenario = dim_encodings["scenario"][si]
                     point_data_pkg[decade][season][model][scenario] = {
                         varname: (
                             None
@@ -686,13 +672,13 @@ def package_ar5_point_summary(point_data, varname):
     """
     point_data_pkg = {}
     for si, mod_li in enumerate(point_data):  # (nested list with model at dim 0)
-        season = dim_encodings["seasons"][si]
+        season = dim_encodings["season"][si]
         point_data_pkg[season] = {}
         for mod_i, s_li in enumerate(mod_li):  # (nested list with scenario at dim 0)
-            model = dim_encodings["models"][mod_i]
+            model = dim_encodings["model"][mod_i]
             point_data_pkg[season][model] = {}
             for si, value in enumerate(s_li):  # (nested list with varname at dim 0)
-                scenario = dim_encodings["scenarios"][si]
+                scenario = dim_encodings["scenario"][si]
                 point_data_pkg[season][model][scenario] = {
                     varname: (
                         None
@@ -1040,16 +1026,13 @@ def combine_pkg_dicts(tas_di, pr_di):
     # for models/scenarios etc with AR5 data
     dim_combos = [
         ("1950_2009", season, "CRU-TS40", "CRU_historical")
-        for season in dim_encodings["seasons"].values()
+        for season in dim_encodings["season"].values()
     ]
     # generate combinations of AR5 coords
-    periods = ["2040_2069", "2070_2099", *dim_encodings["decades"].values()]
+    periods = ["2040_2069", "2070_2099", *dim_encodings["decade"].values()]
     dim_basis = [periods]
     dim_basis.extend(
-        [
-            dim_encodings[dimname].values()
-            for dimname in ["seasons", "models", "scenarios"]
-        ]
+        [dim_encodings[dimname].values() for dimname in ["season", "model", "scenario"]]
     )
     dim_combos.extend(itertools.product(*dim_basis))
     for map_list in dim_combos:
@@ -1139,8 +1122,8 @@ def run_fetch_var_point_data(var_ep, lat, lon):
     varname = var_ep_lu[var_ep]
     # get the coordinate value for the specified variable
     # just a way to lookup reverse of varname
-    var_coord = list(dim_encodings["varnames"].keys())[
-        list(dim_encodings["varnames"].values()).index(varname)
+    var_coord = list(dim_encodings["varname"].keys())[
+        list(dim_encodings["varname"].values()).index(varname)
     ]
 
     x, y = project_latlon(lat, lon, 3338)
@@ -1203,36 +1186,79 @@ def run_aggregate_allvar_polygon(poly_id):
 
 def run_aggregate_var_polygon(var_ep, poly_id):
     """Get data summary (e.g. zonal mean) of single variable in polygon.
-
+    Fetches data on the individual instances of the singular dimension combinations.
     Args:
         var_ep (str): Data variable. One of 'taspr', 'temperature', or 'precipitation'.
-        poly_gdf (GeoDataFrame): the object from which to fetch the polygon, e.g. the HUC 8 geodataframe for watershed polygons
         poly_id (str or int): the unique `id` used to identify the Polygon for which to compute the zonal mean.
-
     Returns:
         aggr_results (dict): data representing zonal means within the polygon.
-
-    Notes:
-        Fetches data on the individual instances of the singular dimension combinations. Consider validating polygon IDs in `validate_data` or `lat_lon` module.
     """
     poly = get_poly(poly_id)
-    # mapping between coordinate values (ints) and variable names (strs)
     varname = var_ep_lu[var_ep]
-    var_coord = list(dim_encodings["varnames"].keys())[
-        list(dim_encodings["varnames"].values()).index(varname)
+    bandname = "Gray"
+
+    # find the integer coordinate for the variable name
+    var_coord = list(dim_encodings["varname"].keys())[
+        list(dim_encodings["varname"].values()).index(varname)
     ]
-    # fetch data within the Polygon bounding box
+
+    # fetch variable data within the Polygon bounding box
+    # data is fetched from "iem_cru_2km_taspr_seasonal_baseline_stats":
+    #       ds_list[0] = pre-summarized 1950-2009 baseline
+    # and from "iem_cru_2km_taspr_ar5_seasonal":
+    #       ds_list[1] = summarized decades 3-5 (2040-2069)
+    #       ds_list[2] = summarized decades 6-8 (2070-2099)
+    #       ds_list[3] = unsummarized all decades (2010-2099)
+
+    summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
     cov_ids, summary_decades = make_fetch_args()
     ds_list = asyncio.run(
-        fetch_bbox_netcdf(*poly.bounds, var_coord, cov_ids, summary_decades)
+        fetch_bbox_netcdf(*poly.total_bounds, var_coord, cov_ids, summary_decades)
     )
-    # average over the following decades / time periods
-    aggr_results = {}
-    summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
+
     for ds, period in zip(ds_list[:-1], summary_periods):
-        aggr_results[period] = summarize_within_poly(
-            ds, poly, dim_encodings, "Gray", varname
+
+        print(ds)
+        print(period)
+
+        # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
+        # and create a dict to hold the results for each combo
+        all_dims = ds[bandname].dims
+        dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
+
+        print(dimnames)
+
+        iter_coords = list(
+            itertools.product(*[list(ds[dim].values) for dim in dimnames])
         )
+
+        print(iter_coords)
+
+        dim_combos = []
+        for coords in iter_coords:
+
+            print(coords)
+            # convert coords to integers
+            coords = [int(coord) for coord in coords]
+            print(coords)
+
+            map_list = [
+                dim_encodings[dimname][coord]
+                for coord, dimname in zip(coords, dimnames)
+            ]
+            dim_combos.append(map_list)
+
+        print(dim_combos)
+
+        aggr_results = {}
+        aggr_results[period] = generate_nested_dict(dim_combos)
+
+        # aggr_results[period] = summarize_within_poly(
+        #     ds, poly, dim_encodings, "Gray", varname
+        # )
+
+        print(aggr_results)
+
     ar5_results = summarize_within_poly(
         ds_list[-1], poly, dim_encodings, "Gray", varname
     )
@@ -1246,7 +1272,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
             }
         }
     # add the varnames for AR5
-    for period in summary_periods[1:] + list(dim_encodings["decades"].values()):
+    for period in summary_periods[1:] + list(dim_encodings["decade"].values()):
         for season in aggr_results[period]:
             for model in aggr_results[period][season]:
                 for scenario in aggr_results[period][season][model]:
