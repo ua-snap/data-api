@@ -425,6 +425,8 @@ def summarize_cmip6_mmm(results):
                     for era in results[scenario][model]
                     if era in cmip6_eras.keys()
                 }
+    results = nullify_and_prune(results, "cmip6_indicators")
+    results = prune_nulls_with_max_intensity(results)
 
     return results
 
