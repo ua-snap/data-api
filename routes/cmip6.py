@@ -259,7 +259,9 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     cmip6_bbox = construct_latlon_bbox_from_coverage_bounds(metadata)
-    within_bounds = validate_latlon_in_bboxes(lat, lon, [cmip6_bbox])
+    within_bounds = validate_latlon_in_bboxes(
+        lat, lon, [cmip6_bbox], [cmip6_monthly_coverage_id]
+    )
     if within_bounds == 422:
         return (
             render_template(

@@ -98,7 +98,17 @@ def run_point_fetch_all_landfastice(lat, lon):
     # now construct bboxes to check if the point is within any coverage extent
     beaufort_bbox = construct_latlon_bbox_from_coverage_bounds(beaufort_meta)
     chukchi_bbox = construct_latlon_bbox_from_coverage_bounds(chukchi_meta)
-    within_bounds = validate_latlon_in_bboxes(lat, lon, [beaufort_bbox, chukchi_bbox])
+    within_bounds = validate_latlon_in_bboxes(
+        lat,
+        lon,
+        [beaufort_bbox, chukchi_bbox],
+        [beaufort_daily_slie_id, chukchi_daily_slie_id],
+    )
+    if within_bounds == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
     if within_bounds == 422:
         return (
             render_template(

@@ -6,6 +6,11 @@ host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
 bbox_offset = 0.000000001
 
+# Coverages with non-EPSG:3338 projections
+geotiff_projections = {
+    "hsia_arctic_production": "EPSG:3572",
+}
+
 landcover_names = {
     0: {"type": "No Data at this location.", "color": "#ffffff"},
     1: {"type": "Temperate or sub-polar needleleaf forest", "color": "#003d00"},
