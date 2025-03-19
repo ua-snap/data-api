@@ -1335,8 +1335,6 @@ def run_aggregate_var_polygon(var_ep, poly_id):
         for era in aggr_results:
             aggr_results_combined[era] = aggr_results[era]
 
-    print(aggr_results_combined)
-
     return aggr_results_combined
 
 
