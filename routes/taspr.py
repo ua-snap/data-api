@@ -6,6 +6,7 @@ from urllib.parse import quote
 import numpy as np
 import pandas as pd
 import xarray as xr
+from math import floor
 from flask import (
     Blueprint,
     render_template,
@@ -21,8 +22,10 @@ from fetch_data import (
     fetch_data,
     fetch_wcs_point_data,
     get_from_dict,
+    interpolate_and_compute_zonal_stats,
     summarize_within_poly,
     get_poly,
+    generate_nested_dict,
 )
 from validate_request import (
     validate_latlon,
@@ -1193,7 +1196,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     Returns:
         aggr_results (dict): data representing zonal means within the polygon.
     """
-    poly = get_poly(poly_id)
+    polygon = get_poly(poly_id)
     varname = var_ep_lu[var_ep]
     bandname = "Gray"
 
@@ -1209,77 +1212,132 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     #       ds_list[1] = summarized decades 3-5 (2040-2069)
     #       ds_list[2] = summarized decades 6-8 (2070-2099)
     #       ds_list[3] = unsummarized all decades (2010-2099)
-
-    summary_periods = ["1950_2009", "2040_2069", "2070_2099"]
+    summary_periods = ["1950_2009", "2040_2069", "2070_2099", None]
     cov_ids, summary_decades = make_fetch_args()
     ds_list = asyncio.run(
-        fetch_bbox_netcdf(*poly.total_bounds, var_coord, cov_ids, summary_decades)
+        fetch_bbox_netcdf(*polygon.total_bounds, var_coord, cov_ids, summary_decades)
     )
+    # use a flag to indicate if we need to add CRU labels (they are not included in the coverage axes)
+    add_cru_flag = [True, False, False, False]
+    # use another flag to indicate if we need have the summary period as a dimension (ie the 4th dataset)
+    add_ar5_flag = [False, False, False, True]
 
-    for ds, period in zip(ds_list[:-1], summary_periods):
+    aggr_results_combined = {}
 
-        print(ds)
-        print(period)
-
+    # run the zonal stats process for the summary periods
+    for ds, period, cru, ar5 in zip(
+        ds_list, summary_periods, add_cru_flag, add_ar5_flag
+    ):
         # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
         # and create a dict to hold the results for each combo
         all_dims = ds[bandname].dims
         dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
-
-        print(dimnames)
-
         iter_coords = list(
             itertools.product(*[list(ds[dim].values) for dim in dimnames])
         )
-
-        print(iter_coords)
-
         dim_combos = []
         for coords in iter_coords:
-
-            print(coords)
-            # convert coords to integers
-            coords = [int(coord) for coord in coords]
-            print(coords)
-
             map_list = [
                 dim_encodings[dimname][coord]
                 for coord, dimname in zip(coords, dimnames)
             ]
             dim_combos.append(map_list)
 
-        print(dim_combos)
+        # if we are summarizing over a period, we need to use the summary periods as keys
+        # otherwise we use the full dim_combos to populate decades as keys (ie the 4th dataset)
+        if period is not None:
+            aggr_results = {}
+            aggr_results[period] = generate_nested_dict(dim_combos)
+        else:
+            aggr_results = generate_nested_dict(dim_combos)
 
-        aggr_results = {}
-        aggr_results[period] = generate_nested_dict(dim_combos)
-
-        # aggr_results[period] = summarize_within_poly(
-        #     ds, poly, dim_encodings, "Gray", varname
-        # )
-
-        print(aggr_results)
-
-    ar5_results = summarize_within_poly(
-        ds_list[-1], poly, dim_encodings, "Gray", varname
-    )
-    for decade, summaries in ar5_results.items():
-        aggr_results[decade] = summaries
-    #  add the model, scenario, and varname levels for CRU
-    for season in aggr_results[summary_periods[0]]:
-        aggr_results[summary_periods[0]][season] = {
-            "CRU-TS40": {
-                "CRU_historical": {varname: aggr_results[summary_periods[0]][season]}
-            }
-        }
-    # add the varnames for AR5
-    for period in summary_periods[1:] + list(dim_encodings["decade"].values()):
-        for season in aggr_results[period]:
-            for model in aggr_results[period][season]:
-                for scenario in aggr_results[period][season][model]:
-                    aggr_results[period][season][model][scenario] = {
-                        varname: aggr_results[period][season][model][scenario]
+        # add model/scenario labels for the CRU dataset, and varname labels for all datasets
+        for era in aggr_results:
+            for season in aggr_results[era]:
+                if cru:
+                    season_stat_dict = aggr_results[era][season].copy()
+                    aggr_results[era][season] = {
+                        "CRU-TS40": {"CRU_historical": {varname: season_stat_dict}}
                     }
-    return aggr_results
+                else:
+                    for model in aggr_results[era][season]:
+                        for scenario in aggr_results[era][season][model]:
+                            aggr_results[era][season][model][scenario] = {varname: {}}
+
+        # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
+        for coords, dim_combo in zip(iter_coords, dim_combos):
+            sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+            combo_ds = ds.sel(sel_di)
+            combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
+                polygon, combo_ds
+            )
+
+            if cru:
+                if dim_combo[1] == "mean":
+                    result = round(
+                        combo_zonal_stats_dict["mean"],
+                        dim_encodings["rounding"][varname],
+                    )
+                elif dim_combo[1] == "min":
+                    result = round(
+                        combo_zonal_stats_dict["min"],
+                        dim_encodings["rounding"][varname],
+                    )
+                elif dim_combo[1] == "max":
+                    result = round(
+                        combo_zonal_stats_dict["max"],
+                        dim_encodings["rounding"][varname],
+                    )
+                # we are taking means of all other stat values here, which is mathematically questionable!
+                else:
+                    result = round(
+                        combo_zonal_stats_dict["mean"],
+                        dim_encodings["rounding"][varname],
+                    )
+
+                # use the dim_combo to index into the results dict (period, season, model, scenario, varname, stat)
+                aggr_results["1950_2009"][dim_combo[0]]["CRU-TS40"]["CRU_historical"][
+                    varname
+                ][dim_combo[1]] = result
+
+            else:
+                mean = round(
+                    combo_zonal_stats_dict["mean"], dim_encodings["rounding"][varname]
+                )
+                min = round(
+                    combo_zonal_stats_dict["min"], dim_encodings["rounding"][varname]
+                )
+                max = round(
+                    combo_zonal_stats_dict["max"], dim_encodings["rounding"][varname]
+                )
+
+                result = mean  # default to mean for projected data
+
+                # option to return min/mean/max for projected data
+                # result = {
+                #     "mean": mean,
+                #     "min": min,
+                #     "max": max,
+                # }
+
+                # populate the dict with results
+                # need to skip a dimension in the combo for the 4th dataset
+                if ar5:
+                    aggr_results[dim_combo[0]][dim_combo[1]][dim_combo[2]][
+                        dim_combo[3]
+                    ][varname] = result
+                else:
+                    aggr_results[period][dim_combo[0]][dim_combo[1]][dim_combo[2]][
+                        varname
+                    ] = result
+
+        # combine the results for this summary period with the overall results
+        for era in aggr_results:
+            aggr_results_combined[era] = aggr_results[era]
+
+    print(aggr_results_combined)
+
+    return aggr_results_combined
 
 
 def run_fetch_proj_precip_point_data(lat, lon, csv=False):
