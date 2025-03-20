@@ -1,5 +1,6 @@
 import asyncio
 import numpy as np
+import itertools
 from flask import Blueprint, render_template, request
 
 # local imports
@@ -11,7 +12,6 @@ from fetch_data import (
     describe_via_wcps,
     generate_nested_dict,
     interpolate_and_compute_zonal_stats,
-    itertools,
     get_poly,
 )
 from csv_functions import create_csv

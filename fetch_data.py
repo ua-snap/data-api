@@ -4,7 +4,6 @@ A module of data gathering functions for use across multiple endpoints.
 
 import copy
 import io
-import itertools
 import operator
 import time
 import asyncio
@@ -21,7 +20,6 @@ from functools import reduce
 from aiohttp import ClientSession
 from flask import current_app as app
 
-from rasterstats import zonal_stats
 from generate_requests import (
     generate_wcs_getcov_str,
     generate_netcdf_wcs_getcov_str,
@@ -247,24 +245,6 @@ async def fetch_bbox_netcdf_list(urls):
     # create xarray.DataSets from bytestring list
     ds_list = [xr.open_dataset(io.BytesIO(bytestr)) for bytestr in netcdf_bytes_list]
     return ds_list
-
-
-async def fetch_bbox_data(bbox_bounds, cov_id_str):
-    """Make the async request for the data at the specified bbox for a specific coverage
-
-    Args:
-        bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
-        cov_id_str (str): shared portion of coverage_ids to query
-
-    Returns:
-        list of data results from each of historical and future coverages
-    """
-    # set up WCS request strings
-    request_strs = []
-    request_strs.append(generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id_str))
-    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
-    bbox_ds_list = await fetch_bbox_netcdf_list(urls)
-    return bbox_ds_list
 
 
 def get_scale_factor(grid_cell_area, polygon_area):

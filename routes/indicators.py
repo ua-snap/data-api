@@ -7,6 +7,7 @@ The thresholds and eras are preconfigured in the coverage. Calling this the "bas
 import json
 import asyncio
 import numpy as np
+import itertools
 from math import floor, isnan
 from flask import Blueprint, render_template, request
 
@@ -19,7 +20,6 @@ from fetch_data import (
     get_poly,
     interpolate_and_compute_zonal_stats,
     generate_nested_dict,
-    itertools,
     describe_via_wcps,
 )
 from validate_request import (
