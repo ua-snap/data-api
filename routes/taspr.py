@@ -23,7 +23,6 @@ from fetch_data import (
     fetch_wcs_point_data,
     get_from_dict,
     interpolate_and_compute_zonal_stats,
-    summarize_within_poly,
     get_poly,
     generate_nested_dict,
 )
