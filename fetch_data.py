@@ -342,7 +342,7 @@ def rasterize_polygon(da_i, x_dim, y_dim, polygon):
     return rasterized_polygon_array
 
 
-def calculate_zonal_stats(da_i, polygon_array):
+def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim):
     """Calculate zonal statistics for an xarray data array and a rasterized polygon array of the same shape.
     Args:
         da_i (xarray.DataArray): xarray data array, probably interpolated
@@ -353,7 +353,7 @@ def calculate_zonal_stats(da_i, polygon_array):
     zonal_stats = {}
 
     # transpose to match numpy array YX order and get values that overlap the polygon
-    arr = da_i.transpose("Y", "X").values
+    arr = da_i.transpose(y_dim, x_dim).values
     values = arr[polygon_array == 1].tolist()
 
     if values:
@@ -405,7 +405,9 @@ def interpolate_and_compute_zonal_stats(
     rasterized_polygon_array = rasterize_polygon(da_i, x_dim, y_dim, polygon)
 
     # calculate zonal statistics
-    zonal_stats_dict = calculate_zonal_stats(da_i, rasterized_polygon_array)
+    zonal_stats_dict = calculate_zonal_stats(
+        da_i, rasterized_polygon_array, x_dim, y_dim
+    )
 
     return zonal_stats_dict
 
@@ -517,17 +519,6 @@ def get_poly_mask_arr(ds, poly, bandname):
     )[0]["mini_raster_array"]
     cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
     return cropped_poly_mask
-
-
-def geotiff_zonal_stats(poly, arr, nodata_value, transform, stat_list):
-    poly_mask_arr = zonal_stats(
-        poly,
-        arr,
-        affine=transform,
-        nodata=nodata_value,
-        stats=stat_list,
-    )
-    return poly_mask_arr
 
 
 def generate_nested_dict(dim_combos):
