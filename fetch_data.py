@@ -11,6 +11,7 @@ import numpy as np
 import xarray as xr
 import rasterio
 import rioxarray
+import itertools
 from rasterio.features import rasterize
 import geopandas as gpd
 import json
@@ -390,6 +391,25 @@ def interpolate_and_compute_zonal_stats(
     )
 
     return zonal_stats_dict
+
+
+def get_all_possible_dimension_combinations(iter_coords, dim_names, dim_encodings):
+    """Get all possible combinations of dimension values for a given xarray dataset.
+    Providing dimension names allows combinations to be limited to a subset of dimensions (e.g., ignoring X and Y).
+    Args:
+        iter_coords (list): list of tuples containing all possible combinations of dimension coordinates
+        dim_names (list): list of dimension names to use for combinations
+        dim_encodings (dict): dictionary of dimension encodings, mapping dimension names to their respective encoding values
+    Returns:
+        dim_combos (list): list of lists containing the corresponding encoded values for each combination
+    """
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dim_names)
+        ]
+        dim_combos.append(map_list)
+    return dim_combos
 
 
 def generate_nested_dict(dim_combos):

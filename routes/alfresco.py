@@ -17,6 +17,7 @@ from fetch_data import (
     get_poly,
     describe_via_wcps,
     interpolate_and_compute_zonal_stats,
+    get_all_possible_dimension_combinations,
 )
 from validate_request import get_coverage_encodings
 from csv_functions import create_csv
@@ -103,12 +104,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
     dim_encodings = var_ep_lu[var_ep]["dim_encodings"]
     iter_coords = list(itertools.product(*[list(ds[dim].values) for dim in dimnames]))
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
+    dim_combos = get_all_possible_dimension_combinations(
+        iter_coords, dimnames, dim_encodings
+    )
     aggr_results = generate_nested_dict(dim_combos)
 
     # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict

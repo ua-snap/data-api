@@ -25,6 +25,7 @@ from fetch_data import (
     interpolate_and_compute_zonal_stats,
     get_poly,
     generate_nested_dict,
+    get_all_possible_dimension_combinations,
 )
 from validate_request import (
     validate_latlon,
@@ -1021,11 +1022,7 @@ def combine_pkg_dicts(tas_di, pr_di):
     Returns:
         Combined dict containing both tas and pr results
     """
-    # merge pr_di with tas_di
-    # do so by creating all dim combinations up to level of "tas"/"pr"
-    # and pull/place values
-    # start with CRU separateley since we don't have valid combinations
-    # for models/scenarios etc with AR5 data
+    # explicitly create all dim combinations since we are using multiple datasets here
     dim_combos = [
         ("1950_2009", season, "CRU-TS40", "CRU_historical")
         for season in dim_encodings["season"].values()
@@ -1234,13 +1231,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
         iter_coords = list(
             itertools.product(*[list(ds[dim].values) for dim in dimnames])
         )
-        dim_combos = []
-        for coords in iter_coords:
-            map_list = [
-                dim_encodings[dimname][coord]
-                for coord, dimname in zip(coords, dimnames)
-            ]
-            dim_combos.append(map_list)
+        dim_combos = get_all_possible_dimension_combinations(
+            iter_coords, dimnames, dim_encodings
+        )
 
         # if we are summarizing over a period, we need to use the summary periods as keys
         # otherwise we use the full dim_combos to populate decades as keys (ie the 4th dataset)

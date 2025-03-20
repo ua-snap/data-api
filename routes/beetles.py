@@ -13,6 +13,7 @@ from fetch_data import (
     generate_nested_dict,
     interpolate_and_compute_zonal_stats,
     get_poly,
+    get_all_possible_dimension_combinations,
 )
 from csv_functions import create_csv
 from validate_request import (
@@ -114,13 +115,9 @@ def run_aggregate_var_polygon(poly_id):
     all_dims = ds[bandname].dims
     dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
     dim_encodings = var_ep_lu["beetles"]["dim_encodings"]
-    iter_coords = list(itertools.product(*[list(ds[dim].values) for dim in dimnames]))
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
+    iter_coords, dim_combos = get_all_possible_dimension_combinations(
+        ds, dimnames, dim_encodings
+    )
     aggr_results = generate_nested_dict(dim_combos)
 
     # fetch each dim combo from the dataset and calculate zonal stats, adding to the results dict
@@ -212,16 +209,12 @@ def run_point_fetch_all_beetles(lat, lon):
             "scenario",
             "snowpack",
         ]  # we could get these directly from the encodings, but the encodings dict includes "risk" dimension which is actually not present in the coverage ... so we define it explicitly here
-        dim_combos = []
         iter_coords = list(
             itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
         )
-        for coords in iter_coords:
-            map_list = [
-                dim_encodings[dimname][coord]
-                for coord, dimname in zip(coords, dimnames)
-            ]
-            dim_combos.append(map_list)
+        dim_combos = get_all_possible_dimension_combinations(
+            iter_coords, dimnames, dim_encodings
+        )
         results = generate_nested_dict(dim_combos)
 
         # populate the results dict with the fetched data

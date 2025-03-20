@@ -21,6 +21,7 @@ from fetch_data import (
     interpolate_and_compute_zonal_stats,
     generate_nested_dict,
     describe_via_wcps,
+    get_all_possible_dimension_combinations,
 )
 from validate_request import (
     validate_latlon,
@@ -142,15 +143,12 @@ def package_cmip5_point_data(rasdaman_response):
         "scenario",
         "stat",
     ]
-    dim_combos = []
     iter_coords = list(
         itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
     )
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
+    dim_combos = get_all_possible_dimension_combinations(
+        iter_coords, dimnames, dim_encodings
+    )
     results = generate_nested_dict(dim_combos)
 
     # populate the results dict with the fetched data
@@ -219,12 +217,9 @@ def run_aggregate_var_polygon(poly_id, var_ep):
     dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
     dim_encodings = var_ep_lu[var_ep]["dim_encodings"]
     iter_coords = list(itertools.product(*[list(ds[dim].values) for dim in dimnames]))
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
+    dim_combos = get_all_possible_dimension_combinations(
+        iter_coords, dimnames, dim_encodings
+    )
     aggr_results = generate_nested_dict(dim_combos)
 
     # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
@@ -297,15 +292,12 @@ def package_cmip6_point_data(rasdaman_response):
         "model",
         "year",
     ]
-    dim_combos = []
     iter_coords = list(
         itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
     )
-    for coords in iter_coords:
-        map_list = [
-            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
+    dim_combos = get_all_possible_dimension_combinations(
+        iter_coords, dimnames, dim_encodings
+    )
 
     results = generate_nested_dict(dim_combos)
 
