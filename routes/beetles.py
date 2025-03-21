@@ -115,8 +115,11 @@ def run_aggregate_var_polygon(poly_id):
     all_dims = ds[bandname].dims
     dimnames = [dim for dim in all_dims if dim not in ["X", "Y"]]
     dim_encodings = var_ep_lu["beetles"]["dim_encodings"]
-    iter_coords, dim_combos = get_all_possible_dimension_combinations(
-        ds, dimnames, dim_encodings
+    iter_coords = list(
+        itertools.product(*[dim_encodings[dim].keys() for dim in dimnames])
+    )
+    dim_combos = get_all_possible_dimension_combinations(
+        iter_coords, dimnames, dim_encodings
     )
     aggr_results = generate_nested_dict(dim_combos)
 
