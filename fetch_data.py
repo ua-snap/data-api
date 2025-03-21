@@ -4,12 +4,15 @@ A module of data gathering functions for use across multiple endpoints.
 
 import copy
 import io
-import itertools
 import operator
 import time
 import asyncio
 import numpy as np
 import xarray as xr
+import rasterio
+import rioxarray
+import itertools
+from rasterio.features import rasterize
 import geopandas as gpd
 import json
 import re
@@ -17,7 +20,7 @@ from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
 from flask import current_app as app
-from rasterstats import zonal_stats
+
 from generate_requests import (
     generate_wcs_getcov_str,
     generate_netcdf_wcs_getcov_str,
@@ -158,15 +161,13 @@ async def fetch_data(urls):
     return results
 
 
-def get_poly_3338_bbox(poly_id, crs=3338):
-    """Get the Polygon Object corresponding to the ID from GeoServer
-
+def get_poly(poly_id, crs=3338):
+    """Get the GeoDataFrame corresponding to the polygon ID from GeoServer.
+    Assumes GeoServer polygon is in EPSG:4326; returns in EPSG:3338 if CRS is not specified.
     Args:
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
     Returns:
-        poly (shapely.Polygon): Polygon object used to summarize data within.
-        Includes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
-        polygon. Format is (xmin, ymin, xmax, ymax).
+        poly (GeoDataFrame): GeoDataFrame of the polygon
     """
     geometry = asyncio.run(
         fetch_data(
@@ -180,11 +181,9 @@ def get_poly_3338_bbox(poly_id, crs=3338):
             ]
         )
     )
-    if crs == 3338:
-        poly_gdf = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
-        poly = poly_gdf.iloc[0]["geometry"]
-    else:
-        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+
+    poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+
     return poly
 
 
@@ -249,142 +248,168 @@ async def fetch_bbox_netcdf_list(urls):
     return ds_list
 
 
-async def fetch_bbox_data(bbox_bounds, cov_id_str):
-    """Make the async request for the data at the specified bbox for a specific coverage
-
+def get_scale_factor(grid_cell_area, polygon_area):
+    """Calculate the scale factor for a given grid cell area and polygon area. Inputs must be in the same units.
     Args:
-        bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
-        cov_id_str (str): shared portion of coverage_ids to query
-
+        grid_cell_area (float): area of a grid cell
+        polygon_area (float): area of a polygon
     Returns:
-        list of data results from each of historical and future coverages
+        int: scale factor, rounded up to the nearest integer
     """
-    # set up WCS request strings
-    request_strs = []
-    request_strs.append(generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id_str))
-    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
-    bbox_ds_list = await fetch_bbox_netcdf_list(urls)
-    return bbox_ds_list
+
+    def hyp_function(x, m, b, c, h):
+        y = (m * x + b) / (x - c) + h
+        return y
+
+    x = polygon_area / grid_cell_area
+    m = 0
+    b = 350
+    c = -24
+    h = 1
+
+    scale_factor = np.ceil(hyp_function(x, m, b, c, h))[0]
+    return int(scale_factor)
 
 
-def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gray"):
-    """Summarize a single Data Variable of a xarray.DataSet within a polygon.
-    Return the results as a nested dict.
-
-    Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of
-            interest
-        poly (shapely.Polygon): polygon within which to summarize
-        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the data and map integer data coordinates to models, scenarios, variables, etc.
-        varname (str): name of variable represented by ds
-        roundkey (str): variable key that will fetch an integer that determines rounding precision (e.g. 1 for a single decimal place)
-
-    Returns:
-        Nested dict of results for all non-X/Y axis combinations,
-
-    Notes:
-        This default "Gray" is used because it is the default name for ingesting into Rasdaman from GeoTIFFs. Othwerwise it should be the name of a xarray.DataSet DataVariable, i.e. something in `list(ds.keys())`
-    """
-    # will actually operate on underlying DataArray
-
-    da = ds[varname]
-    # get axis (dimension) names and make list of all coordinate combinations
-    all_dims = da.dims
-    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-    iter_coords = list(
-        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-    )
-
-    # generate all combinations of decoded coordinate values
-    dim_combos = []
-    for coords in iter_coords:
-        map_list = [
-            # dim_encodings[dimname][coord]
-            dim_encodings[f"{dimname}s"][coord]
-            for coord, dimname in zip(coords, dimnames)
-        ]
-        dim_combos.append(map_list)
-
-    aggr_results = generate_nested_dict(dim_combos)
-
-    data_arr = []
-    for coords, map_list in zip(iter_coords, dim_combos):
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        data_arr.append(da.sel(sel_di).values)
-    data_arr = np.array(data_arr)
-
-    # need to transpose the 2D spatial slices if X is the "rows" dimension
-    if all_dims.index("X") < all_dims.index("Y"):
-        data_arr = data_arr.transpose(0, 2, 1)
-
-    # get transform from a DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr[0],
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-
-    crop_shape = data_arr[0].shape
-    cropped_poly_mask = poly_mask_arr[0 : crop_shape[0], 0 : crop_shape[1]]
-    data_arr_mask = np.broadcast_to(cropped_poly_mask.mask, data_arr.shape)
-    data_arr[data_arr_mask] = np.nan
-
-    # Set any remaining nodata values to nan if they snuck through the mask.
-    data_arr[np.isclose(data_arr, -9.223372e18)] = np.nan
-
-    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-
-    for map_list, result in zip(dim_combos, results):
-        get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
-            result, dim_encodings["rounding"][roundkey]
-        )
-    return aggr_results
-
-
-def get_poly_mask_arr(ds, poly, bandname):
-    """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid zonal summary across results from multiple WCS requests for the same bbox. Wrapper for rasterstats zonal_stats().
+def interpolate(ds, var_name, x_dim, y_dim, scale_factor, method):
+    """Interpolate the array for a single variable from an xarray dataset to a higher resolution.
 
     Args:
         ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
-        poly (shapely.Polygon): polygon to create mask from
-        bandname (str): name of the DataArray containing the data
+        var_name (str): name of the variable to interpolate
+        x_dim (str): name of the x dimension
+        y_dim (str): name of the y dimension
+        scale_factor (int): multiplier to increase the resolution by
+        method (str): method to use for interpolation
 
     Returns:
-        cropped_poly_mask (numpy.ma.core.MaskedArra): a masked array masking the cells
-            intersecting the polygon of interest, cropped to the right shape
+        ds_new (xarray.DataArray): xarray data array interpolated to higher resolution
     """
-    # need a data layer of same x/y shape just for running a zonal stats
-    xy_shape = ds[bandname].values.shape[-2:]
-    data_arr = np.zeros(xy_shape)
-    # get affine transform from the xarray.DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr,
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-    cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
-    return cropped_poly_mask
+    X = x_dim
+    Y = y_dim
+
+    new_lon = np.linspace(ds[X][0].item(), ds[X][-1].item(), ds.sizes[X] * scale_factor)
+    new_lat = np.linspace(ds[Y][0].item(), ds[Y][-1].item(), ds.sizes[Y] * scale_factor)
+
+    da_i = ds[var_name].interp(method=method, coords={X: new_lon, Y: new_lat})
+    da_i = da_i.rio.set_spatial_dims(x_dim, y_dim, inplace=True)
+
+    return da_i
 
 
-def geotiff_zonal_stats(poly, arr, nodata_value, transform, stat_list):
-    poly_mask_arr = zonal_stats(
-        poly,
-        arr,
-        affine=transform,
-        nodata=nodata_value,
-        stats=stat_list,
+def rasterize_polygon(da_i, x_dim, y_dim, polygon):
+    """Rasterize a polygon to the same shape as the dataset.
+    Args:
+        da_i (xarray.DataArray): xarray data array, probably interpolated
+        x_dim (str): name of the x dimension
+        y_dim (str): name of the y dimension
+        polygon (shapely.Polygon): polygon to rasterize. Must be in the same CRS as the dataset.
+    Returns:
+        rasterized_polygon_array (numpy.ndarray): 2D numpy array with the rasterized polygon
+    """
+    rasterized_polygon_array = rasterize(
+        [(polygon.geometry.iloc[0], 1)],
+        out_shape=(
+            da_i[y_dim].values.shape[0],
+            da_i[x_dim].values.shape[0],
+        ),  # must be YX order for numpy array!
+        transform=da_i.rio.transform(
+            recalc=True
+        ),  # must recalc since we interpolated, otherwise the old stored transform is used and rasterized polygon is not aligned
+        fill=0,
+        all_touched=False,
     )
-    return poly_mask_arr
+
+    return rasterized_polygon_array
+
+
+def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim):
+    """Calculate zonal statistics for an xarray data array and a rasterized polygon array of the same shape.
+    Args:
+        da_i (xarray.DataArray): xarray data array, probably interpolated
+        poly_array (numpy.ndarray): 2D numpy array with the rasterized polygon
+    Returns:
+        zonal_stats (dict): dictionary of zonal statistics
+    """
+    zonal_stats = {}
+
+    # transpose to match numpy array YX order and get values that overlap the polygon
+    arr = da_i.transpose(y_dim, x_dim).values
+    values = arr[polygon_array == 1].tolist()
+
+    if values:
+        zonal_stats["count"] = len(values)
+        zonal_stats["mean"] = np.nanmean(values)
+        zonal_stats["min"] = np.nanmin(values)
+        zonal_stats["max"] = np.nanmax(values)
+        # the following stat can be used to compute a mode
+        # mode is not computed here because same datasets (e.g. beetles) need to drop nan values first
+        unique_vals, counts = np.unique(values, return_counts=True)
+        zonal_stats["unique_values_and_counts"] = dict(zip(unique_vals, counts))
+
+    else:
+        zonal_stats["count"] = 0
+        zonal_stats["mean"] = np.nan
+        zonal_stats["min"] = np.nan
+        zonal_stats["max"] = np.nan
+        zonal_stats["unique_values_and_counts"] = {}
+
+    return zonal_stats
+
+
+def interpolate_and_compute_zonal_stats(
+    polygon, dataset, var_name="Gray", x_dim="X", y_dim="Y"
+):
+    """Interpolate a dataset to a higher resolution and compute polygon zonal statistics for a single variable.
+    Args:
+        polygon (shapely.Polygon): polygon to compute zonal statistics for. Must be in the same CRS as the dataset.
+        dataset (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+        var_name (str): name of the variable to interpolate. Default is "Gray", the default name used when ingesting into Rasdaman.
+        x_dim (str): name of the x dimension. Default is "X".
+        y_dim (str): name of the y dimension. Default is "Y".
+    Returns:
+        zonal_stats_dict (dict): dictionary of zonal statistics
+    """
+    # confirm spatial info
+    dataset.rio.set_spatial_dims(x_dim, y_dim)
+    dataset.rio.write_crs("EPSG:3338", inplace=True)
+
+    # calculate the scale factor, assuming square pixels and projection in meters
+    spatial_resolution = dataset.rio.resolution()
+    grid_cell_area_m2 = abs(spatial_resolution[0]) * abs(spatial_resolution[1])
+    polygon_area_m2 = polygon.area
+    scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
+
+    # interpolate the dataset and rasterize the polygon
+    da_i = interpolate(dataset, var_name, x_dim, y_dim, scale_factor, method="nearest")
+
+    rasterized_polygon_array = rasterize_polygon(da_i, x_dim, y_dim, polygon)
+
+    # calculate zonal statistics
+    zonal_stats_dict = calculate_zonal_stats(
+        da_i, rasterized_polygon_array, x_dim, y_dim
+    )
+
+    return zonal_stats_dict
+
+
+def get_all_possible_dimension_combinations(iter_coords, dim_names, dim_encodings):
+    """Get all possible combinations of dimension values for a given xarray dataset.
+    Providing dimension names allows combinations to be limited to a subset of dimensions (e.g., ignoring X and Y).
+    Args:
+        iter_coords (list): list of tuples containing all possible combinations of dimension coordinates
+        dim_names (list): list of dimension names to use for combinations
+        dim_encodings (dict): dictionary of dimension encodings, mapping dimension names to their respective encoding values
+    Returns:
+        dim_combos (list): list of lists containing the corresponding encoded values for each combination
+    """
+    dim_combos = []
+    for coords in iter_coords:
+        map_list = [
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dim_names)
+        ]
+        dim_combos.append(map_list)
+    return dim_combos
 
 
 def generate_nested_dict(dim_combos):

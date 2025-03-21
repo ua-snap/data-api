@@ -7,7 +7,7 @@ import json
 # local imports
 from validate_request import validate_var_id
 from postprocessing import recursive_rounding
-from fetch_data import get_poly_3338_bbox
+from fetch_data import get_poly
 from . import routes
 
 boundary_api = Blueprint("boundary_api", __name__)
@@ -40,7 +40,7 @@ def run_fetch_area_poly(var_id):
         return poly_type
 
     try:
-        poly = get_poly_3338_bbox(var_id, 4326)
+        poly = get_poly(var_id, 4326)
     except:
         return render_template("422/invalid_area.html"), 422
     poly_geojson = poly.to_json()
