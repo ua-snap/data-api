@@ -6,7 +6,6 @@ from urllib.parse import quote
 import numpy as np
 import pandas as pd
 import xarray as xr
-from math import floor
 from flask import (
     Blueprint,
     render_template,
@@ -1264,21 +1263,28 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                 polygon, combo_ds
             )
 
+            # using 0 in round() function will still return a float ... need to drop the digit arg to get an int
+            d = (
+                None
+                if dim_encodings["rounding"][varname] == 0
+                else dim_encodings["rounding"][varname]
+            )
+
             if cru:
                 if dim_combo[1] == "mean":
                     result = round(
                         combo_zonal_stats_dict["mean"],
-                        dim_encodings["rounding"][varname],
+                        d,
                     )
                 elif dim_combo[1] == "min":
                     result = round(
                         combo_zonal_stats_dict["min"],
-                        dim_encodings["rounding"][varname],
+                        d,
                     )
                 elif dim_combo[1] == "max":
                     result = round(
                         combo_zonal_stats_dict["max"],
-                        dim_encodings["rounding"][varname],
+                        d,
                     )
                 # we are taking means of all other stat values here, which is mathematically questionable!
                 else:
@@ -1293,15 +1299,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                 ][dim_combo[1]] = result
 
             else:
-                mean = round(
-                    combo_zonal_stats_dict["mean"], dim_encodings["rounding"][varname]
-                )
-                min = round(
-                    combo_zonal_stats_dict["min"], dim_encodings["rounding"][varname]
-                )
-                max = round(
-                    combo_zonal_stats_dict["max"], dim_encodings["rounding"][varname]
-                )
+                mean = round(combo_zonal_stats_dict["mean"], d)
+                min = round(combo_zonal_stats_dict["min"], d)
+                max = round(combo_zonal_stats_dict["max"], d)
 
                 result = mean  # default to mean for projected data
 
