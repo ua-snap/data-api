@@ -1286,11 +1286,11 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                         combo_zonal_stats_dict["max"],
                         d,
                     )
-                # we are taking means of all other stat values here, which is mathematically questionable!
+                # we are taking means of all other stat values here, which may be mathematically
                 else:
                     result = round(
                         combo_zonal_stats_dict["mean"],
-                        dim_encodings["rounding"][varname],
+                        d,
                     )
 
                 # use the dim_combo to index into the results dict (period, season, model, scenario, varname, stat)
