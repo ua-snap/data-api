@@ -11,10 +11,10 @@ from fetch_data import (
     fetch_wcs_point_data,
     describe_via_wcps,
     generate_nested_dict,
-    interpolate_and_compute_zonal_stats,
     get_poly,
     get_all_possible_dimension_combinations,
 )
+from zonal_stats import interpolate_and_compute_zonal_stats
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,

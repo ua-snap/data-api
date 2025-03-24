@@ -21,11 +21,11 @@ from fetch_data import (
     fetch_data,
     fetch_wcs_point_data,
     get_from_dict,
-    interpolate_and_compute_zonal_stats,
     get_poly,
     generate_nested_dict,
     get_all_possible_dimension_combinations,
 )
+from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,
     project_latlon,

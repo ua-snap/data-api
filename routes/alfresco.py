@@ -16,9 +16,9 @@ from fetch_data import (
     generate_nested_dict,
     get_poly,
     describe_via_wcps,
-    interpolate_and_compute_zonal_stats,
     get_all_possible_dimension_combinations,
 )
+from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import get_coverage_encodings
 from csv_functions import create_csv
 from validate_request import (

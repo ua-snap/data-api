@@ -18,11 +18,11 @@ from fetch_data import (
     fetch_data,
     fetch_bbox_netcdf_list,
     get_poly,
-    interpolate_and_compute_zonal_stats,
     generate_nested_dict,
     describe_via_wcps,
     get_all_possible_dimension_combinations,
 )
+from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,
     latlon_is_numeric_and_in_geodetic_range,

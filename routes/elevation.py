@@ -11,8 +11,8 @@ from fetch_data import (
     fetch_geoserver_data,
     fetch_bbox_geotiff_from_gs,
     get_poly,
-    interpolate_and_compute_zonal_stats,
 )
+from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,
     validate_var_id,
