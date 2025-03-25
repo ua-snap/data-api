@@ -4,7 +4,7 @@
 
 <p>
   The endpoints here provide access to demographic data derived from the 2020 US Census Demographics and 
-  Housing Characteristics File (DHC), the 2017&ndash;2021 US Census American Community Survey (ACS) 5-year dataset,
+  Housing Characteristics File (DHC), the 2019&ndash;2023 US Census American Community Survey (ACS) 5-year dataset,
    the 2023 CDC PLACES dataset, and the 2017&ndash;2021 CDC Social Determinants of Health (SDOH) dataset. 
    Data is returned for individual Alaskan communities, and also includes contextual data for the state of
     Alaska and the United States.
@@ -53,7 +53,6 @@
     "pct_under_18": 23.5,
     "pct_under_5": 6.4,
     "pct_65_plus": 12.4,
-    "pct_minority": 43.9,
     "pct_african_american": 4.7,
     "pct_amer_indian_ak_native": 7.7,
     "pct_asian": 9.4,
@@ -83,22 +82,42 @@
     "pct_emospt": 25.4,
     "pct_emospt_low": 22.8,
     "pct_emospt_high": 28,
+    "pct_minority": 43.9,
+    "pct_minority_low": 43,
+    "pct_minority_high": 44.8,
     "pct_foodstamps": 9.4,
     "pct_foodstamps_low": 8.2,
     "pct_foodstamps_high": 10.6,
-    "pct_w_disability": 11.2,
-    "moe_pct_w_disability": 0.5,
-    "pct_insured": 89.5,
-    "moe_pct_insured": 0.7,
-    "pct_uninsured": 10.5,
-    "moe_pct_uninsured": 0.7,
+    "pct_w_disability": 12.2,
+    "pct_w_disability_low": 11.6,
+    "pct_w_disability_high": 12.8,
+    "pct_insured": 90,
+    "pct_insured_low": 89.3,
+    "pct_insured_high": 90.7,
+    "pct_uninsured": 10,
+    "pct_uninsured_low": 9.3,
+    "pct_uninsured_high": 10.7,
     "pct_no_bband": 7.3,
+    "pct_no_bband_low": 6.3,
+    "pct_no_bband_high": 8.3,
     "pct_no_hsdiploma": 5.8,
+    "pct_no_hsdiploma_low": 5.3,
+    "pct_no_hsdiploma_high": 6.3,
     "pct_below_150pov": 15.1,
+    "pct_below_150pov_low": 14.1,
+    "pct_below_150pov_high": 16.1,
     "pct_crowding": 4.5,
+    "pct_crowding_low": 3.9,
+    "pct_crowding_high": 5.1,
     "pct_single_parent": 6,
+    "pct_single_parent_low": 5.4,
+    "pct_single_parent_high": 6.6,
     "pct_unemployed": 5.4,
-    "pct_hcost": 25.7
+    "pct_unemployed_low": 4.8,
+    "pct_unemployed_high": 6,
+    "pct_hcost": 25.7,
+    "pct_hcost_low": 24.4,
+    "pct_hcost_high": 27
   },
   ...
 }
@@ -115,7 +134,6 @@
         "pct_under_18": &lt;percentage of population under age 18&gt;,
         "pct_under_5": &lt;percentage of population under age 5&gt;,
         "pct_65_plus": &lt;percentage of population age 65 and older&gt;,
-        "pct_minority": &lt;percentage of population of racial or ethnic minority status&gt;,
         "pct_african_american": &lt;percentage of population African American&gt;,
         "pct_amer_indian_ak_native": &lt;percentage of population American Indian or Alaska Native&gt;,
         "pct_asian": &lt;percentage of population Asian&gt;,
@@ -125,42 +143,62 @@
         "pct_multi": &lt;percentage of population two or more races&gt;,
         "pct_other": &lt;percentage of population other race&gt;,
         "pct_asthma": &lt;percentage of of adults aged >=18 years with current asthma&gt;,
-        "pct_asthma_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years with current asthma&gt;,
-        "pct_asthma_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years with current asthma&gt;,
+        "pct_asthma_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years with current asthma&gt;,
+        "pct_asthma_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years with current asthma&gt;,
         "pct_copd": &lt;percentage of of adults aged >=18 years with chronic obstructive pulmonary disease&gt;,
-        "pct_copd_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease&gt;,
-        "pct_copd_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease&gt;,
+        "pct_copd_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease&gt;,
+        "pct_copd_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years with chronic obstructive pulmonary disease&gt;,
         "pct_diabetes": &lt;percentage of of adults aged >=18 years with diagnosed diabetes&gt;,
-        "pct_diabetes_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes&gt;,
-        "pct_diabetes_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes&gt;,
+        "pct_diabetes_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes&gt;,
+        "pct_diabetes_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years with diagnosed diabetes&gt;,
         "pct_hd": &lt;percentage of of adults aged >=18 years with coronary heart disease&gt;,
-        "pct_hd_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years with coronary heart disease&gt;,
-        "pct_hd_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years with coronary heart disease&gt;,
+        "pct_hd_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years with coronary heart disease&gt;,
+        "pct_hd_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years with coronary heart disease&gt;,
         "pct_stroke": &lt;percentage of of adults aged >=18 years with stroke&gt;,
-        "pct_stroke_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years with stroke&gt;,
-        "pct_stroke_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years with stroke&gt;,
+        "pct_stroke_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years with stroke&gt;,
+        "pct_stroke_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years with stroke&gt;,
         "pct_mh": &lt;percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days); crude prevalence rate&gt;,
-        "pct_mh_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress'&gt;,
-        "pct_mh_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress'&gt;,
+        "pct_mh_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress'&gt;,
+        "pct_mh_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress'&gt;,
         "pct_emospt": &lt;percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed); crude prevalence rate&gt;,
-        "pct_emospt_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support'&gt;,
-        "pct_emospt_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support'&gt;,
+        "pct_emospt_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support'&gt;,
+        "pct_emospt_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support'&gt;,
+        "pct_minority": &lt;percentage of population of racial or ethnic minority status&gt;,
+        "pct_minority_low": &lt;lower bound of the 90% confidence interval for percentage of population of racial or ethnic minority status&gt;,
+        "pct_minority_high": &lt;upper bound of the 90% confidence interval for percentage of population of racial or ethnic minority status&gt;,
         "pct_foodstamps": &lt;percentage of adults aged >=18 years that received food stamps in the past 12 months&gt;,
-        "pct_foodstamps_low": &lt;lower bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months&gt;,
-        "pct_foodstamps_high": &lt;upper bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months&gt;,
+        "pct_foodstamps_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months&gt;,
+        "pct_foodstamps_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months&gt;,
         "pct_w_disability": &lt;percentage of population with a disability&gt;,
-        "moe_pct_w_disability": &lt;margin of error for percentage of population with a disability&gt;,
+        "pct_w_disability_low": &lt;lower bound of the 90% confidence interval for percentage of population with a disability&gt;,
+        "pct_w_disability_high": &lt;upper bound of the 90% confidence interval for percentage of population with a disability&gt;,
         "pct_insured": &lt;percentage of population with health insurance&gt;,
-        "moe_pct_insured": &lt;margin of error percentage of population with health insurance&gt;,
+        "pct_insured_low": &lt;lower bound of the 90% confidence interval for percentage of population with health insurance&gt;,
+        "pct_insured_high": &lt;upper bound of the 90% confidence interval for percentage of population with health insurance&gt;,
         "pct_uninsured": &lt;percentage of population without health insurance&gt;,
-        "moe_pct_uninsured": &lt;margin of error percentage of population without health insurance&gt;,
+        "pct_uninsured_low": &lt;lower bound of the 90% confidence interval for percentage of population without health insurance&gt;,
+        "pct_uninsured_high": &lt;upper bound of the 90% confidence interval for percentage of population without health insurance&gt;,
         "pct_no_bband": &lt;percentage of households with no broadband internet subscription&gt;,
+        "pct_no_bband_low": &lt;lower bound of the 90% confidence interval for percentage of households with no broadband internet subscription&gt;,
+        "pct_no_bband_high": &lt;upper bound of the 90% confidence interval for percentage of households with no broadband internet subscription&gt;,
         "pct_no_hsdiploma": &lt;percentage of adults aged >=25 years with no high school diploma&gt;,
+        "pct_no_hsdiploma_low": &lt;lower bound of the 90% confidence interval for percentage of adults aged >=25 years with no high school diploma&gt;,
+        "pct_no_hsdiploma_high": &lt;upper bound of the 90% confidence interval for percentage of adults aged >=25 years with no high school diploma&gt;,
         "pct_below_150pov": &lt;percentage of population living below 150% of the poverty level&gt;,
+        "pct_below_150pov_low": &lt;lower bound of the 90% confidence interval for percentage of population living below 150% of the poverty level&gt;,
+        "pct_below_150pov_high": &lt;upper bound of the 90% confidence interval for percentage of population living below 150% of the poverty level&gt;,
         "pct_crowding": &lt;percentage of households with 'crowding' (occupied housing units with 1.01 to 1.50 and 1.51 or more occupants per room)&gt;,
+        "pct_crowding_low": &lt;lower bound of the 90% confidence interval for percentage of households with 'crowding'&gt;,
+        "pct_crowding_high": &lt;upper bound of the 90% confidence interval for percentage of households with 'crowding'&gt;,
         "pct_single_parent": &lt;percentage of single parent households (households with a male or female householder with no spouse or partner present with children of the householder)&gt;,
+        "pct_single_parent_low": &lt;lower bound of the 90% confidence interval for percentage of single parent households&gt;,
+        "pct_single_parent_high": &lt;upper bound of the 90% confidence interval for percentage of single parent households&gt;,
         "pct_unemployed": &lt;percentage of the population >= 16 years in the civilian labor force who are unemployed (jobless but are available to work and have actively looked for work in the past 4 weeks)&gt;,
+        "pct_unemployed_low": &lt;lower bound of the 90% confidence interval for percentage of the population >= 16 years in the civilian labor force who are unemployed&gt;,
+        "pct_unemployed_high": &lt;upper bound of the 90% confidence interval for percentage of the population >= 16 years in the civilian labor force who are unemployed&gt;,
         "pct_hcost": &lt;percentage of households with 'housing cost burden' (households with annual income less than $75,000 that spend 30% or more of their household income on housing)&gt;
+        "pct_hcost_low": &lt;lower bound of the 90% confidence interval for percentage of households with 'housing cost burden'&gt;,
+        "pct_hcost_high": &lt;upper bound of the 90% confidence interval for percentage of households with 'housing cost burden'&gt;,
     },
     ...
     }
@@ -196,16 +234,19 @@
             </td>
         </tr>
         <tr>
-            <td>2018-2022 US Census American Community Survey (ACS) 5-year dataset</td>
-            <td>U.S. Census Bureau (2022). 2018-2022 American Community Survey 5-year estimates. 
-                Accessed May 2024, from <a href="https://www.census.gov/programs-surveys/acs/data.html">https://www.census.gov/programs-surveys/acs/data.html</a></td>
+            <td>2019-2023 US Census American Community Survey (ACS) 5-year dataset</td>
+            <td>U.S. Census Bureau (2023). 2019-2023 American Community Survey 5-year estimates. 
+                Accessed March 2025, from <a href="https://www.census.gov/programs-surveys/acs/data.html">https://www.census.gov/programs-surveys/acs/data.html</a></td>
             <td>
-                <code>pct_w_disability</code>, 
-                <code>moe_pct_w_disability</code>, 
+                <code>pct_w_disability</code>,
+                <code>pct_w_disability_low</code>,
+                <code>pct_w_disability_high</code>,
                 <code>pct_insured</code>, 
-                <code>moe_pct_insured</code>, 
+                <code>pct_insured_low</code>,
+                <code>pct_insured_high</code>,
                 <code>pct_uninsured</code>, 
-                <code>moe_pct_uninsured</code>
+                <code>pct_uninsured_low</code>,
+                <code>pct_uninsured_high</code>
             </td>
         </tr>
         <tr>
@@ -214,7 +255,7 @@
                 Accessed May 2024, from <a href="https://www.cdc.gov/places">https://www.cdc.gov/places</a></td>
             <td> 
                 <code>pct_asthma</code>, 
-                <code>pct_asthma_low</code>
+                <code>pct_asthma_low</code>,
                 <code>pct_asthma_high</code>,
                 <code>pct_copd</code>, 
                 <code>pct_copd_low</code>,
@@ -227,7 +268,16 @@
                 <code>pct_hd_high</code>,
                 <code>pct_stroke</code>,
                 <code>pct_stroke_low</code>,
-                <code>pct_stroke_high</code>
+                <code>pct_stroke_high</code>,
+                <code>pct_mh</code>,
+                <code>pct_mh_low</code>,
+                <code>pct_mh_high</code>,
+                <code>pct_emospt</code>,
+                <code>pct_emospt_low</code>,
+                <code>pct_emospt_high</code>,
+                <code>pct_foodstamps</code>,
+                <code>pct_foodstamps_low</code>,
+                <code>pct_foodstamps_high</code>
             </td>
         </tr>
         <tr>
@@ -235,14 +285,30 @@
             <td>Healthy People 2030, U.S. Department of Health and Human Services, Office of Disease Prevention and Health Promotion. 
                 Accessed May 2024, from <a href="https://health.gov/healthypeople/objectives-and-data/social-determinants-health">https://health.gov/healthypeople/objectives-and-data/social-determinants-health</a></td>
             <td> 
-                <code>pct_no_bband</code>, 
-                <code>pct_no_hsdiploma</code>, 
-                <code>pct_below_150pov</code>, 
+                <code>pct_no_bband</code>,
+                <code>pct_no_bband_low</code>,
+                <code>pct_no_bband_high</code>, 
+                <code>pct_no_hsdiploma</code>,
+                <code>pct_no_hsdiploma_low</code>,
+                <code>pct_no_hsdiploma_high</code>, 
+                <code>pct_below_150pov</code>,
+                <code>pct_below_150pov_low</code>,
+                <code>pct_below_150pov_high</code>, 
                 <code>pct_minority</code>,
+                <code>pct_minority_low</code>,
+                <code>pct_minority_high</code>,
                 <code>pct_crowding</code>,
+                <code>pct_crowding_low</code>,
+                <code>pct_crowding_high</code>,
                 <code>pct_single_parent</code>,
+                <code>pct_single_parent_low</code>,
+                <code>pct_single_parent_high</code>,
                 <code>pct_unemployed</code>,
-                <code>pct_hcost</code>
+                <code>pct_unemployed_low</code>,
+                <code>pct_unemployed_high</code>,
+                <code>pct_hcost</code>,
+                <code>pct_hcost_low</code>,
+                <code>pct_hcost_high</code>
             </td>
         </tr>
     </tbody>
