@@ -1269,7 +1269,8 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                 if dim_encodings["rounding"][varname] == 0
                 else dim_encodings["rounding"][varname]
             )
-
+            # the string values for the `combo_zonal_stats_dict` will need to be updated to "min" or "max" for those summaries
+            # if or when we implement a different kind method of extrema aggregation, see issue 560
             if cru:
                 if dim_combo[1] == "mean":
                     result = round(
@@ -1278,15 +1279,14 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                     )
                 elif dim_combo[1] == "min":
                     result = round(
-                        combo_zonal_stats_dict["min"],
+                        combo_zonal_stats_dict["mean"],
                         d,
                     )
                 elif dim_combo[1] == "max":
                     result = round(
-                        combo_zonal_stats_dict["max"],
+                        combo_zonal_stats_dict["mean"],
                         d,
                     )
-                # we are taking means of all other stat values here, which may be mathematically
                 else:
                     result = round(
                         combo_zonal_stats_dict["mean"],

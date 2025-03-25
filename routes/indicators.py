@@ -240,12 +240,14 @@ def run_aggregate_var_polygon(poly_id, var_ep):
         combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(polygon, combo_ds)
 
         # determine the result based on the requested statistic (min, mean, max)
+        # the string values for the `combo_zonal_stats_dict` will need to be updated to "min" or "max" for those summaries
+        # if or when we implement a different kind method of extrema aggregation, see issue 560
         if dim_combo[4] == "min":
-            result = floor(combo_zonal_stats_dict["min"])
+            result = floor(combo_zonal_stats_dict["mean"])
         elif dim_combo[4] == "mean":
             result = round(combo_zonal_stats_dict["mean"], 1)
         elif dim_combo[4] == "max":
-            result = np.ceil(combo_zonal_stats_dict["max"])
+            result = np.ceil(combo_zonal_stats_dict["mean"])
 
         # use the dim_combo to index into the results dict (indicator, era, model, scenario, stat)
         aggr_results[dim_combo[0]][dim_combo[1]][dim_combo[2]][dim_combo[3]][
