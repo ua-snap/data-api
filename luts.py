@@ -132,9 +132,6 @@ areas_near = {
 # NOTE: fields that were not truncated do not appear here!
 # see data dictionary in the repo for more info: https://github.com/ua-snap/epa-justice/blob/main/README.md
 demographics_fields = {
-    "moe_pct_in": "moe_pct_insured",
-    "moe_pct_un": "moe_pct_uninsured",
-    "moe_pct_w_": "moe_pct_w_disability",
     "pct_65_plu": "pct_65_plus",
     "pct_africa": "pct_african_american",
     "pct_amer_i": "pct_amer_indian_ak_native",
@@ -155,7 +152,7 @@ demographics_fields = {
     "pct_single": "pct_single_parent",
     "pct_unempl": "pct_unemployed",
     "total_popu": "total_population",
-    # the fields below are low and high confidence intervals (95% CI values)
+    # the fields below are low and high confidence intervals (90% CI values)
     "pct_asth_1": "pct_asthma_low",
     "pct_asth_2": "pct_asthma_high",
     "pct_copd_l": "pct_copd_low",
@@ -170,6 +167,28 @@ demographics_fields = {
     "pct_hd_hig": "pct_hd_high",
     "pct_stro_1": "pct_stroke_low",
     "pct_stro_2": "pct_stroke_high",
+    "pct_w_di_1": "pct_w_disability_low",
+    "pct_w_di_2": "pct_w_disability_high",
+    "pct_insu_1": "pct_insured_low",
+    "pct_insu_2": "pct_insured_high",
+    "pct_unin_1": "pct_uninsured_low",
+    "pct_unin_2": "pct_uninsured_high",
+    "pct_no_b_1": "pct_no_bband_low",
+    "pct_no_b_2": "pct_no_bband_high",
+    "pct_crow_1": "pct_crowding_low",
+    "pct_crow_2": "pct_crowding_high",
+    "pct_hcost_": "pct_hcost_low",
+    "pct_hcos_1": "pct_hcost_high",
+    "pct_no_h_1": "pct_no_hsdiploma_low",
+    "pct_no_h_2": "pct_no_hsdiploma_high",
+    "pct_belo_1": "pct_below_150pov_low",
+    "pct_belo_2": "pct_below_150pov_high",
+    "pct_mino_1": "pct_minority_low",
+    "pct_mino_2": "pct_minority_high",
+    "pct_sing_1": "pct_single_parent_low",
+    "pct_sing_2": "pct_single_parent_high",
+    "pct_unem_1": "pct_unemployed_low",
+    "pct_unem_2": "pct_unemployed_high",
 }
 
 
@@ -198,10 +217,6 @@ demographics_descriptions = {
     "pct_65_plus": {
         "description": "pct_65_plus is the percentage of the population age 65 and older; this value was calculated by summing the population count of multiple sex by age categories and expressing that sum as a percentage of the total population",
         "source": "U.S. Census Demographic and Housing Characteristics Survey for 2020",
-    },
-    "pct_minority": {
-        "description": "pct_minority is the percentage of the population of racial or ethnic minority status (including individuals who identified as any of the following: Hispanic or Latino (any race); Black and African American, non-Hispanic; American Indian and Alaska Native, non-Hispanic; Asian, non-Hispanic; Native Hawaiian and Other Pacific Islander, non-Hispanic; Two or More Races, non-Hispanic; Other Races, non-Hispanic)",
-        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
     "pct_african_american": {
         "description": "pct_african_american is the percentage of the population that is African American; this value was calculated by taking the population count of African Americans and expressing that count as a percentage of the total population",
@@ -241,11 +256,11 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_asthma_low": {
-        "description": "pct_asthma_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with and currently having asthma",
+        "description": "pct_asthma_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with and currently having asthma",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_asthma_high": {
-        "description": "pct_asthma_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with and currently having asthma",
+        "description": "pct_asthma_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with and currently having asthma",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_copd": {
@@ -253,11 +268,11 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_copd_low": {
-        "description": "pct_copd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
+        "description": "pct_copd_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_copd_high": {
-        "description": "pct_copd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
+        "description": "pct_copd_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with chronic obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_diabetes": {
@@ -265,11 +280,11 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_diabetes_low": {
-        "description": "pct_diabetes_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes)",
+        "description": "pct_diabetes_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes)",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_diabetes_high": {
-        "description": "pct_diabetes_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes)",
+        "description": "pct_diabetes_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with diabetes (excluding diabetes during pregnancy/gestational diabetes)",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_hd": {
@@ -277,11 +292,11 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_hd_low": {
-        "description": "pct_hd_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with coronary heart disease",
+        "description": "pct_hd_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with coronary heart disease",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_hd_high": {
-        "description": "pct_hd_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report being diagnosed with coronary heart disease",
+        "description": "pct_hd_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report being diagnosed with coronary heart disease",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_mh": {
@@ -289,11 +304,11 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_mh_low": {
-        "description": "pct_mh_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days)",
+        "description": "pct_mh_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days)",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_mh_high": {
-        "description": "pct_mh_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days)",
+        "description": "pct_mh_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report having 'frequent mental distress' (mental health including stress, depression, and problems with emotions, was not good for 14 or more days during the past 30 days)",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_stroke": {
@@ -301,11 +316,11 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_stroke_low": {
-        "description": "pct_stroke_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke",
+        "description": "pct_stroke_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_stroke_high": {
-        "description": "pct_stroke_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke",
+        "description": "pct_stroke_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report having ever been told by a doctor, nurse, or other health professional that they have had a stroke",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_emospt": {
@@ -313,76 +328,156 @@ demographics_descriptions = {
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_emospt_low": {
-        "description": "pct_emospt_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed)",
+        "description": "pct_emospt_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed)",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_emospt_high": {
-        "description": "pct_emospt_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed)",
+        "description": "pct_emospt_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years who report 'lack of social and emotional support' (self-report sometimes, rarely, or never getting the social and emotional support needed)",
         "source": "CDC PLACES dataset for 2024",
     },
     # social determinants of health
+    "pct_minority": {
+        "description": "pct_minority is the percentage of the population of racial or ethnic minority status (including individuals who identified as any of the following: Hispanic or Latino (any race); Black and African American, non-Hispanic; American Indian and Alaska Native, non-Hispanic; Asian, non-Hispanic; Native Hawaiian and Other Pacific Islander, non-Hispanic; Two or More Races, non-Hispanic; Other Races, non-Hispanic)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_minority_low": {
+        "description": "pct_minority_low is the lower bound of the 90% confidence interval for percentage of the population of racial or ethnic minority status (including individuals who identified as any of the following: Hispanic or Latino (any race); Black and African American, non-Hispanic; American Indian and Alaska Native, non-Hispanic; Asian, non-Hispanic; Native Hawaiian and Other Pacific Islander, non-Hispanic; Two or More Races, non-Hispanic; Other Races, non-Hispanic)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_minority_high": {
+        "description": "pct_minority_high is the upper bound of the 90% confidence interval for percentage of the population of racial or ethnic minority status (including individuals who identified as any of the following: Hispanic or Latino (any race); Black and African American, non-Hispanic; American Indian and Alaska Native, non-Hispanic; Asian, non-Hispanic; Native Hawaiian and Other Pacific Islander, non-Hispanic; Two or More Races, non-Hispanic; Other Races, non-Hispanic)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
     "pct_foodstamps": {
         "description": "pct_foodstamps is the percentage of adults aged >=18 years that received food stamps in the past 12 months",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_foodstamps_low": {
-        "description": "pct_foodstamps_low is the lower bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months",
+        "description": "pct_foodstamps_low is the lower bound of the 90% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_foodstamps_high": {
-        "description": "pct_foodstamps_high is the upper bound of the 95% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months",
+        "description": "pct_foodstamps_high is the upper bound of the 90% confidence interval for percentage of adults aged >=18 years that received food stamps in the past 12 months",
         "source": "CDC PLACES dataset for 2024",
     },
     "pct_w_disability": {
         "description": "pct_w_disability is the percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
         "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
     },
-    "moe_pct_w_disability": {
-        "description": "moe_pct_w_disability is the margin of error for the percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
+    "pct_w_disability_low": {
+        "description": "pct_w_disability_low is the lower bound of the 90% confidence interval for percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "pct_w_disability_high": {
+        "description": "pct_w_disability_high is the upper bound of the 90% confidence interval for percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
         "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
     },
     "pct_insured": {
         "description": "pct_insured is the percentage of the population with health insurance",
         "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
     },
-    "moe_pct_insured": {
-        "description": "moe_pct_insured is the margin of error for percentage of the population with health insurance",
+    "pct_insured_low": {
+        "description": "pct_insured_low is the lower bound of the 90% confidence interval for percentage of the population with health insurance",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "pct_insured_high": {
+        "description": "pct_insured_high is the upper bound of the 90% confidence interval for percentage of the population with health insurance",
         "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
     },
     "pct_uninsured": {
         "description": "pct_uninsured is the percentage of the population without health insurance",
         "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
     },
-    "moe_pct_uninsured": {
-        "description": "moe_pct_uninsured is the margin of error for percentage of the population without health insurance",
+    "pct_uninsured_low": {
+        "description": "pct_uninsured_low is the lower bound of the 90% confidence interval for percentage of the population without health insurance",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+    },
+    "pct_uninsured_high": {
+        "description": "pct_uninsured_high is the upper bound of the 90% confidence interval for percentage of the population without health insurance",
         "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
     },
     "pct_no_bband": {
         "description": "pct_no_bband is the percentage of households with no broadband internet subscription",
         "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
+    "pct_no_bband_low": {
+        "description": "pct_no_bband_low is the lower bound of the 90% confidence interval for percentage of households with no broadband internet subscription",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_no_bband_high": {
+        "description": "pct_no_bband_high is the upper bound of the 90% confidence interval for percentage of households with no broadband internet subscription",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
     "pct_no_hsdiploma": {
         "description": "pct_no_hsdiploma is the percentage of adults aged >=25 years with no high school diploma",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_no_hsdiploma_low": {
+        "description": "pct_no_hsdiploma_low is the lower bound of the 90% confidence interval for percentage of adults aged >=25 years with no high school diploma",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_no_hsdiploma_high": {
+        "description": "pct_no_hsdiploma_high is the upper bound of the 90% confidence interval for percentage of adults aged >=25 years with no high school diploma",
         "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
     "pct_below_150pov": {
         "description": "pct_below_150pov is the percentage of population living below 150% of the federal poverty threshold",
         "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
+    "pct_below_150pov_low": {
+        "description": "pct_below_150pov_low is the lower bound of the 90% confidence interval for percentage of population living below 150% of the federal poverty threshold",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_below_150pov_high": {
+        "description": "pct_below_150pov_high is the upper bound of the 90% confidence interval for percentage of population living below 150% of the federal poverty threshold",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
     "pct_crowding": {
         "description": "pct_crowding is the percentage of households with 'crowding' (occupied housing units with 1.01 to 1.50 and 1.51 or more occupants per room)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_crowding_low": {
+        "description": "pct_crowding_low is the lower bound of the 90% confidence interval for percentage of households with 'crowding' (occupied housing units with 1.01 to 1.50 and 1.51 or more occupants per room)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_crowding_high": {
+        "description": "pct_crowding_high is the upper bound of the 90% confidence interval for percentage of households with 'crowding' (occupied housing units with 1.01 to 1.50 and 1.51 or more occupants per room)",
         "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
     "pct_hcost": {
         "description": "pct_hcost is the percentage of households with 'housing cost burden' (households with annual income less than $75,000 that spend 30% or more of their household income on housing)",
         "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
+    "pct_hcost_low": {
+        "description": "pct_hcost_low is the lower bound of the 90% confidence interval for percentage of households with 'housing cost burden' (households with annual income less than $75,000 that spend 30% or more of their household income on housing)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_hcost_high": {
+        "description": "pct_hcost_high is the upper bound of the 90% confidence interval for percentage of households with 'housing cost burden' (households with annual income less than $75,000 that spend 30% or more of their household income on housing)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
     "pct_unemployed": {
         "description": "pct_unemployed is the percentage of the population >= 16 years in the civilian labor force who are unemployed (jobless but are available to work and have actively looked for work in the past 4 weeks)",
         "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
+    "pct_unemployed_low": {
+        "description": "pct_unemployed_low is the lower bound of the 90% confidence interval for percentage of the population >= 16 years in the civilian labor force who are unemployed (jobless but are available to work and have actively looked for work in the past 4 weeks)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_unemployed_high": {
+        "description": "pct_unemployed_high is the upper bound of the 90% confidence interval for percentage of the population >= 16 years in the civilian labor force who are unemployed (jobless but are available to work and have actively looked for work in the past 4 weeks)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
     "pct_single_parent": {
         "description": "pct_single_parent is the percentage of single parent households (households with a male or female householder with no spouse or partner present with children of the householder)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_single_parent_low": {
+        "description": "pct_single_parent_low is the lower bound of the 90% confidence interval for percentage of single parent households (households with a male or female householder with no spouse or partner present with children of the householder)",
+        "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
+    },
+    "pct_single_parent_high": {
+        "description": "pct_single_parent_high is the upper bound of the 90% confidence interval for percentage of single parent households (households with a male or female householder with no spouse or partner present with children of the householder)",
         "source": "CDC PLACES Social Determinants of Health dataset for 2024 (originally derived from ACS estimates 2017-2021)",
     },
 }
@@ -428,23 +523,42 @@ demographics_order = [
     "pct_mh_high",
     # social determinants of health
     "pct_minority",
+    "pct_minority_low",
+    "pct_minority_high",
     "pct_no_hsdiploma",
+    "pct_no_hsdiploma_low",
+    "pct_no_hsdiploma_high",
     "pct_below_150pov",
+    "pct_below_150pov_low",
+    "pct_below_150pov_high",
     "pct_unemployed",
+    "pct_unemployed_low",
+    "pct_unemployed_high",
     "pct_foodstamps",
     "pct_foodstamps_low",
     "pct_foodstamps_high",
     "pct_single_parent",
+    "pct_single_parent_low",
+    "pct_single_parent_high",
     "pct_no_bband",
+    "pct_no_bband_low",
+    "pct_no_bband_high",
     "pct_crowding",
+    "pct_crowding_low",
+    "pct_crowding_high",
     "pct_hcost",
+    "pct_hcost_low",
+    "pct_hcost_high",
     "pct_emospt",
     "pct_emospt_low",
     "pct_emospt_high",
     "pct_w_disability",
-    "moe_pct_w_disability",
+    "pct_w_disability_low",
+    "pct_w_disability_high",
     "pct_insured",
-    "moe_pct_insured",
+    "pct_insured_low",
+    "pct_insured_high",
     "pct_uninsured",
-    "moe_pct_uninsured",
+    "pct_uninsured_low",
+    "pct_uninsured_high",
 ]
