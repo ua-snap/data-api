@@ -362,39 +362,39 @@ demographics_descriptions = {
     },
     "pct_w_disability": {
         "description": "pct_w_disability is the percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_w_disability_low": {
         "description": "pct_w_disability_low is the lower bound of the 90% confidence interval for percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_w_disability_high": {
         "description": "pct_w_disability_high is the upper bound of the 90% confidence interval for percentage of the population with a reported disability (presence of six types of disability related to serious difficulty including: hearing, vision, concentrating, remembering or making decisions (i.e. cognition), walking or climbing stairs (i.e. mobility), dressing or bathing (i.e., self-care), and doing errands alone (i.e., independent living))",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_insured": {
         "description": "pct_insured is the percentage of the population with health insurance",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_insured_low": {
         "description": "pct_insured_low is the lower bound of the 90% confidence interval for percentage of the population with health insurance",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_insured_high": {
         "description": "pct_insured_high is the upper bound of the 90% confidence interval for percentage of the population with health insurance",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_uninsured": {
         "description": "pct_uninsured is the percentage of the population without health insurance",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_uninsured_low": {
         "description": "pct_uninsured_low is the lower bound of the 90% confidence interval for percentage of the population without health insurance",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_uninsured_high": {
         "description": "pct_uninsured_high is the upper bound of the 90% confidence interval for percentage of the population without health insurance",
-        "source": "U.S. Census American Community Survey 5-year estimates for years 2018-2022",
+        "source": "U.S. Census American Community Survey 5-year estimates for years 2019-2023",
     },
     "pct_no_bband": {
         "description": "pct_no_bband is the percentage of households with no broadband internet subscription",
