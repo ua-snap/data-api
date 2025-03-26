@@ -89,7 +89,9 @@ def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim):
     """Calculate zonal statistics for an xarray data array and a rasterized polygon array of the same shape.
     Args:
         da_i (xarray.DataArray): xarray data array, probably interpolated
-        poly_array (numpy.ndarray): 2D numpy array with the rasterized polygon
+        polygon_array (numpy.ndarray): 2D numpy array with the rasterized polygon
+        x_dim (str): name of the x dimension
+        y_dim (str): name of the y dimension
     Returns:
         zonal_stats (dict): dictionary of zonal statistics
     """
