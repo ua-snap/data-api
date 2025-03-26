@@ -41,7 +41,7 @@ def get_data_for_community(community):
     """
     Function to pull demographics data as JSON or CSV.
        Args:
-           community (string): A community ID from https://earthmaps.io/places/communities, or "all" to get all available communities
+           community (string): A community ID from https://earthmaps.io/places/communities
 
        Returns:
            JSON-formatted output of demographic data for the requested community,
@@ -88,7 +88,6 @@ def get_data_for_community(community):
         "pct_under_18",
         "pct_under_5",
         "pct_65_plus",
-        "pct_minority",
         "pct_african_american",
         "pct_amer_indian_ak_native",
         "pct_asian",
@@ -118,22 +117,42 @@ def get_data_for_community(community):
         "pct_emospt",
         "pct_emospt_low",
         "pct_emospt_high",
+        "pct_minority",
+        "pct_minority_low",
+        "pct_minority_high",
         "pct_foodstamps",
         "pct_foodstamps_low",
         "pct_foodstamps_high",
         "pct_w_disability",
-        "moe_pct_w_disability",
+        "pct_w_disability_low",
+        "pct_w_disability_high",
         "pct_insured",
-        "moe_pct_insured",
+        "pct_insured_low",
+        "pct_insured_high",
         "pct_uninsured",
-        "moe_pct_uninsured",
+        "pct_uninsured_low",
+        "pct_uninsured_high",
         "pct_no_bband",
+        "pct_no_bband_low",
+        "pct_no_bband_high",
         "pct_no_hsdiploma",
+        "pct_no_hsdiploma_low",
+        "pct_no_hsdiploma_high",
         "pct_below_150pov",
+        "pct_below_150pov_low",
+        "pct_below_150pov_high",
         "pct_crowding",
+        "pct_crowding_low",
+        "pct_crowding_high",
         "pct_single_parent",
+        "pct_single_parent_low",
+        "pct_single_parent_high",
         "pct_unemployed",
+        "pct_unemployed_low",
+        "pct_unemployed_high",
         "pct_hcost",
+        "pct_hcost_low",
+        "pct_hcost_high",
     ]
 
     reformatted_results = {}
