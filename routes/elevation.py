@@ -25,6 +25,9 @@ elevation_api = Blueprint("elevation_api", __name__)
 
 wms_targets = ["astergdem_min_max_avg"]
 wfs_targets = {}
+target_crs = (
+    "EPSG:3338"  # hard coded for now, since metadata is not fetched from GeoServer
+)
 
 
 def package_astergdem(astergdem_resp):
@@ -111,6 +114,7 @@ def run_area_fetch_all_elevation(var_id):
         "astergdem_min_max_avg",
         var_coord=None,
         encoding="GeoTIFF",
+        projection=target_crs,
     )
 
     url = generate_wcs_query_url(request_str, GS_BASE_URL)
@@ -126,7 +130,7 @@ def run_area_fetch_all_elevation(var_id):
     }
     for band in list(ds.data_vars):
         combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-            polygon, ds, var_name=band, x_dim="x", y_dim="y"
+            polygon, ds, var_name=band, x_dim="x", y_dim="y", crs=target_crs
         )
         if band == "min":
             if combo_zonal_stats_dict["min"] is None:

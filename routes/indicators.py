@@ -31,6 +31,7 @@ from validate_request import (
     project_latlon,
     validate_var_id,
     get_coverage_encodings,
+    get_coverage_crs_str,
 )
 from postprocessing import (
     nullify_and_prune,
@@ -49,12 +50,14 @@ var_ep_lu = {
         "dim_encodings": None,  # populated below
         "bandnames": ["Gray"],
         "label": None,
+        "crs": None,
     },
     "cmip6_indicators": {
         "cov_id_str": "cmip6_indicators",
         "dim_encodings": None,  # populated below
         "bandnames": ["dw", "ftc", "rx1day", "su"],
         "label": None,
+        "crs": None,
     },
 }
 
@@ -73,6 +76,9 @@ async def get_indicators_metadata():
     var_ep_lu["cmip6_indicators"]["dim_encodings"] = get_coverage_encodings(
         cmip6_metadata
     )
+    var_ep_lu["cmip5_indicators"]["crs"] = get_coverage_crs_str(cmip5_metadata)
+    var_ep_lu["cmip6_indicators"]["crs"] = get_coverage_crs_str(cmip6_metadata)
+
     return var_ep_lu, cmip5_metadata, cmip6_metadata
 
 
@@ -208,6 +214,7 @@ def run_aggregate_var_polygon(poly_id, var_ep):
     polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     bandname = var_ep_lu[var_ep]["bandnames"][0]
+    crs = var_ep_lu[var_ep]["crs"]
 
     ds = asyncio.run(fetch_indicators_bbox_data(polygon.total_bounds, cov_id_str))
 
@@ -237,7 +244,9 @@ def run_aggregate_var_polygon(poly_id, var_ep):
 
         sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
         combo_ds = ds.sel(sel_di)
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(polygon, combo_ds)
+        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
+            polygon, combo_ds, crs
+        )
 
         # determine the result based on the requested statistic (min, mean, max)
         # the string values for the `combo_zonal_stats_dict` will need to be updated to "min" or "max" for those summaries

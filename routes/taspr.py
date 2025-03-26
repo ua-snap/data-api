@@ -1260,7 +1260,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
             sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
             combo_ds = ds.sel(sel_di)
             combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-                polygon, combo_ds
+                polygon,
+                combo_ds,
+                crs="EPSG:3338",  # hard-coded for now, since metadata is not fetched from Rasdaman for any of the 9 (!) taspr coverages
             )
 
             # using 0 in round() function will still return a float ... need to drop the digit arg to get an int

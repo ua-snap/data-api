@@ -19,7 +19,7 @@ from fetch_data import (
     get_all_possible_dimension_combinations,
 )
 from zonal_stats import interpolate_and_compute_zonal_stats
-from validate_request import get_coverage_encodings
+from validate_request import get_coverage_encodings, get_coverage_crs_str
 from csv_functions import create_csv
 from validate_request import (
     validate_latlon,
@@ -37,12 +37,14 @@ var_ep_lu = {
         "dim_encodings": None,  # populated below
         "bandnames": ["Gray"],
         "label": "Flammability",
+        "crs": None,
     },
     "veg_type": {
         "cov_id_str": "alfresco_vegetation_type_percentage",
         "dim_encodings": None,  # populated below
         "bandnames": ["Gray"],
         "label": "Vegetation Type",
+        "crs": None,
     },
 }
 
@@ -54,6 +56,9 @@ async def get_alfresco_metadata(var_ep_lu):
 
     var_ep_lu["flammability"]["dim_encodings"] = get_coverage_encodings(flam_metadata)
     var_ep_lu["veg_type"]["dim_encodings"] = get_coverage_encodings(veg_metadata)
+
+    var_ep_lu["flammability"]["crs"] = get_coverage_crs_str(flam_metadata)
+    var_ep_lu["veg_type"]["crs"] = get_coverage_crs_str(veg_metadata)
 
     return var_ep_lu
 
@@ -96,6 +101,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     bandname = var_ep_lu[var_ep]["bandnames"][0]
+    crs = var_ep_lu[var_ep]["crs"]
     ds = asyncio.run(fetch_alf_bbox_data(polygon.total_bounds, cov_id_str))
 
     # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
@@ -113,7 +119,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     for coords, dim_combo in zip(iter_coords, dim_combos):
         sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
         combo_ds = ds.sel(sel_di)
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(polygon, combo_ds)
+        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
+            polygon, combo_ds, crs
+        )
         result = combo_zonal_stats_dict["mean"]
         if var_ep == "flammability":
             result = round(result, 4)

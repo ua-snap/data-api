@@ -4,6 +4,7 @@ Read more about the Zonal Oversampling Process (ZOP) here: https://github.com/ua
 
 import numpy as np
 from rasterio.features import rasterize
+from rasterio.crs import CRS
 from flask import render_template
 
 
@@ -123,21 +124,33 @@ def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim):
 
 
 def interpolate_and_compute_zonal_stats(
-    polygon, dataset, var_name="Gray", x_dim="X", y_dim="Y"
+    polygon, dataset, crs, var_name="Gray", x_dim="X", y_dim="Y"
 ):
     """Interpolate a dataset to a higher resolution and compute polygon zonal statistics for a single variable.
     Args:
-        polygon (shapely.Polygon): polygon to compute zonal statistics for. Must be in the same CRS as the dataset.
+        polygon (geopandas.GeoDataFrame): polygon to compute zonal statistics for. Must be in the same CRS as the dataset.
         dataset (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+        crs (str): coordinate reference system of the dataset. Must be in the same CRS as the polygon.
         var_name (str): name of the variable to interpolate. Default is "Gray", the default name used when ingesting into Rasdaman.
         x_dim (str): name of the x dimension. Default is "X".
         y_dim (str): name of the y dimension. Default is "Y".
     Returns:
         zonal_stats_dict (dict): dictionary of zonal statistics
     """
+
+    # test if the polygon is in the same CRS as the dataset
+    if str(polygon.crs) != crs:
+        print("Polygon and dataset CRS do not match")
+        return render_template("500/server_error.html"), 500
+
+    # make sure dataset CRS is projected, not geographic
+    if not CRS.from_string(crs).is_projected:
+        print("Dataset CRS is not projected")
+        return render_template("500/server_error.html"), 500
+
     # confirm spatial info
     dataset.rio.set_spatial_dims(x_dim, y_dim)
-    dataset.rio.write_crs("EPSG:3338", inplace=True)
+    dataset.rio.write_crs(crs, inplace=True)
 
     # calculate the scale factor, assuming square pixels and projection in meters
     spatial_resolution = dataset.rio.resolution()

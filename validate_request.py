@@ -8,6 +8,7 @@ import ast
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
+from rasterio.crs import CRS
 
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
@@ -391,3 +392,20 @@ def get_axis_encodings(coverage_axis_metadata):
 
     except (KeyError, TypeError) as e:
         raise ValueError(f"Invalid coverage metadata format: {str(e)}")
+
+
+def get_coverage_crs_str(coverage_metadata):
+    try:
+        # Navigate to the generalGrid section which contains the CRS information
+        domain_set = coverage_metadata.get("domainSet", {})
+        general_grid = domain_set.get("generalGrid", {})
+        srs_string = general_grid.get("srsName", [])
+        epsg_code_str = srs_string.split("EPSG/0/")[1]
+        # get rasterio CRS object from EPSG code
+        crs = CRS.from_epsg(int(epsg_code_str))
+    except:
+        raise ValueError(
+            "Unexpected coverage metadata: 'srsName' not found or metadata otherwise invalid."
+        )
+
+    return crs.to_string()

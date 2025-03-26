@@ -21,6 +21,7 @@ from validate_request import (
     project_latlon,
     validate_var_id,
     get_coverage_encodings,
+    get_coverage_crs_str,
 )
 from postprocessing import (
     nullify_and_prune,
@@ -37,6 +38,7 @@ var_ep_lu = {
         "dim_encodings": None,  # populated below
         "bandnames": ["Gray"],
         "label": None,
+        "crs": None,
     },
 }
 
@@ -45,6 +47,7 @@ async def get_beetles_metadata(var_ep_lu):
     """Get the coverage metadata and encodings for ALFRESCO coverages and populate the lookup."""
     beetles_metadata = await describe_via_wcps(var_ep_lu["beetles"]["cov_id_str"])
     var_ep_lu["beetles"]["dim_encodings"] = get_coverage_encodings(beetles_metadata)
+    var_ep_lu["beetles"]["crs"] = get_coverage_crs_str(beetles_metadata)
 
     return var_ep_lu
 
@@ -104,6 +107,7 @@ def run_aggregate_var_polygon(poly_id):
     """
     polygon = get_poly(poly_id)
     bandname = var_ep_lu["beetles"]["bandnames"][0]
+    crs = var_ep_lu["beetles"]["crs"]
     ds = asyncio.run(
         fetch_beetles_bbox_data(
             polygon.total_bounds, var_ep_lu["beetles"]["cov_id_str"]
@@ -127,7 +131,9 @@ def run_aggregate_var_polygon(poly_id):
     for coords, dim_combo in zip(iter_coords, dim_combos):
         sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
         combo_ds = ds.sel(sel_di)
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(polygon, combo_ds)
+        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
+            polygon, combo_ds, crs
+        )
         vals_counts_dict = combo_zonal_stats_dict["unique_values_and_counts"]
 
         # if nan is the only value in the subset, set all null results for this dim combo (will get pruned)
