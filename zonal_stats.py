@@ -1,5 +1,6 @@
 import numpy as np
 from rasterio.features import rasterize
+from flask import render_template
 
 
 def get_scale_factor(grid_cell_area, polygon_area):
@@ -10,6 +11,9 @@ def get_scale_factor(grid_cell_area, polygon_area):
     Returns:
         int: scale factor, rounded up to the nearest integer
     """
+
+    if grid_cell_area <= 0:
+        return render_template("500/server_error.html"), 500
 
     def hyp_function(x, m, b, c, h):
         y = (m * x + b) / (x - c) + h
