@@ -45,7 +45,7 @@ def interpolate(ds, var_name, x_dim, y_dim, scale_factor, method):
         method (str): method to use for interpolation
 
     Returns:
-        ds_new (xarray.DataArray): xarray data array interpolated to higher resolution
+        da_i (xarray.DataArray): xarray data array interpolated to higher resolution
     """
     x = x_dim
     y = y_dim
