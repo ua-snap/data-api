@@ -161,6 +161,7 @@ def get_poly(poly_id, crs=3338):
     Assumes GeoServer polygon is in EPSG:4326; returns in EPSG:3338 if CRS is not specified.
     Args:
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
+        crs (int): EPSG CRS code
     Returns:
         poly (GeoDataFrame): GeoDataFrame of the polygon
     """
