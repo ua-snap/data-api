@@ -47,13 +47,13 @@ def interpolate(ds, var_name, x_dim, y_dim, scale_factor, method):
     Returns:
         ds_new (xarray.DataArray): xarray data array interpolated to higher resolution
     """
-    X = x_dim
-    Y = y_dim
+    x = x_dim
+    y = y_dim
 
-    new_lon = np.linspace(ds[X][0].item(), ds[X][-1].item(), ds.sizes[X] * scale_factor)
-    new_lat = np.linspace(ds[Y][0].item(), ds[Y][-1].item(), ds.sizes[Y] * scale_factor)
+    new_lon = np.linspace(ds[x][0].item(), ds[x][-1].item(), ds.sizes[x] * scale_factor)
+    new_lat = np.linspace(ds[y][0].item(), ds[y][-1].item(), ds.sizes[y] * scale_factor)
 
-    da_i = ds[var_name].interp(method=method, coords={X: new_lon, Y: new_lat})
+    da_i = ds[var_name].interp(method=method, coords={x: new_lon, y: new_lat})
     da_i = da_i.rio.set_spatial_dims(x_dim, y_dim, inplace=True)
 
     return da_i
