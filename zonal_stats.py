@@ -1,3 +1,7 @@
+"""A module to interpolate a dataset to a higher resolution and compute zonal statistics for a polygon.
+Read more about the Zonal Oversampling Process (ZOP) here: https://github.com/ua-snap/zonal_stats
+"""
+
 import numpy as np
 from rasterio.features import rasterize
 from flask import render_template
