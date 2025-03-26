@@ -107,7 +107,8 @@ def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim):
         zonal_stats["min"] = np.nanmin(values)
         zonal_stats["max"] = np.nanmax(values)
         # the following stat can be used to compute a mode
-        # mode is not computed here because same datasets (e.g. beetles) need to drop nan values first
+        # mode is not computed directly here because same datasets (e.g. beetles) need to drop nan values first
+        # and the np.mode function does not support dropping nans, and does not return percentages of unique values (as required by beetles)
         unique_vals, counts = np.unique(values, return_counts=True)
         zonal_stats["unique_values_and_counts"] = dict(zip(unique_vals, counts))
 
