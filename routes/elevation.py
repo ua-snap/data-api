@@ -1,16 +1,18 @@
 import asyncio
 from flask import Blueprint, render_template
 import rasterio as rio
+import rioxarray
+import xarray
 
 # local imports
-from generate_requests import generate_wcs_getcov_str, get_wcs_xy_str_from_bbox_bounds
+from generate_requests import generate_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
     fetch_geoserver_data,
     fetch_bbox_geotiff_from_gs,
-    geotiff_zonal_stats,
-    get_poly_3338_bbox,
+    get_poly,
 )
+from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,
     validate_var_id,
@@ -23,6 +25,9 @@ elevation_api = Blueprint("elevation_api", __name__)
 
 wms_targets = ["astergdem_min_max_avg"]
 wfs_targets = {}
+target_crs = (
+    "EPSG:3338"  # hard coded for now, since metadata is not fetched from GeoServer
+)
 
 
 def package_astergdem(astergdem_resp):
@@ -40,27 +45,6 @@ def package_astergdem(astergdem_resp):
     di.update({"max": elevation_m["elevation_max"]})
     di.update({"mean": elevation_m["elevation_avg"]})
     di.update({"min": elevation_m["elevation_min"]})
-    return di
-
-
-def package_zonal_stats(src, poly):
-    transform = src.transform
-    min_band = src.read(1)
-    max_band = src.read(2)
-    mean_band = src.read(3)
-    zonal_mu = geotiff_zonal_stats(poly, mean_band, src.nodata, transform, ["mean"])
-    zonal_mu[0]["mean"] = int(zonal_mu[0]["mean"])
-    zonal_min = geotiff_zonal_stats(poly, min_band, src.nodata, transform, ["min"])
-    zonal_max = geotiff_zonal_stats(poly, max_band, src.nodata, transform, ["max"])
-
-    di = {
-        "title": "ASTER Global Digital Elevation Model Zonal Statistics",
-        "units": "meters difference from sea level",
-        "res": "1 kilometer",
-    }
-    di.update(zonal_min[0])
-    di.update(zonal_max[0])
-    di.update(zonal_mu[0])
     return di
 
 
@@ -117,22 +101,51 @@ def run_area_fetch_all_elevation(var_id):
         return poly_type
 
     try:
-        poly = get_poly_3338_bbox(var_id)
+        polygon = get_poly(var_id)
     except:
         return render_template("422/invalid_area.html"), 422
 
-    wcsxy = get_wcs_xy_str_from_bbox_bounds(poly)
+    xstr = f"{polygon.total_bounds[0]},{polygon.total_bounds[2]}"
+    ystr = f"{polygon.total_bounds[1]},{polygon.total_bounds[3]}"
 
     request_str = generate_wcs_getcov_str(
-        wcsxy.xstr,
-        wcsxy.ystr,
+        xstr,
+        ystr,
         "astergdem_min_max_avg",
         var_coord=None,
         encoding="GeoTIFF",
+        projection=target_crs,
     )
 
     url = generate_wcs_query_url(request_str, GS_BASE_URL)
-    with rio.open(asyncio.run(fetch_bbox_geotiff_from_gs([url]))) as src:
-        poly_pkg = package_zonal_stats(src, poly)
+    # get the geotiff as a dataset, bands will be order: min, max, and mean
+    da = rioxarray.open_rasterio(asyncio.run(fetch_bbox_geotiff_from_gs([url])))
+    ds = da.to_dataset(dim="band").rename({1: "min", 2: "max", 3: "mean"})
 
-    return postprocess(poly_pkg, "elevation")
+    # fetch each band from the dataset and calculate zonal stats, adding to the results dict
+    results = {
+        "title": "ASTER Global Digital Elevation Model Zonal Statistics",
+        "units": "meters difference from sea level",
+        "res": "1 kilometer",
+    }
+    for band in list(ds.data_vars):
+        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
+            polygon, ds, var_name=band, x_dim="x", y_dim="y", crs=target_crs
+        )
+        if band == "min":
+            if combo_zonal_stats_dict["min"] is None:
+                results[band] = -9999
+            else:
+                results[band] = int(combo_zonal_stats_dict["min"])
+        elif band == "max":
+            if combo_zonal_stats_dict["max"] is None:
+                results[band] = -9999
+            else:
+                results[band] = int(combo_zonal_stats_dict["max"])
+        elif band == "mean":
+            if combo_zonal_stats_dict["mean"] is None:
+                results[band] = -9999
+            else:
+                results[band] = int(combo_zonal_stats_dict["mean"])
+
+    return postprocess(results, "elevation")

@@ -4,23 +4,6 @@ from collections import namedtuple
 from urllib.parse import quote
 
 
-def get_wcs_xy_str_from_bbox_bounds(poly):
-    """Helper function to get WCS-formatted XY strings from Polygon.
-    Args:
-        poly (object): shapely.Polygon with 4-tuple bounding box (xmin, ymin, xmax, ymax).
-    Returns:
-        xy (tuple): 2-tuple of coordinate strings formatted for WCS requests.
-            Instantiated as a namedtuple for access convenience and s
-            elf-documentation when used in service endpoints.
-    """
-    WCS_xy = namedtuple("WCS_xy", "xstr ystr")
-    (x1, y1, x2, y2) = poly.bounds
-    x = f"{x1},{x2}"
-    y = f"{y1},{y2}"
-    xy = WCS_xy(x, y)
-    return xy
-
-
 def generate_mmm_wcs_getcov_str(x, y, cov_id, model, scenario, encoding="json"):
     """Generate a WCS GetCoverage request for fetching a
     subset of a coverage over X and Y axes.

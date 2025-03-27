@@ -4,11 +4,9 @@ A module of data gathering functions for use across multiple endpoints.
 
 import copy
 import io
-import itertools
 import operator
 import time
 import asyncio
-import numpy as np
 import xarray as xr
 import geopandas as gpd
 import json
@@ -17,7 +15,7 @@ from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
 from flask import current_app as app
-from rasterstats import zonal_stats
+
 from generate_requests import (
     generate_wcs_getcov_str,
     generate_netcdf_wcs_getcov_str,
@@ -158,15 +156,14 @@ async def fetch_data(urls):
     return results
 
 
-def get_poly_3338_bbox(poly_id, crs=3338):
-    """Get the Polygon Object corresponding to the ID from GeoServer
-
+def get_poly(poly_id, crs=3338):
+    """Get the GeoDataFrame corresponding to the polygon ID from GeoServer.
+    Assumes GeoServer polygon is in EPSG:4326; returns in EPSG:3338 if CRS is not specified.
     Args:
         poly_id (str or int): ID of polygon e.g. "FWS12", or a HUC code (int).
+        crs (int): EPSG CRS code
     Returns:
-        poly (shapely.Polygon): Polygon object used to summarize data within.
-        Includes a 4-tuple (poly.bounds) of the bounding box enclosing the HUC
-        polygon. Format is (xmin, ymin, xmax, ymax).
+        poly (GeoDataFrame): GeoDataFrame of the polygon
     """
     geometry = asyncio.run(
         fetch_data(
@@ -180,11 +177,9 @@ def get_poly_3338_bbox(poly_id, crs=3338):
             ]
         )
     )
-    if crs == 3338:
-        poly_gdf = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
-        poly = poly_gdf.iloc[0]["geometry"]
-    else:
-        poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326)
+
+    poly = gpd.GeoDataFrame.from_features(geometry).set_crs(4326).to_crs(crs)
+
     return poly
 
 
@@ -249,142 +244,23 @@ async def fetch_bbox_netcdf_list(urls):
     return ds_list
 
 
-async def fetch_bbox_data(bbox_bounds, cov_id_str):
-    """Make the async request for the data at the specified bbox for a specific coverage
-
+def get_all_possible_dimension_combinations(iter_coords, dim_names, dim_encodings):
+    """Get all possible combinations of dimension values for a given xarray dataset.
+    Providing dimension names allows combinations to be limited to a subset of dimensions (e.g., ignoring X and Y).
     Args:
-        bbox_bounds (tuple): 4-tuple of x,y lower/upper bounds: (<xmin>,<ymin>,<xmax>,<ymax>)
-        cov_id_str (str): shared portion of coverage_ids to query
-
+        iter_coords (list): list of tuples containing all possible combinations of dimension coordinates
+        dim_names (list): list of dimension names to use for combinations
+        dim_encodings (dict): dictionary of dimension encodings, mapping dimension names to their respective encoding values
     Returns:
-        list of data results from each of historical and future coverages
+        dim_combos (list): list of lists containing the corresponding encoded values for each combination
     """
-    # set up WCS request strings
-    request_strs = []
-    request_strs.append(generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id_str))
-    urls = [generate_wcs_query_url(request_str) for request_str in request_strs]
-    bbox_ds_list = await fetch_bbox_netcdf_list(urls)
-    return bbox_ds_list
-
-
-def summarize_within_poly(ds, poly, dim_encodings, varname="Gray", roundkey="Gray"):
-    """Summarize a single Data Variable of a xarray.DataSet within a polygon.
-    Return the results as a nested dict.
-
-    Args:
-        ds (xarray.DataSet): DataSet with "Gray" as variable of
-            interest
-        poly (shapely.Polygon): polygon within which to summarize
-        dim_encodings (dict): nested dictionary of thematic key value pairs that chacterize the data and map integer data coordinates to models, scenarios, variables, etc.
-        varname (str): name of variable represented by ds
-        roundkey (str): variable key that will fetch an integer that determines rounding precision (e.g. 1 for a single decimal place)
-
-    Returns:
-        Nested dict of results for all non-X/Y axis combinations,
-
-    Notes:
-        This default "Gray" is used because it is the default name for ingesting into Rasdaman from GeoTIFFs. Othwerwise it should be the name of a xarray.DataSet DataVariable, i.e. something in `list(ds.keys())`
-    """
-    # will actually operate on underlying DataArray
-
-    da = ds[varname]
-    # get axis (dimension) names and make list of all coordinate combinations
-    all_dims = da.dims
-    dimnames = [dimname for dimname in all_dims if dimname not in ("X", "Y")]
-    iter_coords = list(
-        itertools.product(*[list(ds[dimname].values) for dimname in dimnames])
-    )
-
-    # generate all combinations of decoded coordinate values
     dim_combos = []
     for coords in iter_coords:
         map_list = [
-            # dim_encodings[dimname][coord]
-            dim_encodings[f"{dimname}s"][coord]
-            for coord, dimname in zip(coords, dimnames)
+            dim_encodings[dimname][coord] for coord, dimname in zip(coords, dim_names)
         ]
         dim_combos.append(map_list)
-
-    aggr_results = generate_nested_dict(dim_combos)
-
-    data_arr = []
-    for coords, map_list in zip(iter_coords, dim_combos):
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        data_arr.append(da.sel(sel_di).values)
-    data_arr = np.array(data_arr)
-
-    # need to transpose the 2D spatial slices if X is the "rows" dimension
-    if all_dims.index("X") < all_dims.index("Y"):
-        data_arr = data_arr.transpose(0, 2, 1)
-
-    # get transform from a DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr[0],
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-
-    crop_shape = data_arr[0].shape
-    cropped_poly_mask = poly_mask_arr[0 : crop_shape[0], 0 : crop_shape[1]]
-    data_arr_mask = np.broadcast_to(cropped_poly_mask.mask, data_arr.shape)
-    data_arr[data_arr_mask] = np.nan
-
-    # Set any remaining nodata values to nan if they snuck through the mask.
-    data_arr[np.isclose(data_arr, -9.223372e18)] = np.nan
-
-    results = np.nanmean(data_arr, axis=(1, 2)).astype(float)
-
-    for map_list, result in zip(dim_combos, results):
-        get_from_dict(aggr_results, map_list[:-1])[map_list[-1]] = round(
-            result, dim_encodings["rounding"][roundkey]
-        )
-    return aggr_results
-
-
-def get_poly_mask_arr(ds, poly, bandname):
-    """Get the polygon mask array from an xarray dataset, intended to be recycled for rapid zonal summary across results from multiple WCS requests for the same bbox. Wrapper for rasterstats zonal_stats().
-
-    Args:
-        ds (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
-        poly (shapely.Polygon): polygon to create mask from
-        bandname (str): name of the DataArray containing the data
-
-    Returns:
-        cropped_poly_mask (numpy.ma.core.MaskedArra): a masked array masking the cells
-            intersecting the polygon of interest, cropped to the right shape
-    """
-    # need a data layer of same x/y shape just for running a zonal stats
-    xy_shape = ds[bandname].values.shape[-2:]
-    data_arr = np.zeros(xy_shape)
-    # get affine transform from the xarray.DataSet
-    ds.rio.set_spatial_dims("X", "Y")
-    transform = ds.rio.transform()
-    poly_mask_arr = zonal_stats(
-        poly,
-        data_arr,
-        affine=transform,
-        nodata=np.nan,
-        stats=["mean"],
-        raster_out=True,
-    )[0]["mini_raster_array"]
-    cropped_poly_mask = poly_mask_arr[0 : xy_shape[1], 0 : xy_shape[0]]
-    return cropped_poly_mask
-
-
-def geotiff_zonal_stats(poly, arr, nodata_value, transform, stat_list):
-    poly_mask_arr = zonal_stats(
-        poly,
-        arr,
-        affine=transform,
-        nodata=nodata_value,
-        stats=stat_list,
-    )
-    return poly_mask_arr
+    return dim_combos
 
 
 def generate_nested_dict(dim_combos):
