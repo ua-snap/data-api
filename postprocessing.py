@@ -59,6 +59,7 @@ nodata_mappings = {
     "tas2km": nodata_values["default"],
     "temperature": nodata_values["taspr"],
     "temperature_all": nodata_values["taspr"],
+    "temperature_anomalies": nodata_values["default"],
     "temperature_mmm": nodata_values["taspr"],
     "taspr": nodata_values["taspr"],
     "snow": nodata_values["default"],
