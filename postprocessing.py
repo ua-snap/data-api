@@ -234,3 +234,23 @@ def add_titles(packaged_data, titles):
                     if packaged_data[key] is not None:
                         packaged_data[key]["title"] = titles[key]
     return packaged_data
+
+
+def merge_dicts(dict1, dict2):
+    """Merge two dictionaries recursively, combining nested dictionaries.
+    Args:
+        dict1 (dict): First dictionary
+        dict2 (dict): Second dictionary
+    Returns:
+        dict: Merged dictionary
+    """
+    merged = dict1.copy()
+    for key, value in dict2.items():
+        if key in merged:
+            if isinstance(merged[key], dict) and isinstance(value, dict):
+                merged[key] = merge_dicts(merged[key], value)
+            else:
+                merged[key] = value
+        else:
+            merged[key] = value
+    return merged

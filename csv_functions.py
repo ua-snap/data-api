@@ -98,6 +98,8 @@ def create_csv(
         "tas2km",
     ]:
         properties = taspr_csv(data, endpoint)
+    elif endpoint == "temperature_anomalies":
+        properties = temperature_anomalies_csv(data)
     elif endpoint == "veg_type":
         properties = veg_type_csv(data)
     elif endpoint in ["wet_days_per_year", "wet_days_per_year_all"]:
@@ -919,6 +921,69 @@ def taspr_csv(data, endpoint):
     return {
         "csv_dicts": csv_dicts,
         "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def temperature_anomalies_csv(data):
+    # Separate anomaly and baseline data due to heterogenous data structures.
+    filtered_baseline_data = {}
+    filtered_anomaly_data = {}
+    for model in data.keys():
+        filtered_baseline_data[model] = data[model]["temperature_baseline"]
+        filtered_anomaly_data[model] = data[model]["temperature_anomalies"]
+
+    baseline_data = {}
+    anomaly_data = {}
+
+    # print("filtered_baseline_data", filtered_baseline_data)
+    # print("filtered_anomaly_data", filtered_anomaly_data)
+
+    for model, value in filtered_baseline_data.items():
+        baseline_data[model] = {"1950-1980": {"temperature_baseline": {"value": value}}}
+
+    # print(baseline_data)
+
+    for model in filtered_anomaly_data.keys():
+        anomaly_data[model] = dict()
+        for scenario in filtered_anomaly_data[model].keys():
+            anomaly_data[model][scenario] = dict()
+            for year, value in filtered_anomaly_data[model][scenario].items():
+                anomaly_data[model][scenario][year] = {
+                    "temperature_anomaly": {"value": value}
+                }
+
+    # print(anomaly_data)
+
+    baseline_coords = ["model", "year(s)", "variable"]
+    baseline_values = ["value"]
+    baseline_fieldnames = baseline_coords + baseline_values
+    csv_dicts = build_csv_dicts(
+        baseline_data, baseline_fieldnames, values=baseline_values
+    )
+
+    # print(csv_dicts)
+
+    anomaly_coords = ["model", "scenario", "year(s)", "variable"]
+    anomaly_values = ["value"]
+    anomaly_fieldnames = anomaly_coords + anomaly_values
+    csv_dicts += build_csv_dicts(
+        anomaly_data, anomaly_fieldnames, values=anomaly_values
+    )
+
+    # print(csv_dicts)
+
+    csv_dicts = sorted(csv_dicts, key=lambda x: x["model"])
+
+    all_fieldnames = anomaly_fieldnames
+
+    metadata = "# temperature_anomaly is calculated by subtracting the 1950-1980 baseline mean from the annual mean in degrees C\n"
+    filename_data_name = "Temperature Anomalies"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": all_fieldnames,
         "metadata": metadata,
         "filename_data_name": filename_data_name,
     }
