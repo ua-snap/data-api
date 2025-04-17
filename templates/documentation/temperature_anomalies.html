@@ -1,0 +1,126 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Temperature Anomalies</h2>
+
+<p>
+  This endpoint provides access to historical and projected annual mean temperature anomalies, which are
+  the differences in annual mean temperatures compared to a 1950&ndash;1980 baseline. Historical temperature anomalies
+  are provided by the Berkeley Earth "Global Monthly Land + Ocean" dataset at a resolution of 1° longitude x 1°
+  latitude. Projected temperature anomalies are provided by multiple CMIP6 models for multiple scenarios at a resolution
+  of 100 km.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>
+  Query historical and projected annual mean temperature anomalies for each year from
+  1850&ndash;2100 at a single point specified by latitude and longitude.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Temperature anomalies point query</td>
+      <td>
+        <a href="/temperature_anomalies/point/63.73/-166.32">/temperature_anomalies/point/63.73/-166.32</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from temperature anomalies queries will look like this:</p>
+
+<pre>
+{
+  "Berkeley-Earth": {
+    "temperature_anomalies": {
+      "historical": {
+        "1850": -0.73,
+        "1851": 0.13,
+        "1852": -0.19,
+        ...
+      },
+    },
+    "temperature_baseline": -6.04
+  },
+  "CESM2": {
+    "temperature_anomalies": {
+      "ssp126": {
+        "2025": 3.44,
+        "2026": 1.51,
+        "2027": 2.24,
+        ...
+      },
+      ...
+    },
+    "temperature_baseline": -4.18
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    "temperature_anomalies": {
+      &lt;scenario&gt;: {
+        &lt;year&gt;: &lt;difference from model's temperature_baseline in °C&gt;,
+        ...
+      },
+    },
+    "temperature_baseline": &lt;model's temperature mean for 1950-1980 in °C&gt;
+  },
+}
+</pre>
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Source data access</th>
+      <th>Citation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a href="https://berkeleyearth.org/data/">Berkeley Earth, Global Monthly Land + Ocean, Average Temperature with
+          Air Temperatures at Sea Ice</a>
+      </td>
+      <td>
+        Berkeley Earth. Global Temperature Data. 2025. Retrieved from https://berkeleyearth.org/data/. Licensed under
+        CC BY 4.0 International.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a href="/cmip6/references">CMIP6 temperature data</a>
+      </td>
+      <td>
+        See <a href="/cmip6/references">this page</a> for a full list of our CMIP6 data sources and suggested citations.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}

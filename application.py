@@ -34,6 +34,7 @@ def get_service_categories():
         # ("Ecoregions", "/ecoregions"),
         ("Sea Ice Concentration", "/seaice"),
         ("Snowfall Equivalent", "/snow"),
+        ("Temperature Anomalies", "/temperature_anomalies"),
         ("Temperature and Precipitation", "/taspr"),
         ("Wet Days Per Year", "/wet_days_per_year"),
         ("Wildfire", "/fire"),

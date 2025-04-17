@@ -76,6 +76,13 @@ def package_temperature_anomalies_data(point_data_list, cov_id):
         return package_baseline_data(point_data_list)
 
 
+@routes.route("/temperature_anomalies/")
+@routes.route("/temperature_anomalies/abstract/")
+@routes.route("/temperature_anomalies/point/")
+def about_temperature_anomalies():
+    return render_template("documentation/temperature_anomalies.html")
+
+
 @routes.route("/temperature_anomalies/point/<lat>/<lon>/")
 def run_point_fetch_all_temperature_anomalies(lat, lon):
     # validation = validate_latlon(lat, lon, [anomaly_coverage_id])
