@@ -937,13 +937,8 @@ def temperature_anomalies_csv(data):
     baseline_data = {}
     anomaly_data = {}
 
-    # print("filtered_baseline_data", filtered_baseline_data)
-    # print("filtered_anomaly_data", filtered_anomaly_data)
-
     for model, value in filtered_baseline_data.items():
         baseline_data[model] = {"1950-1980": {"temperature_baseline": {"value": value}}}
-
-    # print(baseline_data)
 
     for model in filtered_anomaly_data.keys():
         anomaly_data[model] = dict()
@@ -954,8 +949,6 @@ def temperature_anomalies_csv(data):
                     "temperature_anomaly": {"value": value}
                 }
 
-    # print(anomaly_data)
-
     baseline_coords = ["model", "year(s)", "variable"]
     baseline_values = ["value"]
     baseline_fieldnames = baseline_coords + baseline_values
@@ -963,16 +956,12 @@ def temperature_anomalies_csv(data):
         baseline_data, baseline_fieldnames, values=baseline_values
     )
 
-    # print(csv_dicts)
-
     anomaly_coords = ["model", "scenario", "year(s)", "variable"]
     anomaly_values = ["value"]
     anomaly_fieldnames = anomaly_coords + anomaly_values
     csv_dicts += build_csv_dicts(
         anomaly_data, anomaly_fieldnames, values=anomaly_values
     )
-
-    # print(csv_dicts)
 
     csv_dicts = sorted(csv_dicts, key=lambda x: x["model"])
 
