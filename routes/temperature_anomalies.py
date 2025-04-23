@@ -13,32 +13,25 @@ from fetch_data import (
 from csv_functions import create_csv
 from validate_request import (
     get_coverage_encodings,
-    validate_latlon,
+    construct_latlon_bbox_from_coverage_bounds,
+    validate_latlon_in_bboxes,
 )
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import fetch_data, describe_via_wcps
 from postprocessing import merge_dicts, postprocess, prune_nulls_with_max_intensity
 from . import routes
-from config import WEST_BBOX, EAST_BBOX
 
 seaice_api = Blueprint("temperature_anomalies_api", __name__)
 
 anomaly_coverage_id = "temperature_anomaly_anomalies"
 baseline_coverage_id = "temperature_anomaly_baselines"
 
+anomaly_metadata = asyncio.run(describe_via_wcps(anomaly_coverage_id))
+baseline_metadata = asyncio.run(describe_via_wcps(baseline_coverage_id))
 
-async def get_temperature_anomalies_metadata(coverage_id):
-    metadata = await describe_via_wcps(coverage_id)
-    return get_coverage_encodings(metadata)
-
-
-anomaly_dim_encodings = asyncio.run(
-    get_temperature_anomalies_metadata(anomaly_coverage_id)
-)
-baseline_dim_encodings = asyncio.run(
-    get_temperature_anomalies_metadata(baseline_coverage_id)
-)
+anomaly_dim_encodings = get_coverage_encodings(anomaly_metadata)
+baseline_dim_encodings = get_coverage_encodings(baseline_metadata)
 
 
 def package_anomaly_data(point_data_list):
@@ -85,18 +78,22 @@ def about_temperature_anomalies():
 
 @routes.route("/temperature_anomalies/point/<lat>/<lon>/")
 def run_point_fetch_all_temperature_anomalies(lat, lon):
-    validation = validate_latlon(lat, lon, [anomaly_coverage_id])
-    if validation == 400:
+    # Anomaly and baseline coverages have the same BBOX, so use only one of
+    # them to validate the lat/lon.
+    anomaly_bbox = construct_latlon_bbox_from_coverage_bounds(anomaly_metadata)
+    within_bounds = validate_latlon_in_bboxes(lat, lon, [anomaly_bbox])
+
+    if within_bounds == 400:
         return render_template("400/bad_request.html"), 400
-    if validation == 404:
+    if within_bounds == 404:
         return (
             render_template("404/no_data.html"),
             404,
         )
-    if validation == 422:
+    if within_bounds == 422:
         return (
             render_template(
-                "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
+                "422/invalid_latlon_outside_coverage.html", bboxes=[anomaly_bbox]
             ),
             422,
         )
