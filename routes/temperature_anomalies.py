@@ -35,6 +35,15 @@ baseline_dim_encodings = get_coverage_encodings(baseline_metadata)
 
 
 def package_anomaly_data(point_data_list):
+    """
+    Package the temperature anomaly values into human-readable JSON format
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCS query
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list with keys derived from anomaly_dim_encodings global variable
+    """
     di = dict()
     years = list(range(1850, 2101))
     for mi, model_li in enumerate(point_data_list):
@@ -54,6 +63,15 @@ def package_anomaly_data(point_data_list):
 
 
 def package_baseline_data(point_data_list):
+    """
+    Package the temperature baseline values into human-readable JSON format
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCS query
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list with keys derived from baseline_dim_encodings global variable
+    """
     di = dict()
     for mi, value in enumerate(point_data_list):
         model = anomaly_dim_encodings["model"][mi]
@@ -63,6 +81,16 @@ def package_baseline_data(point_data_list):
 
 
 def package_temperature_anomalies_data(point_data_list, cov_id):
+    """
+    Package the temperature anomalies & temperature anomaly baselines
+
+    Args:
+        point_data_list (list): nested list of data from Rasdaman WCS query
+        cov_id (str): coverage ID of the data being processed
+
+    Returns:
+        di (dict): dictionary mirroring structure of nested list for corresponding cov_id
+    """
     if cov_id == anomaly_coverage_id:
         return package_anomaly_data(point_data_list)
     elif cov_id == baseline_coverage_id:
@@ -70,16 +98,29 @@ def package_temperature_anomalies_data(point_data_list, cov_id):
 
 
 @routes.route("/temperature_anomalies/")
-@routes.route("/temperature_anomalies/abstract/")
 @routes.route("/temperature_anomalies/point/")
 def about_temperature_anomalies():
     return render_template("documentation/temperature_anomalies.html")
 
 
 @routes.route("/temperature_anomalies/point/<lat>/<lon>/")
-def run_point_fetch_all_temperature_anomalies(lat, lon):
-    # Anomaly and baseline coverages have the same BBOX, so use only one of
-    # them to validate the lat/lon.
+def run_fetch_temperature_anomalies_point_data(lat, lon):
+    """
+    Query both the temperature anomalies & baselines coverages
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        JSON-like dict of requested temperature anomalies & baselines data
+
+    Notes:
+        example request: http://localhost:5000/temperature_anomalies/point/63.73/-166.32
+
+    """
+    # Validate the lat/lon values. Anomaly and baseline coverages have the same
+    # BBOX, so use only one of them to validate the lat/lon.
     anomaly_bbox = construct_latlon_bbox_from_coverage_bounds(anomaly_metadata)
     within_bounds = validate_latlon_in_bboxes(lat, lon, [anomaly_bbox])
 
