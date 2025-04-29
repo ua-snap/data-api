@@ -16,32 +16,25 @@ def enforce_site_offline():
     return check_site_offline()
 
 
-# from .fire import *
-
-# from .permafrost import *
-# from .seaice import *
-# from .taspr import *
-# from .ecoregions import *
+from .fire import *
+from .permafrost import *
+from .seaice import *
+from .taspr import *
+from .ecoregions import *
 from .boundary import *
 from .vectordata import *
-
-# from .recache import *
-# from .elevation import *
-
-# from .alfresco import *
-# from .degree_days import *
-# from .snow import *
-
-# from .landfastice import *
-# from .beetles import *
-# from .eds import *
-
-# from .wet_days_per_year import *
-# from .indicators import *
-# from .hydrology import *
-# from .demographics import *
-
+from .recache import *
+from .elevation import *
+from .alfresco import *
+from .degree_days import *
+from .snow import *
+from .landfastice import *
+from .beetles import *
+from .eds import *
+from .wet_days_per_year import *
+from .indicators import *
+from .hydrology import *
+from .demographics import *
 from .temperature_anomalies import *
-
-# from .cmip6 import *
+from .cmip6 import *
 from .places import *
