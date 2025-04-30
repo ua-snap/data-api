@@ -18,7 +18,7 @@ from . import routes
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly"
+cmip6_monthly_coverage_id = "cmip6_monthly_e3sm"
 
 
 async def get_cmip6_metadata():
@@ -99,27 +99,15 @@ def package_cmip6_monthly_data(
         if var_id != None:
             varname = var_id
         else:
-
-            # TODO: fix cryo coverage so we can delete this line below
-            # temporary fix for "string key" issue
-            var_coord = str(var_coord)
             varname = dim_encodings["varname"][var_coord]
-
+        
         for mi, model_li in enumerate(var_li):
-
-            # TODO: fix cryo coverage so we can delete this line below
-            # temporary fix for "string key" issue
-            mi = str(mi)
-
             model = dim_encodings["model"][mi]
+
             if model not in di:
                 di[model] = dict()
+
             for si, scenario_li in enumerate(model_li):
-
-                # TODO: fix cryo coverage so we can delete this line below
-                # temporary fix for "string key" issue
-                si = str(si)
-
                 scenario = dim_encodings["scenario"][si]
                 if scenario not in di[model]:
                     di[model][scenario] = dict()
@@ -175,6 +163,7 @@ def package_cmip6_monthly_data(
     # all 0 values are replaced with -9999 and will be pruned from the response.
     # If the scenario is not historical, and the year is less than 2015,
     # all 0 values are replaced with -9999 and will be pruned from the response.
+                    
 
     for model, scenarios in di.items():
         for scenario, months in scenarios.items():
@@ -295,6 +284,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                 new_results = package_cmip6_monthly_data(
                     point_data_list, var_id, start_year, end_year
                 )
+
                 for model, scenarios in new_results.items():
                     results.setdefault(model, {})
                     for scenario, months in scenarios.items():
