@@ -403,9 +403,6 @@ def get_coverage_encodings(coverage_metadata):
             # get encoding string from first slice (all slices contain the same encoding)
             encoding_str = slices[0].get("Encoding")
 
-        # get encoding string from first slice (all slices contain the same encoding)
-        encoding_str = slices[0].get("Encoding")
-
         if not encoding_str:
             raise ValueError("No encoding information found in coverage metadata")
 
