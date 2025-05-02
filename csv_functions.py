@@ -938,7 +938,7 @@ def temperature_anomalies_csv(data):
     anomaly_data = {}
 
     for model, value in filtered_baseline_data.items():
-        baseline_data[model] = {"1950-1980": {"temperature_baseline": {"value": value}}}
+        baseline_data[model] = {"1951-1980": {"temperature_baseline": {"value": value}}}
 
     for model in filtered_anomaly_data.keys():
         anomaly_data[model] = dict()
@@ -967,7 +967,9 @@ def temperature_anomalies_csv(data):
 
     all_fieldnames = anomaly_fieldnames
 
-    metadata = "# temperature_anomaly is calculated by subtracting the 1950-1980 baseline mean from the annual mean in degrees C\n"
+    metadata = "# temperature_baseline is the mean of annuals means from 1951-1980 for the corresponding model in degrees C\n"
+    metadata += "# temperature_anomaly is calculated by subtracting the 1951-1980 baseline from the annual mean in degrees C\n"
+
     filename_data_name = "Temperature Anomalies"
 
     return {
