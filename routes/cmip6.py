@@ -18,7 +18,7 @@ from . import routes
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly_e3sm"
+cmip6_monthly_coverage_id = "cmip6_monthly"
 
 
 async def get_cmip6_metadata():
@@ -100,7 +100,7 @@ def package_cmip6_monthly_data(
             varname = var_id
         else:
             varname = dim_encodings["varname"][var_coord]
-        
+
         for mi, model_li in enumerate(var_li):
             model = dim_encodings["model"][mi]
 
@@ -163,7 +163,6 @@ def package_cmip6_monthly_data(
     # all 0 values are replaced with -9999 and will be pruned from the response.
     # If the scenario is not historical, and the year is less than 2015,
     # all 0 values are replaced with -9999 and will be pruned from the response.
-                    
 
     for model, scenarios in di.items():
         for scenario, months in scenarios.items():
