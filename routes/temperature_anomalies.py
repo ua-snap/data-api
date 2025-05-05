@@ -21,7 +21,7 @@ from fetch_data import fetch_data, describe_via_wcps
 from postprocessing import merge_dicts, postprocess, prune_nulls_with_max_intensity
 from . import routes
 
-seaice_api = Blueprint("temperature_anomalies_api", __name__)
+temperature_anomaly_api = Blueprint("temperature_anomalies_api", __name__)
 
 anomaly_coverage_id = "temperature_anomaly_anomalies"
 baseline_coverage_id = "temperature_anomaly_baselines"
