@@ -1,5 +1,4 @@
 import asyncio
-from math import floor
 from flask import (
     Blueprint,
     render_template,
