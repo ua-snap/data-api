@@ -357,7 +357,7 @@ def validate_latlon_in_bboxes(lat, lon, bboxes, coverages=[]):
     for bbox in bboxes:
         valid_lat = bbox[1] <= lat <= bbox[3]
         valid_lon = bbox[0] <= lon <= bbox[2]
-        if valid_lat or valid_lon:
+        if valid_lat and valid_lon:
             within_a_bbox = True
 
     if not within_a_bbox:

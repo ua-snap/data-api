@@ -35,5 +35,6 @@ from .wet_days_per_year import *
 from .indicators import *
 from .hydrology import *
 from .demographics import *
+from .temperature_anomalies import *
 from .cmip6 import *
 from .places import *
