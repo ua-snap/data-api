@@ -2,11 +2,11 @@
 <h2>Temperature Anomalies</h2>
 
 <p>
-  This endpoint provides access to historical and projected annual mean temperature anomalies, which are
-  the differences in annual mean temperature compared to a 1951&ndash;1980 baseline. Historical temperature anomalies
-  are provided by Berkeley Earth's global monthly land and ocean dataset at a resolution of 0.25° x 0.25° (currently in
-  beta). Projected temperature anomalies are provided by multiple CMIP6 models for multiple scenarios at a native
-  resolution of 100 km interpolated to 0.25° x 0.25°.
+  This endpoint provides access to historical and projected annual mean surface air temperature anomalies, which are
+  the differences in annual mean surface air temperature compared to a 1951&ndash;1980 baseline. Historical temperature
+  anomalies are provided by Berkeley Earth's global monthly land and ocean dataset at a resolution of 0.25° x 0.25°
+  (currently in beta). Projected temperature anomalies are provided by multiple CMIP6 models for multiple scenarios at a
+  native resolution of 100 km interpolated to 0.25° x 0.25°.
 </p>
 
 <h3>Service endpoints</h3>
@@ -14,8 +14,8 @@
 <h4>Point query</h4>
 
 <p>
-  Query annual mean temperature anomalies for each year from 1850&ndash;2100, and their corresponding temperature
-  baselines, at a single point specified by latitude and longitude.
+  Query annual mean surface air temperature anomalies for each year from 1850&ndash;2100, and their corresponding
+  surface air temperature baselines, at a single point specified by latitude and longitude.
 </p>
 
 <table class="endpoints">
@@ -87,7 +87,7 @@
         ...
       },
     },
-    "temperature_baseline": &lt;model's temperature mean for 1951-1980 in °C&gt;
+    "temperature_baseline": &lt;model's surface air temperature mean for 1951-1980 in °C&gt;
   },
 }
 </pre>
