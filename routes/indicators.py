@@ -334,6 +334,8 @@ def package_cmip6_point_data(rasdaman_response):
         for indicator_name, indicator_value in zip(
             var_ep_lu["cmip6_indicators"]["bandnames"], indicator_values
         ):
+            if indicator_name == "rx1day":
+                indicator_value = round(indicator_value)
             indicator_dict[indicator_name] = indicator_value
 
         results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
