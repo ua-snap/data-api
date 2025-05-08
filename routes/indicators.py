@@ -334,6 +334,8 @@ def package_cmip6_point_data(rasdaman_response):
         for indicator_name, indicator_value in zip(
             var_ep_lu["cmip6_indicators"]["bandnames"], indicator_values
         ):
+            if indicator_name == "rx1day":
+                indicator_value = round(indicator_value)
             indicator_dict[indicator_name] = indicator_value
 
         results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
@@ -461,7 +463,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
         return render_template("400/bad_request.html"), 400
     cmip6_bbox = construct_latlon_bbox_from_coverage_bounds(cmip6_metadata)
     within_bounds = validate_latlon_in_bboxes(
-        lat, lon, [cmip6_bbox], [cmip6_indicators_coverage_id]
+        lat, lon, [cmip6_bbox], [var_ep_lu["cmip6_indicators"]["cov_id_str"]]
     )
     if within_bounds == 422:
         return (
@@ -515,7 +517,9 @@ def run_fetch_cmip5_indicators_point_data(lat, lon):
     Notes:
         example request: http://localhost:5000/indicators/cmip5/point/65.06/-146.16
     """
-    validation = validate_latlon(lat, lon, [indicators_coverage_id])
+    validation = validate_latlon(
+        lat, lon, [var_ep_lu["cmip5_indicators"]["cov_id_str"]]
+    )
     if validation == 400:
         return render_template("400/bad_request.html"), 400
     if validation == 404:
