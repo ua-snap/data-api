@@ -1126,19 +1126,35 @@ def demographics_csv(data):
     fieldnames = ["variable"] + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
 
-    # order CSV dicts to match NCR data display order in the luts.py demographics_order list
+    # order variables in CSV dicts to match NCR data display order in the luts.py demographics_order list
     ordered_csv_dicts = []
     for key in demographics_order:
         for csv_dict in csv_dicts:
             if csv_dict["variable"] == key:
                 ordered_csv_dicts.append(csv_dict)
 
+    reordered_csv_dicts = []
+    # reorder dicts to make community (or communities) first in all the variable dicts followed by Alaska, US, description, and source
+    key_order = ["Alaska", "United States", "description", "source"]
+    for csv_dict in ordered_csv_dicts:
+        reordered_dict = {}
+        for key in csv_dict.keys():
+            if key == "variable":
+                reordered_dict[key] = csv_dict[key]
+            if key not in key_order:
+                reordered_dict[key] = csv_dict[key]
+            else:
+                for key in key_order:
+                    if key in csv_dict.keys():
+                        reordered_dict[key] = csv_dict[key]
+        reordered_csv_dicts.append(reordered_dict)
+
     metadata = "# Demographic and health data for individual communities plus the state of Alaska and United States.\n"
 
     filename_data_name = "Demographic and Health Data - "
 
     return {
-        "csv_dicts": ordered_csv_dicts,
+        "csv_dicts": reordered_csv_dicts,
         "fieldnames": fieldnames,
         "metadata": metadata,
         "filename_data_name": filename_data_name,
