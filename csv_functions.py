@@ -1134,15 +1134,19 @@ def demographics_csv(data):
                 ordered_csv_dicts.append(csv_dict)
 
     reordered_csv_dicts = []
-    # reorder dicts to make community (or communities) first in all the variable dicts followed by Alaska, US, description, and source
+    # reorder dicts to make community (or communities) first, followed by Alaska, US, description, and source
+    # this is just for consistent formatting of the CSV to always show the community columns first
     key_order = ["Alaska", "United States", "description", "source"]
     for csv_dict in ordered_csv_dicts:
         reordered_dict = {}
         for key in csv_dict.keys():
+            # variable first
             if key == "variable":
                 reordered_dict[key] = csv_dict[key]
+            # followed by community or communities (anything not in the key_order)
             if key not in key_order:
                 reordered_dict[key] = csv_dict[key]
+            # then the rest of the keys in order
             else:
                 for key in key_order:
                     if key in csv_dict.keys():
