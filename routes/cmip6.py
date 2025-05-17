@@ -108,6 +108,12 @@ def package_cmip6_monthly_data(
                 di[model] = dict()
 
             for si, scenario_li in enumerate(model_li):
+                # Rasdaman Enterprise (as of v10.4.7) returns missing model/scenario NoData gaps
+                # as arrays full of 0s, which get converted to 0.0 somewhere along the way.
+                # Treat any array that is full of nothing but 0.0s as NoData and skip over it.
+                if all(value == 0.0 for value in scenario_li):
+                    continue
+
                 scenario = dim_encodings["scenario"][si]
                 if scenario not in di[model]:
                     di[model][scenario] = dict()
