@@ -1123,7 +1123,10 @@ def demographics_csv(data):
 
     # specify the order of the CSV columns
     fieldnames = ["variable", "Alaska", "United States", "description", "source"]
-    community_fieldname = [key for key in value_cols if key not in fieldnames][0]
+    community_keys = [key for key in value_cols if key not in fieldnames]
+    if not community_keys:
+        raise ValueError("No valid community fieldname found in value_cols.")
+    community_fieldname = community_keys[0]
     fieldnames.insert(1, community_fieldname)
     csv_dicts = build_csv_dicts(data, fieldnames, values=value_cols)
 
