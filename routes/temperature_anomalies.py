@@ -57,7 +57,9 @@ def package_anomaly_data(point_data_list):
                 di[model]["temperature_anomalies"][scenario] = dict()
             for yi, value in enumerate(scenario_li):
                 year = years[yi]
-                di[model]["temperature_anomalies"][scenario][year] = round(value, 2)
+                if value is not None:
+                    value = round(value, 2)
+                di[model]["temperature_anomalies"][scenario][year] = value
     return di
 
 
