@@ -1114,7 +1114,6 @@ def hydrology_csv(data, endpoint):
 
 
 def demographics_csv(data):
-
     value_cols = []
     for key in data.keys():
         for subkey in data[key].keys():
@@ -1122,9 +1121,14 @@ def demographics_csv(data):
                 value_cols.append(subkey)
     value_cols = list(set(value_cols)) + ["description", "source"]
 
-    values = value_cols
-    fieldnames = ["variable"] + values
-    csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+    # specify the order of the CSV columns
+    fieldnames = ["variable", "Alaska", "United States", "description", "source"]
+    community_keys = [key for key in value_cols if key not in fieldnames]
+    if not community_keys:
+        raise ValueError("No valid community fieldname found in value_cols.")
+    community_fieldname = community_keys[0]
+    fieldnames.insert(1, community_fieldname)
+    csv_dicts = build_csv_dicts(data, fieldnames, values=value_cols)
 
     # order variables in CSV dicts to match NCR data display order in the luts.py demographics_order list
     ordered_csv_dicts = []
@@ -1133,32 +1137,12 @@ def demographics_csv(data):
             if csv_dict["variable"] == key:
                 ordered_csv_dicts.append(csv_dict)
 
-    reordered_csv_dicts = []
-    # reorder dicts to make community (or communities) first, followed by Alaska, US, description, and source
-    # this is just for consistent formatting of the CSV to always show the community columns first
-    key_order = ["Alaska", "United States", "description", "source"]
-    for csv_dict in ordered_csv_dicts:
-        reordered_dict = {}
-        for key in csv_dict.keys():
-            # variable first
-            if key == "variable":
-                reordered_dict[key] = csv_dict[key]
-            # followed by community or communities (anything not in the key_order)
-            if key not in key_order:
-                reordered_dict[key] = csv_dict[key]
-            # then the rest of the keys in order
-            else:
-                for key in key_order:
-                    if key in csv_dict.keys():
-                        reordered_dict[key] = csv_dict[key]
-        reordered_csv_dicts.append(reordered_dict)
-
     metadata = "# Demographic and health data for individual communities plus the state of Alaska and United States.\n"
 
     filename_data_name = "Demographic and Health Data - "
 
     return {
-        "csv_dicts": reordered_csv_dicts,
+        "csv_dicts": ordered_csv_dicts,
         "fieldnames": fieldnames,
         "metadata": metadata,
         "filename_data_name": filename_data_name,
