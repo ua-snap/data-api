@@ -1114,7 +1114,6 @@ def hydrology_csv(data, endpoint):
 
 
 def demographics_csv(data):
-
     value_cols = []
     for key in data.keys():
         for subkey in data[key].keys():
@@ -1122,11 +1121,16 @@ def demographics_csv(data):
                 value_cols.append(subkey)
     value_cols = list(set(value_cols)) + ["description", "source"]
 
-    values = value_cols
-    fieldnames = ["variable"] + values
-    csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+    # specify the order of the CSV columns
+    fieldnames = ["variable", "Alaska", "United States", "description", "source"]
+    community_keys = [key for key in value_cols if key not in fieldnames]
+    if not community_keys:
+        raise ValueError("No valid community fieldname found in value_cols.")
+    community_fieldname = community_keys[0]
+    fieldnames.insert(1, community_fieldname)
+    csv_dicts = build_csv_dicts(data, fieldnames, values=value_cols)
 
-    # order CSV dicts to match NCR data display order in the luts.py demographics_order list
+    # order variables in CSV dicts to match NCR data display order in the luts.py demographics_order list
     ordered_csv_dicts = []
     for key in demographics_order:
         for csv_dict in csv_dicts:
