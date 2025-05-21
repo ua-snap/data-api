@@ -1,4 +1,5 @@
 from flask import render_template
+import re
 
 nodata_values = {
     "beetles": [None],
@@ -181,16 +182,39 @@ def nullify_and_prune(data, endpoint):
     return pruned_data
 
 
+def parse_string_values(data):
+    """Convert string values to their appropriate types"""
+    if isinstance(data, dict):
+        return {k: parse_string_values(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [parse_string_values(x) for x in data]
+    elif isinstance(data, str):
+        if data.isdigit():
+            return int(data)
+        elif bool(re.fullmatch(r"[0-9e\.\-]+", data)):
+            try:
+                return float(data)
+            except:
+                return data
+        else:
+            return data
+    else:
+        return data
+
+
 def postprocess(data, endpoint, titles=None):
     """Nullify and prune data, add titles, and return 404 if appropriate"""
     pruned_data = nullify_and_prune(data, endpoint)
+
     if pruned_data in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
 
-    if titles is not None:
-        pruned_data = add_titles(pruned_data, titles)
+    parsed_data = parse_string_values(pruned_data)
 
-    return pruned_data
+    if titles is not None:
+        parsed_data = add_titles(parsed_data, titles)
+
+    return parsed_data
 
 
 def recursive_rounding(keys, values):
