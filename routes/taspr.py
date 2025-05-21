@@ -364,32 +364,6 @@ async def fetch_mmm_point_data(x, y, cov_id, start_year, end_year):
     return point_data_list
 
 
-async def fetch_tas_2km_mmm_point_data(x, y, month, summary_years):
-    """Make the async request for the data at the specified point for
-    a specific varname.
-
-    Args:
-        x (float): lower x-coordinate bound
-        y (float): lower y-coordinate bound
-        month (int): month to summarize over, one of 0 - 11
-        summary_years (tuple): 2-tuple of integers mapped to
-            desired range of years to summarise over,
-            e.g. (0, 10) for 2006-2016
-
-    Returns:
-        list of averaged mmm data results
-    """
-    point_data_list = await fetch_data(
-        [
-            generate_wcs_query_url(
-                get_tas_2km_wcps_request_str(x, y, month, summary_years)
-            )
-        ]
-    )
-
-    return point_data_list
-
-
 async def fetch_point_data(x, y, var_coord, cov_ids, summary_decades):
     """Make the async request for the data at the specified point for
     a specific varname.
