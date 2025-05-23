@@ -30,6 +30,8 @@ from postprocessing import (
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
 
+beetle_coverage_id = "beetle_risk"
+
 beetles_api = Blueprint("beetles_api", __name__)
 
 var_ep_lu = {
