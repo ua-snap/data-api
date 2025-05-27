@@ -239,7 +239,7 @@ def run_point_fetch_all_beetles(lat, lon):
             protection_level = rasdaman_response[coords[0]][coords[1]][coords[2]][
                 coords[3]
             ]
-            if protection_level is not None:
+            if protection_level is not None and protection_level != 0:
                 results[dim_combo[0]][dim_combo[1]][dim_combo[2]][dim_combo[3]] = {
                     "climate-protection": protection_levels_dict[protection_level][
                         "protection_level"
