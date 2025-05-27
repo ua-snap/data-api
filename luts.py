@@ -126,6 +126,7 @@ areas_near = {
     "huc": "hucs_near",
     "yt_watershed": "yt_watersheds_near",
     "protected_area": "protected_areas_near",
+    "ecoregion": "ecoregions_near",
 }
 
 # table to decode field names for demographic data from GeoServer
