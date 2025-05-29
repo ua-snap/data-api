@@ -23,7 +23,7 @@ if conda info --envs | grep -q 'api-env'; then
 else
   echo "Creating conda environment 'api-env'..."
   conda create -y -n api-env -c conda-forge python=3.11 \
-    flask flask-cors aiohttp requests marshmallow \
+    flask flask-cors gunicorn aiohttp requests marshmallow \
     numpy xarray h5py h5netcdf rioxarray rasterio \
     pyproj shapely geopandas rtree fiona
 fi
