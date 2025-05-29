@@ -20,7 +20,6 @@ dash-html-components==2.0.0
 dash-table==5.0.0
 dask==2024.12.1
 dask-expr==1.1.21
-fiona==1.10.1
 Flask==3.0.3
 Flask-Cors==5.0.0
 frozenlist==1.4.1
