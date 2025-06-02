@@ -82,6 +82,11 @@ def find_via_gs(lat, lon):
     # For each returned area, place it inside the correct area type.
     # We want to collect the area's geometry, id, name, and type.
     for ai in range(len(nearby_areas)):
+        # HUC12s do not play well with Northern Climate Reports.
+        # Remove them from /places endpoints for now.
+        if nearby_areas[ai]["properties"]["area_type"] == "HUC12":
+            continue
+
         current_area_type = areas_near[nearby_areas[ai]["properties"]["type"]]
         current_index = len(proximal_di[current_area_type])
         proximal_di[current_area_type][current_index] = gather_nearby_area(
@@ -275,6 +280,11 @@ def get_json_for_type(type, recurse=False):
             # For each feature, put the properties (name, id, type) into the
             # list for creation of a JSON object to be returned.
             for ai in range(len(all_areas)):
+                # HUC12s do not play well with Northern Climate Reports.
+                # Remove them from /places endpoints for now.
+                if all_areas[ai]["properties"]["area_type"] == "HUC12":
+                    continue
+
                 # If this area is a protected_area, keep area_type in
                 # returned output.
                 if all_areas[ai]["properties"]["area_type"] != "":
