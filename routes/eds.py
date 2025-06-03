@@ -1,108 +1,40 @@
-from flask import (
-    Blueprint,
-    request,
-    current_app as app,
-)
-import asyncio
-from aiohttp import ClientSession, ClientResponseError, client_exceptions
-from fetch_data import make_get_request
+from flask import Blueprint, request, current_app as app, jsonify
 from . import routes
+from .taspr import get_temperature_plate, get_precipitation_plate, proj_precip_point
+from .snow import eds_snow_data
+from .degree_days import get_dd_plate
+from .permafrost import permafrost_eds_request
+from .wet_days_per_year import get_wet_days_per_year_plate
+from .elevation import run_fetch_elevation
+from .hydrology import eds_hydrology_data
 
 eds_api = Blueprint("eds_api", __name__)
 
 
-async def fetch_data(url):
-    """Wrapper for make_get_request() which gathers and
-    executes the urls as asyncio tasks
+def extract_json(response):
+    """
+    Function to extract JSON data from a response.
 
     Args:
-        url (string): URL being requested from API.
+        response (tuple, Flask response, or dict): The response from the endpoint.
 
     Returns:
-        Results of query as JSON
+        dict: The JSON data from the response.
     """
-    try:
-        async with ClientSession() as session:
-            results = await asyncio.create_task(make_get_request(url, session))
-        return results
-    except ClientResponseError as e:
-        # If any of the URLs returns a status other than HTTP status 200,
-        # it will return the error given to determine what went wrong.
-        return e
+    # If response is a tuple, the endpoint failed and we should return an empty dict
+    if isinstance(response, tuple):
+        return {}
+
+    # Extract JSON from the response if it's a Flask response
+    if hasattr(response, "get_json"):
+        return response.get_json()
+    elif hasattr(response, "json"):
+        return response.json
+
+    # Return the dictionary if not a Flask response
+    return response
 
 
-async def fetch_data_with_retry(url, max_retries=3):
-    for retry in range(max_retries):
-        response = await fetch_data(url)
-        # If the response is not a blank dictionary, return the response
-        if type(response) is dict and response != dict():
-            return response
-        elif (
-            type(response) is client_exceptions.ClientResponseError
-            and (response.status != 400 and response.status != 404 and response != 422)
-            and retry < max_retries - 1
-        ):
-            # Sleep for a moment before retrying the given endpoint
-            app.logger.warning(f"Retrying {url} after attempt {retry + 1}")
-            await asyncio.sleep(2)
-        else:
-            # If all retries are error codes, return the blank section
-            # to allow ArcticEDS to continue showing other sections.
-            return dict()
-
-
-async def run_fetch_all_eds(lat, lon):
-    """
-    Fetches a list of data API end points to generate a multiple
-    variable JSON that can be used to generate a full report in the
-    Arctic EDS website.
-
-    Args:
-        lat (float): latitude
-        lon (float): longitude
-
-
-    Returns:
-        Multiple variable JSON object
-    """
-    host = request.host_url
-    all_urls = [
-        f"{host}eds/temperature/{lat}/{lon}",
-        f"{host}eds/precipitation/{lat}/{lon}",
-        f"{host}eds/snow/{lat}/{lon}",
-        f"{host}eds/degree_days/freezing_index/{lat}/{lon}",
-        f"{host}eds/degree_days/heating/{lat}/{lon}",
-        f"{host}eds/degree_days/thawing_index/{lat}/{lon}",
-        f"{host}eds/permafrost/{lat}/{lon}",
-        f"{host}eds/wet_days_per_year/point/{lat}/{lon}",
-        f"{host}elevation/point/{lat}/{lon}",
-        f"{host}precipitation/frequency/point/{lat}/{lon}",
-        f"{host}eds/hydrology/{lat}/{lon}",
-    ]
-
-    all_keys = [
-        "temperature",
-        "precipitation",
-        "snowfall",
-        "freezing_index",
-        "heating_degree_days",
-        "thawing_index",
-        "permafrost",
-        "wet_days_per_year",
-        "elevation",
-        "precip_frequency",
-        "hydrology",
-    ]
-
-    results = await asyncio.gather(*[fetch_data_with_retry(url) for url in all_urls])
-
-    eds = dict()
-    for index in range(len(results)):
-        eds[all_keys[index]] = results[index]
-    return eds
-
-
-@routes.route("/eds/all/<lat>/<lon>")
 def fetch_all_eds(lat, lon):
     """
     Endpoint for requesting all data required for the Arctic EDS reports.
@@ -114,5 +46,45 @@ def fetch_all_eds(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/all/68.0764/-154.5501
     """
+    # Get data from each endpoint directly using their functions
+    temperature = extract_json(get_temperature_plate(lat, lon))
+    precipitation = extract_json(get_precipitation_plate(lat, lon))
+    snow = extract_json(eds_snow_data(lat, lon))
+    freezing_index = extract_json(get_dd_plate("freezing_index", lat, lon))
+    heating_degree_days = extract_json(get_dd_plate("heating", lat, lon))
+    thawing_index = extract_json(get_dd_plate("thawing_index", lat, lon))
+    permafrost = extract_json(permafrost_eds_request(lat, lon))
+    wet_days_per_year = extract_json(get_wet_days_per_year_plate(lat, lon))
+    elevation = extract_json(run_fetch_elevation(lat, lon))
+    precip_frequency = extract_json(proj_precip_point(lat, lon))
+    hydrology = extract_json(eds_hydrology_data(lat, lon))
 
-    return asyncio.run(run_fetch_all_eds(lat, lon))
+    # Combine all results into a single dictionary for return to ArcticEDS
+    return {
+        "temperature": temperature,
+        "precipitation": precipitation,
+        "snowfall": snow,
+        "freezing_index": freezing_index,
+        "heating_degree_days": heating_degree_days,
+        "thawing_index": thawing_index,
+        "permafrost": permafrost,
+        "wet_days_per_year": wet_days_per_year,
+        "elevation": elevation,
+        "precip_frequency": precip_frequency,
+        "hydrology": hydrology,
+    }
+
+
+@routes.route("/eds/all/<lat>/<lon>")
+def fetch_all_eds_route(lat, lon):
+    """
+    Endpoint for requesting all data required for the Arctic EDS reports.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Notes:
+        example request: http://localhost:5000/eds/all/68.0764/-154.5501
+    """
+    return jsonify(fetch_all_eds(lat, lon))
