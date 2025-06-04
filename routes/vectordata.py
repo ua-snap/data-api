@@ -175,19 +175,23 @@ def gather_nearby_area(nearby_area):
     return curr_di
 
 
-def filter_by_tag(communities):
+def filter_by_tag(communities, taglist=None):
     """
     Filters communities by tags if tags are provided in the request.
 
     Args:
         communities: All communities returned from the WFS request.
-
+        taglist: A list of tags to filter the communities by.
     Returns:
         Communities with the tags provided in the request, with the tags removed
         from the output after filtering.
     """
-    if request.args.get("tags"):
-        tags = request.args.get("tags").split(",")
+    if request.args.get("tags") or taglist:
+        tags = []
+        if taglist:
+            tags = taglist
+        else:
+            tags = request.args.get("tags").split(",")
         filtered_communities = []
         for community in communities:
             community_added = False
