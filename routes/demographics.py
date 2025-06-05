@@ -62,7 +62,7 @@ def get_data_for_community(community):
     for c in community_ids:
         urls.append(
             generate_wfs_places_url(
-                "demographics:demographics", filter=c, filter_type="id"
+                "demographics:demographics_new", filter=c, filter_type="id"
             )
         )
 
