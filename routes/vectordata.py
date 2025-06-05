@@ -72,7 +72,7 @@ def find_via_gs(lat, lon):
 
     # WFS request to Geoserver for all polygon areas.
     nearby_areas = asyncio.run(
-        fetch_data([generate_wfs_search_url("all_boundaries:all_areas", lat, lon)])
+        fetch_data([generate_wfs_search_url("all_boundaries:all_areas_temp", lat, lon)])
     )["features"]
 
     # Create the JSON section for each of the area types.
@@ -269,7 +269,7 @@ def get_json_for_type(type, recurse=False):
                 fetch_data(
                     [
                         generate_wfs_places_url(
-                            "all_boundaries:all_areas",
+                            "all_boundaries:all_areas_temp",
                             "id,name,type,area_type",
                             type,
                         )

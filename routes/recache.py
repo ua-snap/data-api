@@ -87,7 +87,7 @@ def get_all_route_endpoints(curr_route, curr_type):
         )["features"]
     else:
         places = asyncio.run(
-            fetch_data([generate_wfs_places_url("all_boundaries:all_areas", "id")])
+            fetch_data([generate_wfs_places_url("all_boundaries:all_areas_temp", "id")])
         )["features"]
 
     # For each JSON item in the JSON object array

@@ -190,7 +190,11 @@ def validate_var_id(var_id):
 
     var_id_check = asyncio.run(
         fetch_data(
-            [generate_wfs_places_url("all_boundaries:all_areas", "type", var_id, "id")]
+            [
+                generate_wfs_places_url(
+                    "all_boundaries:all_areas_temp", "type", var_id, "id"
+                )
+            ]
         )
     )
 

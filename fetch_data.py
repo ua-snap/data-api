@@ -169,7 +169,7 @@ def get_poly(poly_id, crs=3338):
         fetch_data(
             [
                 generate_wfs_places_url(
-                    "all_boundaries:all_areas",
+                    "all_boundaries:all_areas_temp",
                     "the_geom",
                     poly_id,
                     "id",
