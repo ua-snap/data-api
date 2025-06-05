@@ -18,7 +18,7 @@ from . import routes
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly"
+cmip6_monthly_coverage_id = "cmip6_monthly_zeus"
 
 
 async def get_cmip6_metadata():
