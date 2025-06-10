@@ -28,7 +28,7 @@ from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 
 permafrost_api = Blueprint("permafrost_api", __name__)
-gipl_1km_coverage_id = "crrel_gipl_outputs"
+gipl_1km_coverage_id = "crrel_gipl_outputs_nc"
 
 
 async def get_gipl_metadata():
@@ -39,6 +39,7 @@ async def get_gipl_metadata():
 
 gipl1km_metadata = asyncio.run(get_gipl_metadata())
 gipl1km_dim_encodings = get_coverage_encodings(gipl1km_metadata)
+print(gipl1km_dim_encodings)
 if type(gipl1km_dim_encodings["model"]) == str:
     gipl1km_dim_encodings["model"] = json.loads(
         gipl1km_dim_encodings["model"].replace("'", '"')
@@ -112,14 +113,14 @@ def package_obu_vector(obu_vector_resp):
 
 
 def make_ncr_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation):
-    """Generate a WCPS query string specific the to GIPL 1 km coverage.
+    """Generate a WCPS query string specific to the GIPL 1 km coverage for the NCR.
 
     Arguments:
         x -- (float) x-coordinate for the point query
         y -- (float) y-coordinate for the point query
-        years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
-        model(int) - Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4
-        scenario(int) - Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
+        years -- (str) colon-separated ISO date-time, e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
+        model (int) -- Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4)
+        scenario (int) -- Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
         summary_operation -- (str) one of 'min', 'avg', or 'max'
     Returns:
         gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
@@ -127,8 +128,8 @@ def make_ncr_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_oper
     gipl1km_wcps_str = quote(
         (
             f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
-            f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
+            f"  return encode ("
+            f"    {summary_operation}($c[model({model}),scenario({scenario}),year({years}),X({x}),Y({y})])"
             f', "application/json")'
         )
     )
@@ -163,7 +164,7 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
                         raise ValueError(f"Failed to parse encoding string: {str(e)}")
 
                 # Now iterate over the variable_encodings dictionary
-                for k, v in zip(variable_encodings.values(), resp):
+                for k, v in zip(variable_encodings.values(), resp.split()):
                     if v is None:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
                             k
@@ -171,7 +172,7 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
                     else:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
                             k
-                        ] = round(v, 1)
+                        ] = round(float(v), 1)
     return gipl1km_wcps_point_pkg
 
 
@@ -189,8 +190,8 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
     gipl1km_wcps_str = quote(
         (
             f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
-            f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),year({years}),X({x}),Y({y})] )"
+            f"  return encode ("
+            f"    {summary_operation}($c[year({years}),X({x}),Y({y})] )"
             f', "application/json")'
         )
     )
@@ -227,9 +228,9 @@ def generate_gipl1km_time_index():
     Returns:
         date_index (pd.DatetimeIndex): a time index with annual frequency
     """
-    # CP note: manually fetching the time index from metadata here because this wasn't ingested as an "ansi" axis in Rasdaman - 3 is the index for the time axis
-    year_start = gipl1km_metadata["envelope"]["axis"][3]["lowerBound"]
-    year_stop = gipl1km_metadata["envelope"]["axis"][3]["upperBound"]
+    # CP note: manually fetching the time index from metadata here because this wasn't ingested as an "ansi" axis in Rasdaman - 2 is the index for the time axis
+    year_start = gipl1km_metadata["envelope"]["axis"][2]["lowerBound"]
+    year_stop = gipl1km_metadata["envelope"]["axis"][2]["upperBound"]
     date_index = pd.date_range(
         start=pd.Timestamp(year_start.split("T")[0]),
         end=pd.Timestamp(year_stop.split("T")[0]),
@@ -515,6 +516,8 @@ async def run_fetch_gipl_1km_point_data(
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
+    print(gipl_1km_point_data)
+
     if ncr is True and all(val != None for val in [start_year, end_year, summarize]):
         gipl_1km_point_package = package_ncr_gipl1km_wcps_data(gipl_1km_point_data)
     elif all(val != None for val in [start_year, end_year, summarize]):
@@ -686,6 +689,7 @@ def permafrost_eds_request(lat, lon):
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
 def permafrost_ncr_request(lat, lon, ncr=True):
     permafrostData = asyncio.run(run_ncr_requests(lat, lon, ncr))
+    print(permafrostData)
 
     # Return corresponding error page if any sub-request returns error.
     for value in permafrostData.values():
