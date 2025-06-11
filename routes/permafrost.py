@@ -255,13 +255,13 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
 
     gipl1km_point_pkg = {}
 
-    # Step through the years and package the data
-    for year_idx, t in enumerate(tx):
-        year = t.date().strftime("%Y")
-        gipl1km_point_pkg[year] = {}
-        # Step through the models
-        for model_idx, model_name in enumerate(model_names):
-            gipl1km_point_pkg[year][model_name] = {}
+    # Step through the models
+    for model_idx, model_name in enumerate(model_names):
+        gipl1km_point_pkg[model_name] = {}
+        # Step through the years and package the data
+        for year_idx, t in enumerate(tx):
+            year = t.date().strftime("%Y")
+            gipl1km_point_pkg[model_name][year] = {}
             # Step through the scenarios
             for scenario_idx, scenario_name in enumerate(scenario_names):
                 # Grab the 10 returned variables for this year, model, and scenario
@@ -269,7 +269,7 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
                 # Split them by whitespace and convert to float
                 values = [float(v) for v in value_str.split()]
                 # Add the variable values to the packaged data
-                gipl1km_point_pkg[year][model_name][scenario_name] = {
+                gipl1km_point_pkg[model_name][year][scenario_name] = {
                     var: round(val, 1) for var, val in zip(variable_names, values)
                 }
 
