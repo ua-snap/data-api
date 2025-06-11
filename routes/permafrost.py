@@ -144,26 +144,24 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
     Returns:
         gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
     """
+    models = list(gipl1km_dim_encodings["model"].values())
+    variable_names = list(gipl1km_dim_encodings["variable"].values())
+
     gipl1km_wcps_point_pkg = dict()
-    models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
+    # Step through all the models
     for all_resp, model in zip(gipl1km_wcps_resp, models):
         gipl1km_wcps_point_pkg[model] = dict()
+        # These are the expected scenario names for NCR
         scenarios = ["rcp45", "rcp85"]
+        # Step through the scenarios for each model
         for scenario_resp, scenario in zip(all_resp, scenarios):
             gipl1km_wcps_point_pkg[model][scenario] = dict()
             summary_methods = ["min", "mean", "max"]
+            # Step through the min-mean-max responses for each scenario
             for resp, stat_type in zip(scenario_resp, summary_methods):
                 gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
-                # Check if gipl1km_dim_encodings["variable"] is a string
-                variable_encodings = gipl1km_dim_encodings["variable"]
-                if isinstance(variable_encodings, str):
-                    try:
-                        variable_encodings = ast.literal_eval(variable_encodings)
-                    except (SyntaxError, ValueError) as e:
-                        raise ValueError(f"Failed to parse encoding string: {str(e)}")
-
-                # Now iterate over the variable_encodings dictionary
-                for k, v in zip(variable_encodings.values(), resp.split()):
+                # Step through the variable names and their corresponding values
+                for k, v in zip(variable_names, resp.split()):
                     if v is None:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
                             k
@@ -241,9 +239,8 @@ def generate_gipl1km_time_index():
 def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
     """
     Package the response for full set of point data. The structure is:
-    [year][model][scenario] = "space-separated values for 10 variables"
+    gipl1km_point_resp[year][model][scenario] = "space-separated values for 10 variables"
     """
-    # Prepare encodings
     model_names = list(gipl1km_dim_encodings["model"].values())
     scenario_names = list(gipl1km_dim_encodings["scenario"].values())
     variable_names = list(gipl1km_dim_encodings["variable"].values())
@@ -258,16 +255,20 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
 
     gipl1km_point_pkg = {}
 
+    # Step through the years and package the data
     for year_idx, t in enumerate(tx):
         year = t.date().strftime("%Y")
         gipl1km_point_pkg[year] = {}
+        # Step through the models
         for model_idx, model_name in enumerate(model_names):
             gipl1km_point_pkg[year][model_name] = {}
+            # Step through the scenarios
             for scenario_idx, scenario_name in enumerate(scenario_names):
-                # Get the string of values for this year/model/scenario
+                # Grab the 10 returned variables for this year, model, and scenario
                 value_str = gipl1km_point_resp[year_idx][model_idx][scenario_idx]
+                # Split them by whitespace and convert to float
                 values = [float(v) for v in value_str.split()]
-                # Map variable names to values
+                # Add the variable values to the packaged data
                 gipl1km_point_pkg[year][model_name][scenario_name] = {
                     var: round(val, 1) for var, val in zip(variable_names, values)
                 }
