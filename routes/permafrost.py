@@ -118,8 +118,8 @@ def make_ncr_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_oper
         x -- (float) x-coordinate for the point query
         y -- (float) y-coordinate for the point query
         years -- (str) colon-separated ISO date-time, e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
-        model (int) -- Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4)
-        scenario (int) -- Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
+        model -- (int) Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4)
+        scenario -- (int) Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
         summary_operation -- (str) one of 'min', 'avg', or 'max'
     Returns:
         gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
