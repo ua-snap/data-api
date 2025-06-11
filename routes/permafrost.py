@@ -39,7 +39,6 @@ async def get_gipl_metadata():
 
 gipl1km_metadata = asyncio.run(get_gipl_metadata())
 gipl1km_dim_encodings = get_coverage_encodings(gipl1km_metadata)
-print(gipl1km_dim_encodings)
 if type(gipl1km_dim_encodings["model"]) == str:
     gipl1km_dim_encodings["model"] = json.loads(
         gipl1km_dim_encodings["model"].replace("'", '"')
@@ -214,10 +213,10 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
 
         for k, v in zip(
             gipl1km_dim_encodings["variable"].values(),
-            summary_op_resp,
+            summary_op_resp.split(),
         ):
             if v is not None:
-                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
+                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(float(v), 1)
 
     return gipl1km_wcps_point_pkg
 
@@ -240,38 +239,38 @@ def generate_gipl1km_time_index():
 
 
 def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
-    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9). Values are rounded to one decimal place because units are either meters or degrees C.
-
-    Arguments:
-        gipl1km_point_resp -- (list) deeply nested list of WCS response values.
-        time_slice -- (tuple) 2-tuple of (start_year, end_year)
-    Returns:
-        gipl1km_point_pkg -- (dict) results for all ten variables, all models, all scenario. defaults to the entire time range (time_slice=None).
     """
+    Package the response for full set of point data. The structure is:
+    [year][model][scenario] = "space-separated values for 10 variables"
+    """
+    # Prepare encodings
+    model_names = list(gipl1km_dim_encodings["model"].values())
+    scenario_names = list(gipl1km_dim_encodings["scenario"].values())
+    variable_names = list(gipl1km_dim_encodings["variable"].values())
 
-    # must match length of time index when it is sliced
-    flat_list = list(deepflatten(gipl1km_point_resp))
-    i = 0
+    # Get the time index
+    if time_slice is not None:
+        start, stop = time_slice
+        tx = generate_gipl1km_time_index()
+        tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
+    else:
+        tx = generate_gipl1km_time_index()
 
     gipl1km_point_pkg = {}
-    for model_name in gipl1km_dim_encodings["model"].values():
-        gipl1km_point_pkg[model_name] = {}
-        if time_slice is not None:
-            start, stop = time_slice
-            tx = generate_gipl1km_time_index()
-            tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
-        else:
-            tx = generate_gipl1km_time_index()
-        for t in tx:
-            year = t.date().strftime("%Y")
-            gipl1km_point_pkg[model_name][year] = {}
-            for scenario_name in gipl1km_dim_encodings["scenario"].values():
-                gipl1km_point_pkg[model_name][year][scenario_name] = {}
-                for gipl_var_name in gipl1km_dim_encodings["variable"].values():
-                    gipl1km_point_pkg[model_name][year][scenario_name][
-                        gipl_var_name
-                    ] = round(flat_list[i], 1)
-                    i += 1
+
+    for year_idx, t in enumerate(tx):
+        year = t.date().strftime("%Y")
+        gipl1km_point_pkg[year] = {}
+        for model_idx, model_name in enumerate(model_names):
+            gipl1km_point_pkg[year][model_name] = {}
+            for scenario_idx, scenario_name in enumerate(scenario_names):
+                # Get the string of values for this year/model/scenario
+                value_str = gipl1km_point_resp[year_idx][model_idx][scenario_idx]
+                values = [float(v) for v in value_str.split()]
+                # Map variable names to values
+                gipl1km_point_pkg[year][model_name][scenario_name] = {
+                    var: round(val, 1) for var, val in zip(variable_names, values)
+                }
 
     return gipl1km_point_pkg
 
@@ -516,8 +515,6 @@ async def run_fetch_gipl_1km_point_data(
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    print(gipl_1km_point_data)
-
     if ncr is True and all(val != None for val in [start_year, end_year, summarize]):
         gipl_1km_point_package = package_ncr_gipl1km_wcps_data(gipl_1km_point_data)
     elif all(val != None for val in [start_year, end_year, summarize]):
@@ -689,7 +686,6 @@ def permafrost_eds_request(lat, lon):
 @routes.route("/ncr/permafrost/point/<lat>/<lon>")
 def permafrost_ncr_request(lat, lon, ncr=True):
     permafrostData = asyncio.run(run_ncr_requests(lat, lon, ncr))
-    print(permafrostData)
 
     # Return corresponding error page if any sub-request returns error.
     for value in permafrostData.values():
