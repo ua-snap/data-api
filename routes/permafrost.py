@@ -28,7 +28,7 @@ from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 
 permafrost_api = Blueprint("permafrost_api", __name__)
-gipl_1km_coverage_id = "crrel_gipl_outputs"
+gipl_1km_coverage_id = "crrel_gipl_outputs_nc"
 
 
 async def get_gipl_metadata():
@@ -112,14 +112,14 @@ def package_obu_vector(obu_vector_resp):
 
 
 def make_ncr_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_operation):
-    """Generate a WCPS query string specific the to GIPL 1 km coverage.
+    """Generate a WCPS query string specific to the GIPL 1 km coverage for the NCR.
 
     Arguments:
         x -- (float) x-coordinate for the point query
         y -- (float) y-coordinate for the point query
-        years -- (str) colon-separated ISO date-time,= e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
-        model(int) - Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4
-        scenario(int) - Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
+        years -- (str) colon-separated ISO date-time, e.g., "\"2040-01-01T00:00:00.000Z\":\"2069-01-01T00:00:00.000Z\""
+        model -- (int) Integer representing model (0 = 5ModelAvg, 1 = GFDL-CM3, 2 = NCAR-CCSM4)
+        scenario -- (int) Integer representing scenario (0 = RCP 4.5, 1 = RCP 8.5)
         summary_operation -- (str) one of 'min', 'avg', or 'max'
     Returns:
         gipl1km_wcps_str -- (str) fragment used to construct the WCPS request
@@ -127,8 +127,8 @@ def make_ncr_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_oper
     gipl1km_wcps_str = quote(
         (
             f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
-            f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),model({model}),scenario({scenario}),year({years}),X({x}),Y({y})] )"
+            f"  return encode ("
+            f"    {summary_operation}($c[model({model}),scenario({scenario}),year({years}),X({x}),Y({y})])"
             f', "application/json")'
         )
     )
@@ -144,34 +144,32 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
     Returns:
         gipl1km_wcps_point_pkg -- (dict) min-mean-max summarized results for all ten variables
     """
+    models = list(gipl1km_dim_encodings["model"].values())
+    variable_names = list(gipl1km_dim_encodings["variable"].values())
+
     gipl1km_wcps_point_pkg = dict()
-    models = ["5ModelAvg", "GFDL-CM3", "NCAR-CCSM4"]
+    # Step through all the models
     for all_resp, model in zip(gipl1km_wcps_resp, models):
         gipl1km_wcps_point_pkg[model] = dict()
+        # These are the expected scenario names for NCR
         scenarios = ["rcp45", "rcp85"]
+        # Step through the scenarios for each model
         for scenario_resp, scenario in zip(all_resp, scenarios):
             gipl1km_wcps_point_pkg[model][scenario] = dict()
             summary_methods = ["min", "mean", "max"]
+            # Step through the min-mean-max responses for each scenario
             for resp, stat_type in zip(scenario_resp, summary_methods):
                 gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
-                # Check if gipl1km_dim_encodings["variable"] is a string
-                variable_encodings = gipl1km_dim_encodings["variable"]
-                if isinstance(variable_encodings, str):
-                    try:
-                        variable_encodings = ast.literal_eval(variable_encodings)
-                    except (SyntaxError, ValueError) as e:
-                        raise ValueError(f"Failed to parse encoding string: {str(e)}")
-
-                # Now iterate over the variable_encodings dictionary
-                for k, v in zip(variable_encodings.values(), resp):
-                    if v is None:
+                # Step through the variable names and their corresponding values
+                for k, v in zip(variable_names, resp.split()):
+                    if v == "null" or v is None:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
                             k
                         ] = None
                     else:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
                             k
-                        ] = round(v, 1)
+                        ] = round(float(v), 1)
     return gipl1km_wcps_point_pkg
 
 
@@ -189,8 +187,8 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
     gipl1km_wcps_str = quote(
         (
             f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
-            f"  return encode (coverage summary over $v variable(0:9)"
-            f"  values {summary_operation}( $c[variable($v),year({years}),X({x}),Y({y})] )"
+            f"  return encode ("
+            f"    {summary_operation}($c[year({years}),X({x}),Y({y})] )"
             f', "application/json")'
         )
     )
@@ -213,10 +211,12 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
 
         for k, v in zip(
             gipl1km_dim_encodings["variable"].values(),
-            summary_op_resp,
+            summary_op_resp.split(),
         ):
-            if v is not None:
-                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(v, 1)
+            if v == "null" or v is None:
+                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = None
+            else:
+                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(float(v), 1)
 
     return gipl1km_wcps_point_pkg
 
@@ -227,9 +227,9 @@ def generate_gipl1km_time_index():
     Returns:
         date_index (pd.DatetimeIndex): a time index with annual frequency
     """
-    # CP note: manually fetching the time index from metadata here because this wasn't ingested as an "ansi" axis in Rasdaman - 3 is the index for the time axis
-    year_start = gipl1km_metadata["envelope"]["axis"][3]["lowerBound"]
-    year_stop = gipl1km_metadata["envelope"]["axis"][3]["upperBound"]
+    # CP note: manually fetching the time index from metadata here because this wasn't ingested as an "ansi" axis in Rasdaman - 2 is the index for the time axis
+    year_start = gipl1km_metadata["envelope"]["axis"][2]["lowerBound"]
+    year_stop = gipl1km_metadata["envelope"]["axis"][2]["upperBound"]
     date_index = pd.date_range(
         start=pd.Timestamp(year_start.split("T")[0]),
         end=pd.Timestamp(year_stop.split("T")[0]),
@@ -239,38 +239,48 @@ def generate_gipl1km_time_index():
 
 
 def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
-    """Package the response for full set of point data. The native structure of the response is nested as follows: model (0 1 2), year, scenario (0 1), variable (0 9). Values are rounded to one decimal place because units are either meters or degrees C.
-
-    Arguments:
-        gipl1km_point_resp -- (list) deeply nested list of WCS response values.
-        time_slice -- (tuple) 2-tuple of (start_year, end_year)
-    Returns:
-        gipl1km_point_pkg -- (dict) results for all ten variables, all models, all scenario. defaults to the entire time range (time_slice=None).
     """
+    Package the response for full set of point data. The structure is:
+    gipl1km_point_resp[year][model][scenario] = "space-separated values for 10 variables"
+    """
+    model_names = list(gipl1km_dim_encodings["model"].values())
+    scenario_names = list(gipl1km_dim_encodings["scenario"].values())
+    variable_names = list(gipl1km_dim_encodings["variable"].values())
 
-    # must match length of time index when it is sliced
-    flat_list = list(deepflatten(gipl1km_point_resp))
-    i = 0
+    # Get the time index
+    if time_slice is not None:
+        start, stop = time_slice
+        tx = generate_gipl1km_time_index()
+        tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
+    else:
+        tx = generate_gipl1km_time_index()
 
     gipl1km_point_pkg = {}
-    for model_name in gipl1km_dim_encodings["model"].values():
+
+    # Step through the models
+    for model_idx, model_name in enumerate(model_names):
         gipl1km_point_pkg[model_name] = {}
-        if time_slice is not None:
-            start, stop = time_slice
-            tx = generate_gipl1km_time_index()
-            tx = tx[tx.slice_indexer(f"{start}-01-01", f"{stop}-01-01")]
-        else:
-            tx = generate_gipl1km_time_index()
-        for t in tx:
+        # Step through the years and package the data
+        for year_idx, t in enumerate(tx):
             year = t.date().strftime("%Y")
             gipl1km_point_pkg[model_name][year] = {}
-            for scenario_name in gipl1km_dim_encodings["scenario"].values():
-                gipl1km_point_pkg[model_name][year][scenario_name] = {}
-                for gipl_var_name in gipl1km_dim_encodings["variable"].values():
-                    gipl1km_point_pkg[model_name][year][scenario_name][
-                        gipl_var_name
-                    ] = round(flat_list[i], 1)
-                    i += 1
+            # Step through the scenarios
+            for scenario_idx, scenario_name in enumerate(scenario_names):
+                # Grab the 10 returned variables for this year, model, and scenario
+                value_str = gipl1km_point_resp[year_idx][model_idx][scenario_idx]
+                # Split them by whitespace and convert to float if not None
+                values = []
+                for v in value_str.split():
+                    # Checks for null values to give a 404 error if all values are null
+                    if v == "null" or v is None:
+                        values.append(None)
+                    else:
+                        values.append(float(v))
+                # Add the variable values to the packaged data
+                gipl1km_point_pkg[model_name][year][scenario_name] = {
+                    var: (round(val, 1) if val is not None else None)
+                    for var, val in zip(variable_names, values)
+                }
 
     return gipl1km_point_pkg
 
