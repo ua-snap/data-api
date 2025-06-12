@@ -162,7 +162,7 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
                 gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
                 # Step through the variable names and their corresponding values
                 for k, v in zip(variable_names, resp.split()):
-                    if v is None:
+                    if v == "null" or v is None:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
                             k
                         ] = None
@@ -213,7 +213,9 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
             gipl1km_dim_encodings["variable"].values(),
             summary_op_resp.split(),
         ):
-            if v is not None:
+            if v == "null" or v is None:
+                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = None
+            else:
                 gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(float(v), 1)
 
     return gipl1km_wcps_point_pkg
@@ -266,11 +268,18 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
             for scenario_idx, scenario_name in enumerate(scenario_names):
                 # Grab the 10 returned variables for this year, model, and scenario
                 value_str = gipl1km_point_resp[year_idx][model_idx][scenario_idx]
-                # Split them by whitespace and convert to float
-                values = [float(v) for v in value_str.split()]
+                # Split them by whitespace and convert to float if not None
+                values = []
+                for v in value_str.split():
+                    # Checks for null values to give a 404 error if all values are null
+                    if v == "null" or v is None:
+                        values.append(None)
+                    else:
+                        values.append(float(v))
                 # Add the variable values to the packaged data
                 gipl1km_point_pkg[model_name][year][scenario_name] = {
-                    var: round(val, 1) for var, val in zip(variable_names, values)
+                    var: (round(val, 1) if val is not None else None)
+                    for var, val in zip(variable_names, values)
                 }
 
     return gipl1km_point_pkg
