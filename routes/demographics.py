@@ -6,7 +6,7 @@ import pandas as pd
 
 # local imports
 from . import routes
-from luts import demographics_fields, demographics_descriptions
+from luts import demographics_fields, demographics_descriptions, demographics_order
 
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
@@ -81,79 +81,7 @@ def get_data_for_community(community):
 
     # Recreate the dicts in a better order for viewing (drops "id", "GEOID", and "areatype")
     # convert to JSON object to preserve ordered output
-    fields = [
-        "name",
-        "comment",
-        "total_population",
-        "pct_under_18",
-        "pct_under_5",
-        "pct_65_plus",
-        "pct_african_american",
-        "pct_amer_indian_ak_native",
-        "pct_asian",
-        "pct_hawaiian_pacislander",
-        "pct_hispanic_latino",
-        "pct_white",
-        "pct_multi",
-        "pct_other",
-        "pct_asthma",
-        "pct_asthma_low",
-        "pct_asthma_high",
-        "pct_copd",
-        "pct_copd_low",
-        "pct_copd_high",
-        "pct_diabetes",
-        "pct_diabetes_low",
-        "pct_diabetes_high",
-        "pct_hd",
-        "pct_hd_low",
-        "pct_hd_high",
-        "pct_stroke",
-        "pct_stroke_low",
-        "pct_stroke_high",
-        "pct_mh",
-        "pct_mh_low",
-        "pct_mh_high",
-        "pct_emospt",
-        "pct_emospt_low",
-        "pct_emospt_high",
-        "pct_minority",
-        "pct_minority_low",
-        "pct_minority_high",
-        "pct_foodstamps",
-        "pct_foodstamps_low",
-        "pct_foodstamps_high",
-        "pct_w_disability",
-        "pct_w_disability_low",
-        "pct_w_disability_high",
-        "pct_insured",
-        "pct_insured_low",
-        "pct_insured_high",
-        "pct_uninsured",
-        "pct_uninsured_low",
-        "pct_uninsured_high",
-        "pct_no_bband",
-        "pct_no_bband_low",
-        "pct_no_bband_high",
-        "pct_no_hsdiploma",
-        "pct_no_hsdiploma_low",
-        "pct_no_hsdiploma_high",
-        "pct_below_150pov",
-        "pct_below_150pov_low",
-        "pct_below_150pov_high",
-        "pct_crowding",
-        "pct_crowding_low",
-        "pct_crowding_high",
-        "pct_single_parent",
-        "pct_single_parent_low",
-        "pct_single_parent_high",
-        "pct_unemployed",
-        "pct_unemployed_low",
-        "pct_unemployed_high",
-        "pct_hcost",
-        "pct_hcost_low",
-        "pct_hcost_high",
-    ]
+    fields = ["name"] + demographics_order
 
     reformatted_results = {}
     for c in community_ids:
