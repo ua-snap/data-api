@@ -1,4 +1,4 @@
-from flask import Blueprint, request, current_app as app, jsonify, render_template
+from flask import Blueprint, request, current_app as app, jsonify
 from . import routes
 from .taspr import get_temperature_plate, get_precipitation_plate, proj_precip_point
 from .snow import eds_snow_data
