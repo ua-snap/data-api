@@ -1,4 +1,4 @@
-from flask import Blueprint, request, current_app as app, jsonify
+from flask import Blueprint, request, current_app as app, jsonify, render_template
 from . import routes
 from .taspr import get_temperature_plate, get_precipitation_plate, proj_precip_point
 from .snow import eds_snow_data
@@ -21,8 +21,16 @@ def extract_json(response):
     Returns:
         dict: The JSON data from the response.
     """
-    # If response is a tuple, the endpoint failed and we should return an empty dict
+    # If a 500 HTTP error code is returned from any of the individual dataset
+    # endpoints, the error will be returned from the entire /eds/all endpoint.
+    # I.e., treat 500 error codes as a total failure, not just a nodata
+    # response.
     if isinstance(response, tuple):
+        if len(response) == 2:
+            status_code = response[1]
+            if status_code == 500:
+                return response
+        # Treat non-500 error codes as invalid/nodata responses
         return {}
 
     # Extract JSON from the response if it's a Flask response
@@ -46,33 +54,34 @@ def fetch_all_eds(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/all/68.0764/-154.5501
     """
-    # Get data from each endpoint directly using their functions
-    temperature = extract_json(get_temperature_plate(lat, lon))
-    precipitation = extract_json(get_precipitation_plate(lat, lon))
-    snow = extract_json(eds_snow_data(lat, lon))
-    freezing_index = extract_json(get_dd_plate("freezing_index", lat, lon))
-    heating_degree_days = extract_json(get_dd_plate("heating", lat, lon))
-    thawing_index = extract_json(get_dd_plate("thawing_index", lat, lon))
-    permafrost = extract_json(permafrost_eds_request(lat, lon))
-    wet_days_per_year = extract_json(get_wet_days_per_year_plate(lat, lon))
-    elevation = extract_json(run_fetch_elevation(lat, lon))
-    precip_frequency = extract_json(proj_precip_point(lat, lon))
-    hydrology = extract_json(eds_hydrology_data(lat, lon))
+
+    # List of dataset keys and their corresponding getter functions
+    endpoints = [
+        ("temperature", get_temperature_plate),
+        ("precipitation", get_precipitation_plate),
+        ("snowfall", eds_snow_data),
+        ("freezing_index", lambda lat, lon: get_dd_plate("freezing_index", lat, lon)),
+        ("heating_degree_days", lambda lat, lon: get_dd_plate("heating", lat, lon)),
+        ("thawing_index", lambda lat, lon: get_dd_plate("thawing_index", lat, lon)),
+        ("permafrost", permafrost_eds_request),
+        ("wet_days_per_year", get_wet_days_per_year_plate),
+        ("elevation", run_fetch_elevation),
+        ("precip_frequency", proj_precip_point),
+        ("hydrology", eds_hydrology_data),
+    ]
 
     # Combine all results into a single dictionary for return to ArcticEDS
-    return {
-        "temperature": temperature,
-        "precipitation": precipitation,
-        "snowfall": snow,
-        "freezing_index": freezing_index,
-        "heating_degree_days": heating_degree_days,
-        "thawing_index": thawing_index,
-        "permafrost": permafrost,
-        "wet_days_per_year": wet_days_per_year,
-        "elevation": elevation,
-        "precip_frequency": precip_frequency,
-        "hydrology": hydrology,
-    }
+    results = {}
+    for key, func in endpoints:
+        result = extract_json(func(lat, lon))
+
+        # If results is a tuple, this is an error response. Return it directly.
+        if isinstance(result, tuple):
+            return result
+
+        results[key] = result
+
+    return results
 
 
 @routes.route("/eds/all/<lat>/<lon>")
@@ -87,4 +96,10 @@ def fetch_all_eds_route(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/all/68.0764/-154.5501
     """
-    return jsonify(fetch_all_eds(lat, lon))
+    results = fetch_all_eds(lat, lon)
+
+    # If results is a tuple, this is an error response. Return it directly.
+    if isinstance(results, tuple):
+        return results
+
+    return jsonify(results)
