@@ -92,6 +92,20 @@ def validate_get_params():
             required=False,
         )
 
+        # Make sure "extent" parameter is only letters and commas, and less than
+        # or equal to 50 characters long.
+        extent = fields.Str(
+            validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,50}$", str)),
+            required=False,
+        )
+
+        # Make sure "substring" parameter is only letters, numbers, and commas,
+        # and less than or equal to 50 characters long.
+        substring = fields.Str(
+            validate=lambda str: bool(re.match(r"^[A-Za-z0-9,]{0,50}$", str)),
+            required=False,
+        )
+
     schema = QueryParamsSchema()
     errors = schema.validate(request.args)
     if errors:

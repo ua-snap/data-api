@@ -3,6 +3,8 @@ import asyncio
 import geopandas as gpd
 import json
 import pandas as pd
+import os
+from shapely.geometry import shape, Point
 
 # local imports
 from . import routes
@@ -38,6 +40,7 @@ def find_via_gs(lat, lon):
 
     # Validate the latitude and longitude are valid and within the bounding
     # box of our area of interest.
+    print("Am I getting in here?")
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -304,3 +307,74 @@ def get_json_for_type(type, recurse=False):
 
     # Returns Flask JSON Response
     return Response(response=js, status=200, mimetype="application/json")
+
+
+@routes.route("/places/search/communities")
+def get_communities():
+    """
+    GET function to return communities filtered by tags, extent, and substring.
+    Query params:
+        tags: comma-separated list of tags
+        extent: alaska, mizukami, or slie (GeoJSON region)
+        substring: substring to match in name or alt_name
+        format: csv (optional)
+    Returns:
+        JSON or CSV of filtered communities.
+    """
+
+
+    # Fetch all communities from GeoServer
+    all_communities = asyncio.run(
+        fetch_data([
+            generate_wfs_places_url(
+                "all_boundaries:all_communities",
+                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+            )
+        ])
+    )["features"]
+
+    # Filter by extent if provided and matches a GeoJSON
+    extent = request.args.get("extent")
+    geojson_names = ["alaska", "mizukami", "slie"]
+    if extent in geojson_names:
+        print("Filtering by extent:", extent)
+        geojson_path = os.path.join(
+            os.path.dirname(__file__), "..", "data", "geojsons", f"{extent}.geojson"
+        )
+        gdf_extent = gpd.read_file(geojson_path)
+        # Force CRS to WGS84 (EPSG:4326) regardless of what is in the file
+        gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
+        # Combine all geometries into one (MultiPolygon or GeometryCollection)
+        region_geom = gdf_extent.unary_union
+        filtered = []
+        for community in all_communities:
+            try:
+                lat = float(community["properties"].get("latitude", 0))
+                lon = float(community["properties"].get("longitude", 0))
+                pt = Point(lon, lat)
+                if region_geom.contains(pt):
+                    filtered.append(community)
+            except Exception:
+                continue
+
+        # Sets all communities to be only those within the extent
+        all_communities = filtered
+
+    # Filter by substring if provided
+    substring = request.args.get("substring")
+    if substring:
+        substring = substring.lower()
+        filtered = []
+        for community in all_communities:
+            name = community["properties"].get("name", "").lower()
+            alt_name = community["properties"].get("alt_name", "").lower()
+            if substring in name or substring in alt_name:
+                filtered.append(community)
+
+        # Sets all communities to be only those matching the substring
+        all_communities = filtered
+
+    # Prepare output list (properties only)
+    output = [c["properties"] for c in all_communities]
+
+    return Response(response=json.dumps(output), status=200, mimetype="application/json")
