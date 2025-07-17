@@ -322,20 +322,21 @@ def get_communities():
         JSON or CSV of filtered communities.
     """
 
-
     # Fetch all communities from GeoServer
     all_communities = asyncio.run(
-        fetch_data([
-            generate_wfs_places_url(
-                "all_boundaries:all_communities",
-                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
-            )
-        ])
+        fetch_data(
+            [
+                generate_wfs_places_url(
+                    "all_boundaries:all_communities",
+                    "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+                )
+            ]
+        )
     )["features"]
 
     # Filter by extent if provided and matches a GeoJSON
     extent = request.args.get("extent")
-    geojson_names = ["alaska", "mizukami", "slie"]
+    geojson_names = ["alaska", "blocky_alaska", "elevation", "mizukami", "slie"]
     if extent in geojson_names:
         print("Filtering by extent:", extent)
         geojson_path = os.path.join(
@@ -345,7 +346,7 @@ def get_communities():
 
         # Force CRS to WGS84 (EPSG:4326) regardless of what is in the file
         gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
-        
+
         # Combine all geometries into one (MultiPolygon or GeometryCollection)
         region_geom = gdf_extent.unary_union
         filtered = []
@@ -379,4 +380,6 @@ def get_communities():
     # Prepare output list (properties only)
     output = [c["properties"] for c in all_communities]
 
-    return Response(response=json.dumps(output), status=200, mimetype="application/json")
+    return Response(
+        response=json.dumps(output), status=200, mimetype="application/json"
+    )
