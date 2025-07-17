@@ -40,7 +40,6 @@ def find_via_gs(lat, lon):
 
     # Validate the latitude and longitude are valid and within the bounding
     # box of our area of interest.
-    print("Am I getting in here?")
     validation = validate_latlon(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
