@@ -336,7 +336,7 @@ def get_communities():
 
     # Filter by extent if provided and matches a GeoJSON
     extent = request.args.get("extent")
-    geojson_names = ["alaska", "blocky_alaska", "elevation", "mizukami", "slie"]
+    geojson_names = ["alaska", "blockyAlaska", "elevation", "mizukami", "slie"]
     if extent in geojson_names:
         print("Filtering by extent:", extent)
         geojson_path = os.path.join(
@@ -351,14 +351,11 @@ def get_communities():
         region_geom = gdf_extent.unary_union
         filtered = []
         for community in all_communities:
-            try:
-                lat = float(community["properties"].get("latitude", 0))
-                lon = float(community["properties"].get("longitude", 0))
-                pt = Point(lon, lat)
-                if region_geom.contains(pt):
-                    filtered.append(community)
-            except Exception:
-                continue
+            lat = float(community["properties"].get("latitude", 0))
+            lon = float(community["properties"].get("longitude", 0))
+            pt = Point(lon, lat)
+            if region_geom.contains(pt):
+                filtered.append(community)
 
         # Sets all communities to be only those within the extent
         all_communities = filtered
