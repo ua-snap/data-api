@@ -342,8 +342,10 @@ def get_communities():
             os.path.dirname(__file__), "..", "data", "geojsons", f"{extent}.geojson"
         )
         gdf_extent = gpd.read_file(geojson_path)
+
         # Force CRS to WGS84 (EPSG:4326) regardless of what is in the file
         gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
+        
         # Combine all geometries into one (MultiPolygon or GeometryCollection)
         region_geom = gdf_extent.unary_union
         filtered = []
