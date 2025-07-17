@@ -312,14 +312,12 @@ def get_json_for_type(type, recurse=False):
 @routes.route("/places/search/communities")
 def get_communities():
     """
-    GET function to return communities filtered by tags, extent, and substring.
+    GET function to return communities filtered by extent and substring.
     Query params:
-        tags: comma-separated list of tags
-        extent: alaska, mizukami, or slie (GeoJSON region)
+        extent: alaska, blockyAlaska, elevation, mizukami, or slie (GeoJSON region)
         substring: substring to match in name or alt_name
-        format: csv (optional)
     Returns:
-        JSON or CSV of filtered communities.
+        JSON of filtered communities.
     """
 
     # Fetch all communities from GeoServer
