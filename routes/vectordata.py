@@ -20,6 +20,37 @@ from csv_functions import create_csv
 
 data_api = Blueprint("data_api", __name__)
 
+# Precompute all of the communities filtered by extent
+geojson_names = ["alaska", "blockyAlaska", "mizukami", "slie"]
+extent_filtered_communities = {}
+
+all_communities_full = asyncio.run(
+    fetch_data(
+        [
+            generate_wfs_places_url(
+                "all_boundaries:all_communities",
+                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+            )
+        ]
+    )
+)["features"]
+
+for extent in geojson_names:
+    geojson_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "geojsons", f"{extent}.geojson"
+    )
+    gdf_extent = gpd.read_file(geojson_path)
+    gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
+    region_geom = gdf_extent.unary_union
+    filtered = []
+    for community in all_communities_full:
+        lat = float(community["properties"].get("latitude", 0))
+        lon = float(community["properties"].get("longitude", 0))
+        pt = Point(lon, lat)
+        if region_geom.contains(pt):
+            filtered.append(community)
+    extent_filtered_communities[extent] = filtered
+
 
 @routes.route("/places/search/<lat>/<lon>")
 def find_via_gs(lat, lon):
@@ -319,43 +350,14 @@ def get_communities():
         JSON of filtered communities.
     """
 
-    # Fetch all communities from GeoServer
-    all_communities = asyncio.run(
-        fetch_data(
-            [
-                generate_wfs_places_url(
-                    "all_boundaries:all_communities",
-                    "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
-                )
-            ]
-        )
-    )["features"]
-
-    # Filter by extent if provided and matches a GeoJSON
+    # Filter by precomputed extent if provided
     extent = request.args.get("extent")
     geojson_names = ["alaska", "blockyAlaska", "elevation", "mizukami", "slie"]
     if extent in geojson_names:
-        print("Filtering by extent:", extent)
-        geojson_path = os.path.join(
-            os.path.dirname(__file__), "..", "data", "geojsons", f"{extent}.geojson"
-        )
-        gdf_extent = gpd.read_file(geojson_path)
-
-        # Force CRS to WGS84 (EPSG:4326) regardless of what is in the file
-        gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
-
-        # Combine all geometries into one (MultiPolygon or GeometryCollection)
-        region_geom = gdf_extent.unary_union
-        filtered = []
-        for community in all_communities:
-            lat = float(community["properties"].get("latitude", 0))
-            lon = float(community["properties"].get("longitude", 0))
-            pt = Point(lon, lat)
-            if region_geom.contains(pt):
-                filtered.append(community)
-
-        # Sets all communities to be only those within the extent
-        all_communities = filtered
+        print("Filtering by extent (precomputed):", extent)
+        all_communities = extent_filtered_communities[extent]
+    else:
+        all_communities = all_communities_full
 
     # Filter by substring if provided
     substring = request.args.get("substring")
@@ -367,11 +369,8 @@ def get_communities():
             alt_name = community["properties"].get("alt_name", "").lower()
             if substring in name or substring in alt_name:
                 filtered.append(community)
-
-        # Sets all communities to be only those matching the substring
         all_communities = filtered
 
-    # Prepare output list (properties only)
     output = [c["properties"] for c in all_communities]
 
     return Response(
