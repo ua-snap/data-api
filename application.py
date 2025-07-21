@@ -92,17 +92,12 @@ def validate_get_params():
             required=False,
         )
 
-        # Make sure "extent" parameter is only letters and commas, and less than
-        # or equal to 50 characters long.
-        extent = fields.Str(
-            validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,50}$", str)),
-            required=False,
-        )
+        # Make sure "extent" parameter is one of the predefined extents
+        extent = fields.Str(validate=validate.OneOf(["alaska","blockAlaska","elevation","mizukami","slie"]), required=False)
 
-        # Make sure "substring" parameter is only letters, numbers, and commas,
-        # and less than or equal to 50 characters long.
+        # Make sure "substring" parameter is less than or equal to 50 characters long, allow all UTF-8 characteres
         substring = fields.Str(
-            validate=lambda str: bool(re.match(r"^[A-Za-z0-9,]{0,50}$", str)),
+            validate=lambda str: len(str) <= 50,
             required=False,
         )
 
