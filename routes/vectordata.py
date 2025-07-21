@@ -12,7 +12,7 @@ from luts import (
     all_jsons,
     areas_near,
 )
-from config import EAST_BBOX, WEST_BBOX
+from config import EAST_BBOX, WEST_BBOX, geojson_names
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
 from fetch_data import fetch_data
@@ -20,8 +20,6 @@ from csv_functions import create_csv
 
 data_api = Blueprint("data_api", __name__)
 
-# Precompute all of the communities filtered by extent
-geojson_names = ["alaska", "blockyAlaska", "mizukami", "slie"]
 extent_filtered_communities = {}
 
 all_communities_full = asyncio.run(
@@ -352,7 +350,6 @@ def get_communities():
 
     # Filter by precomputed extent if provided
     extent = request.args.get("extent")
-    geojson_names = ["alaska", "blockyAlaska", "elevation", "mizukami", "slie"]
     if extent in geojson_names:
         print("Filtering by extent (precomputed):", extent)
         all_communities = extent_filtered_communities[extent]
