@@ -351,7 +351,6 @@ def get_communities():
     # Filter by precomputed extent if provided
     extent = request.args.get("extent")
     if extent in geojson_names:
-        print("Filtering by extent (precomputed):", extent)
         all_communities = extent_filtered_communities[extent]
     else:
         all_communities = all_communities_full

@@ -93,7 +93,12 @@ def validate_get_params():
         )
 
         # Make sure "extent" parameter is one of the predefined extents
-        extent = fields.Str(validate=validate.OneOf(["alaska","blockAlaska","elevation","mizukami","slie"]), required=False)
+        extent = fields.Str(
+            validate=validate.OneOf(
+                ["alaska", "blockyAlaska", "elevation", "mizukami", "slie"]
+            ),
+            required=False,
+        )
 
         # Make sure "substring" parameter is less than or equal to 50 characters long, allow all UTF-8 characteres
         substring = fields.Str(
