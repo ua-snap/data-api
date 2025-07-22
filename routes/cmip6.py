@@ -1,5 +1,7 @@
 import asyncio
 import ast
+import logging
+import time
 from flask import Blueprint, render_template, request
 
 # local imports
@@ -15,6 +17,10 @@ from validate_request import (
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
@@ -199,12 +205,22 @@ def package_cmip6_monthly_data(
 
 @routes.route("/cmip6/")
 def cmip6_about():
-    return render_template("/documentation/cmip6.html")
+    start_time = time.time()
+    logger.info(f"CMIP6 about endpoint accessed: {request.path}")
+    response = render_template("/documentation/cmip6.html")
+    elapsed = time.time() - start_time
+    logger.info(f"CMIP6 about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/cmip6/references")
 def cmip6_references():
-    return render_template("/documentation/cmip6_refs.html")
+    start_time = time.time()
+    logger.info(f"CMIP6 references endpoint accessed: {request.path}")
+    response = render_template("/documentation/cmip6_refs.html")
+    elapsed = time.time() - start_time
+    logger.info(f"CMIP6 references endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/cmip6/point/<lat>/<lon>")
@@ -228,6 +244,10 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
         example request (all variables, select years): http://localhost:5000/cmip6/point/65.06/-146.16/2000/2005
 
     """
+    start_time = time.time()
+    logger.info(
+        f"CMIP6 point endpoint accessed: lat={lat}, lon={lon}, start_year={start_year}, end_year={end_year}"
+    )
     # Validate the start and end years
     if None in [start_year, end_year]:
         time_slice_ansi = None
@@ -237,6 +257,10 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
             end_year_ansi = f"{end_year}-12-15T12:00:00.000Z"
             time_slice_ansi = ("ansi", f'"{start_year_ansi}","{end_year_ansi}"')
         else:
+            elapsed = time.time() - start_time
+            logger.warning(
+                f"Invalid year for CMIP6 point: start_year={start_year}, end_year={end_year} (in {elapsed:.3f} seconds)"
+            )
             return (
                 render_template(
                     "422/invalid_year.html",
@@ -247,16 +271,23 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                 ),
                 422,
             )
-
     # Validate the lat/lon values
     validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for CMIP6 point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     cmip6_bbox = construct_latlon_bbox_from_coverage_bounds(metadata)
     within_bounds = validate_latlon_in_bboxes(
         lat, lon, [cmip6_bbox], [cmip6_monthly_coverage_id]
     )
     if within_bounds == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Lat/lon outside coverage for CMIP6 point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon_outside_coverage.html", bboxes=[cmip6_bbox]
@@ -270,6 +301,10 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
             vars = request.args.get("vars").split(",")
             for var_id in vars:
                 if var_id not in varnames.values():
+                    elapsed = time.time() - start_time
+                    logger.warning(
+                        f"Invalid varname for CMIP6 point: var_id={var_id} (in {elapsed:.3f} seconds)"
+                    )
                     return render_template("400/bad_request.html"), 400
         else:
             vars = None
@@ -321,9 +356,12 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                                 vars.append(var)
 
         print(f"Results limited to {vars}")
-
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
+            elapsed = time.time() - start_time
+            logger.info(
+                f"CMIP6 point fetch returned CSV: lat={lat}, lon={lon}, start_year={start_year}, end_year={end_year} (in {elapsed:.3f} seconds)"
+            )
             return create_csv(
                 results,
                 "cmip6_monthly",
@@ -334,12 +372,22 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                 start_year=start_year,
                 end_year=end_year,
             )
-
+        elapsed = time.time() - start_time
+        logger.info(
+            f"CMIP6 point fetch returned JSON: lat={lat}, lon={lon}, start_year={start_year}, end_year={end_year} (in {elapsed:.3f} seconds)"
+        )
         return results
-
     except ValueError:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"ValueError in CMIP6 point fetch: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     except Exception as exc:
+        elapsed = time.time() - start_time
+        logger.error(
+            f"Error in CMIP6 point fetch: lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

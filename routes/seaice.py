@@ -5,6 +5,8 @@ from flask import (
     render_template,
     request,
 )
+import logging
+import time
 
 # local imports
 from fetch_data import (
@@ -21,6 +23,10 @@ from validate_data import validate_seaice_timestring
 from postprocessing import postprocess
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 seaice_api = Blueprint("seaice_api", __name__)
 # Rasdaman targets
@@ -61,7 +67,12 @@ def package_seaice_data(seaice_resp):
 @routes.route("/seaice/abstract/")
 @routes.route("/seaice/point/")
 def about_seaice():
-    return render_template("documentation/seaice.html")
+    start_time = time.time()
+    logger.info(f"Sea ice about endpoint accessed: {request.path}")
+    response = render_template("documentation/seaice.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Sea ice about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/seaice/point/<lat>/<lon>/")
@@ -74,15 +85,29 @@ def run_point_fetch_all_seaice(lat, lon):
     Returns:
         JSON-like dict of sea ice concentration data
     """
+    start_time = time.time()
+    logger.info(f"Sea ice point endpoint accessed: lat={lat}, lon={lon}")
     validation = validate_seaice_latlon(lat, lon, [seaice_coverage_id])
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for sea ice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     if validation == 404:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"No data for sea ice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template("404/no_data.html"),
             404,
         )
     if validation == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid lat/lon for sea ice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
@@ -95,16 +120,33 @@ def run_point_fetch_all_seaice(lat, lon):
         seaice_conc = postprocess(package_seaice_data(rasdaman_response), "seaice")
         if request.args.get("format") == "csv":
             if type(seaice_conc) is not dict:
-                # Returns errors if any are generated
+                elapsed = time.time() - start_time
+                logger.warning(
+                    f"Error in sea ice point fetch for CSV: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                )
                 return seaice_conc
             # Returns CSV for download
             data = postprocess(package_seaice_data(rasdaman_response), "seaice")
+            elapsed = time.time() - start_time
+            logger.info(
+                f"Sea ice point fetch returned CSV: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return create_csv(data, "seaice", lat=lat, lon=lon)
-        # Returns sea ice concentrations across years & months
+        elapsed = time.time() - start_time
+        logger.info(
+            f"Sea ice point fetch returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return postprocess(package_seaice_data(rasdaman_response), "seaice")
     except Exception as exc:
+        elapsed = time.time() - start_time
         if hasattr(exc, "status") and exc.status == 404:
+            logger.warning(
+                f"No data for sea ice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return render_template("404/no_data.html"), 404
+        logger.error(
+            f"Error in sea ice point fetch: lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         return render_template("500/server_error.html"), 500
 
 

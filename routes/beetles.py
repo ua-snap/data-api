@@ -2,6 +2,8 @@ import asyncio
 import numpy as np
 import itertools
 from flask import Blueprint, render_template, request
+import logging
+import time
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -29,6 +31,10 @@ from postprocessing import (
 )
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 beetle_coverage_id = "beetle_risk"
 
@@ -182,7 +188,12 @@ def run_aggregate_var_polygon(poly_id):
 @routes.route("/beetles/point/")
 @routes.route("/beetles/area/")
 def about_beetles():
-    return render_template("documentation/beetles.html")
+    start_time = time.time()
+    logger.info(f"Beetles about endpoint accessed: {request.path}")
+    response = render_template("documentation/beetles.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Beetles about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/beetles/point/<lat>/<lon>")
@@ -195,15 +206,29 @@ def run_point_fetch_all_beetles(lat, lon):
     Returns:
         JSON-like dict of beetle risk for a single lat / lon point.
     """
+    start_time = time.time()
+    logger.info(f"Beetles point fetch endpoint accessed: lat={lat}, lon={lon}")
     validation = validate_latlon(lat, lon, [beetle_coverage_id])
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for beetles point fetch: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     if validation == 404:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"No data for beetles point fetch: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template("404/no_data.html"),
             404,
         )
     if validation == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid lat/lon for beetles point fetch: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
@@ -250,15 +275,31 @@ def run_point_fetch_all_beetles(lat, lon):
         results = prune_nulls_with_max_intensity(results)
 
         if results in [{}, None, 0]:
+            elapsed = time.time() - start_time
+            logger.info(
+                f"No beetles data found for point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return render_template("404/no_data.html"), 404
 
         if request.args.get("format") == "csv":
+            elapsed = time.time() - start_time
+            logger.info(
+                f"Beetles point fetch returned CSV: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return create_csv(results, "beetles", lat=lat, lon=lon)
 
         else:
+            elapsed = time.time() - start_time
+            logger.info(
+                f"Beetles point fetch returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return results
 
     except Exception as exc:
+        elapsed = time.time() - start_time
+        logger.error(
+            f"Error in beetles point fetch: lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -275,10 +316,15 @@ def beetle_area_data_endpoint(var_id):
         poly_pkg (dict): zonal mode of beetle risk and percentages for AOI polygon
 
     """
-
+    start_time = time.time()
+    logger.info(f"Beetles area endpoint accessed: var_id={var_id}")
     poly_type = validate_var_id(var_id)
     # This is only ever true when it is returning an error template
     if type(poly_type) is tuple:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid var_id for beetles area: var_id={var_id} (in {elapsed:.3f} seconds)"
+        )
         return poly_type
 
     try:
@@ -287,14 +333,30 @@ def beetle_area_data_endpoint(var_id):
         results = prune_nulls_with_max_intensity(results)
 
         if results in [{}, None, 0]:
+            elapsed = time.time() - start_time
+            logger.info(
+                f"No beetles data found for area: var_id={var_id} (in {elapsed:.3f} seconds)"
+            )
             return render_template("404/no_data.html"), 404
 
         if request.args.get("format") == "csv":
+            elapsed = time.time() - start_time
+            logger.info(
+                f"Beetles area fetch returned CSV: var_id={var_id} (in {elapsed:.3f} seconds)"
+            )
             return create_csv(results, "beetles", var_id)
 
+        elapsed = time.time() - start_time
+        logger.info(
+            f"Beetles area fetch returned JSON: var_id={var_id} (in {elapsed:.3f} seconds)"
+        )
         return results
 
     except Exception as exc:
+        elapsed = time.time() - start_time
+        logger.error(
+            f"Error in beetles area fetch: var_id={var_id}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

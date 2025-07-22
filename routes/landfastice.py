@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import time
 
 import pandas as pd
 from flask import (
@@ -22,6 +24,10 @@ from fetch_data import (
 )
 from postprocessing import prune_nulls_with_max_intensity, postprocess
 from csv_functions import create_csv
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 # following are global because we only need to fetch metadata once
 # but must do it to determine request validity and what coverage to query
@@ -78,7 +84,12 @@ def package_landfastice_data(landfastice_resp, meta):
 @routes.route("/landfastice/abstract/")
 @routes.route("/landfastice/point/")
 def about_landfastice():
-    return render_template("documentation/landfastice.html")
+    start_time = time.time()
+    logger.info(f"Landfastice about endpoint accessed: {request.path}")
+    response = render_template("documentation/landfastice.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Landfastice about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/landfastice/point/<lat>/<lon>/")
@@ -91,9 +102,15 @@ def run_point_fetch_all_landfastice(lat, lon):
     Returns:
         JSON-like dict of landfast ice extent data
     """
+    start_time = time.time()
+    logger.info(f"Landfastice point endpoint accessed: lat={lat}, lon={lon}")
     # ensure the coordinates are numeric and in +/- 90, +/- 180 range
     validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for landfastice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     # now construct bboxes to check if the point is within any coverage extent
     beaufort_bbox = construct_latlon_bbox_from_coverage_bounds(beaufort_meta)
@@ -105,11 +122,19 @@ def run_point_fetch_all_landfastice(lat, lon):
         [beaufort_daily_slie_id, chukchi_daily_slie_id],
     )
     if within_bounds == 404:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"No data for landfastice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template("404/no_data.html"),
             404,
         )
     if within_bounds == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Lat/lon outside coverage for landfastice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon_outside_coverage.html",
@@ -131,7 +156,10 @@ def run_point_fetch_all_landfastice(lat, lon):
         target_coverage = chukchi_daily_slie_id
         target_meta = chukchi_meta
     else:
-        # this should never happen, because we already establish the point is syntactically valid and within the bounds of at least one bounding box
+        elapsed = time.time() - start_time
+        logger.error(
+            f"Unexpected error: no valid coverage for landfastice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("500/server_error.html"), 500
     try:
         rasdaman_response = asyncio.run(fetch_wcs_point_data(x, y, target_coverage))
@@ -142,9 +170,24 @@ def run_point_fetch_all_landfastice(lat, lon):
             postprocess(landfastice_time_series, "landfast_sea_ice")
         )
         if request.args.get("format") == "csv":
+            elapsed = time.time() - start_time
+            logger.info(
+                f"Landfastice point fetch returned CSV: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
+        elapsed = time.time() - start_time
+        logger.info(
+            f"Landfastice point fetch returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return postprocessed
     except Exception as exc:
+        elapsed = time.time() - start_time
         if hasattr(exc, "status") and exc.status == 404:
+            logger.warning(
+                f"No data for landfastice point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return render_template("404/no_data.html"), 404
+        logger.error(
+            f"Error in landfastice point fetch: lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         return render_template("500/server_error.html"), 500

@@ -6,6 +6,8 @@ from flask import (
     render_template,
     request,
 )
+import logging
+import time
 
 # local imports
 from generate_requests import generate_netcdf_wcs_getcov_str
@@ -28,6 +30,10 @@ from validate_request import (
 from postprocessing import nullify_and_prune, postprocess
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 alfresco_api = Blueprint("alfresco_api", __name__)
 
@@ -189,7 +195,12 @@ def remove_invalid_dim_combos(var_ep, results):
 @routes.route("/alfresco/veg_type/local/")
 @routes.route("/alfresco/local/")
 def alfresco_about():
-    return render_template("documentation/alfresco.html")
+    start_time = time.time()
+    logger.info(f"Alfresco about endpoint accessed: {request.path}")
+    response = render_template("documentation/alfresco.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Alfresco about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/alfresco/<var_ep>/local/<lat>/<lon>")
@@ -205,23 +216,38 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
     Returns:
         JSON-like dict of requested ALFRESCO data
     """
+    start_time = time.time()
+    logger.info(
+        f"Alfresco local endpoint accessed: var_ep={var_ep}, lat={lat}, lon={lon}"
+    )
     validation = validate_latlon(lat, lon)
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for alfresco local: var_ep={var_ep}, lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     if validation == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid lat/lon for alfresco local: var_ep={var_ep}, lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
             ),
             422,
         )
-
     # Requests for HUC12s that intersect
     huc12_features = asyncio.run(
         fetch_data([generate_wfs_huc12_intersection_url(lat, lon)])
     )["features"]
 
     if len(huc12_features) < 1:
+        elapsed = time.time() - start_time
+        logger.info(
+            f"No HUC12 found for alfresco local: var_ep={var_ep}, lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("404/no_data.html"), 404
 
     huc12_gdf = gpd.GeoDataFrame.from_features(huc12_features)
@@ -232,18 +258,32 @@ def run_fetch_alf_local_data(var_ep, lat, lon):
 
     # this is only ever true when it is returning an error template
     if isinstance(huc12_pkg, tuple):
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Error in alfresco local: var_ep={var_ep}, lat={lat}, lon={lon}, huc_id={huc_id} (in {elapsed:.3f} seconds)"
+        )
         return huc12_pkg
 
     if request.args.get("format") == "csv":
         huc12_pkg = nullify_and_prune(huc12_pkg, var_ep)
         if huc12_pkg in [{}, None, 0]:
+            elapsed = time.time() - start_time
+            logger.info(
+                f"No data for alfresco local CSV: var_ep={var_ep}, lat={lat}, lon={lon}, huc_id={huc_id} (in {elapsed:.3f} seconds)"
+            )
             return render_template("404/no_data.html"), 404
-        # return CSV with lat/lon info since HUC12 names not handled
+        elapsed = time.time() - start_time
+        logger.info(
+            f"Alfresco local returned CSV: var_ep={var_ep}, lat={lat}, lon={lon}, huc_id={huc_id} (in {elapsed:.3f} seconds)"
+        )
         return create_csv(huc12_pkg, var_ep, huc_id, lat, lon)
 
     huc12_pkg["huc_id"] = huc_id
     huc12_pkg["boundary_url"] = f"https://earthmaps.io/boundary/area/{huc_id}"
-
+    elapsed = time.time() - start_time
+    logger.info(
+        f"Alfresco local returned JSON: var_ep={var_ep}, lat={lat}, lon={lon}, huc_id={huc_id} (in {elapsed:.3f} seconds)"
+    )
     return huc12_pkg
 
 
@@ -260,21 +300,43 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
     Returns:
         poly_pkg (dict): zonal mean of variable(s) for AOI polygon
     """
+    start_time = time.time()
+    logger.info(f"Alfresco area endpoint accessed: var_ep={var_ep}, var_id={var_id}")
     poly_type = validate_var_id(var_id)
 
     # This is only ever true when it is returning an error template
     if type(poly_type) is tuple:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid var_id for alfresco area: var_ep={var_ep}, var_id={var_id} (in {elapsed:.3f} seconds)"
+        )
         return poly_type
 
     try:
         poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
-    except:
+    except Exception as exc:
+        elapsed = time.time() - start_time
+        logger.error(
+            f"Error in alfresco area fetch: var_ep={var_ep}, var_id={var_id}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:
         poly_pkg = nullify_and_prune(poly_pkg, var_ep)
         if poly_pkg in [{}, None, 0]:
+            elapsed = time.time() - start_time
+            logger.info(
+                f"No data for alfresco area CSV: var_ep={var_ep}, var_id={var_id} (in {elapsed:.3f} seconds)"
+            )
             return render_template("404/no_data.html"), 404
+        elapsed = time.time() - start_time
+        logger.info(
+            f"Alfresco area returned CSV: var_ep={var_ep}, var_id={var_id} (in {elapsed:.3f} seconds)"
+        )
         return create_csv(poly_pkg, var_ep, var_id)
 
-    return postprocess(poly_pkg, var_ep)
+    elapsed = time.time() - start_time
+    logger.info(
+        f"Alfresco area returned JSON: var_ep={var_ep}, var_id={var_id} (in {elapsed:.3f} seconds)"
+    )
+    return poly_pkg

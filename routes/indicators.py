@@ -10,6 +10,8 @@ import numpy as np
 import itertools
 from math import floor, isnan
 from flask import Blueprint, render_template, request
+import logging
+import time
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -41,6 +43,10 @@ from postprocessing import (
 from csv_functions import create_csv
 from . import routes
 from config import WEST_BBOX, EAST_BBOX
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 indicators_api = Blueprint("indicators_api", __name__)
 
@@ -438,7 +444,12 @@ def summarize_cmip6_mmm(results):
 
 @routes.route("/indicators/")
 def about_indicators():
-    return render_template("documentation/indicators.html")
+    start_time = time.time()
+    logger.info(f"Indicators about endpoint accessed: {request.path}")
+    response = render_template("documentation/indicators.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Indicators about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/indicators/cmip6/point/<lat>/<lon>")
@@ -457,15 +468,25 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
         example request: http://localhost:5000/indicators/cmip6/point/65.06/-146.16
     """
 
+    start_time = time.time()
+    logger.info(f"Indicators CMIP6 point endpoint accessed: lat={lat}, lon={lon}")
     # Validate the lat/lon values
     validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for indicators CMIP6 point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     cmip6_bbox = construct_latlon_bbox_from_coverage_bounds(cmip6_metadata)
     within_bounds = validate_latlon_in_bboxes(
         lat, lon, [cmip6_bbox], [var_ep_lu["cmip6_indicators"]["cov_id_str"]]
     )
     if within_bounds == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Lat/lon outside coverage for indicators CMIP6 point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon_outside_coverage.html", bboxes=[cmip6_bbox]
@@ -478,21 +499,32 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
                 lat, lon, var_ep_lu["cmip6_indicators"]["cov_id_str"], "EPSG:4326"
             )
         )
-
         results = package_cmip6_point_data(rasdaman_response)
-
         if "summarize" in request.args and request.args.get("summarize") == "mmm":
             results = summarize_cmip6_mmm(results)
-
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
+            elapsed = time.time() - start_time
+            logger.info(
+                f"Indicators CMIP6 point fetch returned CSV: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return create_csv(results, "cmip6_indicators", place_id, lat, lon)
-
+        elapsed = time.time() - start_time
+        logger.info(
+            f"Indicators CMIP6 point fetch returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return results
-
     except ValueError:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"ValueError in indicators CMIP6 point fetch: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     except Exception as exc:
+        elapsed = time.time() - start_time
+        logger.error(
+            f"Error in indicators CMIP6 point fetch: lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

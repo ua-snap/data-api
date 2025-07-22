@@ -3,6 +3,8 @@ import asyncio
 import json
 import requests
 import pandas as pd
+import logging
+import time
 
 # local imports
 from . import routes
@@ -11,6 +13,10 @@ from luts import demographics_fields, demographics_descriptions, demographics_or
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 from csv_functions import create_csv
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 def validate_community_id(community):
@@ -33,7 +39,12 @@ def validate_community_id(community):
 
 @routes.route("/demographics/")
 def demographics_about():
-    return render_template("/documentation/demographics.html")
+    start_time = time.time()
+    logger.info(f"Demographics about endpoint accessed: {request.path}")
+    response = render_template("/documentation/demographics.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Demographics about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/demographics/<community>")
@@ -50,9 +61,15 @@ def get_data_for_community(community):
        Notes:
            example: http://localhost:5000/demographics/AK15
     """
+    start_time = time.time()
+    logger.info(f"Demographics community endpoint accessed: community={community}")
     # Validate community ID; if not valid, return an error
     validation, community_ids = validate_community_id(community)
     if not validation:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid community ID for demographics: community={community} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     else:
         community_ids = [community, "US0", "AK0"]
@@ -101,6 +118,10 @@ def get_data_for_community(community):
     population_under_18 = total_population * (percent_under_18 / 100)
     adult_population = round(total_population - population_under_18)
     if adult_population < 50:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Population under 50 for demographics: community={community} (in {elapsed:.3f} seconds)"
+        )
         return render_template("/403/pop_under_50.html"), 403
 
     # Return CSV if requested
@@ -122,10 +143,18 @@ def get_data_for_community(community):
             ]
             transposed_results[key]["source"] = demographics_descriptions[key]["source"]
 
+        elapsed = time.time() - start_time
+        logger.info(
+            f"Demographics community fetch returned CSV: community={community} (in {elapsed:.3f} seconds)"
+        )
         return create_csv(
             transposed_results, endpoint="demographics", place_id=community
         )
 
     # Otherwise return Flask JSON Response
     json_results = json.dumps(reformatted_results, indent=4)
+    elapsed = time.time() - start_time
+    logger.info(
+        f"Demographics community fetch returned JSON: community={community} (in {elapsed:.3f} seconds)"
+    )
     return Response(response=json_results, status=200, mimetype="application/json")

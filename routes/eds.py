@@ -7,8 +7,14 @@ from .permafrost import permafrost_eds_request
 from .wet_days_per_year import get_wet_days_per_year_plate
 from .elevation import run_fetch_elevation
 from .hydrology import eds_hydrology_data
+import logging
+import time
 
 eds_api = Blueprint("eds_api", __name__)
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 def extract_json(response):
@@ -96,10 +102,20 @@ def fetch_all_eds_route(lat, lon):
     Notes:
         example request: http://localhost:5000/eds/all/68.0764/-154.5501
     """
+    start_time = time.time()
+    logger.info(f"EDS all endpoint accessed: lat={lat}, lon={lon}")
     results = fetch_all_eds(lat, lon)
 
     # If results is a tuple, this is an error response. Return it directly.
     if isinstance(results, tuple):
+        elapsed = time.time() - start_time
+        logger.error(
+            f"EDS all endpoint error for lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return results
 
+    elapsed = time.time() - start_time
+    logger.info(
+        f"EDS all endpoint returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+    )
     return jsonify(results)

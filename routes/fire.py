@@ -1,7 +1,10 @@
 import asyncio
+import logging
+import time
 from flask import (
     Blueprint,
     render_template,
+    request,
 )
 
 # local imports
@@ -12,6 +15,10 @@ from postprocessing import nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status
 from . import routes
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 fire_api = Blueprint("fire_api", __name__)
 
@@ -110,7 +117,12 @@ def package_landcover(landcover_resp):
 @routes.route("/fire/abstract/")
 @routes.route("/fire/point/")
 def fire_about():
-    return render_template("documentation/fire.html")
+    start_time = time.time()
+    logger.info(f"Fire about endpoint accessed: {request.path}")
+    response = render_template("documentation/fire.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Fire about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/fire/point/<lat>/<lon>")
@@ -118,10 +130,20 @@ def run_fetch_fire(lat, lon):
     """Run the async requesting and return data
     example request: http://localhost:5000/%F0%9F%94%A5/65.0628/-146.1627
     """
+    start_time = time.time()
+    logger.info(f"Fire point endpoint accessed: lat={lat}, lon={lon}")
     validation = validate_latlon(lat, lon)
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for fire point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     if validation == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid lat/lon for fire point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
@@ -134,7 +156,6 @@ def run_fetch_fire(lat, lon):
                 GS_BASE_URL, "alaska_wildfires", wms_targets, wfs_targets, lat, lon
             )
         )
-
         fire_points = asyncio.run(
             fetch_data(
                 [
@@ -157,10 +178,16 @@ def run_fetch_fire(lat, lon):
             )
         )
     except Exception as exc:
+        elapsed = time.time() - start_time
         if hasattr(exc, "status") and exc.status == 404:
+            logger.warning(
+                f"No data for fire point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return render_template("404/no_data.html"), 404
+        logger.error(
+            f"Error in fire point fetch: lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+        )
         return render_template("500/server_error.html"), 500
-
     landcover = package_landcover(results[0])
     firedanger = package_fire_danger(results[1])
     snow = package_snow(results[2])
@@ -170,7 +197,6 @@ def run_fetch_fire(lat, lon):
     aqi_forecast_24_hrs = package_aqi_forecast(results[6])
     aqi_forecast_48_hrs = package_aqi_forecast(results[7])
     firehist = package_fire_history(results[8])
-
     data = {
         "lc": landcover,
         "is_snow": snow,
@@ -184,5 +210,8 @@ def run_fetch_fire(lat, lon):
         "fire_points": fire_points["features"],
         "fire_polygons": fire_polygons["features"],
     }
-
+    elapsed = time.time() - start_time
+    logger.info(
+        f"Fire point fetch returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+    )
     return postprocess(data, "fire")

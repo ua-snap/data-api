@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import time
 
 import numpy as np
 from flask import Blueprint, render_template, request, current_app as app, jsonify
@@ -17,6 +19,10 @@ from postprocessing import postprocess
 from csv_functions import create_csv
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
+
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 hydrology_api = Blueprint("hydrology_api", __name__)
 hydrology_coverage_id = "hydrology"
@@ -357,40 +363,72 @@ def run_fetch_hydrology_point_data_mmm(lat, lon, summarize=None):
 @routes.route("/hydrology/abstract/")
 @routes.route("/hydrology/point/")
 def hydro_about():
-    return render_template("documentation/hydrology.html")
+    start_time = time.time()
+    logger.info(f"Hydrology about endpoint accessed: {request.path}")
+    response = render_template("documentation/hydrology.html")
+    elapsed = time.time() - start_time
+    logger.info(f"Hydrology about endpoint response in {elapsed:.3f} seconds")
+    return response
 
 
 @routes.route("/hydrology/point/<lat>/<lon>")
 def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
+    start_time = time.time()
+    logger.info(f"Hydrology point endpoint accessed: lat={lat}, lon={lon}")
     validation = validate_latlon(lat, lon, [hydrology_coverage_id])
     if validation == 400:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Bad request for hydrology point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     if validation == 404:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"No data for hydrology point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template("404/no_data.html"),
             404,
         )
     if validation == 422:
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid lat/lon for hydrology point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return (
             render_template(
                 "422/invalid_latlon.html", west_bbox=WEST_BBOX, east_bbox=EAST_BBOX
             ),
             422,
         )
-
     # validate request arguments if they exist, otherwise run the fetch
     if len(request.args) == 0 and (summarize is None and preview is None):
         try:
             point_pkg = run_fetch_hydrology_point_data(lat, lon)
+            elapsed = time.time() - start_time
+            logger.info(
+                f"Hydrology point fetch returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+            )
             return postprocess(point_pkg, "hydrology")
         except Exception as exc:
+            elapsed = time.time() - start_time
             if hasattr(exc, "status") and exc.status == 404:
+                logger.warning(
+                    f"No data for hydrology point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                )
                 return render_template("404/no_data.html"), 404
+            logger.error(
+                f"Error in hydrology point fetch: lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+            )
             return render_template("500/server_error.html"), 500
-
     # if args exist, check if they are allowed
     allowed_args = ["summarize", "format", "community"]
     if not all(key in allowed_args for key in request.args.keys()):
+        elapsed = time.time() - start_time
+        logger.warning(
+            f"Invalid request args for hydrology point: {request.args} (in {elapsed:.3f} seconds)"
+        )
         return render_template("400/bad_request.html"), 400
     else:
         # if args exist and are allowed, return the appropriate response
@@ -398,6 +436,10 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
             try:
                 point_pkg = run_fetch_hydrology_point_data_mmm(lat, lon)
                 place_id = request.args.get("community")
+                elapsed = time.time() - start_time
+                logger.info(
+                    f"Hydrology point fetch returned CSV (summarize+format): lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                )
                 if place_id:
                     return create_csv(
                         point_pkg, "hydrology_mmm", place_id=place_id, lat=lat, lon=lon
@@ -405,22 +447,42 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                 else:
                     return create_csv(point_pkg, "hydrology_mmm", lat=lat, lon=lon)
             except Exception as exc:
+                elapsed = time.time() - start_time
                 if hasattr(exc, "status") and exc.status == 404:
+                    logger.warning(
+                        f"No data for hydrology point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                    )
                     return render_template("404/no_data.html"), 404
+                logger.error(
+                    f"Error in hydrology point fetch (summarize+format): lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+                )
                 return render_template("500/server_error.html"), 500
-
         elif "summarize" in request.args or summarize:
             try:
+                elapsed = time.time() - start_time
+                logger.info(
+                    f"Hydrology point fetch returned JSON (summarize): lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                )
                 return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
             except Exception as exc:
+                elapsed = time.time() - start_time
                 if hasattr(exc, "status") and exc.status == 404:
+                    logger.warning(
+                        f"No data for hydrology point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                    )
                     return render_template("404/no_data.html"), 404
+                logger.error(
+                    f"Error in hydrology point fetch (summarize): lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+                )
                 return render_template("500/server_error.html"), 500
-
         elif "format" in request.args or preview:
             try:
                 point_pkg = run_fetch_hydrology_point_data(lat, lon)
                 place_id = request.args.get("community")
+                elapsed = time.time() - start_time
+                logger.info(
+                    f"Hydrology point fetch returned CSV (format): lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                )
                 if place_id:
                     return create_csv(
                         point_pkg, "hydrology", place_id=place_id, lat=lat, lon=lon
@@ -430,33 +492,47 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                         point_pkg, "hydrology", place_id=None, lat=lat, lon=lon
                     )
             except Exception as exc:
+                elapsed = time.time() - start_time
                 if hasattr(exc, "status") and exc.status == 404:
+                    logger.warning(
+                        f"No data for hydrology point: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+                    )
                     return render_template("404/no_data.html"), 404
+                logger.error(
+                    f"Error in hydrology point fetch (format): lat={lat}, lon={lon}, error={exc} (in {elapsed:.3f} seconds)"
+                )
                 return render_template("500/server_error.html"), 500
 
 
 @routes.route("/eds/hydrology/<lat>/<lon>")
 @routes.route("/eds/hydrology/point/<lat>/<lon>")
 def eds_hydrology_data(lat, lon):
+    start_time = time.time()
+    logger.info(f"EDS hydrology endpoint accessed: lat={lat}, lon={lon}")
     hydrology = dict()
-
     summary = run_get_hydrology_point_data(lat, lon, summarize=True)
     # Check for error response from summary response
     if isinstance(summary, tuple):
+        elapsed = time.time() - start_time
+        logger.error(
+            f"EDS hydrology endpoint error for lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return summary
-
     hydrology["summary"] = summary
-
     preview = run_get_hydrology_point_data(lat, lon, preview=True)
     # Check for error responses in the preview
     if isinstance(preview, tuple):
-        # Returns error template that was generated for invalid request
+        elapsed = time.time() - start_time
+        logger.error(
+            f"EDS hydrology endpoint preview error for lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+        )
         return preview
-
     hydrology_csv = preview.data.decode("utf-8")
     first = "\n".join(hydrology_csv.split("\n")[20:26]) + "\n"
     last = "\n".join(hydrology_csv.split("\n")[-6:])
-
     hydrology["preview"] = first + last
-
+    elapsed = time.time() - start_time
+    logger.info(
+        f"EDS hydrology endpoint returned JSON: lat={lat}, lon={lon} (in {elapsed:.3f} seconds)"
+    )
     return jsonify(hydrology)
