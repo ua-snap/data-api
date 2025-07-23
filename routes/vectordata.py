@@ -3,6 +3,8 @@ import asyncio
 import geopandas as gpd
 import json
 import pandas as pd
+import os
+from shapely.geometry import shape, Point
 
 # local imports
 from . import routes
@@ -10,13 +12,42 @@ from luts import (
     all_jsons,
     areas_near,
 )
-from config import EAST_BBOX, WEST_BBOX
+from config import EAST_BBOX, WEST_BBOX, geojson_names
 from validate_request import validate_latlon
 from generate_urls import generate_wfs_search_url, generate_wfs_places_url
 from fetch_data import fetch_data
 from csv_functions import create_csv
 
 data_api = Blueprint("data_api", __name__)
+
+extent_filtered_communities = {}
+
+all_communities_full = asyncio.run(
+    fetch_data(
+        [
+            generate_wfs_places_url(
+                "all_boundaries:all_communities",
+                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+            )
+        ]
+    )
+)["features"]
+
+for extent in geojson_names:
+    geojson_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "geojsons", f"{extent}.geojson"
+    )
+    gdf_extent = gpd.read_file(geojson_path)
+    gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
+    region_geom = gdf_extent.unary_union
+    filtered = []
+    for community in all_communities_full:
+        lat = float(community["properties"].get("latitude", 0))
+        lon = float(community["properties"].get("longitude", 0))
+        pt = Point(lon, lat)
+        if region_geom.contains(pt):
+            filtered.append(community)
+    extent_filtered_communities[extent] = filtered
 
 
 @routes.route("/places/search/<lat>/<lon>")
@@ -304,3 +335,40 @@ def get_json_for_type(type, recurse=False):
 
     # Returns Flask JSON Response
     return Response(response=js, status=200, mimetype="application/json")
+
+
+@routes.route("/places/search/communities")
+def get_communities():
+    """
+    GET function to return communities filtered by extent and substring.
+    Query params:
+        extent: alaska, blockyAlaska, elevation, mizukami, or slie (GeoJSON region)
+        substring: substring to match in name or alt_name
+    Returns:
+        JSON of filtered communities.
+    """
+
+    # Filter by precomputed extent if provided
+    extent = request.args.get("extent")
+    if extent in geojson_names:
+        all_communities = extent_filtered_communities[extent]
+    else:
+        all_communities = all_communities_full
+
+    # Filter by substring if provided
+    substring = request.args.get("substring")
+    if substring:
+        substring = substring.lower()
+        filtered = []
+        for community in all_communities:
+            name = community["properties"].get("name", "").lower()
+            alt_name = community["properties"].get("alt_name", "").lower()
+            if substring in name or substring in alt_name:
+                filtered.append(community)
+        all_communities = filtered
+
+    output = [c["properties"] for c in all_communities]
+
+    return Response(
+        response=json.dumps(output), status=200, mimetype="application/json"
+    )

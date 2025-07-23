@@ -21,6 +21,7 @@ rtree = "*"
 pygeos = "*"
 lxml = "*"
 marshmallow = "*"
+fiona = "*"
 
 [dev-packages]
 black = "*"

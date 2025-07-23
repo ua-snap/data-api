@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
-from config import SITE_OFFLINE
+from config import SITE_OFFLINE, geojson_names
 from marshmallow import Schema, fields, validate
 import re
 
@@ -89,6 +89,18 @@ def validate_get_params():
         # or equal to 50 characters long.
         tags = fields.Str(
             validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,50}$", str)),
+            required=False,
+        )
+
+        # Make sure "extent" parameter is one of the predefined extents
+        extent = fields.Str(
+            validate=validate.OneOf(geojson_names),
+            required=False,
+        )
+
+        # Make sure "substring" parameter is less than or equal to 50 characters long, allow all UTF-8 characteres
+        substring = fields.Str(
+            validate=lambda str: len(str) <= 50,
             required=False,
         )
 
