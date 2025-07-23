@@ -17,4 +17,4 @@ if os.getenv("SITE_OFFLINE"):
 else:
     SITE_OFFLINE = False
 
-geojson_names = geojson_names = ["alaska", "blockyAlaska", "elevation", "mizukami", "slie"]
+geojson_names = ["alaska", "blockyAlaska", "elevation", "mizukami", "slie"]
