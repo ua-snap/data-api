@@ -22,6 +22,8 @@ if conda info --envs | grep -q 'api-env'; then
   echo "Conda environment 'api-env' already exists, skipping creation."
 else
   echo "Creating conda environment 'api-env'..."
+  conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+  conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
   conda create -y -n api-env -c conda-forge python=3.11 \
     flask flask-cors gunicorn aiohttp requests marshmallow \
     numpy xarray h5py h5netcdf rioxarray rasterio \
