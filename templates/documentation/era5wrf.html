@@ -95,6 +95,8 @@
         Specific variables can be requested using <code>?vars=t2_mean,rh2_mean</code>.
         <br>
         Chaining parameters is also supported, e.g. <code>?vars=t2_mean,rh2_mean&format=csv</code>.
+        <br>
+        All parameter combinations work for both point and area queries.
       </td>
     </tr>
   </tfoot>
@@ -104,31 +106,29 @@
 
 <p>Data are returned as JSON by default, keyed by date, with each date containing a dictionary of variable names and values. The variable names are the same as the ones listed in the Available Variables section.</p>
 <pre><code>{
-  {
-    "2012-06-01": {
-      "rh2_mean": 87.30744,
-      "t2_mean": 6.640991,
-      "wspd10_max": 4.135267
-    },
-    "2012-06-02": {
-      "rh2_mean": 79.30379,
-      "t2_mean": 7.702545,
-      "wspd10_max": 3.844817
-    },
-    "2012-06-03": {
-      "rh2_mean": 63.48309,
-      "t2_mean": 12.60672,
-      "wspd10_max": 3.779818
-    },
-    ...
-  }
-  
+  "2012-06-01": {
+    "rh2_mean": 87.3,
+    "t2_mean": 6.6,
+    "wspd10_max": 4.1
+  },
+  "2012-06-02": {
+    "rh2_mean": 79.3,
+    "t2_mean": 7.7,
+    "wspd10_max": 3.8
+  },
+  "2012-06-03": {
+    "rh2_mean": 63.5,
+    "t2_mean": 12.6,
+    "wspd10_max": 3.8
+  },
+  ...
 }</code></pre>
 
 <h4>Area query</h4>
 <p>
-  Learn more about what
-  <a href="/places">types of places</a> are available for area queries.
+  Area queries return zonal statistics (mean values) aggregated over a specified polygon area. 
+  Values represent the spatial average of all 4 km by 4 km grid cells within the polygon boundary.
+  Learn more about what <a href="/places">types of places</a> are available for area queries.
 </p>
 
 <table class="endpoints">
@@ -140,19 +140,55 @@
   </thead>
   <tbody>
     <tr>
-      <td>ERA5-WRF area aggregation<br>Returns mean values over the area with the ID 19070506 for all variables, all dates.</td>
+      <td>Return mean values over area for all variables, full time range</td>
       <td><a href="/era5wrf/area/19070506">/era5wrf/area/19070506</a></td>
     </tr>
     <tr>
-      <td>ERA5-WRF area aggregation with date range<br>Returns mean values over the area with the ID 19070506 for all variables for June 2012.</td>
-      <td><a href="/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30">/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30</a></td>
-    </tr>
-    <tr>
-      <td>ERA5-WRF area aggregation with date range and variables</td>
+      <td>Return mean values over area for selected variables and date range</td>
       <td><a href="/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean">/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean</a></td>
     </tr>
+    <tr>
+      <td>Return mean values over area for selected variables in CSV format</td>
+      <td><a href="/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv">/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv</a></td>
+    </tr>
+    <tr>
+      <td>Return mean values over area for selected variables for specific month</td>
+      <td><a href="/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30">/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a></td>
+    </tr>
   </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Area queries support the same parameters as point queries: <code>vars</code> (comma-separated variable names), 
+        <code>start_date</code> and <code>end_date</code> (YYYY-MM-DD format), and <code>format=csv</code> for CSV output.
+        <br>
+        Results represent mean values of all 4 km by 4 km grid cells within the specified polygon area.
+      </td>
+    </tr>
+  </tfoot>
 </table>
+
+<h4>Area Query Output</h4>
+
+<p>Area queries return the same JSON structure as point queries, but values represent spatial averages rather than point measurements:</p>
+
+<pre><code>{
+  "2012-06-01": {
+    "rh2_mean": 85.7,
+    "t2_mean": 8.2
+  },
+  "2012-06-02": {
+    "rh2_mean": 82.1,
+    "t2_mean": 9.5
+  },
+  "2012-06-03": {
+    "rh2_mean": 78.9,
+    "t2_mean": 10.1
+  },
+  ...
+}</code></pre>
+
+<p>Each value is the mean of all valid 4km grid cells within the polygon boundary for that date.</p>
 
 
 

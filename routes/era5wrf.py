@@ -5,8 +5,9 @@ from flask import Blueprint, render_template, request
 
 # local imports
 from generate_urls import generate_wcs_query_url
-from generate_requests import generate_wcs_getcov_str
-from fetch_data import fetch_data, describe_via_wcps, fetch_wcs_point_data
+from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
+from fetch_data import fetch_data, describe_via_wcps, fetch_wcs_point_data, fetch_bbox_netcdf, get_poly
+from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
@@ -14,6 +15,7 @@ from validate_request import (
     project_latlon,
     validate_xy_in_coverage_extent,
     generate_time_index_from_coverage_metadata,
+    validate_var_id,
 )
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
@@ -122,6 +124,8 @@ def validate_era5_date_range(start_date, end_date, coverage_meta):
                     "422/invalid_date_range.html",
                     start_date=start_date.strftime("%Y-%m-%d"),
                     end_date=end_date.strftime("%Y-%m-%d"),
+                    min_date=min_date.strftime("%Y-%m-%d"),
+                    max_date=max_date.strftime("%Y-%m-%d"),
                 ),
                 422,
             )
@@ -244,6 +248,120 @@ async def fetch_era5_wrf_point_data(x, y, variables, start_date=None, end_date=N
     return {var_name: data for var_name, data in zip(variables, results)}
 
 
+async def fetch_era5_wrf_area_data(polygon, variables, start_date=None, end_date=None):
+    """Fetch ERA5-WRF bbox data for multiple variables with optional temporal slicing.
+    
+    Args:
+        polygon (GeoDataFrame): Polygon for which to compute zonal statistics
+        variables (list): List of variable names to fetch
+        start_date (datetime, optional): Start date for temporal slice
+        end_date (datetime, optional): End date for temporal slice
+    
+    Returns:
+        dict: Variable names mapped to xarray datasets
+    """
+    time_slice = create_era5_time_slice(start_date, end_date)
+    bbox_bounds = polygon.total_bounds  # (xmin, ymin, xmax, ymax)
+    
+    tasks = []
+    for var_name in variables:
+        cov_id = era5wrf_monthly_coverage_ids[var_name]
+        
+        if time_slice:
+            request_str = generate_netcdf_wcs_getcov_str(
+                bbox_bounds, cov_id, time_slice=time_slice
+            )
+        else:
+            request_str = generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id)
+        
+        url = generate_wcs_query_url(request_str)
+        tasks.append(fetch_bbox_netcdf([url]))
+    
+    datasets = await asyncio.gather(*tasks)
+    return {var_name: ds for var_name, ds in zip(variables, datasets)}
+
+
+def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
+    """Process zonal statistics for ERA5-WRF datasets.
+    
+    Args:
+        polygon (GeoDataFrame): Target polygon
+        datasets_dict (dict): Variable names mapped to xarray datasets
+        variables (list): List of variable names
+    
+    Returns:
+        dict: Variable names mapped to their zonal statistics arrays (time series)
+    """
+    zonal_results = {}
+    
+    for var_name in variables:
+        ds = datasets_dict[var_name]
+        
+        # ERA5-WRF datasets have time dimension, need to process each time step
+        if 'time' in ds.dims:
+            time_series_means = []
+            
+            # Iterate through each time step
+            for time_idx in range(ds.sizes['time']):
+                # Select single time step
+                time_slice_ds = ds.isel(time=time_idx)
+                
+                # Calculate zonal stats for this time step
+                zonal_stats_dict = interpolate_and_compute_zonal_stats(
+                    polygon, time_slice_ds, crs="EPSG:3338", var_name=var_name, x_dim="X", y_dim="Y"
+                )
+                
+                # Extract mean value for this time step
+                time_series_means.append(zonal_stats_dict["mean"])
+            
+            zonal_results[var_name] = time_series_means
+        else:
+            # Handle case without time dimension (fallback)
+            zonal_stats_dict = interpolate_and_compute_zonal_stats(
+                polygon, ds, crs="EPSG:3338", var_name=var_name, x_dim="X", y_dim="Y"
+            )
+            zonal_results[var_name] = [zonal_stats_dict["mean"]]
+    
+    return zonal_results
+
+
+def package_era5wrf_area_data(zonal_results, coverage_meta, variables, start_date=None, end_date=None):
+    """Package ERA5-WRF area data with time-first structure.
+    
+    Args:
+        zonal_results (dict): Variable names mapped to zonal statistics
+        coverage_meta (dict): Coverage metadata containing time axis
+        variables (list): List of variable names
+        start_date (datetime, optional): Start date for filtering
+        end_date (datetime, optional): End date for filtering
+    
+    Returns:
+        dict: Time-first structured data {date: {variable: zonal_mean}}
+    """
+    time_index = generate_time_index_from_coverage_metadata(coverage_meta)
+    
+    # Filter time index if date range provided
+    if start_date and end_date:
+        mask = (time_index.date >= start_date.date()) & (
+            time_index.date <= end_date.date()
+        )
+        time_index = time_index[mask]
+    
+    # Package data with time keys
+    packaged_data = {}
+    for i, timestamp in enumerate(time_index):
+        date_key = timestamp.strftime("%Y-%m-%d")
+        packaged_data[date_key] = {}
+        
+        # Add each variable's zonal mean for this date
+        for variable in variables:
+            if i < len(zonal_results[variable]) and zonal_results[variable][i] is not None:
+                # Round to 1 decimal for consistency with point queries
+                packaged_data[date_key][variable] = round(zonal_results[variable][i], 1)
+    
+    return packaged_data
+
+
 @routes.route("/era5wrf/point/<lat>/<lon>")
 def era5wrf_point(lat, lon):
     """ERA5-WRF point data endpoint.
@@ -342,6 +460,96 @@ def era5wrf_point(lat, lon):
 
         return postprocessed
 
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+@routes.route("/era5wrf/area/<place_id>")
+def era5wrf_area(place_id):
+    """ERA5-WRF area data endpoint.
+    
+    Args:
+        place_id (str): ID for polygon from places endpoint
+        
+    Query Parameters:
+        vars (str): Comma-separated variable names
+        start_date (str): Start date in YYYY-MM-DD format
+        end_date (str): End date in YYYY-MM-DD format  
+        format (str): Output format ('csv' or default JSON)
+        
+    Returns:
+        JSON-like object of ERA5-WRF area-aggregated data
+    """
+    
+    poly_type = validate_var_id(place_id)
+
+    # this may need to point to a 4xx error page
+    if type(poly_type) is tuple:
+        return poly_type
+
+    try:
+        polygon = get_poly(place_id, crs=3338)
+    except:
+        return render_template("422/invalid_area.html"), 422
+    
+    # extract and validate query parameters (mirror point query logic)
+    requested_vars = request.args.get("vars")
+    requested_start_date = request.args.get("start_date")
+    requested_end_date = request.args.get("end_date")
+    
+    # Handle variable selection
+    if requested_vars:
+        variables = requested_vars.split(",")
+        for var in variables:
+            if var not in era5wrf_monthly_coverage_ids:
+                return render_template("400/bad_request.html"), 400
+    else:
+        variables = list(era5wrf_monthly_coverage_ids.keys())
+    
+    # Handle start/end date selection
+    if requested_start_date and requested_end_date:
+        try:
+            start_date = datetime.strptime(requested_start_date, "%Y-%m-%d")
+            end_date = datetime.strptime(requested_end_date, "%Y-%m-%d")
+        except ValueError:
+            return render_template("400/bad_request.html"), 400
+
+        # Validate dates against coverage metadata
+        reference_meta = era5wrf_meta["t2_mean"]
+        validation_result = validate_era5_date_range(start_date, end_date, reference_meta)
+        if validation_result != True:
+            return validation_result
+    else:
+        start_date = None
+        end_date = None
+
+    try:
+        # Fetch bbox datasets for requested variables
+        datasets_dict = asyncio.run(
+            fetch_era5_wrf_area_data(polygon, variables, start_date, end_date)
+        )
+        # Process zonal statistics
+        zonal_results = process_era5wrf_zonal_stats(polygon, datasets_dict, variables)
+    
+        # Package data with time information
+        reference_meta = era5wrf_meta["t2_mean"]  # Use any coverage for time axis
+        packaged_data = package_era5wrf_area_data(
+            zonal_results, reference_meta, variables, start_date, end_date
+        )
+        
+        # Apply standard postprocessing
+        postprocessed = prune_nulls_with_max_intensity(
+            postprocess(packaged_data, "era5wrf_4km")
+        )
+        
+        # Handle CSV format request
+        if request.args.get("format") == "csv":
+            return create_csv(postprocessed, "era5wrf_4km", place_id=place_id)
+        
+        return postprocessed
+    
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
