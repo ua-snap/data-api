@@ -91,6 +91,14 @@ def validate_get_params():
             validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,50}$", str)),
             required=False,
         )
+        start_date = fields.Str(
+            validate=lambda str: bool(re.match(r"^\d{4}-\d{2}-\d{2}$", str)),
+            required=False,
+        )
+        end_date = fields.Str(
+            validate=lambda str: bool(re.match(r"^\d{4}-\d{2}-\d{2}$", str)),
+            required=False,
+        )
 
     schema = QueryParamsSchema()
     errors = schema.validate(request.args)
