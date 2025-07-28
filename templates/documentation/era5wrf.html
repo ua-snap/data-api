@@ -1,0 +1,167 @@
+{% extends 'base.html' %} {% block content %}
+<h2>WRF Dynamically Downscaled ERA5 Reanalysis</h2>
+
+<p>
+  This endpoint provides access to dynamically downscaled (using the Weather
+  Research and Forecasting (WRF) model) ERA5 reanalysis climate data. The
+  dataset spans 1960-2019 with daily temporal resolution and 4 km spatial
+  resolution. Available data include temperature, humidity, precipitation, wind,
+  and sea ice variables. To produce this dataset, ERA5 was used to initialize
+  the WRF model version 4.3.3 over the central Alaska landmass and immediately
+  neighboring Canada. Data were produced in 2-day runs, each with a 6-hour
+  spin-up phase, and spectral nudging enabled.
+</p>
+
+<h3>Available Variables</h3>
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Variables</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Temperature</td>
+      <td>t2_max, t2_mean, t2_min</td>
+      <td>Daily maximum, mean, and minimum 2-meter air temperature</td>
+      <td>°C</td>
+    </tr>
+    <tr>
+      <td>Humidity</td>
+      <td>rh2_max, rh2_mean, rh2_min</td>
+      <td>Daily maximum, mean, and minimum 2-meter relative humidity</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td>Precipitation</td>
+      <td>rainnc_sum</td>
+      <td>Daily precipitation total</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td>Wind</td>
+      <td>wspd10_max, wspd10_mean, wdir10_mean</td>
+      <td>Daily wind speed (max, mean) and direction (mean) at 10 meters</td>
+      <td>m/s, degrees</td>
+    </tr>
+    <tr>
+      <td>Sea Ice</td>
+      <td>seaice_max</td>
+      <td>Daily maximum sea ice concentration</td>
+      <td>fraction</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ERA5-WRF point query (all variables, all dates)</td>
+      <td><a href="/era5wrf/point/65.0628/-146.1627">/era5wrf/point/65.0628/-146.1627</a></td>
+    </tr>
+    <tr>
+      <td>ERA5-WRF point query (single variable, all dates)</td>
+      <td><a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean">/era5wrf/point/65.0628/-146.1627?vars=t2_mean</a></td>
+    </tr>
+    <tr>
+      <td>ERA5-WRF point query (several variables, one date)</td>
+      <td><a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01">/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01</a></td>
+    </tr>
+    <tr>
+      <td>ERA5-WRF point query (single variable, date range)</td>
+      <td><a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30">/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Date ranges can be specified using <code>start_date=YYYY-MM-DD</code> and <code>end_date=YYYY-MM-DD</code> query parameters.
+        <br>
+        CSV output is available by appending <code>?format=csv</code> to the URL.
+        <br>
+        Specific variables can be requested using <code>?vars=t2_mean,rh2_mean</code>.
+        <br>
+        Chaining parameters is also supported, e.g. <code>?vars=t2_mean,rh2_mean&format=csv</code>.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Point Query Output</h4>
+
+<p>Data are returned as JSON by default, keyed by date, with each date containing a dictionary of variable names and values. The variable names are the same as the ones listed in the Available Variables section.</p>
+<pre><code>{
+  {
+    "2012-06-01": {
+      "rh2_mean": 87.30744,
+      "t2_mean": 6.640991,
+      "wspd10_max": 4.135267
+    },
+    "2012-06-02": {
+      "rh2_mean": 79.30379,
+      "t2_mean": 7.702545,
+      "wspd10_max": 3.844817
+    },
+    "2012-06-03": {
+      "rh2_mean": 63.48309,
+      "t2_mean": 12.60672,
+      "wspd10_max": 3.779818
+    },
+    ...
+  }
+  
+}</code></pre>
+
+<h4>Area query</h4>
+<p>
+  Learn more about what
+  <a href="/places">types of places</a> are available for area queries.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ERA5-WRF area aggregation<br>Returns mean values over the area with the ID 19070506 for all variables, all dates.</td>
+      <td><a href="/era5wrf/area/19070506">/era5wrf/area/19070506</a></td>
+    </tr>
+    <tr>
+      <td>ERA5-WRF area aggregation with date range<br>Returns mean values over the area with the ID 19070506 for all variables for June 2012.</td>
+      <td><a href="/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30">/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30</a></td>
+    </tr>
+    <tr>
+      <td>ERA5-WRF area aggregation with date range and variables</td>
+      <td><a href="/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean">/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean</a></td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+<h3>References and Data Sources</h3>
+
+<h3>Citing This Dataset</h3>
+
+<p>
+  When using this dataset, please cite the original ERA5 reanalysis and acknowledge the WRF downscaling effort: [Citation details to be provided]
+</p>
+
+{% endblock %} 
