@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Invalid date range</h3>
+<p>
+  The start date (<code>{{ start_date }}</code>) must be before the end date (<code>{{ end_date }}</code>).
+</p>
+<p>
+  Valid dates for this endpoint are <code>{{ min_date }}</code> &ndash; <code>{{ max_date }}</code>.
+</p>
+{% endblock %}
