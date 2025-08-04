@@ -367,18 +367,17 @@ def get_communities():
             name = community["properties"].get("name", "").lower()
             alt_name = community["properties"].get("alt_name", "").lower()
             community_id = community["properties"].get("id")
-            # Exact substring match
             if substring in name or substring in alt_name:
                 if community_id not in seen_ids:
                     filtered_exact.append(community)
                     seen_ids.add(community_id)
-            # Fuzzy match
-            ratio_name = fuzz.ratio(substring, name) if name else 0
+
+            ratio_name = fuzz.ratio(substring, name)
             ratio_alt = fuzz.ratio(substring, alt_name) if alt_name else 0
             if (ratio_name >= 85 or ratio_alt >= 85) and community_id not in seen_ids:
                 filtered_fuzzy.append(community)
                 seen_ids.add(community_id)
-        # Combine both lists (order: exact matches first, then fuzzy matches)
+
         all_communities = filtered_exact + filtered_fuzzy
 
     output = [c["properties"] for c in all_communities]
