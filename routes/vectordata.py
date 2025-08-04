@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import os
 from shapely.geometry import shape, Point
+from thefuzz import fuzz
 
 # local imports
 from . import routes
@@ -343,7 +344,7 @@ def get_communities():
     GET function to return communities filtered by extent and substring.
     Query params:
         extent: alaska, blockyAlaska, elevation, mizukami, or slie (GeoJSON region)
-        substring: substring to match in name or alt_name
+        substring: substring to match in name or alt_name. Also performs fuzzy matching.
     Returns:
         JSON of filtered communities.
     """
@@ -359,13 +360,29 @@ def get_communities():
     substring = request.args.get("substring")
     if substring:
         substring = substring.lower()
-        filtered = []
+        filtered_exact = []
+        filtered_fuzzy = []
+        seen_ids = set()
         for community in all_communities:
             name = community["properties"].get("name", "").lower()
             alt_name = community["properties"].get("alt_name", "").lower()
+            community_id = community["properties"].get("id")
             if substring in name or substring in alt_name:
-                filtered.append(community)
-        all_communities = filtered
+                filtered_exact.append(community)
+                # Add community ID to the seen_ids set to avoid duplicates
+                seen_ids.add(community_id)
+
+            # Runs fuzzy matching for names and alt_names that are
+            # one character off or very similar to the substring.
+            ratio_name = fuzz.ratio(substring, name)
+            ratio_alt = fuzz.ratio(substring, alt_name) if alt_name else 0
+            # If the Levenshtein ratio is above 85% and the community ID
+            # has not been added to the set, add it to the filtered list.
+            if (ratio_name >= 85 or ratio_alt >= 85) and community_id not in seen_ids:
+                filtered_fuzzy.append(community)
+                seen_ids.add(community_id)
+
+        all_communities = filtered_exact + filtered_fuzzy
 
     output = [c["properties"] for c in all_communities]
 

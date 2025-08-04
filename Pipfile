@@ -22,6 +22,7 @@ pygeos = "*"
 lxml = "*"
 marshmallow = "*"
 fiona = "*"
+thefuzz = "*"
 
 [dev-packages]
 black = "*"
