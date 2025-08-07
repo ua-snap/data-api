@@ -361,7 +361,7 @@ def get_communities():
     if substring:
         substring = substring.lower()
         filtered_exact = []
-        filtered_fuzzy = []
+        filtered_fuzzy_with_scores = []
         seen_ids = set()
         for community in all_communities:
             name = community["properties"].get("name", "").lower()
@@ -376,13 +376,15 @@ def get_communities():
             # one character off or very similar to the substring.
             ratio_name = jaro.jaro_winkler_metric(substring, name)
             ratio_alt = jaro.jaro_winkler_metric(substring, alt_name) if alt_name else 0
-            # If the Levenshtein ratio is above 85% and the community ID
-            # has not been added to the set, add it to the filtered list.
-            if (
-                ratio_name >= 0.85 or ratio_alt >= 0.85
-            ) and community_id not in seen_ids:
-                filtered_fuzzy.append(community)
+            max_ratio = max(ratio_name, ratio_alt)
+
+            if max_ratio >= 0.85 and community_id not in seen_ids:
+                filtered_fuzzy_with_scores.append((community, max_ratio))
                 seen_ids.add(community_id)
+
+        # Sort the fuzzy matches by their Jaro-Winkler score in descending order
+        filtered_fuzzy_with_scores.sort(key=lambda x: x[1], reverse=True)
+        filtered_fuzzy = [community for community, score in filtered_fuzzy_with_scores]
 
         all_communities = filtered_exact + filtered_fuzzy
 
