@@ -5,7 +5,7 @@ import json
 import pandas as pd
 import os
 from shapely.geometry import shape, Point
-from thefuzz import fuzz
+import jaro
 
 # local imports
 from . import routes
@@ -374,11 +374,13 @@ def get_communities():
 
             # Runs fuzzy matching for names and alt_names that are
             # one character off or very similar to the substring.
-            ratio_name = fuzz.ratio(substring, name)
-            ratio_alt = fuzz.ratio(substring, alt_name) if alt_name else 0
+            ratio_name = jaro.jaro_winkler_metric(substring, name)
+            ratio_alt = jaro.jaro_winkler_metric(substring, alt_name) if alt_name else 0
             # If the Levenshtein ratio is above 85% and the community ID
             # has not been added to the set, add it to the filtered list.
-            if (ratio_name >= 85 or ratio_alt >= 85) and community_id not in seen_ids:
+            if (
+                ratio_name >= 0.85 or ratio_alt >= 0.85
+            ) and community_id not in seen_ids:
                 filtered_fuzzy.append(community)
                 seen_ids.add(community_id)
 
