@@ -360,20 +360,14 @@ def get_communities():
     substring = request.args.get("substring")
     if substring:
         substring = substring.lower()
-        filtered_exact = []
         filtered_fuzzy_with_scores = []
         seen_ids = set()
         for community in all_communities:
             name = community["properties"].get("name", "").lower()
             alt_name = community["properties"].get("alt_name", "").lower()
             community_id = community["properties"].get("id")
-            if substring in name or substring in alt_name:
-                filtered_exact.append(community)
-                # Add community ID to the seen_ids set to avoid duplicates
-                seen_ids.add(community_id)
 
-            # Runs fuzzy matching for names and alt_names that are
-            # one character off or very similar to the substring.
+            # Runs fuzzy matching for names and alt_names using Jaro-Winkler
             ratio_name = jaro.jaro_winkler_metric(substring, name)
             ratio_alt = jaro.jaro_winkler_metric(substring, alt_name) if alt_name else 0
             max_ratio = max(ratio_name, ratio_alt)
@@ -384,9 +378,7 @@ def get_communities():
 
         # Sort the fuzzy matches by their Jaro-Winkler score in descending order
         filtered_fuzzy_with_scores.sort(key=lambda x: x[1], reverse=True)
-        filtered_fuzzy = [community for community, score in filtered_fuzzy_with_scores]
-
-        all_communities = filtered_exact + filtered_fuzzy
+        all_communities = [community for community, score in filtered_fuzzy_with_scores]
 
     output = [c["properties"] for c in all_communities]
 
