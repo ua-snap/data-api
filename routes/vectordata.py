@@ -373,7 +373,7 @@ def get_communities():
             ratio_alt = jaro.jaro_winkler_metric(substring, alt_name) if alt_name else 0
             max_ratio = max(ratio_name, ratio_alt)
 
-            if max_ratio >= 0.85 and community_id not in seen_ids:
+            if max_ratio >= 0.8 and community_id not in seen_ids:
                 filtered_fuzzy_with_scores.append((community, max_ratio))
                 seen_ids.add(community_id)
 
