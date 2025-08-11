@@ -344,7 +344,8 @@ def get_communities():
     GET function to return communities filtered by extent and substring.
     Query params:
         extent: alaska, blockyAlaska, elevation, mizukami, or slie (GeoJSON region)
-        substring: substring to match in name or alt_name. Also performs fuzzy matching.
+        substring: substring to match in name or alt_name. Performs fuzzy matching using
+                   the Jaro-Winkler algorithm.
     Returns:
         JSON of filtered communities.
     """
