@@ -5,6 +5,7 @@ import json
 import pandas as pd
 import os
 from shapely.geometry import shape, Point
+import jaro
 
 # local imports
 from . import routes
@@ -343,7 +344,8 @@ def get_communities():
     GET function to return communities filtered by extent and substring.
     Query params:
         extent: alaska, blockyAlaska, elevation, mizukami, or slie (GeoJSON region)
-        substring: substring to match in name or alt_name
+        substring: substring to match in name or alt_name. Performs fuzzy matching using
+                   the Jaro-Winkler algorithm.
     Returns:
         JSON of filtered communities.
     """
@@ -359,13 +361,25 @@ def get_communities():
     substring = request.args.get("substring")
     if substring:
         substring = substring.lower()
-        filtered = []
+        filtered_fuzzy_with_scores = []
+        seen_ids = set()
         for community in all_communities:
             name = community["properties"].get("name", "").lower()
             alt_name = community["properties"].get("alt_name", "").lower()
-            if substring in name or substring in alt_name:
-                filtered.append(community)
-        all_communities = filtered
+            community_id = community["properties"].get("id")
+
+            # Runs fuzzy matching for names and alt_names using Jaro-Winkler
+            ratio_name = jaro.jaro_winkler_metric(substring, name)
+            ratio_alt = jaro.jaro_winkler_metric(substring, alt_name) if alt_name else 0
+            max_ratio = max(ratio_name, ratio_alt)
+
+            if max_ratio >= 0.8 and community_id not in seen_ids:
+                filtered_fuzzy_with_scores.append((community, max_ratio))
+                seen_ids.add(community_id)
+
+        # Sort the fuzzy matches by their Jaro-Winkler score in descending order
+        filtered_fuzzy_with_scores.sort(key=lambda x: x[1], reverse=True)
+        all_communities = [community for community, score in filtered_fuzzy_with_scores]
 
     output = [c["properties"] for c in all_communities]
 
