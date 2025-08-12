@@ -39,6 +39,7 @@ era5wrf_coverage_ids = {
     "wspd10_mean": "era5_4km_daily_wspd10_mean",
     "wdir10_mean": "era5_4km_daily_wdir10_mean",
     "seaice_max": "era5_4km_daily_seaice_max",
+    "rainnc_sum": "era5_4km_daily_rainnc_sum",
 }
 
 era5wrf_meta = {
@@ -303,37 +304,24 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
     for var_name in variables:
         ds = datasets_dict[var_name]
 
-        # need to do zonal stats for each time slice
-        if "time" in ds.dims:
-            # think we can drop this if block because there should always be a time dimension
-            time_series_means = []
+        time_series_means = []
 
-            # Iterate through each time step
-            for time_idx in range(ds.sizes["time"]):
-                # Select single time step
-                time_slice_ds = ds.isel(time=time_idx)
+        # zonal stats computed per time slice
+        for time_idx in range(ds.sizes["time"]):
 
-                # Calculate zonal stats for this time step
-                zonal_stats_dict = interpolate_and_compute_zonal_stats(
-                    polygon,
-                    time_slice_ds,
-                    crs="EPSG:3338",
-                    var_name=var_name,
-                    x_dim="X",
-                    y_dim="Y",
-                )
+            time_slice_ds = ds.isel(time=time_idx)
+            zonal_stats_dict = interpolate_and_compute_zonal_stats(
+                polygon,
+                time_slice_ds,
+                crs="EPSG:3338",
+                var_name=var_name,
+                x_dim="X",
+                y_dim="Y",
+            )
 
-                # Extract mean value for this time step
-                time_series_means.append(zonal_stats_dict["mean"])
+            time_series_means.append(zonal_stats_dict["mean"])
 
-            zonal_results[var_name] = time_series_means
-        else:
-            pass
-            # Handle case without time dimension (fallback)
-            # zonal_stats_dict = interpolate_and_compute_zonal_stats(
-            #     polygon, ds, crs="EPSG:3338", var_name=var_name, x_dim="X", y_dim="Y"
-            # )
-            # zonal_results[var_name] = [zonal_stats_dict["mean"]]
+        zonal_results[var_name] = time_series_means
 
     return zonal_results
 
@@ -429,13 +417,13 @@ def era5wrf_point(lat, lon):
 
     # construct bbox and validate coordinates are within it
     era5wrf_bbox = construct_latlon_bbox_from_coverage_bounds(
-        era5wrf_meta["t2_mean"]  # any coverage will do
+        era5wrf_meta["t2_mean"]  # any coverage, they all have the same bounds
     )
     within_bounds = validate_latlon_in_bboxes(
         lat,
         lon,
         [era5wrf_bbox],
-        ["era5_4km_daily_t2_mean"],  # using reference coverage
+        ["era5_4km_daily_t2_mean"],  # any coverage OK
     )
     if within_bounds == 404:
         return render_template("404/no_data.html"), 404
@@ -502,7 +490,6 @@ def era5wrf_area(place_id):
 
     poly_type = validate_var_id(place_id)
 
-    # this may need to point to a 4xx error page
     if type(poly_type) is tuple:
         return poly_type
 
@@ -516,7 +503,7 @@ def era5wrf_area(place_id):
     requested_start_date = request.args.get("start_date")
     requested_end_date = request.args.get("end_date")
 
-    # Handle variable selection
+    # handle variable selection, no vars means all variables
     if requested_vars:
         variables = requested_vars.split(",")
         for var in variables:
@@ -525,7 +512,7 @@ def era5wrf_area(place_id):
     else:
         variables = list(era5wrf_coverage_ids.keys())
 
-    # Handle start/end date selection
+    # handle start/end date selection, no dates means all dates
     if requested_start_date and requested_end_date:
         try:
             start_date = datetime.strptime(requested_start_date, "%Y-%m-%d")
@@ -533,7 +520,7 @@ def era5wrf_area(place_id):
         except ValueError:
             return render_template("400/bad_request.html"), 400
 
-        # Validate dates against coverage metadata
+        # validate dates against any coverage metadata, they have the same time spans
         reference_meta = era5wrf_meta["t2_mean"]
         validation_result = validate_era5_date_range(
             start_date, end_date, reference_meta
@@ -545,25 +532,22 @@ def era5wrf_area(place_id):
         end_date = None
 
     try:
-        # Fetch bbox datasets for requested variables
+        # fetch bbox datasets for requested variables
         datasets_dict = asyncio.run(
             fetch_era5_wrf_area_data(polygon, variables, start_date, end_date)
         )
-        # Process zonal statistics
         zonal_results = process_era5wrf_zonal_stats(polygon, datasets_dict, variables)
-
-        # Package data with time information
-        reference_meta = era5wrf_meta["t2_mean"]  # Use any coverage for time axis
+        reference_meta = era5wrf_meta[
+            "t2_mean"
+        ]  # any coverage, they all have the same time spans
         packaged_data = package_era5wrf_area_data(
             zonal_results, reference_meta, variables, start_date, end_date
         )
 
-        # Apply standard postprocessing
         postprocessed = prune_nulls_with_max_intensity(
             postprocess(packaged_data, "era5wrf_4km")
         )
 
-        # Handle CSV format request
         if request.args.get("format") == "csv":
             return create_csv(postprocessed, "era5wrf_4km", place_id=place_id)
 
