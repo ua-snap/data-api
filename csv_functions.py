@@ -294,6 +294,8 @@ def era5wrf_csv(data):
         "wspd10_max": "wspd10_max is the maximum daily wind speed in meters per second",
         "wspd10_mean": "wspd10_mean is the mean daily wind speed in meters per second",
         "wdir10_mean": "wdir10_mean is the mean daily wind direction in degrees",
+        "rainnc_sum": "rainnc_sum is the total daily accumulated precipitation in millimeters",
+        "seaice_max": "seaice_max is the maximum daily sea ice concentration, range 0-1",
     }
 
     metadata = "# Dynamically Downscaled ERA5 4km Data\n"
