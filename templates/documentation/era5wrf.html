@@ -70,32 +70,55 @@
   <tbody>
     <tr>
       <td>ERA5-WRF point query (all variables, all dates)</td>
-      <td><a href="/era5wrf/point/65.0628/-146.1627">/era5wrf/point/65.0628/-146.1627</a></td>
+      <td>
+        <a href="/era5wrf/point/65.0628/-146.1627"
+          >/era5wrf/point/65.0628/-146.1627</a
+        >
+      </td>
     </tr>
     <tr>
       <td>ERA5-WRF point query (single variable, all dates)</td>
-      <td><a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean">/era5wrf/point/65.0628/-146.1627?vars=t2_mean</a></td>
+      <td>
+        <a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean"
+          >/era5wrf/point/65.0628/-146.1627?vars=t2_mean</a
+        >
+      </td>
     </tr>
     <tr>
       <td>ERA5-WRF point query (several variables, one date)</td>
-      <td><a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01">/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01</a></td>
+      <td>
+        <a
+          href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01"
+          >/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01</a
+        >
+      </td>
     </tr>
     <tr>
       <td>ERA5-WRF point query (single variable, date range)</td>
-      <td><a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30">/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a></td>
+      <td>
+        <a
+          href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30"
+          >/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a
+        >
+      </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
       <td colspan="2">
-        Date ranges can be specified using <code>start_date=YYYY-MM-DD</code> and <code>end_date=YYYY-MM-DD</code> query parameters.
-        <br>
-        CSV output is available by appending <code>?format=csv</code> to the URL.
-        <br>
-        Specific variables can be requested using <code>?vars=t2_mean,rh2_mean</code>.
-        <br>
-        Chaining parameters is also supported, e.g. <code>?vars=t2_mean,rh2_mean&format=csv</code>.
-        <br>
+        Date ranges can be specified using
+        <code>start_date=YYYY-MM-DD</code> and
+        <code>end_date=YYYY-MM-DD</code> query parameters.
+        <br />
+        CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br />
+        Specific variables can be requested using
+        <code>?vars=t2_mean,rh2_mean</code>.
+        <br />
+        Chaining parameters is also supported, e.g.
+        <code>?vars=t2_mean,rh2_mean&format=csv</code>.
+        <br />
         All parameter combinations work for both point and area queries.
       </td>
     </tr>
@@ -104,7 +127,11 @@
 
 <h4>Point Query Output</h4>
 
-<p>Data are returned as JSON by default, keyed by date, with each date containing a dictionary of variable names and values. The variable names are the same as the ones listed in the Available Variables section.</p>
+<p>
+  Data are returned as JSON by default, keyed by date, with each date containing
+  a dictionary of variable names and values. The variable names are the same as
+  the ones listed in the Available Variables section.
+</p>
 <pre><code>{
   "2012-06-01": {
     "rh2_mean": 87.3,
@@ -126,9 +153,10 @@
 
 <h4>Area query</h4>
 <p>
-  Area queries return zonal statistics (mean values) aggregated over a specified polygon area. 
-  Values represent the spatial average of all 4 km by 4 km grid cells within the polygon boundary.
-  Learn more about what <a href="/places">types of places</a> are available for area queries.
+  Area queries return zonal statistics (mean values) aggregated over a specified
+  polygon area. Values represent the spatial average of all 4 km by 4 km grid
+  cells within the polygon boundary. Learn more about what
+  <a href="/places">types of places</a> are available for area queries.
 </p>
 
 <table class="endpoints">
@@ -144,25 +172,46 @@
       <td><a href="/era5wrf/area/19070506">/era5wrf/area/19070506</a></td>
     </tr>
     <tr>
-      <td>Return mean values over area for selected variables and date range</td>
-      <td><a href="/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean">/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean</a></td>
+      <td>
+        Return mean values over area for selected variables and date range
+      </td>
+      <td>
+        <a
+          href="/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean"
+          >/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean</a
+        >
+      </td>
     </tr>
     <tr>
       <td>Return mean values over area for selected variables in CSV format</td>
-      <td><a href="/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv">/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv</a></td>
+      <td>
+        <a href="/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv"
+          >/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv</a
+        >
+      </td>
     </tr>
     <tr>
-      <td>Return mean values over area for selected variables for specific month</td>
-      <td><a href="/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30">/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a></td>
+      <td>
+        Return mean values over area for selected variables for specific month
+      </td>
+      <td>
+        <a
+          href="/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30"
+          >/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a
+        >
+      </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
       <td colspan="2">
-        Area queries support the same parameters as point queries: <code>vars</code> (comma-separated variable names), 
-        <code>start_date</code> and <code>end_date</code> (YYYY-MM-DD format), and <code>format=csv</code> for CSV output.
-        <br>
-        Results represent mean values of all 4 km by 4 km grid cells within the specified polygon area.
+        Area queries support the same parameters as point queries:
+        <code>vars</code> (comma-separated variable names),
+        <code>start_date</code> and <code>end_date</code> (YYYY-MM-DD format),
+        and <code>format=csv</code> for CSV output.
+        <br />
+        Results represent mean values of all 4 km by 4 km grid cells within the
+        specified polygon area.
       </td>
     </tr>
   </tfoot>
@@ -170,7 +219,10 @@
 
 <h4>Area Query Output</h4>
 
-<p>Area queries return the same JSON structure as point queries, but values represent spatial averages rather than point measurements:</p>
+<p>
+  Area queries return the same JSON structure as point queries, but values
+  represent spatial averages rather than point measurements:
+</p>
 
 <pre><code>{
   "2012-06-01": {
@@ -188,16 +240,18 @@
   ...
 }</code></pre>
 
-<p>Each value is the mean of all valid 4km grid cells within the polygon boundary for that date.</p>
-
-
+<p>
+  Each value is the mean of all valid grid cells within the polygon boundary
+  for that date.
+</p>
 
 <h3>References and Data Sources</h3>
 
 <h3>Citing This Dataset</h3>
 
 <p>
-  When using this dataset, please cite the original ERA5 reanalysis and acknowledge the WRF downscaling effort: [Citation details to be provided]
+  When using this dataset, please cite the original ERA5 reanalysis and
+  acknowledge the WRF downscaling effort: [Citation details to be provided]
 </p>
 
-{% endblock %} 
+{% endblock %}
