@@ -423,7 +423,7 @@ def era5wrf_point(lat, lon):
         lat,
         lon,
         [era5wrf_bbox],
-        ["era5_4km_daily_t2_mean"],  # any coverage OK
+        ["era5_4km"],  # name of the geotiff we check for data vs. nodata extent
     )
     if within_bounds == 404:
         return render_template("404/no_data.html"), 404
