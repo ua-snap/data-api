@@ -92,28 +92,19 @@ def get_era5_temporal_bounds(coverage_meta):
 
 
 def package_era5wrf_point_data(
-    data_dict, coverage_meta, start_date=None, end_date=None
+    data_dict, coverage_meta
 ):
     """Package ERA5-WRF data with time-first structure.
 
     Args:
         data_dict (dict): Variable names mapped to data arrays from fetch
         coverage_meta (dict): Coverage metadata containing time axis
-        start_date (datetime, optional): Start date for filtering
-        end_date (datetime, optional): End date for filtering
 
     Returns:
         dict: Time-first structured data {date: {variable: value}}
     """
 
     time_index = generate_time_index_from_coverage_metadata(coverage_meta)
-
-    # filter time index if date range provided
-    if start_date and end_date:
-        mask = (time_index.date >= start_date.date()) & (
-            time_index.date <= end_date.date()
-        )
-        time_index = time_index[mask]
 
     # package data with time keys at top level
     packaged_data = {}
@@ -137,40 +128,31 @@ def era5wrf_about():
     return render_template("documentation/era5wrf.html")
 
 
-async def fetch_era5_wrf_point_data(x, y, variables, start_date=None, end_date=None):
+async def fetch_era5_wrf_point_data(x, y, variables):
     """Fetch ERA5-WRF data for multiple variables asynchronously.
 
     Args:
         x (float): x-coordinate
         y (float): y-coordinate
         variables (list): List of variable names to fetch
-        start_date (datetime, optional): Start date for temporal slice
-        end_date (datetime, optional): End date for temporal slice
 
     Returns:
         dict: Variable names mapped to their data arrays
     """
-    # create time slice if dates are provided, will default to None
-
     tasks = []
     for var_name in variables:
         cov_id = era5wrf_coverage_ids[var_name]
 
-        if time_slice:
-            # WCS string creation is now extended with temporal slicing
-            request_str = generate_wcs_getcov_str(x, y, cov_id, time_slice=time_slice)
-            url = generate_wcs_query_url(request_str)
-            tasks.append(fetch_data([url]))
-        else:
-            # otherwise use the "stock" WCS get function for full temporal range
-            tasks.append(fetch_wcs_point_data(x, y, cov_id))
+        request_str = generate_wcs_getcov_str(x, y, cov_id)
+        url = generate_wcs_query_url(request_str)
+        tasks.append(fetch_data([url]))
 
     results = await asyncio.gather(*tasks)
     return {var_name: data for var_name, data in zip(variables, results)}
 
 
 async def fetch_era5_wrf_area_data(polygon, variables):
-    """Fetch ERA5-WRF bbox data for multiple variables with optional temporal slicing.
+    """Fetch ERA5-WRF bbox data for multiple variables.
 
     Args:
         polygon (GeoDataFrame): Polygon for which to compute zonal statistics
@@ -233,7 +215,7 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
 
 
 def package_era5wrf_area_data(
-    zonal_results, coverage_meta, variables, start_date=None, end_date=None
+    zonal_results, coverage_meta, variables
 ):
     """Package ERA5-WRF area data with time-first structure.
 
@@ -241,8 +223,6 @@ def package_era5wrf_area_data(
         zonal_results (dict): Variable names mapped to zonal statistics
         coverage_meta (dict): Coverage metadata containing time axis
         variables (list): List of variable names
-        start_date (datetime, optional): Start date for filtering
-        end_date (datetime, optional): End date for filtering
 
     Returns:
         dict: Time-first structured data {date: {variable: zonal_mean}}
@@ -276,7 +256,7 @@ def era5wrf_point(lat, lon):
     Returns:
         JSON-like object of ERA5-WRF data
     """
-    # extract query parameters for variables and start/end dates
+    # extract query parameters for variables
     requested_vars = request.args.get("vars")
     # handle variable selection
     if requested_vars:
@@ -288,7 +268,6 @@ def era5wrf_point(lat, lon):
     else:
         # if no variables are requested, use all variables
         variables = list(era5wrf_coverage_ids.keys())
-    # handle start/end date selection
 
     # validate coordinates
     validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
@@ -326,15 +305,13 @@ def era5wrf_point(lat, lon):
         return render_template("500/server_error.html"), 500
 
     try:
-        all_data = asyncio.run(
-            fetch_era5_wrf_point_data(x, y, variables, start_date, end_date)
-        )
+        all_data = asyncio.run(fetch_era5_wrf_point_data(x, y, variables))
 
         reference_meta = era5wrf_meta[
             "t2_mean"
         ]  # any coverage metadata for time axis, they are all the same
         packaged_data = package_era5wrf_point_data(
-            all_data, reference_meta, start_date, end_date
+            all_data, reference_meta
         )
         postprocessed = prune_nulls_with_max_intensity(
             postprocess(packaged_data, "era5wrf_4km")
@@ -365,7 +342,6 @@ def era5wrf_area(place_id):
     Returns:
         JSON-like object of ERA5-WRF area-aggregated data
     """
-
     poly_type = validate_var_id(place_id)
 
     if type(poly_type) is tuple:
