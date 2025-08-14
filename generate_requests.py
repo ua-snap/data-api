@@ -96,7 +96,7 @@ def generate_wcs_getcov_str(
     return wcs_getcov_str
 
 
-def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None, time_slice=None):
+def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None):
     """Generate a WCS GetCoverage request for netCDF data over an area.
 
     Args:
@@ -104,7 +104,6 @@ def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None, time_sli
         cov_id (str): Rasdaman coverage ID
         var_coord (int): coordinate value corresponding to variable name to query,
             default=None will include all variables
-        time_slice (tuple): two-tuple of the time axis name and the ISO time-string used to slice the data
     Returns:
         netcdf_wcs_getcov_str (str): WCS GetCoverage Request to append to a query URL
     """
@@ -112,7 +111,7 @@ def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None, time_sli
     x = f"{x1},{x2}"
     y = f"{y1},{y2}"
     netcdf_wcs_getcov_str = generate_wcs_getcov_str(
-        x, y, cov_id, var_coord, time_slice=time_slice, encoding="netcdf"
+        x, y, cov_id, var_coord, encoding="netcdf"
     )
     return netcdf_wcs_getcov_str
 
