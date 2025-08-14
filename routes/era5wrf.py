@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+
 from flask import Blueprint, render_template, request
 import pandas as pd
 
@@ -48,43 +48,6 @@ era5wrf_meta = {
 }
 
 
-def format_era5_datetime(date_obj):
-    """Convert datetime object to ISO format.
-
-    CP note: good candidate to move to a utility module for time slicing and time validation
-
-    Args:
-        date_obj (datetime): Python datetime object
-
-    Returns:
-        str: ISO formatted datetime string
-    """
-    if date_obj is None:
-        return None
-    return f"{date_obj.strftime('%Y-%m-%d')}T00:00:00.000Z"
-
-
-def create_era5_time_slice(start_date, end_date):
-    """Create time_slice tuple for ERA5-WRF WCS requests.
-
-    CP note: good candidate to move to a utility module for time slicing and time validation
-    This is a small function and could be bundled but it helps me debug
-
-    Args:
-        start_date (datetime): Start date for temporal slice
-        end_date (datetime): End date for temporal slice
-
-    Returns:
-        tuple: (time_axis, time_range_string) for WCS request, or None if no dates
-    """
-    if start_date is None or end_date is None:
-        return None
-
-    start_iso = format_era5_datetime(start_date)
-    end_iso = format_era5_datetime(end_date)
-    return ("time", f'"{start_iso}","{end_iso}"')
-
-
 def get_era5_temporal_bounds(coverage_meta):
     """Extract temporal bounds from ERA5-WRF coverage metadata.
 
@@ -126,54 +89,6 @@ def get_era5_temporal_bounds(coverage_meta):
         raise ValueError(
             "Could not extract temporal bounds from ERA5-WRF coverage metadata"
         )
-
-
-def validate_era5_date_range(start_date, end_date, coverage_meta):
-    """Validate date range against actual ERA5-WRF coverage bounds.
-
-    Args:
-        start_date (datetime): User-provided start date
-        end_date (datetime): User-provided end date
-        coverage_meta (dict): ERA5-WRF coverage metadata
-
-    Returns:
-        True if valid, or Flask response tuple for errors
-    """
-    try:
-        # get actual temporal bounds from coverage description
-        min_date, max_date = get_era5_temporal_bounds(coverage_meta)
-
-        # validate for chronological order
-        if start_date > end_date:
-            return (
-                render_template(
-                    "422/invalid_date_range.html",
-                    start_date=start_date.strftime("%Y-%m-%d"),
-                    end_date=end_date.strftime("%Y-%m-%d"),
-                    min_date=min_date.strftime("%Y-%m-%d"),
-                    max_date=max_date.strftime("%Y-%m-%d"),
-                ),
-                422,
-            )
-
-        # validate for within coverage date range
-        if start_date < min_date or end_date > max_date:
-            return (
-                render_template(
-                    "422/invalid_year.html",
-                    start_year=start_date.year,
-                    end_year=end_date.year,
-                    min_year=min_date.year,
-                    max_year=max_date.year,
-                ),
-                422,
-            )
-
-        return True
-
-    except ValueError as e:
-        # in trouble if we can't parse coverage description metadata
-        return render_template("500/server_error.html"), 500
 
 
 def package_era5wrf_point_data(
@@ -236,7 +151,6 @@ async def fetch_era5_wrf_point_data(x, y, variables, start_date=None, end_date=N
         dict: Variable names mapped to their data arrays
     """
     # create time slice if dates are provided, will default to None
-    time_slice = create_era5_time_slice(start_date, end_date)
 
     tasks = []
     for var_name in variables:
@@ -255,31 +169,23 @@ async def fetch_era5_wrf_point_data(x, y, variables, start_date=None, end_date=N
     return {var_name: data for var_name, data in zip(variables, results)}
 
 
-async def fetch_era5_wrf_area_data(polygon, variables, start_date=None, end_date=None):
+async def fetch_era5_wrf_area_data(polygon, variables):
     """Fetch ERA5-WRF bbox data for multiple variables with optional temporal slicing.
 
     Args:
         polygon (GeoDataFrame): Polygon for which to compute zonal statistics
         variables (list): List of variable names to fetch
-        start_date (datetime, optional): Start date for temporal slice
-        end_date (datetime, optional): End date for temporal slice
 
     Returns:
         dict: Variable names mapped to xarray datasets
     """
-    time_slice = create_era5_time_slice(start_date, end_date)
     bbox_bounds = polygon.total_bounds  # (xmin, ymin, xmax, ymax)
 
     tasks = []
     for var_name in variables:
         cov_id = era5wrf_coverage_ids[var_name]
 
-        if time_slice:
-            request_str = generate_netcdf_wcs_getcov_str(
-                bbox_bounds, cov_id, time_slice=time_slice
-            )
-        else:
-            request_str = generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id)
+        request_str = generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id)
 
         url = generate_wcs_query_url(request_str)
         tasks.append(fetch_bbox_netcdf([url]))
@@ -343,13 +249,6 @@ def package_era5wrf_area_data(
     """
     time_index = generate_time_index_from_coverage_metadata(coverage_meta)
 
-    # filter time index if date range provided
-    if start_date and end_date:
-        mask = (time_index.date >= start_date.date()) & (
-            time_index.date <= end_date.date()
-        )
-        time_index = time_index[mask]
-
     # package data with time keys at top level, same as point query
     packaged_data = {}
     for i, timestamp in enumerate(time_index):
@@ -379,8 +278,6 @@ def era5wrf_point(lat, lon):
     """
     # extract query parameters for variables and start/end dates
     requested_vars = request.args.get("vars")
-    requested_start_date = request.args.get("start_date")
-    requested_end_date = request.args.get("end_date")
     # handle variable selection
     if requested_vars:
         variables = requested_vars.split(",")
@@ -392,23 +289,6 @@ def era5wrf_point(lat, lon):
         # if no variables are requested, use all variables
         variables = list(era5wrf_coverage_ids.keys())
     # handle start/end date selection
-    if requested_start_date and requested_end_date:
-        try:
-            start_date = datetime.strptime(requested_start_date, "%Y-%m-%d")
-            end_date = datetime.strptime(requested_end_date, "%Y-%m-%d")
-        except ValueError:
-            return render_template("400/bad_request.html"), 400
-
-        # validate dates against any coverage metadata, they have the same time spans
-        reference_meta = era5wrf_meta["t2_mean"]
-        validation_result = validate_era5_date_range(
-            start_date, end_date, reference_meta
-        )
-        if validation_result != True:
-            return validation_result
-    else:
-        start_date = None
-        end_date = None
 
     # validate coordinates
     validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
@@ -480,8 +360,6 @@ def era5wrf_area(place_id):
 
     Query Parameters:
         vars (str): Comma-separated variable names
-        start_date (str): Start date in YYYY-MM-DD format
-        end_date (str): End date in YYYY-MM-DD format
         format (str): Output format ('csv' or default JSON)
 
     Returns:
@@ -500,8 +378,6 @@ def era5wrf_area(place_id):
 
     # extract and validate query parameters (mirror point query logic)
     requested_vars = request.args.get("vars")
-    requested_start_date = request.args.get("start_date")
-    requested_end_date = request.args.get("end_date")
 
     # handle variable selection, no vars means all variables
     if requested_vars:
@@ -512,36 +388,15 @@ def era5wrf_area(place_id):
     else:
         variables = list(era5wrf_coverage_ids.keys())
 
-    # handle start/end date selection, no dates means all dates
-    if requested_start_date and requested_end_date:
-        try:
-            start_date = datetime.strptime(requested_start_date, "%Y-%m-%d")
-            end_date = datetime.strptime(requested_end_date, "%Y-%m-%d")
-        except ValueError:
-            return render_template("400/bad_request.html"), 400
-
-        # validate dates against any coverage metadata, they have the same time spans
-        reference_meta = era5wrf_meta["t2_mean"]
-        validation_result = validate_era5_date_range(
-            start_date, end_date, reference_meta
-        )
-        if validation_result != True:
-            return validation_result
-    else:
-        start_date = None
-        end_date = None
-
     try:
         # fetch bbox datasets for requested variables
-        datasets_dict = asyncio.run(
-            fetch_era5_wrf_area_data(polygon, variables, start_date, end_date)
-        )
+        datasets_dict = asyncio.run(fetch_era5_wrf_area_data(polygon, variables))
         zonal_results = process_era5wrf_zonal_stats(polygon, datasets_dict, variables)
         reference_meta = era5wrf_meta[
             "t2_mean"
         ]  # any coverage, they all have the same time spans
         packaged_data = package_era5wrf_area_data(
-            zonal_results, reference_meta, variables, start_date, end_date
+            zonal_results, reference_meta, variables
         )
 
         postprocessed = prune_nulls_with_max_intensity(
