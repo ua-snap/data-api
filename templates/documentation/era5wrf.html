@@ -85,20 +85,11 @@
       </td>
     </tr>
     <tr>
-      <td>ERA5-WRF point query (several variables, one date)</td>
+      <td>ERA5-WRF point query (several variables, all dates)</td>
       <td>
         <a
-          href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01"
-          >/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean&start_date=2012-06-01&end_date=2012-06-01</a
-        >
-      </td>
-    </tr>
-    <tr>
-      <td>ERA5-WRF point query (single variable, date range)</td>
-      <td>
-        <a
-          href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30"
-          >/era5wrf/point/65.0628/-146.1627?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a
+          href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean"
+          >/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean</a
         >
       </td>
     </tr>
@@ -106,10 +97,6 @@
   <tfoot>
     <tr>
       <td colspan="2">
-        Date ranges can be specified using
-        <code>start_date=YYYY-MM-DD</code> and
-        <code>end_date=YYYY-MM-DD</code> query parameters.
-        <br />
         CSV output is available by appending <code>?format=csv</code> to the
         URL.
         <br />
@@ -172,13 +159,11 @@
       <td><a href="/era5wrf/area/19070506">/era5wrf/area/19070506</a></td>
     </tr>
     <tr>
-      <td>
-        Return mean values over area for selected variables and date range
-      </td>
+      <td>Return mean values over area for selected variables</td>
       <td>
         <a
-          href="/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean"
-          >/era5wrf/area/19070506?start_date=2012-06-01&end_date=2012-06-30&vars=t2_mean,rh2_mean</a
+          href="/era5wrf/area/19070506?vars=t2_mean,rh2_mean"
+          >/era5wrf/area/19070506?vars=t2_mean,rh2_mean</a
         >
       </td>
     </tr>
@@ -191,14 +176,9 @@
       </td>
     </tr>
     <tr>
+      <td>Return mean values over area for selected variables</td>
       <td>
-        Return mean values over area for selected variables for specific month
-      </td>
-      <td>
-        <a
-          href="/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30"
-          >/era5wrf/area/19070506?vars=t2_mean&start_date=2012-06-01&end_date=2012-06-30</a
-        >
+        <a href="/era5wrf/area/19070506?vars=t2_mean,rh2_mean">/era5wrf/area/19070506?vars=t2_mean,rh2_mean</a>
       </td>
     </tr>
   </tbody>
@@ -207,7 +187,6 @@
       <td colspan="2">
         Area queries support the same parameters as point queries:
         <code>vars</code> (comma-separated variable names),
-        <code>start_date</code> and <code>end_date</code> (YYYY-MM-DD format),
         and <code>format=csv</code> for CSV output.
         <br />
         Results represent mean values of all 4 km by 4 km grid cells within the
