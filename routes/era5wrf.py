@@ -1,14 +1,13 @@
 import asyncio
 
 from flask import Blueprint, render_template, request
-import pandas as pd
+
 
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
     fetch_data,
     describe_via_wcps,
-    fetch_wcs_point_data,
     fetch_bbox_netcdf,
     get_poly,
 )
@@ -48,52 +47,7 @@ era5wrf_meta = {
 }
 
 
-def get_era5_temporal_bounds(coverage_meta):
-    """Extract temporal bounds from ERA5-WRF coverage metadata.
-
-    Args:
-        coverage_meta (dict): Coverage metadata from describe_via_wcps()
-
-    Returns:
-        tuple: (min_date, max_date) as datetime objects
-    """
-    try:
-        # Find the time axis in coverage metadata
-        # CP note: good candidate to move to a function in validate_request
-        # much like the function that determines the spatial axes
-        time_axis = next(
-            axis
-            for axis in coverage_meta["domainSet"]["generalGrid"]["axis"]
-            if axis["axisLabel"]
-            == "time"  # ERA5-WRF uses "time" axis, could also be "ansi"
-        )
-
-        # Extract coordinate list and get bounds
-        time_coordinates = time_axis["coordinate"]
-
-        # Convert to datetime objects
-        min_date = pd.to_datetime(time_coordinates[0])
-        max_date = pd.to_datetime(time_coordinates[-1])
-
-        # Remove timezone info to make naive datetimes
-        min_date_naive = (
-            min_date.tz_localize(None) if min_date.tz is not None else min_date
-        )
-        max_date_naive = (
-            max_date.tz_localize(None) if max_date.tz is not None else max_date
-        )
-
-        return min_date_naive.to_pydatetime(), max_date_naive.to_pydatetime()
-
-    except (KeyError, StopIteration, IndexError):
-        raise ValueError(
-            "Could not extract temporal bounds from ERA5-WRF coverage metadata"
-        )
-
-
-def package_era5wrf_point_data(
-    data_dict, coverage_meta
-):
+def package_era5wrf_point_data(data_dict, coverage_meta):
     """Package ERA5-WRF data with time-first structure.
 
     Args:
@@ -214,9 +168,7 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
     return zonal_results
 
 
-def package_era5wrf_area_data(
-    zonal_results, coverage_meta, variables
-):
+def package_era5wrf_area_data(zonal_results, coverage_meta, variables):
     """Package ERA5-WRF area data with time-first structure.
 
     Args:
@@ -310,9 +262,7 @@ def era5wrf_point(lat, lon):
         reference_meta = era5wrf_meta[
             "t2_mean"
         ]  # any coverage metadata for time axis, they are all the same
-        packaged_data = package_era5wrf_point_data(
-            all_data, reference_meta
-        )
+        packaged_data = package_era5wrf_point_data(all_data, reference_meta)
         postprocessed = prune_nulls_with_max_intensity(
             postprocess(packaged_data, "era5wrf_4km")
         )
