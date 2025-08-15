@@ -357,7 +357,6 @@ async def fetch_dd_point_data(x, y, cov_id, start_year=None, end_year=None):
 
 
 @routes.route("/degree_days/")
-@routes.route("/degree_days/abstract/")
 @routes.route("/degree_days/heating/")
 @routes.route("/degree_days/below_zero/")
 @routes.route("/degree_days/thawing_index/")

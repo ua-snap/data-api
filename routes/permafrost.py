@@ -286,7 +286,6 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
 
 
 @routes.route("/permafrost/")
-@routes.route("/permafrost/abstract/")
 @routes.route("/permafrost/point/")
 def pf_about():
     return render_template("documentation/permafrost.html")

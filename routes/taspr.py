@@ -1351,10 +1351,7 @@ def run_fetch_proj_precip_point_data(lat, lon, csv=False):
 
 @routes.route("/taspr/")
 @routes.route("/temperature/")
-@routes.route("/temperature/abstract/")
 @routes.route("/precipitation/")
-@routes.route("/precipitation/abstract/")
-@routes.route("/taspr/abstract/")
 @routes.route("/taspr/point/")
 @routes.route("/temperature/point/")
 @routes.route("/precipitation/point/")
