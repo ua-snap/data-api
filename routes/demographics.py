@@ -1,8 +1,10 @@
 from flask import render_template, Response, request
 import asyncio
 import json
+import logging
 import requests
 import pandas as pd
+import time
 
 # local imports
 from . import routes
@@ -11,6 +13,8 @@ from luts import demographics_fields, demographics_descriptions, demographics_or
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 from csv_functions import create_csv
+
+logger = logging.getLogger(__name__)
 
 
 def validate_community_id(community):
@@ -22,7 +26,11 @@ def validate_community_id(community):
     """
     community_ids = []
     url = generate_wfs_places_url("demographics:demographics", properties="id")
+    logger.info(f"Making HTTP request: GET {url}")
+    start_time = time.time()
     with requests.get(url, verify=True) as r:
+        duration = time.time() - start_time
+        logger.info(f"HTTP request completed in {duration:.2f}s: GET {url}")
         for feature in r.json()["features"]:
             community_ids.append(feature["properties"]["id"])
     if community in community_ids:
