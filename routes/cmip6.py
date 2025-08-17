@@ -1,5 +1,6 @@
 import asyncio
 import ast
+import logging
 from flask import Blueprint, render_template, request
 
 # local imports
@@ -15,6 +16,8 @@ from validate_request import (
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
+
+logger = logging.getLogger(__name__)
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
@@ -320,7 +323,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                             if var not in vars:
                                 vars.append(var)
 
-        print(f"Results limited to {vars}")
+        logger.debug(f"Results limited to {vars}")
 
         if request.args.get("format") == "csv":
             place_id = request.args.get("community")
