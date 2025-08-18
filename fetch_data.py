@@ -4,6 +4,7 @@ A module of data gathering functions for use across multiple endpoints.
 
 import copy
 import io
+import logging
 import operator
 import time
 import asyncio
@@ -29,6 +30,8 @@ from generate_urls import (
     generate_wfs_places_url,
     generate_describe_coverage_url,
 )
+
+logger = logging.getLogger(__name__)
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
@@ -64,8 +67,12 @@ async def fetch_layer_data(url, session, encoding="json"):
     Returns:
         Query result, deocded differently depending on encoding argument.
     """
+    logger.info(f"Making HTTP request: GET {url}")
+    start_time = time.time()
     resp = await session.request(method="GET", url=url)
     resp.raise_for_status()
+    duration = time.time() - start_time
+    logger.info(f"HTTP request completed in {duration:.2f}s: GET {url}")
 
     if encoding == "json":
         data = await resp.json()
@@ -102,10 +109,14 @@ async def make_get_request(url, session):
         Query result, deocded differently depending on encoding argument.
     """
     cache_header = {"Cache-Control": "max-age=7776000"}
+    logger.info(f"Making HTTP request: GET {url}")
+    start_time = time.time()
     resp = await session.request(
         method="GET", url=url, headers=cache_header, verify_ssl=True
     )
     resp.raise_for_status()
+    duration = time.time() - start_time
+    logger.info(f"HTTP request completed in {duration:.2f}s: GET {url}")
 
     # way of auto-detecting encoding from URL
     if "application/json" in url:

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from flask import (
     Blueprint,
     render_template,
@@ -23,6 +24,8 @@ from validate_request import (
 from postprocessing import prune_nulls_with_max_intensity, postprocess
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
+
+logger = logging.getLogger(__name__)
 
 degree_days_api = Blueprint("degree_days_api", __name__)
 
@@ -243,7 +246,7 @@ def package_distilled_response(mmm_point_data, start_year=None, end_year=None):
     """
     distilled = {}
     for era in mmm_point_data["min"].keys():
-        print(era)
+        logger.debug(era)
         distilled[era] = {}
         distilled[era]["ddmin"] = mmm_point_data["min"][era]["wcps_response"]
         distilled[era]["ddmean"] = round(mmm_point_data["mean"][era]["wcps_response"])

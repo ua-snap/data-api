@@ -1,4 +1,6 @@
 from datetime import datetime
+import logging
+import sys
 from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 from config import SITE_OFFLINE, geojson_names
@@ -6,6 +8,15 @@ from marshmallow import Schema, fields, validate
 import re
 
 from routes import routes, request
+
+# Configure logging to emit to stdout
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 # Elastic Beanstalk wants `application` to be present.
 application = app = Flask(__name__)

@@ -2,10 +2,13 @@
 Read more about the Zonal Oversampling Process (ZOP) here: https://github.com/ua-snap/zonal_stats
 """
 
+import logging
 import numpy as np
 from rasterio.features import rasterize
 from rasterio.crs import CRS
 from flask import render_template
+
+logger = logging.getLogger(__name__)
 
 
 def get_scale_factor(grid_cell_area, polygon_area):
@@ -140,12 +143,12 @@ def interpolate_and_compute_zonal_stats(
 
     # test if the polygon is in the same CRS as the dataset
     if str(polygon.crs) != crs:
-        print("Polygon and dataset CRS do not match")
+        logger.debug("Polygon and dataset CRS do not match")
         return render_template("500/server_error.html"), 500
 
     # make sure dataset CRS is projected, not geographic
     if not CRS.from_string(crs).is_projected:
-        print("Dataset CRS is not projected")
+        logger.debug("Dataset CRS is not projected")
         return render_template("500/server_error.html"), 500
 
     # confirm spatial info
