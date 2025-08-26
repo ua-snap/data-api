@@ -80,7 +80,6 @@ cached_urls = [
     "/beetles/point/",
     "/elevation/point/",
     "/taspr/point/",
-    "/indicators/base/point/",
     "/ncr/permafrost/point/",
     "/eds/hydrology/point/",
     "/alfresco/flammability/area/",
@@ -88,7 +87,6 @@ cached_urls = [
     "/beetles/area/",
     "/elevation/area/",
     "/taspr/area/",
-    "/indicators/base/area/",
 ]
 
 # Used for generating output for vector_data for /places/all
