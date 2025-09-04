@@ -23,3 +23,6 @@ data/shapefiles/
 # IDE hidden files
 .idea/
 .vscode/
+
+# QGIS junk after looking at GeoTIFFs
+*.aux.xml

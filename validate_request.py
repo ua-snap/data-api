@@ -10,6 +10,7 @@ import os.path
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
+import pandas as pd
 from rasterio.crs import CRS
 
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
@@ -255,6 +256,33 @@ def get_x_y_axes(coverage_metadata):
         return x_axis, y_axis
     except (KeyError, StopIteration):
         raise ValueError("Unexpected coverage metadata: 'X' or 'Y' axis not found")
+
+
+def generate_time_index_from_coverage_metadata(meta):
+    """Generate a pandas DatetimeIndex from the ansi/time axis coordinates
+    in the coverage description metadata.
+
+    Args:
+        meta (dict): JSON-like dictionary containing coverage metadata
+
+    Returns:
+        pd.DatetimeIndex: corresponding to the ansi (i.e. time) axis coordinates
+    """
+    try:
+        # we won't always know the axis positioning / ordering
+        ansi_axis = next(
+            axis
+            for axis in meta["domainSet"]["generalGrid"]["axis"]
+            if axis["axisLabel"] == "ansi" or axis["axisLabel"] == "time"
+        )
+        # this is a list of dates formatted like "1996-11-03T00:00:00.000Z"
+        ansi_coordinates = ansi_axis["coordinate"]
+        date_index = pd.DatetimeIndex(ansi_coordinates)
+        return date_index
+    except (KeyError, StopIteration):
+        raise ValueError(
+            "Unexpected coverage metadata: 'ansi' or 'time' axis not found"
+        )
 
 
 def validate_xy_in_coverage_extent(
