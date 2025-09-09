@@ -26,8 +26,8 @@ from csv_functions import create_csv
 # following are global because we only need to fetch metadata once
 # but must do it to determine request validity and what coverage to query
 landfastice_api = Blueprint("landfastice_api", __name__)
-beaufort_daily_slie_id = "ardac_beaufort_daily_slie"
-chukchi_daily_slie_id = "ardac_chukchi_daily_slie"
+beaufort_daily_slie_id = "ardac_beaufort_daily_slie_wcs"
+chukchi_daily_slie_id = "ardac_chukchi_daily_slie_wcs"
 beaufort_meta = asyncio.run(describe_via_wcps(beaufort_daily_slie_id))
 chukchi_meta = asyncio.run(describe_via_wcps(chukchi_daily_slie_id))
 
