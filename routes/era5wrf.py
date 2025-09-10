@@ -28,23 +28,90 @@ from . import routes
 era5wrf_api = Blueprint("era5wrf_api", __name__)
 
 era5wrf_coverage_ids = {
-    "t2_min": "era5_4km_daily_t2_min",
-    "t2_mean": "era5_4km_daily_t2_mean",
-    "t2_max": "era5_4km_daily_t2_max",
-    "rh2_min": "era5_4km_daily_rh2_min",
-    "rh2_mean": "era5_4km_daily_rh2_mean",
-    "rh2_max": "era5_4km_daily_rh2_max",
-    "wspd10_max": "era5_4km_daily_wspd10_max",
-    "wspd10_mean": "era5_4km_daily_wspd10_mean",
-    "wdir10_mean": "era5_4km_daily_wdir10_mean",
-    "seaice_max": "era5_4km_daily_seaice_max",
-    "rainnc_sum": "era5_4km_daily_rainnc_sum",
+    "t2_min": "era5_4km_daily_t2_min_wcs",
+    "t2_mean": "era5_4km_daily_t2_mean_wcs",
+    "t2_max": "era5_4km_daily_t2_max_wcs",
+    "rh2_min": "era5_4km_daily_rh2_min_wcs",
+    "rh2_mean": "era5_4km_daily_rh2_mean_wcs",
+    "rh2_max": "era5_4km_daily_rh2_max_wcs",
+    "wspd10_max": "era5_4km_daily_wspd10_max_wcs",
+    "wspd10_mean": "era5_4km_daily_wspd10_mean_wcs",
+    "wdir10_mean": "era5_4km_daily_wdir10_mean_wcs",
+    "seaice_max": "era5_4km_daily_seaice_max_wcs",
+    "rainnc_sum": "era5_4km_daily_rainnc_sum_wcs",
 }
 
 era5wrf_meta = {
     key: asyncio.run(describe_via_wcps(cov_id))
     for key, cov_id in era5wrf_coverage_ids.items()
 }
+
+
+async def run_with_semaphore_limit(tasks, limit=2):
+    """Run tasks with semaphore limiting to prevent server overload.
+    
+    Args:
+        tasks: List of awaitable tasks to run
+        limit: Maximum concurrent tasks (default: 2)
+        
+    Returns:
+        List of task results in same order as input tasks
+    """
+    semaphore = asyncio.Semaphore(limit)
+    
+    async def limited_task(task):
+        async with semaphore:
+            return await task
+    
+    limited_tasks = [limited_task(task) for task in tasks]
+    return await asyncio.gather(*limited_tasks)
+
+async def fetch_era5_wrf_point_data(x, y, variables):
+    """Fetch ERA5-WRF data for multiple variables asynchronously.
+
+    Args:
+        x (float): x-coordinate
+        y (float): y-coordinate
+        variables (list): List of variable names to fetch
+
+    Returns:
+        dict: Variable names mapped to their data arrays
+    """
+    tasks = []
+    for var_name in variables:
+        cov_id = era5wrf_coverage_ids[var_name]
+
+        request_str = generate_wcs_getcov_str(x, y, cov_id)
+        url = generate_wcs_query_url(request_str)
+        tasks.append(fetch_data([url]))
+
+    results = await run_with_semaphore_limit(tasks, limit=2)
+    return {var_name: data for var_name, data in zip(variables, results)}
+
+
+async def fetch_era5_wrf_area_data(polygon, variables):
+    """Fetch ERA5-WRF bbox data for multiple variables.
+
+    Args:
+        polygon (GeoDataFrame): Polygon for which to compute zonal statistics
+        variables (list): List of variable names to fetch
+
+    Returns:
+        dict: Variable names mapped to xarray datasets
+    """
+    bbox_bounds = polygon.total_bounds  # (xmin, ymin, xmax, ymax)
+
+    tasks = []
+    for var_name in variables:
+        cov_id = era5wrf_coverage_ids[var_name]
+
+        request_str = generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id)
+
+        url = generate_wcs_query_url(request_str)
+        tasks.append(fetch_bbox_netcdf([url]))
+
+    datasets = await run_with_semaphore_limit(tasks, limit=2)
+    return {var_name: ds for var_name, ds in zip(variables, datasets)}
 
 
 def package_era5wrf_point_data(data_dict, coverage_meta):
@@ -82,52 +149,7 @@ def era5wrf_about():
     return render_template("documentation/era5wrf.html")
 
 
-async def fetch_era5_wrf_point_data(x, y, variables):
-    """Fetch ERA5-WRF data for multiple variables asynchronously.
 
-    Args:
-        x (float): x-coordinate
-        y (float): y-coordinate
-        variables (list): List of variable names to fetch
-
-    Returns:
-        dict: Variable names mapped to their data arrays
-    """
-    tasks = []
-    for var_name in variables:
-        cov_id = era5wrf_coverage_ids[var_name]
-
-        request_str = generate_wcs_getcov_str(x, y, cov_id)
-        url = generate_wcs_query_url(request_str)
-        tasks.append(fetch_data([url]))
-
-    results = await asyncio.gather(*tasks)
-    return {var_name: data for var_name, data in zip(variables, results)}
-
-
-async def fetch_era5_wrf_area_data(polygon, variables):
-    """Fetch ERA5-WRF bbox data for multiple variables.
-
-    Args:
-        polygon (GeoDataFrame): Polygon for which to compute zonal statistics
-        variables (list): List of variable names to fetch
-
-    Returns:
-        dict: Variable names mapped to xarray datasets
-    """
-    bbox_bounds = polygon.total_bounds  # (xmin, ymin, xmax, ymax)
-
-    tasks = []
-    for var_name in variables:
-        cov_id = era5wrf_coverage_ids[var_name]
-
-        request_str = generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id)
-
-        url = generate_wcs_query_url(request_str)
-        tasks.append(fetch_bbox_netcdf([url]))
-
-    datasets = await asyncio.gather(*tasks)
-    return {var_name: ds for var_name, ds in zip(variables, datasets)}
 
 
 def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
@@ -256,26 +278,26 @@ def era5wrf_point(lat, lon):
     ):
         return render_template("500/server_error.html"), 500
 
-    try:
-        all_data = asyncio.run(fetch_era5_wrf_point_data(x, y, variables))
+    #try:
+    all_data = asyncio.run(fetch_era5_wrf_point_data(x, y, variables))
 
-        reference_meta = era5wrf_meta[
-            "t2_mean"
-        ]  # any coverage metadata for time axis, they are all the same
-        packaged_data = package_era5wrf_point_data(all_data, reference_meta)
-        postprocessed = prune_nulls_with_max_intensity(
-            postprocess(packaged_data, "era5wrf_4km")
-        )
+    reference_meta = era5wrf_meta[
+        "t2_mean"
+    ]  # any coverage metadata for time axis, they are all the same
+    packaged_data = package_era5wrf_point_data(all_data, reference_meta)
+    postprocessed = prune_nulls_with_max_intensity(
+        postprocess(packaged_data, "era5wrf_4km")
+    )
 
-        if request.args.get("format") == "csv":
-            return create_csv(postprocessed, "era5wrf_4km", lat=lat, lon=lon)
+    if request.args.get("format") == "csv":
+        return create_csv(postprocessed, "era5wrf_4km", lat=lat, lon=lon)
 
-        return postprocessed
+    return postprocessed
 
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
+    # except Exception as exc:
+    #     if hasattr(exc, "status") and exc.status == 404:
+    #         return render_template("404/no_data.html"), 404
+    #     return render_template("500/server_error.html"), 500
 
 
 @routes.route("/era5wrf/area/<place_id>")
