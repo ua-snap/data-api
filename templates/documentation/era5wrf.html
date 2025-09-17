@@ -87,8 +87,7 @@
     <tr>
       <td>ERA5-WRF point query (several variables, all dates)</td>
       <td>
-        <a
-          href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean"
+        <a href="/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean"
           >/era5wrf/point/65.0628/-146.1627?vars=t2_mean,rh2_mean</a
         >
       </td>
@@ -161,8 +160,7 @@
     <tr>
       <td>Return mean values over area for selected variables</td>
       <td>
-        <a
-          href="/era5wrf/area/19070506?vars=t2_mean,rh2_mean"
+        <a href="/era5wrf/area/19070506?vars=t2_mean,rh2_mean"
           >/era5wrf/area/19070506?vars=t2_mean,rh2_mean</a
         >
       </td>
@@ -180,8 +178,8 @@
     <tr>
       <td colspan="2">
         Area queries support the same parameters as point queries:
-        <code>vars</code> (comma-separated variable names),
-        and <code>format=csv</code> for CSV output.
+        <code>vars</code> (comma-separated variable names), and
+        <code>format=csv</code> for CSV output.
         <br />
         Results represent mean values of all 4 km by 4 km grid cells within the
         specified polygon area.
@@ -214,17 +212,38 @@
 }</code></pre>
 
 <p>
-  Each value is the mean of all valid grid cells within the polygon boundary
-  for that date.
+  Each value is the mean of all valid grid cells within the polygon boundary for
+  that date.
 </p>
 
 <h3>References and Data Sources</h3>
-
-<h3>Citing This Dataset</h3>
-
-<p>
-  When using this dataset, please cite the original ERA5 reanalysis and
-  acknowledge the WRF downscaling effort: [Citation details to be provided]
-</p>
+<table>
+  <thead>
+    <tr>
+      <th>Metadata & source data access</th>
+      <th>Academic references</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a
+          href="https://www.sciencebase.gov/catalog/catalogParty/show?partyId=Waigl%2C+Christine+F."
+          >USGS ScienceBase Record</a
+        >
+      </td>
+      <td>
+        Waigl, C. F., Bieniek, P., Bhatt, U. S., Lader, R., & Walsh, J. (2024,
+        January). A High-Resolution, Dynamically Downscaled ERA5 Reanalysis
+        Dataset for Alaska. In 104th Annual AMS Meeting 2024 (Vol. 104, p.
+        439976).
+        <a
+          href="https://ams.confex.com/ams/104ANNUAL/meetingapp.cgi/Paper/439976"
+          >https://ams.confex.com/ams/104ANNUAL/meetingapp.cgi/Paper/439976</a
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 {% endblock %}
