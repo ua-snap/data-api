@@ -301,7 +301,8 @@ def era5wrf_csv(data):
     metadata = "# Dynamically Downscaled ERA5 4km Data\n"
     metadata += "# Variables and Units:\n"
     for var, description in metadata_variables.items():
-        metadata += f"# {var}: {description}\n"
+        if var in fieldnames:
+            metadata += f"# {var}: {description}\n"
     metadata += "#\n"
 
     return {
