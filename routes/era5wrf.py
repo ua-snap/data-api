@@ -268,7 +268,8 @@ def era5wrf_point(lat, lon):
         )
 
         if request.args.get("format") == "csv":
-            return create_csv(postprocessed, "era5wrf_4km", lat=lat, lon=lon)
+            place_id = request.args.get("community")
+            return create_csv(postprocessed, "era5wrf_4km", place_id=place_id, lat=lat, lon=lon)
 
         return postprocessed
 
