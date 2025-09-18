@@ -250,17 +250,6 @@ def era5wrf_point(lat, lon):
 
     x, y = project_latlon(lat, lon, 3338)
 
-    # but check projected space also for edge case
-    if not validate_xy_in_coverage_extent(
-        x, y, era5wrf_meta["t2_mean"], east_tolerance=2000, north_tolerance=2000
-    ):
-        return (
-            render_template(
-                "422/invalid_latlon_outside_coverage.html", bboxes=[era5wrf_bbox]
-            ),
-            422,
-        )
-
     try:
         all_data = asyncio.run(fetch_era5_wrf_point_data(x, y, variables))
 
