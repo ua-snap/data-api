@@ -11,13 +11,17 @@ from fetch_data import (
     fetch_bbox_netcdf,
     get_poly,
 )
-from zonal_stats import interpolate_and_compute_zonal_stats
+from zonal_stats import (
+    get_scale_factor,
+    rasterize_polygon,
+    interpolate,
+    calculate_zonal_stats,
+)
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
     validate_latlon_in_bboxes,
     project_latlon,
-    validate_xy_in_coverage_extent,
     generate_time_index_from_coverage_metadata,
     validate_var_id,
 )
@@ -141,22 +145,38 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
     Returns:
         dict: Variable names mapped to their zonal statistics arrays (time series)
     """
-    zonal_results = {}
 
+    # use first dataset to get spatial resolution and rasterization
+    ds = next(iter(datasets_dict.values()))
+
+    # get scale factor once, not per variable or time slice!
+    spatial_resolution = ds.rio.resolution()
+    grid_cell_area_m2 = abs(spatial_resolution[0]) * abs(spatial_resolution[1])
+    polygon_area_m2 = polygon.area
+    scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
+
+    # create an initial array for the basis of polygon rasterization
+    # why? polygon rasterization bogs down hard when doing it in the loop
+    da_i = interpolate(
+        ds.isel(time=0), variables[0], "X", "Y", scale_factor, method="nearest"
+    )
+    rasterized_polygon_array = rasterize_polygon(da_i, "X", "Y", polygon)
+
+    zonal_results = {}
     for var_name in variables:
+
         ds = datasets_dict[var_name]
 
-        time_series_means = []
-
-        # zonal stats computed per time slice
+        time_series_means = []  # zonal stats computed per time slice
         for time_idx in range(ds.sizes["time"]):
 
             time_slice_ds = ds.isel(time=time_idx)
-            zonal_stats_dict = interpolate_and_compute_zonal_stats(
-                polygon,
-                time_slice_ds,
-                crs="EPSG:3338",
-                var_name=var_name,
+            da_i = interpolate(
+                time_slice_ds, var_name, "X", "Y", scale_factor, method="nearest"
+            )
+            zonal_stats_dict = calculate_zonal_stats(
+                da_i,
+                rasterized_polygon_array,
                 x_dim="X",
                 y_dim="Y",
             )
