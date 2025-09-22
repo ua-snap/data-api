@@ -8,7 +8,11 @@ import datetime
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import fetch_data, describe_via_wcps
-from validate_request import validate_latlon
+from validate_request import (
+    latlon_is_numeric_and_in_geodetic_range,
+    check_geotiffs,
+    validate_year,
+)
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from . import routes
@@ -57,24 +61,15 @@ for coverage_id in fire_weather_coverage_ids:
     }
 
 
-def validate_years(start_year, end_year, var):
+def validate_years_against_coverage_metadata(start_year, end_year, var):
     """
     Validate the start and end years against the coverage metadata.
     Args:
         start_year (int): start year
         end_year (int): end year
-        coverage_id (str): coverage ID to get metadata for
+        var (str): variable to get coverage metadata for
     Returns:
         tuple: (start_time_value, end_time_value) in days since base date"""
-    if start_year is None and end_year is None:
-        return None, None  # No validation needed if both are None
-    # if only one is None, return 400 bad request
-    if start_year is None or end_year is None:
-        print("only one of start_year or end_year is provided")
-        return None  # render_template("400/bad_request.html"), 400
-    if start_year > end_year:
-        print("start_year is greater than end_year")
-        return None  # render_template("400/bad_request.html"), 400
 
     time_units, time_min, time_max = (
         var_coverage_metadata[var]["time_units"],
@@ -87,8 +82,7 @@ def validate_years(start_year, end_year, var):
         base_date_str = time_units.split("since")[1].strip()
         base_date = datetime.datetime.strptime(base_date_str, "%Y-%m-%d")
     except (IndexError, ValueError) as e:
-        print("base date didnt work")
-        return None  # render_template("400/bad_request.html"), 400
+        return 400
 
     def start_year_to_time_value(year):
         date = datetime.datetime(year, 4, 1)
@@ -104,21 +98,17 @@ def validate_years(start_year, end_year, var):
         start_year = int(start_year)
         start_time_value = start_year_to_time_value(start_year)
         if start_time_value < time_min or start_time_value > time_max:
-            print("start time value out of range")
-            return None  # render_template("400/bad_request.html"), 400
+            return 400
     except ValueError as e:
-        print("start year conversion error")
-        return None  # render_template("400/bad_request.html"), 400
+        return 400
 
     try:
         end_year = int(end_year)
         end_time_value = end_year_to_time_value(end_year)
         if end_time_value < time_min or end_time_value > time_max:
-            print("end time value out of range")
-            return None  # render_template("400/bad_request.html"), 400
+            return 400
     except ValueError as e:
-        print("end year conversion error")
-        return None  # render_template("400/bad_request.html"), 400
+        return 400
 
     return start_time_value, end_time_value
 
@@ -150,11 +140,17 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     """
 
     # Validate lat/lon values
-    validation = validate_latlon(
+    latlon_validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
+    geotiff_validation = check_geotiffs(
         float(lat), float(lon), coverages=[fire_weather_geotiff]
     )
 
-    print(validation)
+    if latlon_validation != True:
+        validation = latlon_validation
+    elif geotiff_validation != True:
+        validation = geotiff_validation
+    else:
+        validation = True
 
     if validation == 400:
         return render_template("400/bad_request.html"), 400
@@ -170,7 +166,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         requested_vars = requested_vars.split(",")
         for var in requested_vars:
             if var not in var_coverage_metadata:
-                return render_template("400/bad_request.html"), 400
+                return render_template("422/invalid_get_parameter.html"), 422
         # Filter the coverage IDs to only those requested
         coverage_ids = [
             var_coverage_metadata[var]["coverage_id"] for var in requested_vars
@@ -182,14 +178,17 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
 
     # Validate the start and end years for each requested variable's coverage
     for var in requested_vars:
-        times = validate_years(start_year, end_year, var)
-        # If both are None, no time filtering
-        if times[0] is None and times[1] is None:
-            print(f"no time filtering on {var_coverage_metadata[var]['coverage_id']}")
-        # otherwise, filter by the validated times
+        if start_year is None and end_year is None:
+            pass  # No validation needed if both are None
+        elif start_year is None or end_year is None:
+            return render_template("400/bad_request.html"), 400  # Both must be provided
         else:
-            print(
-                f"time filtering on {var_coverage_metadata[var]['coverage_id']} from {times[0]} to {times[1]}"
-            )
+            if validate_year(start_year, end_year) == True:
+                times = validate_years_against_coverage_metadata(
+                    start_year, end_year, var
+                )
+            if not isinstance(times, tuple):
 
-    return "end function"
+                return render_template("400/bad_request.html"), 400
+
+    return f"filter data for {requested_vars}, in coverages {coverage_ids}, by {times}, at point {lat} {lon}"  # TODO remove this line when ready
