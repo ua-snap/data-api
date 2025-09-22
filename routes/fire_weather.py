@@ -18,6 +18,7 @@ from validate_request import (
     validate_year,
 )
 
+# TODO: for additional postprocessing or csv output, uncomment these imports and add code
 # from postprocessing import postprocess, prune_nulls_with_max_intensity
 # from csv_functions import create_csv
 
@@ -157,10 +158,8 @@ def fetch_data(requested_vars, lat, lon, times):
 
         url += f"&RANGESUBSET={var}"
 
-        # Here you would implement the actual data fetching logic, e.g., using requests or aiohttp
-        # read netcdf into xarray and perform postprocessing as needed
-        # For now, we'll just simulate it with a placeholder
         with requests.get(url) as response:
+            print("requesting data from:", url)
             # return 500 for any non-200 response
             if response.status_code != 200:
                 return render_template("500/server_error.html"), 500
