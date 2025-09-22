@@ -9,6 +9,7 @@ bbox_offset = 0.000000001
 # Coverages with non-EPSG:3338 projections
 geotiff_projections = {
     "hsia_arctic_production": "EPSG:3572",
+    "cmip6_all_fire_weather_variables": "EPSG:4326",
 }
 
 landcover_names = {
