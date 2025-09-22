@@ -44,11 +44,21 @@ def check_geotiffs(lat, lon, coverages):
                     crs = geotiff_projections[coverage]
                 else:
                     crs = "EPSG:3338"
-                x, y = project_latlon(lat, lon, crs)
-                row, col = dataset.index(x, y)
-                if 0 <= row < dataset.height and 0 <= col < dataset.width:
-                    if dataset.read(1)[row, col] == 1:
-                        return True
+                if crs == "EPSG:4326":
+                    # check if lat/lon is within the dataset's geographic bounds
+                    if (
+                        dataset.bounds.left <= lon <= dataset.bounds.right
+                        and dataset.bounds.bottom <= lat <= dataset.bounds.top
+                    ):
+                        row, col = dataset.index(lon, lat)
+                        if dataset.read(1)[row, col] == 1:
+                            return True
+                else:
+                    x, y = project_latlon(lat, lon, crs)
+                    row, col = dataset.index(x, y)
+                    if 0 <= row < dataset.height and 0 <= col < dataset.width:
+                        if dataset.read(1)[row, col] == 1:
+                            return True
         except:
             return True
 

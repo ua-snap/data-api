@@ -56,8 +56,6 @@ for coverage_id in fire_weather_coverage_ids:
         "time_max": int(coverage_metadata["metadata"]["axes"]["time"]["max_value"]),
     }
 
-print(var_coverage_metadata)
-
 
 def validate_years(start_year, end_year, var):
     """
@@ -151,6 +149,21 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         example request (all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2005
     """
 
+    # Validate lat/lon values
+    validation = validate_latlon(
+        float(lat), float(lon), coverages=[fire_weather_geotiff]
+    )
+
+    print(validation)
+
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
+
     # Validate any requested variables
     requested_vars = request.args.get("vars")
     if requested_vars:
@@ -178,15 +191,5 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
             print(
                 f"time filtering on {var_coverage_metadata[var]['coverage_id']} from {times[0]} to {times[1]}"
             )
-
-    # Validate lat/lon values
-    validation = validate_latlon(lat, lon, coverages=[fire_weather_geotiff])
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    if validation == 404:
-        return (
-            render_template("404/no_data.html"),
-            404,
-        )
 
     return "end function"
