@@ -215,9 +215,9 @@ def postprocess(data_dict, var_coverage_metadata, start_year, end_year):
         ds_rolled = ds.rolling(time=3, center=True).mean()
 
         # Group by day of year and model, and calculate min, mean, max
-        ds_min_doy = ds.groupby(["time.dayofyear", "model"]).min()
-        ds_mean_doy = ds.groupby(["time.dayofyear", "model"]).mean()
-        ds_max_doy = ds.groupby(["time.dayofyear", "model"]).max()
+        ds_min_doy = ds_rolled.groupby(["time.dayofyear", "model"]).min()
+        ds_mean_doy = ds_rolled.groupby(["time.dayofyear", "model"]).mean()
+        ds_max_doy = ds_rolled.groupby(["time.dayofyear", "model"]).max()
 
         for model in ds_mean_doy["model"].values:
             model_name_str = var_coverage_metadata[var]["model_encoding"][int(model)]
