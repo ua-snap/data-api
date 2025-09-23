@@ -1,6 +1,5 @@
 import asyncio
 
-import pandas as pd
 from flask import (
     Blueprint,
     render_template,
@@ -15,6 +14,7 @@ from validate_request import (
     validate_latlon_in_bboxes,
     project_latlon,
     validate_xy_in_coverage_extent,
+    generate_time_index_from_coverage_metadata,
 )
 from fetch_data import (
     fetch_wcs_point_data,
@@ -30,32 +30,6 @@ beaufort_daily_slie_id = "ardac_beaufort_daily_slie_wcs"
 chukchi_daily_slie_id = "ardac_chukchi_daily_slie_wcs"
 beaufort_meta = asyncio.run(describe_via_wcps(beaufort_daily_slie_id))
 chukchi_meta = asyncio.run(describe_via_wcps(chukchi_daily_slie_id))
-
-
-def generate_time_index_from_coverage_metadata(meta):
-    """Generate a pandas DatetimeIndex from the ansi (i.e. time) axis coordinates in the coverage description metadata.
-
-    CP Note: function is a good candidate to move to a utility module, as it is not necessarily specific to landfast ice data. It could be used to package any OGC coverage with an `ansi` axis where the full temporal range is desired for packaging.
-
-    Args:
-        meta (dict): JSON-like dictionary containing coverage metadata
-
-    Returns:
-        pd.DatetimeIndex: corresponding to the ansi (i.e. time) axis coordinates
-    """
-    try:
-        # we won't always know the axis positioning / ordering
-        ansi_axis = next(
-            axis
-            for axis in meta["domainSet"]["generalGrid"]["axis"]
-            if axis["axisLabel"] == "ansi"
-        )
-        # this is a list of dates formatted like "1996-11-03T00:00:00.000Z"
-        ansi_coordinates = ansi_axis["coordinate"]
-        date_index = pd.DatetimeIndex(ansi_coordinates)
-        return date_index
-    except (KeyError, StopIteration):
-        raise ValueError("Unexpected coverage metadata: 'ansi' axis not found")
 
 
 def package_landfastice_data(landfastice_resp, meta):
