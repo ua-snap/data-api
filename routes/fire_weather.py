@@ -412,7 +412,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     Notes:
         example request (3 day rolling average for all variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?op=3dayrollingavg
         example request (3 day rolling average for select variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?vars=bui,fwi&op=3dayrollingavg
-        example request (3 day rolling average for all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030&op=3dayrollingavg
+        example request (3 day rolling average for all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?op=3dayrollingavg
         example request (3 day rolling average for select variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi&op=3dayrollingavg
 
     """
