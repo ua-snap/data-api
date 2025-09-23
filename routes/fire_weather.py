@@ -29,6 +29,10 @@ logger = logging.getLogger(__name__)
 
 cmip6_api = Blueprint("fire_weather_api", __name__)
 
+
+#### SETUP AND METADATA ####
+
+
 # we have one geotiff to validate all fire weather variables
 # so its not the same as coverage names
 fire_weather_geotiff = "cmip6_all_fire_weather_variables"
@@ -64,6 +68,9 @@ for coverage_id in fire_weather_coverage_ids:
         "time_min": int(coverage_metadata["metadata"]["axes"]["time"]["min_value"]),
         "time_max": int(coverage_metadata["metadata"]["axes"]["time"]["max_value"]),
     }
+
+
+#### DATE CONVERSION FUNCTIONS ####
 
 
 def date_to_cftime_value(year, month, day, base_date):
@@ -110,6 +117,9 @@ def build_variable_year_range_str_from_start_and_end_year(var, start_year, end_y
     return year_range_str
 
 
+#### VALIDATION FUNCTIONS ####
+
+
 def validate_years_against_coverage_metadata(start_year, end_year, var):
     """
     Validate the start and end years against the coverage metadata.
@@ -150,6 +160,9 @@ def validate_years_against_coverage_metadata(start_year, end_year, var):
         return 400
 
     return start_time_value, end_time_value
+
+
+#### DATA FETCHING FUNCTIONS ####
 
 
 async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
@@ -196,6 +209,9 @@ async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
         fetched_data[requested_var] = ds
 
     return fetched_data
+
+
+#### POSTPROCESSING FUNCTIONS ####
 
 
 def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
@@ -360,6 +376,9 @@ def summer_fire_danger_rating_days(
     return var_summer_fire_summary
 
 
+#### FLASK ROUTES ####
+
+
 @routes.route("/fire_weather/")
 def fire_weather_about():
     return render_template("/documentation/fire_weather.html")
@@ -394,7 +413,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
 
     """
 
-    #### VALIDATION ####
+    #### REQUEST VALIDATION ####
 
     # Validate lat/lon values
     latlon_validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
@@ -462,14 +481,14 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     else:
         requested_ops = ["3dayrollingavg"]  # default operation
 
-    #### DATA FETCHING ####
+    #### REQUEST DATA FETCHING ####
 
     # fetch the data
     fetched_data = asyncio.run(
         fetch_data_for_all_vars(requested_vars, float(lat), float(lon), times)
     )
 
-    # postprocess operations
+    #### REQUEST POSTPROCESSING ####
 
     n = None
     if "3dayrollingavg" in requested_ops:
