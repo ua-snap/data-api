@@ -16,6 +16,7 @@ from validate_request import (
     check_geotiffs,
     validate_year,
 )
+from luts import summer_fire_danger_ratings_dict
 
 # TODO: for additional postprocessing or csv output, uncomment these imports and add code
 # from postprocessing import postprocess, prune_nulls_with_max_intensity
@@ -65,24 +66,17 @@ for coverage_id in fire_weather_coverage_ids:
     }
 
 
-def start_year_to_time_value(year, base_date):
-    """Convert a start year to a time value in days since the base date (April 1 of that year)."""
-    date = datetime.datetime(year, 4, 1)
+def date_to_cftime_value(year, month, day, base_date):
+    """Convert a year, month, and day to a CF-compliant time value (days since the base date)."""
+    date = datetime.datetime(year, month, day)
     delta_days = (date - base_date).days
     return delta_days
 
 
-def end_year_to_time_value(year, base_date):
-    """Convert an end year to a time value in days since the base date (October 1 of that year)."""
-    date = datetime.datetime(year, 10, 1)
-    delta_days = (date - base_date).days
-    return delta_days
-
-
-def time_value_to_year(time_value, base_date):
-    """Convert a time value in days since the base date to a year."""
+def cftime_value_to_year_month_day(time_value, base_date):
+    """Convert a time value in days since the base date to a year, month, day tuple."""
     date = base_date + datetime.timedelta(days=time_value)
-    return date.year
+    return date.year, date.month, date.day
 
 
 def dayofyear_to_mmdd(dayofyear):
@@ -97,6 +91,23 @@ def set_dataset_doy_str(ds):
     dayofyear_str = [dayofyear_to_mmdd(doy) for doy in ds["dayofyear"].values]
     ds = ds.assign_coords(dayofyear=("dayofyear", dayofyear_str))
     return ds
+
+
+def build_variable_year_range_str_from_start_and_end_year(var, start_year, end_year):
+    """Build a year range string from start and end year."""
+    if start_year is None:
+        start_year, _start_month, _start_day = cftime_value_to_year_month_day(
+            var_coverage_metadata[var]["time_min"],
+            var_coverage_metadata[var]["time_units"].split("since")[1].strip(),
+        )
+        end_year, _end_month, _end_day = cftime_value_to_year_month_day(
+            var_coverage_metadata[var]["time_max"],
+            var_coverage_metadata[var]["time_units"].split("since")[1].strip(),
+        )
+        year_range_str = str(start_year + "-" + end_year)
+    else:
+        year_range_str = str(start_year + "-" + end_year)
+    return year_range_str
 
 
 def validate_years_against_coverage_metadata(start_year, end_year, var):
@@ -119,23 +130,23 @@ def validate_years_against_coverage_metadata(start_year, end_year, var):
     try:
         base_date_str = time_units.split("since")[1].strip()
         base_date = datetime.datetime.strptime(base_date_str, "%Y-%m-%d")
-    except (IndexError, ValueError) as e:
+    except:
         return 400
 
     try:
         start_year = int(start_year)
-        start_time_value = start_year_to_time_value(start_year, base_date)
+        start_time_value = date_to_cftime_value(start_year, 4, 1, base_date)
         if start_time_value < time_min or start_time_value > time_max:
             return 400
-    except ValueError as e:
+    except:
         return 400
 
     try:
         end_year = int(end_year)
-        end_time_value = end_year_to_time_value(end_year, base_date)
+        end_time_value = date_to_cftime_value(end_year, 10, 1, base_date)
         if end_time_value < time_min or end_time_value > time_max:
             return 400
-    except ValueError as e:
+    except:
         return 400
 
     return start_time_value, end_time_value
@@ -207,21 +218,12 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
     Returns:
         dict: postprocessed data
     """
-
     # highest level of the returned dict is year range
-    if start_year is None:
-        start_year = time_value_to_year(
-            var_coverage_metadata[var]["time_min"],
-            var_coverage_metadata[var]["time_units"].split("since")[1].strip(),
-        )
-        end_year = time_value_to_year(
-            var_coverage_metadata[var]["time_max"],
-            var_coverage_metadata[var]["time_units"].split("since")[1].strip(),
-        )
-        year_range_str = str(start_year + "-" + end_year)
-    else:
-        year_range_str = str(start_year + "-" + end_year)
-
+    # use first var in data_dict to determine year range if start_year and end_year are None
+    var = list(data_dict.keys())[0]
+    year_range_str = build_variable_year_range_str_from_start_and_end_year(
+        var, start_year, end_year
+    )
     var_nday_summary = {year_range_str: {}}
 
     # next levels are variable, model, and min/mean/max of 3-day rolling average per DOY
@@ -264,6 +266,96 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
                 }
 
     return var_nday_summary
+
+
+def summer_fire_danger_rating_days(
+    data_dict, var_coverage_metadata, start_year, end_year
+):
+    """For the months of June, July, and August, classify each day in the dataset based on the
+    summer fire danger rating adjective classes for each fire weather variable. Count the days in each class
+    per year, per model, and per variable. Get an averaege count of days in each class across all years in the dataset,
+    rounded to the nearest integer.
+    Return the data as a dictionary with variable, model, time range, and average counts for each class.
+
+    Args:
+        data_dict (dict): dict of xarray.Datasets, one per variable
+        var_coverage_metadata (dict): metadata for each variable, which includes model encoding
+        start_year (str): start year of the data
+        end_year (str): end year of the data
+    Returns:
+        dict: postprocessed data
+
+    """
+
+    # highest level of the returned dict is year range
+    # use first var in data_dict to determine year range if start_year and end_year are None
+    var = list(data_dict.keys())[0]
+    year_range_str = build_variable_year_range_str_from_start_and_end_year(
+        var, start_year, end_year
+    )
+    var_summer_fire_summary = {year_range_str: {}}
+
+    # get the total number of years from the year range string (to compute averages later)
+    start_year_int = int(year_range_str.split("-")[0])
+    end_year_int = int(year_range_str.split("-")[1])
+    num_years = end_year_int - start_year_int + 1
+
+    # next levels are variable, model, and the fire ranger rating average counts
+    for var in data_dict:
+        var_summer_fire_summary[year_range_str][var] = {}
+
+        ds = data_dict[var]
+        # drop any months that arent June, July, or August
+        ds = ds.sel(time=ds["time"].dt.month.isin([6, 7, 8]))
+
+        # For each variable, classify each daily value based on the summer fire danger rating classes in summer_fire_danger_ratings_dict
+        var_classes = summer_fire_danger_ratings_dict[var].keys()
+
+        for model in ds["model"].values:
+            # use model names from the coverage metadata
+            model_name_str = var_coverage_metadata[var]["model_encoding"][int(model)]
+            var_summer_fire_summary[year_range_str][var][model_name_str] = {}
+
+            for var_class in var_classes:
+                # seed count at 0
+                var_summer_fire_summary[year_range_str][var][model_name_str][
+                    var_class
+                ] = 0
+                # get class bounds
+                class_min, class_max = summer_fire_danger_ratings_dict[var][var_class]
+
+                # filter by summer months and classify each value
+                values = ds[var].sel(model=model).values
+                print(values)
+                # if there are more than 100 NA values, and the model is ERA5, return all NAs
+                # this should catch the situation where the date range includes both historical and projected data
+                if (
+                    model_name_str == "era5"
+                    and np.count_nonzero(np.isnan(values)) > 100
+                ):
+                    for var_class in var_classes:
+                        var_summer_fire_summary[year_range_str][var][model_name_str][
+                            var_class
+                        ] = np.nan
+                    break
+                for value in values:
+                    if class_min <= value < class_max:
+                        var_summer_fire_summary[year_range_str][var][model_name_str][
+                            var_class
+                        ] += 1
+            # compute average counts per year, rounded to nearest integer
+            for var_class in var_classes:
+                avg_count = (
+                    var_summer_fire_summary[year_range_str][var][model_name_str][
+                        var_class
+                    ]
+                    / num_years
+                )
+                var_summer_fire_summary[year_range_str][var][model_name_str][
+                    var_class
+                ] = (int(round(avg_count)) if not np.isnan(avg_count) else np.nan)
+
+    return var_summer_fire_summary
 
 
 @routes.route("/fire_weather/")
@@ -358,7 +450,12 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
                 422,
             )  # only one operation allowed
         for op in requested_ops:
-            if op not in ["3dayrollingavg", "5dayrollingavg", "7dayrollingavg"]:
+            if op not in [
+                "3dayrollingavg",
+                "5dayrollingavg",
+                "7dayrollingavg",
+                "summer_fire_danger_rating_days",
+            ]:
                 return render_template("422/invalid_get_parameter.html"), 422
     else:
         requested_ops = ["3dayrollingavg"]  # default operation
@@ -372,6 +469,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
 
     # postprocess operations
 
+    n = None
     if "3dayrollingavg" in requested_ops:
         n = 3
     elif "5dayrollingavg" in requested_ops:
@@ -388,6 +486,15 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
             end_year,
         )
 
+        return data
+
+    if "summer_fire_danger_rating_days" in requested_ops:
+        data = summer_fire_danger_rating_days(
+            data,
+            var_coverage_metadata,
+            start_year,
+            end_year,
+        )
         return data
 
     return render_template("400/bad_request.html"), 400  # an operation is required

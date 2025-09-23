@@ -1,6 +1,7 @@
 """Module for look-up-table like objects"""
 
 import os
+import numpy as np
 
 host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
@@ -561,3 +562,49 @@ demographics_order = [
     "pct_uninsured_low",
     "pct_uninsured_high",
 ]
+
+
+summer_fire_danger_ratings_dict = {
+    "bui": {
+        "Low": (0, 40),
+        "Mod": (40, 60),
+        "High": (60, 90),
+        "VHigh": (90, 110),
+        "Ext": (110, np.inf),
+    },
+    "dc": {
+        "Low": (0, 150),
+        "Mod": (150, 350),
+        "High": (350, 400),
+        "VHigh": (400, 450),
+        "Ext": (450, np.inf),
+    },
+    "dmc": {
+        "Low": (0, 40),
+        "Mod": (40, 60),
+        "High": (60, 80),
+        "VHigh": (80, 100),
+        "Ext": (100, np.inf),
+    },
+    "ffmc": {
+        "Low": (0, 59),
+        "Mod": (59, 75),
+        "High": (75, 85),
+        "VHigh": (85, 90),
+        "Ext": (90, np.inf),
+    },
+    "fwi": {
+        "Low": (0, 80),
+        "Mod": (80, 86),
+        "High": (86, 89),
+        "VHigh": (89, 92),
+        "Ext": (92, np.inf),
+    },
+    "isi": {
+        "Low": (0, 2),
+        "Mod": (2, 5),
+        "High": (5, 8),
+        "VHigh": (8, 11),
+        "Ext": (11, np.inf),
+    },
+}
