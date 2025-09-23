@@ -397,7 +397,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         vars: comma-separated list of variables to fetch (default: all variables)
             valid variables: bui, dmc, dc, ffmc, fwi, isi
         op: postprocessing operation to perform (required)
-            valid operations: 3dayrollingavg, 5dayrollingavg, 7dayrollingavg
+            valid operations: 3dayrollingavg, 5dayrollingavg, 7dayrollingavg, summer_fire_danger_rating_days
             only one operation can be performed at a time
 
     Args:
@@ -453,7 +453,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     # Validate the start and end years for each requested variable's coverage
     for var in requested_vars:
         if start_year is None and end_year is None:
-            pass  # No validation needed if both are None
+            times = None  # means all available times
         elif start_year is None or end_year is None:
             return render_template("400/bad_request.html"), 400  # Both must be provided
         else:
@@ -462,7 +462,6 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
                     start_year, end_year, var
                 )
             if not isinstance(times, tuple):
-
                 return render_template("400/bad_request.html"), 400
 
     # Validate postprocessing operation
