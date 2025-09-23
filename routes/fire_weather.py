@@ -187,18 +187,19 @@ async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
     return data_dict
 
 
-def postprocess(data_dict, var_coverage_metadata, start_year, end_year):
+def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
     """
-    Postprocess the data as needed.
-
-    #TODO: Decide what kind of postprocessing we really want here.
-
-    Demo:
-    For each dataset in the dictionary, we will take a 3-day rolling average of values (smoothing).
+    For each dataset in the dictionary, we will take an n-day rolling average of values (smoothing).
     Then we summarize min, mean, and max of those rolling averages across the entire time range, for each model (including the baseline).
     Return the data as a dictionary with variable, model, time range, and min/mean/max values for each DOY from April 1 to October 31.
 
+    *** Note that we return NA if any NA are present for a given DOY/model combination.
+    This matters for ERA5 model if date range includes both historical and projected (e.g. 2000-2030), because if we allow mean to ignore NA,
+    we would be averaging the historical values only which could lead to misunderstandings.
+    If the user wants to see the historical values only, they should specify a date range that is fully within the historical period (e.g. 1980-2019).
+
     Args:
+        n (int): number of days for rolling average
         data_dict (dict): dict of xarray.Datasets, one per variable
         var_coverage_metadata (dict): metadata for each variable, which includes model encoding
         start_year (str): start year of the data
@@ -221,15 +222,15 @@ def postprocess(data_dict, var_coverage_metadata, start_year, end_year):
     else:
         year_range_str = str(start_year + "-" + end_year)
 
-    var_data_summary = {year_range_str: {}}
+    var_nday_summary = {year_range_str: {}}
 
     # next levels are variable, model, and min/mean/max of 3-day rolling average per DOY
     for var in data_dict:
-        var_data_summary[year_range_str][var] = {}
+        var_nday_summary[year_range_str][var] = {}
 
         ds = data_dict[var]
-        # Apply a 3-day rolling average along the time dimension
-        ds_rolled = ds.rolling(time=3, center=True).mean()
+        # Apply a n-day rolling average along the time dimension
+        ds_rolled = ds.rolling(time=int(n), center=True).mean()
 
         # Group by day of year and model, and calculate min, mean, max
         # we want to return NA if any NA are present:
@@ -247,10 +248,10 @@ def postprocess(data_dict, var_coverage_metadata, start_year, end_year):
         for model in ds_mean_doy["model"].values:
             # use model names from the coverage metadata
             model_name_str = var_coverage_metadata[var]["model_encoding"][int(model)]
-            var_data_summary[year_range_str][var][model_name_str] = {}
+            var_nday_summary[year_range_str][var][model_name_str] = {}
             # for each DOY in the dataset extract min/mean/max values and create a dict of them under that DOY
             for doy in ds_mean_doy["dayofyear"].values:
-                var_data_summary[year_range_str][var][model_name_str][doy] = {
+                var_nday_summary[year_range_str][var][model_name_str][doy] = {
                     "min": float(
                         ds_min_doy.sel(dayofyear=doy, model=model).to_array().values[0]
                     ),
@@ -262,7 +263,7 @@ def postprocess(data_dict, var_coverage_metadata, start_year, end_year):
                     ),
                 }
 
-    return var_data_summary
+    return var_nday_summary
 
 
 @routes.route("/fire_weather/")
@@ -274,7 +275,13 @@ def fire_weather_about():
 @routes.route("/fire_weather/point/<lat>/<lon>/<start_year>/<end_year>")
 def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     """
-    Query the daily fire weather coverage
+    Query the daily fire weather coverage.
+    GET parameters:
+        vars: comma-separated list of variables to fetch (default: all variables)
+            valid variables: bui, dmc, dc, ffmc, fwi, isi
+        op: postprocessing operation to perform (required)
+            valid operations: 3dayrollingavg, 5dayrollingavg, 7dayrollingavg
+            only one operation can be performed at a time
 
     Args:
         lat (float): latitude
@@ -286,12 +293,14 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         JSON-like dict of requested daily fire weather data
 
     Notes:
-        example request (all variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16
-        example request (select variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?vars=bui,fwi
-        example request (all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030
-        example request (select variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi
+        example request (3 day rolling average for all variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?op=3dayrollingavg
+        example request (3 day rolling average for select variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?vars=bui,fwi&op=3dayrollingavg
+        example request (3 day rolling average for all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030&op=3dayrollingavg
+        example request (3 day rolling average for select variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi&op=3dayrollingavg
 
     """
+
+    #### VALIDATION ####
 
     # Validate lat/lon values
     latlon_validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
@@ -339,16 +348,46 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
 
                 return render_template("400/bad_request.html"), 400
 
+    # Validate postprocessing operation
+    requested_ops = request.args.get("op")
+    if requested_ops:
+        requested_ops = requested_ops.split(",")
+        if len(requested_ops) > 1:
+            return (
+                render_template("422/invalid_get_parameter.html"),
+                422,
+            )  # only one operation allowed
+        for op in requested_ops:
+            if op not in ["3dayrollingavg", "5dayrollingavg", "7dayrollingavg"]:
+                return render_template("422/invalid_get_parameter.html"), 422
+    else:
+        requested_ops = ["3dayrollingavg"]  # default operation
+
+    #### DATA FETCHING ####
+
     # fetch the data
     data = asyncio.run(
         fetch_data_for_all_vars(requested_vars, float(lat), float(lon), times)
     )
-    # postprocess
-    data = postprocess(
-        data,
-        var_coverage_metadata,
-        start_year,
-        end_year,
-    )
 
-    return data
+    # postprocess operations
+
+    if "3dayrollingavg" in requested_ops:
+        n = 3
+    elif "5dayrollingavg" in requested_ops:
+        n = 5
+    elif "7dayrollingavg" in requested_ops:
+        n = 7
+
+    if n:
+        data = nday_rolling_avg(
+            n,
+            data,
+            var_coverage_metadata,
+            start_year,
+            end_year,
+        )
+
+        return data
+
+    return render_template("400/bad_request.html"), 400  # an operation is required
