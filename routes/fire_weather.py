@@ -2,9 +2,8 @@ import asyncio
 import ast
 import logging
 import xarray as xr
-import cftime
 import io
-import requests
+import numpy as np
 from flask import Blueprint, render_template, request
 import datetime
 
@@ -67,20 +66,37 @@ for coverage_id in fire_weather_coverage_ids:
 
 
 def start_year_to_time_value(year, base_date):
+    """Convert a start year to a time value in days since the base date (April 1 of that year)."""
     date = datetime.datetime(year, 4, 1)
     delta_days = (date - base_date).days
     return delta_days
 
 
 def end_year_to_time_value(year, base_date):
+    """Convert an end year to a time value in days since the base date (October 1 of that year)."""
     date = datetime.datetime(year, 10, 1)
     delta_days = (date - base_date).days
     return delta_days
 
 
 def time_value_to_year(time_value, base_date):
+    """Convert a time value in days since the base date to a year."""
     date = base_date + datetime.timedelta(days=time_value)
     return date.year
+
+
+def dayofyear_to_mmdd(dayofyear):
+    """Convert integer day of year (1-365) to a MM-DD string for a non-leap year."""
+    days = float(dayofyear - 1)  # this cant be an int, so we convert to float
+    date = datetime.datetime(2001, 1, 1) + datetime.timedelta(days)
+    return date.strftime("%m-%d")
+
+
+def set_dataset_doy_str(ds):
+    """Convert the integer dayofyear coordinate to a MM-DD string for better readability."""
+    dayofyear_str = [dayofyear_to_mmdd(doy) for doy in ds["dayofyear"].values]
+    ds = ds.assign_coords(dayofyear=("dayofyear", dayofyear_str))
+    return ds
 
 
 def validate_years_against_coverage_metadata(start_year, end_year, var):
@@ -125,7 +141,7 @@ def validate_years_against_coverage_metadata(start_year, end_year, var):
     return start_time_value, end_time_value
 
 
-def fetch_data(requested_vars, lat, lon, times):
+async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
     """
     Fetch the data for the requested variables at the given lat/lon and time range.
     Args:
@@ -138,6 +154,8 @@ def fetch_data(requested_vars, lat, lon, times):
     """
 
     data_dict = {}
+    tasks = []
+
     for var in requested_vars:
         coverage_id = var_coverage_metadata[var]["coverage_id"]
         time_slice = None
@@ -158,13 +176,12 @@ def fetch_data(requested_vars, lat, lon, times):
 
         url += f"&RANGESUBSET={var}"
 
-        with requests.get(url) as response:
-            print("requesting data from:", url)
-            # return 500 for any non-200 response
-            if response.status_code != 200:
-                return render_template("500/server_error.html"), 500
-            ds = xr.open_dataset(io.BytesIO(response.content))
+        tasks.append(fetch_data([url]))
 
+    results = await asyncio.gather(*tasks)
+
+    for result in results:
+        ds = xr.open_dataset(io.BytesIO(result))
         data_dict[var] = ds
 
     return data_dict
@@ -215,16 +232,25 @@ def postprocess(data_dict, var_coverage_metadata, start_year, end_year):
         ds_rolled = ds.rolling(time=3, center=True).mean()
 
         # Group by day of year and model, and calculate min, mean, max
-        ds_min_doy = ds_rolled.groupby(["time.dayofyear", "model"]).min()
-        ds_mean_doy = ds_rolled.groupby(["time.dayofyear", "model"]).mean()
-        ds_max_doy = ds_rolled.groupby(["time.dayofyear", "model"]).max()
+        # we want to return NA if any NA are present:
+        # this matters for era5 model if date range includes both historical and projected (e.g. 2000-2030)
+        ds_min_doy = ds_rolled.groupby(["time.dayofyear", "model"]).min(skipna=False)
+        ds_mean_doy = ds_rolled.groupby(["time.dayofyear", "model"]).mean(skipna=False)
+        ds_max_doy = ds_rolled.groupby(["time.dayofyear", "model"]).max(skipna=False)
 
+        # Replace the integer DOY with dates in format MM-DD for better readability
+        ds_min_doy = set_dataset_doy_str(ds_min_doy)
+        ds_mean_doy = set_dataset_doy_str(ds_mean_doy)
+        ds_max_doy = set_dataset_doy_str(ds_max_doy)
+
+        # for each model in the dataset create a dict of DOYs under that model
         for model in ds_mean_doy["model"].values:
+            # use model names from the coverage metadata
             model_name_str = var_coverage_metadata[var]["model_encoding"][int(model)]
             var_data_summary[year_range_str][var][model_name_str] = {}
             # for each DOY in the dataset extract min/mean/max values and create a dict of them under that DOY
             for doy in ds_mean_doy["dayofyear"].values:
-                var_data_summary[year_range_str][var][model_name_str][int(doy)] = {
+                var_data_summary[year_range_str][var][model_name_str][doy] = {
                     "min": float(
                         ds_min_doy.sel(dayofyear=doy, model=model).to_array().values[0]
                     ),
@@ -260,9 +286,11 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         JSON-like dict of requested daily fire weather data
 
     Notes:
-        example request (all variables): http://localhost:5000/fire_weather/point/65.06/-146.16
-        example request (select variables): http://localhost:5000/fire_weather/point/65.06/-146.16?vars=bui,fwi
-        example request (all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2005
+        example request (all variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16
+        example request (select variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?vars=bui,fwi
+        example request (all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030
+        example request (select variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi
+
     """
 
     # Validate lat/lon values
@@ -312,8 +340,12 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
                 return render_template("400/bad_request.html"), 400
 
     # fetch the data
+    data = asyncio.run(
+        fetch_data_for_all_vars(requested_vars, float(lat), float(lon), times)
+    )
+    # postprocess
     data = postprocess(
-        fetch_data(requested_vars, float(lat), float(lon), times),
+        data,
         var_coverage_metadata,
         start_year,
         end_year,
