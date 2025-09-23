@@ -563,7 +563,7 @@ demographics_order = [
     "pct_uninsured_high",
 ]
 
-
+# from: https://fire.ak.blm.gov/content/FuelFire/Alaska%20Fire%20Danger%20Operating%20Plan/Alaska_FDOP_FINAL_SIGNED.pdf
 summer_fire_danger_ratings_dict = {
     "bui": {
         "Low": (0, 40),
