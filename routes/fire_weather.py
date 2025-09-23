@@ -220,10 +220,14 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
     Then we summarize min, mean, and max of those rolling averages across the entire time range, for each model (including the baseline).
     Return the data as a dictionary with variable, model, time range, and min/mean/max values for each DOY from April 1 to October 31.
 
-    *** Note that we return NA if any NA are present for a given DOY/model combination.
+    ***NOTE: that we return NA if any NA are present for a given DOY/model combination.
     This matters for ERA5 model if date range includes both historical and projected (e.g. 2000-2030), because if we allow mean to ignore NA,
     we would be averaging the historical values only which could lead to misunderstandings.
     If the user wants to see the historical values only, they should specify a date range that is fully within the historical period (e.g. 1980-2021).
+
+    ***NOTE: this function will not work for the isi variable, because some values are stored using scientific notation
+    and Rasdaman is unable to encode these as netCDF (see this issue: https://github.com/ua-snap/rasdaman-ingest/pull/118#issuecomment-2992373485)
+
 
     Args:
         n (int): number of days for rolling average
