@@ -164,7 +164,7 @@ async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
         dict: fetched data as xarray.Datasets, one per variable
     """
 
-    data_dict = {}
+    fetched_data = {}
     tasks = []
 
     for var in requested_vars:
@@ -191,11 +191,11 @@ async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
 
     results = await asyncio.gather(*tasks)
 
-    for result in results:
+    for requested_var, result in zip(requested_vars, results):
         ds = xr.open_dataset(io.BytesIO(result))
-        data_dict[var] = ds
+        fetched_data[requested_var] = ds
 
-    return data_dict
+    return fetched_data
 
 
 def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
@@ -207,7 +207,7 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
     *** Note that we return NA if any NA are present for a given DOY/model combination.
     This matters for ERA5 model if date range includes both historical and projected (e.g. 2000-2030), because if we allow mean to ignore NA,
     we would be averaging the historical values only which could lead to misunderstandings.
-    If the user wants to see the historical values only, they should specify a date range that is fully within the historical period (e.g. 1980-2019).
+    If the user wants to see the historical values only, they should specify a date range that is fully within the historical period (e.g. 1980-2021).
 
     Args:
         n (int): number of days for rolling average
@@ -277,6 +277,9 @@ def summer_fire_danger_rating_days(
     rounded to the nearest integer.
     Return the data as a dictionary with variable, model, time range, and average counts for each class.
 
+    ***NOTE: this function will not work for the isi variable, because some values are stored using scientific notation
+    and Rasdaman is unable to encode these as netCDF (see this issue: https://github.com/ua-snap/rasdaman-ingest/pull/118#issuecomment-2992373485)
+
     Args:
         data_dict (dict): dict of xarray.Datasets, one per variable
         var_coverage_metadata (dict): metadata for each variable, which includes model encoding
@@ -289,9 +292,9 @@ def summer_fire_danger_rating_days(
 
     # highest level of the returned dict is year range
     # use first var in data_dict to determine year range if start_year and end_year are None
-    var = list(data_dict.keys())[0]
+    first_var = list(data_dict.keys())[0]
     year_range_str = build_variable_year_range_str_from_start_and_end_year(
-        var, start_year, end_year
+        first_var, start_year, end_year
     )
     var_summer_fire_summary = {year_range_str: {}}
 
@@ -326,7 +329,6 @@ def summer_fire_danger_rating_days(
 
                 # filter by summer months and classify each value
                 values = ds[var].sel(model=model).values
-                print(values)
                 # if there are more than 100 NA values, and the model is ERA5, return all NAs
                 # this should catch the situation where the date range includes both historical and projected data
                 if (
@@ -463,7 +465,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     #### DATA FETCHING ####
 
     # fetch the data
-    data = asyncio.run(
+    fetched_data = asyncio.run(
         fetch_data_for_all_vars(requested_vars, float(lat), float(lon), times)
     )
 
@@ -477,24 +479,23 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     elif "7dayrollingavg" in requested_ops:
         n = 7
 
-    if n:
-        data = nday_rolling_avg(
+    if n is not None:
+        processed_data = nday_rolling_avg(
             n,
-            data,
+            fetched_data,
             var_coverage_metadata,
             start_year,
             end_year,
         )
-
-        return data
+        return processed_data
 
     if "summer_fire_danger_rating_days" in requested_ops:
-        data = summer_fire_danger_rating_days(
-            data,
+        processed_data = summer_fire_danger_rating_days(
+            fetched_data,
             var_coverage_metadata,
             start_year,
             end_year,
         )
-        return data
+        return processed_data
 
     return render_template("400/bad_request.html"), 400  # an operation is required
