@@ -12,10 +12,8 @@ from routes import routes, request
 # Configure logging to emit to stdout
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
 )
 
 # Elastic Beanstalk wants `application` to be present.
@@ -112,6 +110,16 @@ def validate_get_params():
         # Make sure "substring" parameter is less than or equal to 50 characters long, allow all UTF-8 characteres
         substring = fields.Str(
             validate=lambda str: len(str) <= 50,
+            required=False,
+        )
+
+        models = fields.Str(
+            validate=lambda str: len(str) <= 20,
+            required=False,
+        )
+
+        scenarios = fields.Str(
+            validate=lambda str: len(str) <= 20,
             required=False,
         )
 

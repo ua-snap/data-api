@@ -5,6 +5,7 @@ A module to validate request parameters such as latitude and longitude for use a
 import asyncio
 import ast
 import rasterio
+import pandas as pd
 import os.path
 
 from flask import render_template
@@ -30,27 +31,31 @@ def check_geotiffs(lat, lon, coverages):
         True if valid, or HTTP 404 status code if no data was found
     """
     for coverage in coverages:
+        # Use the same GeoTIFF for all CMIP6 downscaled coverages.
+        if coverage.startswith("cmip6_downscaled_"):
+            coverage = "cmip6_downscaled"
+
         reference_geotiff = "geotiffs/" + coverage + ".tif"
 
         # Do not perform GeoTIFF check if the file does not exist.
         if not os.path.isfile(reference_geotiff):
             return True
 
-        # Do not perform GeoTIFF check if the file does not open properly.
-        # This seems safer than the alternative of hiding data due to a corrupt file.
-        try:
-            with rasterio.open(reference_geotiff) as dataset:
-                if coverage in geotiff_projections:
-                    crs = geotiff_projections[coverage]
-                else:
-                    crs = "EPSG:3338"
-                x, y = project_latlon(lat, lon, crs)
-                row, col = dataset.index(x, y)
-                if 0 <= row < dataset.height and 0 <= col < dataset.width:
-                    if dataset.read(1)[row, col] == 1:
-                        return True
-        except:
-            return True
+        # # Do not perform GeoTIFF check if the file does not open properly.
+        # # This seems safer than the alternative of hiding data due to a corrupt file.
+        # try:
+        with rasterio.open(reference_geotiff) as dataset:
+            if coverage in geotiff_projections:
+                crs = geotiff_projections[coverage]
+            else:
+                crs = "EPSG:3338"
+            x, y = project_latlon(lat, lon, crs)
+            row, col = dataset.index(x, y)
+            if 0 <= row < dataset.height and 0 <= col < dataset.width:
+                if dataset.read(1)[row, col] == 1:
+                    return True
+        # except:
+        #     return True
 
     return 404
 
@@ -472,3 +477,27 @@ def get_coverage_crs_str(coverage_metadata):
         )
 
     return crs.to_string()
+
+
+def generate_time_index_from_coverage_metadata(meta):
+    """Generate a pandas DatetimeIndex from the ansi (i.e. time) axis coordinates in the coverage description metadata.
+
+    Args:
+        meta (dict): JSON-like dictionary containing coverage metadata
+
+    Returns:
+        pd.DatetimeIndex: corresponding to the ansi (i.e. time) axis coordinates
+    """
+    try:
+        # we won't always know the axis positioning / ordering
+        ansi_axis = next(
+            axis
+            for axis in meta["domainSet"]["generalGrid"]["axis"]
+            if axis["axisLabel"] == "ansi"
+        )
+        # this is a list of dates formatted like "1996-11-03T00:00:00.000Z"
+        ansi_coordinates = ansi_axis["coordinate"]
+        date_index = pd.DatetimeIndex(ansi_coordinates)
+        return date_index
+    except (KeyError, StopIteration):
+        raise ValueError("Unexpected coverage metadata: 'ansi' axis not found")

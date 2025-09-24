@@ -93,6 +93,7 @@ def generate_wcs_getcov_str(
             f"&SUBSET=X({x})&SUBSET=Y({y}){var_subset_str}{time_slice_str}"
             f"&FORMAT=application/{encoding}"
         )
+
     return wcs_getcov_str
 
 
