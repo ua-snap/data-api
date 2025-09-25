@@ -38,3 +38,4 @@ from .temperature_anomalies import *
 from .cmip6 import *
 from .places import *
 from .era5wrf import *
+from .dynamic_indicators import *
