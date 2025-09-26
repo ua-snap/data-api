@@ -151,6 +151,16 @@ async def fetch_data_for_all_scenarios(var, lat, lon, times):
 
 
 #### POSTPROCESSING FUNCTIONS ####
+#
+# - compute_max_nday(n)
+#   - covers existing rx1day and rx5day indicators
+#
+# TODO: add additional indicators here, e.g.:
+# - compute_days_above_threshold(t)
+#   - covers r10mm
+#
+# - compute_consecutive_wetter_or_drier(t, type)
+#   - covers cwd and cdd
 
 
 def compute_max_nday(precip_data, n):
