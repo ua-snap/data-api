@@ -1,5 +1,6 @@
 import asyncio
 import ast
+import numpy as np
 import logging
 from flask import Blueprint, render_template, request
 
@@ -51,18 +52,16 @@ coverage_metadata = {
     "end_date": cftime_value_to_ymd(time_max, base_date),
 }
 
-print(coverage_metadata)
 
-
-async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=None):
+async def fetch_cmip6_monthly_point_data(lat, lon, vars=None, time_slice=None):
     """
     Make an async request for CMIP6 monthly data for a range of models, scenarios, and years at a specified point
 
     Args:
         lat (float): latitude
         lon (float): longitude
-        var_coord (int): variable coordinate from dim_encoding, if specified
-        time_slice (str): time slice for the data request, if specified
+        vars (str): comma-separated variable names, if specified
+        time_slice (str): time slice in CF units, if requested
 
     Returns:
         list of data results from each of historical and future data at a specified point
@@ -74,12 +73,17 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=No
         lat,
         cov_id=cmip6_monthly_coverage_id,
         projection="EPSG:4326",
-        var_coord=var_coord,
-        time_slice=time_slice,
+        var_coord=None,
+        time_slice=("time", time_slice),
     )
 
     # Generate the URL for the WCS query
     url = generate_wcs_query_url(wcs_str)
+
+    # If a specific variable is requested, add the RANGESUBSET to the URL
+    if vars is not None:
+        var_str = ",".join(vars)
+        url += f"&RANGESUBSET={var_str}"
 
     # Fetch the data
     point_data_list = await fetch_data([url])
@@ -88,125 +92,119 @@ async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=No
 
 
 def package_cmip6_monthly_data(
-    point_data_list, var_id=None, start_year=None, end_year=None
+    point_data_list, coverage_metadata, vars, start_year, end_year
 ):
     """
     Package the CMIP6 monthly values into human-readable JSON format
 
     Args:
         point_data_list (list): nested list of data from Rasdaman WCPS query
-        var_id (str): variable name, if specified
-        start_year (int): optional start year for WCPS query
-        end_year (int): optional end year for WCPS query
+        coverage_metadata (dict): metadata and encodings for the coverage
+        vars (list): list of variable names, if specified
+        start_year (int): start year
+        end_year (int): end year
 
     Returns:
-        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+        di (dict): dictionary mirroring structure of nested list with keys derived from coverage metadata
     """
     di = dict()
 
-    # Nest point_data_list one level deeper if var_id is specified.
-    # This keeps the nesting level the same for all cases.
-    if var_id != None:
-        point_data_list = [point_data_list]
+    # get vars from coverage metadata if not specified
+    if vars is None:
+        vars = coverage_metadata["variables"]
 
-    for var_coord, var_li in enumerate(point_data_list):
-        if var_id != None:
-            varname = var_id
-        else:
-            varname = dim_encodings["varname"][var_coord]
+    # create a list of time values, in "YYYY-MM" format, for the full coverage time range
+    times = []
+    for year in range(start_year, end_year + 1):
+        for month in range(1, 13):
+            times.append(f"{year}-{str(month).zfill(2)}")
 
-        for mi, model_li in enumerate(var_li):
-            model = dim_encodings["model"][mi]
+    # reverse the model and scenario encodings dicts to create lists of their names from the dict values
+    models = [v for _k, v in coverage_metadata["model_encoding"].items()]
+    scenarios = [v for _k, v in coverage_metadata["scenario_encoding"].items()]
 
-            if model not in di:
-                di[model] = dict()
+    # first level of the nested point_data_list is model (should be 14)
+    # second level is scenario (should be 5)
+    # third is a large list of strings:
+    #   each string represents a month in the time range requested (start to end year)
+    #   each string is a space-separated list of values, one for each variable requested
 
-            for si, scenario_li in enumerate(model_li):
-                # Rasdaman Enterprise (as of v10.4.7) returns missing model/scenario NoData gaps
-                # as arrays full of 0s, which get converted to 0.0 somewhere along the way.
-                # Treat any array that is full of nothing but 0.0s as NoData and skip over it.
-                if all(value == 0.0 for value in scenario_li):
-                    continue
+    for mi, model_li in enumerate(point_data_list):
+        model = models[mi]
+        if model not in di:
+            di[model] = dict()
 
-                scenario = dim_encodings["scenario"][si]
-                if scenario not in di[model]:
-                    di[model][scenario] = dict()
+        for si, scenario_li in enumerate(model_li):
+            scenario = scenarios[si]
+            if scenario not in di[model]:
+                di[model][scenario] = dict()
 
-                # Create an array of every month between start and end year in the format "YYYY-MM"
-                # if no start or end year given, use 1950 and 2100
-                if None in [start_year, end_year]:
-                    months = [
-                        f"{year}-{str(month).zfill(2)}"
-                        for year in range(1950, 2100 + 1)
-                        for month in range(1, 13)
-                    ]
+            for toi, time_str in enumerate(scenario_li):
+                time = times[toi]
+                di[model][scenario][time] = dict()
+
+                # split the space-separated string of values into a list
+                # first check if its a float (occurs if only 1 variable is requested)
+                if isinstance(time_str, float):
+                    value_list = [str(time_str)]
                 else:
-                    months = [
-                        f"{year}-{str(month).zfill(2)}"
-                        for year in range(int(start_year), int(end_year) + 1)
-                        for month in range(1, 13)
-                    ]
+                    value_list = time_str.split(" ")
+                for vi, varname in enumerate(vars):
+                    value = value_list[vi]
 
-                for soi, value in enumerate(scenario_li):
-
-                    # replace NaN values (None) with -9999
-                    if value is None:
-                        value = -9999
-
-                    month = months[soi]
-                    if month not in di[model][scenario]:
-                        di[model][scenario][month] = dict()
-
-                    # The "ts" variable is still in Kelvin in the Rasdaman coverage.
-                    # Convert this to Celsius. All other temperature variables have
-                    # already been converted to Celsius before Rasdaman import.
-                    if varname == "ts" and float(value) != -9999:
-                        value = float(value) - 273.15
-
+                    # clean data
+                    # replace "null" or None with np.nan -> these will be pruned from the response
+                    if value == "null" or value is None:
+                        value = np.nan
                     # Evaporation has very tiny values.
                     if varname == "evspsbl":
                         precision = 8
                     else:
-                        precision = 2
+                        precision = 3
 
-                    di[model][scenario][month][varname] = round(float(value), precision)
+                    di[model][scenario][time][varname] = round(float(value), precision)
 
     # Responses from Rasdaman include the same array length for both
     # historical and projected data, representing every possible year
     # in the request. This means both the historical and projected data
-    # arrays may include nodata years populated with 0s if the year range
+    # arrays may include nodata years populated with NaNs if the year range
     # spans 2014 -2015 (2014 is the last year for historical data, and
     # 2015 is the first year of projected data).
 
-    # The code below replaces 0s with -9999 for nodata years depending on year.
+    # The code below replaces NaNs with -9999 for nodata years depending on year.
     # If the scenario is historical and the year is greater than 2014,
-    # all 0 values are replaced with -9999 and will be pruned from the response.
+    # all NaN values are replaced with -9999 and will be pruned from the response.
     # If the scenario is not historical, and the year is less than 2015,
-    # all 0 values are replaced with -9999 and will be pruned from the response.
+    # all NaN values are replaced with -9999 and will be pruned from the response.
 
     for model, scenarios in di.items():
         for scenario, months in scenarios.items():
             for month, variables in months.items():
                 for variable, value in variables.items():
                     if scenario == "historical" and int(month[:4]) > 2014:
-                        if value == 0:
+                        if value == np.nan:
                             di[model][scenario][month][variable] = -9999
                     elif scenario != "historical" and int(month[:4]) < 2015:
-                        if value == 0:
+                        if value == np.nan:
                             di[model][scenario][month][variable] = -9999
 
     # We can also see entire nodata years in the projected data if a specific
     # scenario did not include data for a particular variable.
-    # For example, try the URL below and examine the "HadGEM3-GC31-MM" model response:
-    # http://127.0.0.1:5000/cmip6/point/61.5/-147/2014/2015?vars=pr
+    # Iterate through the dictionary again, and check if all values for all variables in a scenario are np.nan
+    # If so, replace all those np.nan values with -9999
+    for model, scenarios in di.items():
+        for scenario, months in scenarios.items():
+            for month, variables in months.items():
+                all_nan = True
+                for variable, value in variables.items():
+                    if value != np.nan:
+                        all_nan = False
+                        break
+                if all_nan:
+                    for variable in variables:
+                        di[model][scenario][month][variable] = -9999
 
-    # This is a difficult issue to solve, as we can't safely replace all 0s with -9999
-    # because in some variables, that might actually be reasonable data.
-    # For example, snow depth or sea ice concentration may really be 0 in all
-    # months for a particular year!
-
-    # TODO: find the best approach for handling nodata years in projected data.
-    # The brute force approach (replacing all 0s with -9999) is not safe for all variables.
+    di = prune_nulls_with_max_intensity(di)
 
     return di
 
@@ -240,6 +238,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
         example request (all variables): http://localhost:5000/cmip6/point/65.06/-146.16
         example request (select variables): http://localhost:5000/cmip6/point/65.06/-146.16?vars=tas,pr
         example request (all variables, select years): http://localhost:5000/cmip6/point/65.06/-146.16/2000/2005
+        example request (select variables, select years): http://localhost:5000/cmip6/point/65.06/-146.16/2000/2005?vars=tas,pr
 
     """
 
@@ -247,6 +246,8 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
     # and create the time slice for the WCPS query
     if None in [start_year, end_year]:
         # use full range if no years requested
+        start_year = coverage_metadata["start_date"][0]
+        end_year = coverage_metadata["end_date"][0]
         time_slice_cf = (
             str(coverage_metadata["start_cf_time"])
             + ","
@@ -294,66 +295,45 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
             ),
             422,
         )
+
+    # Validate requested variables against those available in the coverage
+    if request.args.get("vars"):
+        vars = request.args.get("vars").split(",")
+        for var_id in vars:
+            if var_id not in coverage_metadata["variables"]:
+                return render_template("400/bad_request.html"), 400
+    else:
+        vars = None
+
+    # Fetch and package the data
     try:
-        var_parameter = False
-        if request.args.get("vars"):
-            var_parameter = True
-            vars = request.args.get("vars").split(",")
-            for var_id in vars:
-                if var_id not in varnames.values():
-                    return render_template("400/bad_request.html"), 400
-        else:
-            vars = None
+        point_data_list = asyncio.run(
+            fetch_cmip6_monthly_point_data(lat, lon, vars, time_slice=time_slice_cf)
+        )
 
-        if var_parameter:
-            results = {}
-            for var_id in vars:
-                var_coord = next(
-                    key for key, value in varnames.items() if value == var_id
-                )
-                point_data_list = asyncio.run(
-                    fetch_cmip6_monthly_point_data(
-                        lat, lon, var_coord, time_slice=time_slice_ansi
-                    )
-                )
-
-                new_results = package_cmip6_monthly_data(
-                    point_data_list, var_id, start_year, end_year
-                )
-
-                for model, scenarios in new_results.items():
-                    results.setdefault(model, {})
-                    for scenario, months in scenarios.items():
-                        results[model].setdefault(scenario, {})
-                        for month, variables in months.items():
-                            results[model][scenario].setdefault(month, {})
-                            results[model][scenario][month].update(variables)
-        else:
-            point_data_list = asyncio.run(
-                fetch_cmip6_monthly_point_data(lat, lon, time_slice=time_slice_ansi)
-            )
-
-            results = package_cmip6_monthly_data(
-                point_data_list, start_year=start_year, end_year=end_year
-            )
+        results = package_cmip6_monthly_data(
+            point_data_list, coverage_metadata, vars, start_year, end_year
+        )
 
         results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_monthly"))
+    except:
+        return render_template("500/server_error.html"), 500
 
-        # if no specific var(s) requested, find all unique vars in the results after pruning
-        # we need to pass this list explicitly to create_csv since land- or sea-only variables may be missing
-        if vars is None:
-            vars = []
-            for model in results:
-                for scenario in results[model]:
-                    for month in results[model][scenario]:
-                        for var in results[model][scenario][month]:
-                            # append only if not already in list
-                            if var not in vars:
-                                vars.append(var)
+    if request.args.get("format") == "csv":
+        try:
+            # if no specific var(s) requested, find all unique vars in the results after pruning
+            # we need to pass this list explicitly to create_csv since results from land- or sea-only variables may be missing
+            if vars is None:
+                vars = []
+                for model in results:
+                    for scenario in results[model]:
+                        for month in results[model][scenario]:
+                            for var in results[model][scenario][month]:
+                                # append only if not already in list
+                                if var not in vars:
+                                    vars.append(var)
+            logger.debug(f"Results limited to {vars}")
 
-        logger.debug(f"Results limited to {vars}")
-
-        if request.args.get("format") == "csv":
             place_id = request.args.get("community")
             return create_csv(
                 results,
@@ -365,12 +345,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                 start_year=start_year,
                 end_year=end_year,
             )
+        except:
+            return render_template("500/server_error.html"), 500
 
-        return results
-
-    except ValueError:
-        return render_template("400/bad_request.html"), 400
-    except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
-        return render_template("500/server_error.html"), 500
+    return results
