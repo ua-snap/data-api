@@ -48,6 +48,7 @@ from config import WEST_BBOX, EAST_BBOX
 
 indicators_api = Blueprint("indicators_api", __name__)
 
+
 var_ep_lu = {
     "cmip5_indicators": {
         "cov_id_str": "ncar12km_indicators_era_summaries",
@@ -57,22 +58,9 @@ var_ep_lu = {
         "crs": None,
     },
     "cmip6_indicators": {
-        "cov_id_str": "cmip6_indicators",
+        "cov_id_str": "cmip6_indicators_cf",
         "dim_encodings": None,  # populated below
-        "bandnames": [
-            "rx1day",
-            "rx5day",
-            "r10mm",
-            "cdd",
-            "cwd",
-            "dw",
-            "su",
-            "ftc",
-            "hd",
-            "cd",
-            "wsdi",
-            "csdi",
-        ],
+        "bandnames": None,  # populated below
         "label": None,
         "crs": None,
     },
@@ -90,7 +78,11 @@ async def get_indicators_metadata():
     var_ep_lu["cmip5_indicators"]["dim_encodings"] = get_coverage_encodings(
         cmip5_metadata
     )
-    var_ep_lu["cmip6_indicators"]["dim_encodings"] = get_coverage_encodings(
+    var_ep_lu["cmip6_indicators"]["dim_encodings"] = {
+        "model": get_encoding_from_axis_attributes("model", cmip6_metadata),
+        "scenario": get_encoding_from_axis_attributes("scenario", cmip6_metadata),
+    }
+    var_ep_lu["cmip6_indicators"]["bandnames"] = get_variables_from_coverage_metadata(
         cmip6_metadata
     )
     var_ep_lu["cmip5_indicators"]["crs"] = get_coverage_crs_str(cmip5_metadata)
@@ -311,13 +303,12 @@ def remove_invalid_dim_combos(aggr_results):
 def package_cmip6_point_data(rasdaman_response):
     # using the dimension names and dim_encodings, create the nested dict to hold results
     dim_encodings = var_ep_lu["cmip6_indicators"]["dim_encodings"]
-    # there is a year dimension, but its not represented in the encodings dict, so we need to add the year dimension manually
+    # there is a CF compliant time dimension, but we are not using time at all in the query (full time range is returned always)
+    # so we will just hard code the full year range:
     dim_encodings["year"] = {int(i - 1950): str(i) for i in range(1950, 2101)}
-    # we could dimension names directly from the encodings, but they would be in the wrong order
-    # and also contain the band names ("indicator" key) which is not actually a dimension .... so we define explicitly here
     dimnames = [
-        "scenario",
         "model",
+        "scenario",
         "year",
     ]
     iter_coords = list(
@@ -332,6 +323,9 @@ def package_cmip6_point_data(rasdaman_response):
     # populate the results dict with the fetched data
     # using the coords to index into the rasdaman response
     for coords, dim_combo in zip(iter_coords, dim_combos):
+
+        print("processing dim combo: ", dim_combo)
+
         indicator_values = rasdaman_response[coords[0]][coords[1]][coords[2]]
 
         # split the string of values into a list of strings
@@ -351,11 +345,19 @@ def package_cmip6_point_data(rasdaman_response):
         for indicator_name, indicator_value in zip(
             var_ep_lu["cmip6_indicators"]["bandnames"], indicator_values
         ):
-            if indicator_name == "rx1day":
-                indicator_value = round(indicator_value)
+            if indicator_value != -9999:
+                indicator_value = round(indicator_value, 1)
             indicator_dict[indicator_name] = indicator_value
 
         results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
+
+        print(
+            dim_combo[0],
+            dim_combo[1],
+            dim_combo[2],
+        )
+
+        print(indicator_dict)
 
     return nullify_and_prune(results, "cmip6_indicators")
 
@@ -496,7 +498,11 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
             )
         )
 
-        results = package_cmip6_point_data(rasdaman_response)
+        try:
+            results = package_cmip6_point_data(rasdaman_response)
+        except Exception as exc:
+            print(exc)
+            return render_template("500/server_error.html"), 500
 
         if "summarize" in request.args and request.args.get("summarize") == "mmm":
             results = summarize_cmip6_mmm(results)
