@@ -437,6 +437,25 @@ def get_encoding_from_axis_attributes(axis, coverage_metadata):
     return axis_encoding
 
 
+def get_variables_from_coverage_metadata(coverage_metadata):
+    """Extract variable names from coverage metadata (these are called "bands" in the
+    rasdaman coverage metadata.) Assumes that the coverage has a "bands" attribute, which is a
+    dictionary of band metadata using the band names as keys.
+    Args:
+        coverage_metadata (dict): output of describe_via_wcps()
+    Returns:
+        var_names (list): list of variable names (bands) in the coverage."""
+    if (
+        "metadata" not in coverage_metadata
+        or "bands" not in coverage_metadata["metadata"]
+    ):
+        raise ValueError(
+            "Coverage metadata does not contain the expected 'bands' attribute."
+        )
+    var_names = list(coverage_metadata["metadata"]["bands"].keys())
+    return var_names
+
+
 def get_attributes_from_time_axis(coverage_metadata):
     """Extract time axis attributes from coverage metadata. Assumes that the
     coverage has an axis named "time" with "units", "min_value", and "max_value" attributes.
