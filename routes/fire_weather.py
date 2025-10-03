@@ -75,14 +75,14 @@ for coverage_id in fire_weather_coverage_ids:
 
 #### DATE CONVERSION FUNCTIONS ####
 
-
+#TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
 def date_to_cftime_value(year, month, day, base_date):
     """Convert a year, month, and day to a CF-compliant time value (days since the base date)."""
     date = datetime.datetime(year, month, day)
     delta_days = (date - base_date).days
     return delta_days
 
-
+#TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
 def cftime_value_to_year_month_day(time_value, base_date):
     """Convert a time value in days since the base date to a year, month, day tuple."""
     date = base_date + datetime.timedelta(days=time_value)
@@ -122,7 +122,7 @@ def build_variable_year_range_str_from_start_and_end_year(var, start_year, end_y
 
 #### VALIDATION FUNCTIONS ####
 
-
+#TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
 def validate_years_against_coverage_metadata(start_year, end_year, var):
     """
     Validate the start and end years against the coverage metadata.
