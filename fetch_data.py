@@ -406,28 +406,35 @@ async def describe_via_wcps(cov_id):
     return json_description
 
 
-def get_encoding_from_model_axis_attributes(coverage_metadata):
-    """Extract the model encoding dictionary from the coverage metadata. Assumes that the
-    coverage has an axis named "model" with an "encoding" attribute. Assumes the attribute is a string
+def get_encoding_from_axis_attributes(axis, coverage_metadata):
+    """Extract the axis encoding dictionary from the coverage metadata. Assumes that the
+    coverage has an axis named <axis> with an "encoding" attribute. Assumes the attribute is a string
     representation of a dictionary, so it needs to be converted to an actual dictionary.
 
     Designed to be used with the output of describe_via_wcps(), like so:
         coverage_metadata = asyncio.run(describe_via_wcps(cov_id))
-        model_encoding = get_encoding_from_model_axis_attributes(coverage_metadata)
+        model_encoding = get_encoding_from_model_axis_attributes("model", coverage_metadata)
+
+    Args:
+        axis (str): name of the axis to extract encoding from (e.g., "model", "scenario")
+        coverage_metadata (dict): output of describe_via_wcps()
+
+    Returns:
+        axis_encoding (dict): dictionary mapping axis coordinate values to their encoded values
     """
     if (
         "metadata" not in coverage_metadata
         or "axes" not in coverage_metadata["metadata"]
-        or "model" not in coverage_metadata["metadata"]["axes"]
-        or "encoding" not in coverage_metadata["metadata"]["axes"]["model"]
+        or axis not in coverage_metadata["metadata"]["axes"]
+        or "encoding" not in coverage_metadata["metadata"]["axes"][axis]
     ):
         raise ValueError(
-            "Coverage metadata does not contain the expected 'model' axis with 'encoding' attribute."
+            f"Coverage metadata does not contain the expected '{axis}' axis with 'encoding' attribute."
         )
-    model_encoding = ast.literal_eval(
-        coverage_metadata["metadata"]["axes"]["model"]["encoding"]
+    axis_encoding = ast.literal_eval(
+        coverage_metadata["metadata"]["axes"][axis]["encoding"]
     )
-    return model_encoding
+    return axis_encoding
 
 
 def get_attributes_from_time_axis(coverage_metadata):
