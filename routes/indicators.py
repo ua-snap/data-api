@@ -4,7 +4,6 @@ These endpoint(s) query a coverage containing summarized versions of the indicat
 The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now (i.e., url suffix: /indicators/base).
 """
 
-import json
 import asyncio
 import numpy as np
 import itertools
@@ -21,6 +20,11 @@ from fetch_data import (
     generate_nested_dict,
     describe_via_wcps,
     get_all_possible_dimension_combinations,
+    get_encoding_from_axis_attributes,
+    get_variables_from_coverage_metadata,
+    get_attributes_from_time_axis,
+    ymd_to_cftime_value,
+    cftime_value_to_ymd,
 )
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (

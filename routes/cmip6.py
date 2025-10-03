@@ -1,5 +1,4 @@
 import asyncio
-import ast
 import numpy as np
 import logging
 from flask import Blueprint, render_template, request
@@ -18,7 +17,6 @@ from fetch_data import (
 )
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
-    get_coverage_encodings,
     construct_latlon_bbox_from_coverage_bounds,
     validate_latlon_in_bboxes,
 )
