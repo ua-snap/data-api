@@ -60,6 +60,9 @@ for coverage_id in fire_weather_coverage_ids:
     # assumes only one variable per coverage!
     var_coverage_metadata[list(coverage_metadata["metadata"]["bands"].keys())[0]] = {
         "coverage_id": coverage_id,
+
+        #TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
+        
         # Convert the string representation of model encoding dict to an actual dict
         "model_encoding": ast.literal_eval(
             coverage_metadata["metadata"]["axes"]["model"]["encoding"]
