@@ -459,6 +459,7 @@ def get_variables_from_coverage_metadata(coverage_metadata):
 def get_attributes_from_time_axis(coverage_metadata):
     """Extract time axis attributes from coverage metadata. Assumes that the
     coverage has an axis named "time" with "units", "min_value", and "max_value" attributes.
+    This function converts the time units to a base date.
 
     Designed to be used with the output of describe_via_wcps(), like so:
         coverage_metadata = asyncio.run(describe_via_wcps(cov_id))
@@ -476,19 +477,27 @@ def get_attributes_from_time_axis(coverage_metadata):
             "Coverage metadata does not contain the expected 'time' axis with 'units', 'min_value', and 'max_value' attributes."
         )
     time_units = coverage_metadata["metadata"]["axes"]["time"]["units"]
+    # Example time_units: "days since 1850-01-01 00:00:00"
+    match = re.match(r"days since (\d{4})-(\d{2})-(\d{2})", time_units)
+    if not match:
+        raise ValueError(
+            f"Unexpected format for time units: '{time_units}'. Expected format like 'days since YYYY-MM-DD HH:MM:SS'."
+        )
+    year, month, day = map(int, match.groups())
+    base_date = datetime.datetime(year, month, day)
     time_min = int(coverage_metadata["metadata"]["axes"]["time"]["min_value"])
     time_max = int(coverage_metadata["metadata"]["axes"]["time"]["max_value"])
-    return time_units, time_min, time_max
+    return base_date, time_min, time_max
 
 
-def date_to_cftime_value(year, month, day, base_date):
+def ymd_to_cftime_value(year, month, day, base_date):
     """Convert a year, month, and day to a CF-compliant time value (days since the base date)."""
     date = datetime.datetime(year, month, day)
     delta_days = (date - base_date).days
     return delta_days
 
 
-def cftime_value_to_year_month_day(time_value, base_date):
+def cftime_value_to_ymd(time_value, base_date):
     """Convert a time value in days since the base date to a year, month, day tuple."""
     date = base_date + datetime.timedelta(days=time_value)
     return date.year, date.month, date.day

@@ -6,7 +6,15 @@ from flask import Blueprint, render_template, request
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import fetch_data, describe_via_wcps
+from fetch_data import (
+    fetch_data,
+    describe_via_wcps,
+    get_encoding_from_axis_attributes,
+    get_variables_from_coverage_metadata,
+    get_attributes_from_time_axis,
+    ymd_to_cftime_value,
+    cftime_value_to_ymd,
+)
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     get_coverage_encodings,
@@ -21,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly"
+cmip6_monthly_coverage_id = "cmip6_monthly_cf"
 
 
 async def get_cmip6_metadata():
@@ -31,16 +39,19 @@ async def get_cmip6_metadata():
 
 
 metadata = asyncio.run(get_cmip6_metadata())
-dim_encodings = get_coverage_encodings(metadata)
-# TODO: fix cryo coverage so we can delete this line below
-# temporary fix for "dictionary inside a string" issue
-for dim, value in dim_encodings.items():
-    if isinstance(value, str):
-        dim_encodings[dim] = ast.literal_eval(value)
-    else:
-        pass
+base_date, time_min, time_max = get_attributes_from_time_axis(metadata)
 
-varnames = dim_encodings["varname"]
+coverage_metadata = {
+    "variables": get_variables_from_coverage_metadata(metadata),
+    "model_encoding": get_encoding_from_axis_attributes("model", metadata),
+    "scenario_encoding": get_encoding_from_axis_attributes("scenario", metadata),
+    "start_cf_time": time_min,
+    "end_cf_time": time_max,
+    "start_date": cftime_value_to_ymd(time_min, base_date),
+    "end_date": cftime_value_to_ymd(time_max, base_date),
+}
+
+print(coverage_metadata)
 
 
 async def fetch_cmip6_monthly_point_data(lat, lon, var_coord=None, time_slice=None):
@@ -231,22 +242,39 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
         example request (all variables, select years): http://localhost:5000/cmip6/point/65.06/-146.16/2000/2005
 
     """
-    # Validate the start and end years
+
+    # Validate the request start and end years against the coverage time range
+    # and create the time slice for the WCPS query
     if None in [start_year, end_year]:
-        time_slice_ansi = None
+        # use full range if no years requested
+        time_slice_cf = (
+            str(coverage_metadata["start_cf_time"])
+            + ","
+            + str(coverage_metadata["end_cf_time"])
+        )
     elif None not in [start_year, end_year]:
-        if int(start_year) >= 1950 and int(end_year) <= 2100:
-            start_year_ansi = f"{start_year}-01-15T12:00:00.000Z"
-            end_year_ansi = f"{end_year}-12-15T12:00:00.000Z"
-            time_slice_ansi = ("ansi", f'"{start_year_ansi}","{end_year_ansi}"')
+        # basic validation of year inputs:
+        # ensure start_year and end_year are integers in the right order
+        start_year, end_year = int(start_year), int(end_year)
+        if start_year > end_year:
+            return render_template("400/bad_request.html"), 400
+        # check the requested years against the coverage range years
+        if (
+            start_year >= coverage_metadata["start_date"][0]
+            and end_year <= coverage_metadata["end_date"][0]
+        ):
+            # convert to cftime values for the WCPS query
+            start_cf_time = ymd_to_cftime_value(start_year, 1, 1, base_date=base_date)
+            end_cf_time = ymd_to_cftime_value(end_year, 12, 31, base_date=base_date)
+            time_slice_cf = str(start_cf_time) + "," + str(end_cf_time)
         else:
             return (
                 render_template(
                     "422/invalid_year.html",
                     start_year=start_year,
                     end_year=end_year,
-                    min_year=1950,
-                    max_year=2100,
+                    min_year=coverage_metadata["start_date"][0],
+                    max_year=coverage_metadata["end_date"][0],
                 ),
                 422,
             )
