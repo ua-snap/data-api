@@ -12,6 +12,8 @@ import xarray as xr
 import geopandas as gpd
 import json
 import re
+import ast
+import datetime
 from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
@@ -402,3 +404,65 @@ async def describe_via_wcps(cov_id):
     req_url = generate_describe_coverage_url(req_str)
     json_description = await fetch_data([req_url])
     return json_description
+
+
+def get_encoding_from_model_axis_attributes(coverage_metadata):
+    """Extract the model encoding dictionary from the coverage metadata. Assumes that the
+    coverage has an axis named "model" with an "encoding" attribute. Assumes the attribute is a string
+    representation of a dictionary, so it needs to be converted to an actual dictionary.
+
+    Designed to be used with the output of describe_via_wcps(), like so:
+        coverage_metadata = asyncio.run(describe_via_wcps(cov_id))
+        model_encoding = get_encoding_from_model_axis_attributes(coverage_metadata)
+    """
+    if (
+        "metadata" not in coverage_metadata
+        or "axes" not in coverage_metadata["metadata"]
+        or "model" not in coverage_metadata["metadata"]["axes"]
+        or "encoding" not in coverage_metadata["metadata"]["axes"]["model"]
+    ):
+        raise ValueError(
+            "Coverage metadata does not contain the expected 'model' axis with 'encoding' attribute."
+        )
+    model_encoding = ast.literal_eval(
+        coverage_metadata["metadata"]["axes"]["model"]["encoding"]
+    )
+    return model_encoding
+
+
+def get_attributes_from_time_axis(coverage_metadata):
+    """Extract time axis attributes from coverage metadata. Assumes that the
+    coverage has an axis named "time" with "units", "min_value", and "max_value" attributes.
+
+    Designed to be used with the output of describe_via_wcps(), like so:
+        coverage_metadata = asyncio.run(describe_via_wcps(cov_id))
+        time_units, time_min, time_max = get_attributes_from_time_axis(coverage_metadata)
+    """
+    if (
+        "metadata" not in coverage_metadata
+        or "axes" not in coverage_metadata["metadata"]
+        or "time" not in coverage_metadata["metadata"]["axes"]
+        or "units" not in coverage_metadata["metadata"]["axes"]["time"]
+        or "min_value" not in coverage_metadata["metadata"]["axes"]["time"]
+        or "max_value" not in coverage_metadata["metadata"]["axes"]["time"]
+    ):
+        raise ValueError(
+            "Coverage metadata does not contain the expected 'time' axis with 'units', 'min_value', and 'max_value' attributes."
+        )
+    time_units = coverage_metadata["metadata"]["axes"]["time"]["units"]
+    time_min = int(coverage_metadata["metadata"]["axes"]["time"]["min_value"])
+    time_max = int(coverage_metadata["metadata"]["axes"]["time"]["max_value"])
+    return time_units, time_min, time_max
+
+
+def date_to_cftime_value(year, month, day, base_date):
+    """Convert a year, month, and day to a CF-compliant time value (days since the base date)."""
+    date = datetime.datetime(year, month, day)
+    delta_days = (date - base_date).days
+    return delta_days
+
+
+def cftime_value_to_year_month_day(time_value, base_date):
+    """Convert a time value in days since the base date to a year, month, day tuple."""
+    date = base_date + datetime.timedelta(days=time_value)
+    return date.year, date.month, date.day
