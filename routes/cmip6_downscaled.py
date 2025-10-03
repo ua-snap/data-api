@@ -153,6 +153,7 @@ def cmip6_downscaled_point(lat, lon):
             place_id,
             lat,
             lon,
+            vars=vars,
         )
 
     return results

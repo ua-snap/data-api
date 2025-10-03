@@ -57,7 +57,7 @@ def create_csv(
     if endpoint == "beetles":
         properties = beetles_csv(data)
     elif endpoint == "cmip6_downscaled":
-        properties = cmip6_downscaled_csv(data)
+        properties = cmip6_downscaled_csv(data, vars)
     elif endpoint == "cmip6_indicators":
         properties = cmip6_indicators_csv(data)
     elif endpoint == "cmip6_monthly":
@@ -329,9 +329,14 @@ def beetles_csv(data):
     }
 
 
-def cmip6_downscaled_csv(data):
+def cmip6_downscaled_csv(data, vars=None):
     coords = ["model", "scenario", "variable"]
-    values = ["tasmax", "tasmin"]
+
+    if vars is not None:
+        values = vars
+    else:
+        values = ["pr", "tasmax", "tasmin"]
+
     fieldnames = coords + values
     csv_dicts = build_csv_dicts(data, fieldnames, values=values)
     metadata = "# value is the annual value for the specified variable\n"
