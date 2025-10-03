@@ -22,7 +22,7 @@ from . import routes
 
 logger = logging.getLogger(__name__)
 
-cmip6_api = Blueprint("cmip6_api", __name__)
+cmip6_api = Blueprint("cmip6_downscaled_api", __name__)
 
 
 async def get_cmip6_metadata(cov_id):
@@ -136,9 +136,10 @@ def cmip6_downscaled_point(lat, lon):
                         results[model] = {}
                     if scenario not in results[model]:
                         results[model][scenario] = {}
-                    if varname not in results[model][scenario]:
-                        results[model][scenario][varname] = {}
-                    results[model][scenario][varname] = result
+                    for time, value in result.items():
+                        if time not in results[model][scenario]:
+                            results[model][scenario][time] = {}
+                        results[model][scenario][time][varname] = value
 
     results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_downscaled"))
 

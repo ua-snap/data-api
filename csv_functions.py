@@ -56,6 +56,8 @@ def create_csv(
 
     if endpoint == "beetles":
         properties = beetles_csv(data)
+    elif endpoint == "cmip6_downscaled":
+        properties = cmip6_downscaled_csv(data)
     elif endpoint == "cmip6_indicators":
         properties = cmip6_indicators_csv(data)
     elif endpoint == "cmip6_monthly":
@@ -318,6 +320,22 @@ def beetles_csv(data):
 
     filename_data_name = "Climate Protection from Spruce Beetles"
     metadata = "# Values shown are for climate-related protection level from spruce beetle spread in the area.\n"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def cmip6_downscaled_csv(data):
+    coords = ["model", "scenario", "variable"]
+    values = ["tasmax", "tasmin"]
+    fieldnames = coords + values
+    csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+    metadata = "# value is the annual value for the specified variable\n"
+    filename_data_name = "CMIP6 Downscaled Annual Values"
 
     return {
         "csv_dicts": csv_dicts,
