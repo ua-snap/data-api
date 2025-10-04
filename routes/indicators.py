@@ -324,8 +324,6 @@ def package_cmip6_point_data(rasdaman_response):
     # using the coords to index into the rasdaman response
     for coords, dim_combo in zip(iter_coords, dim_combos):
 
-        print("processing dim combo: ", dim_combo)
-
         indicator_values = rasdaman_response[coords[0]][coords[1]][coords[2]]
 
         # split the string of values into a list of strings
@@ -351,81 +349,90 @@ def package_cmip6_point_data(rasdaman_response):
 
         results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
 
-        print(
-            dim_combo[0],
-            dim_combo[1],
-            dim_combo[2],
-        )
-
-        print(indicator_dict)
-
     return nullify_and_prune(results, "cmip6_indicators")
 
 
 def summarize_cmip6_mmm(results):
-    for era in cmip6_eras:
-        for scenario in results:
-            # remove impossible combinations of scenario and era
-            if scenario == "historical" and era != "historical":
-                continue
-            if scenario != "historical" and era == "historical":
-                continue
-            for model in results[scenario]:
 
+    for era in cmip6_eras:
+
+        print(era, "\n")
+
+        for model in results:
+
+            print(model, "\n")
+
+            for scenario in results[model]:
+
+                print(scenario, "\n")
+
+                # remove impossible combinations of scenario and era
+                if scenario == "historical" and era != "historical":
+                    continue
+                if scenario != "historical" and era == "historical":
+                    continue
                 # check for an empty dict (means the scenario is missing for this model), if so, skip to the next model
-                if results[scenario][model] in [{}, None]:
+                if results[model][scenario] in [{}, None]:
+
+                    print("missing scenario\n")
+
                     continue
 
                 # set up a dict to hold the values for this model/scenario/era
                 model_scenario_era_values = dict()
                 model_scenario_era_values[era] = dict()
 
-                for year in results[scenario][model]:
-                    # skip era results already saved in the dict
-                    if year in cmip6_eras:
-                        continue
+                for year in results[model][scenario]:
                     if (
                         int(year) < cmip6_eras[era]["start"]
                         or int(year) > cmip6_eras[era]["end"]
                     ):  # remove unwanted years
                         continue
-                    for indicator in results[scenario][model][year]:
+                    for indicator in results[model][scenario][year]:
                         # if the indicator is not in the dict, add it
                         if indicator not in model_scenario_era_values[era]:
                             model_scenario_era_values[era][indicator] = []
+
+                        print(results[model][scenario][year][indicator])
+
                         # if the value is not -9999, "nan", "null", or None, add it to the values list
-                        if results[scenario][model][year][indicator] not in [
+                        if results[model][scenario][year][indicator] not in [
                             -9999,
                             "nan",
                             "null",
                             None,
                         ]:
-                            model_scenario_era_values[era][indicator].append(
-                                results[scenario][model][year][indicator]
-                            )
+                            try:
+                                model_scenario_era_values[era][indicator].append(
+                                    results[model][scenario][year][indicator]
+                                )
+                            except Exception as exc:
+                                print("could not append!", exc)
+
+                print(model_scenario_era_values, "\n")
 
                 # compute stats for each indicator for this model/scenario/era
-                for era in model_scenario_era_values:
-                    results[scenario][model][era] = dict()
-                    for indicator in model_scenario_era_values[era]:
+                for iter_era in model_scenario_era_values:
+                    results[model][scenario][iter_era] = dict()
+                    for indicator in model_scenario_era_values[iter_era]:
                         # if list of values is not empty, compute min, mean, and max
-                        if model_scenario_era_values[era][indicator]:
+                        if model_scenario_era_values[iter_era][indicator]:
                             era_indicator_mmm = {
                                 "min": round(
                                     np.nanmin(
-                                        model_scenario_era_values[era][indicator]
+                                        model_scenario_era_values[iter_era][indicator]
                                     ),
                                     1,
                                 ),
                                 "mean": round(
                                     np.nanmean(
-                                        model_scenario_era_values[era][indicator]
+                                        model_scenario_era_values[iter_era][indicator]
                                     ),
                                     1,
                                 ),
                                 "max": round(
                                     np.nanmax(
-                                        model_scenario_era_values[era][indicator]
+                                        model_scenario_era_values[iter_era][indicator]
                                     ),
                                     1,
                                 ),
@@ -438,17 +445,20 @@ def summarize_cmip6_mmm(results):
                                 "max": -9999,
                             }
                         # save results in the results dict
-                        results[scenario][model][era][indicator] = era_indicator_mmm
+                        results[model][scenario][iter_era][
+                            indicator
+                        ] = era_indicator_mmm
 
     # prune the results dict to remove any empty dicts (i.e. models/scenarios/eras with no data)
-    for scenario in results:
-        for model in results[scenario]:
-            if results[scenario][model]:
-                results[scenario][model] = {
-                    era: results[scenario][model][era]
-                    for era in results[scenario][model]
+    for model in results:
+        for scenario in results[model]:
+            if results[model][scenario]:
+                results[model][scenario] = {
+                    era: results[model][scenario][era]
+                    for era in results[model][scenario]
                     if era in cmip6_eras.keys()
                 }
+
     results = nullify_and_prune(results, "cmip6_indicators")
     results = prune_nulls_with_max_intensity(results)
 
@@ -513,11 +523,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
 
         return results
 
-    except ValueError:
-        return render_template("400/bad_request.html"), 400
     except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
 
