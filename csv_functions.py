@@ -419,7 +419,7 @@ def cmip6_monthly_csv(data, vars=None):
         "snw": "# snw is the snow water equivalent in mm.\n",
         "tas": "# tas is the mean monthly temperature in deg C.\n",
         "tasmax": "# tasmax is the maximum monthly temperature in deg C.\n",
-        "tasmin": "# tasmin is the mimimum monthly temperature in deg C.\n",
+        "tasmin": "# tasmin is the minimum monthly temperature in deg C.\n",
         "ts": "# ts is the mean monthly surface temperature in deg C.\n",
         "uas": "# uas is the mean monthly near surface eastward wind in m/s.\n",
         "vas": "# vas is the mean monthly near surface northward wind in m/s.\n",
