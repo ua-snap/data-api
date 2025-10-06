@@ -364,8 +364,6 @@ def summarize_cmip6_mmm(results):
             all_eras_values = {}
 
             for era in cmip6_eras:
-                print(f"Processing {era} for model {model}, scenario {scenario}")
-
                 # Remove impossible combinations of scenario and era
                 if (scenario == "historical" and era != "historical") or (
                     scenario != "historical" and era == "historical"
