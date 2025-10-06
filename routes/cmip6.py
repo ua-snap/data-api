@@ -180,10 +180,10 @@ def package_cmip6_monthly_data(
             for month, variables in months.items():
                 for variable, value in variables.items():
                     if scenario == "historical" and int(month[:4]) > 2014:
-                        if value == np.nan:
+                        if np.isnan(value):
                             di[model][scenario][month][variable] = -9999
                     elif scenario != "historical" and int(month[:4]) < 2015:
-                        if value == np.nan:
+                        if np.isnan(value):
                             di[model][scenario][month][variable] = -9999
 
     # We can also see entire nodata years in the projected data if a specific
@@ -195,7 +195,7 @@ def package_cmip6_monthly_data(
             for month, variables in months.items():
                 all_nan = True
                 for variable, value in variables.items():
-                    if value != np.nan:
+                    if not np.isnan(value):
                         all_nan = False
                         break
                 if all_nan:
