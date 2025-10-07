@@ -150,8 +150,8 @@ def package_cmip6_monthly_data(
                 for vi, varname in enumerate(vars):
                     value = value_list[vi]
 
-                    # clean data
-                    # replace "null" or None with np.nan -> these will be pruned from the response
+                    # clean data - replace "null" or None with np.nan
+                    # these values are allowed and not necessarily pruned from the response
                     if value == "null" or value is None:
                         value = np.nan
                     # Evaporation has very tiny values.
@@ -165,11 +165,14 @@ def package_cmip6_monthly_data(
     # Responses from Rasdaman include the same array length for both
     # historical and projected data, representing every possible year
     # in the request. This means both the historical and projected data
-    # arrays may include nodata years populated with NaNs if the year range
+    # arrays may include entire years populated with NaNs if the year range
     # spans 2014 -2015 (2014 is the last year for historical data, and
     # 2015 is the first year of projected data).
 
-    # The code below replaces NaNs with -9999 for nodata years depending on year.
+    # The code below replaces NaNs with -9999 for entire years that have no data.
+    # Consider the -9999 value as a flag to indicate that the prune_nulls_with_max_intensity()
+    # function should drop the entire scenario / year combo from the response.
+    
     # If the scenario is historical and the year is greater than 2014,
     # all NaN values are replaced with -9999 and will be pruned from the response.
     # If the scenario is not historical, and the year is less than 2015,
