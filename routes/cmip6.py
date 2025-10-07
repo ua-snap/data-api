@@ -121,8 +121,8 @@ def package_cmip6_monthly_data(
     models = [v for _k, v in coverage_metadata["model_encoding"].items()]
     scenarios = [v for _k, v in coverage_metadata["scenario_encoding"].items()]
 
-    # first level of the nested point_data_list is model (should be 14)
-    # second level is scenario (should be 5)
+    # first level of the nested point_data_list is model
+    # second level is scenario
     # third is a large list of strings:
     #   each string represents a month in the time range requested (start to end year)
     #   each string is a space-separated list of values, one for each variable requested
