@@ -75,13 +75,13 @@ async def fetch_cmip6_monthly_point_data(lat, lon, vars=None, time_slice=None):
         time_slice=("time", time_slice),
     )
 
-    # Generate the URL for the WCS query
-    url = generate_wcs_query_url(wcs_str)
-
     # If a specific variable is requested, add the RANGESUBSET to the URL
     if vars is not None:
         var_str = ",".join(vars)
-        url += f"&RANGESUBSET={var_str}"
+        wcs_str += f"&RANGESUBSET={var_str}"
+
+    # Generate the URL for the WCS query
+    url = generate_wcs_query_url(wcs_str)
 
     # Fetch the data
     point_data_list = await fetch_data([url])
