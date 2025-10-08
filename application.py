@@ -51,6 +51,7 @@ def get_service_categories():
         ("Wildfire", "/fire"),
         ("WRF Dynamically Downscaled ERA5 Reanalysis", "/era5wrf"),
         ("Demographics", "/demographics"),
+        ("CONUS Hydrology", "/conus_hydrology"),
     ]
 
 
