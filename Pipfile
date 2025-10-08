@@ -22,7 +22,6 @@ pygeos = "*"
 lxml = "*"
 marshmallow = "*"
 fiona = "*"
-jaro-winkler = "*"
 
 [dev-packages]
 black = "*"

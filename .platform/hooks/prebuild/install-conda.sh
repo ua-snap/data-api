@@ -27,7 +27,7 @@ else
   conda create -y -n api-env -c conda-forge python=3.11 \
     flask flask-cors gunicorn aiohttp requests marshmallow \
     numpy xarray h5py h5netcdf rioxarray rasterio \
-    pyproj shapely geopandas rtree fiona jaro-winkler
+    pyproj shapely geopandas rtree fiona
 fi
 
 # Always ensure EB will activate the environment on app startup
