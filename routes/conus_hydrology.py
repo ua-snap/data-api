@@ -180,7 +180,7 @@ def get_features_and_populate_attributes(data_dict):
                     return render_template("500/server_error.html"), 500
 
         # save json to test size of return
-        with open("/home/jdpaul3/segments.json", "w", encoding="utf-8") as f:
+        with open("/tmp/segments.json", "w", encoding="utf-8") as f:
             json.dump(r_json, f, ensure_ascii=False, indent=4)
 
         # create a valid geodataframe from the features and find a representation point on the line segment
@@ -216,7 +216,7 @@ def run_get_conus_hydrology_point_data(geom_id):
 
     ds = fetch_hydrology_data(cov_id, geom_id)
     # save nc to test size of return
-    ds.to_netcdf("/home/jdpaul3/stats_from_geom_id.nc", engine="h5netcdf")
+    ds.to_netcdf("/tmp/stats_from_geom_id.nc", engine="h5netcdf")
 
     # build the data dictionary and populate with the hydrology statistics
     data_dict = build_dict_and_populate_stats(geom_id, ds)
@@ -228,7 +228,7 @@ def run_get_conus_hydrology_point_data(geom_id):
     json_results = json.dumps(data_dict, indent=4)
 
     # save json to test size of return
-    with open("/home/jdpaul3/result.json", "w", encoding="utf-8") as f:
+    with open("/tmp/result.json", "w", encoding="utf-8") as f:
         json.dump(json_results, f)
 
     return Response(json_results, mimetype="application/json")
