@@ -30,7 +30,7 @@ export FLASK_DEBUG=True
 Review environment variables found in `config.py`, and reset them for development if necessary (e.g., `export API_GS_BASE_URL=https://gs-dev.earthmaps.io/geoserver/`).
 
 
-Start the application via `pip`:
+Start the application via `pipenv`:
 
 ```
 pipenv run flask run
