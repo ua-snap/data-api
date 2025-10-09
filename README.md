@@ -4,7 +4,7 @@
 
 Running the API requires Python 3.11. 
 
-Use `pip` to create a virtual environment from the repo's `Pipfile` using:
+Use `pipenv` to create a virtual environment from the repo's `Pipfile` using:
 ```
 pipenv install
 ```
