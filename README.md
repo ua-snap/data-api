@@ -2,25 +2,45 @@
 
 ## Installing
 
-`pipenv install`
+Running the API requires Python 3.11. 
+
+Use `pipenv` to create a virtual environment from the repo's `Pipfile` using:
+```
+pipenv install
+```
+
+Alternatively, create a new `conda` environment like so:
+
+```
+conda create -n api python=3.11
+conda activate api
+conda install -c conda-forge flask flask-cors gunicorn aiohttp requests marshmallow numpy xarray h5py h5netcdf rioxarray rasterio pyproj shapely geopandas rtree fiona jaro-winkler
+```
 
 ## Running application
 
 Set `flask` application environment variables:
 
-`export FLASK_APP=application.py`
+```
+export FLASK_APP=application.py
+export FLASK_DEBUG=True
+```
 
-`export FLASK_DEBUG=True`
 
-Set the GeoServer/Rasdaman URL environment variables. (If not set using environment variables, these will default to the URLs found in `config.py`.):
+Review environment variables found in `config.py`, and reset them for development if necessary (e.g., `export API_GS_BASE_URL=https://gs-dev.earthmaps.io/geoserver/`).
 
-`export API_GS_BASE_URL=http://...`
 
-`export API_RAS_BASE_URL=https://apollo.snap.uaf.edu/rasdaman/`
+Start the application via `pipenv`:
 
-Run the application:
+```
+pipenv run flask run
+```
 
-`pipenv run flask run`
+Or alternatively, from your `conda` environment:
+
+```
+flask run
+```
 
 ## Query API endpoints
 
@@ -39,14 +59,10 @@ Example Precipitation Query:
 - http://localhost:5000/precipitation/point/65.028/-146.1627
 - http://localhost:5000/precipitation/point/62.906/-148.345
 
-Example Ecoregions Query
-
-- http://localhost:5000/ecoregions/point/64.606/-147.345
 
 ## Updating Production API + Varnish Cache
 
-Due to the configuration of our services, we need to both update
-our API instance + restart our Varnish cache when necessary.
+Due to the configuration of our services, we need to both update our API instance + restart our Varnish cache when necessary.
 
 Prior to deploying, update the `requirements.txt`:
 
