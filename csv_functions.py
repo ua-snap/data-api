@@ -375,7 +375,7 @@ def beetles_csv(data):
 def cmip6_indicators_csv(data):
 
     if "summarize" in request.args and request.args.get("summarize") == "mmm":
-        coords = ["scenario", "model", "year", "variable"]
+        coords = ["model", "scenario", "year", "variable"]
         values = ["max", "mean", "min"]
         fieldnames = coords + values
         csv_dicts = build_csv_dicts(data, fieldnames, values=values)
@@ -385,7 +385,7 @@ def cmip6_indicators_csv(data):
         metadata += "# su are Summer Days. This is the number of days with maximum temperature above 25 (deg C).\n"
         filename_data_name = "CMIP6 Indicators Era Summaries"
     else:
-        coords = ["scenario", "model", "year"]
+        coords = ["model", "scenario", "year"]
         values = ["dw", "ftc", "rx1day", "su"]
         fieldnames = coords + values
         csv_dicts = build_csv_dicts(data, fieldnames, values=values)
