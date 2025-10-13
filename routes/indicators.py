@@ -4,7 +4,6 @@ These endpoint(s) query a coverage containing summarized versions of the indicat
 The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now (i.e., url suffix: /indicators/base).
 """
 
-import json
 import asyncio
 import numpy as np
 import itertools
@@ -21,6 +20,11 @@ from fetch_data import (
     generate_nested_dict,
     describe_via_wcps,
     get_all_possible_dimension_combinations,
+    get_encoding_from_axis_attributes,
+    get_variables_from_coverage_metadata,
+    get_attributes_from_time_axis,
+    ymd_to_cftime_value,
+    cftime_value_to_ymd,
 )
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
@@ -44,6 +48,7 @@ from config import WEST_BBOX, EAST_BBOX
 
 indicators_api = Blueprint("indicators_api", __name__)
 
+
 var_ep_lu = {
     "cmip5_indicators": {
         "cov_id_str": "ncar12km_indicators_era_summaries",
@@ -53,9 +58,9 @@ var_ep_lu = {
         "crs": None,
     },
     "cmip6_indicators": {
-        "cov_id_str": "cmip6_indicators",
+        "cov_id_str": "cmip6_indicators_cf",
         "dim_encodings": None,  # populated below
-        "bandnames": ["dw", "ftc", "rx1day", "su"],
+        "bandnames": None,  # populated below
         "label": None,
         "crs": None,
     },
@@ -73,7 +78,11 @@ async def get_indicators_metadata():
     var_ep_lu["cmip5_indicators"]["dim_encodings"] = get_coverage_encodings(
         cmip5_metadata
     )
-    var_ep_lu["cmip6_indicators"]["dim_encodings"] = get_coverage_encodings(
+    var_ep_lu["cmip6_indicators"]["dim_encodings"] = {
+        "model": get_encoding_from_axis_attributes("model", cmip6_metadata),
+        "scenario": get_encoding_from_axis_attributes("scenario", cmip6_metadata),
+    }
+    var_ep_lu["cmip6_indicators"]["bandnames"] = get_variables_from_coverage_metadata(
         cmip6_metadata
     )
     var_ep_lu["cmip5_indicators"]["crs"] = get_coverage_crs_str(cmip5_metadata)
@@ -294,13 +303,12 @@ def remove_invalid_dim_combos(aggr_results):
 def package_cmip6_point_data(rasdaman_response):
     # using the dimension names and dim_encodings, create the nested dict to hold results
     dim_encodings = var_ep_lu["cmip6_indicators"]["dim_encodings"]
-    # there is a year dimension, but its not represented in the encodings dict, so we need to add the year dimension manually
+    # there is a CF compliant time dimension, but we are not using time at all in the query (full time range is returned always)
+    # so we will just hard code the full year range:
     dim_encodings["year"] = {int(i - 1950): str(i) for i in range(1950, 2101)}
-    # we could dimension names directly from the encodings, but they would be in the wrong order
-    # and also contain the band names ("indicator" key) which is not actually a dimension .... so we define explicitly here
     dimnames = [
-        "scenario",
         "model",
+        "scenario",
         "year",
     ]
     iter_coords = list(
@@ -315,6 +323,7 @@ def package_cmip6_point_data(rasdaman_response):
     # populate the results dict with the fetched data
     # using the coords to index into the rasdaman response
     for coords, dim_combo in zip(iter_coords, dim_combos):
+
         indicator_values = rasdaman_response[coords[0]][coords[1]][coords[2]]
 
         # split the string of values into a list of strings
@@ -334,8 +343,8 @@ def package_cmip6_point_data(rasdaman_response):
         for indicator_name, indicator_value in zip(
             var_ep_lu["cmip6_indicators"]["bandnames"], indicator_values
         ):
-            if indicator_name == "rx1day":
-                indicator_value = round(indicator_value)
+            if indicator_value != -9999:
+                indicator_value = round(indicator_value, 1)
             indicator_dict[indicator_name] = indicator_value
 
         results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = indicator_dict
@@ -344,92 +353,69 @@ def package_cmip6_point_data(rasdaman_response):
 
 
 def summarize_cmip6_mmm(results):
-    for era in cmip6_eras:
-        for scenario in results:
-            # remove impossible combinations of scenario and era
-            if scenario == "historical" and era != "historical":
+    # Iterate through a copy of the models and scenarios keys to avoid modification errors
+    for model in list(results.keys()):
+        for scenario in list(results[model].keys()):
+            # Check for an empty dict
+            if not results[model][scenario]:
                 continue
-            if scenario != "historical" and era == "historical":
-                continue
-            for model in results[scenario]:
 
-                # check for an empty dict (means the scenario is missing for this model), if so, skip to the next model
-                if results[scenario][model] in [{}, None]:
+            # This dict will hold all the calculated eras for the current model/scenario
+            all_eras_values = {}
+
+            for era in cmip6_eras:
+                # Remove impossible combinations of scenario and era
+                if (scenario == "historical" and era != "historical") or (
+                    scenario != "historical" and era == "historical"
+                ):
                     continue
 
-                # set up a dict to hold the values for this model/scenario/era
-                model_scenario_era_values = dict()
-                model_scenario_era_values[era] = dict()
+                # Set up a dict to hold the values for the current era
+                era_values = {}
+                era_start = cmip6_eras[era]["start"]
+                era_end = cmip6_eras[era]["end"]
 
-                for year in results[scenario][model]:
-                    # skip era results already saved in the dict
-                    if year in cmip6_eras:
-                        continue
-                    if (
-                        int(year) < cmip6_eras[era]["start"]
-                        or int(year) > cmip6_eras[era]["end"]
-                    ):  # remove unwanted years
-                        continue
-                    for indicator in results[scenario][model][year]:
-                        # if the indicator is not in the dict, add it
-                        if indicator not in model_scenario_era_values[era]:
-                            model_scenario_era_values[era][indicator] = []
-                        # if the value is not -9999, "nan", "null", or None, add it to the values list
-                        if results[scenario][model][year][indicator] not in [
-                            -9999,
-                            "nan",
-                            "null",
-                            None,
-                        ]:
-                            model_scenario_era_values[era][indicator].append(
-                                results[scenario][model][year][indicator]
-                            )
+                # Populate era_values with data from the correct years
+                for year in results[model][scenario]:
+                    if era_start <= int(year) <= era_end:
+                        for indicator, value in results[model][scenario][year].items():
+                            # Filter out bad values
+                            if value not in [-9999, "nan", "null", None]:
+                                era_values.setdefault(indicator, []).append(value)
 
-                # compute stats for each indicator for this model/scenario/era
-                for era in model_scenario_era_values:
-                    results[scenario][model][era] = dict()
-                    for indicator in model_scenario_era_values[era]:
-                        # if list of values is not empty, compute min, mean, and max
-                        if model_scenario_era_values[era][indicator]:
-                            era_indicator_mmm = {
-                                "min": round(
-                                    np.nanmin(
-                                        model_scenario_era_values[era][indicator]
-                                    ),
-                                    1,
-                                ),
-                                "mean": round(
-                                    np.nanmean(
-                                        model_scenario_era_values[era][indicator]
-                                    ),
-                                    1,
-                                ),
-                                "max": round(
-                                    np.nanmax(
-                                        model_scenario_era_values[era][indicator]
-                                    ),
-                                    1,
-                                ),
-                            }
-                        # if list of values is empty, set min, mean, and max to -9999
-                        else:
-                            era_indicator_mmm = {
-                                "min": -9999,
-                                "mean": -9999,
-                                "max": -9999,
-                            }
-                        # save results in the results dict
-                        results[scenario][model][era][indicator] = era_indicator_mmm
+                # Compute stats for each indicator for this model/scenario/era
+                era_summary = {}
+                for indicator, values in era_values.items():
+                    if values:
+                        era_indicator_mmm = {
+                            "min": round(np.nanmin(values), 1),
+                            "mean": round(np.nanmean(values), 1),
+                            "max": round(np.nanmax(values), 1),
+                        }
+                    else:
+                        era_indicator_mmm = {
+                            "min": -9999,
+                            "mean": -9999,
+                            "max": -9999,
+                        }
+                    era_summary[indicator] = era_indicator_mmm
 
-    # prune the results dict to remove any empty dicts (i.e. models/scenarios/eras with no data)
-    for scenario in results:
-        for model in results[scenario]:
-            if results[scenario][model]:
-                results[scenario][model] = {
-                    era: results[scenario][model][era]
-                    for era in results[scenario][model]
-                    if era in cmip6_eras.keys()
+                # Store the summary for this era
+                all_eras_values[era] = era_summary
+
+            # After processing all eras, update the main results dictionary
+            results[model][scenario] = all_eras_values
+
+    # Prune the results dict to remove any empty dicts
+    for model in list(results.keys()):
+        for scenario in list(results[model].keys()):
+            if results[model][scenario]:
+                results[model][scenario] = {
+                    era: data
+                    for era, data in results[model][scenario].items()
+                    if era in cmip6_eras.keys() and data
                 }
+
     results = nullify_and_prune(results, "cmip6_indicators")
     results = prune_nulls_with_max_intensity(results)
 
@@ -479,7 +465,11 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
             )
         )
 
-        results = package_cmip6_point_data(rasdaman_response)
+        try:
+            results = package_cmip6_point_data(rasdaman_response)
+        except Exception as exc:
+            print(exc)
+            return render_template("500/server_error.html"), 500
 
         if "summarize" in request.args and request.args.get("summarize") == "mmm":
             results = summarize_cmip6_mmm(results)
@@ -490,11 +480,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
 
         return results
 
-    except ValueError:
-        return render_template("400/bad_request.html"), 400
     except Exception as exc:
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
 
