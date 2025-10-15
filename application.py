@@ -31,6 +31,7 @@ def get_service_categories():
     """
     return [
         ("CMIP6", "/cmip6"),
+        ("CMIP6, Downscaled", "/cmip6_downscaled"),
         ("Climate Indicators", "/indicators"),
         ("Climate Protection from Spruce Beetles", "/beetles"),
         ("Degree Days", "/degree_days"),

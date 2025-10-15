@@ -102,6 +102,11 @@ def package_cmip6_downscaled_data(
     return di
 
 
+@routes.route("/cmip6_downscaled/")
+def cmip6_downscaled_about():
+    return render_template("/documentation/cmip6_downscaled.html")
+
+
 @routes.route("/cmip6_downscaled/point/<lat>/<lon>")
 def cmip6_downscaled_point(lat, lon):
     if request.args.get("vars"):
