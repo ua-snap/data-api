@@ -319,6 +319,8 @@ def era5wrf_area(place_id):
 
     # extract and validate query parameters (mirror point query logic)
     requested_vars = request.args.get("vars")
+    # variables prohibited from area summaries
+    vars_not_for_area_summaries = ["wspd10_max", "wspd10_mean", "wdir10_mean"]
 
     # handle variable selection, no vars means all variables
     if requested_vars:
@@ -326,8 +328,12 @@ def era5wrf_area(place_id):
         for var in variables:
             if var not in era5wrf_coverage_ids:
                 return render_template("400/bad_request.html"), 400
+        # some variables should not be summarized over an area, so we prohibit them from being requested
+        if any(var in variables for var in vars_not_for_area_summaries):
+            return render_template("400/bad_request.html"), 400
     else:
-        variables = list(era5wrf_coverage_ids.keys())
+        # if no variables are requested, use all variables minus the prohibited list
+        variables = list(era5wrf_coverage_ids.keys()) - vars_not_for_area_summaries
 
     try:
         # fetch bbox datasets for requested variables
