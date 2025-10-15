@@ -26,35 +26,26 @@ cmip6_api = Blueprint("cmip6_downscaled_api", __name__)
 
 
 async def get_cmip6_metadata(cov_id):
-    """Get the coverage metadata and encodings for CMIP6 monthly coverage"""
+    """Get the coverage metadata and encodings for CMIP6 downscaled daily coverage"""
     metadata = await describe_via_wcps(cov_id)
     return metadata
 
 
-async def fetch_cmip6_downscaled_point_data(
-    cov_id, x, y, var_coord=None, time_slice=None
-):
+async def fetch_cmip6_downscaled_point_data(cov_id, x, y):
     """
-    Make an async request for CMIP6 monthly data for a range of models, scenarios, and years at a specified point
+    Make an async request for CMIP6 downscaled daily data for provided coverage at a specified point
 
     Args:
-        lat (float): latitude
-        lon (float): longitude
-        var_coord (int): variable coordinate from dim_encoding, if specified
-        time_slice (str): time slice for the data request, if specified
+        cov_id (str): coverage ID
+        x (float): x-coordinate
+        y (float): y-coordinate
 
     Returns:
-        list of data results from each of historical and future data at a specified point
+        list of data results at a specified point
     """
 
-    # We must use EPSG:4326 for the CMIP6 monthly coverage to match the coverage projection
-    wcs_str = generate_wcs_getcov_str(
-        x,
-        y,
-        cov_id=cov_id,
-        var_coord=var_coord,
-        time_slice=time_slice,
-    )
+    # We must use EPSG:4326 for the CMIP6 downscaled coverage to match the coverage projection
+    wcs_str = generate_wcs_getcov_str(x, y, cov_id=cov_id)
 
     # Generate the URL for the WCS query
     url = generate_wcs_query_url(wcs_str)
@@ -65,38 +56,23 @@ async def fetch_cmip6_downscaled_point_data(
     return point_data_list
 
 
-def package_cmip6_downscaled_data(
-    metadata, point_data_list, var_id=None, start_year=None, end_year=None
-):
+def package_cmip6_downscaled_data(metadata, point_data_list):
     """
-    Package the CMIP6 monthly values into human-readable JSON format
+    Package CMIP6 downscaled daily values into human-readable JSON format
 
     Args:
-        point_data_list (list): nested list of data from Rasdaman WCPS query
-        var_id (str): variable name, if specified
-        start_year (int): optional start year for WCPS query
-        end_year (int): optional end year for WCPS query
+        metadata (dict): coverage metadata
+        point_data_list (list): list of data from Rasdaman WCPS query
 
     Returns:
-        di (dict): dictionary mirroring structure of nested list with keys derived from dim_encodings global variable
+        di (dict): time series dictionary of date/value pairs
     """
     di = dict()
-
-    # Nest point_data_list one level deeper if var_id is specified.
-    # This keeps the nesting level the same for all cases.
-    if var_id != None:
-        point_data_list = [point_data_list]
 
     time_series = generate_time_index_from_coverage_metadata(metadata)
 
     for var_coord, value in enumerate(point_data_list):
         time = time_series[var_coord].date().strftime("%Y-%m-%d")
-        di[time] = dict()
-
-        # replace NaN values (None) with -9999
-        if value is None:
-            value = -9999
-
         di[time] = round(float(value))
 
     return di
@@ -109,22 +85,45 @@ def cmip6_downscaled_about():
 
 @routes.route("/cmip6_downscaled/point/<lat>/<lon>")
 def cmip6_downscaled_point(lat, lon):
+    """
+    Fetch CMIP6 downscaled daily data for at a specified point for each variable/model/scenario,
+    then combine them all into a single nested dictionary.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+
+    Returns:
+        dict: time series data for the specified point for provided variables/models/scenarios
+
+    Notes:
+        example request (all variables): /cmip6_downscaled/point/61.5/-147
+        example request (specific variable): /cmip6_downscaled/point/61.5/-147?vars=tasmax
+        example request (specific model): /cmip6_downscaled/point/61.5/-147?models=6ModelAvg
+        example request (specific scenario): /cmip6_downscaled/point/61.5/-147?scenarios=ssp585
+    """
+    # Split and assign optional HTTP GET parameters.
     if request.args.get("vars"):
         vars = request.args.get("vars").split(",")
         varname = vars
+        logger.debug(f"Results limited to vars: {vars}")
     else:
         vars = list(cmip6_downscaled_options.keys())
 
     if request.args.get("models"):
         models = request.args.get("models").split(",")
+        logger.debug(f"Results limited to models: {models}")
     else:
         models = list(cmip6_downscaled_options["pr"].keys())
 
     if request.args.get("scenarios"):
         scenarios = request.args.get("scenarios").split(",")
+        logger.debug(f"Results limited to scenarios: {scenarios}")
     else:
         scenarios = cmip6_downscaled_options["pr"][models[0]]
 
+    # Query variable/model/scenario coverages individually, then combine them
+    # into a nested dictionary.
     results = {}
     for varname in vars:
         for model in models:
@@ -148,8 +147,6 @@ def cmip6_downscaled_point(lat, lon):
 
     results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_downscaled"))
 
-    logger.debug(f"Results limited to {vars}")
-
     if request.args.get("format") == "csv":
         place_id = request.args.get("community")
         return create_csv(
@@ -165,6 +162,19 @@ def cmip6_downscaled_point(lat, lon):
 
 
 def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
+    """
+    Fetch CMIP6 downscaled daily data for a single variable/model/scenario combo at a specified point.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+        varname (str): variable name
+        model (str): model name
+        scenario (str): scenario name
+
+    Returns:
+        dict: time series data for the specified point for a single variable/model/scenario combo
+    """
     try:
         if scenario in cmip6_downscaled_options[varname][model]:
             cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_crstephenson"
