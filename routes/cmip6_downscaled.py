@@ -122,17 +122,54 @@ def cmip6_downscaled_point(lat, lon):
     else:
         scenarios = cmip6_downscaled_options["pr"][models[0]]
 
-    # Query variable/model/scenario coverages individually, then combine them
-    # into a nested dictionary.
+    try:
+        results = fetch_all_requested_combos(lat, lon, vars, models, scenarios)
+        if isinstance(results, tuple):
+            return results
+        if request.args.get("format") == "csv":
+            place_id = request.args.get("community")
+            return create_csv(
+                results,
+                "cmip6_downscaled",
+                place_id,
+                lat,
+                lon,
+                vars=vars,
+            )
+    except ValueError:
+        return render_template("400/bad_request.html"), 400
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    return results
+
+
+def fetch_all_requested_combos(lat, lon, vars, models, scenarios):
+    """
+    Query each variable/model/scenario coverage individually and combine them all into a nested dictionary.
+
+    Args:
+        lat (float): latitude
+        lon (float): longitude
+        vars (list): list of variable names
+        models (list): list of model names
+        scenarios (list): list of scenario names
+
+    Returns:
+        dict: combined time series data for the specified point
+    """
     results = {}
     for varname in vars:
         for model in models:
             for scenario in scenarios:
+                # Return immediately if an exception is encountered for any coverage.
+                # All coverages share the same BBOX and structure, so an exception for one
+                # can be assumed to be an exception for all.
                 result = run_fetch_cmip6_downscaled_point_data(
                     lat, lon, varname, model, scenario
                 )
-                # Since all coverages share the same BBOX and GeoTIFF mask, if
-                # any coverage returns any of these error codes, return immediately.
                 if isinstance(result, tuple) and result[1] in [400, 404, 422]:
                     return result
                 else:
@@ -146,18 +183,6 @@ def cmip6_downscaled_point(lat, lon):
                         results[model][scenario][time][varname] = value
 
     results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_downscaled"))
-
-    if request.args.get("format") == "csv":
-        place_id = request.args.get("community")
-        return create_csv(
-            results,
-            "cmip6_downscaled",
-            place_id,
-            lat,
-            lon,
-            vars=vars,
-        )
-
     return results
 
 
@@ -209,18 +234,7 @@ def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
             422,
         )
 
-    # try:
-
     x, y = project_latlon(lat, lon, 3338)
-
     point_data_list = asyncio.run(fetch_cmip6_downscaled_point_data(cov_id, x, y))
     results = package_cmip6_downscaled_data(metadata, point_data_list)
-
     return results
-
-    # except ValueError:
-    #     return render_template("400/bad_request.html"), 400
-    # except Exception as exc:
-    #     if hasattr(exc, "status") and exc.status == 404:
-    #         return render_template("404/no_data.html"), 404
-    #     return render_template("500/server_error.html"), 500
