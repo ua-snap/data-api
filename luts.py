@@ -563,7 +563,7 @@ demographics_order = [
 
 cmip6_downscaled_options = {
     "tasmax": {
-        "6ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "5ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
         "CNRM-CM6-1-HR": ["historical", "ssp126", "ssp585"],
         "E3SM-2-0": ["historical", "ssp370"],
         "EC-Earth3-Veg": ["historical", "ssp370", "ssp585"],
@@ -577,7 +577,7 @@ cmip6_downscaled_options = {
         "TaiESM1": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
     },
     "tasmin": {
-        "6ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "5ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
         "CNRM-CM6-1-HR": ["historical", "ssp126", "ssp585"],
         "E3SM-2-0": ["historical", "ssp370"],
         "EC-Earth3-Veg": ["historical", "ssp126", "ssp370", "ssp585"],
@@ -591,7 +591,7 @@ cmip6_downscaled_options = {
         "TaiESM1": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
     },
     "pr": {
-        "6ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "5ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
         "CESM2": ["historical", "ssp126", "ssp585"],
         "CNRM-CM6-1-HR": ["historical", "ssp126", "ssp585"],
         "E3SM-2-0": ["historical", "ssp370"],

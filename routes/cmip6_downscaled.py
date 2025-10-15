@@ -99,7 +99,7 @@ def cmip6_downscaled_point(lat, lon):
     Notes:
         example request (all variables): /cmip6_downscaled/point/61.5/-147
         example request (specific variable): /cmip6_downscaled/point/61.5/-147?vars=tasmax
-        example request (specific model): /cmip6_downscaled/point/61.5/-147?models=6ModelAvg
+        example request (specific model): /cmip6_downscaled/point/61.5/-147?models=5ModelAvg
         example request (specific scenario): /cmip6_downscaled/point/61.5/-147?scenarios=ssp585
     """
     # Split and assign optional HTTP GET parameters.
