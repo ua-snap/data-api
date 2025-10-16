@@ -323,7 +323,7 @@ def era5wrf_area(place_id):
             return render_template("400/bad_request.html"), 400
     else:
         # if no variables are requested, use all variables minus the prohibited list
-        variables = list(era5wrf_coverage_ids.keys()) - vars_not_for_area_summaries
+        variables = [x for x in list(era5wrf_coverage_ids.keys()) if x not in vars_not_for_area_summaries]
 
     try:
         # fetch bbox datasets for requested variables
