@@ -256,8 +256,6 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
                 rasterized_polygon_array,
                 x_dim="X",
                 y_dim="Y",
-                #x_dim="X",
-                #y_dim="Y",
             )
 
             time_series_means.append(zonal_stats_dict["mean"])
@@ -303,14 +301,6 @@ def era5wrf_area(place_id):
 
     if type(poly_type) is tuple:
         return poly_type
-
-    try:
-        polygon = get_poly(place_id, crs=3338)
-    except:
-        return render_template("422/invalid_area.html"), 422
-
-    # extract and validate query parameters (mirror point query logic)
-    requested_vars = request.args.get("vars")
 
     try:
         polygon = get_poly(place_id, crs=3338)
