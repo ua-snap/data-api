@@ -1,5 +1,6 @@
 import asyncio
-
+import logging
+import time
 from flask import Blueprint, render_template, request
 
 
@@ -50,6 +51,7 @@ era5wrf_meta = {
     for key, cov_id in era5wrf_coverage_ids.items()
 }
 
+logger = logging.getLogger(__name__)
 
 def package_era5wrf_point_data(data_dict, coverage_meta):
     """Package ERA5-WRF data with time-first structure.
@@ -222,7 +224,8 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
     Returns:
         dict: Variable names mapped to their zonal statistics arrays (time series)
     """
-
+    logger.info(f"Processing zonal stats for {variables} variables")
+    time_start = time.time()
     # use first dataset to get spatial resolution and rasterization
     ds = next(iter(datasets_dict.values()))
 
@@ -262,6 +265,7 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
 
         zonal_results[var_name] = time_series_means
 
+    logger.info(f"Zonal stats processed in {time.time() - time_start} seconds")
     return zonal_results
 
 
