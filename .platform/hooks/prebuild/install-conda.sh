@@ -1,34 +1,34 @@
 #!/bin/bash
 set -e
 
-# Skip if conda already installed
-if [ -d "/opt/conda" ]; then
-  echo "Miniconda already installed at /opt/conda, skipping download and install."
+# Skip if micromamba already installed
+if [ -f "/opt/micromamba/bin/micromamba" ]; then
+  echo "Micromamba already installed at /opt/micromamba, skipping download and install."
 else
-  echo "Installing Miniconda..."
+  echo "Installing Micromamba..."
   cd /tmp
-  CONDA_INSTALLER="Miniconda3-latest-Linux-aarch64.sh"
-  curl -LO "https://repo.anaconda.com/miniconda/${CONDA_INSTALLER}"
-  bash $CONDA_INSTALLER -b -p /opt/conda
+  MICROMAMBA_URL="https://micro.mamba.pm/api/micromamba/linux-64/latest"
+  mkdir -p /opt/micromamba/bin
+  curl -Ls $MICROMAMBA_URL | tar -xvj /opt/micromamba/bin/micromamba
 fi
-
-# Ensure conda is on PATH and initialized
-echo 'export PATH="/opt/conda/bin:$PATH"' >> /etc/profile.d/conda.sh
-export PATH="/opt/conda/bin:$PATH"
-. /opt/conda/etc/profile.d/conda.sh
+  
+# Ensure micromamba is on PATH and initialized
+echo 'export PATH="/opt/micromamba/bin:$PATH"' >> /etc/profile.d/conda.sh
+echo 'export MAMBA_ROOT_PREFIX="/opt/micromamba"' >> /etc/profile.d/conda.sh
+export PATH="/opt/micromamba/bin:$PATH"
+export MAMBA_ROOT_PREFIX="/opt/micromamba"
 
 # Check if environment exists
-if conda info --envs | grep -q 'api-env'; then
-  echo "Conda environment 'api-env' already exists, skipping creation."
+if micromamba env list | grep -q 'api-env'; then
+  echo "Micromamba environment 'api-env' already exists, skipping creation."
 else
-  echo "Creating conda environment 'api-env'..."
-  conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
-  conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
-  conda create -y -n api-env -c conda-forge python=3.11 \
+  echo "Creating micromamba environment 'api-env'..."
+  micromamba create -y -n api-env -c conda-forge python=3.11 \
     flask flask-cors gunicorn aiohttp requests marshmallow \
     numpy xarray h5py h5netcdf rioxarray rasterio \
     pyproj shapely geopandas rtree fiona jaro-winkler
 fi
 
 # Always ensure EB will activate the environment on app startup
-echo 'source activate api-env' >> /etc/profile.d/conda.sh
+echo 'eval "$(micromamba shell hook --shell bash)"' >> /etc/profile.d/conda.sh
+echo 'micromamba activate api-env' >> /etc/profile.d/conda.sh
