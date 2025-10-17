@@ -24,7 +24,7 @@ from zonal_stats import (
     get_scale_factor,
     rasterize_polygon,
     interpolate,
-    calculate_zonal_stats,
+    calculate_zonal_stats_vectorized,
 )
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
@@ -247,22 +247,13 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
 
         ds = datasets_dict[var_name]
 
-        time_series_means = []  # zonal stats computed per time slice
-        for time_idx in range(ds.sizes["time"]):
+        # interpolate the entire time series for the variable
+        da_i_3d = interpolate(ds, var_name, "X", "Y", scale_factor, method="nearest")
 
-            time_slice_ds = ds.isel(time=time_idx)
-            da_i = interpolate(
-                time_slice_ds, var_name, "X", "Y", scale_factor, method="nearest"
-            )
-            zonal_stats_dict = calculate_zonal_stats(
-                da_i,
-                rasterized_polygon_array,
-                x_dim="X",
-                y_dim="Y",
-            )
-
-            time_series_means.append(zonal_stats_dict["mean"])
-
+        # calculate zonal stats for the entire time series
+        time_series_means = calculate_zonal_stats_vectorized(
+            da_i_3d, rasterized_polygon_array, "X", "Y"
+        )
         zonal_results[var_name] = time_series_means
 
     logger.info(f"Zonal stats processed in {time.time() - time_start} seconds")
