@@ -7,10 +7,10 @@ if [ -f "/opt/micromamba/bin/micromamba" ]; then
 else
   echo "Installing Micromamba..."
   cd /tmp
-  MICROMAMBA_URL="https://micro.mamba.pm/api/micromamba/linux-64/latest"
+  MICROMAMBA_URL="https://micro.mamba.pm/api/micromamba/linux-aarch64/latest"
   curl -Ls $MICROMAMBA_URL | tar -xvj bin/micromamba
   mkdir -p /opt/micromamba/bin
-  sudo mv bin/micromamba /opt/micromamba/bin/
+  mv bin/micromamba /opt/micromamba/bin/
   rmdir bin
 fi
 
