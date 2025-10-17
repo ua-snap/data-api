@@ -256,7 +256,7 @@ def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
         )
         zonal_results[var_name] = time_series_means
 
-    logger.info(f"Zonal stats processed in {time.time() - time_start} seconds")
+    logger.info(f"Zonal stats processed in {round(time.time() - time_start, 2)} seconds")
     return zonal_results
 
 
