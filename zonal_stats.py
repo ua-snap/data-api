@@ -126,9 +126,9 @@ def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim):
     return zonal_stats
 
 
-def calculate_zonal_stats_vectorized(da_i, polygon_array, x_dim, y_dim):
+def calculate_zonal_means_vectorized(da_i, polygon_array, x_dim, y_dim):
     """
-    Calculate zonal statistics for a 3D xarray data array (time, y, x)
+    Calculate zonal means for a 3D xarray data array (time, y, x)
     and a 2D rasterized polygon array of the same shape.
     Args:
         da_i (xarray.DataArray): 3D xarray data array, probably interpolated
