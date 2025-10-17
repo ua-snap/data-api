@@ -8,10 +8,12 @@ else
   echo "Installing Micromamba..."
   cd /tmp
   MICROMAMBA_URL="https://micro.mamba.pm/api/micromamba/linux-64/latest"
+  curl -Ls $MICROMAMBA_URL | tar -xvj bin/micromamba
   mkdir -p /opt/micromamba/bin
-  curl -Ls $MICROMAMBA_URL | tar -xvj /opt/micromamba/bin/micromamba
+  sudo mv bin/micromamba /opt/micromamba/bin/
+  rmdir bin
 fi
-  
+
 # Ensure micromamba is on PATH and initialized
 echo 'export PATH="/opt/micromamba/bin:$PATH"' >> /etc/profile.d/conda.sh
 echo 'export MAMBA_ROOT_PREFIX="/opt/micromamba"' >> /etc/profile.d/conda.sh
