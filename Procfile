@@ -1,1 +1,1 @@
-web: export PATH="/opt/micromamba/bin:$PATH" && export MAMBA_ROOT_PREFIX="/opt/micromamba" && eval "$(micromamba shell hook --shell bash)" && micromamba activate api-env && gunicorn --workers 5 --timeout 600 -b 0.0.0.0:8000 application:app
+web: export PATH="/opt/micromamba/bin:$PATH" && export MAMBA_ROOT_PREFIX="/opt/micromamba" && eval "$(micromamba shell hook --shell bash)" && micromamba activate api-env && gunicorn --workers 5 --timeout 600 --chdir /var/app/current -b 0.0.0.0:8000 application:app
