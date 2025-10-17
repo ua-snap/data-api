@@ -269,6 +269,8 @@ def package_era5wrf_area_data(zonal_results, coverage_meta, variables):
     Returns:
         dict: Time-first structured data {date: {variable: zonal_mean}}
     """
+    logger.info(f"Packaging area data for {variables} variables")
+    time_start = time.time()
     time_index = generate_time_index_from_coverage_metadata(coverage_meta)
 
     # package data with time keys at top level, same as point query
@@ -286,6 +288,7 @@ def package_era5wrf_area_data(zonal_results, coverage_meta, variables):
                 # round to 1 decimal for consistency with point queries
                 packaged_data[date_key][variable] = round(zonal_results[variable][i], 1)
 
+    logger.info(f"Area data packaged in {round(time.time() - time_start, 2)} seconds")
     return packaged_data
 
 
