@@ -1,21 +1,30 @@
 import asyncio
-
+import logging
+import time
 from flask import Blueprint, render_template, request
 
 
 from generate_urls import generate_wcs_query_url
-from generate_requests import generate_wcs_getcov_str
+from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
     fetch_data,
     describe_via_wcps,
+    fetch_bbox_netcdf,
+    get_poly,
 )
-
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
     validate_latlon_in_bboxes,
     project_latlon,
     generate_time_index_from_coverage_metadata,
+    validate_var_id,
+)
+from zonal_stats import (
+    get_scale_factor,
+    rasterize_polygon,
+    interpolate,
+    calculate_zonal_means_vectorized,
 )
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
@@ -42,6 +51,7 @@ era5wrf_meta = {
     for key, cov_id in era5wrf_coverage_ids.items()
 }
 
+logger = logging.getLogger(__name__)
 
 def package_era5wrf_point_data(data_dict, coverage_meta):
     """Package ERA5-WRF data with time-first structure.
@@ -168,6 +178,168 @@ def era5wrf_point(lat, lon):
             return create_csv(
                 postprocessed, "era5wrf_4km", place_id=place_id, lat=lat, lon=lon
             )
+
+        return postprocessed
+
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+# Polygon endpoint stuff
+async def fetch_era5_wrf_area_data(polygon, variables):
+    """Fetch ERA5-WRF bbox data for multiple variables.
+
+    Args:
+        polygon (GeoDataFrame): Polygon for which to compute zonal statistics
+        variables (list): List of variable names to fetch
+
+    Returns:
+        dict: Variable names mapped to xarray datasets
+    """
+    bbox_bounds = polygon.total_bounds  # (xmin, ymin, xmax, ymax)
+
+    tasks = []
+    for var_name in variables:
+        cov_id = era5wrf_coverage_ids[var_name]
+
+        request_str = generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id)
+
+        url = generate_wcs_query_url(request_str)
+        tasks.append(fetch_bbox_netcdf([url]))
+
+    datasets = await asyncio.gather(*tasks)
+    return {var_name: ds for var_name, ds in zip(variables, datasets)}
+
+
+def process_era5wrf_zonal_stats(polygon, datasets_dict, variables):
+    """Process zonal statistics for ERA5-WRF datasets.
+
+    Args:
+        polygon (GeoDataFrame): Target polygon
+        datasets_dict (dict): Variable names mapped to xarray datasets
+        variables (list): List of variable names
+
+    Returns:
+        dict: Variable names mapped to their zonal statistics arrays (time series)
+    """
+    logger.info(f"Processing zonal stats for {variables} variables")
+    time_start = time.time()
+    # use first dataset to get spatial resolution and rasterization
+    ds = next(iter(datasets_dict.values()))
+
+    # get scale factor once, not per variable or time slice!
+    spatial_resolution = ds.rio.resolution()
+    grid_cell_area_m2 = abs(spatial_resolution[0]) * abs(spatial_resolution[1])
+    polygon_area_m2 = polygon.area
+    scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
+
+    # create an initial array for the basis of polygon rasterization
+    # why? polygon rasterization bogs down hard when doing it in the loop
+    da_i = interpolate(
+        ds.isel(time=0), variables[0], "X", "Y", scale_factor, method="nearest"
+    )
+    rasterized_polygon_array = rasterize_polygon(da_i, "X", "Y", polygon)
+
+    zonal_results = {}
+    for var_name in variables:
+
+        ds = datasets_dict[var_name]
+
+        # interpolate the entire time series for the variable
+        da_i_3d = interpolate(ds, var_name, "X", "Y", scale_factor, method="nearest")
+
+        # calculate zonal stats for the entire time series
+        time_series_means = calculate_zonal_means_vectorized(
+            da_i_3d, rasterized_polygon_array, "X", "Y"
+        )
+        zonal_results[var_name] = time_series_means
+
+    logger.info(f"Zonal stats processed in {round(time.time() - time_start, 2)} seconds")
+    return zonal_results
+
+
+def package_era5wrf_area_data(zonal_results, coverage_meta, variables):
+    """Package ERA5-WRF area data with time-first structure.
+    Args:
+        zonal_results (dict): Variable names mapped to zonal statistics
+        coverage_meta (dict): Coverage metadata containing time axis
+        variables (list): List of variable names
+    Returns:
+        dict: Time-first structured data {date: {variable: zonal_mean}}
+    """
+    logger.info(f"Packaging area data for {variables} variables")
+    time_start = time.time()
+    time_index = generate_time_index_from_coverage_metadata(coverage_meta)
+
+    # package data with time keys at top level, same as point query
+    packaged_data = {}
+    for i, timestamp in enumerate(time_index):
+        date_key = timestamp.strftime("%Y-%m-%d")
+        packaged_data[date_key] = {}
+
+        # add each variable's zonal mean for this date
+        for variable in variables:
+            if (
+                i < len(zonal_results[variable])
+                and zonal_results[variable][i] is not None
+            ):
+                # round to 1 decimal for consistency with point queries
+                packaged_data[date_key][variable] = round(zonal_results[variable][i], 1)
+
+    logger.info(f"Area data packaged in {round(time.time() - time_start, 2)} seconds")
+    return packaged_data
+
+
+@routes.route("/era5wrf/area/<place_id>")
+def era5wrf_area(place_id):
+
+    poly_type = validate_var_id(place_id)
+
+    if type(poly_type) is tuple:
+        return poly_type
+
+    try:
+        polygon = get_poly(place_id, crs=3338)
+    except:
+        return render_template("422/invalid_area.html"), 422
+
+    # extract and validate query parameters (mirror point query logic)
+    requested_vars = request.args.get("vars")
+    # variables prohibited from area summaries
+    vars_not_for_area_summaries = ["wspd10_max", "wspd10_mean", "wdir10_mean"]
+
+    # handle variable selection, no vars means all variables
+    if requested_vars:
+        variables = requested_vars.split(",")
+        for var in variables:
+            if var not in era5wrf_coverage_ids:
+                return render_template("400/bad_request.html"), 400
+        # some variables should not be summarized over an area, so we prohibit them from being requested
+        if any(var in variables for var in vars_not_for_area_summaries):
+            return render_template("400/bad_request.html"), 400
+    else:
+        # if no variables are requested, use all variables minus the prohibited list
+        variables = [x for x in list(era5wrf_coverage_ids.keys()) if x not in vars_not_for_area_summaries]
+
+    try:
+        # fetch bbox datasets for requested variables
+        datasets_dict = asyncio.run(fetch_era5_wrf_area_data(polygon, variables))
+        zonal_results = process_era5wrf_zonal_stats(polygon, datasets_dict, variables)
+        reference_meta = era5wrf_meta[
+            "t2_mean"
+        ]  # any coverage, they all have the same time spans
+        packaged_data = package_era5wrf_area_data(
+            zonal_results, reference_meta, variables
+        )
+
+        postprocessed = prune_nulls_with_max_intensity(
+            postprocess(packaged_data, "era5wrf_4km")
+        )
+
+        if request.args.get("format") == "csv":
+            return create_csv(postprocessed, "era5wrf_4km", place_id=place_id)
 
         return postprocessed
 

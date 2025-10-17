@@ -105,6 +105,8 @@
         Chaining parameters is also supported, e.g.
         <code>?vars=t2_mean,rh2_mean&format=csv</code>.
         <br />
+        All parameter combinations work for both point and area queries.
+        <br />
       </td>
     </tr>
   </tfoot>
@@ -135,6 +137,85 @@
   },
   ...
 }</code></pre>
+
+<h4>Area query</h4>
+<p>
+  Area queries return zonal statistics (mean values) aggregated over a specified
+  polygon area. Values represent the spatial average of all 4 km by 4 km grid
+  cells within the polygon boundary. Wind variables are not well suited to zonal statistics, so they are not available for area queries. Learn more about what
+  <a href="/places">types of places</a> are available for area queries.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Return mean values over area for all variables, full time range</td>
+      <td><a href="/era5wrf/area/19070506">/era5wrf/area/19070506</a></td>
+    </tr>
+    <tr>
+      <td>Return mean values over area for selected variables</td>
+      <td>
+        <a href="/era5wrf/area/19070506?vars=t2_mean,rh2_mean"
+          >/era5wrf/area/19070506?vars=t2_mean,rh2_mean</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>Return mean values over area for selected variables in CSV format</td>
+      <td>
+        <a href="/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv"
+          >/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Area queries support the same parameters as point queries:
+        <code>vars</code> (comma-separated variable names), and
+        <code>format=csv</code> for CSV output.
+        <br />
+        Results represent mean values of all 4 km by 4 km grid cells within the
+        specified polygon area.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Area Query Output</h4>
+
+<p>
+  Area queries return the same JSON structure as point queries, but values
+  represent spatial averages rather than point measurements:
+</p>
+
+<pre><code>{
+  "2012-06-01": {
+    "rh2_mean": 85.7,
+    "t2_mean": 8.2
+  },
+  "2012-06-02": {
+    "rh2_mean": 82.1,
+    "t2_mean": 9.5
+  },
+  "2012-06-03": {
+    "rh2_mean": 78.9,
+    "t2_mean": 10.1
+  },
+  ...
+}</code></pre>
+
+<p>
+  Each value is the mean of all valid grid cells within the polygon boundary for
+  that date.
+</p>
 
 <h3>References and Data Sources</h3>
 <table>
