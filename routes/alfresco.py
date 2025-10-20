@@ -1,6 +1,7 @@
 import asyncio
 import itertools
 import logging
+import time
 
 import geopandas as gpd
 from flask import (
@@ -109,6 +110,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     crs = var_ep_lu[var_ep]["crs"]
     ds = asyncio.run(fetch_alf_bbox_data(polygon.total_bounds, cov_id_str))
 
+    start_time = time.time()
     # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
     # and create a dict to hold the results for each combo
     all_dims = ds[bandname].dims
@@ -143,7 +145,8 @@ def run_aggregate_var_polygon(var_ep, poly_id):
             ] = result
 
     aggr_results = remove_invalid_dim_combos(var_ep, aggr_results)
-
+    end_time = time.time()
+    logger.info(f"Completed in : {end_time - start_time} seconds")
     return aggr_results
 
 
@@ -151,11 +154,14 @@ def remove_invalid_dim_combos(var_ep, results):
     """Remove data from invalid era/model/scenario dimension combinations
 
     Args:
+        var_ep (str): "flammability" or "veg_type"
         results (dict): point or area results data
 
     Returns:
         results (dict): point or area results data with invalid combos removed
     """
+    start_time = time.time()
+    logger.debug(f"Removing invalid dimension combinations for {var_ep}")
     dim_encodings = var_ep_lu[var_ep]["dim_encodings"]
 
     eras = list(dim_encodings["era"].values())
@@ -181,6 +187,8 @@ def remove_invalid_dim_combos(var_ep, results):
             results[era].pop("CRU-TS", None)
             results[era].pop("MODEL-SPINUP", None)
 
+    end_time = time.time()
+    logger.info(f"Completed removing invalid dimension combinations in : {end_time - start_time:.4f} seconds")
     return results
 
 
