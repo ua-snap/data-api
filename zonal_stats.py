@@ -3,10 +3,14 @@ Read more about the Zonal Oversampling Process (ZOP) here: https://github.com/ua
 """
 
 import logging
+import time
+
+
 import numpy as np
 from rasterio.features import rasterize
 from rasterio.crs import CRS
 from flask import render_template
+import xarray as xr
 
 logger = logging.getLogger(__name__)
 
@@ -172,3 +176,78 @@ def interpolate_and_compute_zonal_stats(
     )
 
     return zonal_stats_dict
+
+
+def vectorized_zonal_means_nd(
+    polygon,
+    dataset,
+    crs,
+    var_name="Gray",
+    x_dim="X",
+    y_dim="Y",
+    method="nearest",
+):
+    """Compute vectorized zonal means over all non-spatial dims.
+
+    Args:
+        polygon (geopandas.GeoDataFrame): polygon to compute zonal statistics for. Must be in the same CRS as the dataset.
+        dataset (xarray.DataSet): xarray dataset returned from fetching a bbox from a coverage
+        crs (str): coordinate reference system of the dataset. Must be in the same CRS as the polygon.
+        var_name (str): name of the variable to interpolate. Default is "Gray".
+        x_dim (str): name of the x dimension. Default is "X".
+        y_dim (str): name of the y dimension. Default is "Y".
+        method (str): interpolation method for spatial dims. Default is "nearest".
+
+    Returns:
+        xarray.DataArray | tuple: means over spatial dims for each non-spatial coordinate, or (template, code) on error.
+    """
+    time_start = time.time()
+    # Validate CRS alignment
+    
+    if str(polygon.crs) != crs:
+        logger.debug("Polygon and dataset CRS do not match")
+        return render_template("500/server_error.html"), 500
+
+    if not CRS.from_string(crs).is_projected:
+        logger.debug("Dataset CRS is not projected")
+        return render_template("500/server_error.html"), 500
+
+    # Ensure spatial info
+    dataset.rio.set_spatial_dims(x_dim, y_dim)
+    dataset.rio.write_crs(crs, inplace=True)
+
+    # Compute scale factor, assuming square pixels and projected CRS in meters
+    spatial_resolution = dataset.rio.resolution()
+    grid_cell_area_m2 = abs(spatial_resolution[0]) * abs(spatial_resolution[1])
+    polygon_area_m2 = polygon.area
+    scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
+
+    # Interpolate spatial dimensions once, broadcasting across all other dims
+    x = x_dim
+    y = y_dim
+    new_lon = np.linspace(dataset[x][0].item(), dataset[x][-1].item(), dataset.sizes[x] * scale_factor)
+    new_lat = np.linspace(dataset[y][0].item(), dataset[y][-1].item(), dataset.sizes[y] * scale_factor)
+
+    da = dataset[var_name]
+    da_i = da.interp(method=method, coords={x: new_lon, y: new_lat})
+    da_i = da_i.rio.set_spatial_dims(x_dim, y_dim, inplace=True)
+
+    # Rasterize polygon once at interpolated resolution
+    mask_np = rasterize(
+        [(polygon.geometry.iloc[0], 1)],
+        out_shape=(da_i[y_dim].shape[0], da_i[x_dim].shape[0]),
+        transform=da_i.rio.transform(recalc=True),
+        fill=0,
+        all_touched=False,
+    ).astype(bool)
+
+    # Make mask a DataArray so it broadcasts over all non-spatial dims
+    mask = xr.DataArray(mask_np, dims=(y_dim, x_dim), coords={y_dim: da_i[y_dim], x_dim: da_i[x_dim]})
+
+    # Apply mask and compute mean across spatial dims, retaining non-spatial dims
+    masked = da_i.where(mask)
+    means = masked.mean(dim=(y_dim, x_dim), skipna=True)
+
+    time_end = time.time()
+    logger.info(f"Vectorized zonal means for {var_name} completed in {time_end - time_start:.2f} seconds")
+    return means

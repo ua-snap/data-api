@@ -1,5 +1,7 @@
 import asyncio
 import itertools
+import logging
+
 import geopandas as gpd
 from flask import (
     Blueprint,
@@ -18,7 +20,7 @@ from fetch_data import (
     describe_via_wcps,
     get_all_possible_dimension_combinations,
 )
-from zonal_stats import interpolate_and_compute_zonal_stats
+from zonal_stats import vectorized_zonal_means_nd
 from validate_request import get_coverage_encodings, get_coverage_crs_str
 from csv_functions import create_csv
 from validate_request import (
@@ -28,6 +30,8 @@ from validate_request import (
 from postprocessing import nullify_and_prune, postprocess
 from config import WEST_BBOX, EAST_BBOX
 from . import routes
+
+logger = logging.getLogger(__name__)
 
 alfresco_api = Blueprint("alfresco_api", __name__)
 
@@ -98,6 +102,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     Returns:
         aggr_results (dict): data representing zonal stats within the polygon.
     """
+    logger.debug(f"Running aggregate var polygon for {var_ep} with polygon ID {poly_id}")
     polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     bandname = var_ep_lu[var_ep]["bandnames"][0]
@@ -115,20 +120,23 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     )
     aggr_results = generate_nested_dict(dim_combos)
 
-    # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
+    # Vectorized zonal means across all non-XY dims
+    means_da = vectorized_zonal_means_nd(polygon, ds, crs, var_name=bandname)
+    # If an error template/tuple is returned (CRS issues), propagate as-is
+    if isinstance(means_da, tuple):
+        return means_da
+
+    # Populate aggregated results using the vectorized means
     for coords, dim_combo in zip(iter_coords, dim_combos):
         sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        combo_ds = ds.sel(sel_di)
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-            polygon, combo_ds, crs
-        )
-        result = combo_zonal_stats_dict["mean"]
+        mean_val = means_da.sel(sel_di).item()
+
         if var_ep == "flammability":
-            result = round(result, 4)
+            result = round(float(mean_val), 4)
             # use the dim_combo to index into the results dict (era, model, scenario)
             aggr_results[dim_combo[0]][dim_combo[1]][dim_combo[2]] = result
         elif var_ep == "veg_type":
-            result = round(result * 100, 2)
+            result = round(float(mean_val) * 100, 2)
             # use the dim_combo to index into the results dict (era, model, scenario, veg_type)
             aggr_results[dim_combo[0]][dim_combo[1]][dim_combo[2]][
                 dim_combo[3]
@@ -177,17 +185,14 @@ def remove_invalid_dim_combos(var_ep, results):
 
 
 @routes.route("/alfresco/")
-@routes.route("/alfresco/abstract/")
 @routes.route("/alfresco/flammability/")
 @routes.route("/alfresco/veg_type/")
 @routes.route("/alfresco/flammability/point/")
 @routes.route("/alfresco/veg_type/point/")
 @routes.route("/alfresco/flammability/area/")
 @routes.route("/alfresco/veg_type/area/")
-@routes.route("/alfresco/area/")
 @routes.route("/alfresco/flammability/local/")
 @routes.route("/alfresco/veg_type/local/")
-@routes.route("/alfresco/local/")
 def alfresco_about():
     return render_template("documentation/alfresco.html")
 
@@ -266,10 +271,10 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
     if type(poly_type) is tuple:
         return poly_type
 
-    try:
-        poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
-    except:
-        return render_template("422/invalid_area.html"), 422
+    #try:
+    poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
+    # except:
+    #     return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:
         poly_pkg = nullify_and_prune(poly_pkg, var_ep)
