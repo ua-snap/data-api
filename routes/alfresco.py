@@ -1,4 +1,7 @@
 import asyncio
+import logging
+import time
+
 import itertools
 import geopandas as gpd
 from flask import (
@@ -30,7 +33,7 @@ from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
 alfresco_api = Blueprint("alfresco_api", __name__)
-
+logger = logging.getLogger(__name__)
 var_ep_lu = {
     "flammability": {
         "cov_id_str": "alfresco_relative_flammability_30yr",
@@ -98,12 +101,13 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     Returns:
         aggr_results (dict): data representing zonal stats within the polygon.
     """
+    
     polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     bandname = var_ep_lu[var_ep]["bandnames"][0]
     crs = var_ep_lu[var_ep]["crs"]
     ds = asyncio.run(fetch_alf_bbox_data(polygon.total_bounds, cov_id_str))
-
+    start_time = time.time()
     # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
     # and create a dict to hold the results for each combo
     all_dims = ds[bandname].dims
@@ -135,7 +139,8 @@ def run_aggregate_var_polygon(var_ep, poly_id):
             ] = result
 
     aggr_results = remove_invalid_dim_combos(var_ep, aggr_results)
-
+    end_time = time.time()
+    logger.info(f"Time taken to run aggregate var polygon for {var_ep}: {end_time - start_time} seconds")
     return aggr_results
 
 
