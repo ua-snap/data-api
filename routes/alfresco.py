@@ -103,7 +103,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     Returns:
         aggr_results (dict): data representing zonal stats within the polygon.
     """
-    logger.debug(f"Running aggregate var polygon for {var_ep} with polygon ID {poly_id}")
+    logger.debug(
+        f"Running aggregate var polygon for {var_ep} with polygon ID {poly_id}"
+    )
     polygon = get_poly(poly_id)
     cov_id_str = var_ep_lu[var_ep]["cov_id_str"]
     bandname = var_ep_lu[var_ep]["bandnames"][0]
@@ -145,8 +147,9 @@ def run_aggregate_var_polygon(var_ep, poly_id):
             ] = result
 
     aggr_results = remove_invalid_dim_combos(var_ep, aggr_results)
-    end_time = time.time()
-    logger.info(f"Completed in : {end_time - start_time} seconds")
+    logger.info(
+        f"Completed zonal mean processing in : {time.time() - start_time:.2f} seconds"
+    )
     return aggr_results
 
 
@@ -160,7 +163,6 @@ def remove_invalid_dim_combos(var_ep, results):
     Returns:
         results (dict): point or area results data with invalid combos removed
     """
-    start_time = time.time()
     logger.debug(f"Removing invalid dimension combinations for {var_ep}")
     dim_encodings = var_ep_lu[var_ep]["dim_encodings"]
 
@@ -187,8 +189,6 @@ def remove_invalid_dim_combos(var_ep, results):
             results[era].pop("CRU-TS", None)
             results[era].pop("MODEL-SPINUP", None)
 
-    end_time = time.time()
-    logger.info(f"Completed removing invalid dimension combinations in : {end_time - start_time:.4f} seconds")
     return results
 
 
@@ -279,10 +279,10 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
     if type(poly_type) is tuple:
         return poly_type
 
-    #try:
-    poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
-    # except:
-    #     return render_template("422/invalid_area.html"), 422
+    try:
+        poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
+    except:
+        return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:
         poly_pkg = nullify_and_prune(poly_pkg, var_ep)
