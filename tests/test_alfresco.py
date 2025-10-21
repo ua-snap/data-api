@@ -78,7 +78,7 @@ def test_alfresco_flammability_invalid_area(client):
     Tests the /alfresco/flammability/area/<id> endpoint to ensure that a 422 error is returned for an invalid area.
     """
     # Get the actual response from the endpoint
-    response = client.get("/alfresco/flammability/area/foobar")
+    response = client.get("/flammability/area/foobar")
     assert response.status_code == 422
 
 
