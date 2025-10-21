@@ -206,10 +206,11 @@ def construct_get_annual_mmm_stat_wcps_query_string(
 ):
     """
     Construct a WCPS query string to compute annual min, mean, or max statistics over a time range.
+    Note that using an empty string in the operator will return all annual values without aggregation.
 
     Args:
         coverage (str): The coverage identifier.
-        operator (str): The statistical operation to perform ('min', 'max', 'mean').
+        operator (str): The statistical operation to perform ('min', 'max', 'mean', or '' to return all values).
         start_year (int): The starting year of the time range.
         end_year (int): The ending year of the time range.
         x_coord (float or str): The x-coordinate for the point query.
