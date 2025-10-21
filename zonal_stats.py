@@ -202,8 +202,8 @@ def vectorized_zonal_means_nd(
         xarray.DataArray | tuple: means over spatial dims for each non-spatial coordinate, or (template, code) on error.
     """
     time_start = time.time()
+
     # Validate CRS alignment
-    
     if str(polygon.crs) != crs:
         logger.debug("Polygon and dataset CRS do not match")
         return render_template("500/server_error.html"), 500
