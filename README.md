@@ -14,7 +14,7 @@ Alternatively, create a new `conda` environment like so:
 ```
 conda create -n api python=3.11
 conda activate api
-conda install -c conda-forge flask flask-cors gunicorn aiohttp requests marshmallow numpy xarray h5py h5netcdf rioxarray rasterio pyproj shapely geopandas rtree fiona jaro-winkler
+conda install -c conda-forge flask flask-cors gunicorn aiohttp requests marshmallow numpy xarray h5py h5netcdf rioxarray rasterio pyproj shapely geopandas rtree fiona jaro-winkler pytest
 ```
 
 ## Running application
@@ -74,3 +74,29 @@ git commit -am'update requirements.txt'
 Instructions for this can be found here:
 
 - [SNAP Data API Instructions](https://docs.google.com/document/d/1Z31-mkDE0skITOuOOMBQwuO2I8jUDuApm7VX-A9v1LA/edit?usp=sharing)
+
+## Test Suite
+### Running Tests
+Run `pytest` or `pytest -v` from the root directory of this repository.
+
+The test client is created from the same Flask "app" object that a local development instance uses (see `conftest.py`). Basically everything is the same, except there is no actual network socket opened. Stuff that is inbound to the API happens in-memory (no server or port), but the outbound stuff (requests to Rasdaman and Geoserver) still creates normal HTTP requests.
+
+### Adding Tests
+#### Area Query JSON Integrity Blueprint
+- test name must be prefixed with `test_`
+- match the name to the routing, exactly
+  - e.g. `test_alfresco_flammability_area` maps to `/alfresco/flammability/area`
+- assert the expected HTTP status code
+- assert the response from the local client maps to the reference JSON
+   - add reference JSON via `curl`
+   - `curl -sS https://earthmaps.io/taspr/area/19010208 -o tests/taspr_area_19010208.json`
+   - ensure the reference JSON file name maps exactly to the route
+
+### Test Guidance
+ - Keep it simple
+ - Favor integration-scope over unit-scope
+ - Ask: is this test useful?
+ - Consider testing overhead (e.g., the largest polygons could be annoying test cases because of their lengthy durations)
+ - Don't add tests to just add tests, 100% coverage not realistically the goal
+ - Let the test suite evolve organically: fiddling with a tricky bit of code and want to be able to move with more confidence? Good signal to add a test
+ - Consider adding conjugate, non-happy path tests, e.g., does `/route/area/null*$(!*)` yield the expected status code?
