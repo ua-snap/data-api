@@ -441,7 +441,7 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
 def count_days(operator, threshold, units, variable, lat, lon, start_year, end_year):
     # example usage:
     # http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate the "summer days" indicator
-    # http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate the "deep winter days" indicator
+    # http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate the "deep winter days" indicator
     # http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
     # http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "wet days" indicator
 
