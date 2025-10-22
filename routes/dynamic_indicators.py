@@ -65,7 +65,7 @@ def validate_latlon_and_reproject_to_epsg_3338(lat, lon):
     lat = float(lat)
     lon = float(lon)
     if not latlon_is_numeric_and_in_geodetic_range(lat, lon):
-        raise ValueError("Latitude and/or longitude are out of range or not numeric.")
+        return render_template("400/bad_request.html"), 400
 
     # TODO: add step to validate geographic lat/lon with geotiff
 
@@ -76,7 +76,7 @@ def validate_latlon_and_reproject_to_epsg_3338(lat, lon):
 
 def validate_operator(operator):
     if operator not in ["above", "below"]:
-        raise ValueError("Operator must be 'above' or 'below'.")
+        return render_template("400/bad_request.html"), 400
     if operator == "above":
         operator = ">"
     else:
@@ -95,14 +95,14 @@ def validate_units_threshold_and_variable(units, threshold, variable):
                 threshold = float(threshold)
     elif variable == "pr":
         if units not in ["mm", "in"]:
-            raise ValueError("Units for precipitation must be 'mm' or 'in'.")
+            return render_template("400/bad_request.html"), 400
         if threshold is not None:
             if units == "in":
                 threshold = float(threshold) * 25.4
             else:
                 threshold = float(threshold)
     else:
-        raise ValueError("Variable must be 'tasmax', 'tasmin', or 'pr'.")
+        return render_template("400/bad_request.html"), 400
 
     # TODO: validate threshold ranges based on variable if needed
     # ie, temperature thresholds within reasonable limits, no negative precip allowed, etc.
@@ -112,7 +112,7 @@ def validate_units_threshold_and_variable(units, threshold, variable):
 
 def validate_stat(stat):
     if stat not in ["max", "min", "mean", "sum"]:
-        raise ValueError("Stat must be 'max', 'min', 'mean', or 'sum'.")
+        return render_template("400/bad_request.html"), 400
     if stat == "mean":
         stat = "avg"  # rasdaman uses 'avg' instead of 'mean' in WCPS queries
     return stat
@@ -125,9 +125,9 @@ def validate_rank_position_and_direction(position, direction):
         if position < 1 or position > 365:
             raise ValueError
     except ValueError:
-        raise ValueError("Position must be an integer between 1 and 365.")
+        return render_template("400/bad_request.html"), 400
     if direction not in ["highest", "lowest"]:
-        raise ValueError("Direction must be 'highest' or 'lowest'.")
+        return render_template("400/bad_request.html"), 400
     return position, direction
 
 
@@ -454,21 +454,26 @@ def count_days(operator, threshold, units, variable, lat, lon, start_year, end_y
             units=units, threshold=threshold, variable=variable
         )
         validate_year(start_year, end_year)
-    except ValueError as e:
-        return {"error": str(e)}, 400
+    except:
+        return render_template("400/bad_request.html"), 400
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
-    data = asyncio.run(
-        fetch_count_days_data(var_coverages, year_ranges, threshold, operator, lon, lat)
-    )
-
-    result = postprocess_count_days(data, start_year, end_year)
-
-    return result
+    try:
+        data = asyncio.run(
+            fetch_count_days_data(
+                var_coverages, year_ranges, threshold, operator, lon, lat
+            )
+        )
+        result = postprocess_count_days(data, start_year, end_year)
+        return result
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
 
 @routes.route(
@@ -490,21 +495,24 @@ def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
             units=units, threshold=None, variable=variable
         )
         validate_year(start_year, end_year)
-    except ValueError as e:
-        return {"error": str(e)}, 400
+    except:
+        return render_template("400/bad_request.html"), 400
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
-    data = asyncio.run(
-        fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
-    )
-
-    result = postprocess_annual_stat(data, start_year, end_year, units)
-
-    return result
+    try:
+        data = asyncio.run(
+            fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
+        )
+        result = postprocess_annual_stat(data, start_year, end_year, units)
+        return result
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
 
 @routes.route(
@@ -520,10 +528,10 @@ def get_annual_rank(position, direction, variable, lat, lon, start_year, end_yea
         position, direction = validate_rank_position_and_direction(position, direction)
         lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
         validate_year(start_year, end_year)
-    except ValueError as e:
-        return {"error": str(e)}, 400
+    except:
+        return render_template("400/bad_request.html"), 400
     if variable not in ["tasmax", "tasmin", "pr"]:
-        raise ValueError("Variable must be 'tasmax', 'tasmin', or 'pr'.")
+        return render_template("400/bad_request.html"), 400
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
@@ -533,11 +541,15 @@ def get_annual_rank(position, direction, variable, lat, lon, start_year, end_yea
     stat = (
         ""  # omitting stat will force a return of all values, which we need for ranking
     )
-
-    data = asyncio.run(
-        fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
-    )
-
-    result = postprocess_annual_rank(data, start_year, end_year, position, direction)
-
-    return result
+    try:
+        data = asyncio.run(
+            fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
+        )
+        result = postprocess_annual_rank(
+            data, start_year, end_year, position, direction
+        )
+        return result
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
