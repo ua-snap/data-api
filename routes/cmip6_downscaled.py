@@ -24,6 +24,17 @@ logger = logging.getLogger(__name__)
 
 cmip6_api = Blueprint("cmip6_downscaled_api", __name__)
 
+all_possible_vars = list(cmip6_downscaled_options.keys())
+all_possible_models = set(
+    model for var in cmip6_downscaled_options.values() for model in var.keys()
+)
+all_possible_scenarios = set(
+    scenario
+    for var in cmip6_downscaled_options.values()
+    for model in var.values()
+    for scenario in model
+)
+
 
 async def get_cmip6_metadata(cov_id):
     """Get the coverage metadata and encodings for CMIP6 downscaled daily coverage"""
@@ -73,7 +84,11 @@ def package_cmip6_downscaled_data(metadata, point_data_list):
 
     for var_coord, value in enumerate(point_data_list):
         time = time_series[var_coord].date().strftime("%Y-%m-%d")
-        di[time] = round(float(value))
+
+        if value is None:
+            di[time] = None
+        else:
+            di[time] = round(float(value))
 
     return di
 
@@ -102,22 +117,28 @@ def cmip6_downscaled_point(lat, lon):
         example request (specific model): /cmip6_downscaled/point/61.5/-147?models=5ModelAvg
         example request (specific scenario): /cmip6_downscaled/point/61.5/-147?scenarios=ssp585
     """
+
     # Split and assign optional HTTP GET parameters.
     if request.args.get("vars"):
         vars = request.args.get("vars").split(",")
-        varname = vars
+        if not all(var in all_possible_vars for var in vars):
+            return render_template("400/bad_request.html"), 400
         logger.debug(f"Results limited to vars: {vars}")
     else:
         vars = list(cmip6_downscaled_options.keys())
 
     if request.args.get("models"):
         models = request.args.get("models").split(",")
+        if not all(model in all_possible_models for model in models):
+            return render_template("400/bad_request.html"), 400
         logger.debug(f"Results limited to models: {models}")
     else:
         models = list(cmip6_downscaled_options["pr"].keys())
 
     if request.args.get("scenarios"):
         scenarios = request.args.get("scenarios").split(",")
+        if not all(scenario in all_possible_scenarios for scenario in scenarios):
+            return render_template("400/bad_request.html"), 400
         logger.debug(f"Results limited to scenarios: {scenarios}")
     else:
         scenarios = cmip6_downscaled_options["pr"][models[0]]
@@ -200,14 +221,15 @@ def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
     Returns:
         dict: time series data for the specified point for a single variable/model/scenario combo
     """
-    try:
-        if scenario in cmip6_downscaled_options[varname][model]:
-            cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_crstephenson"
-        else:
-            return render_template("400/bad_request.html"), 400
-    except:
-        return render_template("400/bad_request.html"), 400
 
+    # If we have made it this far, the model and scenario are valid.
+    # If they are not found for the variable, return empty results.
+    if model not in cmip6_downscaled_options[varname]:
+        return {}
+    if scenario not in cmip6_downscaled_options[varname][model]:
+        return {}
+
+    cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_crstephenson"
     cov_id = cov_id.replace("-", "_")
 
     metadata = asyncio.run(get_cmip6_metadata(cov_id))
