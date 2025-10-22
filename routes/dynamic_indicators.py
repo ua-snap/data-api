@@ -53,11 +53,11 @@ time_domains = {
     "historical": (
         1966,
         2014,
-    ),  # actual data starts at 1965, but we are having an issue with noon time stamps at lower bound
+    ),  # actual data starts at 1965, but we are having an issue with noon time stamps at lower bound! Ask JP for more details
     "projected": (
         2016,
         2100,
-    ),  # actual data starts at 2015, but we are having an issue with noon time stamps at lower bound
+    ),  # actual data starts at 2015, but we are having an issue with noon time stamps at lower bound! Ask JP for more details
 }
 
 
@@ -88,17 +88,19 @@ def validate_units_threshold_and_variable(units, threshold, variable):
     if variable in ["tasmax", "tasmin"]:
         if units not in ["C", "F"]:
             raise ValueError("Units for temperature must be 'C' or 'F'.")
-        if units == "F":
-            threshold = (float(threshold) - 32) * 5.0 / 9.0
-        else:
-            threshold = float(threshold)
+        if threshold is not None:
+            if units == "F":
+                threshold = (float(threshold) - 32) * 5.0 / 9.0
+            else:
+                threshold = float(threshold)
     elif variable == "pr":
         if units not in ["mm", "in"]:
             raise ValueError("Units for precipitation must be 'mm' or 'in'.")
-        if units == "in":
-            threshold = float(threshold) * 25.4
-        else:
-            threshold = float(threshold)
+        if threshold is not None:
+            if units == "in":
+                threshold = float(threshold) * 25.4
+            else:
+                threshold = float(threshold)
     else:
         raise ValueError("Variable must be 'tasmax', 'tasmin', or 'pr'.")
 
@@ -106,6 +108,27 @@ def validate_units_threshold_and_variable(units, threshold, variable):
     # ie, temperature thresholds within reasonable limits, no negative precip allowed, etc.
 
     return units, threshold
+
+
+def validate_stat(stat):
+    if stat not in ["max", "min", "mean", "sum"]:
+        raise ValueError("Stat must be 'max', 'min', 'mean', or 'sum'.")
+    if stat == "mean":
+        stat = "avg"  # rasdaman uses 'avg' instead of 'mean' in WCPS queries
+    return stat
+
+
+def validate_rank_position_and_direction(position, direction):
+    # position must be between 1 and 365, and direction must be "highest" or "lowest"
+    try:
+        position = int(position)
+        if position < 1 or position > 365:
+            raise ValueError
+    except ValueError:
+        raise ValueError("Position must be an integer between 1 and 365.")
+    if direction not in ["highest", "lowest"]:
+        raise ValueError("Direction must be 'highest' or 'lowest'.")
+    return position, direction
 
 
 def build_year_and_coverage_lists_for_iteration(
@@ -241,20 +264,194 @@ def postprocess_count_days(data, start_year, end_year):
     return result
 
 
+async def fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat):
+    tasks = []
+    for coverage, year_range in zip(var_coverages, year_ranges):
+        url = generate_wcs_query_url(
+            "ProcessCoverages&query="
+            + construct_get_annual_mmm_stat_wcps_query_string(
+                coverage,
+                stat,
+                year_range[0],
+                year_range[1],
+                x_coord=lon,
+                y_coord=lat,
+            )
+        )
+        tasks.append(fetch_data([url]))
+    data = await asyncio.gather(*tasks)
+
+    return data
+
+
+def postprocess_annual_stat(data, start_year, end_year, units):
+    # data in / out is similar to postprocess_count_days
+    # define conversion functions
+    def mm_to_inches(mm):
+        return mm / 25.4
+
+    def c_to_f(c):
+        return (c * 9 / 5) + 32
+
+    # Determine if and how to convert
+    if units == "in":
+        convert = mm_to_inches
+    elif units == "F":
+        convert = c_to_f
+    else:
+        convert = lambda x: x  # No conversion
+
+    start_year = int(start_year)
+    end_year = int(end_year)
+    result = {}
+    current_index = 0
+
+    if (
+        start_year < time_domains["historical"][1]
+        and end_year > time_domains["historical"][0]
+    ):
+        # historical data present
+        hist_data = data[current_index]
+        hist_years = list(
+            range(
+                max(start_year, time_domains["historical"][0]),
+                min(end_year, time_domains["historical"][1]) + 1,
+            )
+        )
+        hist_stats = {
+            str(year): convert(hist_data[i]) for i, year in enumerate(hist_years)
+        }
+        result["historical"] = {
+            "data": hist_stats,
+            "summary": {
+                "min": min(hist_stats.values()),
+                "max": max(hist_stats.values()),
+                "mean": sum(hist_stats.values()) / len(hist_stats),
+            },
+        }
+        current_index += 1
+
+    if (
+        start_year < time_domains["projected"][1]
+        and end_year > time_domains["projected"][0]
+    ):
+        # projected data present
+        result["projected"] = {}
+        ssp_names = ["ssp126", "ssp245", "ssp370", "ssp585"]
+        proj_years = list(
+            range(
+                max(start_year, time_domains["projected"][0]),
+                min(end_year, time_domains["projected"][1]) + 1,
+            )
+        )
+        for ssp in ssp_names:
+            proj_data = data[current_index]
+            proj_stats = {
+                str(year): convert(proj_data[i]) for i, year in enumerate(proj_years)
+            }
+            result["projected"][ssp] = {
+                "data": proj_stats,
+                "summary": {
+                    "min": min(proj_stats.values()),
+                    "max": max(proj_stats.values()),
+                    "mean": sum(proj_stats.values()) / len(proj_stats),
+                },
+            }
+            current_index += 1
+
+    return result
+
+
+def postprocess_annual_rank(data, start_year, end_year, position, direction):
+    # data in / out is similar to postprocess_annual_stat
+    start_year = int(start_year)
+    end_year = int(end_year)
+    result = {}
+    current_index = 0
+
+    if (
+        start_year < time_domains["historical"][1]
+        and end_year > time_domains["historical"][0]
+    ):
+        # historical data present
+        hist_data = data[current_index]
+        hist_years = list(
+            range(
+                max(start_year, time_domains["historical"][0]),
+                min(end_year, time_domains["historical"][1]) + 1,
+            )
+        )
+        hist_ranks = {}
+        for i, year in enumerate(hist_years):
+            sorted_values = sorted(hist_data[i])
+            if direction == "highest":
+                rank_value = sorted_values[-position]
+            else:
+                rank_value = sorted_values[position - 1]
+            hist_ranks[str(year)] = rank_value
+        result["historical"] = {
+            "data": hist_ranks,
+            "summary": {
+                "min": min(hist_ranks.values()),
+                "max": max(hist_ranks.values()),
+                "mean": sum(hist_ranks.values()) / len(hist_ranks),
+            },
+        }
+
+        current_index += 1
+
+    if (
+        start_year < time_domains["projected"][1]
+        and end_year > time_domains["projected"][0]
+    ):
+        # projected data present
+        result["projected"] = {}
+        ssp_names = ["ssp126", "ssp245", "ssp370", "ssp585"]
+        proj_years = list(
+            range(
+                max(start_year, time_domains["projected"][0]),
+                min(end_year, time_domains["projected"][1]) + 1,
+            )
+        )
+        for ssp in ssp_names:
+            proj_data = data[current_index]
+            proj_ranks = {}
+            for i, year in enumerate(proj_years):
+                sorted_values = sorted(proj_data[i])
+                if direction == "highest":
+                    rank_value = sorted_values[-position]
+                else:
+                    rank_value = sorted_values[position - 1]
+                proj_ranks[str(year)] = rank_value
+            result["projected"][ssp] = {
+                "data": proj_ranks,
+                "summary": {
+                    "min": min(proj_ranks.values()),
+                    "max": max(proj_ranks.values()),
+                    "mean": sum(proj_ranks.values()) / len(proj_ranks),
+                },
+            }
+            current_index += 1
+
+    return result
+
+
 @routes.route(
     "/dynamic_indicators/count_days/<operator>/<threshold>/<units>/<variable>/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def count_days(operator, threshold, units, variable, lat, lon, start_year, end_year):
     # example usage:
-    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2030/
-    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/5/mm/pr/64.5/-147.5/2000/2030/
+    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate the "summer days" indicator
+    # http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate the "deep winter days" indicator
+    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
+    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "wet days" indicator
 
     # Validate request params
     try:
         lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
         operator = validate_operator(operator)
         units, threshold = validate_units_threshold_and_variable(
-            units, threshold, variable
+            units=units, threshold=threshold, variable=variable
         )
         validate_year(start_year, end_year)
     except ValueError as e:
@@ -278,45 +475,69 @@ def count_days(operator, threshold, units, variable, lat, lon, start_year, end_y
     "/dynamic_indicators/stat/<stat>/<variable>/<units>/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
-    # pr, tasmax, or tasmin coverage
-    # usage: .../dynamic_indicators/stat/max/pr/mm/64.5/-147.5/
-    # usage: .../dynamic_indicators/stat/min/tasmin/C/64.5/-147.5/
+    # example usage:
+    # http://127.0.0.1:5000/dynamic_indicators/stat/max/pr/mm/64.5/-147.5/2000/2030   ->>> can recreate the "maxmimum one day precip" indicator
+    # http://127.0.0.1:5000/dynamic_indicators/stat/min/tasmin/C/64.5/-147.5/2000/2030   ->>> coldest day per year
+    # http://127.0.0.1:5000/dynamic_indicators/stat/max/tasmax/C/64.5/-147.5/2000/2030   ->>> hottest day per year
+    # http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/64.5/-147.5/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
+    # http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/64.5/-147.5/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
 
-    # sample URL for maxmimum daily precip
-    url = generate_wcs_query_url(
-        "ProcessCoverages&query="
-        + construct_get_annual_mmm_stat_wcps_query_string(
-            "cmip6_downscaled_prx_5ModelAvg_ssp585_wcs",
-            "max",
-            2000,
-            2010,
-            350000,
-            1700000,
+    # Validate request params
+    try:
+        stat = validate_stat(stat)
+        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
+        units, _threshold = validate_units_threshold_and_variable(
+            units=units, threshold=None, variable=variable
         )
+        validate_year(start_year, end_year)
+    except ValueError as e:
+        return {"error": str(e)}, 400
+
+    # build lists for iteration
+    year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
+        int(start_year), int(end_year), variable, time_domains, all_coverages
     )
-    return None
+
+    data = asyncio.run(
+        fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
+    )
+
+    result = postprocess_annual_stat(data, start_year, end_year, units)
+
+    return result
 
 
 @routes.route(
     "/dynamic_indicators/rank/<position>/<direction>/<variable>/<lat>/<lon>/<start_year>/<end_year>/"
 )
-def get_annual_rank(
-    position, direction, variable, units, lat, lon, start_year, end_year
-):
-    # pr, tasmax, or tasmin coverage
-    # usage: .../dynamic_indicators/rank/6/highest/pr/64.5/-147.5/
-    # usage: .../dynamic_indicators/rank/6/lowest/tasmin/64.5/-147.5/
+def get_annual_rank(position, direction, variable, lat, lon, start_year, end_year):
+    # example usage:
+    # http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate "hot day threshold" indicator
+    # http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate "cold day threshold" indicators
 
-    # sample URL for all values - postprocess this for ranking
-    url = generate_wcs_query_url(
-        "ProcessCoverages&query="
-        + construct_get_annual_mmm_stat_wcps_query_string(
-            "cmip6_downscaled_prx_5ModelAvg_ssp585_wcs",
-            "",
-            2000,
-            2010,
-            350000,
-            1700000,
-        )
+    # Validate request params
+    try:
+        position, direction = validate_rank_position_and_direction(position, direction)
+        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
+        validate_year(start_year, end_year)
+    except ValueError as e:
+        return {"error": str(e)}, 400
+    if variable not in ["tasmax", "tasmin", "pr"]:
+        raise ValueError("Variable must be 'tasmax', 'tasmin', or 'pr'.")
+
+    # build lists for iteration
+    year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
+        int(start_year), int(end_year), variable, time_domains, all_coverages
     )
-    return None
+
+    stat = (
+        ""  # omitting stat will force a return of all values, which we need for ranking
+    )
+
+    data = asyncio.run(
+        fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
+    )
+
+    result = postprocess_annual_rank(data, start_year, end_year, position, direction)
+
+    return result
