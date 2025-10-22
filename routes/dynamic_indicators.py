@@ -53,11 +53,11 @@ time_domains = {
     "historical": (
         1966,
         2014,
-    ),  # actual data starts at 1965, but we are having an issue with noon time stamps at lower bound! Ask JP for more details
+    ),  # NOTE: actual data starts at 1965, but we are having an issue with noon time stamps at lower bound! Ask JP for more details
     "projected": (
         2016,
         2100,
-    ),  # actual data starts at 2015, but we are having an issue with noon time stamps at lower bound! Ask JP for more details
+    ),  # NOTE: actual data starts at 2015, but we are having an issue with noon time stamps at lower bound! Ask JP for more details
 }
 
 
@@ -114,7 +114,7 @@ def validate_stat(stat):
     if stat not in ["max", "min", "mean", "sum"]:
         return render_template("400/bad_request.html"), 400
     if stat == "mean":
-        stat = "avg"  # rasdaman uses 'avg' instead of 'mean' in WCPS queries
+        stat = "avg"  # NOTE: rasdaman uses 'avg' instead of 'mean' in WCPS queries
     return stat
 
 
@@ -293,13 +293,12 @@ def postprocess_annual_stat(data, start_year, end_year, units):
     def c_to_f(c):
         return (c * 9 / 5) + 32
 
-    # Determine if and how to convert
     if units == "in":
         convert = mm_to_inches
     elif units == "F":
         convert = c_to_f
     else:
-        convert = lambda x: x  # No conversion
+        convert = lambda x: x
 
     start_year = int(start_year)
     end_year = int(end_year)
@@ -538,9 +537,7 @@ def get_annual_rank(position, direction, variable, lat, lon, start_year, end_yea
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
-    stat = (
-        ""  # omitting stat will force a return of all values, which we need for ranking
-    )
+    stat = ""  # NOTE: omitting stat will force a return of all values, which we need for ranking
     try:
         data = asyncio.run(
             fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
