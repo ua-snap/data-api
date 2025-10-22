@@ -223,18 +223,23 @@ def construct_get_annual_mmm_stat_wcps_query_string(
     x_coord = str(x_coord)
     y_coord = str(y_coord)
 
-    query_string = f"""
-    for $cov in ({coverage})
-    let $start_year := "{start_year}",
-        $end_year := "{end_year}",
-        $x_coord := {x_coord},
-        $y_coord := {y_coord}
-    return encode(
-      coverage result
-      over $pt t($start_year : $end_year)
-      values {operator} ( $cov[x($x_coord), y($y_coord), ansi($pt : $pt)] )
-    , "{format}")
-    """
+    query_string = quote(
+        (
+            f"for $cov in ({coverage}) "
+            f'let $start_year := "{start_year}", '
+            f'$end_year := "{end_year}", '
+            f"$x_coord := {x_coord}, "
+            f"$y_coord := {y_coord} "
+            f"return encode( "
+            f"coverage result "
+            f"over $pt t($start_year : $end_year) "
+            f"values {operator} ( $cov[x($x_coord), y($y_coord), ansi($pt : $pt)] ) "
+            f', "{format}")'
+        )
+    )
+
+    print(query_string)
+
     return query_string
 
 
@@ -267,17 +272,19 @@ def construct_count_annual_days_above_or_below_threshold_wcps_query_string(
     x_coord = str(x_coord)
     y_coord = str(y_coord)
 
-    query_string = f"""
-    for $cov in ({coverage})
-    let $threshold := {threshold},
-        $start_year := "{start_year}",
-        $end_year := "{end_year}",
-        $x_coord := {x_coord},
-        $y_coord := {y_coord}
-    return encode(
-      coverage result
-      over $pt t($start_year : $end_year)
-      values ( sum($cov[x($x_coord), y($y_coord), ansi($pt : $pt)] {operator} $threshold) )
-    , "{format}")
-    """
+    query_string = quote(
+        (
+            f"for $cov in ({coverage}) "
+            f"let $threshold := {threshold}, "
+            f'$start_year := "{start_year}", '
+            f'$end_year := "{end_year}", '
+            f"$x_coord := {x_coord}, "
+            f"$y_coord := {y_coord} "
+            f"return encode( "
+            f"coverage result "
+            f"over $pt t($start_year : $end_year) "
+            f"values ( sum($cov[x($x_coord), y($y_coord), ansi($pt : $pt)] {operator} $threshold) ) "
+            f', "{format}")'
+        )
+    )
     return query_string

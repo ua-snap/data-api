@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 cmip6_api = Blueprint("dynamic_indicators_api", __name__)
 
-coverages = {
+all_coverages = {
     "pr": [
         "cmip6_downscaled_pr_5ModelAvg_historical_wcs",
         "cmip6_downscaled_pr_5ModelAvg_ssp126_wcs",
@@ -50,8 +50,14 @@ coverages = {
 }
 
 time_domains = {
-    "historical": (1965, 2014),
-    "projected": (2015, 2100),
+    "historical": (
+        1966,
+        2014,
+    ),  # actual data starts at 1965, but we are having an issue with noon time stamps at lower bound
+    "projected": (
+        2016,
+        2100,
+    ),  # actual data starts at 2015, but we are having an issue with noon time stamps at lower bound
 }
 
 
@@ -63,8 +69,9 @@ def validate_latlon_and_reproject_to_epsg_3338(lat, lon):
 
     # TODO: add step to validate geographic lat/lon with geotiff
 
-    lat, lon = project_latlon(lat, lon, from_epsg=4326, to_epsg=3338)
-    return lat, lon
+    lon, lat = project_latlon(lat, lon, dst_crs=3338)
+
+    return lon, lat
 
 
 def validate_operator(operator):
@@ -77,7 +84,7 @@ def validate_operator(operator):
     return operator
 
 
-def validate_units_threshold_and_variable(units, variable):
+def validate_units_threshold_and_variable(units, threshold, variable):
     if variable in ["tasmax", "tasmin"]:
         if units not in ["C", "F"]:
             raise ValueError("Units for temperature must be 'C' or 'F'.")
@@ -94,23 +101,19 @@ def validate_units_threshold_and_variable(units, variable):
             threshold = float(threshold)
     else:
         raise ValueError("Variable must be 'tasmax', 'tasmin', or 'pr'.")
+
+    # TODO: validate threshold ranges based on variable if needed
+    # ie, temperature thresholds within reasonable limits, no negative precip allowed, etc.
+
     return units, threshold
 
 
-def validate_start_and_end_years(start_year, end_year):
-    if not (validate_year(start_year) and validate_year(end_year)):
-        raise ValueError("Start year and/or end year are invalid.")
-    if start_year >= end_year:
-        raise ValueError("Start year must be before end year.")
-    return start_year, end_year
-
-
 def build_year_and_coverage_lists_for_iteration(
-    start_year, end_year, variable, time_domains, coverages
+    start_year, end_year, variable, time_domains, all_coverages
 ):
     # if years span historical and projected, need to split into two ranges
     year_ranges = []
-    coverages = []
+    var_coverages = []
     historical_range = time_domains["historical"]
     projected_range = time_domains["projected"]
 
@@ -119,65 +122,156 @@ def build_year_and_coverage_lists_for_iteration(
         hist_start = max(start_year, historical_range[0])
         hist_end = min(end_year, historical_range[1])
         year_ranges.append((hist_start, hist_end))
-        coverages.append(coverages[variable][0])
+        var_coverages.append(all_coverages[variable][0])
     if start_year < projected_range[1] and end_year > projected_range[0]:
         # overlaps projected
         proj_start = max(start_year, projected_range[0])
         proj_end = min(end_year, projected_range[1])
         year_ranges.append((proj_start, proj_end))
         # for projected, use all SSPs
-        for ssp_coverage in coverages[variable][1:]:
+        for ssp_coverage in all_coverages[variable][1:]:
             year_ranges.append((proj_start, proj_end))
-            coverages.append(ssp_coverage)
+            var_coverages.append(ssp_coverage)
 
-    return year_ranges, coverages
+    return year_ranges, var_coverages
 
 
-async def fetch_count_days_data(coverages, year_ranges, threshold, operator, lon, lat):
+async def fetch_count_days_data(
+    var_coverages, year_ranges, threshold, operator, lon, lat
+):
     tasks = []
-    for coverage, year_range in zip(coverages, year_ranges):
+    for coverage, year_range in zip(var_coverages, year_ranges):
         url = generate_wcs_query_url(
             "ProcessCoverages&query="
             + construct_count_annual_days_above_or_below_threshold_wcps_query_string(
                 coverage,
-                threshold,
                 operator,
+                threshold,
                 year_range[0],
                 year_range[1],
-                lon,
-                lat,
+                x_coord=lon,
+                y_coord=lat,
             )
         )
-        tasks.append(fetch_data[url])
+
+        tasks.append(fetch_data([url]))
     data = await asyncio.gather(*tasks)
+
     return data
+
+
+def postprocess_count_days(data, start_year, end_year):
+    # if the year range spans historical and projected, our data will be a list of 5 lists:
+    # the first has day counts for each historical year, and the rest have day counts for each projected year for each SSP
+    # if the year range is only historical or only projected, our data will be a list of 1-4 lists accordingly
+
+    # we want to create dictionary for output, with the following structure:
+    # {
+    #     "historical": {
+    #         "data": {"2000": 45, "2001": 50, ...},
+    #         "summary": {"min": 30, "max": 60, "mean": 45.5},
+    #     },
+    #     "projected": {
+    #         "ssp126": {
+    #             "data": {"2020": 55, "2021": 60, ...},
+    #             "summary": {"min": 40, "max": 70, "mean": 55.5},
+    #         },
+    #         "ssp245": {
+    #             "data": {"2020": 50, "2021": 55, ...},
+    #             "summary": {"min": 35, "max": 65, "mean": 50.5},
+    #         },
+    #         ...
+    #     }
+    # }
+
+    start_year = int(start_year)
+    end_year = int(end_year)
+
+    result = {}
+    current_index = 0
+    if (
+        start_year < time_domains["historical"][1]
+        and end_year > time_domains["historical"][0]
+    ):
+        # historical data present
+        hist_data = data[current_index]
+        hist_years = list(
+            range(
+                max(start_year, time_domains["historical"][0]),
+                min(end_year, time_domains["historical"][1]) + 1,
+            )
+        )
+        hist_day_counts = {str(year): hist_data[i] for i, year in enumerate(hist_years)}
+        result["historical"] = {
+            "data": hist_day_counts,
+            "summary": {
+                "min": min(hist_day_counts.values()),
+                "max": max(hist_day_counts.values()),
+                "mean": sum(hist_day_counts.values()) / len(hist_day_counts),
+            },
+        }
+        current_index += 1
+    if (
+        start_year < time_domains["projected"][1]
+        and end_year > time_domains["projected"][0]
+    ):
+        # projected data present
+        result["projected"] = {}
+        ssp_names = ["ssp126", "ssp245", "ssp370", "ssp585"]
+        proj_years = list(
+            range(
+                max(start_year, time_domains["projected"][0]),
+                min(end_year, time_domains["projected"][1]) + 1,
+            )
+        )
+        for ssp in ssp_names:
+            proj_data = data[current_index]
+            proj_day_counts = {
+                str(year): proj_data[i] for i, year in enumerate(proj_years)
+            }
+            result["projected"][ssp] = {
+                "data": proj_day_counts,
+                "summary": {
+                    "min": min(proj_day_counts.values()),
+                    "max": max(proj_day_counts.values()),
+                    "mean": sum(proj_day_counts.values()) / len(proj_day_counts),
+                },
+            }
+            current_index += 1
+    return result
 
 
 @routes.route(
     "/dynamic_indicators/count_days/<operator>/<threshold>/<units>/<variable>/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def count_days(operator, threshold, units, variable, lat, lon, start_year, end_year):
-    # pr, tasmin, or tasmax coverage
-    # usage: .../dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2050
-    # usage: .../dynamic_indicators/count_days/above/5/mm/pr/64.5/-147.5/2000/2050/
+    # example usage:
+    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2030/
+    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/5/mm/pr/64.5/-147.5/2000/2030/
 
     # Validate request params
-    lat, lon = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
-    operator = validate_operator(operator)
-    units = validate_units_threshold_and_variable(threshold, units, variable)
-    start_year, end_year = validate_start_and_end_years(start_year, end_year)
+    try:
+        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
+        operator = validate_operator(operator)
+        units, threshold = validate_units_threshold_and_variable(
+            units, threshold, variable
+        )
+        validate_year(start_year, end_year)
+    except ValueError as e:
+        return {"error": str(e)}, 400
 
-    year_ranges, coverages = build_year_and_coverage_lists_for_iteration(
-        start_year, end_year, variable, time_domains, coverages
+    # build lists for iteration
+    year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
+        int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
     data = asyncio.run(
-        fetch_count_days_data(coverages, year_ranges, threshold, operator, lon, lat)
+        fetch_count_days_data(var_coverages, year_ranges, threshold, operator, lon, lat)
     )
 
-    # TODO: postprocess the results as needed
+    result = postprocess_count_days(data, start_year, end_year)
 
-    return data
+    return result
 
 
 @routes.route(
