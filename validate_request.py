@@ -5,7 +5,6 @@ A module to validate request parameters such as latitude and longitude for use a
 import asyncio
 import ast
 import rasterio
-import pandas as pd
 import os.path
 
 from flask import render_template
