@@ -27,25 +27,25 @@ cmip6_api = Blueprint("dynamic_indicators_api", __name__)
 
 all_coverages = {
     "pr": [
-        "cmip6_downscaled_pr_5ModelAvg_historical_wcs",
-        "cmip6_downscaled_pr_5ModelAvg_ssp126_wcs",
-        "cmip6_downscaled_pr_5ModelAvg_ssp245_wcs",
-        "cmip6_downscaled_pr_5ModelAvg_ssp370_wcs",
-        "cmip6_downscaled_pr_5ModelAvg_ssp585_wcs",
+        "cmip6_downscaled_pr_6ModelAvg_historical_wcs",
+        "cmip6_downscaled_pr_6ModelAvg_ssp126_wcs",
+        "cmip6_downscaled_pr_6ModelAvg_ssp245_wcs",
+        "cmip6_downscaled_pr_6ModelAvg_ssp370_wcs",
+        "cmip6_downscaled_pr_6ModelAvg_ssp585_wcs",
     ],
     "tasmin": [
-        "cmip6_downscaled_tasmin_5ModelAvg_historical_wcs",
-        "cmip6_downscaled_tasmin_5ModelAvg_ssp126_wcs",
-        "cmip6_downscaled_tasmin_5ModelAvg_ssp245_wcs",
-        "cmip6_downscaled_tasmin_5ModelAvg_ssp370_wcs",
-        "cmip6_downscaled_tasmin_5ModelAvg_ssp585_wcs",
+        "cmip6_downscaled_tasmin_6ModelAvg_historical_wcs",
+        "cmip6_downscaled_tasmin_6ModelAvg_ssp126_wcs",
+        "cmip6_downscaled_tasmin_6ModelAvg_ssp245_wcs",
+        "cmip6_downscaled_tasmin_6ModelAvg_ssp370_wcs",
+        "cmip6_downscaled_tasmin_6ModelAvg_ssp585_wcs",
     ],
     "tasmax": [
-        "cmip6_downscaled_tasmax_5ModelAvg_historical_wcs",
-        "cmip6_downscaled_tasmax_5ModelAvg_ssp126_wcs",
-        "cmip6_downscaled_tasmax_5ModelAvg_ssp245_wcs",
-        "cmip6_downscaled_tasmax_5ModelAvg_ssp370_wcs",
-        "cmip6_downscaled_tasmax_5ModelAvg_ssp585_wcs",
+        "cmip6_downscaled_tasmax_6ModelAvg_historical_wcs",
+        "cmip6_downscaled_tasmax_6ModelAvg_ssp126_wcs",
+        "cmip6_downscaled_tasmax_6ModelAvg_ssp245_wcs",
+        "cmip6_downscaled_tasmax_6ModelAvg_ssp370_wcs",
+        "cmip6_downscaled_tasmax_6ModelAvg_ssp585_wcs",
     ],
 }
 
