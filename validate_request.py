@@ -505,27 +505,3 @@ def get_coverage_crs_str(coverage_metadata):
         )
 
     return crs.to_string()
-
-
-def generate_time_index_from_coverage_metadata(meta):
-    """Generate a pandas DatetimeIndex from the ansi (i.e. time) axis coordinates in the coverage description metadata.
-
-    Args:
-        meta (dict): JSON-like dictionary containing coverage metadata
-
-    Returns:
-        pd.DatetimeIndex: corresponding to the ansi (i.e. time) axis coordinates
-    """
-    try:
-        # we won't always know the axis positioning / ordering
-        ansi_axis = next(
-            axis
-            for axis in meta["domainSet"]["generalGrid"]["axis"]
-            if axis["axisLabel"] == "ansi"
-        )
-        # this is a list of dates formatted like "1996-11-03T00:00:00.000Z"
-        ansi_coordinates = ansi_axis["coordinate"]
-        date_index = pd.DatetimeIndex(ansi_coordinates)
-        return date_index
-    except (KeyError, StopIteration):
-        raise ValueError("Unexpected coverage metadata: 'ansi' axis not found")
