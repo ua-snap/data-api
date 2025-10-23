@@ -2,6 +2,7 @@ import asyncio
 import io
 import time
 import itertools
+import logging
 from urllib.parse import quote
 import numpy as np
 import pandas as pd
@@ -25,7 +26,7 @@ from fetch_data import (
     generate_nested_dict,
     get_all_possible_dimension_combinations,
 )
-from zonal_stats import interpolate_and_compute_zonal_stats
+from zonal_stats import vectorized_zonal_means_nd
 from validate_request import (
     validate_latlon,
     project_latlon,
@@ -41,6 +42,7 @@ from config import WEST_BBOX, EAST_BBOX
 from . import routes
 
 taspr_api = Blueprint("taspr_api", __name__)
+logger = logging.getLogger(__name__)
 
 # Dimensions for January and July min, mean, max temperature statistics
 # Table generated from luts.py file found here:
@@ -1155,6 +1157,8 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     Returns:
         aggr_results (dict): data representing zonal means within the polygon.
     """
+    logger.debug(f"run_aggregate_var_polygon start var_ep={var_ep} poly_id={poly_id}")
+    overall_start = time.time()
     polygon = get_poly(poly_id)
     varname = var_ep_lu[var_ep]
     bandname = "Gray"
@@ -1187,6 +1191,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     for ds, period, cru, ar5 in zip(
         ds_list, summary_periods, add_cru_flag, add_ar5_flag
     ):
+        loop_start = time.time()
         # get all combinations of non-XY dimensions in the dataset and their corresponding encodings
         # and create a dict to hold the results for each combo
         all_dims = ds[bandname].dims
@@ -1219,65 +1224,40 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                         for scenario in aggr_results[era][season][model]:
                             aggr_results[era][season][model][scenario] = {varname: {}}
 
-        # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
+        # Compute vectorized zonal means across all non-XY dims
+        means_da = vectorized_zonal_means_nd(
+            polygon,
+            ds,
+            crs="EPSG:3338",  # hard-coded for now, since metadata is not fetched from Rasdaman for any of the 9 (!) taspr coverages
+            var_name=bandname,
+        )
+        if isinstance(means_da, tuple):
+            return means_da
+
+        # rounding: preserve historical behavior for digits=0 (drop ndigits)
+        rounding_digits = dim_encodings["rounding"][varname]
+        use_digits = None if rounding_digits == 0 else rounding_digits
+
         for coords, dim_combo in zip(iter_coords, dim_combos):
             sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-            combo_ds = ds.sel(sel_di)
-            combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-                polygon,
-                combo_ds,
-                crs="EPSG:3338",  # hard-coded for now, since metadata is not fetched from Rasdaman for any of the 9 (!) taspr coverages
-            )
+            mean_val = float(means_da.sel(sel_di).item())
 
-            # using 0 in round() function will still return a float ... need to drop the digit arg to get an int
-            d = (
-                None
-                if dim_encodings["rounding"][varname] == 0
-                else dim_encodings["rounding"][varname]
-            )
-            # the string values for the `combo_zonal_stats_dict` will need to be updated to "min" or "max" for those summaries
-            # if or when we implement a different kind method of extrema aggregation, see issue 560
             if cru:
-                if dim_combo[1] == "mean":
-                    result = round(
-                        combo_zonal_stats_dict["mean"],
-                        d,
-                    )
-                elif dim_combo[1] == "min":
-                    result = round(
-                        combo_zonal_stats_dict["mean"],
-                        d,
-                    )
-                elif dim_combo[1] == "max":
-                    result = round(
-                        combo_zonal_stats_dict["mean"],
-                        d,
-                    )
-                else:
-                    result = round(
-                        combo_zonal_stats_dict["mean"],
-                        d,
-                    )
-
+                result = (
+                    round(mean_val)
+                    if use_digits is None
+                    else round(mean_val, use_digits)
+                )
                 # use the dim_combo to index into the results dict (period, season, model, scenario, varname, stat)
                 aggr_results["1950_2009"][dim_combo[0]]["CRU-TS40"]["CRU_historical"][
                     varname
                 ][dim_combo[1]] = result
-
             else:
-                mean = round(combo_zonal_stats_dict["mean"], d)
-                min = round(combo_zonal_stats_dict["min"], d)
-                max = round(combo_zonal_stats_dict["max"], d)
-
-                result = mean  # default to mean for projected data
-
-                # option to return min/mean/max for projected data
-                # result = {
-                #     "mean": mean,
-                #     "min": min,
-                #     "max": max,
-                # }
-
+                result = (
+                    round(mean_val)
+                    if use_digits is None
+                    else round(mean_val, use_digits)
+                )
                 # populate the dict with results
                 # need to skip a dimension in the combo for the 4th dataset
                 if ar5:
@@ -1289,10 +1269,17 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                         varname
                     ] = result
 
+        logger.info(
+            f"zonal means computed for period={period} cru={cru} ar5={ar5} in {time.time() - loop_start:.2f}s"
+        )
+
         # combine the results for this summary period with the overall results
         for era in aggr_results:
             aggr_results_combined[era] = aggr_results[era]
 
+    logger.info(
+        f"run_aggregate_var_polygon completed in {time.time() - overall_start:.2f}s"
+    )
     return aggr_results_combined
 
 
