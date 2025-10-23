@@ -229,7 +229,7 @@ def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
     if scenario not in cmip6_downscaled_options[varname][model]:
         return {}
 
-    cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_crstephenson"
+    cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_wcs"
     cov_id = cov_id.replace("-", "_")
 
     metadata = asyncio.run(get_cmip6_metadata(cov_id))
