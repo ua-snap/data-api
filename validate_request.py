@@ -42,8 +42,8 @@ def check_geotiffs(lat, lon, coverages):
         if not os.path.isfile(reference_geotiff):
             return True
 
-        # # Do not perform GeoTIFF check if the file does not open properly.
-        # # This seems safer than the alternative of hiding data due to a corrupt file.
+        # Do not perform GeoTIFF check if the file does not open properly.
+        # This seems safer than the alternative of hiding data due to a corrupt file.
         try:
             with rasterio.open(reference_geotiff) as dataset:
                 if coverage in geotiff_projections:
