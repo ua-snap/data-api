@@ -115,12 +115,12 @@ def validate_get_params():
         )
 
         models = fields.Str(
-            validate=lambda str: len(str) <= 20,
+            validate=lambda str: bool(re.match(r"^[0-9A-Za-z\-,]{0,100}$", str)),
             required=False,
         )
 
         scenarios = fields.Str(
-            validate=lambda str: len(str) <= 20,
+            validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,100}$", str)),
             required=False,
         )
 
