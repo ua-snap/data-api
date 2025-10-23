@@ -43,19 +43,19 @@ def check_geotiffs(lat, lon, coverages):
 
         # # Do not perform GeoTIFF check if the file does not open properly.
         # # This seems safer than the alternative of hiding data due to a corrupt file.
-        # try:
-        with rasterio.open(reference_geotiff) as dataset:
-            if coverage in geotiff_projections:
-                crs = geotiff_projections[coverage]
-            else:
-                crs = "EPSG:3338"
-            x, y = project_latlon(lat, lon, crs)
-            row, col = dataset.index(x, y)
-            if 0 <= row < dataset.height and 0 <= col < dataset.width:
-                if dataset.read(1)[row, col] == 1:
-                    return True
-        # except:
-        #     return True
+        try:
+            with rasterio.open(reference_geotiff) as dataset:
+                if coverage in geotiff_projections:
+                    crs = geotiff_projections[coverage]
+                else:
+                    crs = "EPSG:3338"
+                x, y = project_latlon(lat, lon, crs)
+                row, col = dataset.index(x, y)
+                if 0 <= row < dataset.height and 0 <= col < dataset.width:
+                    if dataset.read(1)[row, col] == 1:
+                        return True
+        except:
+            return True
 
     return 404
 
