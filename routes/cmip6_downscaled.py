@@ -16,24 +16,18 @@ from validate_request import (
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
 
-from luts import cmip6_downscaled_options
+from luts import (
+    cmip6_downscaled_options,
+    all_cmip6_downscaled_vars,
+    all_cmip6_downscaled_models,
+    all_cmip6_downscaled_scenarios,
+)
 
 from . import routes
 
 logger = logging.getLogger(__name__)
 
 cmip6_api = Blueprint("cmip6_downscaled_api", __name__)
-
-all_possible_vars = list(cmip6_downscaled_options.keys())
-all_possible_models = set(
-    model for var in cmip6_downscaled_options.values() for model in var.keys()
-)
-all_possible_scenarios = set(
-    scenario
-    for var in cmip6_downscaled_options.values()
-    for model in var.values()
-    for scenario in model
-)
 
 
 async def get_cmip6_metadata(cov_id):
@@ -55,7 +49,6 @@ async def fetch_cmip6_downscaled_point_data(cov_id, x, y):
         list of data results at a specified point
     """
 
-    # We must use EPSG:4326 for the CMIP6 downscaled coverage to match the coverage projection
     wcs_str = generate_wcs_getcov_str(x, y, cov_id=cov_id)
 
     # Generate the URL for the WCS query
@@ -121,27 +114,29 @@ def cmip6_downscaled_point(lat, lon):
     # Split and assign optional HTTP GET parameters.
     if request.args.get("vars"):
         vars = request.args.get("vars").split(",")
-        if not all(var in all_possible_vars for var in vars):
+        if not all(var in all_cmip6_downscaled_vars for var in vars):
             return render_template("400/bad_request.html"), 400
         logger.debug(f"Results limited to vars: {vars}")
     else:
-        vars = list(cmip6_downscaled_options.keys())
+        vars = all_cmip6_downscaled_vars
 
     if request.args.get("models"):
         models = request.args.get("models").split(",")
-        if not all(model in all_possible_models for model in models):
+        if not all(model in all_cmip6_downscaled_models for model in models):
             return render_template("400/bad_request.html"), 400
         logger.debug(f"Results limited to models: {models}")
     else:
-        models = list(cmip6_downscaled_options["pr"].keys())
+        models = all_cmip6_downscaled_models
 
     if request.args.get("scenarios"):
         scenarios = request.args.get("scenarios").split(",")
-        if not all(scenario in all_possible_scenarios for scenario in scenarios):
+        if not all(
+            scenario in all_cmip6_downscaled_scenarios for scenario in scenarios
+        ):
             return render_template("400/bad_request.html"), 400
         logger.debug(f"Results limited to scenarios: {scenarios}")
     else:
-        scenarios = cmip6_downscaled_options["pr"][models[0]]
+        scenarios = all_cmip6_downscaled_scenarios
 
     try:
         results = fetch_all_requested_combos(lat, lon, vars, models, scenarios)

@@ -606,3 +606,14 @@ cmip6_downscaled_options = {
         "TaiESM1": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
     },
 }
+
+all_cmip6_downscaled_vars = list(cmip6_downscaled_options.keys())
+all_cmip6_downscaled_models = set(
+    model for var in cmip6_downscaled_options.values() for model in var.keys()
+)
+all_cmip6_downscaled_scenarios = set(
+    scenario
+    for var in cmip6_downscaled_options.values()
+    for model in var.values()
+    for scenario in model
+)
