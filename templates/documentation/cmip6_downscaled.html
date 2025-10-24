@@ -6,9 +6,7 @@
     href="/era5wrf">dynamically downscaled ERA5</a>
   reference data. Select models and scenarios are available. Read more about our CMIP6 subset
   <a href="https://arcticdatascience.org/item/story-arctic-climate-data-node">here</a>. This dataset spans years
-  1965&ndash;2100 and its extent covers most of Alaska and parts of western Canada. A 6-model average is also available,
-  consisting of an equal-weighted mean of the KACE-1-0-G, MIROC6, MPI-ESM1-2-HR, MRI-ESM2-0, NorESM2-MM, and TaiESM1
-  models.
+  1965&ndash;2100 and its extent covers most of Alaska and parts of western Canada. A 6-model average is also available.
 </p>
 
 <h3>Service endpoints</h3>
@@ -16,7 +14,7 @@
 <h4>CMIP6 downscaled daily data</h4>
 
 <p>
-  Query data for provided models, scenarios, and variables. These variables are defined <a
+  Query data for provided models, scenarios, and variables. These models, scenarios, and variables are defined <a
     href="#cmip6-variable-information">below</a>.
 </p>
 
@@ -29,7 +27,13 @@
   </thead>
   <tbody>
     <tr>
-      <td>Daily values at a given latitude and longitude</td>
+      <td>Values for all models, scenarios, and variables at a given latitude and longitude</td>
+      <td style="white-space: nowrap;">
+        <a href="/cmip6_downscaled/point/61.5/-147">/cmip6_downscaled/point/61.5/-147</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Values at a given latitude and longitude for provided model, scenario, and variable</td>
       <td style="white-space: nowrap;">
         <a href="/cmip6_downscaled/point/61.5/-147?models=6ModelAvg&scenarios=ssp585&vars=tasmax">
           /cmip6_downscaled/point/61.5/-147?models=6ModelAvg&scenarios=ssp585&vars=tasmax</a>
@@ -54,6 +58,97 @@
   </tfoot>
 </table>
 
+<h5>Endpoint options</h5>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Variables</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>6ModelAvg</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td>Equal-weighted mean of KACE-1-0-G, MIROC6, MPI-ESM1-2-HR, MRI-ESM2-0, NorESM2-MM, and TaiESM1.</td>
+  </tr>
+  <tr>
+    <td>CESM2</td>
+    <td>historical, ssp126, ssp585</td>
+    <td>pr</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>CNRM-CM6-1-HR</td>
+    <td>historical, ssp126, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>E3SM-2-0</td>
+    <td>historical, ssp370</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EC-Earth3-Veg</td>
+    <td>historical, ssp126, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td>ssp126 scenario only is only available for the pr variable.</td>
+  </tr>
+  <tr>
+    <td>HadGEM3-GC31-LL</td>
+    <td>historical, ssp126, ssp245, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap;">HadGEM3-GC31-MM</td>
+    <td>historical, ssp126, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>KACE-1-0-G</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>MIROC6</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>MPI-ESM1-2-HR</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>MRI-ESM2-0</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>NorESM2-MM</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>TaiESM1</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+</table>
+
 <h4>Output</h4>
 
 <p>Results from point queries will look like this:</p>
@@ -61,18 +156,26 @@
 <pre>
 {
   "6ModelAvg": {
-    "ssp585": {
+    "ssp126": {
       "2015-01-01": {
-        "tasmax": -13
+        "pr": 14,
+        "tasmax": -12,
+        "tasmin": -19
       },
       "2015-01-02": {
-        "tasmax": -13
+        "pr": 2,
+        "tasmax": -12,
+        "tasmin": -18
       },
       "2015-01-03": {
-        "tasmax": -13
+        "pr": 18,
+        "tasmax": -12,
+        "tasmin": -19
       },
       "2015-01-04": {
-        "tasmax": -14
+        "pr": 8,
+        "tasmax": -12,
+        "tasmin": -19
       },
       ...
     },
@@ -80,8 +183,6 @@
   },
   ...
 }
-
-
 </pre>
 
 <p>The above output is structured like this:</p>
@@ -141,7 +242,8 @@
     </tr>
     <tr>
       <td>
-        See <a href="/cmip6/references">this page</a> for a full list of our CMIP6 data sources and suggested citations.
+        See <a href="/cmip6/references">this page</a> for a full list of our CMIP6 data sources and suggested
+        citations.
       </td>
     </tr>
   </tbody>
