@@ -120,13 +120,20 @@ def validate_requested_vars_start_and_end_year(requested_vars, start_year, end_y
     for var in requested_vars:
         if None in [start_year, end_year]:
             # use full range if no years requested
-            start_year = var_coverage_metadata[var]["start_date"][0]
-            end_year = var_coverage_metadata[var]["end_date"][0]
             time_slice_cf = (
                 var_coverage_metadata[var]["start_cf_time"],
                 var_coverage_metadata[var]["end_cf_time"],
             )
-        elif None not in [start_year, end_year]:
+        if None not in [start_year, end_year]:
+            if not validate_year(start_year, end_year):
+                render_template(
+                    "422/invalid_year.html",
+                    start_year=start_year,
+                    end_year=end_year,
+                    min_year=coverage_metadata["start_date"][0],
+                    max_year=coverage_metadata["end_date"][0],
+                ), 422
+
             start_cf_time = ymd_to_cftime_value(
                 start_year, 4, 1, var_coverage_metadata[var]["base_date"]
             )
@@ -135,17 +142,7 @@ def validate_requested_vars_start_and_end_year(requested_vars, start_year, end_y
             )
             time_slice_cf = (start_cf_time, end_cf_time)
 
-        if not validate_year(start_year, end_year):
-            render_template(
-                "422/invalid_year.html",
-                start_year=start_year,
-                end_year=end_year,
-                min_year=coverage_metadata["start_date"][0],
-                max_year=coverage_metadata["end_date"][0],
-            ), 422
         var_time_slices[var] = time_slice_cf
-
-    print(var_time_slices)
 
     return var_time_slices
 
@@ -453,12 +450,13 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         example request (3 day rolling average for select variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi&op=3dayrollingavg
 
     """
-
     validate_latlon(lat, lon)
 
     requested_vars = request.args.get("vars")
     requested_vars = validate_vars(requested_vars)
 
+    start_year = int(start_year) if start_year is not None else None
+    end_year = int(end_year) if end_year is not None else None
     var_time_slices = validate_requested_vars_start_and_end_year(
         requested_vars, start_year, end_year
     )
