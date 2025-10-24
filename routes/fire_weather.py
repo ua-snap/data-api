@@ -242,9 +242,9 @@ def build_variable_year_range_str_from_start_and_end_year(var, start_year, end_y
             var_coverage_metadata[var]["end_cf_time"],
             var_coverage_metadata[var]["base_date"],
         )
-        year_range_str = str(start_year + "-" + end_year)
+        year_range_str = str(str(start_year) + "-" + str(end_year))
     else:
-        year_range_str = str(start_year + "-" + end_year)
+        year_range_str = str(str(start_year) + "-" + str(end_year))
     return year_range_str
 
 
