@@ -108,6 +108,8 @@ def create_csv(
         properties = hydrology_csv(data, endpoint)
     elif endpoint == "demographics":
         properties = demographics_csv(data)
+    elif endpoint == "era5wrf_4km":
+        properties = era5wrf_csv(data)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -268,6 +270,49 @@ def write_csv(properties):
     return response
 
 
+def era5wrf_csv(data):
+
+    csv_dicts = []
+    for date in sorted(data.keys()):
+        row = {"date": date}
+        row.update(data[date])
+        csv_dicts.append(row)
+
+    if not csv_dicts:
+        fieldnames = ["date"]
+    else:
+        fieldnames = ["date"] + [key for key in csv_dicts[0].keys() if key != "date"]
+
+    filename = "Dynamically Downscaled ERA5 4km Data"
+    metadata_variables = {
+        "t2_mean": "t2_mean is the mean daily temperature in degrees Celsius",
+        "t2_max": "t2_max is the maximum daily temperature in degrees Celsius",
+        "t2_min": "t2_min is the minimum daily temperature in degrees Celsius",
+        "rh2_mean": "rh2_mean is the mean daily relative humidity in percent",
+        "rh2_max": "rh2_max is the maximum daily relative humidity in percent",
+        "rh2_min": "rh2_min is the minimum daily relative humidity in percent",
+        "wspd10_max": "wspd10_max is the maximum daily wind speed in meters per second",
+        "wspd10_mean": "wspd10_mean is the mean daily wind speed in meters per second",
+        "wdir10_mean": "wdir10_mean is the mean daily wind direction in degrees",
+        "rainnc_sum": "rainnc_sum is the total daily accumulated precipitation in millimeters",
+        "seaice_max": "seaice_max is the maximum daily sea ice concentration, range 0-1",
+    }
+
+    metadata = "# Dynamically Downscaled ERA5 4km Data\n"
+    metadata += "# Variables and Units:\n"
+    for var, description in metadata_variables.items():
+        if var in fieldnames:
+            metadata += f"# {var}: {description}\n"
+    metadata += "#\n"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename,
+    }
+
+
 def beetles_csv(data):
     # If this is an area, we include percentages in the CSV fields.
     if (
@@ -330,7 +375,7 @@ def beetles_csv(data):
 def cmip6_indicators_csv(data):
 
     if "summarize" in request.args and request.args.get("summarize") == "mmm":
-        coords = ["scenario", "model", "year", "variable"]
+        coords = ["model", "scenario", "year", "variable"]
         values = ["max", "mean", "min"]
         fieldnames = coords + values
         csv_dicts = build_csv_dicts(data, fieldnames, values=values)
@@ -340,7 +385,7 @@ def cmip6_indicators_csv(data):
         metadata += "# su are Summer Days. This is the number of days with maximum temperature above 25 (deg C).\n"
         filename_data_name = "CMIP6 Indicators Era Summaries"
     else:
-        coords = ["scenario", "model", "year"]
+        coords = ["model", "scenario", "year"]
         values = ["dw", "ftc", "rx1day", "su"]
         fieldnames = coords + values
         csv_dicts = build_csv_dicts(data, fieldnames, values=values)
@@ -374,7 +419,7 @@ def cmip6_monthly_csv(data, vars=None):
         "snw": "# snw is the snow water equivalent in mm.\n",
         "tas": "# tas is the mean monthly temperature in deg C.\n",
         "tasmax": "# tasmax is the maximum monthly temperature in deg C.\n",
-        "tasmin": "# tasmin is the mimimum monthly temperature in deg C.\n",
+        "tasmin": "# tasmin is the minimum monthly temperature in deg C.\n",
         "ts": "# ts is the mean monthly surface temperature in deg C.\n",
         "uas": "# uas is the mean monthly near surface eastward wind in m/s.\n",
         "vas": "# vas is the mean monthly near surface northward wind in m/s.\n",

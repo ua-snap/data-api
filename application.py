@@ -47,6 +47,7 @@ def get_service_categories():
         ("Temperature and Precipitation", "/taspr"),
         ("Wet Days Per Year", "/wet_days_per_year"),
         ("Wildfire", "/fire"),
+        ("WRF Dynamically Downscaled ERA5 Reanalysis", "/era5wrf"),
         ("Demographics", "/demographics"),
     ]
 
