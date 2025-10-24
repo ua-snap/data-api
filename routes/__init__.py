@@ -36,5 +36,6 @@ from .hydrology import *
 from .demographics import *
 from .temperature_anomalies import *
 from .cmip6 import *
+from .cmip6_downscaled import *
 from .places import *
 from .era5wrf import *
