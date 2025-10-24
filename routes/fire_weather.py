@@ -10,7 +10,15 @@ import datetime
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import fetch_data, describe_via_wcps
+from fetch_data import (
+    fetch_data,
+    describe_via_wcps,
+    ymd_to_cftime_value,
+    cftime_value_to_ymd,
+    get_encoding_from_axis_attributes,
+    get_variables_from_coverage_metadata,
+    get_attributes_from_time_axis,
+)
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     check_geotiffs,
@@ -24,17 +32,14 @@ from luts import summer_fire_danger_ratings_dict
 
 from . import routes
 
-
 logger = logging.getLogger(__name__)
 
-cmip6_api = Blueprint("fire_weather_api", __name__)
+fire_weather_api = Blueprint("fire_weather_api", __name__)
 
 
 #### SETUP AND METADATA ####
 
-
-# we have one geotiff to validate all fire weather variables
-# so its not the same as coverage names
+# we have one geotiff to validate all fire weather variables, so its not the same as coverage names
 fire_weather_geotiff = "cmip6_all_fire_weather_variables"
 
 fire_weather_coverage_ids = [
@@ -54,128 +59,129 @@ async def get_coverage_metadata(coverage_id):
     return metadata
 
 
-var_coverage_metadata = {}  # dict to hold coverage metadata for each variable
+var_coverage_metadata = {}
 for coverage_id in fire_weather_coverage_ids:
     coverage_metadata = asyncio.run(get_coverage_metadata(coverage_id))
-    # assumes only one variable per coverage!
+    base_date, time_min, time_max = get_attributes_from_time_axis(coverage_metadata)
+    # below assumes only one variable per coverage
     var_coverage_metadata[list(coverage_metadata["metadata"]["bands"].keys())[0]] = {
         "coverage_id": coverage_id,
-
-        #TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
-        
-        # Convert the string representation of model encoding dict to an actual dict
-        "model_encoding": ast.literal_eval(
-            coverage_metadata["metadata"]["axes"]["model"]["encoding"]
-        ),
-        "time_units": coverage_metadata["metadata"]["axes"]["time"]["units"],
-        "time_min": int(coverage_metadata["metadata"]["axes"]["time"]["min_value"]),
-        "time_max": int(coverage_metadata["metadata"]["axes"]["time"]["max_value"]),
+        "model_encoding": get_encoding_from_axis_attributes("model", coverage_metadata),
+        "start_cf_time": time_min,  # integer days since base date
+        "end_cf_time": time_max,  # integer days since base date
+        "base_date": base_date,  # datetime.datetime object
+        "start_date": cftime_value_to_ymd(
+            time_min, base_date
+        ),  # (year, month, day) tuple
+        "end_date": cftime_value_to_ymd(
+            time_max, base_date
+        ),  # (year, month, day) tuple
     }
-
-
-#### DATE CONVERSION FUNCTIONS ####
-
-#TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
-def date_to_cftime_value(year, month, day, base_date):
-    """Convert a year, month, and day to a CF-compliant time value (days since the base date)."""
-    date = datetime.datetime(year, month, day)
-    delta_days = (date - base_date).days
-    return delta_days
-
-#TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
-def cftime_value_to_year_month_day(time_value, base_date):
-    """Convert a time value in days since the base date to a year, month, day tuple."""
-    date = base_date + datetime.timedelta(days=time_value)
-    return date.year, date.month, date.day
-
-
-def dayofyear_to_mmdd(dayofyear):
-    """Convert integer day of year (1-365) to a MM-DD string for a non-leap year."""
-    days = float(dayofyear - 1)  # this cant be an int, so we convert to float
-    date = datetime.datetime(2001, 1, 1) + datetime.timedelta(days)
-    return date.strftime("%m-%d")
-
-
-def set_dataset_doy_str(ds):
-    """Convert the integer dayofyear coordinate to a MM-DD string for better readability."""
-    dayofyear_str = [dayofyear_to_mmdd(doy) for doy in ds["dayofyear"].values]
-    ds = ds.assign_coords(dayofyear=("dayofyear", dayofyear_str))
-    return ds
-
-
-def build_variable_year_range_str_from_start_and_end_year(var, start_year, end_year):
-    """Build a year range string from start and end year."""
-    if start_year is None:
-        start_year, _start_month, _start_day = cftime_value_to_year_month_day(
-            var_coverage_metadata[var]["time_min"],
-            var_coverage_metadata[var]["time_units"].split("since")[1].strip(),
-        )
-        end_year, _end_month, _end_day = cftime_value_to_year_month_day(
-            var_coverage_metadata[var]["time_max"],
-            var_coverage_metadata[var]["time_units"].split("since")[1].strip(),
-        )
-        year_range_str = str(start_year + "-" + end_year)
-    else:
-        year_range_str = str(start_year + "-" + end_year)
-    return year_range_str
 
 
 #### VALIDATION FUNCTIONS ####
 
-#TODO: replace code below with generalized functions being developed for CF coverages (cmip6_monthly_cf and cmip6_indicators_cf)
-def validate_years_against_coverage_metadata(start_year, end_year, var):
-    """
-    Validate the start and end years against the coverage metadata.
-    Args:
-        start_year (int): start year
-        end_year (int): end year
-        var (str): variable to get coverage metadata for
-    Returns:
-        tuple: (start_time_value, end_time_value) in days since base date"""
 
-    time_units, time_min, time_max = (
-        var_coverage_metadata[var]["time_units"],
-        var_coverage_metadata[var]["time_min"],
-        var_coverage_metadata[var]["time_max"],
+def validate_latlon(lat, lon):
+    latlon_validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
+    geotiff_validation = check_geotiffs(
+        float(lat), float(lon), coverages=[fire_weather_geotiff]
     )
 
-    # Extract the base date from the time units string
-    try:
-        base_date_str = time_units.split("since")[1].strip()
-        base_date = datetime.datetime.strptime(base_date_str, "%Y-%m-%d")
-    except:
-        return 400
+    if latlon_validation != True:
+        validation = latlon_validation
+    elif geotiff_validation != True:
+        validation = geotiff_validation
+    else:
+        validation = True
 
-    try:
-        start_year = int(start_year)
-        start_time_value = date_to_cftime_value(start_year, 4, 1, base_date)
-        if start_time_value < time_min or start_time_value > time_max:
-            return 400
-    except:
-        return 400
+    if validation == 400:
+        return render_template("400/bad_request.html"), 400
+    if validation == 404:
+        return (
+            render_template("404/no_data.html"),
+            404,
+        )
 
-    try:
-        end_year = int(end_year)
-        end_time_value = date_to_cftime_value(end_year, 10, 1, base_date)
-        if end_time_value < time_min or end_time_value > time_max:
-            return 400
-    except:
-        return 400
 
-    return start_time_value, end_time_value
+def validate_vars(requested_vars):
+    if requested_vars is not None:
+        requested_vars = requested_vars.split(",")
+        for var in requested_vars:
+            if var not in var_coverage_metadata:
+                return render_template("422/invalid_get_parameter.html"), 422
+    else:
+        requested_vars = [var for var in var_coverage_metadata]
+    return requested_vars
+
+
+def validate_requested_vars_start_and_end_year(requested_vars, start_year, end_year):
+    var_time_slices = {}
+    for var in requested_vars:
+        if None in [start_year, end_year]:
+            # use full range if no years requested
+            start_year = var_coverage_metadata[var]["start_date"][0]
+            end_year = var_coverage_metadata[var]["end_date"][0]
+            time_slice_cf = (
+                var_coverage_metadata[var]["start_cf_time"],
+                var_coverage_metadata[var]["end_cf_time"],
+            )
+        elif None not in [start_year, end_year]:
+            start_cf_time = ymd_to_cftime_value(
+                start_year, 4, 1, var_coverage_metadata[var]["base_date"]
+            )
+            end_cf_time = ymd_to_cftime_value(
+                end_year, 10, 1, var_coverage_metadata[var]["base_date"]
+            )
+            time_slice_cf = (start_cf_time, end_cf_time)
+
+        if not validate_year(start_year, end_year):
+            render_template(
+                "422/invalid_year.html",
+                start_year=start_year,
+                end_year=end_year,
+                min_year=coverage_metadata["start_date"][0],
+                max_year=coverage_metadata["end_date"][0],
+            ), 422
+        var_time_slices[var] = time_slice_cf
+
+    print(var_time_slices)
+
+    return var_time_slices
+
+
+def validate_postprocessing_operation(requested_ops):
+    if requested_ops:
+        requested_ops = requested_ops.split(",")
+        if len(requested_ops) > 1:
+            return (
+                render_template("422/invalid_get_parameter.html"),
+                422,
+            )  # only one operation allowed
+        for op in requested_ops:
+            if op not in [
+                "3dayrollingavg",
+                "5dayrollingavg",
+                "7dayrollingavg",
+                "summer_fire_danger_rating_days",
+            ]:
+                return render_template("422/invalid_get_parameter.html"), 422
+    else:
+        requested_ops = ["3dayrollingavg"]  # default operation
+    return requested_ops
 
 
 #### DATA FETCHING FUNCTIONS ####
 
 
-async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
+async def fetch_data_for_all_vars(requested_vars, lat, lon, var_time_slices):
     """
     Fetch the data for the requested variables at the given lat/lon and time range.
     Args:
         requested_vars (list): list of requested variables
         lat (float): latitude
         lon (float): longitude
-        times (tuple): (start_time_value, end_time_value) in days since base date, or None
+        var_time_slices (dict): dict of time slices for each variable
     Returns:
         dict: fetched data as xarray.Datasets, one per variable
     """
@@ -185,10 +191,7 @@ async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
 
     for var in requested_vars:
         coverage_id = var_coverage_metadata[var]["coverage_id"]
-        time_slice = None
-        if times:
-            time_slice = ("time", f"{times[0]},{times[1]}")
-
+        time_slice = ("time", f"{var_time_slices[var][0]},{var_time_slices[var][1]}")
         url = generate_wcs_query_url(
             generate_wcs_getcov_str(
                 x=lon,
@@ -215,6 +218,37 @@ async def fetch_data_for_all_vars(requested_vars, lat, lon, times):
 
 
 #### POSTPROCESSING FUNCTIONS ####
+
+
+def dayofyear_to_mmdd(dayofyear):
+    """Convert integer day of year (1-365) to a MM-DD string for a non-leap year."""
+    days = float(dayofyear - 1)  # this cant be an int, so we convert to float
+    date = datetime.datetime(2001, 1, 1) + datetime.timedelta(days)
+    return date.strftime("%m-%d")
+
+
+def set_dataset_doy_str(ds):
+    """Convert the integer dayofyear coordinate to a MM-DD string for better readability."""
+    dayofyear_str = [dayofyear_to_mmdd(doy) for doy in ds["dayofyear"].values]
+    ds = ds.assign_coords(dayofyear=("dayofyear", dayofyear_str))
+    return ds
+
+
+def build_variable_year_range_str_from_start_and_end_year(var, start_year, end_year):
+    """Build a year range string from start and end year."""
+    if start_year is None:
+        start_year, _start_month, _start_day = cftime_value_to_ymd(
+            var_coverage_metadata[var]["start_cf_time"],
+            var_coverage_metadata[var]["base_date"],
+        )
+        end_year, _end_month, _end_day = cftime_value_to_ymd(
+            var_coverage_metadata[var]["end_cf_time"],
+            var_coverage_metadata[var]["base_date"],
+        )
+        year_range_str = str(start_year + "-" + end_year)
+    else:
+        year_range_str = str(start_year + "-" + end_year)
+    return year_range_str
 
 
 def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
@@ -420,81 +454,21 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
 
     """
 
-    #### REQUEST VALIDATION ####
+    validate_latlon(lat, lon)
 
-    # Validate lat/lon values
-    latlon_validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
-    geotiff_validation = check_geotiffs(
-        float(lat), float(lon), coverages=[fire_weather_geotiff]
-    )
-
-    if latlon_validation != True:
-        validation = latlon_validation
-    elif geotiff_validation != True:
-        validation = geotiff_validation
-    else:
-        validation = True
-
-    if validation == 400:
-        return render_template("400/bad_request.html"), 400
-    if validation == 404:
-        return (
-            render_template("404/no_data.html"),
-            404,
-        )
-
-    # Validate any requested variables
     requested_vars = request.args.get("vars")
-    if requested_vars:
-        requested_vars = requested_vars.split(",")
-        for var in requested_vars:
-            if var not in var_coverage_metadata:
-                return render_template("422/invalid_get_parameter.html"), 422
-    else:
-        requested_vars = [var for var in var_coverage_metadata]
+    requested_vars = validate_vars(requested_vars)
 
-    # Validate the start and end years for each requested variable's coverage
-    for var in requested_vars:
-        if start_year is None and end_year is None:
-            times = None  # means all available times
-        elif start_year is None or end_year is None:
-            return render_template("400/bad_request.html"), 400  # Both must be provided
-        else:
-            if validate_year(start_year, end_year) == True:
-                times = validate_years_against_coverage_metadata(
-                    start_year, end_year, var
-                )
-            if not isinstance(times, tuple):
-                return render_template("400/bad_request.html"), 400
-
-    # Validate postprocessing operation
-    requested_ops = request.args.get("op")
-    if requested_ops:
-        requested_ops = requested_ops.split(",")
-        if len(requested_ops) > 1:
-            return (
-                render_template("422/invalid_get_parameter.html"),
-                422,
-            )  # only one operation allowed
-        for op in requested_ops:
-            if op not in [
-                "3dayrollingavg",
-                "5dayrollingavg",
-                "7dayrollingavg",
-                "summer_fire_danger_rating_days",
-            ]:
-                return render_template("422/invalid_get_parameter.html"), 422
-    else:
-        requested_ops = ["3dayrollingavg"]  # default operation
-
-    #### REQUEST DATA FETCHING ####
-
-    # fetch the data
-    fetched_data = asyncio.run(
-        fetch_data_for_all_vars(requested_vars, float(lat), float(lon), times)
+    var_time_slices = validate_requested_vars_start_and_end_year(
+        requested_vars, start_year, end_year
     )
 
-    #### REQUEST POSTPROCESSING ####
+    requested_ops = request.args.get("op")
+    requested_ops = validate_postprocessing_operation(requested_ops)
+
+    fetched_data = asyncio.run(
+        fetch_data_for_all_vars(requested_vars, float(lat), float(lon), var_time_slices)
+    )
 
     n = None
     if "3dayrollingavg" in requested_ops:

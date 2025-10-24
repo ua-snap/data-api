@@ -49,6 +49,7 @@ def get_service_categories():
         ("Wildfire", "/fire"),
         ("WRF Dynamically Downscaled ERA5 Reanalysis", "/era5wrf"),
         ("Demographics", "/demographics"),
+        ("CMIP6 Fire Weather Indices", "/fire_weather"),
     ]
 
 
