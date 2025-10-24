@@ -23,6 +23,7 @@ lxml = "*"
 marshmallow = "*"
 fiona = "*"
 jaro-winkler = "*"
+cftime = "*"
 
 [dev-packages]
 black = "*"
