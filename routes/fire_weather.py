@@ -43,7 +43,7 @@ fire_weather_api = Blueprint("fire_weather_api", __name__)
 fire_weather_geotiff = "cmip6_all_fire_weather_variables"
 
 fire_weather_coverage_ids = [
-    "cmip6_bui",
+    "cmip6_bui_opt1",
     "cmip6_dmc",
     "cmip6_dc",
     "cmip6_ffmc",
@@ -254,10 +254,9 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
     Then we summarize min, mean, and max of those rolling averages across the entire time range, for each model (including the baseline).
     Return the data as a dictionary with variable, model, time range, and min/mean/max values for each DOY from April 1 to October 31.
 
-    ***NOTE: that we return NA if any NA are present for a given DOY/model combination.
-    This matters for ERA5 model if date range includes both historical and projected (e.g. 2000-2030), because if we allow mean to ignore NA,
-    we would be averaging the historical values only which could lead to misunderstandings.
-    If the user wants to see the historical values only, they should specify a date range that is fully within the historical period (e.g. 1980-2021).
+    ***NOTE: We skip NAs when calculating min/mean/max.
+    This matters for ERA5 model if date range includes both historical and projected (e.g. 2000-2030) because if we skip NA,
+    we are averaging the historical values only (e.g. 2000-2020).
 
     Args:
         n (int): number of days for rolling average
@@ -282,14 +281,12 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
 
         ds = data_dict[var]
         # Apply a n-day rolling average along the time dimension
-        ds_rolled = ds.rolling(time=int(n), center=True).mean()
+        ds_rolled = ds.rolling(time=int(n), center=True).mean(skipna=True)
 
         # Group by day of year and model, and calculate min, mean, max
-        # we want to return NA if any NA are present:
-        # this matters for era5 model if date range includes both historical and projected (e.g. 2000-2030)
-        ds_min_doy = ds_rolled.groupby(["time.dayofyear", "model"]).min(skipna=False)
-        ds_mean_doy = ds_rolled.groupby(["time.dayofyear", "model"]).mean(skipna=False)
-        ds_max_doy = ds_rolled.groupby(["time.dayofyear", "model"]).max(skipna=False)
+        ds_min_doy = ds_rolled.groupby(["time.dayofyear", "model"]).min(skipna=True)
+        ds_mean_doy = ds_rolled.groupby(["time.dayofyear", "model"]).mean(skipna=True)
+        ds_max_doy = ds_rolled.groupby(["time.dayofyear", "model"]).max(skipna=True)
 
         # Replace the integer DOY with dates in format MM-DD for better readability
         ds_min_doy = set_dataset_doy_str(ds_min_doy)
@@ -323,7 +320,7 @@ def summer_fire_danger_rating_days(
 ):
     """For the months of June, July, and August, classify each day in the dataset based on the
     summer fire danger rating adjective classes for each fire weather variable. Count the days in each class
-    per year, per model, and per variable. Get an averaege count of days in each class across all years in the dataset,
+    per year, per model, and per variable. Get an average count of days in each class across all years in the dataset,
     rounded to the nearest integer.
     Return the data as a dictionary with variable, model, time range, and average counts for each class.
 
@@ -360,7 +357,6 @@ def summer_fire_danger_rating_days(
 
         # For each variable, classify each daily value based on the summer fire danger rating classes in summer_fire_danger_ratings_dict
         var_classes = summer_fire_danger_ratings_dict[var].keys()
-
         for model in ds["model"].values:
             # use model names from the coverage metadata
             model_name_str = var_coverage_metadata[var]["model_encoding"][int(model)]
@@ -374,25 +370,30 @@ def summer_fire_danger_rating_days(
                 # get class bounds
                 class_min, class_max = summer_fire_danger_ratings_dict[var][var_class]
 
-                # filter by summer months and classify each value
-                values = ds[var].sel(model=model).values
-                # if there are more than 100 NA values, and the model is ERA5, return all NAs
-                # this should catch the situation where the date range includes both historical and projected data
+                # classify each value
+                # catch era5 case where only years up to 2020 should be counted
                 if (
                     model_name_str == "era5"
-                    and np.count_nonzero(np.isnan(values)) > 100
+                    and start_year_int < 2021
+                    and end_year_int >= 2021
                 ):
-                    for var_class in var_classes:
-                        var_summer_fire_summary[year_range_str][var][model_name_str][
-                            var_class
-                        ] = np.nan
-                    break
+                    ds_model = ds.sel(
+                        model=model,
+                        time=ds["time"].dt.year.isin(list(range(start_year_int, 2021))),
+                    )
+                    num_years = 2020 - start_year_int + 1
+                else:
+                    ds_model = ds.sel(model=model)
+
+                values = ds_model[var].values
                 for value in values:
                     if class_min <= value < class_max:
                         var_summer_fire_summary[year_range_str][var][model_name_str][
                             var_class
                         ] += 1
             # compute average counts per year, rounded to nearest integer
+            # handle era5 case which has a different number of years
+
             for var_class in var_classes:
                 avg_count = (
                     var_summer_fire_summary[year_range_str][var][model_name_str][
