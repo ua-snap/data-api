@@ -259,10 +259,6 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
     we would be averaging the historical values only which could lead to misunderstandings.
     If the user wants to see the historical values only, they should specify a date range that is fully within the historical period (e.g. 1980-2021).
 
-    ***NOTE: this function will not work for the isi variable, because some values are stored using scientific notation
-    and Rasdaman is unable to encode these as netCDF (see this issue: https://github.com/ua-snap/rasdaman-ingest/pull/118#issuecomment-2992373485)
-
-
     Args:
         n (int): number of days for rolling average
         data_dict (dict): dict of xarray.Datasets, one per variable
@@ -330,9 +326,6 @@ def summer_fire_danger_rating_days(
     per year, per model, and per variable. Get an averaege count of days in each class across all years in the dataset,
     rounded to the nearest integer.
     Return the data as a dictionary with variable, model, time range, and average counts for each class.
-
-    ***NOTE: this function will not work for the isi variable, because some values are stored using scientific notation
-    and Rasdaman is unable to encode these as netCDF (see this issue: https://github.com/ua-snap/rasdaman-ingest/pull/118#issuecomment-2992373485)
 
     Args:
         data_dict (dict): dict of xarray.Datasets, one per variable
