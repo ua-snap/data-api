@@ -2,6 +2,8 @@ import asyncio
 import ast
 import logging
 import xarray as xr
+import rasterio
+import rioxarray
 import io
 import numpy as np
 from flask import Blueprint, render_template, request
@@ -235,22 +237,25 @@ async def fetch_polygon_data_for_all_vars(requested_vars, polygon, var_time_slic
         dict: Dictionary with fetched data as xarray.Datasets, one per variable
     """
     tasks = []
-    bbox_bounds = polygon.total_bounds  # (xmin, ymin, xmax, ymax)
+    bbox_bounds = polygon.total_bounds
     x_str = f"{bbox_bounds[0]},{bbox_bounds[2]}"
     y_str = f"{bbox_bounds[1]},{bbox_bounds[3]}"
     for var in requested_vars:
+        coverage_id = var_coverage_metadata[var]["coverage_id"]
         time_slice = ("time", f"{var_time_slices[var][0]},{var_time_slices[var][1]}")
-        request_str = generate_wcs_getcov_str(
-            x=x_str,
-            y=y_str,
-            cov_id=var_coverage_metadata[var]["coverage_id"],
-            time_slice=time_slice,
-            encoding="netcdf",
+        url = generate_wcs_query_url(
+            generate_wcs_getcov_str(
+                x=x_str,
+                y=y_str,
+                cov_id=coverage_id,
+                var_coord=None,
+                time_slice=time_slice,
+                encoding="netcdf",
+                projection="EPSG:4326",
+            )
         )
-        url = generate_wcs_query_url(request_str)
+
         url += f"&RANGESUBSET={var}"
-        # replace X and Y in the request URL with lon and lat to match coverage axes - look for "SUBSET=Y" and "SUBSET=X"
-        url = url.replace("SUBSET=Y", "SUBSET=lat").replace("SUBSET=X", "SUBSET=lon")
 
         tasks.append(fetch_bbox_netcdf([url]))
 
@@ -268,21 +273,28 @@ def calculate_zonal_stats(polygon, datasets_dict, variables):
         variables (list): List of variable names
 
     Returns:
-        dict: Dictionary with variable names mapped to their zonal statistics arrays (time series)
+        dict: Dictionary with variable names mapped to xarray.Datasets of zonal statistics
     """
     logger.info(f"Processing zonal stats for {variables} variables")
     time_start = time.time()
 
     # convert polygon and all datasets to 3338 so we can do area calculations in meters
     polygon = polygon.to_crs(epsg=3338)
+
+    # we need to split the datasets by model and reproject each one because we cant reproject multi-model datasets directly
+    datasets_by_var_model_dict = {}
     for var_name in variables:
-        ds = datasets_dict[var_name]
-        ds = ds.rio.write_crs("EPSG:4326", inplace=True)
-        ds = ds.rio.reproject("EPSG:3338")
-        datasets_dict[var_name] = ds
+        datasets_by_var_model_dict[var_name] = {}
+        var_ds = datasets_dict[var_name]
+        models = var_ds["model"].values
+        for model in models:
+            ds_model = var_ds.sel(model=model)
+            ds_model = ds_model.rio.write_crs("EPSG:4326", inplace=True)
+            ds_model = ds_model.rio.reproject("EPSG:3338")
+            datasets_by_var_model_dict[var_name][model] = ds_model
 
     # use first dataset to get spatial resolution and rasterization
-    ds = next(iter(datasets_dict.values()))
+    ds = next(iter(datasets_by_var_model_dict[variables[0]].values()))
 
     # get scale factor once, not per variable or time slice!
     spatial_resolution = ds.rio.resolution()
@@ -293,27 +305,54 @@ def calculate_zonal_stats(polygon, datasets_dict, variables):
     # create an initial array for the basis of polygon rasterization
     # why? polygon rasterization bogs down hard when doing it in the loop
     da_i = interpolate(
-        ds.isel(time=0), variables[0], "lon", "lat", scale_factor, method="nearest"
+        ds.isel(time=0), variables[0], "x", "y", scale_factor, method="nearest"
     )
-    rasterized_polygon_array = rasterize_polygon(da_i, "lon", "lat", polygon)
+
+    rasterized_polygon_array = rasterize_polygon(da_i, "x", "y", polygon)
 
     zonal_results = {}
     for var_name in variables:
-        ds = datasets_dict[var_name]
-        # interpolate the entire time series for the variable
-        da_i_3d = interpolate(
-            ds, var_name, "lon", "lat", scale_factor, method="nearest"
-        )
-        # calculate zonal stats for the entire time series
-        time_series_means = calculate_zonal_means_vectorized(
-            da_i_3d, rasterized_polygon_array, "lon", "lat"
-        )
-        zonal_results[var_name] = time_series_means
+        zonal_results[var_name] = {}
+        for model in datasets_by_var_model_dict[var_name]:
+            ds = datasets_by_var_model_dict[var_name][model]
+            # interpolate the entire time series for the variable
+            da_i_3d = interpolate(
+                ds, var_name, "x", "y", scale_factor, method="nearest"
+            )
+            # calculate zonal stats for the entire time series
+            time_series_means = calculate_zonal_means_vectorized(
+                da_i_3d, rasterized_polygon_array, "x", "y"
+            )
+            zonal_results[var_name][model] = time_series_means
 
     logger.info(
         f"Zonal stats processed in {round(time.time() - time_start, 2)} seconds"
     )
-    return zonal_results
+
+    # the returned dict is variable -> model -> list of daily zonal means
+    # turn the lists into xarray datasets for postprocessing: one dataset per variable, with all models ... no spatial info required here
+    zonal_results_datasets = {}
+    for var_name in zonal_results:
+        model_dataarrays = []
+        models = []
+        for model in zonal_results[var_name]:
+            models.append(model)
+            model_da = xr.DataArray(
+                zonal_results[var_name][model],
+                dims=["time"],
+                coords={"time": datasets_dict[var_name]["time"].values},
+                name=var_name,
+            )
+            model_dataarrays.append(model_da)
+
+        # create datasets from the arrays
+        var_ds = xr.Dataset(
+            {var_name: xr.concat(model_dataarrays, dim="model")},
+            coords={"model": models, "time": datasets_dict[var_name]["time"].values},
+        )
+        zonal_results_datasets[var_name] = var_ds
+
+    return zonal_results_datasets
 
 
 #### POSTPROCESSING FUNCTIONS ####
