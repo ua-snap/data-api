@@ -43,9 +43,9 @@ fire_weather_api = Blueprint("fire_weather_api", __name__)
 fire_weather_geotiff = "cmip6_all_fire_weather_variables"
 
 fire_weather_coverage_ids = [
-    "cmip6_bui_opt1",
-    "cmip6_dmc",
+    "cmip6_bui",
     "cmip6_dc",
+    "cmip6_dmc",
     "cmip6_ffmc",
     "cmip6_fwi",
     "cmip6_isi",
