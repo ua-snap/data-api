@@ -1,0 +1,253 @@
+{% extends 'base.html' %} {% block content %}
+<h2>CMIP6, Downscaled</h2>
+
+<p>
+  This endpoint provides access to daily CMIP6 data that have been bias-adjusted and downscaled to 4km using <a
+    href="/era5wrf">dynamically downscaled ERA5</a>
+  reference data. Twelve models are available with up to four future scenarios available per model. This is a subset of
+  the model and scenario combinations described <a
+    href="https://arcticdatascience.org/item/story-arctic-climate-data-node">here</a>. A 6-model average is also
+  available. This dataset spans years 1965&ndash;2100 and its extent covers most of Alaska and parts of western Canada.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>CMIP6 downscaled daily data</h4>
+
+<p>
+  Query data for provided models, scenarios, and variables. These models, scenarios, and variables are defined <a
+    href="#cmip6-variable-information">below</a>.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Values for all models, scenarios, and variables at a given latitude and longitude</td>
+      <td style="white-space: nowrap;">
+        <a href="/cmip6_downscaled/point/61.5/-147">/cmip6_downscaled/point/61.5/-147</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Values at a given latitude and longitude for provided model, scenario, and variable</td>
+      <td style="white-space: nowrap;">
+        <a href="/cmip6_downscaled/point/61.5/-147?models=6ModelAvg&scenarios=ssp585&vars=tasmax">
+          /cmip6_downscaled/point/61.5/-147?models=6ModelAvg&scenarios=ssp585&vars=tasmax</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Multiple models can be requested by appending a comma-separated string
+        like <code>?models=&lt;model_1&gt;,&lt;model_2&gt;</code>.<br />
+        Multiple scenarios can be requested by appending a comma-separated
+        string like <code>?scenarios=&lt;scenario_1&gt;,&lt;scenario_2&gt;</code>.<br />
+        Multiple variables can be requested by appending a comma-separated
+        string like <code>?vars=&lt;var_id_1&gt;,&lt;var_id_2&gt;</code>.<br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.<br />
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?vars=tasmax,tasmin&format=csv</code>).
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h5>Endpoint options</h5>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Variables</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>6ModelAvg</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td>Equal-weighted mean of KACE-1-0-G, MIROC6, MPI-ESM1-2-HR, MRI-ESM2-0, NorESM2-MM, and TaiESM1.</td>
+  </tr>
+  <tr>
+    <td>CESM2</td>
+    <td>historical, ssp126, ssp585</td>
+    <td>pr</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>CNRM-CM6-1-HR</td>
+    <td>historical, ssp126, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>E3SM-2-0</td>
+    <td>historical, ssp370</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>EC-Earth3-Veg</td>
+    <td>historical, ssp126, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td>ssp126 scenario is only available for the pr variable.</td>
+  </tr>
+  <tr>
+    <td>HadGEM3-GC31-LL</td>
+    <td>historical, ssp126, ssp245, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td style="white-space: nowrap;">HadGEM3-GC31-MM</td>
+    <td>historical, ssp126, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>KACE-1-0-G</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>MIROC6</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>MPI-ESM1-2-HR</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>MRI-ESM2-0</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>NorESM2-MM</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>TaiESM1</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
+  </tr>
+</table>
+
+<h4>Output</h4>
+
+<p>Results from point queries will look like this:</p>
+
+<pre>
+{
+  "6ModelAvg": {
+    "ssp126": {
+      "2015-01-01": {
+        "pr": 14,
+        "tasmax": -12,
+        "tasmin": -19
+      },
+      "2015-01-02": {
+        "pr": 2,
+        "tasmax": -12,
+        "tasmin": -18
+      },
+      "2015-01-03": {
+        "pr": 18,
+        "tasmax": -12,
+        "tasmin": -19
+      },
+      "2015-01-04": {
+        "pr": 8,
+        "tasmax": -12,
+        "tasmin": -19
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;model&gt;: {
+    &lt;scenario&gt;: {
+      &lt;year-month-day&gt;: {
+        &lt;var_id&gt;: daily value,
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  ...
+}
+</pre>
+
+<h3 id="cmip6-variable-information">CMIP6 Variable Information</h3>
+
+<p>
+  Below is the list of CMIP6 variables that are found in this endpoint. For
+  complete variable definitions, see the official CMIP6 documentation
+  <a href="https://wcrp-cmip.org/cmip-model-and-experiment-documentation/">here</a>.
+</p>
+
+<dl>
+  <dt>pr</dt>
+  <dd>
+    Precipitation, including both liquid and solid phases (mm/day)
+  </dd>
+  <dt>tasmax</dt>
+  <dd>Maximum near surface air temperature (&deg;C)</dd>
+  <dt>tasmin</dt>
+  <dd>Minimum near surface air temperature (&deg;C)</dd>
+</dl>
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metadata & source data access</th>
+      <th>Academic reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Publication in progress. For more information,
+        please
+        <a href="mailto:uaf-snap-data-tools@alaska.edu">contact us</a> directly.
+      </td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>
+        See <a href="/cmip6/references">this page</a> for a full list of our CMIP6 data sources and suggested
+        citations.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}

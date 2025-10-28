@@ -560,3 +560,60 @@ demographics_order = [
     "pct_uninsured_low",
     "pct_uninsured_high",
 ]
+
+cmip6_downscaled_options = {
+    "tasmax": {
+        "6ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "CNRM-CM6-1-HR": ["historical", "ssp126", "ssp585"],
+        "E3SM-2-0": ["historical", "ssp370"],
+        "EC-Earth3-Veg": ["historical", "ssp370", "ssp585"],
+        "HadGEM3-GC31-LL": ["historical", "ssp126", "ssp245", "ssp585"],
+        "HadGEM3-GC31-MM": ["historical", "ssp126", "ssp585"],
+        "KACE-1-0-G": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MIROC6": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MPI-ESM1-2-HR": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MRI-ESM2-0": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "NorESM2-MM": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "TaiESM1": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+    },
+    "tasmin": {
+        "6ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "CNRM-CM6-1-HR": ["historical", "ssp126", "ssp585"],
+        "E3SM-2-0": ["historical", "ssp370"],
+        "EC-Earth3-Veg": ["historical", "ssp370", "ssp585"],
+        "HadGEM3-GC31-LL": ["historical", "ssp126", "ssp245", "ssp585"],
+        "HadGEM3-GC31-MM": ["historical", "ssp126", "ssp585"],
+        "KACE-1-0-G": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MIROC6": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MPI-ESM1-2-HR": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MRI-ESM2-0": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "NorESM2-MM": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "TaiESM1": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+    },
+    "pr": {
+        "6ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "CESM2": ["historical", "ssp126", "ssp585"],
+        "CNRM-CM6-1-HR": ["historical", "ssp126", "ssp585"],
+        "E3SM-2-0": ["historical", "ssp370"],
+        "EC-Earth3-Veg": ["historical", "ssp126", "ssp370", "ssp585"],
+        "HadGEM3-GC31-LL": ["historical", "ssp126", "ssp245", "ssp585"],
+        "HadGEM3-GC31-MM": ["historical", "ssp126", "ssp585"],
+        "KACE-1-0-G": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MIROC6": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MPI-ESM1-2-HR": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "MRI-ESM2-0": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "NorESM2-MM": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+        "TaiESM1": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],
+    },
+}
+
+all_cmip6_downscaled_vars = list(cmip6_downscaled_options.keys())
+all_cmip6_downscaled_models = set(
+    model for var in cmip6_downscaled_options.values() for model in var.keys()
+)
+all_cmip6_downscaled_scenarios = set(
+    scenario
+    for var in cmip6_downscaled_options.values()
+    for model in var.values()
+    for scenario in model
+)
