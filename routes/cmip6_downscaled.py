@@ -224,15 +224,14 @@ def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
     if scenario not in cmip6_downscaled_options[varname][model]:
         return {}
 
-    cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_wcs"
-    cov_id = cov_id.replace("-", "_")
-
-    metadata = asyncio.run(get_cmip6_metadata(cov_id))
-
     # Validate the lat/lon values
     validation = latlon_is_numeric_and_in_geodetic_range(lat, lon)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
+
+    cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_wcs"
+    cov_id = cov_id.replace("-", "_")
+    metadata = asyncio.run(get_cmip6_metadata(cov_id))
     cmip6_downscaled_bbox = construct_latlon_bbox_from_coverage_bounds(metadata)
     within_bounds = validate_latlon_in_bboxes(
         lat, lon, [cmip6_downscaled_bbox], [cov_id]
