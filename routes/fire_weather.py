@@ -1,9 +1,6 @@
 import asyncio
-import ast
 import logging
 import xarray as xr
-import rasterio
-import rioxarray
 import io
 import numpy as np
 from flask import Blueprint, render_template, request
@@ -35,11 +32,8 @@ from zonal_stats import (
     interpolate,
     calculate_zonal_means_vectorized,
 )
+from csv_functions import create_csv
 from luts import summer_fire_danger_ratings_dict
-
-# TODO: for additional postprocessing or csv output, uncomment these imports and add code
-# from postprocessing import postprocess, prune_nulls_with_max_intensity
-# from csv_functions import create_csv
 
 from . import routes
 
@@ -116,7 +110,7 @@ def validate_latlon(lat, lon):
 
 
 def validate_vars(requested_vars):
-    if requested_vars is not None:
+    if requested_vars:
         requested_vars = requested_vars.split(",")
         for var in requested_vars:
             if var not in var_coverage_metadata:
@@ -168,14 +162,14 @@ def validate_postprocessing_operation(requested_ops):
             )  # only one operation allowed
         for op in requested_ops:
             if op not in [
-                "3dayrollingavg",
-                "5dayrollingavg",
-                "7dayrollingavg",
+                "3_day_rolling_average",
+                "5_day_rolling_average",
+                "7_day_rolling_average",
                 "summer_fire_danger_rating_days",
             ]:
                 return render_template("422/invalid_get_parameter.html"), 422
     else:
-        requested_ops = ["3dayrollingavg"]  # default operation
+        requested_ops = ["3_day_rolling_average"]  # default operation
     return requested_ops
 
 
@@ -389,7 +383,7 @@ def build_variable_year_range_str_from_start_and_end_year(var, start_year, end_y
     return year_range_str
 
 
-def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
+def nday_rolling_average(n, data_dict, var_coverage_metadata, start_year, end_year):
     """
     For each dataset in the dictionary, we will take an n-day rolling average of values (smoothing).
     Then we summarize min, mean, and max of those rolling averages across the entire time range, for each model (including the baseline).
@@ -443,13 +437,22 @@ def nday_rolling_avg(n, data_dict, var_coverage_metadata, start_year, end_year):
             for doy in ds_mean_doy["dayofyear"].values:
                 var_nday_summary[year_range_str][var][model_name_str][doy] = {
                     "min": float(
-                        ds_min_doy.sel(dayofyear=doy, model=model).to_array().values[0]
+                        ds_min_doy.sel(dayofyear=doy, model=model)
+                        .to_array()
+                        .values[0]
+                        .round(3)
                     ),
                     "mean": float(
-                        ds_mean_doy.sel(dayofyear=doy, model=model).to_array().values[0]
+                        ds_mean_doy.sel(dayofyear=doy, model=model)
+                        .to_array()
+                        .values[0]
+                        .round(3)
                     ),
                     "max": float(
-                        ds_max_doy.sel(dayofyear=doy, model=model).to_array().values[0]
+                        ds_max_doy.sel(dayofyear=doy, model=model)
+                        .to_array()
+                        .values[0]
+                        .round(3)
                     ),
                 }
 
@@ -566,8 +569,10 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         vars: comma-separated list of variables to fetch (default: all variables)
             valid variables: bui, dmc, dc, ffmc, fwi, isi
         op: postprocessing operation to perform (required)
-            valid operations: 3dayrollingavg, 5dayrollingavg, 7dayrollingavg, summer_fire_danger_rating_days
+            valid operations: 3_day_rolling_average, 5_day_rolling_average, 7_day_rolling_average, summer_fire_danger_rating_days
             only one operation can be performed at a time
+            default is 3_day_rolling_average
+        format: output format (only supports "csv")
 
     Args:
         lat (float): latitude
@@ -579,10 +584,11 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         JSON-like dict of requested daily fire weather data
 
     Notes:
-        example request (3 day rolling average for all variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?op=3dayrollingavg
-        example request (3 day rolling average for select variables, all years): http://localhost:5000/fire_weather/point/65.06/-146.16?vars=bui,fwi&op=3dayrollingavg
-        example request (3 day rolling average for all variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?op=3dayrollingavg
-        example request (3 day rolling average for select variables, select years): http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi&op=3dayrollingavg
+        usage examples:
+        - 3 day rolling average for all variables, all years: http://localhost:5000/fire_weather/point/65.06/-146.16
+        - 5 day rolling average for select variables, all years: http://localhost:5000/fire_weather/point/65.06/-146.16?vars=bui,fwi&op=5_day_rolling_average
+        - summer fire danger rating days for select years: http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?op=summer_fire_danger_rating_days
+        - summer fire danger rating days for select variables, select years: http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi&op=summer_fire_danger_rating_days
 
     """
     validate_latlon(lat, lon)
@@ -606,33 +612,47 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     )
 
     n = None
-    if "3dayrollingavg" in requested_ops:
+    if "3_day_rolling_average" in requested_ops:
         n = 3
-    elif "5dayrollingavg" in requested_ops:
+    elif "5_day_rolling_average" in requested_ops:
         n = 5
-    elif "7dayrollingavg" in requested_ops:
+    elif "7_day_rolling_average" in requested_ops:
         n = 7
 
     if n is not None:
-        processed_data = nday_rolling_avg(
+        processed_data = nday_rolling_average(
             n,
             fetched_data,
             var_coverage_metadata,
             start_year,
             end_year,
         )
-        return processed_data
 
-    if "summer_fire_danger_rating_days" in requested_ops:
+    elif "summer_fire_danger_rating_days" in requested_ops:
         processed_data = summer_fire_danger_rating_days(
             fetched_data,
             var_coverage_metadata,
             start_year,
             end_year,
         )
-        return processed_data
 
-    return render_template("400/bad_request.html"), 400  # an operation is required
+    if request.args.get("format") == "csv":
+        # reformat ops string for filename prefix, e.g "CMIP6 Fire Weather Indices - 3 Day Rolling Average"
+        filename_prefix = "CMIP6 Fire Weather Indices - " + " ".join(
+            [word.capitalize() for word in requested_ops[0].split("_")]
+        )
+        return create_csv(
+            data=processed_data,
+            endpoint="fire_weather",
+            lat=lat,
+            lon=lon,
+            filename_prefix=filename_prefix,
+            vars=requested_vars,
+            start_year=start_year,
+            end_year=end_year,
+        )
+    else:
+        return processed_data
 
 
 @routes.route("/fire_weather/area/<place_id>")
@@ -644,11 +664,12 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
         vars: comma-separated list of variables to fetch (default: all variables)
             valid variables: bui, dmc, dc, ffmc, fwi, isi
         op: postprocessing operation to perform (required)
-            valid operations: 3dayrollingavg, 5dayrollingavg, 7dayrollingavg, summer_fire_danger_rating_days
+            valid operations: 3_day_rolling_average, 5_day_rolling_average, 7_day_rolling_average, summer_fire_danger_rating_days
             only one operation can be performed at a time
+        format: output format (only supports "csv")
 
     Args:
-        place_id (str): place identifier
+        place_id (str): place identifier, used to fetch polygon and compute zonal statistics
         start_year (int): optional start year for WCPS query
         end_year (int): optional end year for WCPS query
 
@@ -656,10 +677,11 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
         JSON-like dict of requested daily fire weather data
 
     Notes:
-        example request (3 day rolling average for all variables, all years): http://localhost:5000/fire_weather/area/19070502?op=3dayrollingavg
-        example request (3 day rolling average for select variables, all years): http://localhost:5000/fire_weather/area/19070502?vars=bui,fwi&op=3dayrollingavg
-        example request (3 day rolling average for all variables, select years): http://localhost:5000/fire_weather/area/19070502/2000/2030?op=3dayrollingavg
-        example request (3 day rolling average for select variables, select years): http://localhost:5000/fire_weather/area/19070502/2000/2030?vars=bui,fwi&op=3dayrollingavg
+        usage examples (HUC10 polygon: 1908030906):
+        - 3 day rolling average for all variables, all years: http://localhost:5000/fire_weather/area/1908030906
+        - 5 day rolling average for select variables, all years: http://localhost:5000/fire_weather/area/1908030906?vars=bui,fwi&op=5_day_rolling_average
+        - summer fire danger rating days for select years: http://localhost:5000/fire_weather/area/1908030906/2000/2030?op=summer_fire_danger_rating_days
+        - summer fire danger rating days for select variables, select years: http://localhost:5000/fire_weather/area/1908030906/2000/2030?vars=bui,fwi&op=summer_fire_danger_rating_days
     """
 
     poly_type = validate_var_id(place_id)
@@ -689,39 +711,49 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
             fetch_polygon_data_for_all_vars(requested_vars, polygon, var_time_slices)
         )
         zonal_results = calculate_zonal_stats(polygon, datasets_dict, requested_vars)
-
-        print(zonal_results)
-
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
     n = None
-    if "3dayrollingavg" in requested_ops:
+    if "3_day_rolling_average" in requested_ops:
         n = 3
-    elif "5dayrollingavg" in requested_ops:
+    elif "5_day_rolling_average" in requested_ops:
         n = 5
-    elif "7dayrollingavg" in requested_ops:
+    elif "7_day_rolling_average" in requested_ops:
         n = 7
 
     if n is not None:
-        processed_data = nday_rolling_avg(
+        processed_data = nday_rolling_average(
             n,
             zonal_results,
             var_coverage_metadata,
             start_year,
             end_year,
         )
-        return processed_data
 
-    if "summer_fire_danger_rating_days" in requested_ops:
+    elif "summer_fire_danger_rating_days" in requested_ops:
         processed_data = summer_fire_danger_rating_days(
             zonal_results,
             var_coverage_metadata,
             start_year,
             end_year,
         )
-        return processed_data
 
-    return render_template("400/bad_request.html"), 400  # an operation is required
+    if request.args.get("format") == "csv":
+        # reformat ops string for filename prefix, e.g "CMIP6 Fire Weather Indices - 3 Day Rolling Average"
+        filename_prefix = "CMIP6 Fire Weather Indices - " + " ".join(
+            [word.capitalize() for word in requested_ops[0].split("_")]
+        )
+        return create_csv(
+            data=processed_data,
+            endpoint="fire_weather",
+            place_id=place_id,
+            filename_prefix=filename_prefix,
+            vars=requested_vars,
+            start_year=start_year,
+            end_year=end_year,
+        )
+    else:
+        return processed_data
