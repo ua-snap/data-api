@@ -6,23 +6,32 @@ import io
 import numpy as np
 from flask import Blueprint, render_template, request
 import datetime
+import time
 
 # local imports
 from generate_urls import generate_wcs_query_url
-from generate_requests import generate_wcs_getcov_str
+from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
     fetch_data,
     describe_via_wcps,
     ymd_to_cftime_value,
     cftime_value_to_ymd,
     get_encoding_from_axis_attributes,
-    get_variables_from_coverage_metadata,
     get_attributes_from_time_axis,
+    get_poly,
+    fetch_bbox_netcdf,
 )
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     check_geotiffs,
     validate_year,
+    validate_var_id,
+)
+from zonal_stats import (
+    get_scale_factor,
+    rasterize_polygon,
+    interpolate,
+    calculate_zonal_means_vectorized,
 )
 from luts import summer_fire_danger_ratings_dict
 
@@ -171,7 +180,7 @@ def validate_postprocessing_operation(requested_ops):
 #### DATA FETCHING FUNCTIONS ####
 
 
-async def fetch_data_for_all_vars(requested_vars, lat, lon, var_time_slices):
+async def fetch_point_data_for_all_vars(requested_vars, lat, lon, var_time_slices):
     """
     Fetch the data for the requested variables at the given lat/lon and time range.
     Args:
@@ -212,6 +221,99 @@ async def fetch_data_for_all_vars(requested_vars, lat, lon, var_time_slices):
         fetched_data[requested_var] = ds
 
     return fetched_data
+
+
+async def fetch_polygon_data_for_all_vars(requested_vars, polygon, var_time_slices):
+    """
+    Fetch the data for the requested variables in the polygon and time range.
+
+    Args:
+        requested_vars (list): list of requested variables
+        polygon (GeoDataFrame): polygon to fetch data for
+        var_time_slices (dict): dict of time slices for each variable
+    Returns:
+        dict: Dictionary with fetched data as xarray.Datasets, one per variable
+    """
+    tasks = []
+    bbox_bounds = polygon.total_bounds  # (xmin, ymin, xmax, ymax)
+    x_str = f"{bbox_bounds[0]},{bbox_bounds[2]}"
+    y_str = f"{bbox_bounds[1]},{bbox_bounds[3]}"
+    for var in requested_vars:
+        time_slice = ("time", f"{var_time_slices[var][0]},{var_time_slices[var][1]}")
+        request_str = generate_wcs_getcov_str(
+            x=x_str,
+            y=y_str,
+            cov_id=var_coverage_metadata[var]["coverage_id"],
+            time_slice=time_slice,
+            encoding="netcdf",
+        )
+        url = generate_wcs_query_url(request_str)
+        url += f"&RANGESUBSET={var}"
+        # replace X and Y in the request URL with lon and lat to match coverage axes - look for "SUBSET=Y" and "SUBSET=X"
+        url = url.replace("SUBSET=Y", "SUBSET=lat").replace("SUBSET=X", "SUBSET=lon")
+
+        tasks.append(fetch_bbox_netcdf([url]))
+
+    datasets = await asyncio.gather(*tasks)
+    datasets_dict = {var_name: ds for var_name, ds in zip(requested_vars, datasets)}
+    return datasets_dict
+
+
+def calculate_zonal_stats(polygon, datasets_dict, variables):
+    """Process zonal statistics for variable datasets.
+
+    Args:
+        polygon (GeoDataFrame): Target polygon
+        datasets_dict (dict): Dictionary with variable names mapped to xarray.Datasets
+        variables (list): List of variable names
+
+    Returns:
+        dict: Dictionary with variable names mapped to their zonal statistics arrays (time series)
+    """
+    logger.info(f"Processing zonal stats for {variables} variables")
+    time_start = time.time()
+
+    # convert polygon and all datasets to 3338 so we can do area calculations in meters
+    polygon = polygon.to_crs(epsg=3338)
+    for var_name in variables:
+        ds = datasets_dict[var_name]
+        ds = ds.rio.write_crs("EPSG:4326", inplace=True)
+        ds = ds.rio.reproject("EPSG:3338")
+        datasets_dict[var_name] = ds
+
+    # use first dataset to get spatial resolution and rasterization
+    ds = next(iter(datasets_dict.values()))
+
+    # get scale factor once, not per variable or time slice!
+    spatial_resolution = ds.rio.resolution()
+    grid_cell_area_m2 = abs(spatial_resolution[0]) * abs(spatial_resolution[1])
+    polygon_area_m2 = polygon.area
+    scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
+
+    # create an initial array for the basis of polygon rasterization
+    # why? polygon rasterization bogs down hard when doing it in the loop
+    da_i = interpolate(
+        ds.isel(time=0), variables[0], "lon", "lat", scale_factor, method="nearest"
+    )
+    rasterized_polygon_array = rasterize_polygon(da_i, "lon", "lat", polygon)
+
+    zonal_results = {}
+    for var_name in variables:
+        ds = datasets_dict[var_name]
+        # interpolate the entire time series for the variable
+        da_i_3d = interpolate(
+            ds, var_name, "lon", "lat", scale_factor, method="nearest"
+        )
+        # calculate zonal stats for the entire time series
+        time_series_means = calculate_zonal_means_vectorized(
+            da_i_3d, rasterized_polygon_array, "lon", "lat"
+        )
+        zonal_results[var_name] = time_series_means
+
+    logger.info(
+        f"Zonal stats processed in {round(time.time() - time_start, 2)} seconds"
+    )
+    return zonal_results
 
 
 #### POSTPROCESSING FUNCTIONS ####
@@ -459,7 +561,9 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     requested_ops = validate_postprocessing_operation(requested_ops)
 
     fetched_data = asyncio.run(
-        fetch_data_for_all_vars(requested_vars, float(lat), float(lon), var_time_slices)
+        fetch_point_data_for_all_vars(
+            requested_vars, float(lat), float(lon), var_time_slices
+        )
     )
 
     n = None
@@ -483,6 +587,98 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     if "summer_fire_danger_rating_days" in requested_ops:
         processed_data = summer_fire_danger_rating_days(
             fetched_data,
+            var_coverage_metadata,
+            start_year,
+            end_year,
+        )
+        return processed_data
+
+    return render_template("400/bad_request.html"), 400  # an operation is required
+
+
+@routes.route("/fire_weather/area/<place_id>")
+@routes.route("/fire_weather/area/<place_id>/<start_year>/<end_year>")
+def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
+    """
+    Query the daily fire weather coverage.
+    GET parameters:
+        vars: comma-separated list of variables to fetch (default: all variables)
+            valid variables: bui, dmc, dc, ffmc, fwi, isi
+        op: postprocessing operation to perform (required)
+            valid operations: 3dayrollingavg, 5dayrollingavg, 7dayrollingavg, summer_fire_danger_rating_days
+            only one operation can be performed at a time
+
+    Args:
+        place_id (str): place identifier
+        start_year (int): optional start year for WCPS query
+        end_year (int): optional end year for WCPS query
+
+    Returns:
+        JSON-like dict of requested daily fire weather data
+
+    Notes:
+        example request (3 day rolling average for all variables, all years): http://localhost:5000/fire_weather/area/19070502?op=3dayrollingavg
+        example request (3 day rolling average for select variables, all years): http://localhost:5000/fire_weather/area/19070502?vars=bui,fwi&op=3dayrollingavg
+        example request (3 day rolling average for all variables, select years): http://localhost:5000/fire_weather/area/19070502/2000/2030?op=3dayrollingavg
+        example request (3 day rolling average for select variables, select years): http://localhost:5000/fire_weather/area/19070502/2000/2030?vars=bui,fwi&op=3dayrollingavg
+    """
+
+    poly_type = validate_var_id(place_id)
+    if type(poly_type) is tuple:
+        return poly_type
+
+    try:
+        polygon = get_poly(place_id, crs=4326)
+    except:
+        return render_template("422/invalid_area.html"), 422
+
+    requested_vars = request.args.get("vars")
+    requested_vars = validate_vars(requested_vars)
+
+    start_year = int(start_year) if start_year is not None else None
+    end_year = int(end_year) if end_year is not None else None
+    var_time_slices = validate_requested_vars_start_and_end_year(
+        requested_vars, start_year, end_year
+    )
+
+    requested_ops = request.args.get("op")
+    requested_ops = validate_postprocessing_operation(requested_ops)
+
+    try:
+        # fetch bbox datasets for requested variables
+        datasets_dict = asyncio.run(
+            fetch_polygon_data_for_all_vars(requested_vars, polygon, var_time_slices)
+        )
+        zonal_results = calculate_zonal_stats(polygon, datasets_dict, requested_vars)
+
+        print(zonal_results)
+
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+    n = None
+    if "3dayrollingavg" in requested_ops:
+        n = 3
+    elif "5dayrollingavg" in requested_ops:
+        n = 5
+    elif "7dayrollingavg" in requested_ops:
+        n = 7
+
+    if n is not None:
+        processed_data = nday_rolling_avg(
+            n,
+            zonal_results,
+            var_coverage_metadata,
+            start_year,
+            end_year,
+        )
+        return processed_data
+
+    if "summer_fire_danger_rating_days" in requested_ops:
+        processed_data = summer_fire_danger_rating_days(
+            zonal_results,
             var_coverage_metadata,
             start_year,
             end_year,
