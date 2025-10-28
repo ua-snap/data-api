@@ -1,15 +1,4 @@
 import json
-import pprint
-
-
-def dump_response(resp):
-    try:
-        body = resp.json()
-    except Exception:
-        body = resp.text
-    print("\n---- RESPONSE DUMP BEGIN ----")
-    pprint.pprint(body)
-    print("---- RESPONSE DUMP END ----\n")
 
 
 def test_alfresco_flammability_area(client):
@@ -19,8 +8,6 @@ def test_alfresco_flammability_area(client):
     """
     # Get the actual response from the endpoint
     response = client.get("/alfresco/flammability/area/19080309")
-    if response.status_code != 200:
-        dump_response(response)
     assert response.status_code == 200
     actual_data = response.get_json()
 
@@ -39,8 +26,6 @@ def test_alfresco_veg_type_area(client):
     """
     # Get the actual response from the endpoint
     response = client.get("/alfresco/veg_type/area/19080309")
-    if response.status_code != 200:
-        dump_response(response)
     assert response.status_code == 200
     actual_data = response.get_json()
 
@@ -59,8 +44,6 @@ def test_alfresco_flammability_local(client):
     """
     # Get the actual response from the endpoint
     response = client.get("/alfresco/flammability/local/65.4844/-145.4036")
-    if response.status_code != 200:
-        dump_response(response)
     assert response.status_code == 200
     actual_data = response.get_json()
 
@@ -96,7 +79,7 @@ def test_alfresco_flammability_invalid_area(client):
     """
     # Get the actual response from the endpoint
     response = client.get("/alfresco/flammability/area/foobar")
-    assert response.status_code == 422
+    assert response.status_code == 400
 
 
 def test_alfresco_veg_type_invalid_area(client):
@@ -105,7 +88,7 @@ def test_alfresco_veg_type_invalid_area(client):
     """
     # Get the actual response from the endpoint
     response = client.get("/alfresco/veg_type/area/foobar")
-    assert response.status_code == 422
+    assert response.status_code == 400
 
 
 def test_alfresco_flammability_invalid_local_str(client):
