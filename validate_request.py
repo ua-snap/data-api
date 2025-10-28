@@ -6,17 +6,68 @@ import asyncio
 import ast
 import rasterio
 import os.path
+import os
 
 from flask import render_template
 from pyproj import Transformer
 import numpy as np
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import shape
 from rasterio.crs import CRS
 
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from generate_urls import generate_wfs_places_url
 from fetch_data import fetch_data
 from luts import geotiff_projections
+
+
+def check_poly_in_geotiffs(polygon, coverages):
+    """Check if a polygon is completely within the data footprint of binary GeoTIFFs.
+    Args:
+        polygon (GeoDataFrame): GeoDataFrame representing the polygon to check; if multiple polygons are present, only the first will be evaluated.
+        coverages (list): List of coverages to check for data availability.
+    Returns:
+        True if valid or if there is a problem processing the geotiff; HTTP 404 status code if no data was found.
+    """
+    for coverage in coverages:
+        reference_geotiff = "geotiffs/" + coverage + ".tif"
+
+        # Skip if the GeoTIFF file does not exist.
+        if not os.path.isfile(reference_geotiff):
+            return True
+
+        try:
+            with rasterio.open(reference_geotiff) as dataset:
+                # reproject polygon to match geotiff CRS
+                if coverage in geotiff_projections:
+                    crs = geotiff_projections[coverage]
+                else:
+                    crs = "EPSG:3338"
+                polygon_proj = polygon.to_crs(crs)
+
+                # read binary mask from geotiff, convert to uint8 for rasterio
+                mask = dataset.read(1)
+                mask = mask.astype("uint8")
+                transform = dataset.transform
+
+                # convert binary mask to geometries
+                mask_shapes = []
+                for geom, value in rasterio.features.shapes(mask, transform=transform):
+                    if value == 1:
+                        mask_shapes.append(shape(geom))
+
+                # create a unified geometry from the mask shapes
+                mask_geometry = gpd.GeoSeries(mask_shapes, crs=crs).unary_union
+
+                # check if the polygon is completely within the mask geometry
+                if polygon_proj.geometry.iloc[0].within(mask_geometry):
+                    return True
+                else:
+                    return 404
+        except Exception as e:
+            print(f"Error processing GeoTIFF {reference_geotiff}: {e}")
+            return True
 
 
 def check_geotiffs(lat, lon, coverages):
