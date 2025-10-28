@@ -266,10 +266,10 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
     if type(poly_type) is tuple:
         return poly_type
 
-    try:
-        poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
-    except:
-        return render_template("422/invalid_area.html"), 422
+    # try:
+    poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
+    # except:
+    #     return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:
         poly_pkg = nullify_and_prune(poly_pkg, var_ep)
