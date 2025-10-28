@@ -44,7 +44,7 @@ jobs:
       - name: Install dependencies
         run: |
           pipenv install --dev --system
-          pip install pytest pytest-cov
+          pip install pytest
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
@@ -52,15 +52,3 @@ jobs:
       - name: Run tests with pytest
         run: |
           pytest tests/ -v --tb=short
-
-      - name: Run tests with coverage
-        run: |
-          pytest tests/ --cov=. --cov-report=xml --cov-report=term-missing
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
