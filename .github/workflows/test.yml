@@ -78,4 +78,4 @@ jobs:
         with:
           name: pytest-results-${{ github.run_number }}
           path: test-outputs/
-          retention-days: 30
+          retention-days: 10
