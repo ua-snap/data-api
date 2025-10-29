@@ -59,7 +59,7 @@ jobs:
         run: |
           pip install --upgrade setuptools wheel
           pipenv install --dev --system --verbose
-          pip install pytest
+          pip install pytest pytest-html
 
       - name: Set PYTHONPATH and environment variables
         run: |
