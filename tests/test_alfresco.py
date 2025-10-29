@@ -79,7 +79,7 @@ def test_alfresco_flammability_invalid_area(client):
     """
     # Get the actual response from the endpoint
     response = client.get("/alfresco/flammability/area/foobar")
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 
 def test_alfresco_veg_type_invalid_area(client):
@@ -88,7 +88,7 @@ def test_alfresco_veg_type_invalid_area(client):
     """
     # Get the actual response from the endpoint
     response = client.get("/alfresco/veg_type/area/foobar")
-    assert response.status_code == 400
+    assert response.status_code == 422
 
 
 def test_alfresco_flammability_invalid_local_str(client):
