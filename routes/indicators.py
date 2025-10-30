@@ -1,7 +1,7 @@
 """Endpoints for climate indicators
 
 These endpoint(s) query a coverage containing summarized versions of the indicators dataset created from the 12km NCAR dataset.
-The thresholds and eras are preconfigured in the coverage. Calling this the "base" indicators for now (i.e., url suffix: /indicators/base).
+The thresholds and eras are preconfigured in the coverage.
 """
 
 import asyncio
@@ -485,11 +485,8 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
 
 
 @routes.route(
-    "/indicators/base/point/<lat>/<lon>"
-)  # original route, kept for backwards compatibility
-@routes.route(
     "/indicators/cmip5/point/<lat>/<lon>/"
-)  # new route, matches API documentation
+)  # route matches API documentation
 def run_fetch_cmip5_indicators_point_data(lat, lon):
     """Query the NCAR 12km indicators_climatologies rasdaman coverage which contains indicators summarized over NCR time eras
 
@@ -545,11 +542,8 @@ def run_fetch_cmip5_indicators_point_data(lat, lon):
 
 
 @routes.route(
-    "/indicators/base/area/<var_id>"
-)  # original route, kept for backwards compatibility
-@routes.route(
     "/indicators/cmip5/area/<var_id>/"
-)  # new route, matches API documentation
+)  # route matches API documentation
 def get_cmip5_indicators_area_data(var_id):
     """Area aggregation data endpoint. Fetch data within polygon area for specified variable and return JSON-like dict.
 
