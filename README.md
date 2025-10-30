@@ -2,9 +2,10 @@
 
 ## Installing
 
-Running the API requires Python 3.11. 
+Running the API requires Python 3.11.
 
 Use `pipenv` to create a virtual environment from the repo's `Pipfile` using:
+
 ```
 pipenv install
 ```
@@ -26,9 +27,7 @@ export FLASK_APP=application.py
 export FLASK_DEBUG=True
 ```
 
-
 Review environment variables found in `config.py`, and reset them for development if necessary (e.g., `export API_GS_BASE_URL=https://gs-dev.earthmaps.io/geoserver/`).
-
 
 Start the application via `pipenv`:
 
@@ -59,18 +58,25 @@ Example Precipitation Query:
 - http://localhost:5000/precipitation/point/65.028/-146.1627
 - http://localhost:5000/precipitation/point/62.906/-148.345
 
+## Creating and updating Production API + Varnish Cache
 
-## Updating Production API + Varnish Cache
+To create a new ElasticBeanstalk API instance, do the following:
 
-Due to the configuration of our services, we need to both update our API instance + restart our Varnish cache when necessary.
-
-Prior to deploying, update the `requirements.txt`:
-
-```bash
-pipenv run pip freeze > requirements.txt
-git commit -am'update requirements.txt'
+```
+git checkout production
+git pull
+eb init <-- Choose us-west-2 and data-api-production for application
+eb create --it r7g.large --single
 ```
 
-Instructions for this can be found here:
+To update the current API instance, do the following:
 
-- [SNAP Data API Instructions](https://docs.google.com/document/d/1Z31-mkDE0skITOuOOMBQwuO2I8jUDuApm7VX-A9v1LA/edit?usp=sharing)
+```
+git checkout production
+git pull
+eb deploy
+```
+
+Explicit instructions for creating and updating the API can be found here:
+
+- [SNAP Data API Instructions](https://docs.google.com/document/d/18-pEC-Rri3EQcNXaHajhqMYmRc_LBX1p3wWKoYnC874/edit?tab=t.jzrka8gsdrfw)
