@@ -24,11 +24,8 @@ export MAMBA_ROOT_PREFIX="/opt/micromamba"
 if micromamba env list | grep -q 'api-env'; then
   echo "Micromamba environment 'api-env' already exists, skipping creation."
 else
-  echo "Creating micromamba environment 'api-env'..."
-  micromamba create -y -n api-env -c conda-forge python=3.11 \
-    flask flask-cors gunicorn aiohttp requests marshmallow \
-    numpy xarray h5py h5netcdf rioxarray rasterio \
-    pyproj shapely geopandas rtree fiona jaro-winkler
+  echo "Creating micromamba environment 'api-env' from environment.yml..."
+  micromamba env create -f /var/app/staging/environment.yml
 fi
 
 # Always ensure EB will activate the environment on app startup
