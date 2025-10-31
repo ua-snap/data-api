@@ -7,8 +7,8 @@ from config import SITE_OFFLINE, geojson_names
 from marshmallow import Schema, fields, validate, ValidationError
 import re
 
-from luts import fire_weather_ops
 from luts import (
+    fire_weather_ops,
     all_cmip6_downscaled_models,
     all_cmip6_downscaled_scenarios,
 )
@@ -114,9 +114,6 @@ def validate_get_params():
             required=False,
         )
 
-        # Make sure "op" parameter is one of the predefined fire weather operations
-        op = fields.Str(
-            validate=validate.OneOf(fire_weather_ops),
         # Make sure "vars" parameter is only letters and commas, and less than
         # or equal to 100 characters long.
         def validate_vars(value):
@@ -150,6 +147,12 @@ def validate_get_params():
 
         scenarios = fields.Str(
             validate=validate_scenarios,
+            required=False,
+        )
+
+        # Make sure "op" parameter is one of the predefined fire weather operations
+        op = fields.Str(
+            validate=validate.OneOf(fire_weather_ops),
             required=False,
         )
 
