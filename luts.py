@@ -11,7 +11,6 @@ bbox_offset = 0.000000001
 geotiff_projections = {
     "hsia_arctic_production": "EPSG:3572",
     "cmip6_all_fire_weather_variables": "EPSG:4326",
-    "cmip6_all_fire_weather_variables": "EPSG:4326",
 }
 
 landcover_names = {
@@ -588,18 +587,18 @@ summer_fire_danger_ratings_dict = {
         "Ext": (100, np.inf),
     },
     "ffmc": {
-        "Low": (0, 59),
-        "Mod": (59, 75),
-        "High": (75, 85),
-        "VHigh": (85, 90),
-        "Ext": (90, np.inf),
-    },
-    "fwi": {
         "Low": (0, 80),
         "Mod": (80, 86),
         "High": (86, 89),
         "VHigh": (89, 92),
         "Ext": (92, np.inf),
+    },
+    "fwi": {
+        "Low": (0, 9),
+        "Mod": (9, 18),
+        "High": (18, 28),
+        "VHigh": (28, 35),
+        "Ext": (35, np.inf),
     },
     "isi": {
         "Low": (0, 2),

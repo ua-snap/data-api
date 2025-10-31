@@ -95,11 +95,10 @@ ops_dict = {
 #### VALIDATION FUNCTIONS ####
 
 
-def validate_latlon(lat, lon):
+def validate_fwi_latlon(lat, lon):
     if latlon_is_numeric_and_in_geodetic_range(lat, lon) == 400:
         return render_template("400/bad_request.html"), 400
     if check_geotiffs(float(lat), float(lon), coverages=[fire_weather_geotiff]) == 404:
-        print("no data at lat/lon")
         return render_template("404/no_data.html"), 404
     return True
 
@@ -232,7 +231,7 @@ async def fetch_polygon_data_for_all_vars(requested_vars, polygon, var_time_slic
     return datasets_dict
 
 
-def calculate_zonal_stats(polygon, datasets_dict, variables):
+def calculate_fwi_zonal_stats(polygon, datasets_dict, variables):
     """Process zonal statistics for variable datasets.
 
     Args:
@@ -574,7 +573,7 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         - summer fire danger rating days for select variables, select years: http://localhost:5000/fire_weather/point/65.06/-146.16/2000/2030?vars=bui,fwi&op=summer_fire_danger_rating_days
 
     """
-    latlon_validation = validate_latlon(lat, lon)
+    latlon_validation = validate_fwi_latlon(lat, lon)
     if isinstance(latlon_validation, tuple):
         return latlon_validation
 
@@ -697,7 +696,9 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
         datasets_dict = asyncio.run(
             fetch_polygon_data_for_all_vars(requested_vars, polygon, var_time_slices)
         )
-        zonal_results = calculate_zonal_stats(polygon, datasets_dict, requested_vars)
+        zonal_results = calculate_fwi_zonal_stats(
+            polygon, datasets_dict, requested_vars
+        )
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
