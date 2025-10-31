@@ -84,6 +84,13 @@ for coverage_id in fire_weather_coverage_ids:
         ),  # (year, month, day) tuple
     }
 
+ops_dict = {
+    "3_day_rolling_average": 3,
+    "5_day_rolling_average": 5,
+    "7_day_rolling_average": 7,
+    "summer_fire_danger_rating_days": "",
+}
+
 
 #### VALIDATION FUNCTIONS ####
 
@@ -138,27 +145,6 @@ def validate_requested_vars_start_and_end_year(requested_vars, start_year, end_y
         var_time_slices[var] = time_slice_cf
 
     return var_time_slices
-
-
-def validate_postprocessing_operation(requested_ops):
-    if requested_ops:
-        requested_ops = requested_ops.split(",")
-        if len(requested_ops) > 1:
-            return (
-                render_template("422/invalid_get_parameter.html"),
-                422,
-            )  # only one operation allowed
-        for op in requested_ops:
-            if op not in [
-                "3_day_rolling_average",
-                "5_day_rolling_average",
-                "7_day_rolling_average",
-                "summer_fire_danger_rating_days",
-            ]:
-                return render_template("422/invalid_get_parameter.html"), 422
-    else:
-        requested_ops = ["3_day_rolling_average"]  # default operation
-    return requested_ops
 
 
 #### DATA FETCHING FUNCTIONS ####
@@ -540,6 +526,15 @@ def summer_fire_danger_rating_days(
     return var_summer_fire_summary
 
 
+def drop_era5(results_dict):
+    """Drop the ERA5 model from the results dictionary. Use this function if the start year is 2021 or later (2020 is last year of ERA5 data)."""
+    for year_range in results_dict:
+        for var in results_dict[year_range]:
+            if "era5" in results_dict[year_range][var]:
+                del results_dict[year_range][var]["era5"]
+    return results_dict
+
+
 #### FLASK ROUTES ####
 
 
@@ -593,7 +588,6 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
     )
 
     requested_ops = request.args.get("op")
-    requested_ops = validate_postprocessing_operation(requested_ops)
 
     fetched_data = asyncio.run(
         fetch_point_data_for_all_vars(
@@ -601,15 +595,12 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
         )
     )
 
-    n = None
-    if "3_day_rolling_average" in requested_ops:
-        n = 3
-    elif "5_day_rolling_average" in requested_ops:
-        n = 5
-    elif "7_day_rolling_average" in requested_ops:
-        n = 7
+    if ops_dict.get(requested_ops, None) == None:
+        n = 3  # default to 3-day rolling average
+    else:
+        n = ops_dict.get(requested_ops)
 
-    if n is not None:
+    if n in [3, 5, 7]:
         processed_data = nday_rolling_average(
             n,
             fetched_data,
@@ -618,13 +609,16 @@ def run_fetch_fire_weather_point_data(lat, lon, start_year=None, end_year=None):
             end_year,
         )
 
-    elif "summer_fire_danger_rating_days" in requested_ops:
+    else:
         processed_data = summer_fire_danger_rating_days(
             fetched_data,
             var_coverage_metadata,
             start_year,
             end_year,
         )
+
+    if start_year is not None and start_year >= 2021:
+        processed_data = drop_era5(processed_data)
 
     if request.args.get("format") == "csv":
         # reformat ops string for filename prefix, e.g "CMIP6 Fire Weather Indices - 3 Day Rolling Average"
@@ -697,7 +691,6 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
     )
 
     requested_ops = request.args.get("op")
-    requested_ops = validate_postprocessing_operation(requested_ops)
 
     try:
         # fetch bbox datasets for requested variables
@@ -710,15 +703,12 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
 
-    n = None
-    if "3_day_rolling_average" in requested_ops:
-        n = 3
-    elif "5_day_rolling_average" in requested_ops:
-        n = 5
-    elif "7_day_rolling_average" in requested_ops:
-        n = 7
+    if ops_dict.get(requested_ops, None) == None:
+        n = 3  # default to 3-day rolling average
+    else:
+        n = ops_dict.get(requested_ops)
 
-    if n is not None:
+    if n in [3, 5, 7]:
         processed_data = nday_rolling_average(
             n,
             zonal_results,
@@ -727,7 +717,7 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
             end_year,
         )
 
-    elif "summer_fire_danger_rating_days" in requested_ops:
+    else:
         processed_data = summer_fire_danger_rating_days(
             zonal_results,
             var_coverage_metadata,
@@ -735,11 +725,16 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
             end_year,
         )
 
+    if start_year is not None and start_year >= 2021:
+        processed_data = drop_era5(processed_data)
+
     if request.args.get("format") == "csv":
         # reformat ops string for filename prefix, e.g "CMIP6 Fire Weather Indices - 3 Day Rolling Average"
-        filename_prefix = "CMIP6 Fire Weather Indices - " + " ".join(
-            [word.capitalize() for word in requested_ops[0].split("_")]
-        )
+        if requested_ops is None:
+            # use first key of ops dict for default if no ops requested
+            requested_ops = list(ops_dict.keys())[0]
+        op_str = " ".join([word.capitalize() for word in requested_ops.split("_")])
+        filename_prefix = "CMIP6 Fire Weather Indices - " + op_str
         return create_csv(
             data=processed_data,
             endpoint="fire_weather",

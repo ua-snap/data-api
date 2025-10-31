@@ -1214,23 +1214,12 @@ def fire_weather_csv(data, filename_prefix, vars):
                 row["model"] = model
                 # test if "rolling" is part of the filename_prefix to determine data structure
                 if "Rolling" in filename_prefix:
-                    # test for empty data, happens with ERA5 model if request is only future years
-                    if data[time_period][variable][model] == None:
-                        print(
-                            "Skipping empty data in CSV export for ",
-                            time_period,
-                            variable,
-                            model,
-                        )
-                    else:
-                        for date in data[time_period][variable][model].keys():
-                            row["date"] = date
-                            row.update(data[time_period][variable][model][date])
-                            for stat in ["min", "mean", "max"]:
-                                row[stat] = data[time_period][variable][model][date][
-                                    stat
-                                ]
-                            csv_dicts.append(copy.deepcopy(row))
+                    for date in data[time_period][variable][model].keys():
+                        row["date"] = date
+                        row.update(data[time_period][variable][model][date])
+                        for stat in ["min", "mean", "max"]:
+                            row[stat] = data[time_period][variable][model][date][stat]
+                        csv_dicts.append(copy.deepcopy(row))
                 else:  # op is "summer_fire_danger_rating_days"
                     row.update(data[time_period][variable][model])
                     csv_dicts.append(copy.deepcopy(row))

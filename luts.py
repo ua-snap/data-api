@@ -609,3 +609,10 @@ summer_fire_danger_ratings_dict = {
         "Ext": (11, np.inf),
     },
 }
+
+fire_weather_ops = [
+    "3_day_rolling_average",
+    "5_day_rolling_average",
+    "7_day_rolling_average",
+    "summer_fire_danger_rating_days",
+]

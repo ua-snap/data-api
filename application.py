@@ -4,8 +4,10 @@ import sys
 from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 from config import SITE_OFFLINE, geojson_names
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validate, ValidationError
 import re
+
+from luts import fire_weather_ops
 
 from routes import routes, request
 
@@ -115,11 +117,9 @@ def validate_get_params():
             required=False,
         )
 
-        # Make sure "op" parameter parameter is only letters, numbers, and commas, and less than
-        # or equal to 100 characters long.
+        # Make sure "op" parameter is one of the predefined fire weather operations
         op = fields.Str(
-            validate=lambda str: bool(re.match(r"^[A-Za-z0-9,]{0,100}$", str))
-            and len(str) < 100,
+            validate=validate.OneOf(fire_weather_ops),
             required=False,
         )
 
