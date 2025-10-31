@@ -18,59 +18,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Setup Micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            gdal-bin \
-            libgdal-dev \
-            libspatialindex-dev \
-            libproj-dev \
-            libgeos-dev \
-            libblas-dev \
-            liblapack-dev \
-            gfortran
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install pipenv
-        run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-
-      - name: Install scipy and scientific computing dependencies
-        run: |
-          pip install scipy numpy
-
-      - name: Install dependencies
-        env:
-          GDAL_VERSION: 3.4.1
-        run: |
-          pip install --upgrade setuptools wheel
-          pipenv install --dev --system --verbose
-          pip install pytest pytest-html
-
-      - name: Set PYTHONPATH and environment variables
-        run: |
-          echo "PYTHONPATH=${{ github.workspace }}" >> $GITHUB_ENV
-          echo "GDAL_DATA=/usr/share/gdal" >> $GITHUB_ENV
-          echo "PROJ_LIB=/usr/share/proj" >> $GITHUB_ENV
+          environment-file: environment.yml
+          environment-name: api-env
+          cache-environment: true
+          cache-downloads: true
 
       - name: Run tests with pytest
         run: |
           mkdir -p test-outputs
-          pytest tests/ -v --tb=short --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
+          micromamba run -n api-env pytest tests/ -v --tb=short --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
+        shell: bash -l {0}
 
       - name: Upload test artifacts
         uses: actions/upload-artifact@v4

@@ -21,3 +21,5 @@ dependencies:
   - rtree
   - fiona
   - jaro-winkler
+  - pytest
+  - pytest-html
