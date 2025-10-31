@@ -26,3 +26,7 @@ data/shapefiles/
 
 # QGIS junk after looking at GeoTIFFs
 *.aux.xml
+
+# Pipfile files
+Pipfile
+Pipfile.lock
