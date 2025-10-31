@@ -112,6 +112,8 @@ def create_csv(
         properties = demographics_csv(data)
     elif endpoint == "era5wrf_4km":
         properties = era5wrf_csv(data)
+    elif endpoint == "fire_weather":
+        properties = fire_weather_csv(data, filename_prefix, vars)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -1245,4 +1247,63 @@ def demographics_csv(data):
         "fieldnames": fieldnames,
         "metadata": metadata,
         "filename_data_name": filename_data_name,
+    }
+
+
+def fire_weather_csv(data, filename_prefix, vars):
+
+    # filename_prefix denotes operation ("3dayrollingavg", "summer_fire_danger_rating_days", etc.) to aid in packaging CSV
+
+    # data structure:
+    # first level of data is string defining the date range ("1990-2000", etc.), next level is variable, then model
+    # if n-day avg operations, we then have date (DOY like "04-01"), then dict of min/mean/max stat values for each date
+    # if summary of fire danger ratings operations, we then have a dict of rating categories & their values
+
+    csv_dicts = []
+    for time_period in sorted(data.keys()):
+        row = {"period": time_period}
+        for variable in data[time_period].keys():
+            row["variable"] = variable
+            for model in data[time_period][variable].keys():
+                row["model"] = model
+                # test if "rolling" is part of the filename_prefix to determine data structure
+                if "Rolling" in filename_prefix:
+                    for date in data[time_period][variable][model].keys():
+                        row["date"] = date
+                        row.update(data[time_period][variable][model][date])
+                        for stat in ["min", "mean", "max"]:
+                            row[stat] = data[time_period][variable][model][date][stat]
+                        csv_dicts.append(copy.deepcopy(row))
+                else:  # op is "summer_fire_danger_rating_days"
+                    row.update(data[time_period][variable][model])
+                    csv_dicts.append(copy.deepcopy(row))
+
+    fieldnames = ["period", "variable", "model"]
+    if "Rolling" in filename_prefix:
+        fieldnames = fieldnames + ["date", "min", "mean", "max"]
+    else:
+        fieldnames = fieldnames + sorted(data[time_period][variable][model].keys())
+
+    filename = ""
+    metadata_variables = {
+        "bui": "Build Up Index",
+        "dc": "Drought Code",
+        "dmc": "Duff Moisture Code",
+        "ffmc": "Fine Fuel Moisture Code",
+        "fwi": "Fire Weather Index",
+        "isi": "Initial Spread Index",
+    }
+
+    metadata = "# CMIP6 Fire Weather Indices\n"
+    metadata += "# Variables:\n"
+    for var, description in metadata_variables.items():
+        if var in vars:
+            metadata += f"# {var}: {description}\n"
+    metadata += "#\n"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename,
     }

@@ -1,6 +1,7 @@
 """Module for look-up-table like objects"""
 
 import os
+import numpy as np
 
 host = os.environ.get("API_HOSTNAME") or "https://earthmaps.io"
 
@@ -9,6 +10,7 @@ bbox_offset = 0.000000001
 # Coverages with non-EPSG:3338 projections
 geotiff_projections = {
     "hsia_arctic_production": "EPSG:3572",
+    "cmip6_all_fire_weather_variables": "EPSG:4326",
 }
 
 landcover_names = {
@@ -561,6 +563,58 @@ demographics_order = [
     "pct_uninsured_high",
 ]
 
+# from: https://fire.ak.blm.gov/content/FuelFire/Alaska%20Fire%20Danger%20Operating%20Plan/Alaska_FDOP_FINAL_SIGNED.pdf
+summer_fire_danger_ratings_dict = {
+    "bui": {
+        "Low": (0, 40),
+        "Mod": (40, 60),
+        "High": (60, 90),
+        "VHigh": (90, 110),
+        "Ext": (110, np.inf),
+    },
+    "dc": {
+        "Low": (0, 150),
+        "Mod": (150, 350),
+        "High": (350, 400),
+        "VHigh": (400, 450),
+        "Ext": (450, np.inf),
+    },
+    "dmc": {
+        "Low": (0, 40),
+        "Mod": (40, 60),
+        "High": (60, 80),
+        "VHigh": (80, 100),
+        "Ext": (100, np.inf),
+    },
+    "ffmc": {
+        "Low": (0, 80),
+        "Mod": (80, 86),
+        "High": (86, 89),
+        "VHigh": (89, 92),
+        "Ext": (92, np.inf),
+    },
+    "fwi": {
+        "Low": (0, 9),
+        "Mod": (9, 18),
+        "High": (18, 28),
+        "VHigh": (28, 35),
+        "Ext": (35, np.inf),
+    },
+    "isi": {
+        "Low": (0, 2),
+        "Mod": (2, 5),
+        "High": (5, 8),
+        "VHigh": (8, 11),
+        "Ext": (11, np.inf),
+    },
+}
+
+fire_weather_ops = [
+    "3_day_rolling_average",
+    "5_day_rolling_average",
+    "7_day_rolling_average",
+    "summer_fire_danger_rating_days",
+]
 cmip6_downscaled_options = {
     "tasmax": {
         "6ModelAvg": ["historical", "ssp126", "ssp245", "ssp370", "ssp585"],

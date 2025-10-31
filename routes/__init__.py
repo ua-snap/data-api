@@ -39,3 +39,4 @@ from .cmip6 import *
 from .cmip6_downscaled import *
 from .places import *
 from .era5wrf import *
+from .fire_weather import *
