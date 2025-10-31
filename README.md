@@ -2,20 +2,22 @@
 
 ## Installing
 
-Running the API requires Python 3.11.
-
-Use `pipenv` to create a virtual environment from the repo's `Pipfile` using:
+Install Micromamba via brew:
 
 ```
-pipenv install
+brew install micromamba
 ```
 
-Alternatively, create a new `conda` environment like so:
+Create a new `mamba` environment like so:
 
 ```
-conda create -n api python=3.11
-conda activate api
-conda install -c conda-forge flask flask-cors gunicorn aiohttp requests marshmallow numpy xarray h5py h5netcdf rioxarray rasterio pyproj shapely geopandas rtree fiona jaro-winkler pytest
+micromamba env create -f environment.yml
+```
+
+This creates a Mamba environment called api-env which you can activate:
+
+```
+micromamba activate api-env
 ```
 
 ## Running application
@@ -29,13 +31,7 @@ export FLASK_DEBUG=True
 
 Review environment variables found in `config.py`, and reset them for development if necessary (e.g., `export API_GS_BASE_URL=https://gs-dev.earthmaps.io/geoserver/`).
 
-Start the application via `pipenv`:
-
-```
-pipenv run flask run
-```
-
-Or alternatively, from your `conda` environment:
+Start the application via your `mamba` environment:
 
 ```
 flask run
