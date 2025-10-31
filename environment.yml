@@ -1,0 +1,23 @@
+name: api-env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - flask
+  - flask-cors
+  - gunicorn
+  - aiohttp
+  - requests
+  - marshmallow
+  - numpy
+  - xarray
+  - h5py
+  - h5netcdf
+  - rioxarray
+  - rasterio
+  - pyproj
+  - shapely
+  - geopandas
+  - rtree
+  - fiona
+  - jaro-winkler
