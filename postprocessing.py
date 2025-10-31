@@ -21,6 +21,7 @@ nodata_mappings = {
     "air_thawing_index_Fdays": nodata_values["default"],
     "air_thawing_index_Fdays_all": nodata_values["default"],
     "beetles": nodata_values["beetles"],
+    "cmip6_downscaled": nodata_values["default"],
     "cmip6_indicators": nodata_values["cmip6_indicators"],
     "cmip6_monthly": nodata_values["cmip6_monthly"],
     "era5wrf_4km": nodata_values["era5wrf_4km"],

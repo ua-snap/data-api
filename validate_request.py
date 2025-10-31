@@ -82,6 +82,10 @@ def check_geotiffs(lat, lon, coverages):
         True if valid, or HTTP 404 status code if no data was found
     """
     for coverage in coverages:
+        # Use the same GeoTIFF for all CMIP6 downscaled coverages.
+        if coverage.startswith("cmip6_downscaled_"):
+            coverage = "cmip6_downscaled"
+
         reference_geotiff = "geotiffs/" + coverage + ".tif"
 
         # Do not perform GeoTIFF check if the file does not exist.
