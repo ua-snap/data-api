@@ -18,8 +18,8 @@ else
 fi
 
 # Ensure micromamba is on PATH and initialized
-echo 'export PATH="/opt/micromamba/bin:$PATH"' >> /etc/profile.d/conda.sh
-echo 'export MAMBA_ROOT_PREFIX="/opt/micromamba"' >> /etc/profile.d/conda.sh
+echo 'export PATH="/opt/micromamba/bin:$PATH"' >> /etc/profile.d/mamba.sh
+echo 'export MAMBA_ROOT_PREFIX="/opt/micromamba"' >> /etc/profile.d/mamba.sh
 export PATH="/opt/micromamba/bin:$PATH"
 export MAMBA_ROOT_PREFIX="/opt/micromamba"
 
@@ -32,5 +32,5 @@ else
 fi
 
 # Always ensure EB will activate the environment on app startup
-echo 'eval "$(micromamba shell hook --shell bash)"' >> /etc/profile.d/conda.sh
-echo 'micromamba activate api-env' >> /etc/profile.d/conda.sh
+echo 'eval "$(micromamba shell hook --shell bash)"' >> /etc/profile.d/mamba.sh
+echo 'micromamba activate api-env' >> /etc/profile.d/mamba.sh
