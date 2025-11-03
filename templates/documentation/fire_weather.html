@@ -1,3 +1,281 @@
 {% extends 'base.html' %} {% block content %}
-<h2>CMIP6 Fire Weather</h2>
+<h2>CMIP6 Fire Weather Indices</h2>
+
+ <p>
+  This endpoint provides access to fire weather indicies derived from 
+  bias-corrected CMIP6 daily data (for historical and future periods)
+  and from the ERA5 reanalysis (for the historical period). The dataset spans
+  1980&ndash;2100 with daily temporal resolution and 0.25 x 0.25 degree spatial
+  resolution. The spatial domain is limited to the North American boreal ecoregion, 
+  as defined by <a href=https://doi.org/10.1641/0006-3568(2001)051[0933:TEOTWA]2.0.CO;2>Olson et al. (2001)</a>.
+  
+  Variables are those used in the Canadian Forest Fire Danger Rating System (CFFDRS) 
+  Canadian Forest Fire Weather Index (FWI) System.
+</p>
+
+<h3>Available Variables</h3>
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th><code>id</code></th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+     <td>Build-Up Index</td>
+     <td><code>bui</code></td>
+     <td>Numeric rating of the total amount of fuel available for combustion. It is based on the <code>dmc</code> and the <code>dc</code>.
+    </td>
+    </tr>
+    <tr>
+      <td>Drought Code</td>
+      <td><code>dc</code></td>
+      <td>Numeric rating of the average moisture content of deep, compact organic layers. This code is a useful indicator of seasonal drought effects on forest fuels and the amount of smoldering in deep duff layers and large logs.</td>
+    </tr>
+    <tr>
+      <td>Duff Moisture Code</td>
+      <td><code>dmc</code></td>
+      <td>Numeric rating of the average moisture content of loosely compacted organic layers of moderate depth. This code gives an indication of fuel consumption in moderate duff layers and medium-size woody material.</td>
+    </tr>
+    <tr>
+      <td>Fine Fuel Moisture Code</td>
+      <td><code>ffmc</code></td>
+      <td>Numeric rating of the moisture content of litter and other cured fine fuels. This code is an indicator of the relative ease of ignition and the flammability of fine fuel.</td>
+    </tr>
+    <tr>
+      <td>Fire Weather Index</td>
+      <td><code>fwi</code></td>
+      <td>Numeric rating of fire intensity. It is based on the <code>isi</code> and the <code>bui</code>, and is used as a general index of fire danger throughout the forested areas of Canada and Alaska.
+    </td>
+    </tr>
+    <tr>
+      <td>Initial Spread Index</td>
+      <td><code>isi</code></td>
+      <td>Numeric rating of the expected rate of fire spread. It is based on wind speed and <code>ffmc</code>. Like the rest of the FWI system components, <code>isi</code> does not take fuel type into account. Actual spread rates vary between fuel types at the same <code>isi</code>.
+    </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<h3>Available Operations</h3>
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th><code>id</code></th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+     <td>n-day Rolling Average</td>
+     <td><code>3_day_rolling_average</code>, <code>5_day_rolling_average</code>, <code>7_day_rolling_average</code>,</td>
+     <td>Add the description here.
+    </td>
+    </tr>
+    <tr>
+      <td>Summer Fire Danger Rating Days</td>
+      <td><code>summer_fire_danger_rating_days</code></td>
+      <td>Add the description here.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CMIP6 Fire Weather Indices point query (3 day rolling average, all variables, all years)</td>
+      <td>
+        <a href="/fire_weather/point/64.8/-147.5?op=3_day_rolling_average">/fire_weather/point/64.8/-147.5?op=3_day_rolling_average</a>
+      </td>
+    </tr>
+    <tr>
+      <td>CMIP6 Fire Weather Indices point query (summer fire danger rating days, single variable, all years)</td>
+      <td>
+        <a href="/fire_weather/point/64.8/-147.5?op=summer_fire_danger_rating_days&vars=bui">/fire_weather/point/65.0628/-146.1627?op=summer_fire_danger_rating_days&vars=bui</a>
+      </td>
+    </tr>
+    <tr>
+      <td>CMIP6 Fire Weather Indices point query (7 day rolling average, several variables, select years)</td>
+      <td>
+        <a href="/fire_weather/point/64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/point//64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Only one operation is allowed per request.
+        <br />
+        CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br />
+        Multiple variables can be requested using
+        <code>?vars=dc,dmc,ffmc</code>.
+        <br />
+        Chaining parameters is also supported, e.g.
+        <code>?vars=t2_mean,rh2_mean&format=csv</code>.
+        <br />
+        All parameter combinations work for both point and area queries.
+        <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+<!--
+<h4>Point Query Output</h4>
+
+<p>
+  Data are returned as JSON by default, keyed by date, with each date containing
+  a dictionary of variable names and values. The variable names are the same as
+  the ones listed in the Available Variables section.
+</p>
+<pre><code>{
+  "2012-06-01": {
+    "rh2_mean": 87.3,
+    "t2_mean": 6.6,
+    "wspd10_max": 4.1
+  },
+  "2012-06-02": {
+    "rh2_mean": 79.3,
+    "t2_mean": 7.7,
+    "wspd10_max": 3.8
+  },
+  "2012-06-03": {
+    "rh2_mean": 63.5,
+    "t2_mean": 12.6,
+    "wspd10_max": 3.8
+  },
+  ...
+}</code></pre>
+
+<h4>Area query</h4>
+<p>
+  Area queries return zonal statistics (mean values) aggregated over a specified
+  polygon area. Values represent the spatial average of all 4 km by 4 km grid
+  cells within the polygon boundary. Wind variables are not well suited to zonal statistics, so they are not available for area queries. Learn more about what
+  <a href="/places">types of places</a> are available for area queries.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Return mean values over area for all variables, full time range</td>
+      <td><a href="/era5wrf/area/19070506">/era5wrf/area/19070506</a></td>
+    </tr>
+    <tr>
+      <td>Return mean values over area for selected variables</td>
+      <td>
+        <a href="/era5wrf/area/19070506?vars=t2_mean,rh2_mean"
+          >/era5wrf/area/19070506?vars=t2_mean,rh2_mean</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>Return mean values over area for selected variables in CSV format</td>
+      <td>
+        <a href="/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv"
+          >/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Area queries support the same parameters as point queries:
+        <code>vars</code> (comma-separated variable names), and
+        <code>format=csv</code> for CSV output.
+        <br />
+        Results represent mean values of all 4 km by 4 km grid cells within the
+        specified polygon area.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Area Query Output</h4>
+
+<p>
+  Area queries return the same JSON structure as point queries, but values
+  represent spatial averages rather than point measurements:
+</p>
+
+<pre><code>{
+  "2012-06-01": {
+    "rh2_mean": 85.7,
+    "t2_mean": 8.2
+  },
+  "2012-06-02": {
+    "rh2_mean": 82.1,
+    "t2_mean": 9.5
+  },
+  "2012-06-03": {
+    "rh2_mean": 78.9,
+    "t2_mean": 10.1
+  },
+  ...
+}</code></pre>
+
+<p>
+  Each value is the mean of all valid grid cells within the polygon boundary for
+  that date.
+</p>
+
+<h3>References and Data Sources</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Metadata & source data access</th>
+      <th>Academic references</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <a
+          href="https://www.sciencebase.gov/catalog/catalogParty/show?partyId=Waigl%2C+Christine+F."
+          >USGS ScienceBase Record</a
+        >
+      </td>
+      <td>
+        Waigl, C. F., Bieniek, P., Bhatt, U. S., Lader, R., & Walsh, J. (2024,
+        January). A High-Resolution, Dynamically Downscaled ERA5 Reanalysis
+        Dataset for Alaska. In 104th Annual AMS Meeting 2024 (Vol. 104, p.
+        439976).
+        <a
+          href="https://ams.confex.com/ams/104ANNUAL/meetingapp.cgi/Paper/439976"
+          >https://ams.confex.com/ams/104ANNUAL/meetingapp.cgi/Paper/439976</a
+        >
+      </td>
+    </tr>
+  </tbody>
+</table> -->
+
+
+
+
+
+
 {% endblock %}
