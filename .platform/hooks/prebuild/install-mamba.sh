@@ -25,7 +25,9 @@ export MAMBA_ROOT_PREFIX="/opt/micromamba"
 
 # Check if environment exists
 if micromamba env list | grep -q 'api-env'; then
-  echo "Micromamba environment 'api-env' already exists, skipping creation."
+  echo "Micromamba environment 'api-env' already exists."
+  echo "Installing/updating dependencies from environment.yml..."
+  micromamba install -n api-env -f /var/app/staging/environment.yml -y
 else
   echo "Creating micromamba environment 'api-env' from environment.yml..."
   micromamba env create -f /var/app/staging/environment.yml
