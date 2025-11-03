@@ -6,7 +6,7 @@
   bias-corrected CMIP6 daily data (for historical and future periods)
   and from the ERA5 reanalysis (for the historical period). The dataset 
   spans 1980&ndash;2100 with daily temporal resolution from April 1 to 
-  October 31 of each year, at 0.25 x 0.25 degree spatial resolution. The
+  October 31 of each year, at 0.25 &#215; 0.25 degree spatial resolution. The
    spatial domain is limited to the North American boreal ecoregion, 
   as defined by <a href="https://doi.org/10.1641/0006-3568(2001)051[0933:TEOTWA]2.0.CO;2">
     Olson et al. (2001)</a>.
@@ -104,9 +104,9 @@
 </table>
 
 
-<h3>Service endpoints</h3>
+<h3>Service Endpoints</h3>
 
-<h4>Point query</h4>
+<h4>Point Query</h4>
 
 <table class="endpoints">
   <thead>
@@ -117,7 +117,7 @@
   </thead>
   <tbody>
     <tr>
-      <td>CMIP6 Fire Weather Indices point query (select years, all variables, 3 day rolling average operation)</td>
+      <td>CMIP6 Fire Weather Indices point query (select years, all variables, 3-day rolling average operation)</td>
       <td>
         <a href="/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average">/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average</a>
       </td>
@@ -129,7 +129,7 @@
       </td>
     </tr>
     <tr>
-      <td>CMIP6 Fire Weather Indices point query (select years, several variables, 7 day rolling average operation)</td>
+      <td>CMIP6 Fire Weather Indices point query (select years, several variables, 7-day rolling average operation)</td>
       <td>
         <a href="/fire_weather/point/64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/point/64.8/-147.5/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a>
       </td>
@@ -226,11 +226,11 @@
 }</code></pre>
 
 
-<h4>Area query</h4>
+<h4>Area Query</h4>
 
 <p>
     Area queries return zonal statistics aggregated over a specified polygon area. 
-    Values represent the spatially-weighted average of all 0.25 x 0.25 degree grid
+    Values represent the spatially-weighted average of all 0.25 &#215; 0.25 degree grid
     cells within the polygon boundary. Learn more about what
     <a href="/places">types of places</a> are available for area queries.
   </p>
@@ -244,7 +244,7 @@
   </thead>
   <tbody>
     <tr>
-      <td>CMIP6 Fire Weather Indices area query (select years, all variables, 3 day rolling average operation)</td>
+      <td>CMIP6 Fire Weather Indices area query (select years, all variables, 3-day rolling average operation)</td>
       <td>
         <a href="/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average">/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average</a>
       </td>
@@ -256,7 +256,7 @@
       </td>
     </tr>
     <tr>
-      <td>CMIP6 Fire Weather Indices area query (select years, several variables, 7 day rolling average operation)</td>
+      <td>CMIP6 Fire Weather Indices area query (select years, several variables, 7-day rolling average operation)</td>
       <td>
         <a href="/fire_weather/area/19080309/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/area/19080309/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a>
       </td>
