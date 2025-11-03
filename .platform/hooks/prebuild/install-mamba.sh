@@ -7,11 +7,14 @@ if [ -f "/opt/micromamba/bin/micromamba" ]; then
 else
   echo "Installing Micromamba..."
   cd /tmp
-  MICROMAMBA_URL="https://micro.mamba.pm/api/micromamba/linux-aarch64/latest"
+
+  MICROMAMBA_VERSION="1.5.8"
+  MICROMAMBA_URL="https://micro.mamba.pm/api/micromamba/linux-aarch64/${MICROMAMBA_VERSION}"
   curl -Ls $MICROMAMBA_URL | tar -xvj bin/micromamba
   mkdir -p /opt/micromamba/bin
   mv bin/micromamba /opt/micromamba/bin/
   rmdir bin
+  echo "Installed Micromamba version: $MICROMAMBA_VERSION"
 fi
 
 # Ensure micromamba is on PATH and initialized
