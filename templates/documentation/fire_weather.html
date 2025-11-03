@@ -2,15 +2,17 @@
 <h2>CMIP6 Fire Weather Indices</h2>
 
  <p>
-  This endpoint provides access to fire weather indicies derived from 
+  This endpoint provides access to fire weather indices derived from 
   bias-corrected CMIP6 daily data (for historical and future periods)
-  and from the ERA5 reanalysis (for the historical period). The dataset spans
-  1980&ndash;2100 with daily temporal resolution and 0.25 x 0.25 degree spatial
-  resolution. The spatial domain is limited to the North American boreal ecoregion, 
-  as defined by <a href=https://doi.org/10.1641/0006-3568(2001)051[0933:TEOTWA]2.0.CO;2>Olson et al. (2001)</a>.
+  and from the ERA5 reanalysis (for the historical period). The dataset 
+  spans 1980&ndash;2100 with daily temporal resolution from April 1 to 
+  October 31 of each year, at 0.25 x 0.25 degree spatial resolution. The
+   spatial domain is limited to the North American boreal ecoregion, 
+  as defined by <a href="https://doi.org/10.1641/0006-3568(2001)051[0933:TEOTWA]2.0.CO;2">
+    Olson et al. (2001)</a>.
   
   Variables are those used in the Canadian Forest Fire Danger Rating System (CFFDRS) 
-  Canadian Forest Fire Weather Index (FWI) System.
+  Canadian Forest Fire Weather Index (FWI) System. Read more about CFFDRS and FWI <a href="https://cwfis.cfs.nrcan.gc.ca/background/summary/fdr">here</a>.
 </p>
 
 <h3>Available Variables</h3>
@@ -24,36 +26,46 @@
   </thead>
   <tbody>
     <tr>
-     <td>Build-Up Index</td>
+     <td>Buildup Index</td>
      <td><code>bui</code></td>
-     <td>Numeric rating of the total amount of fuel available for combustion. It is based on the <code>dmc</code> and the <code>dc</code>.
+     <td>Numeric rating of the total amount of fuel available for combustion. 
+        It is based on the <code>dmc</code> and the <code>dc</code>.
     </td>
     </tr>
     <tr>
       <td>Drought Code</td>
       <td><code>dc</code></td>
-      <td>Numeric rating of the average moisture content of deep, compact organic layers. This code is a useful indicator of seasonal drought effects on forest fuels and the amount of smoldering in deep duff layers and large logs.</td>
+      <td>Numeric rating of the average moisture content of deep, compact organic layers. 
+        This code is a useful indicator of seasonal drought effects on forest fuels and the 
+        amount of smoldering in deep duff layers and large logs.</td>
     </tr>
     <tr>
       <td>Duff Moisture Code</td>
       <td><code>dmc</code></td>
-      <td>Numeric rating of the average moisture content of loosely compacted organic layers of moderate depth. This code gives an indication of fuel consumption in moderate duff layers and medium-size woody material.</td>
+      <td>Numeric rating of the average moisture content of loosely compacted organic 
+        layers of moderate depth. This code gives an indication of fuel consumption in moderate 
+        duff layers and medium-size woody material.</td>
     </tr>
     <tr>
       <td>Fine Fuel Moisture Code</td>
       <td><code>ffmc</code></td>
-      <td>Numeric rating of the moisture content of litter and other cured fine fuels. This code is an indicator of the relative ease of ignition and the flammability of fine fuel.</td>
+      <td>Numeric rating of the moisture content of litter and other cured fine fuels. 
+        This code is an indicator of the relative ease of ignition and the flammability 
+        of fine fuel.</td>
     </tr>
     <tr>
       <td>Fire Weather Index</td>
       <td><code>fwi</code></td>
-      <td>Numeric rating of fire intensity. It is based on the <code>isi</code> and the <code>bui</code>, and is used as a general index of fire danger throughout the forested areas of Canada and Alaska.
+      <td>Numeric rating of fire intensity. It is based on the <code>isi</code> and the <code>bui</code>, 
+        and is used as a general index of fire danger throughout the forested areas of Canada and Alaska.
     </td>
     </tr>
     <tr>
       <td>Initial Spread Index</td>
       <td><code>isi</code></td>
-      <td>Numeric rating of the expected rate of fire spread. It is based on wind speed and <code>ffmc</code>. Like the rest of the FWI system components, <code>isi</code> does not take fuel type into account. Actual spread rates vary between fuel types at the same <code>isi</code>.
+      <td>Numeric rating of the expected rate of fire spread. It is based on wind speed and <code>ffmc</code>. 
+        Like the rest of the FWI system components, <code>isi</code> does not take fuel type into account. 
+        Actual spread rates vary between fuel types at the same <code>isi</code>.
     </td>
     </tr>
   </tbody>
@@ -71,15 +83,21 @@
   </thead>
   <tbody>
     <tr>
-     <td>n-day Rolling Average</td>
-     <td><code>3_day_rolling_average</code>, <code>5_day_rolling_average</code>, <code>7_day_rolling_average</code>,</td>
-     <td>Add the description here.
+     <td>Compute <i>n</i>-day Rolling Average</td>
+     <td><code>3_day_rolling_average</code>, <code>5_day_rolling_average</code>, <code>7_day_rolling_average</code></td>
+     <td>Computes a rolling average of daily values using an <i>n</i>-day window centered on each 
+        day of the year. The maximum, mean, and minimum of rolling average values across the selected 
+        year range are returned. For area queries, rolling average values are weighted by spatial area.
     </td>
     </tr>
     <tr>
-      <td>Summer Fire Danger Rating Days</td>
+      <td>Count Summer Fire Danger Rating Days</td>
       <td><code>summer_fire_danger_rating_days</code></td>
-      <td>Add the description here.
+      <td>The mean number of summer (June–August) days per year, over the selected year range, classified into 
+         fire danger categories (low, moderate, high, very high, extreme) according to the fire behavior index thresholds. 
+         (See Table 1 of the <a href="https://fire.ak.blm.gov/content/FuelFire/Alaska%20Fire%20Danger%20Operating%20Plan/Alaska_FDOP_FINAL_SIGNED.pdf">
+            Alaska Interagency Fire Danger Operating Plan</a> for threshold values.)
+         For area queries, daily classifications are based on the area-weighted mean for each variable.
       </td>
     </tr>
   </tbody>
@@ -99,28 +117,28 @@
   </thead>
   <tbody>
     <tr>
-      <td>CMIP6 Fire Weather Indices point query (3 day rolling average, all variables, all years)</td>
+      <td>CMIP6 Fire Weather Indices point query (select years, all variables, 3 day rolling average operation)</td>
       <td>
-        <a href="/fire_weather/point/64.8/-147.5?op=3_day_rolling_average">/fire_weather/point/64.8/-147.5?op=3_day_rolling_average</a>
+        <a href="/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average">/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average</a>
       </td>
     </tr>
     <tr>
-      <td>CMIP6 Fire Weather Indices point query (summer fire danger rating days, single variable, all years)</td>
+      <td>CMIP6 Fire Weather Indices point query (select years, single variable, summer fire danger rating days operation)</td>
       <td>
-        <a href="/fire_weather/point/64.8/-147.5?op=summer_fire_danger_rating_days&vars=bui">/fire_weather/point/65.0628/-146.1627?op=summer_fire_danger_rating_days&vars=bui</a>
+        <a href="/fire_weather/point/64.8/-147.5/2030/2050?op=summer_fire_danger_rating_days&vars=bui">/fire_weather/point/64.8/-147.5/2030/2050?vars=bui&op=summer_fire_danger_rating_days</a>
       </td>
     </tr>
     <tr>
-      <td>CMIP6 Fire Weather Indices point query (7 day rolling average, several variables, select years)</td>
+      <td>CMIP6 Fire Weather Indices point query (select years, several variables, 7 day rolling average operation)</td>
       <td>
-        <a href="/fire_weather/point/64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/point//64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi</a>
+        <a href="/fire_weather/point/64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/point/64.8/-147.5/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
       <td colspan="2">
-        Only one operation is allowed per request.
+        Only one operation is allowed per request. If no operation is requested, default is <code>3_day_rolling_average</code>.
         <br />
         CSV output is available by appending <code>?format=csv</code> to the
         URL.
@@ -131,46 +149,91 @@
         Chaining parameters is also supported, e.g.
         <code>?vars=t2_mean,rh2_mean&format=csv</code>.
         <br />
-        All parameter combinations work for both point and area queries.
-        <br />
       </td>
     </tr>
   </tfoot>
 </table>
-<!--
+
 <h4>Point Query Output</h4>
 
+<h5><i>n</i>-day Rolling Averages</h5>
+
 <p>
-  Data are returned as JSON by default, keyed by date, with each date containing
-  a dictionary of variable names and values. The variable names are the same as
-  the ones listed in the Available Variables section.
+  Data are returned as JSON keyed hierarchically by selected year range,
+  variable, model, day of year, and statistic. Results are the maximum,
+  mean, and minimum of the <i>n</i>-day rolling average values across the selected year range. 
 </p>
 <pre><code>{
-  "2012-06-01": {
-    "rh2_mean": 87.3,
-    "t2_mean": 6.6,
-    "wspd10_max": 4.1
-  },
-  "2012-06-02": {
-    "rh2_mean": 79.3,
-    "t2_mean": 7.7,
-    "wspd10_max": 3.8
-  },
-  "2012-06-03": {
-    "rh2_mean": 63.5,
-    "t2_mean": 12.6,
-    "wspd10_max": 3.8
-  },
-  ...
+    "1980-2010": {
+        "bui": {
+          "CNRM-CM6-1-HR": {
+            "04-01": {
+              "max": 37.757,
+              "mean": 10.241,
+              "min": 0.0
+            },
+            "04-02": {
+              "max": 14.851,
+              "mean": 6.077,
+              "min": 0.124
+            },
+            "04-03": {
+              "max": 16.719,
+              "mean": 6.748,
+              "min": 0.298
+            },
+            ...
+            }
+        }
+    }
+}
+</code></pre>
+
+<h5>Count of Summer Fire Danger Rating Days</h5>
+
+<p>
+  Data are returned as JSON keyed hierarchically by selected year range,
+  variable, model, and fire danger rating class. Results are the average number of 
+  summer days in each fire danger rating class across the selected year range. 
+</p>
+<pre><code>{
+    "2030-2050": {
+      "bui": {
+        "CNRM-CM6-1-HR": {
+          "Ext": 9,
+          "High": 19,
+          "Low": 36,
+          "Mod": 21,
+          "VHigh": 7
+        },
+        "EC-Earth3-Veg": {
+          "Ext": 11,
+          "High": 28,
+          "Low": 24,
+          "Mod": 18,
+          "VHigh": 11
+        },
+        "MPI-ESM1-2-HR": {
+          "Ext": 8,
+          "High": 24,
+          "Low": 31,
+          "Mod": 22,
+          "VHigh": 8
+        },
+        ...
+        }
+    }
 }</code></pre>
 
+
 <h4>Area query</h4>
+
 <p>
-  Area queries return zonal statistics (mean values) aggregated over a specified
-  polygon area. Values represent the spatial average of all 4 km by 4 km grid
-  cells within the polygon boundary. Wind variables are not well suited to zonal statistics, so they are not available for area queries. Learn more about what
-  <a href="/places">types of places</a> are available for area queries.
-</p>
+    Area queries return zonal statistics aggregated over a specified polygon area. 
+    Values represent the spatially-weighted average of all 0.25 x 0.25 degree grid
+    cells within the polygon boundary. Learn more about what
+    <a href="/places">types of places</a> are available for area queries.
+  </p>
 
 <table class="endpoints">
   <thead>
@@ -181,35 +244,38 @@
   </thead>
   <tbody>
     <tr>
-      <td>Return mean values over area for all variables, full time range</td>
-      <td><a href="/era5wrf/area/19070506">/era5wrf/area/19070506</a></td>
-    </tr>
-    <tr>
-      <td>Return mean values over area for selected variables</td>
+      <td>CMIP6 Fire Weather Indices area query (select years, all variables, 3 day rolling average operation)</td>
       <td>
-        <a href="/era5wrf/area/19070506?vars=t2_mean,rh2_mean"
-          >/era5wrf/area/19070506?vars=t2_mean,rh2_mean</a
-        >
+        <a href="/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average">/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average</a>
       </td>
     </tr>
     <tr>
-      <td>Return mean values over area for selected variables in CSV format</td>
+      <td>CMIP6 Fire Weather Indices area query (select years, single variable, summer fire danger rating days operation)</td>
       <td>
-        <a href="/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv"
-          >/era5wrf/area/19070506?vars=t2_min,t2_mean,t2_max&format=csv</a
-        >
+        <a href="/fire_weather/area/19080309/2030/2050?op=summer_fire_danger_rating_days&vars=bui">/fire_weather/area/19080309/2030/2050?vars=bui&op=summer_fire_danger_rating_days</a>
+      </td>
+    </tr>
+    <tr>
+      <td>CMIP6 Fire Weather Indices area query (select years, several variables, 7 day rolling average operation)</td>
+      <td>
+        <a href="/fire_weather/area/19080309/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/area/19080309/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a>
       </td>
     </tr>
   </tbody>
   <tfoot>
     <tr>
       <td colspan="2">
-        Area queries support the same parameters as point queries:
-        <code>vars</code> (comma-separated variable names), and
-        <code>format=csv</code> for CSV output.
+        Only one operation is allowed per request. If no operation is requested, default is <code>3_day_rolling_average</code>.
         <br />
-        Results represent mean values of all 4 km by 4 km grid cells within the
-        specified polygon area.
+        CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br />
+        Multiple variables can be requested using
+        <code>?vars=dc,dmc,ffmc</code>.
+        <br />
+        Chaining parameters is also supported, e.g.
+        <code>?vars=t2_mean,rh2_mean&format=csv</code>.
+        <br />
       </td>
     </tr>
   </tfoot>
@@ -217,31 +283,76 @@
 
 <h4>Area Query Output</h4>
 
-<p>
-  Area queries return the same JSON structure as point queries, but values
-  represent spatial averages rather than point measurements:
-</p>
+<h5><i>n</i>-day Rolling Averages</h5>
 
+<p>
+  Data are returned as JSON keyed hierarchically by selected year range,
+  variable, model, day of year, and statistic. Results are the maximum,
+  mean, and minimum of the <i>n</i>-day rolling average values across the selected year range. 
+</p>
 <pre><code>{
-  "2012-06-01": {
-    "rh2_mean": 85.7,
-    "t2_mean": 8.2
-  },
-  "2012-06-02": {
-    "rh2_mean": 82.1,
-    "t2_mean": 9.5
-  },
-  "2012-06-03": {
-    "rh2_mean": 78.9,
-    "t2_mean": 10.1
-  },
-  ...
+    "1980-2010": {
+        "bui": {
+          "CNRM-CM6-1-HR": {
+            "04-01": {
+              "max": 12.694,
+              "mean": 4.232,
+              "min": 0.0
+            },
+            "04-02": {
+              "max": 7.57,
+              "mean": 2.549,
+              "min": 0.006
+            },
+            "04-03": {
+              "max": 8.493,
+              "mean": 2.881,
+              "min": 0.043
+            },
+            ...
+            }
+        }
+    }
+}
+</code></pre>
+
+<h5>Count of Summer Fire Danger Rating Days</h5>
+
+<p>
+  Data are returned as JSON keyed hierarchically by selected year range,
+  variable, model, and fire danger rating class. Results are the average number of 
+  summer days in each fire danger rating class across the selected year range. 
+</p>
+<pre><code>{
+    "2030-2050": {
+      "bui": {
+        "CNRM-CM6-1-HR": {
+          "Ext": 2,
+          "High": 14,
+          "Low": 53,
+          "Mod": 19,
+          "VHigh": 4
+        },
+        "EC-Earth3-Veg": {
+          "Ext": 1,
+          "High": 19,
+          "Low": 42,
+          "Mod": 26,
+          "VHigh": 4
+        },
+        "MPI-ESM1-2-HR": {
+          "Ext": 4,
+          "High": 15,
+          "Low": 50,
+          "Mod": 20,
+          "VHigh": 3
+        },
+        ...
+        }
+    }
 }</code></pre>
 
-<p>
-  Each value is the mean of all valid grid cells within the polygon boundary for
-  that date.
-</p>
+
 
 <h3>References and Data Sources</h3>
 <table>
@@ -255,23 +366,18 @@
     <tr>
       <td>
         <a
-          href="https://www.sciencebase.gov/catalog/catalogParty/show?partyId=Waigl%2C+Christine+F."
+          href="https://www.sciencebase.gov/catalog/item/67ead89cd34ed02007f8357f"
           >USGS ScienceBase Record</a
         >
       </td>
       <td>
-        Waigl, C. F., Bieniek, P., Bhatt, U. S., Lader, R., & Walsh, J. (2024,
-        January). A High-Resolution, Dynamically Downscaled ERA5 Reanalysis
-        Dataset for Alaska. In 104th Annual AMS Meeting 2024 (Vol. 104, p.
-        439976).
-        <a
-          href="https://ams.confex.com/ams/104ANNUAL/meetingapp.cgi/Paper/439976"
-          >https://ams.confex.com/ams/104ANNUAL/meetingapp.cgi/Paper/439976</a
-        >
+        Young, A.M., Littell, J., and Rupp, S., 2025, 
+        The influence of fire-fuel feedbacks on boreal forest fire regimes under future climate change: 
+        U.S. Geological Survey data release, <a href="https://doi.org/10.5066/P1AAMRUF">https://doi.org/10.5066/P1AAMRUF</a>.
       </td>
     </tr>
   </tbody>
-</table> -->
+</table>
 
 
 
