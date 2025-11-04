@@ -31,7 +31,7 @@ app.register_blueprint(routes)
 
 # attach a custom attribute directly to the Flask app instance
 # this dictionary is the in-memory store for uploaded polygons
-# each key will be a UUID ("byop-<uuid>") and each value is a tuple of (shapely geometry, upload_time)
+# each key will be a unique ID and each value is a dict of metadata
 # see routes/upload_polygon.py for usage
 app.uploaded_polygons = {}
 app.store_lock = threading.Lock()
