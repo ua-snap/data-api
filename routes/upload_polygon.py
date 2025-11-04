@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, render_template, current_app
 import geopandas as gpd
-import io, zipfile, uuid, time, tempfile, os
+import io, zipfile, secrets, time, tempfile, os
 from datetime import datetime, timezone
 
 from . import routes
@@ -12,11 +12,15 @@ upload_polygon = Blueprint("upload_polygon", __name__)
 def upload_polygon():
     """
     Accepts an uploaded shapefile (as a ZIP containing .shp, .shx, .dbf, .prj)
-    and stores the geometry in memory with a UUID key. UUID can then be used to
-    reference the polygon in subsequent requests from other endpoints.
+    and stores the geometry in memory with a unique ID. The ID can then be used to
+    reference the polygon in subsequent requests from other endpoints. Optionally,
+    a user-defined name for the polygon can be provided via form data - this would
+    be used for downstream display purposes, for naming output files, etc.
 
     Upload via curl example:
-        curl -F "file=@my_shapefile.zip" http://localhost:5000/upload_polygon
+        curl -F "file=@my_shapefile.zip" \
+             -F "name=my custom polygon" \
+             http://localhost:5000/upload_polygon 
 
     #TODO: implement form in HTML template for browser-based upload
     #TODO: implement additional validation (file size limit, filename checks, upload limit per IP, etc.)
@@ -24,21 +28,28 @@ def upload_polygon():
     #TODO: encourage users to create polygons via https://geojson.io/#map=3.92/63/-154.56 , which
     # automatically zips the shapefile components for download.
 
-    UUID example response:
+    Example response JSON:
+
         {
-            "expires": "2025-11-04T02:54:51.962653+00:00",
-            "polygon_id": "byop-c53b4d82-116e-4cb1-b356-9efd61a86d00"
+            "expires_at": "2025-11-04T18:48:02.522820+00:00",
+            "name": "my custom polygon",
+            "polygon_id": "f-EMX4YL",
+            "uploaded_at": "2025-11-04T17:48:02.522820+00:00"
         }
 
     Example of current_app.uploaded_polygons content after upload:
 
         {
-            'byop-c53b4d82-116e-4cb1-b356-9efd61a86d00':
-            (<POLYGON ((-147.626 64.942, -147.688 64.966, -147.794 64.97, -147.901 64.948...>, 1762274022.470391),
+            'f-EMX4YL': {
+                'geometry': <POLYGON ((-147.626 64.942, -147.688 64.966, -147.794 64.97, -147.901 64.948...>,
+                'expires_at': "2025-11-04T18:48:02.522820+00:00",
+                'uploaded_at': "2025-11-04T17:48:02.522820+00:00",
+                'name': 'my custom polygon'
+            }
         }
 
     Returns:
-        JSON with polygon_id and expiry time, or error message.
+        JSON with polygon_id, polygon name, and expiry time, or error message.
     """
 
     # check for file in request
@@ -53,6 +64,11 @@ def upload_polygon():
             jsonify({"error": "No selected file"}),
             400,
         )
+
+    # optional user-defined polygon name
+    user_name = request.form.get("name", "").strip()
+    if not user_name:
+        user_name = "unnamed_polygon"
 
     # read the uploaded zip into memory
     file_bytes = file.read()
@@ -79,7 +95,8 @@ def upload_polygon():
     # Shapefiles consist of multiple files (.shp, .shx, .dbf, .prj) that need to be accessed together.
     # Fiona delegates to GDAL, which expects either a folder path, or a “virtual file system” path
     # like zip://path_to_zip!inner_path.
-    # we write the uploaded ZIP to disk temporarily, and give GDAL that real path
+    # we write the uploaded ZIP to disk temporarily and give GDAL that real path,
+    # then delete the temp file after reading.
 
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
         tmp.write(file_bytes)
@@ -120,19 +137,32 @@ def upload_polygon():
     # but for now we just union them to force a single geometry
     geom = gdf.unary_union
 
-    # generate UUID, store geometry and time of upload in memory
-    poly_id = "byop-" + str(uuid.uuid4())
+    # generate a unique polygon ID
+    poly_id = secrets.token_urlsafe(6)
+
+    # store geometry, upload time, and user-defined name in the app's in-memory store
+
+    upload_time = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    # 3600 second = 1 hour expiry
+    expiry_time = datetime.fromtimestamp(
+        time.time() + 3600, tz=timezone.utc
+    ).isoformat()
+
     with current_app.store_lock:
-        current_app.uploaded_polygons[poly_id] = (geom, time.time())
+        current_app.uploaded_polygons[poly_id] = {
+            "geometry": geom,
+            "uploaded_at": upload_time,
+            "expires_at": expiry_time,
+            "name": user_name,
+        }
 
     return (
         jsonify(
             {
                 "polygon_id": poly_id,
-                # NOTE: expiry time not implemeneted - this is just a placeholder with 1 hour expiry message
-                "expires": datetime.fromtimestamp(
-                    time.time() + 3600, tz=timezone.utc
-                ).isoformat(),
+                "name": user_name,
+                "expires_at": expiry_time,
+                "uploaded_at": upload_time,
             }
         ),
         200,

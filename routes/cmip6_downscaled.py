@@ -1,6 +1,7 @@
 import asyncio
 import logging
-from flask import Blueprint, render_template, request, current_app
+import shapely
+from flask import Blueprint, render_template, request, current_app, jsonify
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -265,8 +266,14 @@ def cmip6_downscaled_area(place_id):
     with current_app.store_lock:
         polygon = current_app.uploaded_polygons.get(place_id)
     if polygon:
-        # TODO: proceed to extract data for polygon
-        return "woohoo"
+        print("found user defined polygon:", polygon)
+
+        poly = shapely.to_geojson(polygon["geometry"])
+        name = polygon["name"]
+
     else:
-        # TODO: validate place_id against known places
-        return "womp womp"
+        # do standard validation
+        poly = None
+        name = "not a custom polygon"
+
+    return jsonify(name, poly), 200
