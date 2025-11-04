@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, current_app
 
 # local imports
 from generate_urls import generate_wcs_query_url
@@ -24,7 +24,6 @@ from luts import (
 )
 
 from . import routes
-from .shared_store import uploaded_polygons, store_lock, POLYGON_EXPIRY_SECONDS
 
 logger = logging.getLogger(__name__)
 
@@ -259,13 +258,15 @@ def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
 
 # TODO: finish this and test
 @routes.route("/cmip6_downscaled/area/<place_id>")
-def cmip6_downscaled_point(place_id):
-    with store_lock:
-        byop_id = uploaded_polygons.get(place_id)
-    if byop_id:
-        polygon = byop_id[0]  # get the geometry of the stored polygon
-    else:
-        polygon = None
-        # TODO: validate place_id against known places
+def cmip6_downscaled_area(place_id):
 
-    return f"CMIP6 downscaled area data for place_id: {polygon}"
+    print(current_app.uploaded_polygons)
+
+    with current_app.store_lock:
+        polygon = current_app.uploaded_polygons.get(place_id)
+    if polygon:
+        # TODO: proceed to extract data for polygon
+        return "woohoo"
+    else:
+        # TODO: validate place_id against known places
+        return "womp womp"
