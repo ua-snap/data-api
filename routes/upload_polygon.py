@@ -41,10 +41,11 @@ def upload_polygon():
 
         {
             'f-EMX4YL': {
-                'geometry': <POLYGON ((-147.626 64.942, -147.688 64.966, -147.794 64.97, -147.901 64.948...>,
+                'geojson': ,
                 'expires_at': "2025-11-04T18:48:02.522820+00:00",
                 'uploaded_at': "2025-11-04T17:48:02.522820+00:00",
-                'name': 'my custom polygon'
+                'name': 'my custom polygon',
+                'crs': 4326
             }
         }
 
@@ -125,17 +126,34 @@ def upload_polygon():
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
 
+    # check for features
     if gdf.empty:
         return (
             jsonify({"error": "Uploaded shapefile contains no features"}),
             400,
         )
 
+    # check for a valid CRS
+    if gdf.crs is None:
+        return (
+            jsonify(
+                {
+                    "error": "Uploaded shapefile has no defined coordinate reference system (CRS)"
+                }
+            ),
+            400,
+        )
+    else:  # get 4 digit EPSG code as int to save in uploaded polygons dict
+        crs_int = gdf.crs.to_epsg()
+
     # combine all polygons into one geometry
     # if the user uploads a shapefile with multiple features, they are treated as one feature
     # we could decide to loop through each feature and process them separately,
-    # but for now we just union them to force a single geometry
-    geom = gdf.unary_union
+    # but for now we just dissolve them to force a single geometry
+    gdf_dissolved = gdf.dissolve()
+
+    # create valid geojson from this dissolved gdf
+    geojson = gdf_dissolved.to_json()
 
     # generate a unique polygon ID
     poly_id = secrets.token_urlsafe(6)
@@ -150,10 +168,11 @@ def upload_polygon():
 
     with current_app.store_lock:
         current_app.uploaded_polygons[poly_id] = {
-            "geometry": geom,
+            "geojson": geojson,
             "uploaded_at": upload_time,
             "expires_at": expiry_time,
             "name": user_name,
+            "crs": crs_int,
         }
 
     return (

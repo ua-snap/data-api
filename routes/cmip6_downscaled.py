@@ -6,13 +6,15 @@ from flask import Blueprint, render_template, request, current_app, jsonify
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import fetch_data, describe_via_wcps
+from fetch_data import fetch_data, describe_via_wcps, get_poly, create_gdf_from_geojson
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
     validate_latlon_in_bboxes,
     project_latlon,
     generate_time_index_from_coverage_metadata,
+    check_for_uploaded_polygon,
+    validate_var_id,
 )
 from postprocessing import postprocess, prune_nulls_with_max_intensity
 from csv_functions import create_csv
@@ -261,19 +263,23 @@ def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
 @routes.route("/cmip6_downscaled/area/<place_id>")
 def cmip6_downscaled_area(place_id):
 
-    print(current_app.uploaded_polygons)
-
-    with current_app.store_lock:
-        polygon = current_app.uploaded_polygons.get(place_id)
-    if polygon:
-        print("found user defined polygon:", polygon)
-
-        poly = shapely.to_geojson(polygon["geometry"])
-        name = polygon["name"]
+    if check_for_uploaded_polygon(place_id):
+        # if place_id matches uploaded polygon key, create a GeoDataFrame from it, converting to 3338 for zonal stats
+        polygon = create_gdf_from_geojson(
+            current_app.uploaded_polygons[place_id]["geojson"],
+            current_app.uploaded_polygons[place_id]["crs"],
+            3338,
+        )
 
     else:
-        # do standard validation
-        poly = None
-        name = "not a custom polygon"
+        # otherwise, do the standard process of validating place_id and getting polygon from GeoServer
+        poly_type = validate_var_id(place_id)
+        if type(poly_type) is tuple:
+            return poly_type
+        try:
+            polygon = get_poly(place_id)
+        except:
+            return render_template("422/invalid_area.html"), 422
 
-    return jsonify(name, poly), 200
+    # fetch data and do the zonal stats
+    return jsonify(polygon.to_json())
