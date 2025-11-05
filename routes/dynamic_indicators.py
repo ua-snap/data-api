@@ -475,16 +475,16 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
 
 
 @routes.route(
-    "/dynamic_indicators/count_days/<operator>/<threshold>/<units>/<variable>/<lat>/<lon>/<start_year>/<end_year>/"
+    "/dynamic_indicators/count_days/<operator>/<threshold>/<units>/<variable>/point/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def count_days(operator, threshold, units, variable, lat, lon, start_year, end_year):
     """Count the number of days above or below a threshold for a given variable and location over a specified year range.
 
     Example usage:
-    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate the "summer days" indicator
-    - http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate the "deep winter days" indicator
-    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
-    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "wet days" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/point/64.5/-147.5/2000/2030/  ->>> can recreate the "summer days" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmin/point/64.5/-147.5/2000/2030/  ->>> can recreate the "deep winter days" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/point/64.5/-147.5/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/point/64.5/-147.5/2000/2030/  ->>> can recreate the "wet days" indicator
     """
     # Validate request params
     try:
@@ -517,16 +517,16 @@ def count_days(operator, threshold, units, variable, lat, lon, start_year, end_y
 
 
 @routes.route(
-    "/dynamic_indicators/stat/<stat>/<variable>/<units>/<lat>/<lon>/<start_year>/<end_year>/"
+    "/dynamic_indicators/stat/<stat>/<variable>/<units>/point/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
     """Get annual statistic (max, min, mean, sum) for a given variable and location over a specified year range.
     Example usage:
-    - http://127.0.0.1:5000/dynamic_indicators/stat/max/pr/mm/64.5/-147.5/2000/2030   ->>> can recreate the "maxmimum one day precip" indicator
-    - http://127.0.0.1:5000/dynamic_indicators/stat/min/tasmin/C/64.5/-147.5/2000/2030   ->>> coldest day per year
-    - http://127.0.0.1:5000/dynamic_indicators/stat/max/tasmax/C/64.5/-147.5/2000/2030   ->>> hottest day per year
-    - http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/64.5/-147.5/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
-    - http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/64.5/-147.5/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
+    - http://127.0.0.1:5000/dynamic_indicators/stat/max/pr/mm/point/64.5/-147.5/2000/2030   ->>> can recreate the "maxmimum one day precip" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/stat/min/tasmin/C/point/64.5/-147.5/2000/2030   ->>> coldest day per year
+    - http://127.0.0.1:5000/dynamic_indicators/stat/max/tasmax/C/point/64.5/-147.5/2000/2030   ->>> hottest day per year
+    - http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/point/64.5/-147.5/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
+    - http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/point/64.5/-147.5/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
     """
     # Validate request params
     try:
@@ -557,13 +557,13 @@ def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
 
 
 @routes.route(
-    "/dynamic_indicators/rank/<position>/<direction>/<variable>/<lat>/<lon>/<start_year>/<end_year>/"
+    "/dynamic_indicators/rank/<position>/<direction>/<variable>/point/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def get_annual_rank(position, direction, variable, lat, lon, start_year, end_year):
     """Get annual rank value (e.g., 6th highest, 10th lowest) for a given variable and location over a specified year range.
     Example usage:
-    - http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate "hot day threshold" indicator
-    - http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate "cold day threshold" indicators
+    - http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/point/64.5/-147.5/2000/2030/  ->>> can recreate "hot day threshold" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/point/64.5/-147.5/2000/2030/  ->>> can recreate "cold day threshold" indicators
     """
     # Validate request params
     if variable not in ["tasmax", "tasmin", "pr"]:
