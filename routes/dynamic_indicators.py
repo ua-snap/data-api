@@ -3,11 +3,12 @@ import logging
 from flask import Blueprint, render_template, request
 
 # local imports
-from fetch_data import fetch_data, describe_via_wcps
+from fetch_data import fetch_data, describe_via_wcps, get_poly, fetch_bbox_netcdf
 from generate_urls import generate_wcs_query_url
 from generate_requests import (
     construct_count_annual_days_above_or_below_threshold_wcps_query_string,
     construct_get_annual_mmm_stat_wcps_query_string,
+    generate_netcdf_wcs_getcov_str,
 )
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
@@ -15,6 +16,13 @@ from validate_request import (
     project_latlon,
     validate_latlon_in_bboxes,
     construct_latlon_bbox_from_coverage_bounds,
+    validate_var_id,
+)
+from zonal_stats import (
+    get_scale_factor,
+    rasterize_polygon,
+    interpolate,
+    calculate_zonal_means_vectorized,
 )
 
 # TODO: for additional postprocessing or csv output, uncomment these imports and add code
@@ -165,6 +173,17 @@ def validate_rank_position_and_direction(position, direction):
     return position, direction
 
 
+def validate_place_id(place_id):
+    poly_type = validate_var_id(place_id)
+    if type(poly_type) is tuple:
+        return poly_type
+    try:
+        polygon = get_poly(place_id)
+    except:
+        return render_template("422/invalid_area.html"), 422
+    return polygon
+
+
 def build_year_and_coverage_lists_for_iteration(
     start_year, end_year, variable, time_domains, all_coverages
 ):
@@ -193,6 +212,34 @@ def build_year_and_coverage_lists_for_iteration(
     return year_ranges, var_coverages
 
 
+def calculate_indicators_zonal_stats(polygon, dataset, variable):
+    """Calculate zonal mean statistics for the given polygon and dataset."""
+    # get scale factor once, not per variable or time slice!
+    ds = dataset
+    spatial_resolution = ds.rio.resolution()
+    grid_cell_area_m2 = abs(spatial_resolution[0]) * abs(spatial_resolution[1])
+    polygon_area_m2 = polygon.area
+    scale_factor = get_scale_factor(grid_cell_area_m2, polygon_area_m2)
+
+    # create an initial array for the basis of polygon rasterization
+    # why? polygon rasterization bogs down hard when doing it in the loop
+    da_i = interpolate(
+        ds.isel(ansi=0), variable, "X", "Y", scale_factor, method="nearest"
+    )
+
+    rasterized_polygon_array = rasterize_polygon(da_i, "X", "Y", polygon)
+
+    da_i_3d = interpolate(ds, variable, "X", "Y", scale_factor, method="nearest")
+    # calculate zonal stats for the entire time series
+    # rename the ansi dimensions to "time" so this function will work
+    da_i_3d = da_i_3d.rename({"ansi": "time"})
+    time_series_means = calculate_zonal_means_vectorized(
+        da_i_3d, rasterized_polygon_array, "X", "Y"
+    )
+
+    return time_series_means
+
+
 async def fetch_count_days_data(
     var_coverages, year_ranges, threshold, operator, lon, lat
 ):
@@ -218,15 +265,46 @@ async def fetch_count_days_data(
     return data
 
 
+async def fetch_area_data(var_coverages, year_ranges, polygon):
+    """
+    Make an async request for CMIP6 downscaled daily data for provided coverage within a specified polygon.
+    Args:
+        var_coverages (list): list of coverage IDs
+        year_ranges (tuple): (start_year, end_year)
+        polygon (shapely.geometry.Polygon): polygon geometry
+    Returns:
+        list of data results within the specified polygon
+    """
+    urls = []
+    for cov_id, year_range in zip(var_coverages, year_ranges):
+        # Generate WCS GetCoverage request string for the polygon bounds
+        wcs_str = generate_netcdf_wcs_getcov_str(polygon.total_bounds, cov_id=cov_id)
+        # add time range to WCS string
+        wcs_str += f"&SUBSET=ansi({year_range[0]}-01-01T00:00:00Z,{year_range[1]}-12-31T23:59:59Z)"
+        # Generate the URL for the WCS query
+        url = generate_wcs_query_url(wcs_str)
+        urls.append(url)
+    # Fetch the data and add to a list of area datasets (one dataset per coverage)
+    area_dataset_list = await fetch_bbox_netcdf([urls])
+
+    return area_dataset_list
+
+
 async def fetch_count_days_area_data(
-    var_coverages, year_ranges, threshold, operator, place_id
+    variable, var_coverages, year_ranges, threshold, operator, polygon
 ):
-    """Fetch count of days above or below threshold for given variable coverages and year ranges over an area (zonal mean)."""
+    """Fetch daily data covering a polygon area, and count days above or below threshold for given variable coverages and year range.
+    Compute zonal mean of the counts over the area."""
 
-    # TODO: implement area fetching logic
-    data = None
+    area_dataset_list = await fetch_area_data(var_coverages, year_ranges, polygon)
 
-    return data
+    area_daily_means_list = []
+    for dataset in area_dataset_list:
+        area_daily_means_list.append(
+            calculate_indicators_zonal_stats(polygon, dataset, variable)
+        )
+
+    return area_daily_means_list
 
 
 def postprocess_count_days(data, start_year, end_year):
@@ -333,8 +411,11 @@ async def fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat):
     return data
 
 
-async def fetch_annual_stat_area_data(var_coverages, year_ranges, stat, place_id):
-    """Fetch annual statistic data for given variable coverages and year ranges over an area (zonal mean)."""
+async def fetch_annual_stat_area_data(
+    variable, var_coverages, year_ranges, stat, polygon
+):
+    """Fetch daily data covering a polygon area, and calculate stats for given variable coverages and year range.
+    Compute zonal mean of the stats over the area."""
 
     # TODO: implement area fetching logic
     data = None
@@ -419,8 +500,12 @@ def postprocess_annual_stat(data, start_year, end_year, units):
     return result
 
 
-async def fetch_annual_rank_area_data(var_coverages, year_ranges, stat, place_id):
-    """Fetch annual statistic data for given variable coverages and year ranges over an area (zonal mean)."""
+async def fetch_annual_rank_area_data(
+    variable, var_coverages, year_ranges, stat, polygon
+):
+    """Fetch daily data covering a polygon area, and rank values for given variable coverages and year range.
+    # TODO: inspect zonal stats logic here! >>> Compute zonal mean of the ranks over the area.
+    """
 
     # TODO: implement area fetching logic
     data = None
@@ -653,9 +738,7 @@ def count_days_area(
             units=units, threshold=threshold, variable=variable
         )
         validate_year(start_year, end_year)
-
-        # TODO: validate the place_id
-
+        polygon = validate_place_id(place_id)
     except:
         return render_template("400/bad_request.html"), 400
 
@@ -667,9 +750,12 @@ def count_days_area(
     try:
         data = asyncio.run(
             fetch_count_days_area_data(
-                var_coverages, year_ranges, threshold, operator, place_id
+                variable, var_coverages, year_ranges, threshold, operator, polygon
             )
         )
+
+        print(data)
+
         result = postprocess_count_days(data, start_year, end_year)
         return result
     except Exception as exc:
@@ -697,9 +783,7 @@ def get_annual_stat_area(stat, variable, units, place_id, start_year, end_year):
             units=units, threshold=None, variable=variable
         )
         validate_year(start_year, end_year)
-
-        # TODO: validate the place_id
-
+        polygon = validate_place_id(place_id)
     except:
         return render_template("400/bad_request.html"), 400
 
@@ -710,7 +794,9 @@ def get_annual_stat_area(stat, variable, units, place_id, start_year, end_year):
 
     try:
         data = asyncio.run(
-            fetch_annual_stat_area_data(var_coverages, year_ranges, stat, place_id)
+            fetch_annual_stat_area_data(
+                variable, var_coverages, year_ranges, stat, polygon
+            )
         )
         result = postprocess_annual_stat(data, start_year, end_year, units)
         return result
@@ -735,9 +821,7 @@ def get_annual_rank_area(position, direction, variable, place_id, start_year, en
     try:
         position, direction = validate_rank_position_and_direction(position, direction)
         validate_year(start_year, end_year)
-
-        # TODO: validate the place_id
-
+        polygon = validate_place_id(place_id)
     except:
         return render_template("400/bad_request.html"), 400
 
@@ -748,7 +832,7 @@ def get_annual_rank_area(position, direction, variable, place_id, start_year, en
 
     try:
         data = asyncio.run(
-            fetch_annual_rank_area_data(var_coverages, year_ranges, place_id)
+            fetch_annual_rank_area_data(variable, var_coverages, year_ranges, polygon)
         )
         result = postprocess_annual_rank(
             data, start_year, end_year, position, direction
