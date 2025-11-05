@@ -218,6 +218,17 @@ async def fetch_count_days_data(
     return data
 
 
+async def fetch_count_days_area_data(
+    var_coverages, year_ranges, threshold, operator, place_id
+):
+    """Fetch count of days above or below threshold for given variable coverages and year ranges over an area (zonal mean)."""
+
+    # TODO: implement area fetching logic
+    data = None
+
+    return data
+
+
 def postprocess_count_days(data, start_year, end_year):
     """Postprocess count days data into structured dictionary output.
     If the year range spans historical and projected, our data will be a list of 5 lists:
@@ -322,6 +333,14 @@ async def fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat):
     return data
 
 
+async def fetch_annual_stat_area_data(var_coverages, year_ranges, stat, place_id):
+    """Fetch annual statistic data for given variable coverages and year ranges over an area (zonal mean)."""
+
+    # TODO: implement area fetching logic
+    data = None
+    return data
+
+
 def postprocess_annual_stat(data, start_year, end_year, units):
     """Postprocess annual statistic data into structured dictionary output."""
 
@@ -400,6 +419,14 @@ def postprocess_annual_stat(data, start_year, end_year, units):
     return result
 
 
+async def fetch_annual_rank_area_data(var_coverages, year_ranges, stat, place_id):
+    """Fetch annual statistic data for given variable coverages and year ranges over an area (zonal mean)."""
+
+    # TODO: implement area fetching logic
+    data = None
+    return data
+
+
 def postprocess_annual_rank(data, start_year, end_year, position, direction):
     """Postprocess annual rank data into structured dictionary output."""
     start_year = int(start_year)
@@ -474,10 +501,15 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
     return result
 
 
+###### POINT QUERIES ######
+
+
 @routes.route(
     "/dynamic_indicators/count_days/<operator>/<threshold>/<units>/<variable>/point/<lat>/<lon>/<start_year>/<end_year>/"
 )
-def count_days(operator, threshold, units, variable, lat, lon, start_year, end_year):
+def count_days_point(
+    operator, threshold, units, variable, lat, lon, start_year, end_year
+):
     """Count the number of days above or below a threshold for a given variable and location over a specified year range.
 
     Example usage:
@@ -519,7 +551,7 @@ def count_days(operator, threshold, units, variable, lat, lon, start_year, end_y
 @routes.route(
     "/dynamic_indicators/stat/<stat>/<variable>/<units>/point/<lat>/<lon>/<start_year>/<end_year>/"
 )
-def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
+def get_annual_stat_point(stat, variable, units, lat, lon, start_year, end_year):
     """Get annual statistic (max, min, mean, sum) for a given variable and location over a specified year range.
     Example usage:
     - http://127.0.0.1:5000/dynamic_indicators/stat/max/pr/mm/point/64.5/-147.5/2000/2030   ->>> can recreate the "maxmimum one day precip" indicator
@@ -559,7 +591,9 @@ def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
 @routes.route(
     "/dynamic_indicators/rank/<position>/<direction>/<variable>/point/<lat>/<lon>/<start_year>/<end_year>/"
 )
-def get_annual_rank(position, direction, variable, lat, lon, start_year, end_year):
+def get_annual_rank_point(
+    position, direction, variable, lat, lon, start_year, end_year
+):
     """Get annual rank value (e.g., 6th highest, 10th lowest) for a given variable and location over a specified year range.
     Example usage:
     - http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/point/64.5/-147.5/2000/2030/  ->>> can recreate "hot day threshold" indicator
@@ -584,6 +618,137 @@ def get_annual_rank(position, direction, variable, lat, lon, start_year, end_yea
     try:
         data = asyncio.run(
             fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
+        )
+        result = postprocess_annual_rank(
+            data, start_year, end_year, position, direction
+        )
+        return result
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+###### AREA QUERIES ######
+
+
+@routes.route(
+    "/dynamic_indicators/count_days/<operator>/<threshold>/<units>/<variable>/area/<place_id>/<start_year>/<end_year>/"
+)
+def count_days_area(
+    operator, threshold, units, variable, place_id, start_year, end_year
+):
+    """Count the number of days above or below a threshold for a given variable and specified year range, and compute zonal mean over area.
+
+    Example usage:
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/area/1908030609/2000/2030/  ->>> can recreate the "summer days" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmin/area/1908030609/2000/2030/  ->>> can recreate the "deep winter days" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/area/1908030609/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/area/1908030609/2000/2030/  ->>> can recreate the "wet days" indicator
+    """
+    # Validate request params
+    try:
+        operator = validate_operator(operator)
+        units, threshold = validate_units_threshold_and_variable(
+            units=units, threshold=threshold, variable=variable
+        )
+        validate_year(start_year, end_year)
+
+        # TODO: validate the place_id
+
+    except:
+        return render_template("400/bad_request.html"), 400
+
+    # build lists for iteration
+    year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
+        int(start_year), int(end_year), variable, time_domains, all_coverages
+    )
+
+    try:
+        data = asyncio.run(
+            fetch_count_days_area_data(
+                var_coverages, year_ranges, threshold, operator, place_id
+            )
+        )
+        result = postprocess_count_days(data, start_year, end_year)
+        return result
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+@routes.route(
+    "/dynamic_indicators/stat/<stat>/<variable>/<units>/area/<place_id>/<start_year>/<end_year>/"
+)
+def get_annual_stat_area(stat, variable, units, place_id, start_year, end_year):
+    """Get annual statistic (max, min, mean, sum) for a given variable over a specified year range, and compute zonal mean over area.
+    Example usage:
+    - http://127.0.0.1:5000/dynamic_indicators/stat/max/pr/mm/area/1908030609/2000/2030   ->>> can recreate the "maxmimum one day precip" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/stat/min/tasmin/C/area/1908030609/2000/2030   ->>> coldest day per year
+    - http://127.0.0.1:5000/dynamic_indicators/stat/max/tasmax/C/area/1908030609/2000/2030   ->>> hottest day per year
+    - http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/area/1908030609/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
+    - http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/area/1908030609/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
+    """
+    # Validate request params
+    try:
+        stat = validate_stat(stat)
+        units, _threshold = validate_units_threshold_and_variable(
+            units=units, threshold=None, variable=variable
+        )
+        validate_year(start_year, end_year)
+
+        # TODO: validate the place_id
+
+    except:
+        return render_template("400/bad_request.html"), 400
+
+    # build lists for iteration
+    year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
+        int(start_year), int(end_year), variable, time_domains, all_coverages
+    )
+
+    try:
+        data = asyncio.run(
+            fetch_annual_stat_area_data(var_coverages, year_ranges, stat, place_id)
+        )
+        result = postprocess_annual_stat(data, start_year, end_year, units)
+        return result
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+@routes.route(
+    "/dynamic_indicators/rank/<position>/<direction>/<variable>/area/<place_id>/<start_year>/<end_year>/"
+)
+def get_annual_rank_area(position, direction, variable, place_id, start_year, end_year):
+    """Get annual rank value (e.g., 6th highest, 10th lowest) for a given variable over a specified year range, and compute zonal mean over area.
+    Example usage:
+    - http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/area/1908030609/2000/2030/  ->>> can recreate "hot day threshold" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/area/1908030609/2000/2030/  ->>> can recreate "cold day threshold" indicators
+    """
+    # Validate request params
+    if variable not in ["tasmax", "tasmin", "pr"]:
+        return render_template("400/bad_request.html"), 400
+    try:
+        position, direction = validate_rank_position_and_direction(position, direction)
+        validate_year(start_year, end_year)
+
+        # TODO: validate the place_id
+
+    except:
+        return render_template("400/bad_request.html"), 400
+
+    # build lists for iteration
+    year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
+        int(start_year), int(end_year), variable, time_domains, all_coverages
+    )
+
+    try:
+        data = asyncio.run(
+            fetch_annual_rank_area_data(var_coverages, year_ranges, place_id)
         )
         result = postprocess_annual_rank(
             data, start_year, end_year, position, direction
