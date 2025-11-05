@@ -3,7 +3,7 @@ import logging
 from flask import Blueprint, render_template, request
 
 # local imports
-from fetch_data import fetch_data, describe_via_wcps, get_poly, fetch_bbox_netcdf
+from fetch_data import fetch_data, describe_via_wcps, get_poly, fetch_bbox_netcdf_list
 from generate_urls import generate_wcs_query_url
 from generate_requests import (
     construct_count_annual_days_above_or_below_threshold_wcps_query_string,
@@ -278,14 +278,14 @@ async def fetch_area_data(var_coverages, year_ranges, polygon):
     urls = []
     for cov_id, year_range in zip(var_coverages, year_ranges):
         # Generate WCS GetCoverage request string for the polygon bounds
-        wcs_str = generate_netcdf_wcs_getcov_str(polygon.total_bounds, cov_id=cov_id)
+        wcs_str = generate_netcdf_wcs_getcov_str(polygon.total_bounds, cov_id)
         # add time range to WCS string
-        wcs_str += f"&SUBSET=ansi({year_range[0]}-01-01T00:00:00Z,{year_range[1]}-12-31T23:59:59Z)"
+        wcs_str += f'&SUBSET=ansi("{year_range[0]}-01-01","{year_range[1]}-12-31")'
         # Generate the URL for the WCS query
         url = generate_wcs_query_url(wcs_str)
         urls.append(url)
     # Fetch the data and add to a list of area datasets (one dataset per coverage)
-    area_dataset_list = await fetch_bbox_netcdf([urls])
+    area_dataset_list = await fetch_bbox_netcdf_list(urls)
 
     return area_dataset_list
 
@@ -304,7 +304,27 @@ async def fetch_count_days_area_data(
             calculate_indicators_zonal_stats(polygon, dataset, variable)
         )
 
-    return area_daily_means_list
+    # area_daily_means is a list, where each item corresponds to a coverage/year range combo
+    # and each item is a list of daily means for each day in that range
+    # to count days above or below threshold for each year, we need to iterate through each item in area_daily_means_list
+    # and divide each list into chunks of 365 (no leap years) to count days above/below threshold per year
+    # we will output a list of lists, where each sublist contains the counts for each year in the corresponding year range
+
+    data = []
+
+    for i, daily_means in enumerate(area_daily_means_list):
+        num_years_in_range = year_ranges[i][1] - year_ranges[i][0] + 1
+        yearly_counts = []
+        for year_idx in range(num_years_in_range):
+            year_daily_means = daily_means[year_idx * 365 : (year_idx + 1) * 365]
+            if operator == ">":
+                count = sum(1 for day_mean in year_daily_means if day_mean > threshold)
+            else:
+                count = sum(1 for day_mean in year_daily_means if day_mean < threshold)
+            yearly_counts.append(count)
+        data.append(yearly_counts)
+
+    return data
 
 
 def postprocess_count_days(data, start_year, end_year):
