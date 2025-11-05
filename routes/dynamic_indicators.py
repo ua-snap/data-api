@@ -3,7 +3,7 @@ import logging
 from flask import Blueprint, render_template, request
 
 # local imports
-from fetch_data import fetch_data
+from fetch_data import fetch_data, describe_via_wcps
 from generate_urls import generate_wcs_query_url
 from generate_requests import (
     construct_count_annual_days_above_or_below_threshold_wcps_query_string,
@@ -13,6 +13,8 @@ from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     validate_year,
     project_latlon,
+    validate_latlon_in_bboxes,
+    construct_latlon_bbox_from_coverage_bounds,
 )
 
 # TODO: for additional postprocessing or csv output, uncomment these imports and add code
@@ -61,13 +63,41 @@ time_domains = {
 }
 
 
-def validate_latlon_and_reproject_to_epsg_3338(lat, lon):
+async def get_cmip6_metadata(cov_id):
+    """Get the coverage metadata and encodings for CMIP6 downscaled daily coverage"""
+    metadata = await describe_via_wcps(cov_id)
+    return metadata
+
+
+def validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable):
+    """Validate lat/lon, then reproject to EPSG:3338"""
     lat = float(lat)
     lon = float(lon)
     if not latlon_is_numeric_and_in_geodetic_range(lat, lon):
         return render_template("400/bad_request.html"), 400
 
-    # TODO: add step to validate geographic lat/lon with geotiff
+    var_coverages = all_coverages.get(variable)
+
+    for cov_id in var_coverages:
+
+        metadata = asyncio.run(get_cmip6_metadata(cov_id))
+        cmip6_downscaled_bbox = construct_latlon_bbox_from_coverage_bounds(metadata)
+        within_bounds = validate_latlon_in_bboxes(
+            lat, lon, [cmip6_downscaled_bbox], [cov_id]
+        )
+        if within_bounds == 404:
+            return (
+                render_template("404/no_data.html"),
+                404,
+            )
+        if within_bounds == 422:
+            return (
+                render_template(
+                    "422/invalid_latlon_outside_coverage.html",
+                    bboxes=[cmip6_downscaled_bbox],
+                ),
+                422,
+            )
 
     lon, lat = project_latlon(lat, lon, dst_crs=3338)
 
@@ -75,6 +105,7 @@ def validate_latlon_and_reproject_to_epsg_3338(lat, lon):
 
 
 def validate_operator(operator):
+    """Validate operator is 'above' or 'below' and convert to '>' or '<'"""
     if operator not in ["above", "below"]:
         return render_template("400/bad_request.html"), 400
     if operator == "above":
@@ -85,6 +116,7 @@ def validate_operator(operator):
 
 
 def validate_units_threshold_and_variable(units, threshold, variable):
+    """Validate units and threshold based on variable type. Convert threshold to standard units if needed."""
     if variable in ["tasmax", "tasmin"]:
         if units not in ["C", "F"]:
             raise ValueError("Units for temperature must be 'C' or 'F'.")
@@ -104,13 +136,15 @@ def validate_units_threshold_and_variable(units, threshold, variable):
     else:
         return render_template("400/bad_request.html"), 400
 
-    # TODO: validate threshold ranges based on variable if needed
-    # ie, temperature thresholds within reasonable limits, no negative precip allowed, etc.
+    # precipitation thresholds should be >= 0
+    if variable == "pr" and threshold is not None and threshold < 0:
+        return render_template("400/bad_request.html"), 400
 
     return units, threshold
 
 
 def validate_stat(stat):
+    """Validate that stat is one of 'max', 'min', 'mean', or 'sum'."""
     if stat not in ["max", "min", "mean", "sum"]:
         return render_template("400/bad_request.html"), 400
     if stat == "mean":
@@ -119,7 +153,7 @@ def validate_stat(stat):
 
 
 def validate_rank_position_and_direction(position, direction):
-    # position must be between 1 and 365, and direction must be "highest" or "lowest"
+    """Validate rank position and direction. Position must be between 1 and 365, and direction must be 'highest' or 'lowest'."""
     try:
         position = int(position)
         if position < 1 or position > 365:
@@ -134,7 +168,7 @@ def validate_rank_position_and_direction(position, direction):
 def build_year_and_coverage_lists_for_iteration(
     start_year, end_year, variable, time_domains, all_coverages
 ):
-    # if years span historical and projected, need to split into two ranges
+    """Build lists of year ranges and variable coverages for iteration based on start and end years. If years span historical and projected, need to split into two ranges."""
     year_ranges = []
     var_coverages = []
     historical_range = time_domains["historical"]
@@ -162,6 +196,7 @@ def build_year_and_coverage_lists_for_iteration(
 async def fetch_count_days_data(
     var_coverages, year_ranges, threshold, operator, lon, lat
 ):
+    """Fetch count of days above or below threshold for given variable coverages and year ranges."""
     tasks = []
     for coverage, year_range in zip(var_coverages, year_ranges):
         url = generate_wcs_query_url(
@@ -184,28 +219,30 @@ async def fetch_count_days_data(
 
 
 def postprocess_count_days(data, start_year, end_year):
-    # if the year range spans historical and projected, our data will be a list of 5 lists:
-    # the first has day counts for each historical year, and the rest have day counts for each projected year for each SSP
-    # if the year range is only historical or only projected, our data will be a list of 1-4 lists accordingly
+    """Postprocess count days data into structured dictionary output.
+    If the year range spans historical and projected, our data will be a list of 5 lists:
+    The first has day counts for each historical year, and the rest have day counts for each projected year for each SSP.
+    If the year range is only historical or only projected, our data will be a list of 1-4 lists accordingly.
 
-    # we want to create dictionary for output, with the following structure:
-    # {
-    #     "historical": {
-    #         "data": {"2000": 45, "2001": 50, ...},
-    #         "summary": {"min": 30, "max": 60, "mean": 45.5},
-    #     },
-    #     "projected": {
-    #         "ssp126": {
-    #             "data": {"2020": 55, "2021": 60, ...},
-    #             "summary": {"min": 40, "max": 70, "mean": 55.5},
-    #         },
-    #         "ssp245": {
-    #             "data": {"2020": 50, "2021": 55, ...},
-    #             "summary": {"min": 35, "max": 65, "mean": 50.5},
-    #         },
-    #         ...
-    #     }
-    # }
+    We want to create dictionary for output, with the following structure:
+    {
+        "historical": {
+            "data": {"2000": 45, "2001": 50, ...},
+            "summary": {"min": 30, "max": 60, "mean": 45.5},
+        },
+        "projected": {
+            "ssp126": {
+                "data": {"2020": 55, "2021": 60, ...},
+                "summary": {"min": 40, "max": 70, "mean": 55.5},
+            },
+            "ssp245": {
+                "data": {"2020": 50, "2021": 55, ...},
+                "summary": {"min": 35, "max": 65, "mean": 50.5},
+            },
+            ...
+        }
+    }
+    """
 
     start_year = int(start_year)
     end_year = int(end_year)
@@ -265,6 +302,7 @@ def postprocess_count_days(data, start_year, end_year):
 
 
 async def fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat):
+    """Fetch annual statistic data for given variable coverages and year ranges."""
     tasks = []
     for coverage, year_range in zip(var_coverages, year_ranges):
         url = generate_wcs_query_url(
@@ -285,7 +323,8 @@ async def fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat):
 
 
 def postprocess_annual_stat(data, start_year, end_year, units):
-    # data in / out is similar to postprocess_count_days
+    """Postprocess annual statistic data into structured dictionary output."""
+
     # define conversion functions
     def mm_to_inches(mm):
         return mm / 25.4
@@ -362,7 +401,7 @@ def postprocess_annual_stat(data, start_year, end_year, units):
 
 
 def postprocess_annual_rank(data, start_year, end_year, position, direction):
-    # data in / out is similar to postprocess_annual_stat
+    """Postprocess annual rank data into structured dictionary output."""
     start_year = int(start_year)
     end_year = int(end_year)
     result = {}
@@ -439,19 +478,21 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
     "/dynamic_indicators/count_days/<operator>/<threshold>/<units>/<variable>/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def count_days(operator, threshold, units, variable, lat, lon, start_year, end_year):
-    # example usage:
-    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate the "summer days" indicator
-    # http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate the "deep winter days" indicator
-    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
-    # http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "wet days" indicator
+    """Count the number of days above or below a threshold for a given variable and location over a specified year range.
 
+    Example usage:
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/25/C/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate the "summer days" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/below/-30/C/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate the "deep winter days" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/64.5/-147.5/2000/2030/  ->>> can recreate the "wet days" indicator
+    """
     # Validate request params
     try:
-        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
         operator = validate_operator(operator)
         units, threshold = validate_units_threshold_and_variable(
             units=units, threshold=threshold, variable=variable
         )
+        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable)
         validate_year(start_year, end_year)
     except:
         return render_template("400/bad_request.html"), 400
@@ -479,20 +520,21 @@ def count_days(operator, threshold, units, variable, lat, lon, start_year, end_y
     "/dynamic_indicators/stat/<stat>/<variable>/<units>/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
-    # example usage:
-    # http://127.0.0.1:5000/dynamic_indicators/stat/max/pr/mm/64.5/-147.5/2000/2030   ->>> can recreate the "maxmimum one day precip" indicator
-    # http://127.0.0.1:5000/dynamic_indicators/stat/min/tasmin/C/64.5/-147.5/2000/2030   ->>> coldest day per year
-    # http://127.0.0.1:5000/dynamic_indicators/stat/max/tasmax/C/64.5/-147.5/2000/2030   ->>> hottest day per year
-    # http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/64.5/-147.5/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
-    # http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/64.5/-147.5/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
-
+    """Get annual statistic (max, min, mean, sum) for a given variable and location over a specified year range.
+    Example usage:
+    - http://127.0.0.1:5000/dynamic_indicators/stat/max/pr/mm/64.5/-147.5/2000/2030   ->>> can recreate the "maxmimum one day precip" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/stat/min/tasmin/C/64.5/-147.5/2000/2030   ->>> coldest day per year
+    - http://127.0.0.1:5000/dynamic_indicators/stat/max/tasmax/C/64.5/-147.5/2000/2030   ->>> hottest day per year
+    - http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/64.5/-147.5/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
+    - http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/64.5/-147.5/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
+    """
     # Validate request params
     try:
         stat = validate_stat(stat)
-        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
         units, _threshold = validate_units_threshold_and_variable(
             units=units, threshold=None, variable=variable
         )
+        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable)
         validate_year(start_year, end_year)
     except:
         return render_template("400/bad_request.html"), 400
@@ -518,18 +560,19 @@ def get_annual_stat(stat, variable, units, lat, lon, start_year, end_year):
     "/dynamic_indicators/rank/<position>/<direction>/<variable>/<lat>/<lon>/<start_year>/<end_year>/"
 )
 def get_annual_rank(position, direction, variable, lat, lon, start_year, end_year):
-    # example usage:
-    # http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate "hot day threshold" indicator
-    # http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate "cold day threshold" indicators
-
+    """Get annual rank value (e.g., 6th highest, 10th lowest) for a given variable and location over a specified year range.
+    Example usage:
+    - http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/64.5/-147.5/2000/2030/  ->>> can recreate "hot day threshold" indicator
+    - http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/64.5/-147.5/2000/2030/  ->>> can recreate "cold day threshold" indicators
+    """
     # Validate request params
+    if variable not in ["tasmax", "tasmin", "pr"]:
+        return render_template("400/bad_request.html"), 400
     try:
         position, direction = validate_rank_position_and_direction(position, direction)
-        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon)
+        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable)
         validate_year(start_year, end_year)
     except:
-        return render_template("400/bad_request.html"), 400
-    if variable not in ["tasmax", "tasmin", "pr"]:
         return render_template("400/bad_request.html"), 400
 
     # build lists for iteration
