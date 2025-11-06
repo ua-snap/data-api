@@ -583,7 +583,7 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
                 rank_value = sorted_values[-position]
             else:
                 rank_value = sorted_values[position - 1]
-            hist_ranks[str(year)] = rank_value
+            hist_ranks[str(year)] = round(rank_value, 2)
         result["historical"] = {
             "data": hist_ranks,
             "summary": {
@@ -617,7 +617,7 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
                     rank_value = sorted_values[-position]
                 else:
                     rank_value = sorted_values[position - 1]
-                proj_ranks[str(year)] = rank_value
+                proj_ranks[str(year)] = round(rank_value, 2)
             result["projected"][ssp] = {
                 "data": proj_ranks,
                 "summary": {
