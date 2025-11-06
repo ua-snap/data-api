@@ -1,4 +1,65 @@
 {% extends 'base.html' %} {% block content %}
 <h2>Dynamically Generated Indicators from Downscaled CMIP6</h2>
 
+<p>
+    This endpoint provides access to dynamically generated indicators derived from
+    a 6-model average of CMIP6 daily data that have been bias-adjusted and downscaled
+    using dynamically downscaled ERA5 reference data. The source dataset spans 
+    1965&ndash;2100 at 4km spatial resolution. The spatial domain covers most of Alaska 
+    and parts of western Canada. Variables include daily maximum and minimum temperature
+     (<code>tasmax</code> and <code>tasmin</code>), as well as daily total precipitation 
+     (<code>pr</code>).
+</p>
+
+<h3>Available Operations</h3>
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th><code>route</code></th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Count annual days above / below threshold</td>
+      <td>
+        <code>count_days/above/&lt;value&gt;/&lt;units&gt;/...</code>, 
+        <code>count_days/below/&lt;value&gt;/&lt;units&gt;/...</code>
+      </td>
+      <td>
+        Counts number of days per year where values are above or below the provided <code>&lt;value&gt;</code>
+        given in the provided <code>&lt;units&gt;</code>. For area queries, daily values are weighted by spatial 
+        area before applying the threshold.
+      </td>
+    </tr>
+    <tr>
+      <td>Calculate annual statistic</td>
+      <td>
+        <code>stat/max/&lt;value&gt;/&lt;units&gt;/...</code>,
+        <code>stat/min/&lt;value&gt;/&lt;units&gt;/...</code>,
+        <code>stat/mean/&lt;value&gt;/&lt;units&gt;/...</code>,
+        <code>stat/sum/&lt;value&gt;/&lt;units&gt;/...</code>
+    </td>
+      <td>
+        Calculates the specified annual statistic (<code>max</code>, <code>min</code>, <code>mean</code>, or <code>sum</code>)
+        for the provided <code>&lt;value&gt;</code> in the provided <code>&lt;units&gt;</code>. For area queries, daily values 
+        are weighted by spatial area before calculating the statistic.
+      </td>
+    </tr>
+    <tr>
+        <td>Rank annual values and get <i>n</i>-position</td>
+        <td>
+          <code>rank/&lt;position&gt;/&lt;direction&gt;/...</code>, 
+          <code>rank/&lt;position&gt;/&lt;direction&gt;/...</code>
+        </td>
+        <td>
+          Ranks values in each year and returns the value at the specified <code>&lt;position&gt;</code> 
+          and <code>&lt;direction&gt;</code> (e.g., 5th highest, 2nd lowest). For area queries, daily values
+            are weighted by spatial area before ranking.
+        </td>
+      </tr>
+  </tbody>
+</table>
+
 {% endblock %}

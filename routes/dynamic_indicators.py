@@ -631,6 +631,11 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
     return result
 
 
+@routes.route("/dynamic_indicators/")
+def dyanmic_indicators_about():
+    return render_template("documentation/dynamic_indicators.html")
+
+
 ###### POINT QUERIES ######
 
 
