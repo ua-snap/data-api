@@ -874,10 +874,13 @@ def get_annual_rank_area(position, direction, variable, place_id, start_year, en
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
+
+    # stat is empty to force return of all values for ranking
+    stat = ""
     try:
         data = asyncio.run(
             fetch_annual_stat_area_data(
-                variable, var_coverages, year_ranges, "", polygon
+                variable, var_coverages, year_ranges, stat, polygon
             )
         )
         result = postprocess_annual_rank(
