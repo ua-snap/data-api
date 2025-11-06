@@ -178,7 +178,6 @@ def run_aggregate_var_polygon(poly_id):
 
 
 @routes.route("/beetles/")
-@routes.route("/beetles/abstract/")
 @routes.route("/beetles/point/")
 @routes.route("/beetles/area/")
 def about_beetles():

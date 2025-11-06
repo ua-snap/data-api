@@ -49,7 +49,6 @@ def package_astergdem(astergdem_resp):
 
 
 @routes.route("/elevation/")
-@routes.route("/elevation/abstract/")
 @routes.route("/elevation/point/")
 @routes.route("/elevation/area/")
 def elevation_about():
