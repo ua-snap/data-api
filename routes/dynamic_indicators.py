@@ -265,7 +265,9 @@ async def fetch_count_days_data(
     return data
 
 
-async def fetch_area_data(var_coverages, year_ranges, polygon):
+async def fetch_area_data_and_calculate_zonal_stats(
+    variable, var_coverages, year_ranges, polygon
+):
     """
     Make an async request for CMIP6 downscaled daily data for provided coverage within a specified polygon.
     Args:
@@ -287,22 +289,25 @@ async def fetch_area_data(var_coverages, year_ranges, polygon):
     # Fetch the data and add to a list of area datasets (one dataset per coverage)
     area_dataset_list = await fetch_bbox_netcdf_list(urls)
 
-    return area_dataset_list
-
-
-async def fetch_count_days_area_data(
-    variable, var_coverages, year_ranges, threshold, operator, polygon
-):
-    """Fetch daily data covering a polygon area, and count days above or below threshold for given variable coverages and year range.
-    Compute zonal mean of the counts over the area."""
-
-    area_dataset_list = await fetch_area_data(var_coverages, year_ranges, polygon)
-
+    # Calculate zonal stats for each dataset
     area_daily_means_list = []
     for dataset in area_dataset_list:
         area_daily_means_list.append(
             calculate_indicators_zonal_stats(polygon, dataset, variable)
         )
+
+    return area_daily_means_list
+
+
+async def fetch_count_days_area_data(
+    variable, var_coverages, year_ranges, threshold, operator, polygon
+):
+    """Fetch daily data covering a polygon area, and calculatee the zonal mean of the area.
+    Count days above or below threshold for given variable coverages and year range."""
+
+    area_daily_means_list = await fetch_area_data_and_calculate_zonal_stats(
+        variable, var_coverages, year_ranges, polygon
+    )
 
     # area_daily_means is a list, where each item corresponds to a coverage/year range combo
     # and each item is a list of daily means for each day in that range
@@ -374,9 +379,9 @@ def postprocess_count_days(data, start_year, end_year):
         result["historical"] = {
             "data": hist_day_counts,
             "summary": {
-                "min": min(hist_day_counts.values()),
-                "max": max(hist_day_counts.values()),
-                "mean": sum(hist_day_counts.values()) / len(hist_day_counts),
+                "min": round(min(hist_day_counts.values()), 2),
+                "max": round(max(hist_day_counts.values()), 2),
+                "mean": round(sum(hist_day_counts.values()) / len(hist_day_counts), 2),
             },
         }
         current_index += 1
@@ -401,9 +406,11 @@ def postprocess_count_days(data, start_year, end_year):
             result["projected"][ssp] = {
                 "data": proj_day_counts,
                 "summary": {
-                    "min": min(proj_day_counts.values()),
-                    "max": max(proj_day_counts.values()),
-                    "mean": sum(proj_day_counts.values()) / len(proj_day_counts),
+                    "min": round(min(proj_day_counts.values()), 2),
+                    "max": round(max(proj_day_counts.values()), 2),
+                    "mean": round(
+                        sum(proj_day_counts.values()) / len(proj_day_counts), 2
+                    ),
                 },
             }
             current_index += 1
@@ -434,11 +441,41 @@ async def fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat):
 async def fetch_annual_stat_area_data(
     variable, var_coverages, year_ranges, stat, polygon
 ):
-    """Fetch daily data covering a polygon area, and calculate stats for given variable coverages and year range.
-    Compute zonal mean of the stats over the area."""
+    """Fetch daily data covering a polygon area, and calculatee the zonal mean of the area.
+    Calculate requested stat for given variable coverages and year range."""
 
-    # TODO: implement area fetching logic
-    data = None
+    area_daily_means_list = await fetch_area_data_and_calculate_zonal_stats(
+        variable, var_coverages, year_ranges, polygon
+    )
+
+    # area_daily_means is a list, where each item corresponds to a coverage/year range combo
+    # and each item is a list of daily means for each day in that range
+    # to get the stat for each year, we need to iterate through each item in area_daily_means_list
+    # and divide each list into chunks of 365 (no leap years) and apply the stat function to the yearly values
+    # we will output a list of lists, where each sublist contains the stat for each year in the corresponding year range
+
+    # if no stat is provided, return all daily means (split by year) for ranking purposes
+
+    data = []
+
+    for i, daily_means in enumerate(area_daily_means_list):
+        num_years_in_range = year_ranges[i][1] - year_ranges[i][0] + 1
+        yearly_stats = []
+        for year_idx in range(num_years_in_range):
+            year_daily_means = daily_means[year_idx * 365 : (year_idx + 1) * 365]
+            if stat == "max":
+                stat_value = round(max(year_daily_means), 2)
+            elif stat == "min":
+                stat_value = round(min(year_daily_means), 2)
+            elif stat == "sum":
+                stat_value = round(sum(year_daily_means), 2)
+            elif stat == "avg":
+                stat_value = round(sum(year_daily_means) / len(year_daily_means), 2)
+            else:
+                stat_value = [round(value, 2) for value in year_daily_means]
+            yearly_stats.append(stat_value)
+        data.append(yearly_stats)
+
     return data
 
 
@@ -447,17 +484,17 @@ def postprocess_annual_stat(data, start_year, end_year, units):
 
     # define conversion functions
     def mm_to_inches(mm):
-        return mm / 25.4
+        return round((mm / 25.4), 2)
 
     def c_to_f(c):
-        return (c * 9 / 5) + 32
+        return round(((c * 9 / 5) + 32), 2)
 
     if units == "in":
         convert = mm_to_inches
     elif units == "F":
         convert = c_to_f
-    else:
-        convert = lambda x: x
+    else:  # round values regardless of units
+        convert = lambda x: round(x, 2)
 
     start_year = int(start_year)
     end_year = int(end_year)
@@ -482,9 +519,9 @@ def postprocess_annual_stat(data, start_year, end_year, units):
         result["historical"] = {
             "data": hist_stats,
             "summary": {
-                "min": min(hist_stats.values()),
-                "max": max(hist_stats.values()),
-                "mean": sum(hist_stats.values()) / len(hist_stats),
+                "min": round(min(hist_stats.values()), 2),
+                "max": round(max(hist_stats.values()), 2),
+                "mean": round(sum(hist_stats.values()) / len(hist_stats), 2),
             },
         }
         current_index += 1
@@ -510,26 +547,14 @@ def postprocess_annual_stat(data, start_year, end_year, units):
             result["projected"][ssp] = {
                 "data": proj_stats,
                 "summary": {
-                    "min": min(proj_stats.values()),
-                    "max": max(proj_stats.values()),
-                    "mean": sum(proj_stats.values()) / len(proj_stats),
+                    "min": round(min(proj_stats.values()), 2),
+                    "max": round(max(proj_stats.values()), 2),
+                    "mean": round(sum(proj_stats.values()) / len(proj_stats), 2),
                 },
             }
             current_index += 1
 
     return result
-
-
-async def fetch_annual_rank_area_data(
-    variable, var_coverages, year_ranges, stat, polygon
-):
-    """Fetch daily data covering a polygon area, and rank values for given variable coverages and year range.
-    # TODO: inspect zonal stats logic here! >>> Compute zonal mean of the ranks over the area.
-    """
-
-    # TODO: implement area fetching logic
-    data = None
-    return data
 
 
 def postprocess_annual_rank(data, start_year, end_year, position, direction):
@@ -562,9 +587,9 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
         result["historical"] = {
             "data": hist_ranks,
             "summary": {
-                "min": min(hist_ranks.values()),
-                "max": max(hist_ranks.values()),
-                "mean": sum(hist_ranks.values()) / len(hist_ranks),
+                "min": round(min(hist_ranks.values()), 2),
+                "max": round(max(hist_ranks.values()), 2),
+                "mean": round(sum(hist_ranks.values()) / len(hist_ranks), 2),
             },
         }
 
@@ -596,9 +621,9 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
             result["projected"][ssp] = {
                 "data": proj_ranks,
                 "summary": {
-                    "min": min(proj_ranks.values()),
-                    "max": max(proj_ranks.values()),
-                    "mean": sum(proj_ranks.values()) / len(proj_ranks),
+                    "min": round(min(proj_ranks.values()), 2),
+                    "max": round(max(proj_ranks.values()), 2),
+                    "mean": round(sum(proj_ranks.values()) / len(proj_ranks), 2),
                 },
             }
             current_index += 1
@@ -849,10 +874,11 @@ def get_annual_rank_area(position, direction, variable, place_id, start_year, en
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
-
     try:
         data = asyncio.run(
-            fetch_annual_rank_area_data(variable, var_coverages, year_ranges, polygon)
+            fetch_annual_stat_area_data(
+                variable, var_coverages, year_ranges, "", polygon
+            )
         )
         result = postprocess_annual_rank(
             data, start_year, end_year, position, direction
