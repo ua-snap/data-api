@@ -62,4 +62,100 @@
   </tbody>
 </table>
 
+
+<h3>Service Endpoints</h3>
+
+<h4>Point Query</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Count annual days above 25C in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/25/C/tasmax/point/64.5/-147.5/2000/2030/"
+          >/dynamic_indicators/count_days/above/25/C/tasmax/point/64.5/-147.5/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days below -40F in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/below/-40/F/tasmin/point/64.5/-147.5/2000/2030/"
+          >/dynamic_indicators/count_days/below/-40/F/tasmin/point/64.5/-147.5/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days above 10mm precipitation in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/10/mm/pr/point/64.5/-147.5/2000/2030/"
+          >/dynamic_indicators/count_days/above/10/mm/pr/point/64.5/-147.5/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+        <td>
+          Get maximum 1-day precipitation in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/pr/mm/point/64.5/-147.5/2000/2030/"
+            >/dynamic_indicators/stat/max/pr/mm/point/64.5/-147.5/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get maximum 1-day temperature in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/tasmax/F/point/64.5/-147.5/2000/2030/"
+            >/dynamic_indicators/stat/max/tasmax/F/point/64.5/-147.5/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get 6th coldest day in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/rank/6/lowest/tasmin/point/64.5/-147.5/2000/2030/"
+            >/dynamic_indicators/rank/6/lowest/tasmin/64.5/-147.5/2000/2030/</a
+          >
+        </td>
+      </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Ranking queries will return values in metric units (<code>C</code> 
+        for <code>tasmin</code> and <code>tasmax</code>, <code>mm</code> for <code>pr</code>).
+        <br />
+        <!-- CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br /> -->
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+
+
 {% endblock %}
