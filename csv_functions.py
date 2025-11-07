@@ -56,6 +56,8 @@ def create_csv(
 
     if endpoint == "beetles":
         properties = beetles_csv(data)
+    elif endpoint == "cmip6_downscaled":
+        properties = cmip6_downscaled_csv(data, vars)
     elif endpoint == "cmip6_indicators":
         properties = cmip6_indicators_csv(data)
     elif endpoint == "cmip6_monthly":
@@ -110,6 +112,8 @@ def create_csv(
         properties = demographics_csv(data)
     elif endpoint == "era5wrf_4km":
         properties = era5wrf_csv(data)
+    elif endpoint == "fire_weather":
+        properties = fire_weather_csv(data, filename_prefix, vars)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -363,6 +367,58 @@ def beetles_csv(data):
 
     filename_data_name = "Climate Protection from Spruce Beetles"
     metadata = "# Values shown are for climate-related protection level from spruce beetle spread in the area.\n"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
+    }
+
+
+def cmip6_downscaled_csv(data, vars=None):
+    metadata_variables = {
+        "pr": "# pr is the daily precipitation in mm.\n",
+        "tasmax": "# tasmax is the maximum daily temperature in deg C.\n",
+        "tasmin": "# tasmin is the minimum daily temperature in deg C.\n",
+    }
+
+    coords = ["model", "scenario", "date"]
+
+    if vars is not None:
+        values = vars
+    else:
+        values = list(metadata_variables.keys())
+
+    fieldnames = coords + values
+    csv_dicts = build_csv_dicts(data, fieldnames, values=values)
+
+    metadata = ""
+    for variable in values:
+        metadata += metadata_variables[variable]
+
+    # This dictionary contains the variable pairs that would append to the file name if selected.
+    # This is most likely to happen when the user is downloading the CSV from ARDAC.
+    cmip6_variable_groups = {
+        "Temperature": {"tasmin", "tasmax"},
+        "Precipitation": {"pr"},
+    }
+
+    cmip6_variable_name = None
+
+    # This checks if the variables going into the CSV are a part of the CMIP6 variable groups.
+    # The set of variables must match the required variables exactly or else the default name is used.
+    for name, required_vars in cmip6_variable_groups.items():
+        if required_vars == set(vars):
+            cmip6_variable_name = name
+            break
+
+    # File name is "Downscaled CMIP6 Daily" by default.
+    filename_data_name = (
+        f"Downscaled CMIP6 Daily {cmip6_variable_name}"
+        if cmip6_variable_name
+        else "Downscaled CMIP6 Daily"
+    )
 
     return {
         "csv_dicts": csv_dicts,
@@ -1191,4 +1247,63 @@ def demographics_csv(data):
         "fieldnames": fieldnames,
         "metadata": metadata,
         "filename_data_name": filename_data_name,
+    }
+
+
+def fire_weather_csv(data, filename_prefix, vars):
+
+    # filename_prefix denotes operation ("3dayrollingavg", "summer_fire_danger_rating_days", etc.) to aid in packaging CSV
+
+    # data structure:
+    # first level of data is string defining the date range ("1990-2000", etc.), next level is variable, then model
+    # if n-day avg operations, we then have date (DOY like "04-01"), then dict of min/mean/max stat values for each date
+    # if summary of fire danger ratings operations, we then have a dict of rating categories & their values
+
+    csv_dicts = []
+    for time_period in sorted(data.keys()):
+        row = {"period": time_period}
+        for variable in data[time_period].keys():
+            row["variable"] = variable
+            for model in data[time_period][variable].keys():
+                row["model"] = model
+                # test if "rolling" is part of the filename_prefix to determine data structure
+                if "Rolling" in filename_prefix:
+                    for date in data[time_period][variable][model].keys():
+                        row["date"] = date
+                        row.update(data[time_period][variable][model][date])
+                        for stat in ["min", "mean", "max"]:
+                            row[stat] = data[time_period][variable][model][date][stat]
+                        csv_dicts.append(copy.deepcopy(row))
+                else:  # op is "summer_fire_danger_rating_days"
+                    row.update(data[time_period][variable][model])
+                    csv_dicts.append(copy.deepcopy(row))
+
+    fieldnames = ["period", "variable", "model"]
+    if "Rolling" in filename_prefix:
+        fieldnames = fieldnames + ["date", "min", "mean", "max"]
+    else:
+        fieldnames = fieldnames + sorted(data[time_period][variable][model].keys())
+
+    filename = ""
+    metadata_variables = {
+        "bui": "Build Up Index",
+        "dc": "Drought Code",
+        "dmc": "Duff Moisture Code",
+        "ffmc": "Fine Fuel Moisture Code",
+        "fwi": "Fire Weather Index",
+        "isi": "Initial Spread Index",
+    }
+
+    metadata = "# CMIP6 Fire Weather Indices\n"
+    metadata += "# Variables:\n"
+    for var, description in metadata_variables.items():
+        if var in vars:
+            metadata += f"# {var}: {description}\n"
+    metadata += "#\n"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename,
     }

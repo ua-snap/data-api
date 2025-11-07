@@ -4,8 +4,14 @@ import sys
 from flask import Flask, render_template, send_from_directory
 from flask_cors import CORS
 from config import SITE_OFFLINE, geojson_names
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validate, ValidationError
 import re
+
+from luts import (
+    fire_weather_ops,
+    all_cmip6_downscaled_models,
+    all_cmip6_downscaled_scenarios,
+)
 
 from routes import routes, request
 
@@ -31,6 +37,7 @@ def get_service_categories():
     """
     return [
         ("CMIP6", "/cmip6"),
+        ("CMIP6, Downscaled", "/cmip6_downscaled"),
         ("Climate Indicators", "/indicators"),
         ("Climate Indicators, Dynamic", "/dynamic_indicators"),
         ("Climate Protection from Spruce Beetles", "/beetles"),
@@ -50,6 +57,7 @@ def get_service_categories():
         ("Wildfire", "/fire"),
         ("WRF Dynamically Downscaled ERA5 Reanalysis", "/era5wrf"),
         ("Demographics", "/demographics"),
+        ("CMIP6 Fire Weather Indices", "/fire_weather"),
     ]
 
 
@@ -88,14 +96,6 @@ def validate_get_params():
             required=False,
         )
 
-        # Make sure "vars" parameter is only letters and commas, and less than
-        # or equal to 100 characters long.
-        vars = fields.Str(
-            validate=lambda str: bool(re.match(r"^[A-Za-z,]{0,100}$", str))
-            and len(str) < 100,
-            required=False,
-        )
-
         # Make sure "tags" parameter is only letters and commas, and less than
         # or equal to 50 characters long.
         tags = fields.Str(
@@ -124,6 +124,45 @@ def validate_get_params():
         # Make sure "units" parameter is "in", "mm", "F", or "C"
         units = fields.Str(
             validate=lambda str: str in ["in", "mm", "F", "C"],
+        # Make sure "vars" parameter is only letters and commas, and less than
+        # or equal to 100 characters long.
+        def validate_vars(value):
+            if re.match(r"^[A-Za-z,]{0,100}$", value) == None:
+                raise ValidationError("Invalid var(s) provided.")
+            return True
+
+        vars = fields.Str(
+            validate=validate_vars,
+            required=False,
+        )
+
+        # Make sure "models" parameter contains only valid model names.
+        def validate_models(value):
+            items = value.split(",")
+            if not all(item in all_cmip6_downscaled_models for item in items):
+                raise ValidationError("Invalid model(s) provided.")
+            return True
+
+        models = fields.Str(
+            validate=validate_models,
+            required=False,
+        )
+
+        # Make sure "scenarios" parameter contains only valid scenario names.
+        def validate_scenarios(value):
+            items = value.split(",")
+            if not all(item in all_cmip6_downscaled_scenarios for item in items):
+                raise ValidationError("Invalid scenario(s) provided.")
+            return True
+
+        scenarios = fields.Str(
+            validate=validate_scenarios,
+            required=False,
+        )
+
+        # Make sure "op" parameter is one of the predefined fire weather operations
+        op = fields.Str(
+            validate=validate.OneOf(fire_weather_ops),
             required=False,
         )
 
