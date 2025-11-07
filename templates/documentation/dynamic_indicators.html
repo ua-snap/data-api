@@ -137,7 +137,7 @@
         <td>
           <a
             href="/dynamic_indicators/rank/6/lowest/tasmin/point/64.5/-147.5/2000/2030/"
-            >/dynamic_indicators/rank/6/lowest/tasmin/64.5/-147.5/2000/2030/</a
+            >/dynamic_indicators/rank/6/lowest/tasmin/point/64.5/-147.5/2000/2030/</a
           >
         </td>
       </tr>
@@ -339,7 +339,114 @@
         },
     ...
 }
+</code></pre>
 
+
+<h4>Area Query</h4>
+
+<p>
+    Area queries return zonal statistics aggregated over a specified
+    polygon area. Indicators are values represent the spatially-weighted average of all 4km &#215; 4km grid
+    cells within the polygon boundary.
+    Learn more about what <a href="/places">types of places</a> are available for area queries.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Count annual days above 25C in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/25/C/tasmax/area/1908030609/2000/2030/"
+          >/dynamic_indicators/count_days/above/25/C/tasmax/area/1908030609/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days below -40F in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/below/-40/F/tasmin/area/1908030609/2000/2030/"
+          >/dynamic_indicators/count_days/below/-40/F/tasmin/area/1908030609/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days above 10mm precipitation in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/10/mm/pr/area/1908030609/2000/2030/"
+          >/dynamic_indicators/count_days/above/10/mm/pr/area/1908030609/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+        <td>
+          Get maximum 1-day precipitation in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/pr/mm/area/1908030609/2000/2030/"
+            >/dynamic_indicators/stat/max/pr/mm/area/1908030609/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get maximum 1-day temperature in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/tasmax/F/area/1908030609/2000/2030/"
+            >/dynamic_indicators/stat/max/tasmax/F/area/1908030609/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get 6th coldest day in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/rank/6/lowest/tasmin/area/1908030609/2000/2030/"
+            >/dynamic_indicators/rank/6/lowest/tasmin/area/1908030609/2000/2030/</a
+          >
+        </td>
+      </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Ranking queries will return values in metric units (<code>C</code> 
+        for <code>tasmin</code> and <code>tasmax</code>, <code>mm</code> for <code>pr</code>).
+        <br />
+        <!-- CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br /> -->
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Area Query Output</h4>
+
+<p>
+  Area queries return the same JSON structure as point queries, but values
+  represent spatial averages rather than point measurements. Raw values are
+  averaged over the specified polygon area before applying the indicator calculation.
+</p>
 
 
 {% endblock %}
