@@ -124,6 +124,9 @@ def validate_get_params():
         # Make sure "units" parameter is "in", "mm", "F", or "C"
         units = fields.Str(
             validate=lambda str: str in ["in", "mm", "F", "C"],
+            required=False,
+        )
+        
         # Make sure "vars" parameter is only letters and commas, and less than
         # or equal to 100 characters long.
         def validate_vars(value):
