@@ -390,7 +390,6 @@ def postprocess_count_days(data, start_year, end_year):
         and end_year > time_domains["projected"][0]
     ):
         # projected data present
-        result["projected"] = {}
         ssp_names = ["ssp126", "ssp245", "ssp370", "ssp585"]
         proj_years = list(
             range(
@@ -403,7 +402,7 @@ def postprocess_count_days(data, start_year, end_year):
             proj_day_counts = {
                 str(year): proj_data[i] for i, year in enumerate(proj_years)
             }
-            result["projected"][ssp] = {
+            result[ssp] = {
                 "data": proj_day_counts,
                 "summary": {
                     "min": round(min(proj_day_counts.values()), 2),
@@ -531,7 +530,6 @@ def postprocess_annual_stat(data, start_year, end_year, units):
         and end_year > time_domains["projected"][0]
     ):
         # projected data present
-        result["projected"] = {}
         ssp_names = ["ssp126", "ssp245", "ssp370", "ssp585"]
         proj_years = list(
             range(
@@ -544,7 +542,7 @@ def postprocess_annual_stat(data, start_year, end_year, units):
             proj_stats = {
                 str(year): convert(proj_data[i]) for i, year in enumerate(proj_years)
             }
-            result["projected"][ssp] = {
+            result[ssp] = {
                 "data": proj_stats,
                 "summary": {
                     "min": round(min(proj_stats.values()), 2),
@@ -600,7 +598,6 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
         and end_year > time_domains["projected"][0]
     ):
         # projected data present
-        result["projected"] = {}
         ssp_names = ["ssp126", "ssp245", "ssp370", "ssp585"]
         proj_years = list(
             range(
@@ -618,7 +615,7 @@ def postprocess_annual_rank(data, start_year, end_year, position, direction):
                 else:
                     rank_value = sorted_values[position - 1]
                 proj_ranks[str(year)] = round(rank_value, 2)
-            result["projected"][ssp] = {
+            result[ssp] = {
                 "data": proj_ranks,
                 "summary": {
                     "min": round(min(proj_ranks.values()), 2),
