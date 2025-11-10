@@ -1,0 +1,81 @@
+{% extends 'base.html' %} {% block content %}
+<h2>TTY</h2>
+
+<p>
+  These endpoints provide access to TTY data derived from historical reanalysis.</p>
+
+<p>Links to academic references and a source dataset are included at the bottom of this page.</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Point query</h4>
+
+<p>Query TTY.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Historical TTY</td>
+      <td><a
+          href="/tmy/point/55.6/-164.5">/tmy/point/55.6/-164.5</a>
+      </td>
+    </tr>
+    
+<h3>Output</h3>
+
+<p>Results from TTY queries will look like this:</p>
+
+<pre>
+{
+  "historical": {
+    "wdpymax": 160,
+    "wdpymean": 134,
+    "wdpymin": 112
+  },
+  ...
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  &lt;era&gt;: {
+    "wdpymax": &lt;max number of wet days per year across all models and years used for the summary era time period&gt;,
+    "wdpymean": &lt;number of wet days per year across all models and years used for the summary era time period&gt;,
+    "wdpymin": &lt;number of wet days per year across all models and years used for the summary era time period&gt;
+  },
+  ...
+}
+</pre>
+
+
+<h3>Source data</h3>
+<table>
+  <thead>
+    <tr>
+      <th style="min-width: 30%">Metadata & source data access</th>
+      <th>Academic references</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><a
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/8b51ce8c-7fd9-4541-9736-990c0a008005">Wet
+          Days Per Year</a></td>
+      <td>
+        <p>Bieniek P.A., Bhatt U.S, Walsh J.E., Rupp T.S., Zhang J., Krieger J.R., & Lader R (2016).  Dynamical Downscaling of ERA-Interim Temperature and Precipitation for Alaska, <i>Journal of Applied Meterology and Climatology 55</i>(3) 635&ndash;654; <a href="https://doi.org/10.1175/JAMC-D-15-0153.1">https://doi.org/10.1175/JAMC-D-15-0153.1</a></p>
+        <p>Lader R., Walsh J.E., Bhatt U.S. & Bieniek P.A. (2017) Projections of Twenty-First-Century Climate Extremes for Alaska via Dynamical Downscaling and Quantile Mapping <i>Journal of Applied Meterology and Climatology 56</i>(9) 2393&ndash;2409; <a href="https://doi.org/10.1175/JAMC-D-16-0415.1">https://doi.org/10.1175/JAMC-D-16-0415.1</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}
