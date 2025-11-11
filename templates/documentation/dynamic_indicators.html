@@ -4,7 +4,7 @@
 <p>
     This endpoint provides access to dynamically generated indicators derived from
     a 6-model average of CMIP6 daily data that have been bias-adjusted and downscaled
-    using dynamically downscaled ERA5 reference data. The source dataset spans 
+    using <a href="/era5wrf.html">dynamically downscaled ERA5 reference data</a>. The source dataset spans 
     1965&ndash;2100 at 4km spatial resolution. The spatial domain covers most of Alaska 
     and parts of western Canada. Variables include daily maximum and minimum temperature
      (<code>tasmax</code> and <code>tasmin</code>), as well as daily total precipitation 
@@ -29,8 +29,7 @@
       </td>
       <td>
         Counts number of days per year where values are above or below the provided <code>&lt;value&gt;</code>
-        given in the provided <code>&lt;units&gt;</code>. For area queries, daily values are weighted by spatial 
-        area before applying the threshold.
+        given in the provided <code>&lt;units&gt;</code>.
       </td>
     </tr>
     <tr>
@@ -43,8 +42,7 @@
     </td>
       <td>
         Calculates the specified annual statistic (<code>max</code>, <code>min</code>, <code>mean</code>, or <code>sum</code>)
-        for the provided <code>&lt;value&gt;</code> in the provided <code>&lt;units&gt;</code>. For area queries, daily values 
-        are weighted by spatial area before calculating the statistic.
+        for the provided <code>&lt;value&gt;</code> in the provided <code>&lt;units&gt;</code>.
       </td>
     </tr>
     <tr>
@@ -55,8 +53,7 @@
         </td>
         <td>
           Ranks values in each year and returns the value at the specified <code>&lt;position&gt;</code> 
-          and <code>&lt;direction&gt;</code> (e.g., 5th highest, 2nd lowest). For area queries, daily values
-            are weighted by spatial area before ranking.
+          and <code>&lt;direction&gt;</code> (e.g., 5th highest, 2nd lowest).
         </td>
       </tr>
   </tbody>
@@ -346,7 +343,7 @@
 
 <p>
     Area queries return zonal statistics aggregated over a specified
-    polygon area. Indicators are values represent the spatially-weighted average of all 4km &#215; 4km grid
+    polygon area. Indicators are calculated from mean daily values representing the spatially-weighted average of all 4km &#215; 4km grid
     cells within the polygon boundary.
     Learn more about what <a href="/places">types of places</a> are available for area queries.
 </p>
