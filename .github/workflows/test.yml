@@ -1,0 +1,41 @@
+name: Run Pytest Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Micromamba
+        uses: mamba-org/setup-micromamba@v1
+        with:
+          environment-file: environment.yml
+          environment-name: api-env
+          cache-environment: true
+          cache-downloads: true
+
+      - name: Run tests with pytest
+        run: |
+          mkdir -p test-outputs
+          micromamba run -n api-env pytest tests/ -v --tb=short --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
+        shell: bash -l {0}
+
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-results-${{ github.run_number }}
+          path: test-outputs/
+          retention-days: 10

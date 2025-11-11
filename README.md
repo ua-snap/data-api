@@ -14,7 +14,7 @@ Create a new `mamba` environment like so:
 micromamba env create -f environment.yml
 ```
 
-This creates a Mamba environment called api-env which you can activate:
+This creates a Mamba environment called api-env which you can activate with:
 
 ```
 micromamba activate api-env
