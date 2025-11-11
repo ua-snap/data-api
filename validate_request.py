@@ -565,3 +565,32 @@ def get_coverage_crs_str(coverage_metadata):
         )
 
     return crs.to_string()
+
+
+def validate_operator(operator):
+    """Validate operator is 'above' or 'below' and convert to '>' or '<'"""
+    if operator not in ["above", "below"]:
+        return render_template("400/bad_request.html"), 400
+    if operator == "above":
+        operator = ">"
+    else:
+        operator = "<"
+    return operator
+
+
+def validate_rank_position(position):
+    """Validate rank position. Position must be between 1 and 365."""
+    try:
+        position = int(position)
+        if position < 1 or position > 365:
+            raise ValueError
+    except ValueError:
+        return render_template("400/bad_request.html"), 400
+    return position
+
+
+def validate_rank_direction(direction):
+    """Validate rank direction. Direction must be 'highest' or 'lowest'."""
+    if direction not in ["highest", "lowest"]:
+        return render_template("400/bad_request.html"), 400
+    return direction

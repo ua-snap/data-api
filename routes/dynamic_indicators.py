@@ -17,6 +17,9 @@ from validate_request import (
     validate_latlon_in_bboxes,
     construct_latlon_bbox_from_coverage_bounds,
     validate_var_id,
+    validate_operator,
+    validate_rank_position,
+    validate_rank_direction,
 )
 from zonal_stats import (
     get_scale_factor,
@@ -112,17 +115,6 @@ def validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable):
     return lon, lat
 
 
-def validate_operator(operator):
-    """Validate operator is 'above' or 'below' and convert to '>' or '<'"""
-    if operator not in ["above", "below"]:
-        return render_template("400/bad_request.html"), 400
-    if operator == "above":
-        operator = ">"
-    else:
-        operator = "<"
-    return operator
-
-
 def validate_units_threshold_and_variable(units, threshold, variable):
     """Validate units and threshold based on variable type. Convert threshold to standard units if needed."""
     if variable in ["tasmax", "tasmin"]:
@@ -158,19 +150,6 @@ def validate_stat(stat):
     if stat == "mean":
         stat = "avg"  # NOTE: rasdaman uses 'avg' instead of 'mean' in WCPS queries
     return stat
-
-
-def validate_rank_position_and_direction(position, direction):
-    """Validate rank position and direction. Position must be between 1 and 365, and direction must be 'highest' or 'lowest'."""
-    try:
-        position = int(position)
-        if position < 1 or position > 365:
-            raise ValueError
-    except ValueError:
-        return render_template("400/bad_request.html"), 400
-    if direction not in ["highest", "lowest"]:
-        return render_template("400/bad_request.html"), 400
-    return position, direction
 
 
 def validate_place_id(place_id):
@@ -735,7 +714,8 @@ def get_annual_rank_point(
     if variable not in ["tasmax", "tasmin", "pr"]:
         return render_template("400/bad_request.html"), 400
     try:
-        position, direction = validate_rank_position_and_direction(position, direction)
+        position = validate_rank_position(position)
+        direction = validate_rank_direction(direction)
         lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable)
         validate_year(start_year, end_year)
     except:
@@ -866,7 +846,8 @@ def get_annual_rank_area(position, direction, variable, place_id, start_year, en
     if variable not in ["tasmax", "tasmin", "pr"]:
         return render_template("400/bad_request.html"), 400
     try:
-        position, direction = validate_rank_position_and_direction(position, direction)
+        position = validate_rank_position(position)
+        direction = validate_rank_direction(direction)
         validate_year(start_year, end_year)
         polygon = validate_place_id(place_id)
     except:
