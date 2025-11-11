@@ -238,8 +238,6 @@ def construct_get_annual_mmm_stat_wcps_query_string(
         )
     )
 
-    print(query_string)
-
     return query_string
 
 
