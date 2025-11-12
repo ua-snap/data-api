@@ -571,11 +571,7 @@ def validate_operator(operator):
     """Validate operator is 'above' or 'below' and convert to '>' or '<'"""
     if operator not in ["above", "below"]:
         return render_template("400/bad_request.html"), 400
-    if operator == "above":
-        operator = ">"
-    else:
-        operator = "<"
-    return operator
+    return True
 
 
 def validate_rank_position(position):
@@ -586,11 +582,43 @@ def validate_rank_position(position):
             raise ValueError
     except ValueError:
         return render_template("400/bad_request.html"), 400
-    return position
+    return True
 
 
 def validate_rank_direction(direction):
     """Validate rank direction. Direction must be 'highest' or 'lowest'."""
     if direction not in ["highest", "lowest"]:
         return render_template("400/bad_request.html"), 400
-    return direction
+    return True
+
+
+def validate_stat(stat):
+    """Validate that stat is one of 'max', 'min', 'mean', or 'sum'."""
+    if stat not in ["max", "min", "mean", "sum"]:
+        return render_template("400/bad_request.html"), 400
+    if stat == "mean":
+        stat = "avg"  # NOTE: rasdaman uses 'avg' instead of 'mean' in WCPS queries
+    return stat
+
+
+def validate_units_threshold_and_variable(units, threshold, variable):
+    """Validate units and threshold based on variable type."""
+    if units not in ["C", "F", "mm", "in"]:
+        return render_template("400/bad_request.html"), 400
+    if threshold is not None:
+        try:
+            threshold = float(threshold)
+        except ValueError:
+            return render_template("400/bad_request.html"), 400
+    if variable not in ["tasmax", "tasmin", "pr"]:
+        return render_template("400/bad_request.html"), 400
+    if variable in ["tasmax", "tasmin"]:
+        if units not in ["C", "F"]:
+            return render_template("400/bad_request.html"), 400
+    if variable == "pr":
+        if units not in ["mm", "in"]:
+            return render_template("400/bad_request.html"), 400
+    # precipitation thresholds should be >= 0
+    if variable == "pr" and threshold is not None and threshold < 0:
+        return render_template("400/bad_request.html"), 400
+    return True

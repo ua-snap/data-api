@@ -20,6 +20,8 @@ from validate_request import (
     validate_operator,
     validate_rank_position,
     validate_rank_direction,
+    validate_stat,
+    validate_units_threshold_and_variable,
 )
 from zonal_stats import (
     get_scale_factor,
@@ -80,12 +82,8 @@ async def get_cmip6_metadata(cov_id):
     return metadata
 
 
-def validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable):
+def validate_latlon_in_coverage_bounds(lat, lon, variable):
     """Validate lat/lon, then reproject to EPSG:3338"""
-    lat = float(lat)
-    lon = float(lon)
-    if not latlon_is_numeric_and_in_geodetic_range(lat, lon):
-        return render_template("400/bad_request.html"), 400
 
     var_coverages = all_coverages.get(variable)
 
@@ -109,58 +107,27 @@ def validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable):
                 ),
                 422,
             )
-
-    lon, lat = project_latlon(lat, lon, dst_crs=3338)
-
-    return lon, lat
+    return True
 
 
-def validate_units_threshold_and_variable(units, threshold, variable):
-    """Validate units and threshold based on variable type. Convert threshold to standard units if needed."""
-    if variable in ["tasmax", "tasmin"]:
-        if units not in ["C", "F"]:
-            raise ValueError("Units for temperature must be 'C' or 'F'.")
-        if threshold is not None:
-            if units == "F":
-                threshold = (float(threshold) - 32) * 5.0 / 9.0
-            else:
-                threshold = float(threshold)
-    elif variable == "pr":
-        if units not in ["mm", "in"]:
-            return render_template("400/bad_request.html"), 400
-        if threshold is not None:
-            if units == "in":
-                threshold = float(threshold) * 25.4
-            else:
-                threshold = float(threshold)
+def convert_threshold(units, threshold):
+    """Convert threshold based on units."""
+    if units == "F":
+        threshold = (float(threshold) - 32) * 5.0 / 9.0
+    if units == "in":
+        threshold = float(threshold) * 25.4
+    if units in ["C", "mm"]:
+        threshold = float(threshold)
+    return threshold
+
+
+def convert_operator(operator):
+    """Convert operator from 'above' or 'below' to '>' or '<'"""
+    if operator == "above":
+        operator = ">"
     else:
-        return render_template("400/bad_request.html"), 400
-
-    # precipitation thresholds should be >= 0
-    if variable == "pr" and threshold is not None and threshold < 0:
-        return render_template("400/bad_request.html"), 400
-
-    return units, threshold
-
-
-def validate_stat(stat):
-    """Validate that stat is one of 'max', 'min', 'mean', or 'sum'."""
-    if stat not in ["max", "min", "mean", "sum"]:
-        return render_template("400/bad_request.html"), 400
-    if stat == "mean":
-        stat = "avg"  # NOTE: rasdaman uses 'avg' instead of 'mean' in WCPS queries
-    return stat
-
-
-def validate_place_id(place_id):
-    poly_type = validate_var_id(place_id)
-    if type(poly_type) is tuple:
-        return poly_type
-    try:
-        polygon = get_poly(place_id)
-    except:
-        return render_template("422/invalid_area.html"), 422
-    return polygon
+        operator = "<"
+    return operator
 
 
 def build_year_and_coverage_lists_for_iteration(
@@ -336,10 +303,6 @@ def postprocess_count_days(data, start_year, end_year):
         }
     }
     """
-
-    start_year = int(start_year)
-    end_year = int(end_year)
-
     result = {}
     current_index = 0
     if (
@@ -474,8 +437,6 @@ def postprocess_annual_stat(data, start_year, end_year, units):
     else:  # round values regardless of units
         convert = lambda x: round(x, 2)
 
-    start_year = int(start_year)
-    end_year = int(end_year)
     result = {}
     current_index = 0
 
@@ -536,8 +497,6 @@ def postprocess_annual_stat(data, start_year, end_year, units):
 
 def postprocess_annual_rank(data, start_year, end_year, position, direction):
     """Postprocess annual rank data into structured dictionary output."""
-    start_year = int(start_year)
-    end_year = int(end_year)
     result = {}
     current_index = 0
 
@@ -629,29 +588,42 @@ def count_days_point(
     - http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/point/64.5/-147.5/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
     - http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/point/64.5/-147.5/2000/2030/  ->>> can recreate the "wet days" indicator
     """
-    # Validate request params
-    try:
-        operator = validate_operator(operator)
-        units, threshold = validate_units_threshold_and_variable(
-            units=units, threshold=threshold, variable=variable
-        )
-        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable)
-        validate_year(start_year, end_year)
-    except:
+    # validations
+    year_validation = validate_year(start_year, end_year)
+    latlon_validation = latlon_is_numeric_and_in_geodetic_range(float(lat), float(lon))
+    if latlon_validation == 400 or year_validation == 400:
         return render_template("400/bad_request.html"), 400
+    bound_validation = validate_latlon_in_coverage_bounds(
+        float(lat), float(lon), variable
+    )
+    if bound_validation is not True:
+        return bound_validation
+
+    op_validation = validate_operator(operator)
+    if op_validation is not True:
+        return op_validation
+    utv_validation = validate_units_threshold_and_variable(units, threshold, variable)
+    if utv_validation is not True:
+        return utv_validation
+
+    # conversions
+    lon, lat = project_latlon(float(lat), float(lon), dst_crs=3338)
+    operator = convert_operator(operator)
+    threshold = convert_threshold(units, threshold)
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
+    # fetch and postprocess data
     try:
         data = asyncio.run(
             fetch_count_days_data(
                 var_coverages, year_ranges, threshold, operator, lon, lat
             )
         )
-        result = postprocess_count_days(data, start_year, end_year)
+        result = postprocess_count_days(data, int(start_year), int(end_year))
         return result
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
@@ -671,27 +643,40 @@ def get_annual_stat_point(stat, variable, units, lat, lon, start_year, end_year)
     - http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/point/64.5/-147.5/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
     - http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/point/64.5/-147.5/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
     """
-    # Validate request params
-    try:
-        stat = validate_stat(stat)
-        units, _threshold = validate_units_threshold_and_variable(
-            units=units, threshold=None, variable=variable
-        )
-        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable)
-        validate_year(start_year, end_year)
-    except:
+    # validations
+    year_validation = validate_year(start_year, end_year)
+    latlon_validation = latlon_is_numeric_and_in_geodetic_range(float(lat), float(lon))
+    if latlon_validation == 400 or year_validation == 400:
         return render_template("400/bad_request.html"), 400
+    bound_validation = validate_latlon_in_coverage_bounds(
+        float(lat), float(lon), variable
+    )
+    if bound_validation is not True:
+        return bound_validation
+
+    utv_validation = validate_units_threshold_and_variable(
+        units=units, threshold=None, variable=variable
+    )
+    if utv_validation is not True:
+        return utv_validation
+    stat = validate_stat(stat)
+    if type(stat) is tuple:
+        return stat
+
+    # conversions
+    lon, lat = project_latlon(float(lat), float(lon), dst_crs=3338)
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
+    # fetch and postprocess data
     try:
         data = asyncio.run(
             fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
         )
-        result = postprocess_annual_stat(data, start_year, end_year, units)
+        result = postprocess_annual_stat(data, int(start_year), int(end_year), units)
         return result
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
@@ -710,29 +695,41 @@ def get_annual_rank_point(
     - http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/point/64.5/-147.5/2000/2030/  ->>> can recreate "hot day threshold" indicator
     - http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/point/64.5/-147.5/2000/2030/  ->>> can recreate "cold day threshold" indicators
     """
-    # Validate request params
+    # validations
     if variable not in ["tasmax", "tasmin", "pr"]:
         return render_template("400/bad_request.html"), 400
-    try:
-        position = validate_rank_position(position)
-        direction = validate_rank_direction(direction)
-        lon, lat = validate_latlon_and_reproject_to_epsg_3338(lat, lon, variable)
-        validate_year(start_year, end_year)
-    except:
+    year_validation = validate_year(start_year, end_year)
+    latlon_validation = latlon_is_numeric_and_in_geodetic_range(float(lat), float(lon))
+    if latlon_validation == 400 or year_validation == 400:
         return render_template("400/bad_request.html"), 400
+    bound_validation = validate_latlon_in_coverage_bounds(
+        float(lat), float(lon), variable
+    )
+    if bound_validation is not True:
+        return bound_validation
+    position_validation = validate_rank_position(position)
+    if position_validation is not True:
+        return position_validation
+    direction_validation = validate_rank_direction(direction)
+    if direction_validation is not True:
+        return direction_validation
+
+    # conversions
+    lon, lat = project_latlon(float(lat), float(lon), dst_crs=3338)
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
+    # fetch and postprocess data
     stat = ""  # NOTE: omitting stat will force a return of all values, which we need for ranking
     try:
         data = asyncio.run(
             fetch_annual_stat_data(var_coverages, year_ranges, stat, lon, lat)
         )
         result = postprocess_annual_rank(
-            data, start_year, end_year, position, direction
+            data, int(start_year), int(end_year), int(position), direction
         )
         return result
     except Exception as exc:
@@ -758,32 +755,40 @@ def count_days_area(
     - http://127.0.0.1:5000/dynamic_indicators/count_days/above/10/mm/pr/area/1908030609/2000/2030/  ->>> can recreate the "days above 10mm precip" indicator
     - http://127.0.0.1:5000/dynamic_indicators/count_days/above/1/mm/pr/area/1908030609/2000/2030/  ->>> can recreate the "wet days" indicator
     """
-    # Validate request params
-    try:
-        operator = validate_operator(operator)
-        units, threshold = validate_units_threshold_and_variable(
-            units=units, threshold=threshold, variable=variable
-        )
-        validate_year(start_year, end_year)
-        polygon = validate_place_id(place_id)
-    except:
+    # validations
+    poly_type = validate_var_id(place_id)
+    if type(poly_type) is tuple:
+        return poly_type
+    else:
+        polygon = get_poly(place_id)
+    year_validation = validate_year(start_year, end_year)
+    if year_validation == 400:
         return render_template("400/bad_request.html"), 400
+
+    op_validation = validate_operator(operator)
+    if op_validation is not True:
+        return op_validation
+    utv_validation = validate_units_threshold_and_variable(units, threshold, variable)
+    if utv_validation is not True:
+        return utv_validation
+
+    # conversions
+    operator = convert_operator(operator)
+    threshold = convert_threshold(units, threshold)
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
+    # fetch and postprocess data
     try:
         data = asyncio.run(
             fetch_count_days_area_data(
                 variable, var_coverages, year_ranges, threshold, operator, polygon
             )
         )
-
-        print(data)
-
-        result = postprocess_count_days(data, start_year, end_year)
+        result = postprocess_count_days(data, int(start_year), int(end_year))
         return result
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
@@ -803,29 +808,36 @@ def get_annual_stat_area(stat, variable, units, place_id, start_year, end_year):
     - http://127.0.0.1:5000/dynamic_indicators/stat/sum/pr/mm/area/1908030609/2000/2030/  ->>> total annual precipitation (NOTE: summary section of return will show mean annual precip over the year range)
     - http://127.0.0.1:5000/dynamic_indicators/stat/mean/pr/mm/area/1908030609/2000/2030/  ->>> mean daily precipitation (NOTE: this is not a common mean statistic for precip - avg amount of precip per day over the year)
     """
-    # Validate request params
-    try:
-        stat = validate_stat(stat)
-        units, _threshold = validate_units_threshold_and_variable(
-            units=units, threshold=None, variable=variable
-        )
-        validate_year(start_year, end_year)
-        polygon = validate_place_id(place_id)
-    except:
+    # validations
+    poly_type = validate_var_id(place_id)
+    if type(poly_type) is tuple:
+        return poly_type
+    else:
+        polygon = get_poly(place_id)
+    year_validation = validate_year(start_year, end_year)
+    if year_validation == 400:
         return render_template("400/bad_request.html"), 400
+
+    utv_validation = validate_units_threshold_and_variable(
+        units, threshold=None, variable=variable
+    )
+    if utv_validation is not True:
+        return utv_validation
+    stat = validate_stat(stat)
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
+    # fetch and postprocess data
     try:
         data = asyncio.run(
             fetch_annual_stat_area_data(
                 variable, var_coverages, year_ranges, stat, polygon
             )
         )
-        result = postprocess_annual_stat(data, start_year, end_year, units)
+        result = postprocess_annual_stat(data, int(start_year), int(end_year), units)
         return result
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
@@ -842,24 +854,31 @@ def get_annual_rank_area(position, direction, variable, place_id, start_year, en
     - http://127.0.0.1:5000/dynamic_indicators/rank/6/highest/tasmax/area/1908030609/2000/2030/  ->>> can recreate "hot day threshold" indicator
     - http://127.0.0.1:5000/dynamic_indicators/rank/6/lowest/tasmin/area/1908030609/2000/2030/  ->>> can recreate "cold day threshold" indicators
     """
-    # Validate request params
+    # validations
     if variable not in ["tasmax", "tasmin", "pr"]:
         return render_template("400/bad_request.html"), 400
-    try:
-        position = validate_rank_position(position)
-        direction = validate_rank_direction(direction)
-        validate_year(start_year, end_year)
-        polygon = validate_place_id(place_id)
-    except:
+    poly_type = validate_var_id(place_id)
+    if type(poly_type) is tuple:
+        return poly_type
+    else:
+        polygon = get_poly(place_id)
+    year_validation = validate_year(start_year, end_year)
+    if year_validation == 400:
         return render_template("400/bad_request.html"), 400
+    position_validation = validate_rank_position(position)
+    if position_validation is not True:
+        return position_validation
+    direction_validation = validate_rank_direction(direction)
+    if direction_validation is not True:
+        return direction_validation
 
     # build lists for iteration
     year_ranges, var_coverages = build_year_and_coverage_lists_for_iteration(
         int(start_year), int(end_year), variable, time_domains, all_coverages
     )
 
-    # stat is empty to force return of all values for ranking
-    stat = ""
+    # fetch and postprocess data
+    stat = ""  # NOTE: omitting stat will force a return of all values, which we need for ranking
     try:
         data = asyncio.run(
             fetch_annual_stat_area_data(
@@ -867,7 +886,7 @@ def get_annual_rank_area(position, direction, variable, place_id, start_year, en
             )
         )
         result = postprocess_annual_rank(
-            data, start_year, end_year, position, direction
+            data, int(start_year), int(end_year), int(position), direction
         )
         return result
     except Exception as exc:
