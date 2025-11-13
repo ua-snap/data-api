@@ -114,10 +114,27 @@ def validate_get_params():
             required=False,
         )
 
-        # Make sure "vars" parameter is only letters and commas, and less than
-        # or equal to 100 characters long.
         def validate_vars(value):
-            if re.match(r"^[A-Za-z,]{0,100}$", value) == None:
+            """
+            Validate a comma-separated list of variable names.
+
+            The regex is constructed such that it validates that the input string:
+                - Is between 1 and 200 characters long.
+                - Each variable name is alphanumeric, and may include underscores
+
+            Args:
+                value (str): raw `vars` query parameter to validate
+
+            Returns:
+                bool: True if validation succeeds.
+
+            Raises: ValidationError: when `value` not a valid vars string
+            """
+            # 200 is arbitrary, but endpoints (e.g., era5wrf) have many vars
+            climate_var_regex = re.compile(
+                r"^(?=.{1,200}$)[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+)*$"
+            )
+            if not climate_var_regex.match(value):
                 raise ValidationError("Invalid var(s) provided.")
             return True
 
