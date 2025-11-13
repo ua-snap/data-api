@@ -19,7 +19,7 @@ from generate_urls import generate_wfs_conus_hydrology_url
 from config import RAS_BASE_URL
 from . import routes
 
-cov_id = "conus_hydro_segments_crstephenson"
+cov_id = "conus_hydro_segments_jp"
 # TODO: change to "Rasdaman Encoding" to disambiguate from the encoding attribute in the netCDF file
 encoding_attr = "Encoding"
 
