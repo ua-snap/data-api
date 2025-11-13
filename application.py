@@ -132,7 +132,7 @@ def validate_get_params():
             """
             # 200 is arbitrary, but endpoints (e.g., era5wrf) have many vars
             climate_var_regex = re.compile(
-                r"^(?=.{1,200}$)[A-Za-z0-9_]+(?:,[A-Za-z0-9_]+)*$"
+                r"^(?=.{1,200}$)[A-Za-z0-9,_]+$"
             )
             if not climate_var_regex.match(value):
                 raise ValidationError("Invalid var(s) provided.")
