@@ -142,9 +142,11 @@ def package_cmip6_monthly_data(
                 di[model][scenario][time] = dict()
 
                 # split the space-separated string of values into a list
-                # first check if its a float (occurs if only 1 variable is requested)
-                if isinstance(time_str, float):
+                # first check if its a float, int, or None (occurs if only 1 variable is requested)
+                if isinstance(time_str, float) or isinstance(time_str, int):
                     value_list = [str(time_str)]
+                elif time_str is None:
+                    value_list = [None for _ in vars]
                 else:
                     value_list = time_str.split(" ")
                 for vi, varname in enumerate(vars):
@@ -172,7 +174,7 @@ def package_cmip6_monthly_data(
     # The code below replaces NaNs with -9999 for entire years that have no data.
     # Consider the -9999 value as a flag to indicate that the prune_nulls_with_max_intensity()
     # function should drop the entire scenario / year combo from the response.
-    
+
     # If the scenario is historical and the year is greater than 2014,
     # all NaN values are replaced with -9999 and will be pruned from the response.
     # If the scenario is not historical, and the year is less than 2015,
