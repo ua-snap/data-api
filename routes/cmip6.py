@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 cmip6_api = Blueprint("cmip6_api", __name__)
 
-cmip6_monthly_coverage_id = "cmip6_monthly_cf"
+cmip6_monthly_coverage_id = "cmip6_monthly_cf_wms"
 
 
 async def get_cmip6_metadata():

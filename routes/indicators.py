@@ -58,7 +58,7 @@ var_ep_lu = {
         "crs": None,
     },
     "cmip6_indicators": {
-        "cov_id_str": "cmip6_indicators_cf",
+        "cov_id_str": "cmip6_indicators_cf_wms",
         "dim_encodings": None,  # populated below
         "bandnames": None,  # populated below
         "label": None,
