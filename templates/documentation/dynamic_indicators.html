@@ -1,0 +1,478 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Dynamically Generated Indicators from Downscaled CMIP6</h2>
+
+<p>
+    This endpoint provides access to dynamically generated indicators derived from
+    a 6-model average of CMIP6 daily data that have been bias-adjusted and downscaled
+    using <a href="/era5wrf">dynamically downscaled ERA5 reference data</a>. The source dataset spans 
+    1965&ndash;2100 at 4km spatial resolution. The spatial domain covers most of Alaska 
+    and parts of western Canada. Variables include daily maximum and minimum temperature
+     (<code>tasmax</code> and <code>tasmin</code>), as well as daily total precipitation 
+     (<code>pr</code>).
+</p>
+
+<h3>Available Operations</h3>
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th><code>route</code></th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Count annual days above / below threshold</td>
+      <td>
+        <code>count_days/above/&lt;value&gt;/&lt;units&gt;/...</code>, 
+        <code>count_days/below/&lt;value&gt;/&lt;units&gt;/...</code>
+      </td>
+      <td>
+        Counts number of days per year where values are above or below the provided <code>&lt;value&gt;</code>
+        given in the provided <code>&lt;units&gt;</code>.
+      </td>
+    </tr>
+    <tr>
+      <td>Calculate annual statistic</td>
+      <td>
+        <code>stat/max/&lt;value&gt;/&lt;units&gt;/...</code>,
+        <code>stat/min/&lt;value&gt;/&lt;units&gt;/...</code>,
+        <code>stat/mean/&lt;value&gt;/&lt;units&gt;/...</code>,
+        <code>stat/sum/&lt;value&gt;/&lt;units&gt;/...</code>
+    </td>
+      <td>
+        Calculates the specified annual statistic (<code>max</code>, <code>min</code>, <code>mean</code>, or <code>sum</code>)
+        for the provided <code>&lt;value&gt;</code> in the provided <code>&lt;units&gt;</code>.
+      </td>
+    </tr>
+    <tr>
+        <td>Rank annual values and get <i>n</i>-position</td>
+        <td>
+          <code>rank/&lt;position&gt;/&lt;direction&gt;/...</code>, 
+          <code>rank/&lt;position&gt;/&lt;direction&gt;/...</code>
+        </td>
+        <td>
+          Ranks values in each year and returns the value at the specified <code>&lt;position&gt;</code> 
+          and <code>&lt;direction&gt;</code> (e.g., 5th highest, 2nd lowest).
+        </td>
+      </tr>
+  </tbody>
+</table>
+
+
+<h3>Service Endpoints</h3>
+
+<h4>Point Query</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Count annual days above 25C in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/25/C/tasmax/point/64.5/-147.5/2000/2030/"
+          >/dynamic_indicators/count_days/above/25/C/tasmax/point/64.5/-147.5/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days below -40F in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/below/-40/F/tasmin/point/64.5/-147.5/2000/2030/"
+          >/dynamic_indicators/count_days/below/-40/F/tasmin/point/64.5/-147.5/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days above 10mm precipitation in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/10/mm/pr/point/64.5/-147.5/2000/2030/"
+          >/dynamic_indicators/count_days/above/10/mm/pr/point/64.5/-147.5/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+        <td>
+          Get maximum 1-day precipitation in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/pr/mm/point/64.5/-147.5/2000/2030/"
+            >/dynamic_indicators/stat/max/pr/mm/point/64.5/-147.5/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get maximum 1-day temperature in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/tasmax/F/point/64.5/-147.5/2000/2030/"
+            >/dynamic_indicators/stat/max/tasmax/F/point/64.5/-147.5/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get 6th coldest day in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/rank/6/lowest/tasmin/point/64.5/-147.5/2000/2030/"
+            >/dynamic_indicators/rank/6/lowest/tasmin/point/64.5/-147.5/2000/2030/</a
+          >
+        </td>
+      </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Ranking queries will return values in metric units (<code>C</code> 
+        for <code>tasmin</code> and <code>tasmax</code>, <code>mm</code> for <code>pr</code>).
+        <br />
+        <!-- CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br /> -->
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Point Query Output</h4>
+
+<h5>Count annual days above / below threshold</h5>
+
+<p>
+  Data are returned as JSON keyed hierarchically by scenario. Results 
+  are the annual indicator values, and a summary of the maximum, mean,
+   and minimum of those values.
+</p>
+<pre><code>
+{
+    "historical": {
+        "data": {
+            "2000": 9,
+            "2001": 18,
+            "2002": 18,
+            "2003": 13,
+            "2004": 13,
+            "2005": 8,
+            "2006": 14,
+            "2007": 17,
+            "2008": 17,
+            "2009": 9,
+            "2010": 13,
+            "2011": 16,
+            "2012": 14,
+            "2013": 17,
+            "2014": 7
+            },
+        "summary": {
+            "max": 18,
+            "mean": 13.53,
+            "min": 7
+            }
+        },
+    "ssp126": {
+        "data": {
+            "2016": 17,
+            "2017": 19,
+            "2018": 9,
+            "2019": 15,
+            "2020": 24,
+            "2021": 9,
+            "2022": 9,
+            "2023": 17,
+            "2024": 14,
+            "2025": 13,
+            "2026": 23,
+            "2027": 12,
+            "2028": 12,
+            "2029": 10,
+            "2030": 13
+            },
+        "summary": {
+            "max": 24,
+            "mean": 14.4,
+            "min": 9
+            }
+        },
+    ...
+}
+</code></pre>
+
+<h5>Calculate annual statistic</h5>
+
+<p>
+  Data are returned as JSON keyed hierarchically by scenario. Results 
+  are the annual statistic value, and a summary of the maximum, mean,
+   and minimum of those values.
+</p>
+<pre><code>
+{
+    "historical": {
+        "data": {
+            "2000": 9.24,
+            "2001": 13.12,
+            "2002": 12.99,
+            "2003": 9.09,
+            "2004": 7.65,
+            "2005": 8.04,
+            "2006": 17.5,
+            "2007": 9.66,
+            "2008": 18.01,
+            "2009": 12.92,
+            "2010": 9.7,
+            "2011": 8.52,
+            "2012": 9.53,
+            "2013": 9.84,
+            "2014": 8.19
+            },
+        "summary": {
+            "max": 18.01,
+            "mean": 10.93,
+            "min": 7.65
+            }
+        },
+    "ssp126": {
+        "data": {
+            "2016": 8.33,
+            "2017": 20.16,
+            "2018": 8.33,
+            "2019": 10.45,
+            "2020": 9.44,
+            "2021": 13.5,
+            "2022": 11.63,
+            "2023": 11.29,
+            "2024": 8.2,
+            "2025": 11.06,
+            "2026": 17.36,
+            "2027": 14.05,
+            "2028": 10.67,
+            "2029": 8.84,
+            "2030": 7.96
+            },
+        "summary": {
+            "max": 20.16,
+            "mean": 11.42,
+            "min": 7.96
+            }
+        },
+    ...
+}
+</code></pre>
+
+<h5>Rank annual values and get <i>n</i>-position</h5>
+
+<p>
+  Data are returned as JSON keyed hierarchically by scenario. Results 
+  are the annual rank value, and a summary of the maximum, mean,
+   and minimum of those values.
+</p>
+<pre><code>
+{
+    "historical": {
+        "data": {
+            "2000": -27.58,
+            "2001": -28.37,
+            "2002": -28.24,
+            "2003": -24.46,
+            "2004": -24.73,
+            "2005": -24.83,
+            "2006": -28.61,
+            "2007": -24.63,
+            "2008": -25.46,
+            "2009": -24.71,
+            "2010": -27.45,
+            "2011": -29.64,
+            "2012": -26.92,
+            "2013": -27.47,
+            "2014": -26.68
+            },
+        "summary": {
+            "max": -24.46,
+            "mean": -26.65,
+            "min": -29.64
+            }
+        },
+    "ssp126": {
+        "data": {
+            "2016": -27.28,
+            "2017": -25.53,
+            "2018": -23.39,
+            "2019": -25.74,
+            "2020": -24.14,
+            "2021": -26.39,
+            "2022": -24.82,
+            "2023": -25.08,
+            "2024": -25.39,
+            "2025": -25.87,
+            "2026": -25.14,
+            "2027": -25.58,
+            "2028": -23.52,
+            "2029": -26.43,
+            "2030": -25.61
+            },
+        "summary": {
+            "max": -23.39,
+            "mean": -25.33,
+            "min": -27.28
+            }
+        },
+    ...
+}
+</code></pre>
+
+
+<h4>Area Query</h4>
+
+<p>
+    Area queries return zonal statistics aggregated over a specified
+    polygon area. Indicators are calculated from mean daily values representing the spatially-weighted average of all 4km &#215; 4km grid
+    cells within the polygon boundary.
+    Learn more about what <a href="/places">types of places</a> are available for area queries.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Count annual days above 25C in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/25/C/tasmax/area/1908030609/2000/2030/"
+          >/dynamic_indicators/count_days/above/25/C/tasmax/area/1908030609/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days below -40F in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/below/-40/F/tasmin/area/1908030609/2000/2030/"
+          >/dynamic_indicators/count_days/below/-40/F/tasmin/area/1908030609/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Count annual days above 10mm precipitation in select years
+      </td>
+      <td>
+        <a
+          href="/dynamic_indicators/count_days/above/10/mm/pr/area/1908030609/2000/2030/"
+          >/dynamic_indicators/count_days/above/10/mm/pr/area/1908030609/2000/2030/</a
+        >
+      </td>
+    </tr>
+    <tr>
+        <td>
+          Get maximum 1-day precipitation in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/pr/mm/area/1908030609/2000/2030/"
+            >/dynamic_indicators/stat/max/pr/mm/area/1908030609/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get maximum 1-day temperature in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/stat/max/tasmax/F/area/1908030609/2000/2030/"
+            >/dynamic_indicators/stat/max/tasmax/F/area/1908030609/2000/2030/</a
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Get 6th coldest day in select years
+        </td>
+        <td>
+          <a
+            href="/dynamic_indicators/rank/6/lowest/tasmin/area/1908030609/2000/2030/"
+            >/dynamic_indicators/rank/6/lowest/tasmin/area/1908030609/2000/2030/</a
+          >
+        </td>
+      </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Ranking queries will return values in metric units (<code>C</code> 
+        for <code>tasmin</code> and <code>tasmax</code>, <code>mm</code> for <code>pr</code>).
+        <br />
+        <!-- CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br /> -->
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Area Query Output</h4>
+
+<p>
+  Area queries return the same JSON structure as point queries, but values
+  represent spatial averages rather than point measurements. Raw values are
+  averaged over the specified polygon area before applying the indicator calculation.
+</p>
+
+
+<h3>Source data</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metadata & source data access</th>
+      <th>Academic reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Publication in progress. For more information,
+        please
+        <a href="mailto:uaf-snap-data-tools@alaska.edu">contact us</a> directly.
+      </td>
+      <td>TBD</td>
+    </tr>
+    <tr>
+      <td>
+        See <a href="/cmip6/references">this page</a> for a full list of our CMIP6 data sources and suggested
+        citations.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+{% endblock %}

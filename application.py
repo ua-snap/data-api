@@ -39,6 +39,7 @@ def get_service_categories():
         ("CMIP6", "/cmip6"),
         ("CMIP6, Downscaled", "/cmip6_downscaled"),
         ("Climate Indicators", "/indicators"),
+        ("Climate Indicators, Dynamic", "/dynamic_indicators"),
         ("Climate Protection from Spruce Beetles", "/beetles"),
         ("Degree Days", "/degree_days"),
         ("Digital Elevation Models (DEMs)", "/elevation"),

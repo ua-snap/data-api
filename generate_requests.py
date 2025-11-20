@@ -193,3 +193,96 @@ def generate_wcps_describe_coverage_str(cov_id):
     """
     query_str = f'for $c in ({cov_id}) return describe($c, "application/json", "outputType=GeneralGridCoverage")'
     return quote(query_str)
+
+
+def construct_get_annual_mmm_stat_wcps_query_string(
+    coverage,
+    operator,
+    start_year,
+    end_year,
+    x_coord,
+    y_coord,
+    format="application/json",
+):
+    """
+    Construct a WCPS query string to compute annual min, mean, or max statistics over a time range.
+    Note that using an empty string in the operator will return all annual values without aggregation.
+
+    Args:
+        coverage (str): The coverage identifier.
+        operator (str): The statistical operation to perform ('min', 'max', 'mean', or '' to return all values).
+        start_year (int): The starting year of the time range.
+        end_year (int): The ending year of the time range.
+        x_coord (float or str): The x-coordinate for the point query.
+        y_coord (float or str): The y-coordinate for the point query.
+        format (str): The desired output format (default is "application/json").
+    Returns:
+        query_string (str): The constructed WCPS query string.
+    """
+    # convert inputs to strings if not already
+    x_coord = str(x_coord)
+    y_coord = str(y_coord)
+
+    query_string = quote(
+        (
+            f"for $cov in ({coverage}) "
+            f'let $start_year := "{start_year}", '
+            f'$end_year := "{end_year}", '
+            f"$x_coord := {x_coord}, "
+            f"$y_coord := {y_coord} "
+            f"return encode( "
+            f"coverage result "
+            f"over $pt t($start_year : $end_year) "
+            f"values {operator} ( $cov[x($x_coord), y($y_coord), ansi($pt : $pt)] ) "
+            f', "{format}")'
+        )
+    )
+
+    return query_string
+
+
+def construct_count_annual_days_above_or_below_threshold_wcps_query_string(
+    coverage,
+    operator,
+    threshold,
+    start_year,
+    end_year,
+    x_coord,
+    y_coord,
+    format="application/json",
+):
+    """
+    Construct a WCPS query string to count annual days above or below a specified threshold over a time range.
+    Args:
+        coverage (str): The coverage identifier.
+        operator (str): The comparison operator ('>' for above threshold, '<' for below threshold).
+        threshold (float): The threshold value for comparison.
+        start_year (int): The starting year of the time range.
+        end_year (int): The ending year of the time range.
+        x_coord (float or str): The x-coordinate for the point query.
+        y_coord (float or str): The y-coordinate for the point query.
+        format (str): The desired output format (default is "application/json").
+    Returns:
+        query_string (str): The constructed WCPS query string.
+    """
+    # convert inputs to strings if not already
+    threshold = str(threshold)
+    x_coord = str(x_coord)
+    y_coord = str(y_coord)
+
+    query_string = quote(
+        (
+            f"for $cov in ({coverage}) "
+            f"let $threshold := {threshold}, "
+            f'$start_year := "{start_year}", '
+            f'$end_year := "{end_year}", '
+            f"$x_coord := {x_coord}, "
+            f"$y_coord := {y_coord} "
+            f"return encode( "
+            f"coverage result "
+            f"over $pt t($start_year : $end_year) "
+            f"values ( sum($cov[x($x_coord), y($y_coord), ansi($pt : $pt)] {operator} $threshold) ) "
+            f', "{format}")'
+        )
+    )
+    return query_string
