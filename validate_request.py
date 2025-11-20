@@ -7,8 +7,9 @@ import ast
 import rasterio
 import os.path
 import os
+import shapely
 
-from flask import render_template
+from flask import render_template, current_app, jsonify
 from pyproj import Transformer
 import numpy as np
 import pandas as pd
@@ -565,3 +566,18 @@ def get_coverage_crs_str(coverage_metadata):
         )
 
     return crs.to_string()
+
+
+def check_for_uploaded_polygon(place_id):
+    """Check if a user-defined polygon exists for the given place_id.
+
+    Args:
+        place_id (str): The place identifier to check for an uploaded polygon. This is the a unique token generated when the user uploads a polygon.
+    Returns:
+        True if a user-defined polygon exists, False otherwise.
+    """
+    with current_app.store_lock:
+        polygon = current_app.uploaded_polygons.get(place_id)
+    if polygon:
+        return True
+    return False

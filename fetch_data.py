@@ -501,3 +501,18 @@ def cftime_value_to_ymd(time_value, base_date):
     """Convert a time value in days since the base date to a year, month, day tuple."""
     date = base_date + datetime.timedelta(days=time_value)
     return date.year, date.month, date.day
+
+
+def create_gdf_from_geojson(geojson, in_crs, out_crs):
+    """Create a GeoDataFrame from GeoJSON and CRS.
+    Both input and output CRS must be specified.
+    Args:
+        geojson (dict): GeoJSON geometry
+        in_crs (int): EPSG CRS code
+        out_crs (int): EPSG CRS code
+    Returns:
+        poly (GeoDataFrame): GeoDataFrame of the polygon
+    """
+    geojson_dict = json.loads(geojson)
+    poly = gpd.GeoDataFrame.from_features(geojson_dict).set_crs(in_crs).to_crs(out_crs)
+    return poly
