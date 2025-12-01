@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, jsonify
 import logging
 
 from . import routes
@@ -69,7 +69,7 @@ def run_fetch_landslide_data(place_name):
     try:
         results = get_landslide_db_row(place_name)
         landslide_data = package_landslide_data(results)
-        return landslide_data
+        return jsonify(landslide_data)
 
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
