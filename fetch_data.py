@@ -76,23 +76,20 @@ def get_landslide_db_row(place_name):
         list: Query results from the database
     """
     connection = get_landslide_db_connection()
-    cursor = connection.cursor(cursor_factory=RealDictCursor)
+    try:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT * FROM precip_risk 
+                WHERE place_name = %s
+                ORDER BY ts DESC
+                LIMIT 1
+            """
 
-    query = """
-        SELECT * FROM precip_risk 
-        WHERE place_name = %s
-        ORDER BY ts DESC
-        LIMIT 1
-    """
-
-    cursor.execute(query, (place_name.capitalize(),))
-
-    results = cursor.fetchall()
-
-    cursor.close()
-    connection.close()
-
-    return results
+            cursor.execute(query, (place_name.capitalize(),))
+            results = cursor.fetchall()
+            return results
+    finally:
+        connection.close()
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
