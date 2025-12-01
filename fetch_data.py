@@ -14,6 +14,10 @@ import json
 import re
 import ast
 import datetime
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from psycopg2 import sql
 from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
@@ -34,6 +38,58 @@ from generate_urls import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def get_landslide_db_connection():
+    """
+    Create a database connection using environment variables.
+    Returns psycopg2 connection object.
+    """
+    try:
+        connection = psycopg2.connect(
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=os.getenv("DB_PORT"),
+        )
+        return connection
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
+        raise
+
+
+def get_landslide_db_row(place_name):
+    """
+    Fetch landslide data row for a specific place from the database.
+
+    Args:
+        place_name (str): The name of the place
+
+    Returns:
+        list: Query results from the database
+    """
+    connection = get_landslide_db_connection()
+    cursor = connection.cursor(cursor_factory=RealDictCursor)
+
+    # Use parameterized query to prevent SQL injection
+    query = sql.SQL(
+        """
+        SELECT * FROM precip_risk 
+        WHERE place_name = %s
+        ORDER BY ts DESC
+        LIMIT 1
+    """
+    )
+
+    cursor.execute(query, (place_name.capitalize(),))
+
+    results = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return results
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
