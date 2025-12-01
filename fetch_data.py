@@ -17,7 +17,6 @@ import datetime
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from psycopg2 import sql
 from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
@@ -72,15 +71,12 @@ def get_landslide_db_row(place_name):
     connection = get_landslide_db_connection()
     cursor = connection.cursor(cursor_factory=RealDictCursor)
 
-    # Use parameterized query to prevent SQL injection
-    query = sql.SQL(
-        """
+    query = """
         SELECT * FROM precip_risk 
         WHERE place_name = %s
         ORDER BY ts DESC
         LIMIT 1
     """
-    )
 
     cursor.execute(query, (place_name.capitalize(),))
 
