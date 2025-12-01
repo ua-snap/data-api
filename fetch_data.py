@@ -44,6 +44,13 @@ def get_landslide_db_connection():
     Create a database connection using environment variables.
     Returns psycopg2 connection object.
     """
+    required_vars = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"]
+    missing = [var for var in required_vars if not os.getenv(var)]
+
+    if missing:
+        error_msg = f"Missing required environment variables: {', '.join(missing)}"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
     try:
         connection = psycopg2.connect(
             host=os.getenv("DB_HOST"),
