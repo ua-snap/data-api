@@ -18,9 +18,9 @@ def validate_place_name(place_name):
         bool: True if valid, False if not valid
     """
     valid_places = ["Kasaan", "Craig"]
-    place_name_normalized = place_name.capitalize()
+    place_name_capitalized = place_name.capitalize()
 
-    return place_name_normalized in valid_places
+    return place_name_capitalized in valid_places
 
 
 def package_landslide_data(landslide_resp):
