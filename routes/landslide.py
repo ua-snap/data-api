@@ -69,6 +69,8 @@ def run_fetch_landslide_data(place_name):
     try:
         results = get_landslide_db_row(place_name)
         landslide_data = package_landslide_data(results)
+        if landslide_data is None:
+            return render_template("404/no_data.html"), 404
         return jsonify(landslide_data)
 
     except Exception as exc:
