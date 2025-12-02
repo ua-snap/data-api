@@ -557,3 +557,51 @@ def cftime_value_to_ymd(time_value, base_date):
     """Convert a time value in days since the base date to a year, month, day tuple."""
     date = base_date + datetime.timedelta(days=time_value)
     return date.year, date.month, date.day
+
+
+def get_place_data(place_id):
+    """
+    Get comprehensive place data for a given place ID.
+
+    Args:
+        place_id (str): place identifier (e.g., AK124, AK182)
+
+    Returns:
+        dict or None: Complete place data if found, None if not found
+    """
+    if place_id is None:
+        return None
+
+    # First try all_areas
+    place = asyncio.run(
+        fetch_data(
+            [
+                generate_wfs_places_url(
+                    "all_boundaries:all_areas",
+                    "id,name,type,area_type,alt_name,zone,subzone",
+                    place_id,
+                    "id",
+                )
+            ]
+        )
+    )
+    if place["numberMatched"] > 0:
+        return place["features"][0]["properties"]
+
+    # If not found in areas, try all_communities
+    place = asyncio.run(
+        fetch_data(
+            [
+                generate_wfs_places_url(
+                    "all_boundaries:all_communities",
+                    "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+                    place_id,
+                    "id",
+                )
+            ]
+        )
+    )
+    if place["numberMatched"] > 0:
+        return place["features"][0]["properties"]
+
+    return None
