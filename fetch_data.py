@@ -572,7 +572,6 @@ def get_place_data(place_id):
     if place_id is None:
         return None
 
-    # First try all_areas
     place = asyncio.run(
         fetch_data(
             [
@@ -588,7 +587,6 @@ def get_place_data(place_id):
     if place["numberMatched"] > 0:
         return place["features"][0]["properties"]
 
-    # If not found in areas, try all_communities
     place = asyncio.run(
         fetch_data(
             [
