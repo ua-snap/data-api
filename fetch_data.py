@@ -92,6 +92,9 @@ def get_landslide_db_row(place_name):
             cursor.execute(query, (place_name.capitalize(),))
             results = cursor.fetchall()
             return results
+    except Exception as exc:
+        logger.error(f"Database query failed: {exc}")
+        raise exc
     finally:
         connection.close()
 

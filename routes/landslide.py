@@ -1,5 +1,6 @@
-from flask import render_template, jsonify
+from flask import render_template, jsonify, abort
 import logging
+from datetime import datetime
 
 from . import routes
 from fetch_data import get_landslide_db_row, get_place_data
@@ -56,6 +57,23 @@ def package_landslide_data(landslide_resp, community_data=None):
         "risk_is_elevated_from_previous": data.get("risk_is_elevated_from_previous"),
     }
 
+    expires_at = data.get("expires_at")
+    if expires_at:
+        try:
+            expires_datetime = datetime.fromisoformat(str(expires_at))
+            current_datetime = (
+                datetime.now(expires_datetime.tzinfo)
+                if expires_datetime.tzinfo
+                else datetime.now()
+            )
+
+            if expires_datetime < current_datetime:
+                di["error_code"] = 409
+                di["error_msg"] = "Data is stale"
+        except (ValueError, TypeError) as exc:
+            # Throw a 500 error if we can't parse the datetime
+            raise exc
+
     # Add community data if provided
     if community_data:
         di["community"] = community_data
@@ -85,14 +103,21 @@ def run_fetch_landslide_data(community_id):
     if not place_name:
         return render_template("400/bad_request.html"), 400
 
+    # Check for errors when fetching landslide data
     try:
         results = get_landslide_db_row(place_name)
+    except Exception as exc:
+        logger.error(f"Error fetching landslide data for {community_id}: {exc}")
+        return render_template("502/upstream_unreachable.html"), 502
 
+    # Check for errors when fetching community data
+    # and processing landslide data
+    try:
         community_data = get_place_data(community_id)
 
         landslide_data = package_landslide_data(results, community_data)
         if landslide_data is None:
-            return render_template("404/no_data.html"), 404
+            abort(404)
         return jsonify(landslide_data)
 
     except Exception as exc:
