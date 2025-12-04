@@ -15,24 +15,13 @@ from luts import (
 )
 from config import EAST_BBOX, WEST_BBOX, geojson_names
 from validate_request import validate_latlon
-from generate_urls import generate_wfs_search_url, generate_wfs_places_url
-from fetch_data import fetch_data
+from generate_urls import generate_wfs_search_url
+from fetch_data import fetch_data, all_areas_full, all_communities_full
 from csv_functions import create_csv
 
 data_api = Blueprint("data_api", __name__)
 
 extent_filtered_communities = {}
-
-all_communities_full = asyncio.run(
-    fetch_data(
-        [
-            generate_wfs_places_url(
-                "all_boundaries:all_communities",
-                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
-            )
-        ]
-    )
-)["features"]
 
 for extent in geojson_names:
     geojson_path = os.path.join(
@@ -274,17 +263,7 @@ def get_json_for_type(type, recurse=False):
     else:
         js_list = list()
         if type == "communities":
-            # Requests the Geoserver WFS URL for gathering all the communities
-            all_communities = asyncio.run(
-                fetch_data(
-                    [
-                        generate_wfs_places_url(
-                            "all_boundaries:all_communities",
-                            "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
-                        )
-                    ]
-                )
-            )["features"]
+            all_communities = all_communities_full
 
             filtered_communities = filter_by_tag(all_communities)
 
@@ -296,18 +275,9 @@ def get_json_for_type(type, recurse=False):
             # Remove the 's' at the end of the type
             type = type[:-1]
 
-            # Requests the Geoserver WFS URL for gathering all the polygon areas
-            all_areas = asyncio.run(
-                fetch_data(
-                    [
-                        generate_wfs_places_url(
-                            "all_boundaries:all_areas",
-                            "id,name,type,area_type",
-                            type,
-                        )
-                    ]
-                )
-            )["features"]
+            all_areas = [
+                area for area in all_areas_full if area["properties"]["type"] == type
+            ]
 
             # For each feature, put the properties (name, id, type) into the
             # list for creation of a JSON object to be returned.

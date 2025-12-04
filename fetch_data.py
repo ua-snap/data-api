@@ -572,34 +572,35 @@ def get_place_data(place_id):
     if place_id is None:
         return None
 
-    place = asyncio.run(
-        fetch_data(
-            [
-                generate_wfs_places_url(
-                    "all_boundaries:all_areas",
-                    "id,name,type,area_type,alt_name,zone,subzone",
-                    place_id,
-                    "id",
-                )
-            ]
-        )
-    )
-    if place["numberMatched"] > 0:
-        return place["features"][0]["properties"]
+    for area in all_areas_full:
+        if area["properties"]["id"] == place_id:
+            return area["properties"]
 
-    place = asyncio.run(
-        fetch_data(
-            [
-                generate_wfs_places_url(
-                    "all_boundaries:all_communities",
-                    "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
-                    place_id,
-                    "id",
-                )
-            ]
-        )
-    )
-    if place["numberMatched"] > 0:
-        return place["features"][0]["properties"]
+    for community in all_communities_full:
+        if community["properties"]["id"] == place_id:
+            return community["properties"]
 
     return None
+
+
+all_communities_full = asyncio.run(
+    fetch_data(
+        [
+            generate_wfs_places_url(
+                "all_boundaries:all_communities",
+                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+            )
+        ]
+    )
+)["features"]
+
+all_areas_full = asyncio.run(
+    fetch_data(
+        [
+            generate_wfs_places_url(
+                "all_boundaries:all_areas",
+                "id,name,type,area_type,alt_name,zone,subzone",
+            )
+        ]
+    )
+)["features"]
