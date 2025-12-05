@@ -579,18 +579,16 @@ def get_place_data(place_id):
     if place_id is None:
         return None
 
-    for area in all_areas_full:
-        if area["properties"]["id"] == place_id:
-            return area["properties"]
+    if place_id in all_areas_full:
+        return all_areas_full[place_id]
 
-    for community in all_communities_full:
-        if community["properties"]["id"] == place_id:
-            return community["properties"]
+    if place_id in all_communities_full:
+        return all_communities_full[place_id]
 
     return None
 
 
-all_communities_full = asyncio.run(
+communities_features = asyncio.run(
     fetch_data(
         [
             generate_wfs_places_url(
@@ -601,7 +599,7 @@ all_communities_full = asyncio.run(
     )
 )["features"]
 
-all_areas_full = asyncio.run(
+areas_features = asyncio.run(
     fetch_data(
         [
             generate_wfs_places_url(
@@ -611,3 +609,14 @@ all_areas_full = asyncio.run(
         ]
     )
 )["features"]
+
+# Creates dictionaries mapping place IDs to their property dictionaries
+# for fast lookup by community or area ID ("AK124")
+all_communities_full = {
+    feature["properties"]["id"]: feature["properties"]
+    for feature in communities_features
+}
+
+all_areas_full = {
+    feature["properties"]["id"]: feature["properties"] for feature in areas_features
+}
