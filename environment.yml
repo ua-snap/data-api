@@ -24,3 +24,4 @@ dependencies:
   - pytest
   - pytest-html
   - cftime
+  - psycopg2

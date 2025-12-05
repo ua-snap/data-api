@@ -1,0 +1,144 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Landslide Risk Data</h2>
+
+<p>
+  This service endpoint provides access to landslide risk data based on
+  precipitation measurements. The system monitors precipitation levels and
+  calculates landslide risk probabilities for specific locations in Southeast
+  Alaska (Craig and Kasaan). Data includes current precipitation measurements,
+  accumulated precipitation over multiple time periods (24 hours, 2 days, 3
+  days), and corresponding risk levels.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Location query</h4>
+
+<p>
+  Query landslide risk data for a specific location by community ID. Currently
+  supported communities are Craig (AK91) and Kasaan (AK182).
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Landslide risk data for Craig</td>
+      <td>
+        <a href="/landslide/AK91">/landslide/AK91</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Landslide risk data for Kasaan</td>
+      <td>
+        <a href="/landslide/AK182">/landslide/AK182</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from landslide risk queries will look like this:</p>
+
+<p>
+  <strong>Note:</strong> The response includes both landslide risk data and
+  comprehensive community information from the places service, providing
+  geographic and administrative details about the queried location.
+</p>
+
+<pre>
+{
+  "place_name": "Craig",
+  "timestamp": "2024-12-02 15:30:00",
+  "expires_at": "2024-12-02 18:30:00",
+  "hour": "15:30",
+  "precipitation_mm": 12.5,
+  "precipitation_inches": 0.49,
+  "precipitation_24hr": 45.2,
+  "precipitation_2days": 78.1,
+  "precipitation_3days": 95.6,
+  "risk_level": 2,
+  "risk_probability": 0.25,
+  "risk_24hr": 3,
+  "risk_2days": 4,
+  "risk_3days": 4,
+  "community": {
+    "name": "Craig",
+    "alt_name": "",
+    "id": "AK91",
+    "region": "Southeast Alaska",
+    "country": "US",
+    "type": "community",
+    "latitude": 55.4769,
+    "longitude": -133.1478,
+    "is_coastal": true,
+    "ocean_lat1": 55.4769,
+    "ocean_lon1": -133.1478
+  }
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "place_name": &lt;location name where the measurement was taken&gt;,
+  "timestamp": &lt;timestamp of the measurement&gt;,
+  "expires_at": &lt;timestamp when this data expires&gt;,
+  "hour": &lt;time of measurement (HH:MM format)&gt;,
+  "precipitation_mm": &lt;current precipitation measurement in millimeters&gt;,
+  "precipitation_inches": &lt;current precipitation measurement in inches&gt;,
+  "precipitation_24hr": &lt;accumulated precipitation over 24 hours (mm)&gt;,
+  "precipitation_2days": &lt;accumulated precipitation over 2 days (mm)&gt;,
+  "precipitation_3days": &lt;accumulated precipitation over 3 days (mm)&gt;,
+  "risk_level": &lt;integer risk level (higher values indicate greater risk)&gt;,
+  "risk_probability": &lt;landslide risk probability (0.0 to 1.0)&gt;,
+  "risk_24hr": &lt;risk level based on 24-hour precipitation&gt;,
+  "risk_2days": &lt;risk level based on 2-day precipitation&gt;,
+  "risk_3days": &lt;risk level based on 3-day precipitation&gt;,
+  "risk_is_elevated_from_previous": &lt;boolean indicating if risk increased&gt;,
+  "community": {
+    "name": &lt;community name&gt;,
+    "alt_name": &lt;alternative community name, if any&gt;,
+    "id": &lt;community ID (e.g., AK91, AK182)&gt;,
+    "region": &lt;geographic region&gt;,
+    "country": &lt;country code&gt;,
+    "type": &lt;location type (typically "community")&gt;,
+    "latitude": &lt;community latitude coordinate&gt;,
+    "longitude": &lt;community longitude coordinate&gt;,
+    "is_coastal": &lt;boolean indicating if community is coastal&gt;,
+    "ocean_lat1": &lt;nearest ocean point latitude&gt;,
+    "ocean_lon1": &lt;nearest ocean point longitude&gt;
+  }
+}
+</pre>
+
+<h3>Data Structure and Processing</h3>
+
+<p>
+  The landslide risk data processing and data structure definitions are
+  maintained in the
+  <a href="https://github.com/ua-snap/kuti-lambda" target="_blank"
+    >kuti-lambda repository</a
+  >. This repository contains the AWS Lambda function responsible for:
+</p>
+
+<ul>
+  <li>Processing precipitation data from weather monitoring stations</li>
+  <li>Calculating landslide risk probabilities using established thresholds</li>
+  <li>Inserting processed data into the PostgreSQL database</li>
+  <li>Managing data expiration and cleanup processes</li>
+</ul>
+
+<p>
+  The system is designed to update data every 3 hours, with automatic expiration
+  of older records to maintain current and relevant risk assessments.
+</p>
+
+{% endblock %}

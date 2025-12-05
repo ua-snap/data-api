@@ -671,3 +671,5 @@ all_cmip6_downscaled_scenarios = set(
     for model in var.values()
     for scenario in model
 )
+
+valid_kuti_communityIDs = {"AK182": "Kasaan", "AK91": "Craig"}
