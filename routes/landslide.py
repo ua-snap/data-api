@@ -5,6 +5,7 @@ from datetime import datetime
 from . import routes
 from fetch_data import get_landslide_db_row, get_place_data
 from validate_data import place_name_and_type
+from luts import valid_kuti_communityIDs
 
 logger = logging.getLogger(__name__)
 
@@ -15,22 +16,16 @@ def validate_community_id(community_id):
     Uses the existing place validation system, then restricts to AK182 and AK91.
 
     Args:
-        community_id (str): The community ID to validate (AK182 for Kasaan, AK91 for Craig)
+        community_id (str): The community ID to validate (AK91 for Craig, AK182 for Kasaan)
 
     Returns:
         str or None: Place name if valid community ID, None if invalid
     """
-    place_name, place_type = place_name_and_type(community_id)
 
-    if place_name is None:
-        return None
+    if community_id in valid_kuti_communityIDs:
+        return valid_kuti_communityIDs[community_id]
 
-    community_mapping = {"AK182": "Kasaan", "AK91": "Craig"}
-
-    community_id_upper = community_id.upper()
-    supported_place = community_mapping.get(community_id_upper)
-
-    return supported_place
+    return None
 
 
 def package_landslide_data(landslide_resp, community_data=None):
