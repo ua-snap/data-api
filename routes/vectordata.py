@@ -15,24 +15,13 @@ from luts import (
 )
 from config import EAST_BBOX, WEST_BBOX, geojson_names
 from validate_request import validate_latlon
-from generate_urls import generate_wfs_search_url, generate_wfs_places_url
-from fetch_data import fetch_data
+from generate_urls import generate_wfs_search_url
+from fetch_data import fetch_data, all_areas_full, all_communities_full
 from csv_functions import create_csv
 
 data_api = Blueprint("data_api", __name__)
 
 extent_filtered_communities = {}
-
-all_communities_full = asyncio.run(
-    fetch_data(
-        [
-            generate_wfs_places_url(
-                "all_boundaries:all_communities",
-                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
-            )
-        ]
-    )
-)["features"]
 
 for extent in geojson_names:
     geojson_path = os.path.join(
@@ -42,12 +31,12 @@ for extent in geojson_names:
     gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
     region_geom = gdf_extent.unary_union
     filtered = []
-    for community in all_communities_full:
-        lat = float(community["properties"].get("latitude", 0))
-        lon = float(community["properties"].get("longitude", 0))
+    for community_id, community in all_communities_full.items():
+        lat = float(community.get("latitude", 0))
+        lon = float(community.get("longitude", 0))
         pt = Point(lon, lat)
         if region_geom.contains(pt):
-            filtered.append(community)
+            filtered.append({"properties": community})
     extent_filtered_communities[extent] = filtered
 
 
@@ -100,7 +89,10 @@ def find_via_gs(lat, lon):
     # alternate name, id, lat, lon, and type. They are all
     # found within the properties of the returned JSON.
     for i in range(len(filtered_communities)):
-        proximal_di["communities"][i] = filtered_communities[i]["properties"]
+        if "geometry" in filtered_communities[i]:
+            proximal_di["communities"][i] = filtered_communities[i]["properties"]
+        else:
+            proximal_di["communities"][i] = filtered_communities[i]
 
     # WFS request to Geoserver for all polygon areas.
     nearby_areas = asyncio.run(
@@ -207,34 +199,55 @@ def gather_nearby_area(nearby_area):
     return curr_di
 
 
-def filter_by_tag(communities):
+def filter_by_tag(communities_data):
     """
     Filters communities by tags if tags are provided in the request.
 
     Args:
-        communities: All communities returned from the WFS request.
+        communities_data: Either a dictionary of communities with ID as key and properties as value,
+                         or a list of GeoJSON features with properties.
 
     Returns:
-        Communities with the tags provided in the request, with the tags removed
-        from the output after filtering.
+        - For dictionary input: List of community properties with tags removed
+        - For GeoJSON list input: List of GeoJSON features with tags removed from properties
     """
-    if request.args.get("tags"):
-        tags = request.args.get("tags").split(",")
-        filtered_communities = []
-        for community in communities:
-            community_added = False
-            for tag in tags:
-                if not community_added:
-                    community_tags = community["properties"]["tags"].split(",")
-                    if tag in community_tags:
-                        # Remove tags property from output
-                        del community["properties"]["tags"]
+    tags = request.args.get("tags")
 
-                        filtered_communities.append(community)
-                        community_added = True
-        return filtered_communities
-    else:
-        return communities
+    if not tags:
+        return (
+            list(communities_data.values())
+            if isinstance(communities_data, dict)
+            else communities_data
+        )
+
+    target_tags = set(tags.split(","))
+    filtered_communities = []
+
+    communities = (
+        communities_data.items()
+        if isinstance(communities_data, dict)
+        else enumerate(communities_data)
+    )
+
+    for _, community in communities:
+        community_properties = (
+            community if isinstance(communities_data, dict) else community["properties"]
+        )
+
+        if community_properties.get("tags") and any(
+            tag in community_properties["tags"].split(",") for tag in target_tags
+        ):
+            tag_filtered_props = community_properties.copy()
+            tag_filtered_props.pop("tags", None)
+
+            if isinstance(communities_data, dict):
+                filtered_communities.append(tag_filtered_props)
+            else:
+                community_copy = community.copy()
+                community_copy["properties"] = tag_filtered_props
+                filtered_communities.append(community_copy)
+
+    return filtered_communities
 
 
 @routes.route("/places/<type>")
@@ -274,56 +287,29 @@ def get_json_for_type(type, recurse=False):
     else:
         js_list = list()
         if type == "communities":
-            # Requests the Geoserver WFS URL for gathering all the communities
-            all_communities = asyncio.run(
-                fetch_data(
-                    [
-                        generate_wfs_places_url(
-                            "all_boundaries:all_communities",
-                            "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
-                        )
-                    ]
-                )
-            )["features"]
+            filtered_communities = filter_by_tag(all_communities_full)
 
-            filtered_communities = filter_by_tag(all_communities)
-
-            # For each feature, put the properties (name, id, etc.) into the
-            # list for creation of a JSON object to be returned.
-            for i in range(len(filtered_communities)):
-                js_list.append(filtered_communities[i]["properties"])
+            js_list.extend(filtered_communities)
         else:
             # Remove the 's' at the end of the type
             type = type[:-1]
 
-            # Requests the Geoserver WFS URL for gathering all the polygon areas
-            all_areas = asyncio.run(
-                fetch_data(
-                    [
-                        generate_wfs_places_url(
-                            "all_boundaries:all_areas",
-                            "id,name,type,area_type",
-                            type,
-                        )
-                    ]
-                )
-            )["features"]
+            # Filter areas by type and process them directly
+            for area_id, area_props in all_areas_full.items():
+                if area_props["type"] == type:
+                    # HUC12s do not play well with Northern Climate Reports.
+                    # Remove them from /places endpoints for now.
+                    area_type = area_props.get("area_type", "")
+                    if area_type == "HUC12":
+                        continue
 
-            # For each feature, put the properties (name, id, type) into the
-            # list for creation of a JSON object to be returned.
-            for ai in range(len(all_areas)):
-                # HUC12s do not play well with Northern Climate Reports.
-                # Remove them from /places endpoints for now.
-                if all_areas[ai]["properties"]["area_type"] == "HUC12":
-                    continue
-
-                # If this area is a protected_area, keep area_type in
-                # returned output.
-                if all_areas[ai]["properties"]["area_type"] != "":
-                    js_list.append(all_areas[ai]["properties"])
-                else:
-                    del all_areas[ai]["properties"]["area_type"]
-                    js_list.append(all_areas[ai]["properties"])
+                    if area_type != "":
+                        js_list.append(area_props)
+                    else:
+                        area_copy = area_props.copy()
+                        if "area_type" in area_copy:
+                            del area_copy["area_type"]
+                        js_list.append(area_copy)
 
         # Creates JSON object from created list
         js = json.dumps(js_list)
@@ -355,7 +341,9 @@ def get_communities():
     if extent in geojson_names:
         all_communities = extent_filtered_communities[extent]
     else:
-        all_communities = all_communities_full
+        all_communities = [
+            {"properties": props} for props in all_communities_full.values()
+        ]
 
     # Filter by substring if provided
     substring = request.args.get("substring")
