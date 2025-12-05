@@ -14,6 +14,9 @@ import json
 import re
 import ast
 import datetime
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from collections import defaultdict
 from functools import reduce
 from aiohttp import ClientSession
@@ -34,6 +37,66 @@ from generate_urls import (
 )
 
 logger = logging.getLogger(__name__)
+
+required_vars = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"]
+db_env_var_missing = [var for var in required_vars if not os.getenv(var)]
+
+if db_env_var_missing:
+    error_msg = (
+        f"Missing required environment variables: {', '.join(db_env_var_missing)}"
+    )
+    logger.error(error_msg)
+    raise ValueError(error_msg)
+
+
+def get_landslide_db_connection():
+    """
+    Create a database connection using environment variables.
+    Returns psycopg2 connection object.
+    """
+
+    try:
+        connection = psycopg2.connect(
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            port=5432,
+        )
+        return connection
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
+        raise
+
+
+def get_landslide_db_row(place_name):
+    """
+    Fetch landslide data row for a specific place from the database.
+
+    Args:
+        place_name (str): The name of the place
+
+    Returns:
+        list: Query results from the database
+    """
+    connection = get_landslide_db_connection()
+    try:
+        with connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            query = """
+                SELECT * FROM precip_risk 
+                WHERE place_name = %s
+                ORDER BY ts DESC
+                LIMIT 1
+            """
+
+            cursor.execute(query, (place_name.capitalize(),))
+            results = cursor.fetchall()
+            return results
+    except Exception as exc:
+        logger.error(f"Database query failed: {exc}")
+        raise exc
+    finally:
+        connection.close()
 
 
 async def fetch_wcs_point_data(x, y, cov_id, var_coord=None):
@@ -501,3 +564,59 @@ def cftime_value_to_ymd(time_value, base_date):
     """Convert a time value in days since the base date to a year, month, day tuple."""
     date = base_date + datetime.timedelta(days=time_value)
     return date.year, date.month, date.day
+
+
+def get_place_data(place_id):
+    """
+    Get comprehensive place data for a given place ID.
+
+    Args:
+        place_id (str): place identifier (e.g., AK124, AK182)
+
+    Returns:
+        dict or None: Complete place data if found, None if not found
+    """
+    if place_id is None:
+        return None
+
+    if place_id in all_areas_full:
+        return all_areas_full[place_id]
+
+    if place_id in all_communities_full:
+        return all_communities_full[place_id]
+
+    return None
+
+
+communities_features = asyncio.run(
+    fetch_data(
+        [
+            generate_wfs_places_url(
+                "all_boundaries:all_communities",
+                "name,alt_name,id,region,country,type,latitude,longitude,tags,is_coastal,ocean_lat1,ocean_lon1",
+            )
+        ]
+    )
+)["features"]
+
+areas_features = asyncio.run(
+    fetch_data(
+        [
+            generate_wfs_places_url(
+                "all_boundaries:all_areas",
+                "id,name,type,area_type,alt_name,zone,subzone",
+            )
+        ]
+    )
+)["features"]
+
+# Creates dictionaries mapping place IDs to their property dictionaries
+# for fast lookup by community or area ID ("AK124")
+all_communities_full = {
+    feature["properties"]["id"]: feature["properties"]
+    for feature in communities_features
+}
+
+all_areas_full = {
+    feature["properties"]["id"]: feature["properties"] for feature in areas_features
+}
