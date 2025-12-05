@@ -208,54 +208,46 @@ def filter_by_tag(communities_data):
                          or a list of GeoJSON features with properties.
 
     Returns:
-        For dictionary input: List of community properties with tags removed
-        For GeoJSON list input: List of GeoJSON features with tags removed from properties
+        - For dictionary input: List of community properties with tags removed
+        - For GeoJSON list input: List of GeoJSON features with tags removed from properties
     """
-    if request.args.get("tags"):
-        tags = request.args.get("tags").split(",")
-        filtered_communities = []
+    tags = request.args.get("tags")
 
-        # If this is a dictionary of communities
-        if isinstance(communities_data, dict):
-            for community_id, community_props in communities_data.items():
-                community_added = False
-                for tag in tags:
-                    if not community_added:
-                        community_tags_str = community_props.get("tags", "")
-                        if community_tags_str:
-                            community_tags = community_tags_str.split(",")
-                            if tag in community_tags:
-                                filtered_props = community_props.copy()
-                                if "tags" in filtered_props:
-                                    del filtered_props["tags"]
-                                filtered_communities.append(filtered_props)
-                                community_added = True
+    if not tags:
+        return (
+            list(communities_data.values())
+            if isinstance(communities_data, dict)
+            else communities_data
+        )
 
-        # If this is a list of GeoJSON features
-        else:
-            for community_feature in communities_data:
-                community_added = False
-                for tag in tags:
-                    if not community_added:
-                        community_props = community_feature["properties"]
-                        community_tags_str = community_props.get("tags", "")
-                        if community_tags_str:
-                            community_tags = community_tags_str.split(",")
-                            if tag in community_tags:
-                                filtered_feature = community_feature.copy()
-                                filtered_feature["properties"] = community_props.copy()
-                                if "tags" in filtered_feature["properties"]:
-                                    del filtered_feature["properties"]["tags"]
-                                filtered_communities.append(filtered_feature)
-                                community_added = True
+    target_tags = set(tags.split(","))
+    filtered_communities = []
 
-        return filtered_communities
-    else:
-        # Return appropriate format based on input
-        if isinstance(communities_data, dict):
-            return list(communities_data.values())
-        else:
-            return communities_data
+    communities = (
+        communities_data.items()
+        if isinstance(communities_data, dict)
+        else enumerate(communities_data)
+    )
+
+    for _, community in communities:
+        community_properties = (
+            community if isinstance(communities_data, dict) else community["properties"]
+        )
+
+        if community_properties.get("tags") and any(
+            tag in community_properties["tags"].split(",") for tag in target_tags
+        ):
+            tag_filtered_props = community_properties.copy()
+            tag_filtered_props.pop("tags", None)
+
+            if isinstance(communities_data, dict):
+                filtered_communities.append(tag_filtered_props)
+            else:
+                community_copy = community.copy()
+                community_copy["properties"] = tag_filtered_props
+                filtered_communities.append(community_copy)
+
+    return filtered_communities
 
 
 @routes.route("/places/<type>")
