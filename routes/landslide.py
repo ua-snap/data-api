@@ -66,7 +66,6 @@ def package_landslide_data(landslide_resp, community_data=None):
                 di["error_code"] = 409
                 di["error_msg"] = "Data is stale"
         except (ValueError, TypeError) as exc:
-            # Throw a 500 error if we can't parse the datetime
             raise exc
 
     # Add community data if provided
@@ -111,8 +110,7 @@ def run_fetch_landslide_data(community_id):
         community_data = get_place_data(community_id)
 
         landslide_data = package_landslide_data(results, community_data)
-        if landslide_data is None:
-            abort(404)
+
         return jsonify(landslide_data)
 
     except Exception as exc:
