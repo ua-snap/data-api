@@ -17,8 +17,7 @@ from shapely.geometry import shape
 from rasterio.crs import CRS
 
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
-from generate_urls import generate_wfs_places_url
-from fetch_data import fetch_data
+from fetch_data import all_areas_full
 from luts import geotiff_projections
 
 
@@ -254,17 +253,10 @@ def validate_var_id(var_id):
     if not var_id.isalnum():
         return render_template("400/bad_request.html"), 400
 
-    var_id_check = asyncio.run(
-        fetch_data(
-            [generate_wfs_places_url("all_boundaries:all_areas", "type", var_id, "id")]
-        )
-    )
+    if var_id in all_areas_full:
+        return all_areas_full[var_id]["type"]
 
-    if var_id_check["numberMatched"] > 0:
-        return var_id_check["features"][0]["properties"]["type"]
-
-    else:
-        return render_template("422/invalid_area.html"), 400
+    return render_template("422/invalid_area.html"), 400
 
 
 def project_latlon(lat1, lon1, dst_crs, lat2=None, lon2=None):
