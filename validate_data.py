@@ -18,21 +18,19 @@ def place_name_and_type(place_id):
     if place_id is None:
         return None, None
 
-    for area in all_areas_full:
-        if area["properties"]["id"] == place_id:
-            place = area["properties"]
-            full_name = place["name"]
-            if place.get("alt_name", "") != "":
-                full_name += " (" + place["alt_name"] + ")"
-            return full_name, place["type"]
+    if place_id in all_areas_full:
+        place = all_areas_full[place_id]
+        full_name = place["name"]
+        if place.get("alt_name", "") != "":
+            full_name += " (" + place["alt_name"] + ")"
+        return full_name, place["type"]
 
-    for community in all_communities_full:
-        if community["properties"]["id"] == place_id:
-            place = community["properties"]
-            full_name = place["name"]
-            if place.get("alt_name", "") != "":
-                full_name += " (" + place["alt_name"] + ")"
-            return full_name, place["type"]
+    if place_id in all_communities_full:
+        place = all_communities_full[place_id]
+        full_name = place["name"]
+        if place.get("alt_name", "") != "":
+            full_name += " (" + place["alt_name"] + ")"
+        return full_name, place["type"]
 
     return None, None
 

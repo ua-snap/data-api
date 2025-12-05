@@ -253,9 +253,8 @@ def validate_var_id(var_id):
     if not var_id.isalnum():
         return render_template("400/bad_request.html"), 400
 
-    for area in all_areas_full:
-        if area["properties"]["id"] == var_id:
-            return area["properties"]["type"]
+    if var_id in all_areas_full:
+        return all_areas_full[var_id]["type"]
 
     return render_template("422/invalid_area.html"), 400
 

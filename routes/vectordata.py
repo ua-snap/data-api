@@ -31,12 +31,12 @@ for extent in geojson_names:
     gdf_extent = gdf_extent.set_crs(epsg=4326, allow_override=True)
     region_geom = gdf_extent.unary_union
     filtered = []
-    for community in all_communities_full:
-        lat = float(community["properties"].get("latitude", 0))
-        lon = float(community["properties"].get("longitude", 0))
+    for community_id, community in all_communities_full.items():
+        lat = float(community.get("latitude", 0))
+        lon = float(community.get("longitude", 0))
         pt = Point(lon, lat)
         if region_geom.contains(pt):
-            filtered.append(community)
+            filtered.append({"properties": community})
     extent_filtered_communities[extent] = filtered
 
 
@@ -89,7 +89,10 @@ def find_via_gs(lat, lon):
     # alternate name, id, lat, lon, and type. They are all
     # found within the properties of the returned JSON.
     for i in range(len(filtered_communities)):
-        proximal_di["communities"][i] = filtered_communities[i]["properties"]
+        if "geometry" in filtered_communities[i]:
+            proximal_di["communities"][i] = filtered_communities[i]["properties"]
+        else:
+            proximal_di["communities"][i] = filtered_communities[i]
 
     # WFS request to Geoserver for all polygon areas.
     nearby_areas = asyncio.run(
@@ -196,34 +199,63 @@ def gather_nearby_area(nearby_area):
     return curr_di
 
 
-def filter_by_tag(communities):
+def filter_by_tag(communities_data):
     """
     Filters communities by tags if tags are provided in the request.
 
     Args:
-        communities: All communities returned from the WFS request.
+        communities_data: Either a dictionary of communities with ID as key and properties as value,
+                         or a list of GeoJSON features with properties.
 
     Returns:
-        Communities with the tags provided in the request, with the tags removed
-        from the output after filtering.
+        For dictionary input: List of community properties with tags removed
+        For GeoJSON list input: List of GeoJSON features with tags removed from properties
     """
     if request.args.get("tags"):
         tags = request.args.get("tags").split(",")
         filtered_communities = []
-        for community in communities:
-            community_added = False
-            for tag in tags:
-                if not community_added:
-                    community_tags = community["properties"]["tags"].split(",")
-                    if tag in community_tags:
-                        # Remove tags property from output
-                        del community["properties"]["tags"]
 
-                        filtered_communities.append(community)
-                        community_added = True
+        # If this is a dictionary of communities
+        if isinstance(communities_data, dict):
+            for community_id, community_props in communities_data.items():
+                community_added = False
+                for tag in tags:
+                    if not community_added:
+                        community_tags_str = community_props.get("tags", "")
+                        if community_tags_str:
+                            community_tags = community_tags_str.split(",")
+                            if tag in community_tags:
+                                filtered_props = community_props.copy()
+                                if "tags" in filtered_props:
+                                    del filtered_props["tags"]
+                                filtered_communities.append(filtered_props)
+                                community_added = True
+
+        # If this is a list of GeoJSON features
+        else:
+            for community_feature in communities_data:
+                community_added = False
+                for tag in tags:
+                    if not community_added:
+                        community_props = community_feature["properties"]
+                        community_tags_str = community_props.get("tags", "")
+                        if community_tags_str:
+                            community_tags = community_tags_str.split(",")
+                            if tag in community_tags:
+                                filtered_feature = community_feature.copy()
+                                filtered_feature["properties"] = community_props.copy()
+                                if "tags" in filtered_feature["properties"]:
+                                    del filtered_feature["properties"]["tags"]
+                                filtered_communities.append(filtered_feature)
+                                community_added = True
+
         return filtered_communities
     else:
-        return communities
+        # Return appropriate format based on input
+        if isinstance(communities_data, dict):
+            return list(communities_data.values())
+        else:
+            return communities_data
 
 
 @routes.route("/places/<type>")
@@ -263,37 +295,29 @@ def get_json_for_type(type, recurse=False):
     else:
         js_list = list()
         if type == "communities":
-            all_communities = all_communities_full
+            filtered_communities = filter_by_tag(all_communities_full)
 
-            filtered_communities = filter_by_tag(all_communities)
-
-            # For each feature, put the properties (name, id, etc.) into the
-            # list for creation of a JSON object to be returned.
-            for i in range(len(filtered_communities)):
-                js_list.append(filtered_communities[i]["properties"])
+            js_list.extend(filtered_communities)
         else:
             # Remove the 's' at the end of the type
             type = type[:-1]
 
-            all_areas = [
-                area for area in all_areas_full if area["properties"]["type"] == type
-            ]
+            # Filter areas by type and process them directly
+            for area_id, area_props in all_areas_full.items():
+                if area_props["type"] == type:
+                    # HUC12s do not play well with Northern Climate Reports.
+                    # Remove them from /places endpoints for now.
+                    area_type = area_props.get("area_type", "")
+                    if area_type == "HUC12":
+                        continue
 
-            # For each feature, put the properties (name, id, type) into the
-            # list for creation of a JSON object to be returned.
-            for ai in range(len(all_areas)):
-                # HUC12s do not play well with Northern Climate Reports.
-                # Remove them from /places endpoints for now.
-                if all_areas[ai]["properties"]["area_type"] == "HUC12":
-                    continue
-
-                # If this area is a protected_area, keep area_type in
-                # returned output.
-                if all_areas[ai]["properties"]["area_type"] != "":
-                    js_list.append(all_areas[ai]["properties"])
-                else:
-                    del all_areas[ai]["properties"]["area_type"]
-                    js_list.append(all_areas[ai]["properties"])
+                    if area_type != "":
+                        js_list.append(area_props)
+                    else:
+                        area_copy = area_props.copy()
+                        if "area_type" in area_copy:
+                            del area_copy["area_type"]
+                        js_list.append(area_copy)
 
         # Creates JSON object from created list
         js = json.dumps(js_list)
@@ -325,7 +349,9 @@ def get_communities():
     if extent in geojson_names:
         all_communities = extent_filtered_communities[extent]
     else:
-        all_communities = all_communities_full
+        all_communities = [
+            {"properties": props} for props in all_communities_full.values()
+        ]
 
     # Filter by substring if provided
     substring = request.args.get("substring")
