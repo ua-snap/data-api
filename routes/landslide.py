@@ -115,6 +115,4 @@ def run_fetch_landslide_data(community_id):
 
     except Exception as exc:
         logger.error(f"Error in landslide endpoint for {community_id}: {exc}")
-        if hasattr(exc, "status") and exc.status == 404:
-            return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
