@@ -1,4 +1,5 @@
 import requests
+import asyncio
 import io
 import numpy as np
 import xarray as xr
@@ -16,15 +17,22 @@ from flask import (
 
 from generate_requests import generate_conus_hydrology_wcs_str
 from generate_urls import generate_wfs_conus_hydrology_url
+from fetch_data import describe_via_wcps
+from validate_request import get_axis_encodings
 from config import RAS_BASE_URL
 from . import routes
 
-cov_id = "conus_hydro_segments_jp"
+# TODO: change coverage to "conus_hydro_segments_maurer" and incorporate historical baseline stats
+seg_cov_id = "conus_hydro_segments_jp"
 # TODO: change to "Rasdaman Encoding" to disambiguate from the encoding attribute in the netCDF file
-encoding_attr = "Encoding"
+# TODO: alternatively, put encodings in dimension attributes like the hydrograph dataset
+seg_encoding_attr = "Encoding"
+
+hydrograph_cov_id = "conus_hydro_segments_doy_mmm_maurer"
+hydrograph_dim_encoding_attr = "encoding"
 
 
-def fetch_hydrology_data(cov_id, geom_id):
+def fetch_hydrology_data(seg_cov_id, geom_id):
     """
     Function to fetch hydrology data from Rasdaman. Data is fetched for one geometry ID at a time!
     Args:
@@ -35,7 +43,7 @@ def fetch_hydrology_data(cov_id, geom_id):
         Xarray dataset with hydrological stats for the all var/lc/model/scenario/era combinations for the requested geom ID.
     """
 
-    url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, geom_id)
+    url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(seg_cov_id, geom_id)
     print(url)
 
     with requests.get(url, verify=False) as r:
@@ -46,7 +54,12 @@ def fetch_hydrology_data(cov_id, geom_id):
     return ds
 
 
-def build_decode_dicts(ds, encoding_attr):
+async def build_decode_dicts_from_dimension_attributes(cov_id):
+    metadata = await describe_via_wcps(cov_id)
+    return get_axis_encodings(metadata)
+
+
+def build_decode_dicts(seg_encoding_attr):
     """
     Function to build decoding dictionaries.
     Searches the XML response from the DescribeCoverage request for the encodings metadata and
@@ -54,20 +67,20 @@ def build_decode_dicts(ds, encoding_attr):
     and return dimensions as strings.
     Args:
         ds (xarray dataset): Dataset with hydrological stats for the geom ID
-        encoding_attr (str): Attribute name for the encoding dictionary in the XML response
+        seg_encoding_attr (str): Attribute name for the encoding dictionary in the XML response
     Returns:
         Decoded data dictionary with human-readable keys."""
 
     url = (
         RAS_BASE_URL
-        + f"ows?&SERVICE=WCS&VERSION=2.1.0&REQUEST=DescribeCoverage&COVERAGEID={cov_id}&outputType=GeneralGridCoverage"
+        + f"ows?&SERVICE=WCS&VERSION=2.1.0&REQUEST=DescribeCoverage&COVERAGEID={seg_cov_id}&outputType=GeneralGridCoverage"
     )
     with requests.get(url, verify=False) as r:
         if r.status_code != 200:
             return render_template("500/server_error.html"), 500
         tree = ET.ElementTree(ET.fromstring(r.content))
 
-    xml_search_string = str(".//{http://www.rasdaman.org}" + encoding_attr)
+    xml_search_string = str(".//{http://www.rasdaman.org}" + seg_encoding_attr)
     encoding_dict_str = tree.findall(xml_search_string)[0].text
     encoding_dict = eval(encoding_dict_str)
 
@@ -94,7 +107,9 @@ def build_dict_and_populate_stats(geom_id, ds):
         Data dictionary with the hydrology stats populated.
     """
 
-    lc_dict, model_dict, scenario_dict, era_dict = build_decode_dicts(ds, encoding_attr)
+    lc_dict, model_dict, scenario_dict, era_dict = build_decode_dicts(
+        ds, seg_encoding_attr
+    )
 
     data_dict = {
         geom_id: {"name": None, "latitude": None, "longitude": None, "stats": {}}
@@ -214,7 +229,7 @@ def run_get_conus_hydrology_point_data(geom_id):
         JSON response with hydrological stats for the requested geom ID.
     """
 
-    ds = fetch_hydrology_data(cov_id, geom_id)
+    ds = fetch_hydrology_data(seg_cov_id, geom_id)
     # save nc to test size of return
     ds.to_netcdf("/tmp/stats_from_geom_id.nc", engine="h5netcdf")
 
@@ -232,3 +247,18 @@ def run_get_conus_hydrology_point_data(geom_id):
         json.dump(json_results, f)
 
     return Response(json_results, mimetype="application/json")
+
+
+@routes.route("/conus_hydrology/hydrograph/<geom_id>")
+def run_get_conus_hydrology_hydrograph(geom_id):
+    """
+    Function to fetch hydrograph data from Rasdaman for a single geometry ID.
+    Example URL: http://localhost:5000/conus_hydrology/hydrograph/1000
+    Args:
+        geom_id (str): Geometry ID for the hydrology data
+    Returns:
+        JSON response with hydrograph data for the requested geom ID.
+    """
+    dict = asyncio.run(build_decode_dicts_from_dimension_attributes(hydrograph_cov_id))
+    print(dict)
+    return dict
