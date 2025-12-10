@@ -52,22 +52,6 @@ def package_landslide_data(landslide_resp, community_data=None):
         "risk_is_elevated_from_previous": data.get("risk_is_elevated_from_previous"),
     }
 
-    expires_at = data.get("expires_at")
-    if expires_at:
-        try:
-            expires_datetime = datetime.fromisoformat(str(expires_at))
-            current_datetime = (
-                datetime.now(expires_datetime.tzinfo)
-                if expires_datetime.tzinfo
-                else datetime.now()
-            )
-
-            if expires_datetime < current_datetime:
-                di["error_code"] = 409
-                di["error_msg"] = "Data is stale"
-        except (ValueError, TypeError) as exc:
-            raise exc
-
     # Add community data if provided
     if community_data:
         di["community"] = community_data
@@ -110,6 +94,23 @@ def run_fetch_landslide_data(community_id):
         community_data = get_place_data(community_id)
 
         landslide_data = package_landslide_data(results, community_data)
+
+        expires_at = landslide_data.get("expires_at")
+        if expires_at:
+            try:
+                expires_datetime = datetime.fromisoformat(str(expires_at))
+                current_datetime = (
+                    datetime.now(expires_datetime.tzinfo)
+                    if expires_datetime.tzinfo
+                    else datetime.now()
+                )
+                
+                # data are stale, return the data + HTTP code 409
+                if expires_datetime < current_datetime:
+                    return jsonify(landslide_data), 409
+
+            except (ValueError, TypeError) as exc:
+                raise exc
 
         return jsonify(landslide_data)
 
