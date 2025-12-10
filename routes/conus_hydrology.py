@@ -22,17 +22,19 @@ from validate_request import get_axis_encodings
 from config import RAS_BASE_URL
 from . import routes
 
+# TODO: Add validation of geom ID
+# TODO: Improve error handling throughout
+
 # TODO: change coverage to "conus_hydro_segments_maurer" and incorporate historical baseline stats
 seg_cov_id = "conus_hydro_segments_jp"
-# TODO: change to "Rasdaman Encoding" to disambiguate from the encoding attribute in the netCDF file
-# TODO: alternatively, put encodings in dimension attributes like the hydrograph dataset
+# TODO: put encodings in dimension attributes like the hydrograph dataset
 seg_encoding_attr = "Encoding"
 
 hydrograph_cov_id = "conus_hydro_segments_doy_mmm_maurer"
 hydrograph_dim_encoding_attr = "encoding"
 
 
-def fetch_hydrology_data(seg_cov_id, geom_id):
+def fetch_hydro_data(cov_id, geom_id, type):
     """
     Function to fetch hydrology data from Rasdaman. Data is fetched for one geometry ID at a time!
     Args:
@@ -42,9 +44,7 @@ def fetch_hydrology_data(seg_cov_id, geom_id):
     Returns:
         Xarray dataset with hydrological stats for the all var/lc/model/scenario/era combinations for the requested geom ID.
     """
-
-    url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(seg_cov_id, geom_id)
-    print(url)
+    url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, geom_id, type)
 
     with requests.get(url, verify=False) as r:
         if r.status_code != 200:
@@ -54,7 +54,7 @@ def fetch_hydrology_data(seg_cov_id, geom_id):
     return ds
 
 
-async def build_decode_dicts_from_dimension_attributes(cov_id):
+async def get_decode_dicts_from_axis_attributes(cov_id):
     metadata = await describe_via_wcps(cov_id)
     return get_axis_encodings(metadata)
 
@@ -107,9 +107,7 @@ def build_dict_and_populate_stats(geom_id, ds):
         Data dictionary with the hydrology stats populated.
     """
 
-    lc_dict, model_dict, scenario_dict, era_dict = build_decode_dicts(
-        ds, seg_encoding_attr
-    )
+    lc_dict, model_dict, scenario_dict, era_dict = build_decode_dicts(seg_encoding_attr)
 
     data_dict = {
         geom_id: {"name": None, "latitude": None, "longitude": None, "stats": {}}
@@ -213,13 +211,68 @@ def get_features_and_populate_attributes(data_dict):
     return data_dict
 
 
+def package_hydrograph_data(geom_id, ds):
+    """
+    Function to package the hydrograph data into a dictionary for JSON serialization.
+    The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
+    Streamflow values (cfs) are rounded to integers.
+    Args:
+        geom_id (str): Geometry ID for the hydrology data
+        ds (xarray dataset): Dataset with hydrograph data for the geom ID
+    Returns:
+        Data dictionary with the hydrograph data packaged for JSON serialization.
+    """
+    hydrograph_dict = {
+        geom_id: {"name": None, "latitude": None, "longitude": None, "data": {}}
+    }
+    vars = list(ds.data_vars)
+    for landcover in ds.landcover.values:
+        hydrograph_dict[geom_id]["data"][landcover] = {}
+        for model in ds.model.values:
+            hydrograph_dict[geom_id]["data"][landcover][model] = {}
+            for scenario in ds.scenario.values:
+                hydrograph_dict[geom_id]["data"][landcover][model][scenario] = {}
+                for era in ds.era.values:
+                    hydrograph_dict[geom_id]["data"][landcover][model][scenario][
+                        era
+                    ] = {}
+                    data_points = []
+                    # iterate over the doy dimension to get the hydrograph data points
+                    # create a dict with integer doy as key and a dict of variable values (min, mean, max) as values
+                    for doy in ds.doy.values:
+                        point_dict = {"doy": int(doy)}
+                        for var in vars:
+                            streamflow_value = (
+                                ds[var]
+                                .sel(
+                                    landcover=landcover,
+                                    model=model,
+                                    scenario=scenario,
+                                    era=era,
+                                    doy=doy,
+                                )
+                                .values
+                            )
+                            if np.isnan(streamflow_value):
+                                streamflow_value = None
+                            else:
+                                streamflow_value = int(streamflow_value)
+                            point_dict[var] = streamflow_value
+                        data_points.append(point_dict)
+                    hydrograph_dict[geom_id]["data"][landcover][model][scenario][
+                        era
+                    ] = data_points
+
+    return hydrograph_dict
+
+
 @routes.route("/conus_hydrology/")
 def conus_hydrology_about():
     return render_template("/documentation/conus_hydrology.html")
 
 
 @routes.route("/conus_hydrology/<geom_id>")
-def run_get_conus_hydrology_point_data(geom_id):
+def run_get_conus_hydrology_stats_data(geom_id):
     """
     Function to fetch hydrology data from Rasdaman for a single geometry ID.
     Example URL: http://localhost:5000/conus_hydrology/1000
@@ -229,9 +282,9 @@ def run_get_conus_hydrology_point_data(geom_id):
         JSON response with hydrological stats for the requested geom ID.
     """
 
-    ds = fetch_hydrology_data(seg_cov_id, geom_id)
-    # save nc to test size of return
-    ds.to_netcdf("/tmp/stats_from_geom_id.nc", engine="h5netcdf")
+    # NOTE: using type "stats" here explicitly subsets the model dimension to deal with a bug in rasdaman
+    # if the model dimension is ever changed in the Rasdaman coverage, this will need to be updated!
+    ds = fetch_hydro_data(seg_cov_id, geom_id, type="stats")
 
     # build the data dictionary and populate with the hydrology statistics
     data_dict = build_dict_and_populate_stats(geom_id, ds)
@@ -241,10 +294,6 @@ def run_get_conus_hydrology_point_data(geom_id):
 
     # convert to JSON
     json_results = json.dumps(data_dict, indent=4)
-
-    # save json to test size of return
-    with open("/tmp/result.json", "w", encoding="utf-8") as f:
-        json.dump(json_results, f)
 
     return Response(json_results, mimetype="application/json")
 
@@ -259,6 +308,23 @@ def run_get_conus_hydrology_hydrograph(geom_id):
     Returns:
         JSON response with hydrograph data for the requested geom ID.
     """
-    dict = asyncio.run(build_decode_dicts_from_dimension_attributes(hydrograph_cov_id))
-    print(dict)
-    return dict
+    # NOTE: using type "hydrograph" here explicitly subsets the model dimension to deal with a bug in rasdaman
+    # if the model dimension is ever changed in the Rasdaman coverage, this will need to be updated!
+    decode_dict = asyncio.run(get_decode_dicts_from_axis_attributes(hydrograph_cov_id))
+    ds = fetch_hydro_data(hydrograph_cov_id, geom_id, type="hydrograph")
+
+    # decode dimensions in the dataset to strings using the decode dictionaries
+    # replace the dimension values with the decoded strings
+    for dim in decode_dict.keys():
+        decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
+        ds[dim] = decoded_vals
+
+    print(ds)
+
+    # package the hydrograph data into a dictionary for JSON serialization
+    data_dict = package_hydrograph_data(geom_id, ds)
+
+    # convert to JSON
+    json_results = json.dumps(data_dict, indent=4)
+
+    return Response(json_results, mimetype="application/json")
