@@ -515,7 +515,7 @@ def get_coverage_encodings(coverage_metadata):
         raise ValueError(f"Invalid coverage metadata format: {str(e)}")
 
 
-def get_axis_coordinate_values(coverage_axis_metadata):
+def get_axis_coordinate_values(coverage_metadata):
     """
     Get axis encodings from the JSON output describing a coverage.
 
@@ -527,10 +527,20 @@ def get_axis_coordinate_values(coverage_axis_metadata):
 
     Raises:
         ValueError: If required information is missing in the JSON data.
+
+    Example:
+    >>> metadata = await describe_via_wcps("alfresco_relative_flammability_30yr")
+    >>> coord_values = get_axis_coordinate_values(metadata)
+    >>> print(coord_values)
+    {
+        "era": [0, 1, 2, 3, 4],
+        "model": [0, 1, 2, 3, 4, 5, 6],
+        "scenario": [0, 1, 2, 3]
+    }
     """
     try:
         # Navigate to the generalGrid section which contains the axis coordinate values
-        domain_set = coverage_axis_metadata.get("domainSet", {})
+        domain_set = coverage_metadata.get("domainSet", {})
         general_grid = domain_set.get("generalGrid", {})
         axes = general_grid.get("axis", [])
 
@@ -550,6 +560,10 @@ def get_axis_coordinate_values(coverage_axis_metadata):
 
     except (KeyError, TypeError) as e:
         raise ValueError(f"Invalid coverage metadata format: {str(e)}")
+
+
+def get_axis_encodings():
+    return None
 
 
 def get_coverage_crs_str(coverage_metadata):
