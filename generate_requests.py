@@ -195,11 +195,12 @@ def generate_wcps_describe_coverage_str(cov_id):
     return quote(query_str)
 
 
-def generate_conus_hydrology_wcs_str(cov_id, geom_id):
+def generate_conus_hydrology_wcs_str(cov_id, geom_id, type):
     """Generate a WCS GetCoverage request for fetching CONUS hydrology data.
     Args:
         cov_id (str): Coverage ID
         geom_id (str): Geometry ID
+        type (str): Type of data to fetch, either 'stats' or 'hydrograph'
     Returns:
         request_string (str): WCS GetCoverage Request to append to a query URL
     """
@@ -207,10 +208,16 @@ def generate_conus_hydrology_wcs_str(cov_id, geom_id):
     request_string = f"ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&"
     request_string += f"COVERAGEID={cov_id}&"
 
-    # adding the model subset because there is a bug with the default rasql query
-    request_string += f"SUBSET=model(0,12)&"
+    # NOTE: using type "stats" here explicitly subsets the model dimension to deal with a bug in the default rasql query!
+    # if the model dimension is ever changed in the Rasdaman coverage, this will need to be updated!
+    if type == "stats":
+        request_string += f"SUBSET=model(0,12)&"
+        request_string += f"SUBSET=geom_id({geom_id})&"
 
-    request_string += f"SUBSET=geom_id({geom_id})&"
+    elif type == "hydrograph":
+        request_string += f"SUBSET=model(0,13)&"
+        request_string += f"SUBSET=stream_id({geom_id})&"
+
     request_string += f"FORMAT=application/netcdf"
 
     return request_string
