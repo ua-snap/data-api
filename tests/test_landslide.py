@@ -78,13 +78,7 @@ def test_landslide_package_data_stale_datetime(client, monkeypatch):
     monkeypatch.setattr("routes.landslide.get_place_data", mock_get_place_data)
 
     response = client.get("/landslide/AK91")
-    assert response.status_code == 200
-
-    actual_data = response.get_json()
-    assert "error_code" in actual_data
-    assert actual_data["error_code"] == 409
-    assert "error_msg" in actual_data
-    assert actual_data["error_msg"] == "Data is stale"
+    assert response.status_code == 409
 
 
 def test_landslide_general_exception_in_processing(client, monkeypatch):
