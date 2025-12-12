@@ -17,8 +17,9 @@ from flask import (
 
 from generate_requests import generate_conus_hydrology_wcs_str
 from generate_urls import generate_wfs_conus_hydrology_url
-from fetch_data import describe_via_wcps
+from fetch_data import fetch_data, describe_via_wcps
 from validate_request import get_axis_encodings
+from postprocessing import prune_nulls_with_max_intensity
 from config import RAS_BASE_URL
 from . import routes
 
@@ -30,7 +31,7 @@ seg_cov_id = "conus_hydro_segments_jp"
 # TODO: put encodings in dimension attributes like the hydrograph dataset
 seg_encoding_attr = "Encoding"
 
-hydrograph_hist_cov_id = "conus_hydro_segments_doy_mmm_maurer_historical_test"
+hydrograph_hist_cov_id = "conus_hydro_segments_doy_mmm_maurer_historical_test_2"
 hydrograph_proj_cov_id = "conus_hydro_segments_doy_mmm_maurer_projected_test"
 hydrograph_dim_encoding_attr = "encoding"
 
@@ -46,11 +47,8 @@ def fetch_hydro_data(cov_id, geom_id, type):
         Xarray dataset with hydrological stats for the all var/lc/model/scenario/era combinations for the requested geom ID.
     """
     url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, geom_id, type)
-
-    with requests.get(url, verify=False) as r:
-        if r.status_code != 200:
-            return render_template("500/server_error.html"), 500
-        ds = xr.open_dataset(io.BytesIO(r.content))
+    response = asyncio.run(fetch_data([url]))
+    ds = xr.open_dataset(io.BytesIO(response))
 
     return ds
 
@@ -229,23 +227,35 @@ def package_hydrograph_data(geom_id, ds_hist, ds_proj):
     }
 
     for ds in [ds_hist, ds_proj]:
-        vars = list(ds.data_vars)
         for landcover in ds.landcover.values:
-            hydrograph_dict[geom_id]["data"][landcover] = {}
+            if landcover not in hydrograph_dict[geom_id]["data"]:
+                hydrograph_dict[geom_id]["data"][landcover] = {}
             for model in ds.model.values:
-                hydrograph_dict[geom_id]["data"][landcover][model] = {}
+                if model not in hydrograph_dict[geom_id]["data"][landcover]:
+                    hydrograph_dict[geom_id]["data"][landcover][model] = {}
                 for scenario in ds.scenario.values:
-                    hydrograph_dict[geom_id]["data"][landcover][model][scenario] = {}
-                    for era in ds.era.values:
-                        hydrograph_dict[geom_id]["data"][landcover][model][scenario][
-                            era
+                    if (
+                        scenario
+                        not in hydrograph_dict[geom_id]["data"][landcover][model]
+                    ):
+                        hydrograph_dict[geom_id]["data"][landcover][model][
+                            scenario
                         ] = {}
-                        data_points = []
+                    for era in ds.era.values:
+                        if (
+                            era
+                            not in hydrograph_dict[geom_id]["data"][landcover][model][
+                                scenario
+                            ]
+                        ):
+                            hydrograph_dict[geom_id]["data"][landcover][model][
+                                scenario
+                            ][era] = {}
                         # iterate over the doy dimension to get the hydrograph data points
-                        # create a dict with integer doy as key and a dict of variable values (min, mean, max) as values
+                        # populate a dict with integer doy as key and a dict of variable values (min, mean, max) as values
                         for doy in ds.doy.values:
-                            point_dict = {"doy": int(doy)}
-                            for var in vars:
+                            var_dict = {}
+                            for var in list(ds.data_vars):
                                 streamflow_value = (
                                     ds[var]
                                     .sel(
@@ -261,11 +271,10 @@ def package_hydrograph_data(geom_id, ds_hist, ds_proj):
                                     streamflow_value = None
                                 else:
                                     streamflow_value = int(streamflow_value)
-                                point_dict[var] = streamflow_value
-                            data_points.append(point_dict)
-                        hydrograph_dict[geom_id]["data"][landcover][model][scenario][
-                            era
-                        ] = data_points
+                                var_dict[var] = streamflow_value
+                            hydrograph_dict[geom_id]["data"][landcover][model][
+                                scenario
+                            ][era][int(doy)] = var_dict
 
     return hydrograph_dict
 
@@ -340,7 +349,11 @@ def run_get_conus_hydrology_hydrograph(geom_id):
     # package the hydrograph data into a dictionary for JSON serialization
     data_dict = package_hydrograph_data(geom_id, ds_hist, ds_proj)
 
+    # have to prune twice to remove all the missing scenario / era combinations
+    pruned_data_dict = prune_nulls_with_max_intensity(data_dict)
+    pruned_data_dict = prune_nulls_with_max_intensity(pruned_data_dict)
+
     # convert to JSON
-    json_results = json.dumps(data_dict, indent=4)
+    json_results = json.dumps(pruned_data_dict, indent=4)
 
     return Response(json_results, mimetype="application/json")
