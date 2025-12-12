@@ -349,6 +349,7 @@ def run_get_conus_hydrology_hydrograph(geom_id):
     # package the hydrograph data into a dictionary for JSON serialization
     data_dict = package_hydrograph_data(geom_id, ds_hist, ds_proj)
 
+    # TODO: this pruning only works for lowest dict level - how to remove empty scenario/era combinations?
     # have to prune twice to remove all the missing scenario / era combinations
     pruned_data_dict = prune_nulls_with_max_intensity(data_dict)
     pruned_data_dict = prune_nulls_with_max_intensity(pruned_data_dict)
