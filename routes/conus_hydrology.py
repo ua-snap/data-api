@@ -30,7 +30,8 @@ seg_cov_id = "conus_hydro_segments_jp"
 # TODO: put encodings in dimension attributes like the hydrograph dataset
 seg_encoding_attr = "Encoding"
 
-hydrograph_cov_id = "conus_hydro_segments_doy_mmm_maurer"
+hydrograph_hist_cov_id = "conus_hydro_segments_doy_mmm_maurer_historical_test"
+hydrograph_proj_cov_id = "conus_hydro_segments_doy_mmm_maurer_projected_test"
 hydrograph_dim_encoding_attr = "encoding"
 
 
@@ -211,57 +212,60 @@ def get_features_and_populate_attributes(data_dict):
     return data_dict
 
 
-def package_hydrograph_data(geom_id, ds):
+def package_hydrograph_data(geom_id, ds_hist, ds_proj):
     """
     Function to package the hydrograph data into a dictionary for JSON serialization.
     The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
     Streamflow values (cfs) are rounded to integers.
     Args:
         geom_id (str): Geometry ID for the hydrology data
-        ds (xarray dataset): Dataset with hydrograph data for the geom ID
+        ds_proj (xarray dataset): Dataset with historical era hydrograph data for the geom ID
+        ds_hist (xarray dataset): Dataset with projected era hydrograph data for the geom ID
     Returns:
         Data dictionary with the hydrograph data packaged for JSON serialization.
     """
     hydrograph_dict = {
         geom_id: {"name": None, "latitude": None, "longitude": None, "data": {}}
     }
-    vars = list(ds.data_vars)
-    for landcover in ds.landcover.values:
-        hydrograph_dict[geom_id]["data"][landcover] = {}
-        for model in ds.model.values:
-            hydrograph_dict[geom_id]["data"][landcover][model] = {}
-            for scenario in ds.scenario.values:
-                hydrograph_dict[geom_id]["data"][landcover][model][scenario] = {}
-                for era in ds.era.values:
-                    hydrograph_dict[geom_id]["data"][landcover][model][scenario][
-                        era
-                    ] = {}
-                    data_points = []
-                    # iterate over the doy dimension to get the hydrograph data points
-                    # create a dict with integer doy as key and a dict of variable values (min, mean, max) as values
-                    for doy in ds.doy.values:
-                        point_dict = {"doy": int(doy)}
-                        for var in vars:
-                            streamflow_value = (
-                                ds[var]
-                                .sel(
-                                    landcover=landcover,
-                                    model=model,
-                                    scenario=scenario,
-                                    era=era,
-                                    doy=doy,
+
+    for ds in [ds_hist, ds_proj]:
+        vars = list(ds.data_vars)
+        for landcover in ds.landcover.values:
+            hydrograph_dict[geom_id]["data"][landcover] = {}
+            for model in ds.model.values:
+                hydrograph_dict[geom_id]["data"][landcover][model] = {}
+                for scenario in ds.scenario.values:
+                    hydrograph_dict[geom_id]["data"][landcover][model][scenario] = {}
+                    for era in ds.era.values:
+                        hydrograph_dict[geom_id]["data"][landcover][model][scenario][
+                            era
+                        ] = {}
+                        data_points = []
+                        # iterate over the doy dimension to get the hydrograph data points
+                        # create a dict with integer doy as key and a dict of variable values (min, mean, max) as values
+                        for doy in ds.doy.values:
+                            point_dict = {"doy": int(doy)}
+                            for var in vars:
+                                streamflow_value = (
+                                    ds[var]
+                                    .sel(
+                                        landcover=landcover,
+                                        model=model,
+                                        scenario=scenario,
+                                        era=era,
+                                        doy=doy,
+                                    )
+                                    .values
                                 )
-                                .values
-                            )
-                            if np.isnan(streamflow_value):
-                                streamflow_value = None
-                            else:
-                                streamflow_value = int(streamflow_value)
-                            point_dict[var] = streamflow_value
-                        data_points.append(point_dict)
-                    hydrograph_dict[geom_id]["data"][landcover][model][scenario][
-                        era
-                    ] = data_points
+                                if np.isnan(streamflow_value):
+                                    streamflow_value = None
+                                else:
+                                    streamflow_value = int(streamflow_value)
+                                point_dict[var] = streamflow_value
+                            data_points.append(point_dict)
+                        hydrograph_dict[geom_id]["data"][landcover][model][scenario][
+                            era
+                        ] = data_points
 
     return hydrograph_dict
 
@@ -308,21 +312,33 @@ def run_get_conus_hydrology_hydrograph(geom_id):
     Returns:
         JSON response with hydrograph data for the requested geom ID.
     """
-    # NOTE: using type "hydrograph" here explicitly subsets the model dimension to deal with a bug in rasdaman
+    # NOTE: using type "hydrograph_*" here explicitly subsets the model dimension to deal with a bug in rasdaman
     # if the model dimension is ever changed in the Rasdaman coverage, this will need to be updated!
-    decode_dict = asyncio.run(get_decode_dicts_from_axis_attributes(hydrograph_cov_id))
-    ds = fetch_hydro_data(hydrograph_cov_id, geom_id, type="hydrograph")
+    decode_dict_hist = asyncio.run(
+        get_decode_dicts_from_axis_attributes(hydrograph_hist_cov_id)
+    )
+    ds_hist = fetch_hydro_data(hydrograph_hist_cov_id, geom_id, type="hydrograph_hist")
+
+    decode_dict_proj = asyncio.run(
+        get_decode_dicts_from_axis_attributes(hydrograph_proj_cov_id)
+    )
+    ds_proj = fetch_hydro_data(hydrograph_proj_cov_id, geom_id, type="hydrograph_proj")
 
     # decode dimensions in the dataset to strings using the decode dictionaries
     # replace the dimension values with the decoded strings
-    for dim in decode_dict.keys():
-        decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
-        ds[dim] = decoded_vals
+    for dim in decode_dict_hist.keys():
+        decoded_vals = [decode_dict_hist[dim][float(v)] for v in ds_hist[dim].values]
+        ds_hist[dim] = decoded_vals
 
-    print(ds)
+    for dim in decode_dict_proj.keys():
+        decoded_vals = [decode_dict_proj[dim][float(v)] for v in ds_proj[dim].values]
+        ds_proj[dim] = decoded_vals
+
+    print(ds_hist)
+    print(ds_proj)
 
     # package the hydrograph data into a dictionary for JSON serialization
-    data_dict = package_hydrograph_data(geom_id, ds)
+    data_dict = package_hydrograph_data(geom_id, ds_hist, ds_proj)
 
     # convert to JSON
     json_results = json.dumps(data_dict, indent=4)
