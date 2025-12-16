@@ -4,6 +4,7 @@ import io
 import numpy as np
 import xarray as xr
 import json
+import ast
 import geopandas as gpd
 import xml.etree.ElementTree as ET
 from flask import (
@@ -55,18 +56,20 @@ def fetch_hydro_data(cov_id, stream_id, type):
 
 def package_stats_data(stream_id, ds):
     stats_dict = {
-        stream_id: {"name": None, "latitude": None, "longitude": None, "data": {}}
+        "id": stream_id,
+        "name": None,
+        "latitude": None,
+        "longitude": None,
+        "metadata": {},
+        "data": {},
     }
 
     for landcover in ds.landcover.values:
-        if landcover not in stats_dict[stream_id]["data"]:
-            stats_dict[stream_id]["data"][landcover] = {}
+        stats_dict["data"][landcover] = {}
         for model in ds.model.values:
-            if model not in stats_dict[stream_id]["data"][landcover]:
-                stats_dict[stream_id]["data"][landcover][model] = {}
+            stats_dict["data"][landcover][model] = {}
             for scenario in ds.scenario.values:
-                if scenario not in stats_dict[stream_id]["data"][landcover][model]:
-                    stats_dict[stream_id]["data"][landcover][model][scenario] = {}
+                stats_dict["data"][landcover][model][scenario] = {}
                 for era in ds.era.values:
 
                     var_dict = {}
@@ -86,18 +89,34 @@ def package_stats_data(stream_id, ds):
                             stat_value = None
                         else:
                             stat_value = round(stat_value, 2)
+                        var_dict[var] = stat_value
 
-                        var_dict[var] = {
-                            "value": stat_value,
-                            "units": ds[var].attrs.get("units", ""),
-                            # "description": ds[var].attrs.get("description", ""),
-                        }
-
-                    stats_dict[stream_id]["data"][landcover][model][scenario][
-                        era
-                    ] = var_dict
+                    stats_dict["data"][landcover][model][scenario][era] = var_dict
 
     return stats_dict
+
+
+def package_metadata(ds, data_dict):
+    try:
+        ds_source_str = ds.attrs["Data_Source"]
+        ds_source_dict = ast.literal_eval(ds_source_str)
+        citation = ds_source_dict.get("Citation", "")
+        data_dict["metadata"]["source"] = {"citation": citation}
+    except Exception as e:
+        data_dict["metadata"]["source"] = {"citation": ""}
+        # for debugging ... can remove and just have empty citation
+        print(e)
+
+    data_dict["metadata"]["variables"] = {}
+    for var in list(ds.data_vars):
+        data_dict["metadata"]["variables"][var] = {}
+        data_dict["metadata"]["variables"][var]["units"] = ds[var].attrs.get(
+            "units", ""
+        )
+        data_dict["metadata"]["variables"][var]["description"] = ds[var].attrs.get(
+            "description", ""
+        )
+    return data_dict
 
 
 # TODO: condense into a package_stats_data() function
@@ -156,34 +175,32 @@ def package_hydrograph_data(stream_id, ds_hist, ds_proj):
         Data dictionary with the hydrograph data packaged for JSON serialization.
     """
     hydrograph_dict = {
-        stream_id: {"name": None, "latitude": None, "longitude": None, "data": {}}
+        "id": stream_id,
+        "name": None,
+        "latitude": None,
+        "longitude": None,
+        "metadata": {},
+        "data": {},
     }
 
     for ds in [ds_hist, ds_proj]:
         for landcover in ds.landcover.values:
-            if landcover not in hydrograph_dict[stream_id]["data"]:
-                hydrograph_dict[stream_id]["data"][landcover] = {}
+            if landcover not in hydrograph_dict["data"]:
+                hydrograph_dict["data"][landcover] = {}
             for model in ds.model.values:
-                if model not in hydrograph_dict[stream_id]["data"][landcover]:
-                    hydrograph_dict[stream_id]["data"][landcover][model] = {}
+                if model not in hydrograph_dict["data"][landcover]:
+                    hydrograph_dict["data"][landcover][model] = {}
                 for scenario in ds.scenario.values:
-                    if (
-                        scenario
-                        not in hydrograph_dict[stream_id]["data"][landcover][model]
-                    ):
-                        hydrograph_dict[stream_id]["data"][landcover][model][
-                            scenario
-                        ] = {}
+                    if scenario not in hydrograph_dict["data"][landcover][model]:
+                        hydrograph_dict["data"][landcover][model][scenario] = {}
                     for era in ds.era.values:
                         if (
                             era
-                            not in hydrograph_dict[stream_id]["data"][landcover][model][
-                                scenario
-                            ]
+                            not in hydrograph_dict["data"][landcover][model][scenario]
                         ):
-                            hydrograph_dict[stream_id]["data"][landcover][model][
-                                scenario
-                            ][era] = {}
+                            hydrograph_dict["data"][landcover][model][scenario][
+                                era
+                            ] = {}
                         # iterate over the doy dimension to get the hydrograph data points
                         # populate a dict with integer doy as key and a dict of variable values (min, mean, max) as values
                         for doy in ds.doy.values:
@@ -205,9 +222,22 @@ def package_hydrograph_data(stream_id, ds_hist, ds_proj):
                                 else:
                                     streamflow_value = int(streamflow_value)
                                 var_dict[var] = streamflow_value
-                            hydrograph_dict[stream_id]["data"][landcover][model][
-                                scenario
-                            ][era][int(doy)] = var_dict
+                            hydrograph_dict["data"][landcover][model][scenario][era][
+                                int(doy)
+                            ] = var_dict
+
+    # TODO: reingest with metadata like stats coverage
+    # # get metadata from one dataset only - they all have same variables and attributes
+    # hydrograph_dict["metadata"]["source"] = dict(ds_hist.attrs["Data_Source"])
+    # hydrograph_dict["metadata"]["variables"] = {}
+    # for var in list(ds_hist.data_vars):
+    #     hydrograph_dict["metadata"]["variables"][var] = {}
+    #     hydrograph_dict["metadata"]["variables"][var]["units"] = ds_hist[var].attrs.get(
+    #         "units", ""
+    #     )
+    #     hydrograph_dict["metadata"]["variables"][var][
+    #         "description"
+    #     ] = ds_hist[var].attrs.get("description", "")
 
     return hydrograph_dict
 
@@ -234,8 +264,9 @@ def run_get_conus_hydrology_stats_data(stream_id):
     for dim in decode_dict.keys():
         decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
         ds[dim] = decoded_vals
-    # package the stats data into a dictionary for JSON serialization
+    # package the stats data + metadata into a dictionary for JSON serialization
     data_dict = package_stats_data(stream_id, ds)
+    data_dict = package_metadata(ds, data_dict)
 
     # TODO: populate attributes from vector data
     # data_dict = get_features_and_populate_attributes(data_dict)
@@ -280,8 +311,11 @@ def run_get_conus_hydrology_hydrograph(stream_id):
         decoded_vals = [decode_dict_proj[dim][float(v)] for v in ds_proj[dim].values]
         ds_proj[dim] = decoded_vals
 
-    # Package the hydrograph data into a dictionary for JSON serialization
+    # Package the hydrograph data + metadata into a dictionary for JSON serialization
     data_dict = package_hydrograph_data(stream_id, ds_hist, ds_proj)
+    data_dict = package_metadata(
+        ds_hist, data_dict
+    )  # historical dataset should all required metadata
 
     # TODO: populate attributes from vector data
     # data_dict = get_features_and_populate_attributes(data_dict)
