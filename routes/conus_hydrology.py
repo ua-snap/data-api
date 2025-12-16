@@ -18,35 +18,31 @@ from flask import (
 from generate_requests import generate_conus_hydrology_wcs_str
 from generate_urls import generate_wfs_conus_hydrology_url
 from fetch_data import fetch_data, describe_via_wcps
-from validate_request import get_axis_encodings
+from validate_request import get_axis_encodings, get_coverage_encodings
 from postprocessing import prune_nulls_with_max_intensity
 from config import RAS_BASE_URL
 from . import routes
 
-# TODO: Add validation of geom ID
+# TODO: Add validation of stream ID
 # TODO: Improve error handling throughout
 
-# TODO: change coverage to "conus_hydro_segments_maurer" and incorporate historical baseline stats
-seg_cov_id = "conus_hydro_segments_jp"
-# TODO: put encodings in dimension attributes like the hydrograph dataset
-seg_encoding_attr = "Encoding"
+seg_cov_id = "conus_hydro_segments_all_stats"
 
 hydrograph_hist_cov_id = "conus_hydro_segments_doy_mmm_maurer_historical_test_2"
 hydrograph_proj_cov_id = "conus_hydro_segments_doy_mmm_maurer_projected_test"
-hydrograph_dim_encoding_attr = "encoding"
 
 
-def fetch_hydro_data(cov_id, geom_id, type):
+def fetch_hydro_data(cov_id, stream_id, type):
     """
-    Function to fetch hydrology data from Rasdaman. Data is fetched for one geometry ID at a time!
+    Function to fetch hydrology data from Rasdaman. Data is fetched for one stream ID at a time!
     Args:
         coverage_id (str): Coverage ID for the hydrology data
-        geom_id (str): Geometry ID for the hydrology data
+        stream_id (str): Stream ID for the hydrology data
 
     Returns:
-        Xarray dataset with hydrological stats for the all var/lc/model/scenario/era combinations for the requested geom ID.
+        Xarray dataset with hydrological stats for the all var/lc/model/scenario/era combinations for the requested stream ID.
     """
-    url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, geom_id, type)
+    url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id, type)
     response = asyncio.run(fetch_data([url]))
     ds = xr.open_dataset(io.BytesIO(response))
 
@@ -58,6 +54,12 @@ async def get_decode_dicts_from_axis_attributes(cov_id):
     return get_axis_encodings(metadata)
 
 
+async def get_decode_dicts_from_coverage_attributes(cov_id):
+    metadata = await describe_via_wcps(cov_id)
+    return get_coverage_encodings(metadata)
+
+
+# TODO: replace this function with get_decode_dicts_from_axis_attributes()
 def build_decode_dicts(seg_encoding_attr):
     """
     Function to build decoding dictionaries.
@@ -65,7 +67,7 @@ def build_decode_dicts(seg_encoding_attr):
     returns the dictionary of encodings. Reverses the dictionary of encodingsd so we can decodes
     and return dimensions as strings.
     Args:
-        ds (xarray dataset): Dataset with hydrological stats for the geom ID
+        ds (xarray dataset): Dataset with hydrological stats for the stream ID
         seg_encoding_attr (str): Attribute name for the encoding dictionary in the XML response
     Returns:
         Decoded data dictionary with human-readable keys."""
@@ -94,13 +96,14 @@ def build_decode_dicts(seg_encoding_attr):
     return lc_dict, model_dict, scenario_dict, era_dict
 
 
-def build_dict_and_populate_stats(geom_id, ds):
+# TODO: condense into a package_stats_data() function
+def build_dict_and_populate_stats(stream_id, ds):
     """
     Function to populate the stats in the data dictionary with the hydrology statistics.
     The levels of the stats data dictionary are as follows: landcover, model, scenario, era, variable.
     Args:
-        geom_id (str): Geometry ID for the hydrology data
-        ds (xarray dataset): Dataset with hydrological stats for the geom ID
+        stream_id (str): Stream ID for the hydrology data
+        ds (xarray dataset): Dataset with hydrological stats for the stream ID
         data_dict (dict): Data dictionary to populate with the hydrology stats
     Returns:
         Data dictionary with the hydrology stats populated.
@@ -109,23 +112,23 @@ def build_dict_and_populate_stats(geom_id, ds):
     lc_dict, model_dict, scenario_dict, era_dict = build_decode_dicts(seg_encoding_attr)
 
     data_dict = {
-        geom_id: {"name": None, "latitude": None, "longitude": None, "stats": {}}
+        stream_id: {"name": None, "latitude": None, "longitude": None, "stats": {}}
     }
 
     # get the stats from the dataset for each landcover, model, scenario, era, and variable.
     vars = list(ds.data_vars)
     for lc in ds.lc.values:
-        data_dict[geom_id]["stats"][lc_dict[lc]] = {}
+        data_dict[stream_id]["stats"][lc_dict[lc]] = {}
         for model in ds.model.values:
-            data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]] = {}
+            data_dict[stream_id]["stats"][lc_dict[lc]][model_dict[model]] = {}
             for scenario in ds.scenario.values:
-                data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                data_dict[stream_id]["stats"][lc_dict[lc]][model_dict[model]][
                     scenario_dict[scenario]
                 ] = {}
                 # if scenario is historical, get only the first era values (all others are null)
                 if scenario_dict[scenario] == "historical":
                     for era in ds.era.values[:1]:
-                        data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                        data_dict[stream_id]["stats"][lc_dict[lc]][model_dict[model]][
                             scenario_dict[scenario]
                         ][era_dict[era]] = {}
                         stats_dict = {}
@@ -141,13 +144,13 @@ def build_dict_and_populate_stats(geom_id, ds):
 
                             stats_dict[var] = stat_value
 
-                            data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
-                                scenario_dict[scenario]
-                            ][era_dict[era]] = stats_dict
+                            data_dict[stream_id]["stats"][lc_dict[lc]][
+                                model_dict[model]
+                            ][scenario_dict[scenario]][era_dict[era]] = stats_dict
                 # if scenario is not historical, get all era values except the first (which is null)
                 else:
                     for era in ds.era.values[1:]:
-                        data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
+                        data_dict[stream_id]["stats"][lc_dict[lc]][model_dict[model]][
                             scenario_dict[scenario]
                         ][era_dict[era]] = {}
                         stats_dict = {}
@@ -162,21 +165,23 @@ def build_dict_and_populate_stats(geom_id, ds):
                                 stat_value = None
 
                             stats_dict[var] = stat_value
-                            data_dict[geom_id]["stats"][lc_dict[lc]][model_dict[model]][
-                                scenario_dict[scenario]
-                            ][era_dict[era]] = stats_dict
+                            data_dict[stream_id]["stats"][lc_dict[lc]][
+                                model_dict[model]
+                            ][scenario_dict[scenario]][era_dict[era]] = stats_dict
 
     return data_dict
 
 
+# TODO: condense into a package_stats_data() function
+# TODO: can this be done via existing data fetching function?
 def get_features_and_populate_attributes(data_dict):
     """Function to populate the data dictionary with the attributes from the vector data.
     Args:
         data_dict (dict): Data dictionary with the hydrology stats populated
     Returns:
         Data dictionary with the vector attributes populated."""
-    for geom_id in data_dict.keys():
-        url = generate_wfs_conus_hydrology_url(geom_id)
+    for stream_id in data_dict.keys():
+        url = generate_wfs_conus_hydrology_url(stream_id)
 
         # get the features
         with requests.get(
@@ -203,52 +208,52 @@ def get_features_and_populate_attributes(data_dict):
         rep_x_coord = seg_gdf.loc[0].geometry.representative_point().x
         rep_y_coord = seg_gdf.loc[0].geometry.representative_point().y
 
-        data_dict[geom_id]["name"] = seg_gdf.loc[0].GNIS_NAME
-        data_dict[geom_id]["latitude"] = rep_y_coord
-        data_dict[geom_id]["longitude"] = rep_x_coord
+        data_dict[stream_id]["name"] = seg_gdf.loc[0].GNIS_NAME
+        data_dict[stream_id]["latitude"] = rep_y_coord
+        data_dict[stream_id]["longitude"] = rep_x_coord
 
     return data_dict
 
 
-def package_hydrograph_data(geom_id, ds_hist, ds_proj):
+def package_hydrograph_data(stream_id, ds_hist, ds_proj):
     """
     Function to package the hydrograph data into a dictionary for JSON serialization.
     The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
     Streamflow values (cfs) are rounded to integers.
     Args:
-        geom_id (str): Geometry ID for the hydrology data
-        ds_proj (xarray dataset): Dataset with historical era hydrograph data for the geom ID
-        ds_hist (xarray dataset): Dataset with projected era hydrograph data for the geom ID
+        stream_id (str): Stream ID for the hydrology data
+        ds_proj (xarray dataset): Dataset with historical era hydrograph data for the stream ID
+        ds_hist (xarray dataset): Dataset with projected era hydrograph data for the stream ID
     Returns:
         Data dictionary with the hydrograph data packaged for JSON serialization.
     """
     hydrograph_dict = {
-        geom_id: {"name": None, "latitude": None, "longitude": None, "data": {}}
+        stream_id: {"name": None, "latitude": None, "longitude": None, "data": {}}
     }
 
     for ds in [ds_hist, ds_proj]:
         for landcover in ds.landcover.values:
-            if landcover not in hydrograph_dict[geom_id]["data"]:
-                hydrograph_dict[geom_id]["data"][landcover] = {}
+            if landcover not in hydrograph_dict[stream_id]["data"]:
+                hydrograph_dict[stream_id]["data"][landcover] = {}
             for model in ds.model.values:
-                if model not in hydrograph_dict[geom_id]["data"][landcover]:
-                    hydrograph_dict[geom_id]["data"][landcover][model] = {}
+                if model not in hydrograph_dict[stream_id]["data"][landcover]:
+                    hydrograph_dict[stream_id]["data"][landcover][model] = {}
                 for scenario in ds.scenario.values:
                     if (
                         scenario
-                        not in hydrograph_dict[geom_id]["data"][landcover][model]
+                        not in hydrograph_dict[stream_id]["data"][landcover][model]
                     ):
-                        hydrograph_dict[geom_id]["data"][landcover][model][
+                        hydrograph_dict[stream_id]["data"][landcover][model][
                             scenario
                         ] = {}
                     for era in ds.era.values:
                         if (
                             era
-                            not in hydrograph_dict[geom_id]["data"][landcover][model][
+                            not in hydrograph_dict[stream_id]["data"][landcover][model][
                                 scenario
                             ]
                         ):
-                            hydrograph_dict[geom_id]["data"][landcover][model][
+                            hydrograph_dict[stream_id]["data"][landcover][model][
                                 scenario
                             ][era] = {}
                         # iterate over the doy dimension to get the hydrograph data points
@@ -272,7 +277,7 @@ def package_hydrograph_data(geom_id, ds_hist, ds_proj):
                                 else:
                                     streamflow_value = int(streamflow_value)
                                 var_dict[var] = streamflow_value
-                            hydrograph_dict[geom_id]["data"][landcover][model][
+                            hydrograph_dict[stream_id]["data"][landcover][model][
                                 scenario
                             ][era][int(doy)] = var_dict
 
@@ -284,23 +289,28 @@ def conus_hydrology_about():
     return render_template("/documentation/conus_hydrology.html")
 
 
-@routes.route("/conus_hydrology/<geom_id>")
-def run_get_conus_hydrology_stats_data(geom_id):
+@routes.route("/conus_hydrology/<stream_id>")
+def run_get_conus_hydrology_stats_data(stream_id):
     """
-    Function to fetch hydrology data from Rasdaman for a single geometry ID.
+    Function to fetch hydrology data from Rasdaman for a single stream ID.
     Example URL: http://localhost:5000/conus_hydrology/1000
     Args:
-        geom_id (str): Geometry ID for the hydrology data
+        stream_id (str): Stream ID for the hydrology data
     Returns:
-        JSON response with hydrological stats for the requested geom ID.
+        JSON response with hydrological stats for the requested stream ID.
     """
 
-    # NOTE: using type "stats" here explicitly subsets the model dimension to deal with a bug in rasdaman
-    # if the model dimension is ever changed in the Rasdaman coverage, this will need to be updated!
-    ds = fetch_hydro_data(seg_cov_id, geom_id, type="stats")
+    # testing
+    # print("ORIGINAL ENCODINGS OUTPUT:")
+    # print(build_decode_dicts(seg_encoding_attr), "\n\n")
+    decode_dict = asyncio.run(get_decode_dicts_from_axis_attributes(seg_cov_id))
+    print("NEW ENCODINGS OUTPUT:")
+    print(decode_dict)
+
+    ds = fetch_hydro_data(seg_cov_id, stream_id, type="stats")
 
     # build the data dictionary and populate with the hydrology statistics
-    data_dict = build_dict_and_populate_stats(geom_id, ds)
+    data_dict = build_dict_and_populate_stats(stream_id, ds)
 
     # populate attributes from vector data
     data_dict = get_features_and_populate_attributes(data_dict)
@@ -311,30 +321,30 @@ def run_get_conus_hydrology_stats_data(geom_id):
     return Response(json_results, mimetype="application/json")
 
 
-@routes.route("/conus_hydrology/hydrograph/<geom_id>")
-def run_get_conus_hydrology_hydrograph(geom_id):
+@routes.route("/conus_hydrology/hydrograph/<stream_id>")
+def run_get_conus_hydrology_hydrograph(stream_id):
     """
-    Function to fetch hydrograph data from Rasdaman for a single geometry ID.
+    Function to fetch hydrograph data from Rasdaman for a single stream ID.
     Example URL: http://localhost:5000/conus_hydrology/hydrograph/1000
     Args:
-        geom_id (str): Geometry ID for the hydrology data
+        stream_id (str): Stream ID for the hydrology data
     Returns:
-        JSON response with hydrograph data for the requested geom ID.
+        JSON response with hydrograph data for the requested stream ID.
     """
-    # NOTE: using type "hydrograph_*" here explicitly subsets the model dimension to deal with a bug in rasdaman
-    # if the model dimension is ever changed in the Rasdaman coverage, this will need to be updated!
     decode_dict_hist = asyncio.run(
         get_decode_dicts_from_axis_attributes(hydrograph_hist_cov_id)
     )
-    ds_hist = fetch_hydro_data(hydrograph_hist_cov_id, geom_id, type="hydrograph_hist")
-
+    ds_hist = fetch_hydro_data(
+        hydrograph_hist_cov_id, stream_id, type="hydrograph_hist"
+    )
     decode_dict_proj = asyncio.run(
         get_decode_dicts_from_axis_attributes(hydrograph_proj_cov_id)
     )
-    ds_proj = fetch_hydro_data(hydrograph_proj_cov_id, geom_id, type="hydrograph_proj")
+    ds_proj = fetch_hydro_data(
+        hydrograph_proj_cov_id, stream_id, type="hydrograph_proj"
+    )
 
-    # decode dimensions in the dataset to strings using the decode dictionaries
-    # replace the dimension values with the decoded strings
+    # Decode dimensions in the dataset to strings using the decode dictionaries
     for dim in decode_dict_hist.keys():
         decoded_vals = [decode_dict_hist[dim][float(v)] for v in ds_hist[dim].values]
         ds_hist[dim] = decoded_vals
@@ -343,18 +353,19 @@ def run_get_conus_hydrology_hydrograph(geom_id):
         decoded_vals = [decode_dict_proj[dim][float(v)] for v in ds_proj[dim].values]
         ds_proj[dim] = decoded_vals
 
+    # Print for debugging
     print(ds_hist)
     print(ds_proj)
 
-    # package the hydrograph data into a dictionary for JSON serialization
-    data_dict = package_hydrograph_data(geom_id, ds_hist, ds_proj)
+    # Package the hydrograph data into a dictionary for JSON serialization
+    data_dict = package_hydrograph_data(stream_id, ds_hist, ds_proj)
 
     # TODO: this pruning only works for lowest dict level - how to remove empty scenario/era combinations?
-    # have to prune twice to remove all the missing scenario / era combinations
+    # prune twice does not work to remove all the missing scenario / era combinations
     pruned_data_dict = prune_nulls_with_max_intensity(data_dict)
     pruned_data_dict = prune_nulls_with_max_intensity(pruned_data_dict)
 
-    # convert to JSON
+    # Convert to JSON
     json_results = json.dumps(pruned_data_dict, indent=4)
 
     return Response(json_results, mimetype="application/json")

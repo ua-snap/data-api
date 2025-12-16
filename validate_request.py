@@ -567,19 +567,17 @@ def get_axis_encodings(coverage_metadata, encoding_attr="encoding"):
     Get axis encodings from the JSON output describing a coverage.
     Args:
         coverage_axis_metadata (dict): JSON-like dictionary containing the coverage axes description.
-        encoding_attr (str): The attribute name that stores the encoding dictionary.
+        encoding_attr (str): The axis attribute that stores the encoding dictionary.
     Returns:
         dict: A dictionary with axis names as keys and their encoding attributes as values.
         Encoding attributes are coverted from string to dict.
         If an axis does not have the specified encoding attribute, it will map to None.
     """
-    # Navigate to the generalGrid section which contains the axis coordinate values
     try:
         metadata = coverage_metadata.get("metadata", {})
         axes = metadata.get("axes", {})
 
         axis_encodings = {}
-
         for axis in axes:
             encoding_str = metadata.get("axes").get(axis).get(encoding_attr, None)
             # convert the string representation of dict to actual dict
