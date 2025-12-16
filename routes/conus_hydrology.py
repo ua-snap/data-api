@@ -6,6 +6,7 @@ import xarray as xr
 import json
 import ast
 import geopandas as gpd
+from aiohttp import ClientSession
 import xml.etree.ElementTree as ET
 from flask import (
     Blueprint,
@@ -18,7 +19,7 @@ from flask import (
 
 from generate_requests import generate_conus_hydrology_wcs_str
 from generate_urls import generate_wfs_conus_hydrology_url
-from fetch_data import fetch_data, describe_via_wcps
+from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings, get_coverage_encodings
 from postprocessing import prune_nulls_with_max_intensity
 from config import RAS_BASE_URL
@@ -33,6 +34,12 @@ hydrograph_proj_cov_id = "conus_hydro_segments_doy_mmm_maurer_projected_test"
 
 
 async def get_decode_dicts_from_axis_attributes(cov_id):
+    """
+    Function to get the decode dictionaries for all axes from the coverage metadata.
+    Args:
+        cov_id (str): Coverage ID for the hydrology data
+    Returns:
+        Dictionary of decode dictionaries for each axis."""
     metadata = await describe_via_wcps(cov_id)
     return get_axis_encodings(metadata)
 
@@ -45,7 +52,7 @@ def fetch_hydro_data(cov_id, stream_id, type):
         stream_id (str): Stream ID for the hydrology data
 
     Returns:
-        Xarray dataset with hydrological stats for the all var/lc/model/scenario/era combinations for the requested stream ID.
+        Xarray dataset with hydrological stats for the requested stream ID.
     """
     url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id, type)
     response = asyncio.run(fetch_data([url]))
@@ -55,6 +62,14 @@ def fetch_hydro_data(cov_id, stream_id, type):
 
 
 def package_stats_data(stream_id, ds):
+    """
+    Function to package the stats data into a dictionary for JSON serialization.
+    The levels of the stats data dictionary are as follows: landcover, model, scenario, era, variable.
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+        ds (xarray dataset): Dataset with hydrology data
+    Returns:
+        Data dictionary with the stats data packaged for JSON serialization."""
     stats_dict = {
         "id": stream_id,
         "name": None,
@@ -97,6 +112,13 @@ def package_stats_data(stream_id, ds):
 
 
 def package_metadata(ds, data_dict):
+    """
+    Function to package the metadata from the dataset into the data dictionary.
+    Args:
+        ds (xarray dataset): Dataset with hydrology data
+        data_dict (dict): Data dictionary to populate with metadata.
+    Returns:
+        Data dictionary with the metadata populated."""
     try:
         ds_source_str = ds.attrs["Data_Source"]
         ds_source_dict = ast.literal_eval(ds_source_str)
@@ -116,49 +138,6 @@ def package_metadata(ds, data_dict):
         data_dict["metadata"]["variables"][var]["description"] = ds[var].attrs.get(
             "description", ""
         )
-    return data_dict
-
-
-# TODO: condense into a package_stats_data() function
-# TODO: can this be done via existing data fetching function?
-def get_features_and_populate_attributes(data_dict):
-    """Function to populate the data dictionary with the attributes from the vector data.
-    Args:
-        data_dict (dict): Data dictionary with the hydrology stats populated
-    Returns:
-        Data dictionary with the vector attributes populated."""
-    for stream_id in data_dict.keys():
-        url = generate_wfs_conus_hydrology_url(stream_id)
-
-        # get the features
-        with requests.get(
-            url, verify=False
-        ) as r:  # verify=False is necessary for dev version of Geoserver
-            if r.status_code != 200:
-                return render_template("500/server_error.html"), 500
-            else:
-                try:
-                    r_json = r.json()
-                except:
-                    print("Unable to decode as JSON, got raw text:\n", r.text)
-                    return render_template("500/server_error.html"), 500
-
-        # save json to test size of return
-        with open("/tmp/segments.json", "w", encoding="utf-8") as f:
-            json.dump(r_json, f, ensure_ascii=False, indent=4)
-
-        # create a valid geodataframe from the features and find a representation point on the line segment
-        # CRS is hardcoded to EPSG:5070!
-        seg_gdf = gpd.GeoDataFrame.from_features(r_json["features"], crs="EPSG:5070")
-        seg_gdf["geometry"] = seg_gdf["geometry"].make_valid()
-
-        rep_x_coord = seg_gdf.loc[0].geometry.representative_point().x
-        rep_y_coord = seg_gdf.loc[0].geometry.representative_point().y
-
-        data_dict[stream_id]["name"] = seg_gdf.loc[0].GNIS_NAME
-        data_dict[stream_id]["latitude"] = rep_y_coord
-        data_dict[stream_id]["longitude"] = rep_x_coord
-
     return data_dict
 
 
@@ -242,6 +221,35 @@ def package_hydrograph_data(stream_id, ds_hist, ds_proj):
     return hydrograph_dict
 
 
+async def get_features_and_populate_attributes(data_dict, stream_id):
+    """Function to populate the data dictionary with the attributes from the vector data.
+    Creates a valid geodataframe from the features and finds a representation point on the line segment.
+    Populates the name, latitude, and longitude attributes in the data dictionary.
+
+    Args:
+        data_dict (dict): Data dictionary with the hydrology stats populated
+        stream_id (str): Stream ID for the hydrology data
+    Returns:
+        Data dictionary with the vector attributes populated."""
+    url = generate_wfs_conus_hydrology_url(stream_id)
+
+    async with ClientSession() as session:
+        layer_data = await fetch_layer_data(url, session)
+
+    gdf = gpd.GeoDataFrame.from_features(
+        layer_data["features"], crs="EPSG:5070"
+    ).to_crs(epsg=4326)
+    gdf["geometry"] = gdf["geometry"].make_valid()
+
+    print(gdf)
+
+    data_dict["name"] = gdf.loc[0].GNIS_NAME
+    data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
+    data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
+
+    return data_dict
+
+
 @routes.route("/conus_hydrology/")
 def conus_hydrology_about():
     return render_template("/documentation/conus_hydrology.html")
@@ -267,9 +275,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
     # package the stats data + metadata into a dictionary for JSON serialization
     data_dict = package_stats_data(stream_id, ds)
     data_dict = package_metadata(ds, data_dict)
-
-    # TODO: populate attributes from vector data
-    # data_dict = get_features_and_populate_attributes(data_dict)
+    data_dict = asyncio.run(get_features_and_populate_attributes(data_dict, stream_id))
 
     # TODO: prune nulls
 
@@ -316,9 +322,8 @@ def run_get_conus_hydrology_hydrograph(stream_id):
     data_dict = package_metadata(
         ds_hist, data_dict
     )  # historical dataset should all required metadata
+    data_dict = asyncio.run(get_features_and_populate_attributes(data_dict, stream_id))
 
-    # TODO: populate attributes from vector data
-    # data_dict = get_features_and_populate_attributes(data_dict)
     # TODO: prune nulls
 
     # Convert to JSON
