@@ -24,12 +24,6 @@ from postprocessing import prune_nulls_with_max_intensity
 from config import RAS_BASE_URL
 from . import routes
 
-# TODO: Add validation of stream ID
-# TODO: Improve error handling throughout
-
-hydrograph_hist_cov_id = "conus_hydro_segments_doy_mmm_maurer_historical_test_2"
-hydrograph_proj_cov_id = "conus_hydro_segments_doy_mmm_maurer_projected_test"
-
 coverages = {
     "stats": ["conus_hydro_segments"],
     "hydrograph": [
@@ -236,33 +230,53 @@ def package_hydrograph_data(stream_id, datasets):
     return hydrograph_dict
 
 
-async def get_features_and_populate_attributes(data_dict, stream_id):
-    """Function to populate the data dictionary with the attributes from the vector data.
-    Creates a valid geodataframe from the features and finds a representation point on the line segment.
-    Populates the name, latitude, and longitude attributes in the data dictionary.
-
+async def get_features(stream_id):
+    """Function to fetch the vector features from the WFS for a given stream ID.
+    Creates a valid geodataframe from the features.
     Args:
-        data_dict (dict): Data dictionary with the hydrology stats populated
         stream_id (str): Stream ID for the hydrology data
     Returns:
+        geopandas GeoDataFrame with the vector features, or 400."""
+    try:
+        url = generate_wfs_conus_hydrology_url(stream_id)
+
+        async with ClientSession() as session:
+            layer_data = await fetch_layer_data(url, session)
+        gdf = gpd.GeoDataFrame.from_features(
+            layer_data["features"], crs="EPSG:5070"
+        ).to_crs(epsg=4326)
+        gdf["geometry"] = gdf["geometry"].make_valid()
+
+        return gdf
+    except:
+        return render_template("400/bad_request.html"), 400
+
+
+def populate_feature_attributes(data_dict, gdf):
+    """Function to populate the feature attributes in the data dictionary. Only the first feature is used.
+    Args:
+        data_dict (dict): Data dictionary with the hydrology stats populated
+        gdf (geopandas GeoDataFrame): GeoDataFrame with the vector features
+    Returns:
         Data dictionary with the vector attributes populated."""
-    url = generate_wfs_conus_hydrology_url(stream_id)
-
-    async with ClientSession() as session:
-        layer_data = await fetch_layer_data(url, session)
-
-    gdf = gpd.GeoDataFrame.from_features(
-        layer_data["features"], crs="EPSG:5070"
-    ).to_crs(epsg=4326)
-    gdf["geometry"] = gdf["geometry"].make_valid()
-
-    print(gdf)
 
     data_dict["name"] = gdf.loc[0].GNIS_NAME
     data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
     data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
 
     return data_dict
+
+
+def validate_stream_id(stream_id):
+    """
+    Function to validate the stream ID.
+    Args:
+        stream_id (str): Stream ID to validate
+    Returns:
+        bool: True if valid, False otherwise
+    """
+
+    return None
 
 
 @routes.route("/conus_hydrology/")
@@ -280,23 +294,33 @@ def run_get_conus_hydrology_stats_data(stream_id):
     Returns:
         JSON response with hydrological stats for the requested stream ID.
     """
-    # fetch data and metadata
-    decode_dict = asyncio.run(
-        get_decode_dicts_from_axis_attributes(coverages["stats"])
-    )[0]
-    ds = asyncio.run(fetch_hydro_data(coverages["stats"], stream_id))[0]
-    # decode the dimension values
-    for dim in decode_dict.keys():
-        decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
-        ds[dim] = decoded_vals
-    # package the stats data + metadata into a dictionary for JSON serialization
-    data_dict = package_stats_data(stream_id, ds)
-    data_dict = package_metadata(ds, data_dict)
-    data_dict = asyncio.run(get_features_and_populate_attributes(data_dict, stream_id))
+    gdf = asyncio.run(get_features(stream_id))
+    if isinstance(gdf, tuple):
+        return gdf  # return 400 if gdf is a tuple
 
-    # TODO: prune nulls
+    try:
+        # fetch data and metadata
+        decode_dict = asyncio.run(
+            get_decode_dicts_from_axis_attributes(coverages["stats"])
+        )[0]
+        ds = asyncio.run(fetch_hydro_data(coverages["stats"], stream_id))[0]
+        # decode the dimension values
+        for dim in decode_dict.keys():
+            decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
+            ds[dim] = decoded_vals
+        # package the stats data + metadata into a dictionary for JSON serialization
+        data_dict = package_stats_data(stream_id, ds)
+        data_dict = package_metadata(ds, data_dict)
+        data_dict = populate_feature_attributes(data_dict, gdf)
 
-    return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
+        # TODO: prune nulls
+
+        return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
+
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
 
 
 @routes.route("/conus_hydrology/hydrograph/<stream_id>")
@@ -309,27 +333,37 @@ def run_get_conus_hydrology_hydrograph(stream_id):
     Returns:
         JSON response with hydrograph data for the requested stream ID.
     """
-    # fetch data and metadata
-    datasets = asyncio.run(fetch_hydro_data(coverages["hydrograph"], stream_id))
-    decode_dicts = asyncio.run(
-        get_decode_dicts_from_axis_attributes(coverages["hydrograph"])
-    )
-    # decode the dimension values
-    for ds, decode_dict in zip(datasets, decode_dicts):
-        for dim in decode_dict.keys():
-            decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
-            ds[dim] = decoded_vals
+    gdf = asyncio.run(get_features(stream_id))
+    if isinstance(gdf, tuple):
+        return gdf  # return 400 if gdf is a tuple
 
-    # Package the hydrograph datasets into a dictionary for JSON serialization
-    data_dict = package_hydrograph_data(stream_id, datasets)
-    data_dict = package_metadata(
-        datasets[0], data_dict
-    )  # all datasets should have same metadata, just use the first one
+    try:
+        # fetch data and metadata
+        datasets = asyncio.run(fetch_hydro_data(coverages["hydrograph"], stream_id))
+        decode_dicts = asyncio.run(
+            get_decode_dicts_from_axis_attributes(coverages["hydrograph"])
+        )
 
-    print(data_dict)
+        print(datasets)
 
-    data_dict = asyncio.run(get_features_and_populate_attributes(data_dict, stream_id))
+        # decode the dimension values
+        for ds, decode_dict in zip(datasets, decode_dicts):
+            for dim in decode_dict.keys():
+                decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
+                ds[dim] = decoded_vals
 
-    # TODO: prune nulls
+        # Package the hydrograph datasets into a dictionary for JSON serialization
+        data_dict = package_hydrograph_data(stream_id, datasets)
+        data_dict = package_metadata(
+            datasets[0], data_dict
+        )  # all datasets should have same metadata, just use the first one
+        data_dict = populate_feature_attributes(data_dict, gdf)
 
-    return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
+        # TODO: prune nulls
+
+        return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
+
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
