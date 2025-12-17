@@ -1,4 +1,3 @@
-import requests
 import asyncio
 import io
 import numpy as np
@@ -20,7 +19,7 @@ from flask import (
 from generate_requests import generate_conus_hydrology_wcs_str
 from generate_urls import generate_wfs_conus_hydrology_url
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
-from validate_request import get_axis_encodings, get_coverage_encodings
+from validate_request import get_axis_encodings
 from postprocessing import prune_nulls_with_max_intensity
 from config import RAS_BASE_URL
 from . import routes
