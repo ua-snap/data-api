@@ -205,19 +205,6 @@ def package_hydrograph_data(stream_id, ds_hist, ds_proj):
                                 int(doy)
                             ] = var_dict
 
-    # TODO: reingest with metadata like stats coverage
-    # # get metadata from one dataset only - they all have same variables and attributes
-    # hydrograph_dict["metadata"]["source"] = dict(ds_hist.attrs["Data_Source"])
-    # hydrograph_dict["metadata"]["variables"] = {}
-    # for var in list(ds_hist.data_vars):
-    #     hydrograph_dict["metadata"]["variables"][var] = {}
-    #     hydrograph_dict["metadata"]["variables"][var]["units"] = ds_hist[var].attrs.get(
-    #         "units", ""
-    #     )
-    #     hydrograph_dict["metadata"]["variables"][var][
-    #         "description"
-    #     ] = ds_hist[var].attrs.get("description", "")
-
     return hydrograph_dict
 
 
@@ -279,10 +266,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
 
     # TODO: prune nulls
 
-    # convert to JSON
-    json_results = json.dumps(data_dict, indent=4)
-
-    return Response(json_results, mimetype="application/json")
+    return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
 
 
 @routes.route("/conus_hydrology/hydrograph/<stream_id>")
@@ -326,7 +310,4 @@ def run_get_conus_hydrology_hydrograph(stream_id):
 
     # TODO: prune nulls
 
-    # Convert to JSON
-    json_results = json.dumps(data_dict, indent=4)
-
-    return Response(json_results, mimetype="application/json")
+    return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
