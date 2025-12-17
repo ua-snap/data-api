@@ -27,37 +27,67 @@ from . import routes
 # TODO: Add validation of stream ID
 # TODO: Improve error handling throughout
 
-seg_cov_id = "conus_hydro_segments"
 hydrograph_hist_cov_id = "conus_hydro_segments_doy_mmm_maurer_historical_test_2"
 hydrograph_proj_cov_id = "conus_hydro_segments_doy_mmm_maurer_projected_test"
 
+coverages = {
+    "stats": ["conus_hydro_segments"],
+    "hydrograph": [
+        "conus_hydro_segments_doy_climatology_dynamic_historical",
+        "conus_hydro_segments_doy_climatology_static_historical",
+        "conus_hydro_segments_doy_climatology_dynamic_projected",
+        "conus_hydro_segments_doy_climatology_static_projected",
+    ],
+}
 
-async def get_decode_dicts_from_axis_attributes(cov_id):
+
+async def get_decode_dicts_from_axis_attributes(cov_ids):
     """
     Function to get the decode dictionaries for all axes from the coverage metadata.
     Args:
-        cov_id (str): Coverage ID for the hydrology data
+        cov_ids (list): coverage IDs to get decode dictionaries for
     Returns:
-        Dictionary of decode dictionaries for each axis."""
-    metadata = await describe_via_wcps(cov_id)
-    return get_axis_encodings(metadata)
+        list of with an axis decode dictionary for each coverage."""
+
+    async with ClientSession() as session:
+        tasks = [describe_via_wcps(cov_id) for cov_id in cov_ids]
+        metadata_list = await asyncio.gather(*tasks)
+    decode_dicts = [get_axis_encodings(metadata) for metadata in metadata_list]
+
+    return decode_dicts
 
 
-def fetch_hydro_data(cov_id, stream_id, type):
+async def fetch_hydro_data(cov_ids, stream_id):
     """
     Function to fetch hydrology data from Rasdaman. Data is fetched for one stream ID at a time!
     Args:
-        coverage_id (str): Coverage ID for the hydrology data
+        cov_ids (list): list of coverage IDs for the hydrology data
         stream_id (str): Stream ID for the hydrology data
 
     Returns:
-        Xarray dataset with hydrological stats for the requested stream ID.
+        results (list): list of responses from Rasdaman for each coverage ID
     """
-    url = RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id, type)
-    response = asyncio.run(fetch_data([url]))
-    ds = xr.open_dataset(io.BytesIO(response))
+    # TODO: consider using fetch_data.fetch_bbox_netcdf_list() function here?
 
-    return ds
+    urls = [
+        RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id)
+        for cov_id in cov_ids
+    ]
+
+    if coverages["stats"][0] in cov_ids and len(urls) == 1:
+        # stats data request - need to handle rasql query bug!
+        # TODO: investigate this rasda-bug further and see if there's a solution
+        urls[0] += "&SUBSET=model(0,13)"
+
+    results = await fetch_data(urls)
+
+    # allow for single coverage ID input by wrapping in a list
+    if not isinstance(results, list):
+        results = [results]
+
+    datasets = [xr.open_dataset(io.BytesIO(result)) for result in results]
+
+    return datasets
 
 
 def package_stats_data(stream_id, ds):
@@ -140,15 +170,14 @@ def package_metadata(ds, data_dict):
     return data_dict
 
 
-def package_hydrograph_data(stream_id, ds_hist, ds_proj):
+def package_hydrograph_data(stream_id, datasets):
     """
     Function to package the hydrograph data into a dictionary for JSON serialization.
     The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
     Streamflow values (cfs) are rounded to integers.
     Args:
         stream_id (str): Stream ID for the hydrology data
-        ds_proj (xarray dataset): Dataset with historical era hydrograph data for the stream ID
-        ds_hist (xarray dataset): Dataset with projected era hydrograph data for the stream ID
+        datasets (list of xarray datasets): List of datasets with hydrology data
     Returns:
         Data dictionary with the hydrograph data packaged for JSON serialization.
     """
@@ -161,7 +190,7 @@ def package_hydrograph_data(stream_id, ds_hist, ds_proj):
         "data": {},
     }
 
-    for ds in [ds_hist, ds_proj]:
+    for ds in datasets:
         for landcover in ds.landcover.values:
             if landcover not in hydrograph_dict["data"]:
                 hydrograph_dict["data"][landcover] = {}
@@ -252,8 +281,10 @@ def run_get_conus_hydrology_stats_data(stream_id):
         JSON response with hydrological stats for the requested stream ID.
     """
     # fetch data and metadata
-    decode_dict = asyncio.run(get_decode_dicts_from_axis_attributes(seg_cov_id))
-    ds = fetch_hydro_data(seg_cov_id, stream_id, type="stats")
+    decode_dict = asyncio.run(
+        get_decode_dicts_from_axis_attributes(coverages["stats"])
+    )[0]
+    ds = asyncio.run(fetch_hydro_data(coverages["stats"], stream_id))[0]
     # decode the dimension values
     for dim in decode_dict.keys():
         decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
@@ -279,32 +310,24 @@ def run_get_conus_hydrology_hydrograph(stream_id):
         JSON response with hydrograph data for the requested stream ID.
     """
     # fetch data and metadata
-    decode_dict_hist = asyncio.run(
-        get_decode_dicts_from_axis_attributes(hydrograph_hist_cov_id)
+    datasets = asyncio.run(fetch_hydro_data(coverages["hydrograph"], stream_id))
+    decode_dicts = asyncio.run(
+        get_decode_dicts_from_axis_attributes(coverages["hydrograph"])
     )
-    ds_hist = fetch_hydro_data(
-        hydrograph_hist_cov_id, stream_id, type="hydrograph_hist"
-    )
-    decode_dict_proj = asyncio.run(
-        get_decode_dicts_from_axis_attributes(hydrograph_proj_cov_id)
-    )
-    ds_proj = fetch_hydro_data(
-        hydrograph_proj_cov_id, stream_id, type="hydrograph_proj"
-    )
-
     # decode the dimension values
-    for dim in decode_dict_hist.keys():
-        decoded_vals = [decode_dict_hist[dim][float(v)] for v in ds_hist[dim].values]
-        ds_hist[dim] = decoded_vals
-    for dim in decode_dict_proj.keys():
-        decoded_vals = [decode_dict_proj[dim][float(v)] for v in ds_proj[dim].values]
-        ds_proj[dim] = decoded_vals
+    for ds, decode_dict in zip(datasets, decode_dicts):
+        for dim in decode_dict.keys():
+            decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
+            ds[dim] = decoded_vals
 
-    # Package the hydrograph data + metadata into a dictionary for JSON serialization
-    data_dict = package_hydrograph_data(stream_id, ds_hist, ds_proj)
+    # Package the hydrograph datasets into a dictionary for JSON serialization
+    data_dict = package_hydrograph_data(stream_id, datasets)
     data_dict = package_metadata(
-        ds_hist, data_dict
-    )  # historical dataset should all required metadata
+        datasets[0], data_dict
+    )  # all datasets should have same metadata, just use the first one
+
+    print(data_dict)
+
     data_dict = asyncio.run(get_features_and_populate_attributes(data_dict, stream_id))
 
     # TODO: prune nulls
