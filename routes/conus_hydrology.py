@@ -84,12 +84,40 @@ async def fetch_hydro_data(cov_ids, stream_id):
     return datasets
 
 
+async def get_features(stream_id):
+    """Function to fetch the vector features from the WFS for a given stream ID.
+    Creates a valid geodataframe from the features.
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+    Returns:
+        geopandas GeoDataFrame with the vector features, or 400."""
+    try:
+        url = generate_wfs_conus_hydrology_url(stream_id)
+
+        async with ClientSession() as session:
+            layer_data = await fetch_layer_data(url, session)
+        gdf = gpd.GeoDataFrame.from_features(
+            layer_data["features"], crs="EPSG:5070"
+        ).to_crs(epsg=4326)
+        gdf["geometry"] = gdf["geometry"].make_valid()
+
+        return gdf
+    except:
+        return render_template("400/bad_request.html"), 400
+
+
 def package_stats_data(stream_id, ds):
     """
     Function to package the stats data into a dictionary for JSON serialization.
-    The levels of the stats data dictionary are as follows:
-    landcover -> model -> scenario -> era -> variable.
+    The levels of the stats data dictionary are as follows: landcover, model, scenario, era, variable.
+    Stats values are rounded to 2 decimal places.
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+        ds (xarray dataset): Dataset with hydrology data
+    Returns:
+        Data dictionary with the stats data packaged for JSON serialization.
     """
+
     stats_dict = {
         "id": stream_id,
         "name": None,
@@ -103,16 +131,11 @@ def package_stats_data(stream_id, ds):
     n_vars = len(vars_)
 
     for landcover in ds.landcover.values:
-        land_dict = stats_dict["data"].setdefault(landcover, {})
-
         for model in ds.model.values:
-            model_dict = land_dict.setdefault(model, {})
-
             for scenario in ds.scenario.values:
-                scen_dict = model_dict.setdefault(scenario, {})
-
                 for era in ds.era.values:
-                    sliced = (
+
+                    arr = (
                         ds[vars_]
                         .sel(
                             landcover=landcover,
@@ -121,8 +144,18 @@ def package_stats_data(stream_id, ds):
                             era=era,
                         )
                         .to_array()  # (variable,)
-                        .values  # numpy array
                     )
+
+                    # skip population if all values are NaN (missing model/scenario combo)
+                    if arr.isnull().all():
+                        continue
+
+                    # populate dict structure
+                    land_dict = stats_dict["data"].setdefault(landcover, {})
+                    model_dict = land_dict.setdefault(model, {})
+                    scen_dict = model_dict.setdefault(scenario, {})
+
+                    sliced = arr.values
 
                     var_dict = {}
                     for i in range(n_vars):
@@ -134,6 +167,72 @@ def package_stats_data(stream_id, ds):
                     scen_dict[era] = var_dict
 
     return stats_dict
+
+
+def package_hydrograph_data(stream_id, datasets):
+    """
+    Function to package the hydrograph data into a dictionary for JSON serialization.
+    The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
+    Streamflow values (cfs) are rounded to integers.
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+        datasets (list of xarray datasets): List of datasets with hydrology data
+    Returns:
+        Data dictionary with the hydrograph data packaged for JSON serialization."""
+
+    hydrograph_dict = {
+        "id": stream_id,
+        "name": None,
+        "latitude": None,
+        "longitude": None,
+        "metadata": {},
+        "data": {},
+    }
+
+    for ds in datasets:
+        vars_ = list(ds.data_vars)
+        n_vars = len(vars_)
+        doy_vals = [int(x) for x in ds.doy.values]
+
+        for landcover in ds.landcover.values:
+            for model in ds.model.values:
+                for scenario in ds.scenario.values:
+                    for era in ds.era.values:
+
+                        arr = (
+                            ds[vars_]
+                            .sel(
+                                landcover=landcover,
+                                model=model,
+                                scenario=scenario,
+                                era=era,
+                            )
+                            .to_array()  # (variable, doy)
+                        )
+
+                        # skip population if all values are NaN (missing model/scenario combo)
+                        if arr.isnull().all():
+                            continue
+
+                        # populate dict structure
+                        land_dict = hydrograph_dict["data"].setdefault(landcover, {})
+                        model_dict = land_dict.setdefault(model, {})
+                        scen_dict = model_dict.setdefault(scenario, {})
+
+                        sliced = arr.transpose("doy", "variable").values  # numpy array
+
+                        doy_list = [None] * sliced.shape[0]
+
+                        for i, row in enumerate(sliced):
+                            entry = {"doy": doy_vals[i]}
+                            for j in range(n_vars):
+                                val = row[j]
+                                entry[vars_[j]] = None if np.isnan(val) else int(val)
+                            doy_list[i] = entry
+
+                        scen_dict[era] = doy_list
+
+    return hydrograph_dict
 
 
 def package_metadata(ds, data_dict):
@@ -163,157 +262,27 @@ def package_metadata(ds, data_dict):
         data_dict["metadata"]["variables"][var]["description"] = ds[var].attrs.get(
             "description", ""
         )
+
+        # special cases for "doy" vars from hydrograph datasets
+        # TODO: add this info to the rasdaman coverage metadata so it can be read automatically
+        if var == "doy":
+            data_dict["metadata"]["variables"][var]["units"] = "day of year"
+            data_dict["metadata"]["variables"][var][
+                "description"
+            ] = "Day of year (1-366); all years are treated as leap years for consistency."
+        elif var in ["doy_min", "doy_mean", "doy_max"]:
+            data_dict["metadata"]["variables"][var]["units"] = "cfs"
+            if var == "doy_min":
+                op = "Minimum"
+            elif var == "doy_mean":
+                op = "Mean"
+            else:
+                op = "Maximum"
+            data_dict["metadata"]["variables"][var][
+                "description"
+            ] = f"{op} streamflow value (cfs) on the specified day of year, aggregated over all years in the era."
+
     return data_dict
-
-
-def package_hydrograph_data(stream_id, datasets):
-    """
-    Function to package the hydrograph data into a dictionary for JSON serialization.
-    The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
-    Streamflow values (cfs) are rounded to integers.
-    Args:
-        stream_id (str): Stream ID for the hydrology data
-        datasets (list of xarray datasets): List of datasets with hydrology data
-    Returns:
-        Data dictionary with the hydrograph data packaged for JSON serialization."""
-
-    hydrograph_dict = {
-        "id": stream_id,
-        "name": None,
-        "latitude": None,
-        "longitude": None,
-        "metadata": {},
-        "data": {},
-    }
-
-    for ds in datasets:
-        vars_ = list(ds.data_vars)
-        n_vars = len(vars_)
-        doy_vals = ds.doy.values.astype(int)
-
-        for landcover in ds.landcover.values:
-            land_dict = hydrograph_dict["data"].setdefault(landcover, {})
-
-            for model in ds.model.values:
-                model_dict = land_dict.setdefault(model, {})
-
-                for scenario in ds.scenario.values:
-                    scen_dict = model_dict.setdefault(scenario, {})
-
-                    for era in ds.era.values:
-                        sliced = (
-                            ds[vars_]
-                            .sel(
-                                landcover=landcover,
-                                model=model,
-                                scenario=scenario,
-                                era=era,
-                            )
-                            .to_array()  # (variable, doy)
-                            .transpose("doy", "variable")
-                            .values  # numpy array
-                        )
-
-                        doy_list = [None] * sliced.shape[0]
-
-                        for i, row in enumerate(sliced):
-                            entry = {"doy": doy_vals[i]}
-                            for j in range(n_vars):
-                                val = row[j]
-                                entry[vars_[j]] = None if np.isnan(val) else int(val)
-                            doy_list[i] = entry
-
-                        scen_dict[era] = doy_list
-
-    return hydrograph_dict
-
-
-# def package_hydrograph_data(stream_id, datasets):
-#     """
-#     Function to package the hydrograph data into a dictionary for JSON serialization.
-#     The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
-#     Streamflow values (cfs) are rounded to integers.
-#     Args:
-#         stream_id (str): Stream ID for the hydrology data
-#         datasets (list of xarray datasets): List of datasets with hydrology data
-#     Returns:
-#         Data dictionary with the hydrograph data packaged for JSON serialization.
-#     """
-#     hydrograph_dict = {
-#         "id": stream_id,
-#         "name": None,
-#         "latitude": None,
-#         "longitude": None,
-#         "metadata": {},
-#         "data": {},
-#     }
-
-#     for ds in datasets:
-#         for landcover in ds.landcover.values:
-#             if landcover not in hydrograph_dict["data"]:
-#                 hydrograph_dict["data"][landcover] = {}
-#             for model in ds.model.values:
-#                 if model not in hydrograph_dict["data"][landcover]:
-#                     hydrograph_dict["data"][landcover][model] = {}
-#                 for scenario in ds.scenario.values:
-#                     if scenario not in hydrograph_dict["data"][landcover][model]:
-#                         hydrograph_dict["data"][landcover][model][scenario] = {}
-#                     for era in ds.era.values:
-#                         if (
-#                             era
-#                             not in hydrograph_dict["data"][landcover][model][scenario]
-#                         ):
-#                             hydrograph_dict["data"][landcover][model][scenario][
-#                                 era
-#                             ] = {}
-#                         # iterate over the doy dimension to get the hydrograph data points
-#                         # populate a dict with integer doy as key and a dict of variable values (min, mean, max) as values
-#                         for doy in ds.doy.values:
-#                             var_dict = {}
-#                             for var in list(ds.data_vars):
-#                                 streamflow_value = (
-#                                     ds[var]
-#                                     .sel(
-#                                         landcover=landcover,
-#                                         model=model,
-#                                         scenario=scenario,
-#                                         era=era,
-#                                         doy=doy,
-#                                     )
-#                                     .values
-#                                 )
-#                                 if np.isnan(streamflow_value):
-#                                     streamflow_value = None
-#                                 else:
-#                                     streamflow_value = int(streamflow_value)
-#                                 var_dict[var] = streamflow_value
-#                             hydrograph_dict["data"][landcover][model][scenario][era][
-#                                 int(doy)
-#                             ] = var_dict
-
-#     return hydrograph_dict
-
-
-async def get_features(stream_id):
-    """Function to fetch the vector features from the WFS for a given stream ID.
-    Creates a valid geodataframe from the features.
-    Args:
-        stream_id (str): Stream ID for the hydrology data
-    Returns:
-        geopandas GeoDataFrame with the vector features, or 400."""
-    try:
-        url = generate_wfs_conus_hydrology_url(stream_id)
-
-        async with ClientSession() as session:
-            layer_data = await fetch_layer_data(url, session)
-        gdf = gpd.GeoDataFrame.from_features(
-            layer_data["features"], crs="EPSG:5070"
-        ).to_crs(epsg=4326)
-        gdf["geometry"] = gdf["geometry"].make_valid()
-
-        return gdf
-    except:
-        return render_template("400/bad_request.html"), 400
 
 
 def populate_feature_attributes(data_dict, gdf):
@@ -418,6 +387,7 @@ def run_get_conus_hydrology_hydrograph(stream_id):
         return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
 
     except Exception as exc:
+        print(exc)
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
