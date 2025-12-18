@@ -20,7 +20,6 @@ from generate_requests import generate_conus_hydrology_wcs_str
 from generate_urls import generate_wfs_conus_hydrology_url
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
-from postprocessing import prune_nulls_with_max_intensity
 from config import RAS_BASE_URL
 from . import routes
 
@@ -250,8 +249,6 @@ def package_metadata(ds, data_dict):
         data_dict["metadata"]["source"] = {"citation": citation}
     except Exception as e:
         data_dict["metadata"]["source"] = {"citation": ""}
-        # for debugging ... can remove and just have empty citation
-        print(e)
 
     data_dict["metadata"]["variables"] = {}
     for var in list(ds.data_vars):
@@ -334,8 +331,6 @@ def run_get_conus_hydrology_stats_data(stream_id):
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_attributes(data_dict, gdf)
 
-        # TODO: prune nulls
-
         return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
 
     except Exception as exc:
@@ -365,10 +360,6 @@ def run_get_conus_hydrology_hydrograph(stream_id):
             get_decode_dicts_from_axis_attributes(coverages["hydrograph"])
         )
 
-        # for debugging... how large are these datasets? printout will contain size info
-        for ds in datasets:
-            print(ds)
-
         # decode the dimension values
         for ds, decode_dict in zip(datasets, decode_dicts):
             for dim in decode_dict.keys():
@@ -382,12 +373,9 @@ def run_get_conus_hydrology_hydrograph(stream_id):
         )  # all datasets should have same metadata, just use the first one
         data_dict = populate_feature_attributes(data_dict, gdf)
 
-        # TODO: prune nulls
-
         return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
 
     except Exception as exc:
-        print(exc)
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
