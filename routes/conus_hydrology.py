@@ -332,7 +332,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_attributes(data_dict, gdf)
 
-        return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
+        return jsonify(data_dict)
 
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
@@ -373,7 +373,7 @@ def run_get_conus_hydrology_hydrograph(stream_id):
         )  # all datasets should have same metadata, just use the first one
         data_dict = populate_feature_attributes(data_dict, gdf)
 
-        return Response(json.dumps(data_dict, indent=4), mimetype="application/json")
+        return jsonify(data_dict)
 
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
