@@ -24,7 +24,7 @@ from config import RAS_BASE_URL
 from . import routes
 
 coverages = {
-    "stats": ["conus_hydro_segments"],
+    "stats": ["conus_hydro_segments_test_exsitu_reg"],
     "hydrograph": [
         "conus_hydro_segments_doy_climatology_dynamic_historical",
         "conus_hydro_segments_doy_climatology_static_historical",
@@ -67,10 +67,10 @@ async def fetch_hydro_data(cov_ids, stream_id):
         for cov_id in cov_ids
     ]
 
-    if coverages["stats"][0] in cov_ids and len(urls) == 1:
-        # stats data request - need to handle rasql query bug!
-        # TODO: investigate this rasda-bug further and see if there's a solution
-        urls[0] += "&SUBSET=model(0,13)"
+    # if coverages["stats"][0] in cov_ids and len(urls) == 1:
+    #     # stats data request - need to handle rasql query bug!
+    #     # TODO: investigate this rasda-bug further and see if there's a solution
+    #     urls[0] += "&SUBSET=model(0,13)"
 
     results = await fetch_data(urls)
 
@@ -291,8 +291,8 @@ def populate_feature_attributes(data_dict, gdf):
         Data dictionary with the vector attributes populated."""
 
     data_dict["name"] = gdf.loc[0].GNIS_NAME
-    data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
-    data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
+    data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
+    data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
 
     return data_dict
 
@@ -322,10 +322,11 @@ def run_get_conus_hydrology_stats_data(stream_id):
             get_decode_dicts_from_axis_attributes(coverages["stats"])
         )[0]
         ds = asyncio.run(fetch_hydro_data(coverages["stats"], stream_id))[0]
+
         # decode the dimension values
-        for dim in decode_dict.keys():
-            decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
-            ds[dim] = decoded_vals
+        for dim, mapping in decode_dict.items():
+            ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
+
         # package the stats data + metadata into a dictionary for JSON serialization
         data_dict = package_stats_data(stream_id, ds)
         data_dict = package_metadata(ds, data_dict)
@@ -362,9 +363,8 @@ def run_get_conus_hydrology_hydrograph(stream_id):
 
         # decode the dimension values
         for ds, decode_dict in zip(datasets, decode_dicts):
-            for dim in decode_dict.keys():
-                decoded_vals = [decode_dict[dim][float(v)] for v in ds[dim].values]
-                ds[dim] = decoded_vals
+            for dim, mapping in decode_dict.items():
+                ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
 
         # package the hydrograph datasets into a dictionary for JSON serialization
         data_dict = package_hydrograph_data(stream_id, datasets)
