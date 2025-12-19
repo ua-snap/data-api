@@ -363,9 +363,12 @@ def run_get_conus_hydrology_hydrograph(stream_id):
         )
 
         # decode the dimension values
+        decoded_datasets = []
         for ds, decode_dict in zip(datasets, decode_dicts):
             for dim, mapping in decode_dict.items():
                 ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
+            decoded_datasets.append(ds)
+        datasets = decoded_datasets
 
         # package the hydrograph datasets into a dictionary for JSON serialization
         data_dict = package_hydrograph_data(stream_id, datasets)
