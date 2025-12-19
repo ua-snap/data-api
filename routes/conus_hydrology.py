@@ -110,13 +110,13 @@ def package_stats_data(stream_id, ds):
     Function to package the stats data into a dictionary for JSON serialization.
     The levels of the stats data dictionary are as follows: landcover, model, scenario, era, variable.
     Stats values are rounded to 2 decimal places.
+    Dataset is read into numpy arrays for faster slicing.
     Args:
         stream_id (str): Stream ID for the hydrology data
         ds (xarray dataset): Dataset with hydrology data
     Returns:
         Data dictionary with the stats data packaged for JSON serialization.
     """
-
     stats_dict = {
         "id": stream_id,
         "name": None,
@@ -127,43 +127,39 @@ def package_stats_data(stream_id, ds):
     }
 
     vars_ = list(ds.data_vars)
-    n_vars = len(vars_)
 
-    for landcover in ds.landcover.values:
-        for model in ds.model.values:
-            for scenario in ds.scenario.values:
-                for era in ds.era.values:
+    # stack everything except "variable" into one array
+    arr = ds[vars_].to_array().values  # (variable, landcover, model, scenario, era)
 
-                    arr = (
-                        ds[vars_]
-                        .sel(
-                            landcover=landcover,
-                            model=model,
-                            scenario=scenario,
-                            era=era,
-                        )
-                        .to_array()  # (variable,)
-                    )
+    landcovers = ds.landcover.values
+    models = ds.model.values
+    scenarios = ds.scenario.values
+    eras = ds.era.values
 
-                    # skip population if all values are NaN (missing model/scenario combo)
-                    if arr.isnull().all():
+    for i_lc, landcover in enumerate(landcovers):
+        land_dict = stats_dict["data"].setdefault(landcover, {})
+
+        for i_m, model in enumerate(models):
+            model_dict = land_dict.setdefault(model, {})
+
+            for i_s, scenario in enumerate(scenarios):
+                scen_dict = model_dict.setdefault(scenario, {})
+
+                # slice once per era block
+                block = arr[:, i_lc, i_m, i_s, :]  # (variable, era)
+
+                for i_e, era in enumerate(eras):
+                    vals = block[:, i_e]
+
+                    # skip if all NaN
+                    if np.isnan(vals).all():
                         continue
 
-                    # populate dict structure
-                    land_dict = stats_dict["data"].setdefault(landcover, {})
-                    model_dict = land_dict.setdefault(model, {})
-                    scen_dict = model_dict.setdefault(scenario, {})
-
-                    sliced = arr.values
-
-                    var_dict = {}
-                    for i in range(n_vars):
-                        val = sliced[i]
-                        var_dict[vars_[i]] = (
-                            None if np.isnan(val) else round(float(val), 2)
-                        )
-
-                    scen_dict[era] = var_dict
+                    scen_dict[era] = {
+                        vars_[i]: round(float(v), 2)
+                        for i, v in enumerate(vals)
+                        if not np.isnan(v)
+                    }
 
     return stats_dict
 
@@ -173,12 +169,13 @@ def package_hydrograph_data(stream_id, datasets):
     Function to package the hydrograph data into a dictionary for JSON serialization.
     The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
     Streamflow values (cfs) are rounded to integers.
+    Each dataset is read into numpy array for faster slicing.
     Args:
         stream_id (str): Stream ID for the hydrology data
         datasets (list of xarray datasets): List of datasets with hydrology data
     Returns:
-        Data dictionary with the hydrograph data packaged for JSON serialization."""
-
+        Data dictionary with the hydrograph data packaged for JSON serialization.
+    """
     hydrograph_dict = {
         "id": stream_id,
         "name": None,
@@ -190,46 +187,50 @@ def package_hydrograph_data(stream_id, datasets):
 
     for ds in datasets:
         vars_ = list(ds.data_vars)
-        n_vars = len(vars_)
-        doy_vals = [int(x) for x in ds.doy.values]
 
-        for landcover in ds.landcover.values:
-            for model in ds.model.values:
-                for scenario in ds.scenario.values:
-                    for era in ds.era.values:
+        # stack everything except "variable" into one array
+        arr = (
+            ds[vars_]
+            .to_array()  # (variable, landcover, model, scenario, era, doy)
+            .transpose("landcover", "model", "scenario", "era", "doy", "variable")
+            .values
+        )
 
-                        arr = (
-                            ds[vars_]
-                            .sel(
-                                landcover=landcover,
-                                model=model,
-                                scenario=scenario,
-                                era=era,
-                            )
-                            .to_array()  # (variable, doy)
-                        )
+        doy_vals = ds.doy.values.astype(int)
 
-                        # skip population if all values are NaN (missing model/scenario combo)
-                        if arr.isnull().all():
+        landcovers = ds.landcover.values
+        models = ds.model.values
+        scenarios = ds.scenario.values
+        eras = ds.era.values
+
+        for i_lc, landcover in enumerate(landcovers):
+            land_dict = hydrograph_dict["data"].setdefault(landcover, {})
+
+            for i_m, model in enumerate(models):
+                model_dict = land_dict.setdefault(model, {})
+
+                for i_s, scenario in enumerate(scenarios):
+                    scen_dict = model_dict.setdefault(scenario, {})
+
+                    for i_e, era in enumerate(eras):
+                        block = arr[i_lc, i_m, i_s, i_e]  # (doy, variable)
+
+                        # skip empty combos
+                        if np.isnan(block).all():
                             continue
 
-                        # populate dict structure
-                        land_dict = hydrograph_dict["data"].setdefault(landcover, {})
-                        model_dict = land_dict.setdefault(model, {})
-                        scen_dict = model_dict.setdefault(scenario, {})
+                        rows = []
+                        for i_doy, row in enumerate(block):
+                            if np.isnan(row).all():
+                                continue
 
-                        sliced = arr.transpose("doy", "variable").values  # numpy array
+                            entry = {"doy": int(doy_vals[i_doy])}
+                            for i_v, val in enumerate(row):
+                                if not np.isnan(val):
+                                    entry[vars_[i_v]] = int(val)
+                            rows.append(entry)
 
-                        doy_list = [None] * sliced.shape[0]
-
-                        for i, row in enumerate(sliced):
-                            entry = {"doy": doy_vals[i]}
-                            for j in range(n_vars):
-                                val = row[j]
-                                entry[vars_[j]] = None if np.isnan(val) else int(val)
-                            doy_list[i] = entry
-
-                        scen_dict[era] = doy_list
+                        scen_dict[era] = rows
 
     return hydrograph_dict
 
