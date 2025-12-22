@@ -2,11 +2,9 @@ import asyncio
 import io
 import numpy as np
 import xarray as xr
-import json
 import ast
 import geopandas as gpd
 from aiohttp import ClientSession
-import xml.etree.ElementTree as ET
 from flask import (
     Blueprint,
     Response,
