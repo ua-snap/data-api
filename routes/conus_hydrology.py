@@ -68,11 +68,6 @@ async def fetch_hydro_data(cov_ids, stream_id):
         for cov_id in cov_ids
     ]
 
-    # if coverages["stats"][0] in cov_ids and len(urls) == 1:
-    #     # stats data request - need to handle rasql query bug!
-    #     # TODO: investigate this rasda-bug further and see if there's a solution
-    #     urls[0] += "&SUBSET=model(0,13)"
-
     results = await fetch_data(urls)
 
     # allow for single coverage ID input by wrapping in a list
