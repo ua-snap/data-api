@@ -49,7 +49,6 @@ def package_landfastice_data(landfastice_resp, meta):
 
 
 @routes.route("/landfastice/")
-@routes.route("/landfastice/abstract/")
 @routes.route("/landfastice/point/")
 def about_landfastice():
     return render_template("documentation/landfastice.html")
