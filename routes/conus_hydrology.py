@@ -131,8 +131,8 @@ async def get_usgs_gauge_data(gauge_id):
         return render_template("400/bad_request.html"), 400
 
     # get metadata from JSON and populate dict
-    feature = gauge_metadata["features"][0]
-    gauge_data_dict["name"] = feature["properties"]["monitoring_location_name"]
+    metadata_feature = gauge_metadata["features"][0]
+    gauge_data_dict["name"] = metadata_feature["properties"]["monitoring_location_name"]
     coordinates = feature["geometry"]["coordinates"]
     gauge_data_dict["longitude"] = coordinates[0]
     gauge_data_dict["latitude"] = coordinates[1]
@@ -539,7 +539,6 @@ def run_get_conus_hydrology_gauge_data(stream_id):
 
     try:
         gauge_id = gdf.loc[0].GAUGE_ID
-        print("gauge_id: ", gauge_id)
         if gauge_id is None or gauge_id == "NA":
             return render_template("404/no_data.html"), 404
 
