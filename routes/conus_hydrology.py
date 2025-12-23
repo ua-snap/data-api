@@ -178,7 +178,6 @@ async def get_usgs_gauge_data(gauge_id):
     gauge_data_dict["data"]["actual"] = {}
     gauge_data_dict["data"]["actual"]["usgs"] = {}
     gauge_data_dict["data"]["actual"]["usgs"]["observed"] = {}
-    gauge_data_dict["data"]["actual"]["usgs"]["observed"]["1976-2005"] = {}
     gauge_data_dict["data"]["actual"]["usgs"]["observed"]["1976-2005"] = rows
 
     # populate metadata
