@@ -138,7 +138,7 @@ async def get_usgs_gauge_data(gauge_id):
 
     metadata_feature = metadata_features[0]
     gauge_data_dict["name"] = metadata_feature["properties"]["monitoring_location_name"]
-    coordinates = feature["geometry"]["coordinates"]
+    coordinates = metadata_feature["geometry"]["coordinates"]
     gauge_data_dict["longitude"] = coordinates[0]
     gauge_data_dict["latitude"] = coordinates[1]
 
@@ -152,10 +152,19 @@ async def get_usgs_gauge_data(gauge_id):
     if not data_features:
         return render_template("400/bad_request.html"), 400
 
+    records = []
     for feature in data_features:
         date_str = feature["properties"]["time"][:10]
         value = feature["properties"]["value"]
-        df.loc[date_str, "discharge_cfs"] = float(value)
+        records.append((date_str, float(value)))
+
+    if records:
+        values_df = pd.DataFrame(records, columns=["date", "discharge_cfs"])
+        values_df["date"] = pd.to_datetime(values_df["date"])
+        values_df.set_index("date", inplace=True)
+        # align on index to fill discharge_cfs for matching dates
+        df["discharge_cfs"] = values_df["discharge_cfs"]
+
     df["DOY"] = df.index.dayofyear
 
     # calculate percent completeness
