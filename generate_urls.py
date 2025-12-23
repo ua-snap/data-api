@@ -123,6 +123,6 @@ def generate_describe_coverage_url(describe_coverage_str):
 def generate_wfs_conus_hydrology_url(stream_id):
     wfs_url = (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg&propertyName=(GNIS_NAME,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=playground:conus_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
     )
     return wfs_url
