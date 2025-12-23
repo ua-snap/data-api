@@ -131,7 +131,12 @@ async def get_usgs_gauge_data(gauge_id):
         return render_template("400/bad_request.html"), 400
 
     # get metadata from JSON and populate dict
-    metadata_feature = gauge_metadata["features"][0]
+
+    metadata_features = gauge_metadata.get("features")
+    if not metadata_features:
+        return render_template("400/bad_request.html"), 400
+
+    metadata_feature = metadata_features[0]
     gauge_data_dict["name"] = metadata_feature["properties"]["monitoring_location_name"]
     coordinates = feature["geometry"]["coordinates"]
     gauge_data_dict["longitude"] = coordinates[0]
@@ -142,7 +147,12 @@ async def get_usgs_gauge_data(gauge_id):
     df = pd.DataFrame(date_range, columns=["date"])
     df.set_index("date", inplace=True)
     df["discharge_cfs"] = float("nan")
-    for feature in gauge_data["features"]:
+
+    data_features = gauge_data.get("features")
+    if not data_features:
+        return render_template("400/bad_request.html"), 400
+
+    for feature in data_features:
         date_str = feature["properties"]["time"][:10]
         value = feature["properties"]["value"]
         df.loc[date_str, "discharge_cfs"] = float(value)
