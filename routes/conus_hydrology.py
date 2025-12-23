@@ -255,7 +255,18 @@ def package_metadata(ds, data_dict):
             "description", ""
         )
 
-        # special cases for "doy" vars from hydrograph datasets
+        # special cases:
+
+        # add derived "ma99" annual mean flow stat
+        # if "ma12" is present (indicating we are dealing with a stats dataset)
+        if var == "ma12":
+            data_dict["metadata"]["variables"]["ma99"] = {}
+            data_dict["metadata"]["variables"]["ma99"]["units"] = "cfs"
+            data_dict["metadata"]["variables"]["ma99"][
+                "description"
+            ] = "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows."
+
+        # "doy" vars from hydrograph datasets
         # TODO: add this info to the rasdaman coverage metadata so it can be read automatically
         if var == "doy":
             data_dict["metadata"]["variables"][var]["units"] = "day of year"
@@ -292,6 +303,45 @@ def populate_feature_attributes(data_dict, gdf):
     return data_dict
 
 
+def calculate_and_populate_annual_mean_flow(data_dict):
+    """
+    Function to calculate and populate the annual mean flow (ma99) in the stats data dictionary.
+    Args:
+        data_dict (dict): Data dictionary with the stats data populated
+    Returns:
+        Data dictionary with the annual mean flow populated.
+    """
+    monthly_stats_codes = [
+        "ma12",
+        "ma13",
+        "ma14",
+        "ma15",
+        "ma16",
+        "ma17",
+        "ma18",
+        "ma19",
+        "ma20",
+        "ma21",
+        "ma22",
+        "ma23",
+    ]
+    for landcover_, land_dict in data_dict["data"].items():
+        for model_, model_dict in land_dict.items():
+            for scenario_, scen_dict in model_dict.items():
+                for era_, era_dict in scen_dict.items():
+                    # check if all monthly stats are present
+                    if all(code in era_dict for code in monthly_stats_codes):
+                        # calculate annual mean flow
+                        monthly_values = [
+                            era_dict[code] for code in monthly_stats_codes
+                        ]
+                        annual_mean_flow = sum(monthly_values) / len(monthly_values)
+                        # populate the annual mean flow in the stats dictionary
+                        era_dict["ma99"] = round(annual_mean_flow, 2)
+
+    return data_dict
+
+
 @routes.route("/conus_hydrology/")
 def conus_hydrology_about():
     return render_template("/documentation/conus_hydrology.html")
@@ -324,6 +374,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
 
         # package the stats data + metadata into a dictionary for JSON serialization
         data_dict = package_stats_data(stream_id, ds)
+        data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_attributes(data_dict, gdf)
 
