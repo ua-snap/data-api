@@ -125,7 +125,7 @@ def generate_wfs_conus_hydrology_url(stream_id):
     Generate a WFS URL for fetching CONUS hydrology data for a given stream ID."""
     wfs_url = (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=playground:conus_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
     )
     return wfs_url
 
