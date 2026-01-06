@@ -121,8 +121,43 @@ def generate_describe_coverage_url(describe_coverage_str):
 
 
 def generate_wfs_conus_hydrology_url(stream_id):
+    """
+    Generate a WFS URL for fetching CONUS hydrology data for a given stream ID."""
     wfs_url = (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg&propertyName=(GNIS_NAME,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
     )
     return wfs_url
+
+
+def generate_usgs_gauge_daily_streamflow_data_url(gauge_id, start_date, end_date):
+    """
+    Generate a USGS OGC API URL for fetching daily streamflow data for a given gauge ID and date range.
+    Args:
+        gauge_id (str): USGS gauge ID (e.g. "USGS-07032000")
+        start_date (str): Start date in YYYY-MM-DD format
+        end_date (str): End date in YYYY-MM-DD format
+    Returns:
+        url (str): USGS OGC API URL for daily streamflow data
+    """
+    base_url = "https://api.waterdata.usgs.gov/ogcapi/v0/"
+    param = "00060"  # parameter code for daily discharge in CFS (see here: https://help.waterdata.usgs.gov/parameter_cd?group_cd=PHY)
+    properties = "time,value,unit_of_measure"
+    time = start_date + "/" + end_date
+    request_str = f"collections/daily/items?f=json&lang=en-US&limit=50000&properties={properties}&skipGeometry=true&sortby=%2Btime&offset=0&datetime={time}&monitoring_location_id={gauge_id}&parameter_code={param}&approval_status=Approved"
+    url = base_url + request_str
+    return url
+
+
+def generate_usgs_gauge_metadata_url(gauge_id):
+    """
+    Generate a USGS OGC API URL for fetching metadata for a given gauge ID.
+    Args:
+        gauge_id (str): USGS gauge ID (e.g. "USGS-07032000")
+    Returns:
+        url (str): USGS OGC API URL for gauge metadata (gauge name and location)"""
+    base_url = "https://api.waterdata.usgs.gov/ogcapi/v0/"
+    properties = "monitoring_location_name"
+    request_str = f"collections/monitoring-locations/items?f=json&lang=en-US&limit=1&properties={properties}&skipGeometry=false&offset=0&id={gauge_id}"
+    url = base_url + request_str
+    return url
