@@ -139,8 +139,8 @@ async def get_usgs_gauge_data(gauge_id):
     metadata_feature = metadata_features[0]
     gauge_data_dict["name"] = metadata_feature["properties"]["monitoring_location_name"]
     coordinates = metadata_feature["geometry"]["coordinates"]
-    gauge_data_dict["longitude"] = coordinates[0]
-    gauge_data_dict["latitude"] = coordinates[1]
+    gauge_data_dict["longitude"] = round(float(coordinates[0]), 4)
+    gauge_data_dict["latitude"] = round(float(coordinates[1]), 4)
 
     # get streamflow data from JSON into dataframe
     date_range = pd.date_range(start_date, end=end_date, freq="D")
