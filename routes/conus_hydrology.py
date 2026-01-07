@@ -46,7 +46,6 @@ async def get_decode_dicts_from_axis_attributes(cov_ids):
     Returns:
         list of with an axis decode dictionary for each coverage."""
 
-    # TODO: test this without session
     tasks = [describe_via_wcps(cov_id) for cov_id in cov_ids]
     metadata_list = await asyncio.gather(*tasks)
     decode_dicts = [get_axis_encodings(metadata) for metadata in metadata_list]
@@ -64,8 +63,6 @@ async def fetch_hydro_data(cov_ids, stream_id):
     Returns:
         results (list): list of responses from Rasdaman for each coverage ID
     """
-    # TODO: consider using fetch_data.fetch_bbox_netcdf_list() function here?
-
     urls = [
         RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id)
         for cov_id in cov_ids
@@ -374,7 +371,6 @@ def package_metadata(ds, data_dict):
             ] = "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows."
 
         # "doy" vars from hydrograph datasets
-        # TODO: add this info to the rasdaman coverage metadata so it can be read automatically
         if var == "doy":
             data_dict["metadata"]["variables"][var]["units"] = "day of year"
             data_dict["metadata"]["variables"][var][
