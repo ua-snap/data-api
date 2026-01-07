@@ -47,9 +47,8 @@ async def get_decode_dicts_from_axis_attributes(cov_ids):
         list of with an axis decode dictionary for each coverage."""
 
     # TODO: test this without session
-    async with ClientSession() as session:
-        tasks = [describe_via_wcps(cov_id) for cov_id in cov_ids]
-        metadata_list = await asyncio.gather(*tasks)
+    tasks = [describe_via_wcps(cov_id) for cov_id in cov_ids]
+    metadata_list = await asyncio.gather(*tasks)
     decode_dicts = [get_axis_encodings(metadata) for metadata in metadata_list]
 
     return decode_dicts
