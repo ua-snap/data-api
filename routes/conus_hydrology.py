@@ -6,6 +6,7 @@ import ast
 import pandas as pd
 from datetime import datetime
 import geopandas as gpd
+import copy
 from aiohttp import ClientSession
 from flask import (
     Blueprint,
@@ -24,6 +25,7 @@ from generate_urls import (
 )
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
+from postprocessing import prune_nulls_with_max_intensity
 from config import RAS_BASE_URL
 from . import routes
 
@@ -259,7 +261,7 @@ def package_stats_data(stream_id, ds):
                         if not np.isnan(v)
                     }
 
-    return stats_dict
+    return prune_missing_scenarios(stats_dict)
 
 
 def package_hydrograph_data(stream_id, datasets):
@@ -329,8 +331,7 @@ def package_hydrograph_data(stream_id, datasets):
                             rows.append(entry)
 
                         scen_dict[era] = rows
-
-    return hydrograph_dict
+    return prune_missing_scenarios(hydrograph_dict)
 
 
 def package_metadata(ds, data_dict):
@@ -445,6 +446,23 @@ def calculate_and_populate_annual_mean_flow(data_dict):
     return data_dict
 
 
+def prune_missing_scenarios(data_dict):
+    """
+    Function to prune scenarios with no data from the data dictionary.
+    Args:
+        data_dict (dict): Data dictionary with the hydrology data populated
+    Returns:
+        Data dictionary with empty scenarios pruned.
+    """
+    copy_data_dict = copy.deepcopy(data_dict["data"])
+    for landcover, land_dict in copy_data_dict.items():
+        for model, model_dict in land_dict.items():
+            for scenario, scen_dict in model_dict.items():
+                if not scen_dict:
+                    del data_dict["data"][landcover][model][scenario]
+    return data_dict
+
+
 @routes.route("/conus_hydrology/")
 def conus_hydrology_about():
     return render_template("/documentation/conus_hydrology.html")
@@ -480,6 +498,8 @@ def run_get_conus_hydrology_stats_data(stream_id):
         data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_attributes(data_dict, gdf)
+
+        data_dict = prune_nulls_with_max_intensity(data_dict)
 
         return jsonify(data_dict)
 
@@ -524,6 +544,7 @@ def run_get_conus_hydrology_hydrograph(stream_id):
             datasets[0], data_dict
         )  # all datasets should have same metadata, just use the first one
         data_dict = populate_feature_attributes(data_dict, gdf)
+        data_dict = prune_nulls_with_max_intensity(data_dict)
 
         return jsonify(data_dict)
 
