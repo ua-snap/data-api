@@ -517,14 +517,15 @@ def get_coverage_encodings(coverage_metadata):
 
 def get_axis_coordinate_values(coverage_metadata):
     """
-    Get axis encodings from the JSON output describing a coverage.
+    Get axis coordinate values from the JSON output describing a coverage. These are the literal
+    values defining each axis, and are usually integers e.g., [0, 1, 2, 3, 4] for an axis with 5 positions.
+    This function extracts these coordinate values for each axis defined in the coverage metadata,
+    and returns them in a dictionary format with axis names as keys.
 
     Args:
         coverage_axis_metadata (dict): JSON-like dictionary containing the coverage axes description.
-
     Returns:
         dict: A dictionary where each axis (key) maps to its respective coordinates (value).
-
     Raises:
         ValueError: If required information is missing in the JSON data.
 
@@ -564,14 +565,19 @@ def get_axis_coordinate_values(coverage_metadata):
 
 def get_axis_encodings(coverage_metadata, encoding_attr="encoding"):
     """
-    Get axis encodings from the JSON output describing a coverage.
+    Get axis encodings from the JSON output describing a coverage. This is the dictionary that maps
+    integer values used for axis labels and positions to descriptive strings, which can be used
+    to decode the meaning of each axis value.
+
     Args:
         coverage_axis_metadata (dict): JSON-like dictionary containing the coverage axes description.
         encoding_attr (str): The axis attribute that stores the encoding dictionary.
     Returns:
-        dict: A dictionary with axis names as keys and their encoding attributes as values.
+        dict: A dictionary with axis names as keys and their encoding dictionaries as values.
         Encoding attributes are coverted from string to dict.
         If an axis does not have the specified encoding attribute, it will map to None.
+    Raises:
+        ValueError: If required information is missing in the JSON data.
     """
     try:
         metadata = coverage_metadata.get("metadata", {})
