@@ -170,10 +170,6 @@ async def get_usgs_gauge_data(gauge_id):
     valid_days = df["discharge_cfs"].count()
     pct_complete = (valid_days / total_days) * 100
 
-    df_doy = df.groupby("DOY")["discharge_cfs"].agg(
-        doy_min="min", doy_mean="mean", doy_max="max"
-    )
-
     rows = (
         df.groupby("DOY")["discharge_cfs"]
         .agg(doy_min="min", doy_mean="mean", doy_max="max")
@@ -202,12 +198,21 @@ async def get_usgs_gauge_data(gauge_id):
     gauge_data_dict["metadata"]["source"][
         "citation"
     ] = f"U.S. Geological Survey, {current_year}, U.S. Geological Survey National Water Information System database, accessed {current_date}, at https://doi.org/10.5066/F7P55KJN. Data download directly accessible at {data_url}"
-    gauge_data_dict["metadata"]["variables"] = {}
-    gauge_data_dict["metadata"]["variables"]["daily_discharge"] = {}
-    gauge_data_dict["metadata"]["variables"]["daily_discharge"]["units"] = "cfs"
-    gauge_data_dict["metadata"]["variables"]["daily_discharge"][
-        "description"
-    ] = f"Daily mean streamflow (cfs), climatology for the period 1976-2005. Calculated as the mean streamflow for each day of year over all years in the period. Data completeness: {pct_complete:.2f}%."
+    gauge_data_dict["metadata"]["variables"] = {
+        "doy_max": {
+            "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+            "units": "cfs",
+        },
+        "doy_mean": {
+            "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+            "units": "cfs",
+        },
+        "doy_min": {
+            "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+            "units": "cfs",
+        },
+    }
+    gauge_data_dict["metadata"]["percent_complete"] = round(pct_complete, 2)
 
     return gauge_data_dict
 
