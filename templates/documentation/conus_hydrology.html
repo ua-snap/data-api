@@ -11,6 +11,8 @@
   1976-2005 period.
 </p>
 
+<p>Users can search for stream IDs using the ###TBD###</p>
+
 <p>
   For more detailed model information, see the links to academic references and
   source datasets included at the bottom of this page.
@@ -29,9 +31,105 @@
 
 <h4>Modeled hydrologic statistics by stream ID</h4>
 
+<p>
+  Query hydrologic statistics for all models and scenarios. Statistics are
+  computed over historical (1976-2005) and future (2016-2045, 2046-2075, and
+  2071-2100) eras.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hydrologic statistics</td>
+      <td>
+        <a href="/conus_hydrology/stats/50563">/conus_hydrology/stats/50563</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
 <h4>Modeled daily streamflow climatologies by stream ID</h4>
 
+<p>
+  Query daily streamflow climatologies for all models and scenarios. Useful for
+  constructing hydrographs. Minimum, maximum, and mean values for each day of
+  year are computed over historical (1976-2005) and future (2016-2045,
+  2046-2075, and 2071-2100) eras.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Modeled daily streamflow climatologies</td>
+      <td>
+        <a href="/conus_hydrology/hydrograph/50563"
+          >/conus_hydrology/hydrograph/50563</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
 <h4>Observed daily streamflow climatologies by stream ID</h4>
+
+<p>
+  Query daily streamflow climatologies computed from observed USGS stream gauge
+  data. Useful for constructing hydrographs. Climatologies are computed over the
+  1976-2005 historical era.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Observed daily streamflow climatology</td>
+      <td>
+        <a href="/conus_hydrology/gauge/50563">/conus_hydrology/gauge/50563</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
 
 <!-- <p>
   Query hydrologic variables for all models and scenarios. Monthly variable data

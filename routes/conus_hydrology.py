@@ -170,17 +170,24 @@ async def get_usgs_gauge_data(gauge_id):
     valid_days = df["discharge_cfs"].count()
     pct_complete = (valid_days / total_days) * 100
 
-    # calculate daily climatology
-    df_doy = df.groupby("DOY").mean()
-    rows = []
-    for doy, row in df_doy.iterrows():
-        if np.isnan(row["discharge_cfs"]):
-            continue
-        entry = {
-            "doy": int(doy),
-            "discharge": round(float(row["discharge_cfs"]), 2),
-        }
-        rows.append(entry)
+    df_doy = df.groupby("DOY")["discharge_cfs"].agg(
+        doy_min="min", doy_mean="mean", doy_max="max"
+    )
+
+    rows = (
+        df.groupby("DOY")["discharge_cfs"]
+        .agg(doy_min="min", doy_mean="mean", doy_max="max")
+        .reset_index()
+        .dropna(subset=["doy_mean"])
+        .assign(
+            doy=lambda x: x["DOY"].astype(int),
+            doy_min=lambda x: x["doy_min"].astype(float).round(2),
+            doy_mean=lambda x: x["doy_mean"].astype(float).round(2),
+            doy_max=lambda x: x["doy_max"].astype(float).round(2),
+        )
+        .drop(columns="DOY")
+        .to_dict("records")
+    )
 
     gauge_data_dict["data"]["actual"] = {}
     gauge_data_dict["data"]["actual"]["usgs"] = {}
