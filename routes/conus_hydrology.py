@@ -181,9 +181,9 @@ async def get_usgs_gauge_data(gauge_id):
         .dropna(subset=["doy_mean"])
         .assign(
             doy=lambda x: x["DOY"].astype(int),
-            doy_min=lambda x: x["doy_min"].astype(float).round(2),
-            doy_mean=lambda x: x["doy_mean"].astype(float).round(2),
-            doy_max=lambda x: x["doy_max"].astype(float).round(2),
+            doy_min=lambda x: x["doy_min"].astype(int),
+            doy_mean=lambda x: x["doy_mean"].astype(int),
+            doy_max=lambda x: x["doy_max"].astype(int),
         )
         .drop(columns="DOY")
         .to_dict("records")
