@@ -561,12 +561,33 @@ def run_get_conus_hydrology_gauge_data(stream_id):
     Example URL: http://localhost:5000/conus_hydrology/gauge/50563
     (should fetch associated gauge: USGS-12039500, QUINAULT RIVER AT QUINAULT LAKE, WA)
     Args:
-        stream_id (str): Stream ID for the hydrology data
+        stream_id (str): Stream ID for the hydrology data, or "info" to list all streams with gauges
     Returns:
         JSON response with USGS stream gauge data associated with the requested stream ID.
         Results are a daily climatology for the period 1976-2005, packaged identically to the hydrograph data.
         If no gauge is associated with the stream ID, a 404 response is returned.
+        If stream_id is "info", a list of all stream IDs with associated gauges is returned.
     """
+    if stream_id.lower() == "info":
+        try:
+            gdf = asyncio.run(get_features(""))  # fetch all stream attributes
+            if isinstance(gdf, tuple):
+                return gdf  # return 400 if gdf is a tuple
+            gauges_gdf = gdf[gdf["GAUGE_ID"].notnull() & (gdf["GAUGE_ID"] != "NA")]
+            result = (
+                gauges_gdf[["seg_id_nat", "GNIS_NAME", "GAUGE_ID"]]
+                .rename(columns={"GNIS_NAME": "name", "GAUGE_ID": "usgs_gauge_id"})
+                .groupby("seg_id_nat")
+                .apply(
+                    lambda x: x.drop(columns="seg_id_nat").to_dict(orient="records")
+                )  # allows for >1 gauge per stream, e.g. stream ID 29526
+                .to_dict()
+            )
+            return jsonify(result)
+        except Exception as exc:
+            print(exc)
+            return render_template("500/server_error.html"), 500
+
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
         return gdf  # return 400 if gdf is a tuple

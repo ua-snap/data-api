@@ -122,11 +122,19 @@ def generate_describe_coverage_url(describe_coverage_str):
 
 def generate_wfs_conus_hydrology_url(stream_id):
     """
-    Generate a WFS URL for fetching CONUS hydrology data for a given stream ID."""
-    wfs_url = (
-        GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
-    )
+    Generate a WFS URL for fetching CONUS hydrology data for a given stream ID. Returns both attributes and geometry for a single stream ID.
+    If the stream ID is an empty string, returns only attributes for all streams."""
+    if stream_id == "":
+        wfs_url = (
+            GS_BASE_URL
+            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_segments&propertyName=(seg_id_nat,GNIS_NAME,GAUGE_ID)&outputFormat=application/json"
+        )
+        return wfs_url
+    else:
+        wfs_url = (
+            GS_BASE_URL
+            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
+        )
     return wfs_url
 
 

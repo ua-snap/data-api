@@ -2,24 +2,27 @@
 <h2>CONUS Hydrology</h2>
 
 <p>
-  These endpoints provide access to modeled streamflow statistics
-  and daily streamflow climatologies for 56,460 stream network segments 
-  derived the National Hydrologic Model Geospatial Fabric in the continental United States. 
-  Streamflow was modeled using the Precipitation-Runoff Modeling System (PRMS) and CMIP5 
-  historical and projected climate data. A calibrated historical baseline (the Maurer calibration)
-  is available for the 1976-2005 period. 
-</p>
-
-<p>
-  We also include endpoints to access daily streamflow climatologies from associated USGS stream 
-  gauge data collected over the 1976-2005 historical period, for use in comparing with the modeled data.
-  Note that not all modeled stream segments have associated gauge data. Use the <code>/gauges/info</code> 
-  endpoint to list all stream IDs with gauge data.
+  These endpoints provide access to modeled streamflow statistics and daily
+  streamflow climatologies for 56,460 stream network segments in the continental
+  United States. Stream segments were derived from the National Hydrologic Model
+  Geospatial Fabric, and streamflow was modeled using the Precipitation-Runoff
+  Modeling System (PRMS) and CMIP5 historical and projected climate data. A
+  calibrated historical baseline (the Maurer calibration) is available for the
+  1976-2005 period.
 </p>
 
 <p>
   For more detailed model information, see the links to academic references and
   source datasets included at the bottom of this page.
+</p>
+
+<p>
+  We also include endpoints to access daily streamflow climatologies from
+  associated USGS stream gauge data collected over the 1976-2005 historical
+  period, for use in comparing with the modeled data. Note that not all modeled
+  stream segments have associated gauge data. See the
+  <a href="/conus_hydrology/gauge/info">/conus_hydrology/gauge/info</a> endpoint
+  for a list of all stream IDs with gauge data.
 </p>
 
 <h3>Service endpoints</h3>
@@ -29,7 +32,6 @@
 <h4>Modeled daily streamflow climatologies by stream ID</h4>
 
 <h4>Observed daily streamflow climatologies by stream ID</h4>
-
 
 <!-- <p>
   Query hydrologic variables for all models and scenarios. Monthly variable data
@@ -242,25 +244,50 @@
   <tbody>
     <tr>
       <td>
-        LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for Hydrologic Simulations for the Conterminous United States for Historical and Future Conditions Using the National Hydrologic Model Infrastructure (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5), 1950 - 2100: U.S. Geological Survey data release, <a href="https://doi.org/10.5066/P9EBKREQ">https://doi.org/10.5066/P9EBKREQ</a>.
+        LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for
+        Hydrologic Simulations for the Conterminous United States for Historical
+        and Future Conditions Using the National Hydrologic Model Infrastructure
+        (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5),
+        1950 - 2100: U.S. Geological Survey data release,
+        <a href="https://doi.org/10.5066/P9EBKREQ"
+          >https://doi.org/10.5066/P9EBKREQ</a
+        >.
       </td>
     </tr>
     <tr>
-        <td>
-        Regan, R.S., Markstrom, S.L., Hay, L.E., Viger, R.J., Norton, P.A., Driscoll, J.M., LaFontaine, J.H., 2018, Description of the National Hydrologic Model for use with the Precipitation-Runoff Modeling System (PRMS): U.S. Geological Survey Techniques and Methods, book 6, chap B9, 38 p., <a href="https://doi.org/10.3133/tm6B9">https://doi.org/10.3133/tm6B9</a>.
-        </td>
+      <td>
+        Regan, R.S., Markstrom, S.L., Hay, L.E., Viger, R.J., Norton, P.A.,
+        Driscoll, J.M., LaFontaine, J.H., 2018, Description of the National
+        Hydrologic Model for use with the Precipitation-Runoff Modeling System
+        (PRMS): U.S. Geological Survey Techniques and Methods, book 6, chap B9,
+        38 p.,
+        <a href="https://doi.org/10.3133/tm6B9">https://doi.org/10.3133/tm6B9</a
+        >.
+      </td>
     </tr>
     <tr>
-        <td>
-            LaFontaine, J.H., Hay, L.E., and Riley, J.R., 2023, Application of the National Hydrologic Model Infrastructure with the Precipitation-Runoff Modeling System (NHM-PRMS), 1950-2010, Maurer Calibration: U.S. Geological Survey data release, <a href="https://doi.org/10.5066/P9CVHLMB">https://doi.org/10.5066/P9CVHLMB</a>.
-        </td>
+      <td>
+        LaFontaine, J.H., Hay, L.E., and Riley, J.R., 2023, Application of the
+        National Hydrologic Model Infrastructure with the Precipitation-Runoff
+        Modeling System (NHM-PRMS), 1950-2010, Maurer Calibration: U.S.
+        Geological Survey data release,
+        <a href="https://doi.org/10.5066/P9CVHLMB"
+          >https://doi.org/10.5066/P9CVHLMB</a
+        >.
+      </td>
     </tr>
     <tr>
-        <td>
-        U.S. Geological Survey, 2025, U.S. Geological Survey National Water Information System database, at <a href="https://doi.org/10.5066/F7P55KJN">https://doi.org/10.5066/F7P55KJN</a>. Data download directly accessible at <a href="https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily">https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily</a>.
-        </td>
+      <td>
+        U.S. Geological Survey, 2025, U.S. Geological Survey National Water
+        Information System database, at
+        <a href="https://doi.org/10.5066/F7P55KJN"
+          >https://doi.org/10.5066/F7P55KJN</a
+        >. Data download directly accessible at
+        <a href="https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily"
+          >https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily</a
+        >.
+      </td>
     </tr>
-
   </tbody>
 </table>
 
