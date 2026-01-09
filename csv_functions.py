@@ -120,7 +120,7 @@ def create_csv(
     elif endpoint == "fire_weather":
         properties = fire_weather_csv(data, filename_prefix, vars)
     elif endpoint == "conus_hydrology":
-        properties = conus_hydrology_csv(data, filename_prefix)
+        properties = conus_hydrology_csv(data, filename_prefix, vars)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -1318,7 +1318,7 @@ def fire_weather_csv(data, filename_prefix, vars):
     }
 
 
-def conus_hydrology_csv(data, filename_prefix):
+def conus_hydrology_csv(data, filename_prefix, vars):
 
     # substrings in filename_prefix denotes endpoint ("Statistics", "Modeled") to aid in packaging CSV
 
@@ -1336,6 +1336,7 @@ def conus_hydrology_csv(data, filename_prefix):
 
     # for observed daily climatology:
     # same structure as the modeled daily climatology endpoint, but there is only one landcover/model/scenario combination ("actual"/"usgs"/"observed") and the "metadata" key contains an additional "percent_complete" key/value pair
+    # use "vars" argument to pass the percent complete statement from the observed climatology endpoint metadata into the CSV metadata
 
     csv_dicts = []
     for key in data.keys():
@@ -1436,15 +1437,16 @@ def conus_hydrology_csv(data, filename_prefix):
         if "Modeled" in filename_prefix:
             metadata += "# Climatologies are calculated from from modeled daily streamflow data.\n"
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
-            metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the time period (cubic feet per second).\n"
-            metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the time period (cubic feet per second).\n"
-            metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the time period (cubic feet per second).\n"
+            metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
+            metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
+            metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
         else:
             metadata += "# Climatologies are calculated from from observed daily streamflow data.\n"
+            metadata += "The observation record for this time period is " + vars + ".\n"
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported.\n"
-            metadata += "# doy_min is the minimum streamflow value for the given day of year across all available years in the record (cubic feet per second).\n"
-            metadata += "# doy_mean is the mean streamflow value for the given day of year across all available years in the record (cubic feet per second).\n"
-            metadata += "# doy_max is the maximum streamflow value for the given day of year across all available years in the record (cubic feet per second).\n"
+            metadata += "# doy_min is the minimum streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
+            metadata += "# doy_mean is the mean streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
+            metadata += "# doy_max is the maximum streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
 
     metadata += "# landcover is the landcover type used to parameterize the precipitation-runoff model.\n"
     metadata += "# model is the global climate model.\n"

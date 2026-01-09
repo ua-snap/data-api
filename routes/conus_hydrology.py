@@ -633,10 +633,12 @@ def run_get_conus_hydrology_gauge_data(stream_id):
                 return create_csv(
                     data=gauge_data_dict,
                     endpoint="conus_hydrology",
-                    filename_prefix="Observed Daily Climatologies",
+                    filename_prefix="Observed Daily Climatology",
                     place_id=stream_id + " (" + gauge_id + ")",
                     lat=str(gauge_data_dict["latitude"]),
                     lon=str(gauge_data_dict["longitude"]),
+                    vars=str(gauge_data_dict["metadata"]["percent_complete"])
+                    + f"% complete",
                 )
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
