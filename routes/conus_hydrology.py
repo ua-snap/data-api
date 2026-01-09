@@ -276,7 +276,7 @@ def package_hydrograph_data(stream_id, datasets):
     """
     Function to package the hydrograph data into a dictionary for JSON serialization.
     The levels of the hydrograph data dictionary are as follows: landcover, model, scenario, era, variable.
-    Streamflow values (cfs) are rounded to integers.
+    Streamflow values (cfs) are rounded to 3 decimal places.
     Each dataset is read into numpy array for faster slicing.
     Args:
         stream_id (str): Stream ID for the hydrology data
@@ -335,7 +335,7 @@ def package_hydrograph_data(stream_id, datasets):
                             entry = {"doy": int(doy_vals[i_doy])}
                             for i_v, val in enumerate(row):
                                 if not np.isnan(val):
-                                    entry[vars_[i_v]] = int(val)
+                                    entry[vars_[i_v]] = round(float(val), 3)
                             rows.append(entry)
 
                         scen_dict[era] = rows
