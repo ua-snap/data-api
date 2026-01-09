@@ -32,12 +32,7 @@ from . import routes
 
 coverages = {
     "stats": ["conus_hydro_segments_stats"],
-    "doy_climatology": [
-        "conus_hydro_segments_doy_climatology_dynamic_historical",
-        "conus_hydro_segments_doy_climatology_static_historical",
-        "conus_hydro_segments_doy_climatology_dynamic_projected",
-        "conus_hydro_segments_doy_climatology_static_projected",
-    ],
+    "doy_climatology": ["conus_hydro_segments_doy_climatology"],
 }
 
 
