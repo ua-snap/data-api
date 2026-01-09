@@ -536,6 +536,9 @@ def run_get_conus_hydrology_stats_data(stream_id):
 
 
 @routes.route("/conus_hydrology/modeled_climatology/<stream_id>")
+@routes.route(
+    "/conus_hydrology/hydrograph/<stream_id>"
+)  # TODO: remove this route later, included for backwards compatibility
 def run_get_conus_hydrology_modeled_climatology(stream_id):
     """
     Function to fetch hydrograph data from Rasdaman for a single stream ID.
@@ -596,6 +599,9 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
 
 
 @routes.route("/conus_hydrology/observed_climatology/<stream_id>")
+@routes.route(
+    "/conus_hydrology/gauge/<stream_id>"
+)  # TODO: remove this route later, included for backwards compatibility
 def run_get_conus_hydrology_gauge_data(stream_id):
     """
     Function to fetch USGS stream gauge data associated with a single stream ID.
