@@ -39,7 +39,12 @@ def create_csv(
     """
     if not place_id:
         place_id = request.args.get("community")
-    place_name, place_type = place_name_and_type(place_id)
+    if endpoint == "conus_hydrology":
+        place_name = "Stream ID " + place_id
+        place_id = None
+        place_type = "stream"
+    else:
+        place_name, place_type = place_name_and_type(place_id)
 
     if not endpoint.startswith("places_"):
         metadata = csv_metadata(
@@ -135,8 +140,6 @@ def create_csv(
             filename += place_name
         elif endpoint == "demographics":
             filename += "All communities in Alaska"
-        elif endpoint == "conus_hydrology":
-            filename += "Stream ID"  # TODO: replace with more meaningful title later
         else:
             filename += lat + " " + lon
     filename += ".csv"
@@ -181,6 +184,8 @@ def csv_metadata(
         )
     elif place_type == "community":
         metadata += place_name + "\n"
+    elif place_type == "stream":
+        metadata += place_name + ": " + lat + " " + lon + "\n"
     else:
         metadata += place_name + " (" + place_type_labels[place_type] + ")\n"
 
@@ -1315,7 +1320,7 @@ def fire_weather_csv(data, filename_prefix, vars):
 
 def conus_hydrology_csv(data, filename_prefix):
 
-    # filename_prefix denotes endpoint ("stats", "modeled_climatology", "observed_climatology") to aid in packaging CSV
+    # substrings in filename_prefix denotes endpoint ("Statistics", "Modeled") to aid in packaging CSV
 
     # data structure for all endpoints:
     # first level of data are strings "data", "id", "latitude", "longitude", "metadata", "name"
@@ -1346,7 +1351,7 @@ def conus_hydrology_csv(data, filename_prefix):
                             "scenario": scenario,
                             "era": era,
                         }
-                        if filename_prefix == "stats":
+                        if "Statistics" in filename_prefix:
                             row.update(data["data"][landcover][model][scenario][era])
                             csv_dicts.append(copy.deepcopy(row))
                         else:  # modeled or observed daily climatology
@@ -1359,7 +1364,7 @@ def conus_hydrology_csv(data, filename_prefix):
                                         row[var_key] = doy_dict[var_key]
                                 csv_dicts.append(copy.deepcopy(row))
     fieldnames = ["landcover", "model", "scenario", "era"]
-    if filename_prefix == "stats":
+    if "Statistics" in filename_prefix:
         # get variable keys from metadata to use as fieldnames
         for var_id in data["metadata"]["variables"].keys():
             fieldnames.append(var_id)
@@ -1370,32 +1375,85 @@ def conus_hydrology_csv(data, filename_prefix):
         for var_key in sample_doy_dict.keys():
             if var_key != "doy":
                 fieldnames.append(var_key)
-    metadata = "# CONUS Hydrology Model Outputs\n"
-    if filename_prefix == "stats":
-        metadata += "# Hydrology model outputs for various variables; decadal means of annual values.\n"
-    else:
-        metadata += "# Hydrology model outputs for various variables; daily climatology values.\n"
-    metadata += "# landcover is the landcover type the data is derived from\n"
-    metadata += "# model is the model the data is derived from\n"
-    metadata += "# scenario is the emissions scenario\n"
-    metadata += "# era is the decade over which data are summarized\n"
-    metadata += (
-        "# doy is the day of year (1-366) for which the climatology value is reported\n"
-    )
-    filename_data_name = (
-        "CONUS Hydrology Model Outputs - "
-        + filename_prefix.replace("_", " ").title()
-        + " - "
-    )
 
-    print(csv_dicts[0])
-    print(fieldnames)
-    print(metadata)
-    print(filename_data_name)
+    metadata = ""
+    if "Statistics" in filename_prefix:
+        metadata += "# The following hydrologic statistics are calculated from modeled daily streamflow data:\n"
+        metadata += "# dh1: Annual maximum daily flow. Compute the maximum of a 1-day moving average flow for each year. DH1 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dh2: Annual maximum of 3-day moving average flows. Compute the maximum of a 3-day moving average flow for each year. DH2 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dh3: Annual maximum of 7-day moving average flows. Compute the maximum of a 7-day moving average flow for each year. DH3 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dh4: Annual maximum of 30-day moving average flows. Compute the maximum of 30-day moving average flows. Compute the maximum of a 30-day moving average flow for each year. DH4 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dh5: Annual maximum of 90-day moving average flows. Compute the maximum of a 90-day moving average flow for each year. DH5 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dh15: High flow pulse duration. Compute the average duration for flow events with flows above a threshold equal to the 75th percentile value for each year in the flow record. DH15 is the median of the yearly average durations (days/year - temporal).\n"
+        metadata += "# dl1: Annual minimum daily flow. Compute the minimum 1-day average flow for each year. DL1 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dl2: Annual minimum of 3-day moving average flow. Compute the minimum of a 3-day moving average flow for each year. DL2 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dl3: Annual minimum of 7-day moving average flow. Compute the minimum of a 7-day moving average flow for each year. DL3 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dl4: Annual minimum of 30-day moving average flow. Compute the minimum of a 30-day moving average flow for each year. DL4 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dl5: Annual minimum of 90-day moving average flow. Compute the minimum of a 90-day moving average flow for each year. DL5 is the mean of these values (cubic feet per second - temporal).\n"
+        metadata += "# dl16: Low flow pulse duration. Compute the average pulse duration for each year for flow events below a threshold equal to the 25th percentile value for the entire flow record. DL16 is the median of the yearly average durations (days/year - temporal).\n"
+        metadata += "# lf1: Number of days per year below a threshold of 0.1 cubic feet per second per square mile. LF1 is the median annual number of days below the threshold (number of days/year - temporal).\n"
+        metadata += "# spr_dur3: Spring (April-June) maximum of 3-day moving average flows. Compute the maximum of a 3-day moving average flow for each year. SPR_DUR3 is the median of these values (cubic feet per second - temporal).\n"
+        metadata += "# spr_dur7: Spring (April-June) maximum of 7-day moving average flows. Compute the maximum of a 7-day moving average flow for each year. SPR_DUR7 is the median of these values (cubic feet per second - temporal).\n"
+        metadata += "# sum_dur3: Summer (July-September) minimum of 3-day moving average flow. Compute the minimum of a 3-day moving average flow for each year. SUM_DUR3 is the median of these values (cubic feet per second - temporal).\n"
+        metadata += "# sum_dur7: Summer (July-September) minimum of 7-day moving average flow. Compute the minimum of a 7-day moving average flow for each year. SUM_DUR7 is the median of these values (cubic feet per second - temporal).\n"
+        metadata += "# fh1: High flood pulse count. Compute the average number of flow events with flows above a threshold equal to the 75th percentile value for the entire flow record. FH1 is the mean number of events (number of events/year - temporal).\n"
+        metadata += "# fh5: Flood frequency. Compute the average number of flow events with flows above a threshold equal to the median flow value for the entire flow record. FH5 is the mean number of events (number of events/year - temporal).\n"
+        metadata += "# fh6: Flood frequency. Compute the average number of flow events with flows above a threshold equal to three times the median flow value for the entire flow record. FH6 is the mean number of events (number of events/year - temporal).\n"
+        metadata += "# fh7: Flood frequency. Compute the average number of flow events with flows above a threshold equal to seven times the median flow value for the entire flow record. FH7 is the mean number of events (number of events/year - temporal).\n"
+        metadata += "# fl1: Low flood pulse count. Compute the average number of flow events with flows below a threshold equal to the 25th percentile value for the entire flow record. FL1 is the mean number of events (number of events/year - temporal).\n"
+        metadata += "# fl3: Frequency of low pulse spells. Compute the average number of flow events with flows below a threshold equal to 5 percent of the mean flow value for the entire flow record. FL3 is the mean number of events (number of events/year - temporal).\n"
+        metadata += "# spr_freq: Flood frequency for April-June. Compute the average number of flow events with flows above a threshold equal to the 10th percentile for the entire flow record. SPR_FREQ is the median number of events (number of events/year - temporal).\n"
+        metadata += "# sum_freq: Flood frequency for July-September. Compute the average number of flow events with flows below a threshold equal to the 90th percentile for the entire flow record. SUM_FREQ is the median number of events (number of events/year - temporal).\n"
+        metadata += "# ma3: Coefficient of variation (standard deviation/mean) for each year. Compute the coefficient of variation for each year of daily flows. Compute the mean of the annual coefficients of variation (percent - temporal).\n"
+        metadata += "# ma4: Standard deviation of the percentiles of the logs of the entire flow record divided by the mean of percentiles of the logs. Compute the log10 of the daily flows for the entire record. Compute the 5th; 10th; 15th; 20th; 25th; 30th; 35th; 40th; 45th; 50th; 55th; 60th; 65th; 70th; 75th; 80th; 85th; 90th; and 95th percentiles for the logs of the entire flow record. Percentiles are computed by interpolating between the ordered (ascending) logs of the flow values. Compute the standard deviation and mean for the percentile values. Divide the standard deviation by the mean (percent - spatial).\n"
+        metadata += "# ma12: Mean of monthly flow values for January.\n"
+        metadata += "# ma13: Mean of monthly flow values for February.\n"
+        metadata += "# ma14: Mean of monthly flow values for March.\n"
+        metadata += "# ma15: Mean of monthly flow values for April.\n"
+        metadata += "# ma16: Mean of monthly flow values for May.\n"
+        metadata += "# ma17: Mean of monthly flow values for June.\n"
+        metadata += "# ma18: Mean of monthly flow values for July.\n"
+        metadata += "# ma19: Mean of monthly flow values for August.\n"
+        metadata += "# ma20: Mean of monthly flow values for September.\n"
+        metadata += "# ma21: Mean of monthly flow values for October.\n"
+        metadata += "# ma22: Mean of monthly flow values for November.\n"
+        metadata += "# ma23: Mean of monthly flow values for December.\n"
+        metadata += "# ma99: Mean of monthly flow values for the entire year. Compute the mean of the monthly mean flows for each month of the year. MA99 is the mean of these 12 values (cubic feet per second - temporal).\n"
+        metadata += "# mh14: Median of annual maximum flows. Compute the annual maximum flows from monthly maximum flows. Compute the ratio of annual maximum flow to median annual flow for each year. MH14 is the median of these ratios (dimensionless - temporal).\n"
+        metadata += "# mh20: Specific mean annual maximum flow. MH20 is the mean of the annual maximum flows divided by the drainage area (cubic feet per second/square mile - temporal).\n"
+        metadata += "# ml17: Base flow. Compute the mean annual flows. Compute the minimum of a 7-day moving average flow for each year and divide them by the mean annual flow for that year. ML17 is the mean of those ratios (dimensionless - temporal).\n"
+        metadata += "# spr_mag: Specific mean spring (April-June) maximum flow. The spr_mag statistic is the median of the annual maximum flows divided by the drainage area (cubic feet per second/square mile - temporal).\n"
+        metadata += "# sum_cv: Coefficient of variation (standard deviation/mean) for each year for the summer (July-September). Compute the coefficient of variation for each year of daily flows. Compute the median of the annual coefficients of variation (percent - temporal).\n"
+        metadata += "# sum_mag: Minimum of the summer (July-September) flows divided by the drainage area (cubic feet per second/square mile - temporal).\n"
+        metadata += "# ra1: Rise rate. Compute the change in flow for days in which the change is positive for the entire flow record. RA1 is the mean of these values (cubic feet per second/day - temporal).\n"
+        metadata += "# ra3: Fall rate. Compute the change in flow for days in which the change is negative for the entire flow record. RA3 is the mean of these values (cubic feet per second/day - temporal).\n"
+        metadata += "# ra8: Number of reversals. Compute the number of days in each year when the change in flow from one day to the next changes direction. RA8 is the median of the yearly values (days - temporal).\n"
+        metadata += "# spr_ord: Julian date of spring (April-June) maximum. Determine the Julian date that the maximum flow occurs for each year. SPR_ORD is the median of these values (Julian day - temporal).\n"
+        metadata += "# sum_ord: Julian date of summer (July-September) minimum. Determine the Julian date that the minimum flow occurs for each water year. SUM_ORD is the median of these values (Julian day - temporal).\n"
+        metadata += "# th1: Julian date of annual maximum. Determine the Julian date that the maximum flow occurs for each year. TH1 is the median of these values (Julian day - temporal).\n"
+        metadata += "# tl1: Julian date of annual minimum. Determine the Julian date that the minimum flow occurs for each water year. TL1 is the median of these values (Julian day - temporal).\n"
+    else:
+        if "Modeled" in filename_prefix:
+            metadata += "# Climatologies are calculated from from modeled daily streamflow data.\n"
+            metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
+            metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the time period (cubic feet per second).\n"
+            metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the time period (cubic feet per second).\n"
+            metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the time period (cubic feet per second).\n"
+        else:
+            metadata += "# Climatologies are calculated from from observed daily streamflow data.\n"
+            metadata += "# doy is the day of year (1-366) for which the climatology value is reported.\n"
+            metadata += "# doy_min is the minimum streamflow value for the given day of year across all available years in the record (cubic feet per second).\n"
+            metadata += "# doy_mean is the mean streamflow value for the given day of year across all available years in the record (cubic feet per second).\n"
+            metadata += "# doy_max is the maximum streamflow value for the given day of year across all available years in the record (cubic feet per second).\n"
+
+    metadata += "# landcover is the landcover type used to parameterize the precipitation-runoff model.\n"
+    metadata += "# model is the global climate model.\n"
+    metadata += "# scenario is the emissions scenario.\n"
+    metadata += "# era is the time period over which data are summarized.\n"
 
     return {
         "csv_dicts": csv_dicts,
         "fieldnames": fieldnames,
         "metadata": metadata,
-        "filename_data_name": filename_data_name,
+        "filename_data_name": "calculated",
     }

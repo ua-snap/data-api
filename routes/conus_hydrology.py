@@ -519,10 +519,12 @@ def run_get_conus_hydrology_stats_data(stream_id):
                 return create_csv(
                     data=data_dict,
                     endpoint="conus_hydrology",
-                    filename_prefix="stats",
+                    filename_prefix="Hydrologic Statistics",
+                    place_id=stream_id,
+                    lat=str(data_dict["latitude"]),
+                    lon=str(data_dict["longitude"]),
                 )
             except Exception as exc:
-                print(exc)
                 return render_template("500/server_error.html"), 500
 
         return jsonify(data_dict)
@@ -572,6 +574,19 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
         data_dict = populate_feature_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
+        if request.args.get("format") == "csv":
+            try:
+                return create_csv(
+                    data=data_dict,
+                    endpoint="conus_hydrology",
+                    filename_prefix="Modeled Daily Climatologies",
+                    place_id=stream_id,
+                    lat=str(data_dict["latitude"]),
+                    lon=str(data_dict["longitude"]),
+                )
+            except Exception as exc:
+                return render_template("500/server_error.html"), 500
+
         return jsonify(data_dict)
 
     except Exception as exc:
@@ -606,6 +621,20 @@ def run_get_conus_hydrology_gauge_data(stream_id):
         gauge_data_dict = asyncio.run(get_usgs_gauge_data(gauge_id))
         if isinstance(gauge_data_dict, tuple):
             return gauge_data_dict  # return 400 if gauge_data_dict is a tuple
+
+        if request.args.get("format") == "csv":
+            try:
+                return create_csv(
+                    data=gauge_data_dict,
+                    endpoint="conus_hydrology",
+                    filename_prefix="Observed Daily Climatologies",
+                    place_id=stream_id + " (" + gauge_id + ")",
+                    lat=str(gauge_data_dict["latitude"]),
+                    lon=str(gauge_data_dict["longitude"]),
+                )
+            except Exception as exc:
+                return render_template("500/server_error.html"), 500
+
         return jsonify(gauge_data_dict)
 
     except Exception as exc:
@@ -643,5 +672,4 @@ def run_get_conus_hydrology_gauge_info():
         )
         return jsonify(result)
     except Exception as exc:
-        print(exc)
         return render_template("500/server_error.html"), 500
