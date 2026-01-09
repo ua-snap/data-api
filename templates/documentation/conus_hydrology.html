@@ -8,7 +8,7 @@
   Geospatial Fabric, and streamflow was modeled using the Precipitation-Runoff
   Modeling System (PRMS) and CMIP5 historical and projected climate data. A
   calibrated historical baseline (the Maurer calibration) is available for the
-  1976-2005 period.
+  1976&ndash;2005 period.
 </p>
 
 <!-- <p>Users can search for stream IDs using the ###TBD###</p> -->
@@ -20,10 +20,10 @@
 
 <p>
   We also include endpoints to access daily streamflow climatologies from
-  associated USGS stream gauge data collected over the 1976-2005 historical
-  period, for use in comparing with the modeled data. Note that not all modeled
-  stream segments have associated gauge data. See the
-  <a href="/conus_hydrology/gauge/info">/conus_hydrology/gauge/info</a> endpoint
+  associated USGS stream gauge data collected over the 1976&ndash;2005
+  historical period, for use in comparing with the modeled data. Note that not
+  all modeled stream segments have associated gauge data. See the
+  <a href="/conus_hydrology/gauge_info">/conus_hydrology/gauge_info</a> endpoint
   for a list of all stream IDs with gauge data.
 </p>
 
@@ -33,8 +33,8 @@
 
 <p>
   Query hydrologic statistics for all models and scenarios. Statistics are
-  computed over historical (1976-2005) and future (2016-2045, 2046-2075, and
-  2071-2100) eras.
+  computed over historical (1976&ndash;2005) and future (2016&ndash;2045,
+  2046&ndash;2075, and 2071&ndash;2100) eras.
 </p>
 
 <table class="endpoints">
@@ -67,8 +67,8 @@
 <p>
   Query daily streamflow climatologies for all models and scenarios. Useful for
   constructing hydrographs. Minimum, maximum, and mean values for each day of
-  year are computed over historical (1976-2005) and future (2016-2045,
-  2046-2075, and 2071-2100) eras.
+  year are computed over historical (1976&ndash;2005) and future
+  (2016&ndash;2045, 2046&ndash;2075, and 2071&ndash;2100) eras.
 </p>
 
 <table class="endpoints">
@@ -82,8 +82,8 @@
     <tr>
       <td>Modeled daily streamflow climatologies</td>
       <td>
-        <a href="/conus_hydrology/hydrograph/50563"
-          >/conus_hydrology/hydrograph/50563</a
+        <a href="/conus_hydrology/modeled_climatology/50563"
+          >/conus_hydrology/modeled_climatology/50563</a
         >
       </td>
     </tr>
@@ -103,7 +103,7 @@
 <p>
   Query daily streamflow climatologies computed from observed USGS stream gauge
   data. Useful for constructing hydrographs. Climatologies are computed over the
-  1976-2005 historical era.
+  1976&ndash;2005 historical era.
 </p>
 
 <table class="endpoints">
@@ -117,7 +117,9 @@
     <tr>
       <td>Observed daily streamflow climatology</td>
       <td>
-        <a href="/conus_hydrology/gauge/50563">/conus_hydrology/gauge/50563</a>
+        <a href="/conus_hydrology/observed_climatology/50563"
+          >/conus_hydrology/observed_climatology/50563</a
+        >
       </td>
     </tr>
   </tbody>
@@ -127,7 +129,7 @@
         CSV output is also available by appending <code>?format=csv</code> to
         the URL. <br />
         See
-        <a href="/conus_hydrology/gauge/info">/conus_hydrology/gauge/info</a>
+        <a href="/conus_hydrology/gauge_info">/conus_hydrology/gauge_info</a>
         for a list of all stream IDs with gauge data.
       </td>
     </tr>
@@ -166,24 +168,24 @@
       "source": {
         "citation": "LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for Hydrologic Simulations for the Conterminous United States for Historical and Future Conditions Using the National Hydrologic Model Infrastructure (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5), 1950 - 2100: U.S. Geological Survey data release, https://doi.org/10.5066/P9EBKREQ."
       },
-        "variables": {
-          "dh1": {
-            "description": "Annual maximum daily flow. Compute the maximum of a 1-day moving average flow for each year. DH1 is the mean of these values (cubic feet per second - temporal).",
-            "units": "cfs"
-            },
-          "dh15": {
-            "description": "High flow pulse duration. Compute the average duration for flow events with flows above a threshold equal to the 75th percentile value for each year in the flow record. DH15 is the median of the yearly average durations (days/year - temporal).",
-            "units": "days/year"
-            },
-            ...
-          "th1": {
-              "description": "Julian date of annual maximum. Determine the Julian date that the maximum flow occurs for each year. TH1 is the median of these values (Julian day - temporal).",
-              "units": "day"
-            },
-          "tl1": {
-              "description": "Julian date of annual minimum. Determine the Julian date that the minimum flow occurs for each water year. TL1 is the median of these values (Julian day - temporal).",
-              "units": "day"
-            }
+      "variables": {
+        "dh1": {
+          "description": "Annual maximum daily flow. Compute the maximum of a 1-day moving average flow for each year. DH1 is the mean of these values (cubic feet per second - temporal).",
+          "units": "cfs"
+          },
+        "dh15": {
+          "description": "High flow pulse duration. Compute the average duration for flow events with flows above a threshold equal to the 75th percentile value for each year in the flow record. DH15 is the median of the yearly average durations (days/year - temporal).",
+          "units": "days/year"
+          },
+        ...
+        "th1": {
+          "description": "Julian date of annual maximum. Determine the Julian date that the maximum flow occurs for each year. TH1 is the median of these values (Julian day - temporal).",
+          "units": "day"
+          },
+        "tl1": {
+            "description": "Julian date of annual minimum. Determine the Julian date that the minimum flow occurs for each water year. TL1 is the median of these values (Julian day - temporal).",
+            "units": "day"
+          }
     },
     "name": "Quinault River"
     }
@@ -404,9 +406,9 @@
 <p>
   Note that the latitude and longitude values represent the location of the
   stream gauge. Also note that the climatology is constructed from all available
-  data from 1976-2005, but some gauges may not have a complete record for this
-  time period. Use the <code>percent_complete</code> value to assess the data
-  completeness. The above output is structured like this:
+  data from 1976&ndash;2005, but some gauges may not have a complete record for
+  this time period. Use the <code>percent_complete</code> value to assess the
+  data completeness. The above output is structured like this:
 </p>
 
 <pre>
@@ -466,7 +468,7 @@
         Hydrologic Simulations for the Conterminous United States for Historical
         and Future Conditions Using the National Hydrologic Model Infrastructure
         (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5),
-        1950 - 2100: U.S. Geological Survey data release,
+        1950&ndash;2100: U.S. Geological Survey data release,
         <a href="https://doi.org/10.5066/P9EBKREQ"
           >https://doi.org/10.5066/P9EBKREQ</a
         >.
@@ -487,7 +489,7 @@
       <td>
         LaFontaine, J.H., Hay, L.E., and Riley, J.R., 2023, Application of the
         National Hydrologic Model Infrastructure with the Precipitation-Runoff
-        Modeling System (NHM-PRMS), 1950-2010, Maurer Calibration: U.S.
+        Modeling System (NHM-PRMS), 1950&ndash;2010, Maurer Calibration: U.S.
         Geological Survey data release,
         <a href="https://doi.org/10.5066/P9CVHLMB"
           >https://doi.org/10.5066/P9CVHLMB</a

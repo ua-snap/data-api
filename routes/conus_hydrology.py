@@ -26,12 +26,13 @@ from generate_urls import (
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
 from postprocessing import prune_nulls_with_max_intensity
+from csv_functions import create_csv
 from config import RAS_BASE_URL
 from . import routes
 
 coverages = {
     "stats": ["conus_hydro_segments_stats"],
-    "hydrograph": [
+    "doy_climatology": [
         "conus_hydro_segments_doy_climatology_dynamic_historical",
         "conus_hydro_segments_doy_climatology_static_historical",
         "conus_hydro_segments_doy_climatology_dynamic_projected",
@@ -513,6 +514,17 @@ def run_get_conus_hydrology_stats_data(stream_id):
 
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
+        if request.args.get("format") == "csv":
+            try:
+                return create_csv(
+                    data=data_dict,
+                    endpoint="conus_hydrology",
+                    filename_prefix="stats",
+                )
+            except Exception as exc:
+                print(exc)
+                return render_template("500/server_error.html"), 500
+
         return jsonify(data_dict)
 
     except Exception as exc:
@@ -521,15 +533,15 @@ def run_get_conus_hydrology_stats_data(stream_id):
         return render_template("500/server_error.html"), 500
 
 
-@routes.route("/conus_hydrology/hydrograph/<stream_id>")
-def run_get_conus_hydrology_hydrograph(stream_id):
+@routes.route("/conus_hydrology/modeled_climatology/<stream_id>")
+def run_get_conus_hydrology_modeled_climatology(stream_id):
     """
     Function to fetch hydrograph data from Rasdaman for a single stream ID.
-    Example URL: http://localhost:5000/conus_hydrology/hydrograph/1000
+    Example URL: http://localhost:5000/conus_hydrology/modeled_climatology/1000
     Args:
         stream_id (str): Stream ID for the hydrology data
     Returns:
-        JSON response with hydrograph data for the requested stream ID.
+        JSON response with modeled daily climatology data for the requested stream ID.
     """
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
@@ -537,9 +549,11 @@ def run_get_conus_hydrology_hydrograph(stream_id):
 
     try:
         # fetch data and metadata
-        datasets = asyncio.run(fetch_hydro_data(coverages["hydrograph"], stream_id))
+        datasets = asyncio.run(
+            fetch_hydro_data(coverages["doy_climatology"], stream_id)
+        )
         decode_dicts = asyncio.run(
-            get_decode_dicts_from_axis_attributes(coverages["hydrograph"])
+            get_decode_dicts_from_axis_attributes(coverages["doy_climatology"])
         )
 
         # decode the dimension values
@@ -566,40 +580,20 @@ def run_get_conus_hydrology_hydrograph(stream_id):
         return render_template("500/server_error.html"), 500
 
 
-@routes.route("/conus_hydrology/gauge/<stream_id>")
+@routes.route("/conus_hydrology/observed_climatology/<stream_id>")
 def run_get_conus_hydrology_gauge_data(stream_id):
     """
     Function to fetch USGS stream gauge data associated with a single stream ID.
-    Example URL: http://localhost:5000/conus_hydrology/gauge/50563
+    Example URL: http://localhost:5000/conus_hydrology/observed_climatology/50563
     (should fetch associated gauge: USGS-12039500, QUINAULT RIVER AT QUINAULT LAKE, WA)
     Args:
-        stream_id (str): Stream ID for the hydrology data, or "info" to list all streams with gauges
+        stream_id (str): Stream ID for the hydrology data
     Returns:
         JSON response with USGS stream gauge data associated with the requested stream ID.
-        Results are a daily climatology for the period 1976-2005, packaged identically to the hydrograph data.
+        Results are an observed daily climatology for the period 1976-2005, packaged identically to
+        the modeled daily climatology data.
         If no gauge is associated with the stream ID, a 404 response is returned.
-        If stream_id is "info", a list of all stream IDs with associated gauges is returned.
     """
-    if stream_id.lower() == "info":
-        try:
-            gdf = asyncio.run(get_features(""))  # fetch all stream attributes
-            if isinstance(gdf, tuple):
-                return gdf  # return 400 if gdf is a tuple
-            gauges_gdf = gdf[gdf["GAUGE_ID"].notnull() & (gdf["GAUGE_ID"] != "NA")]
-            result = (
-                gauges_gdf[["seg_id_nat", "GNIS_NAME", "GAUGE_ID"]]
-                .rename(columns={"GNIS_NAME": "name", "GAUGE_ID": "usgs_gauge_id"})
-                .groupby("seg_id_nat")
-                .apply(
-                    lambda x: x.drop(columns="seg_id_nat").to_dict(orient="records")
-                )  # allows for >1 gauge per stream, e.g. stream ID 29526
-                .to_dict()
-            )
-            return jsonify(result)
-        except Exception as exc:
-            print(exc)
-            return render_template("500/server_error.html"), 500
-
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
         return gdf  # return 400 if gdf is a tuple
@@ -617,4 +611,37 @@ def run_get_conus_hydrology_gauge_data(stream_id):
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+@routes.route("/conus_hydrology/gauge_info")
+def run_get_conus_hydrology_gauge_info():
+    """
+    Function to fetch all stream segment attributes and create a reference to associate USGS stream gauges.
+    Example URL: http://localhost:5000/conus_hydrology/gauge_info
+    Args:
+        None
+    Returns:
+        JSON response that lists all stream IDs with associated gauges. Each stream ID key
+        maps to a list of dictionaries with the gauge name and USGS gauge ID. A small number of
+        stream IDs are associated with more than one gauge. If a stream has no associated gauges,
+        it is not included in the response.
+    """
+    try:
+        gdf = asyncio.run(get_features(""))  # omit ID to fetch all stream attributes
+        if isinstance(gdf, tuple):
+            return gdf  # return 400 if gdf is a tuple
+        gauges_gdf = gdf[gdf["GAUGE_ID"].notnull() & (gdf["GAUGE_ID"] != "NA")]
+        result = (
+            gauges_gdf[["seg_id_nat", "GNIS_NAME", "GAUGE_ID"]]
+            .rename(columns={"GNIS_NAME": "name", "GAUGE_ID": "usgs_gauge_id"})
+            .groupby("seg_id_nat")
+            .apply(
+                lambda x: x.drop(columns="seg_id_nat").to_dict(orient="records")
+            )  # allows for >1 gauge per stream, e.g. stream ID 29526
+            .to_dict()
+        )
+        return jsonify(result)
+    except Exception as exc:
+        print(exc)
         return render_template("500/server_error.html"), 500

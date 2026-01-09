@@ -114,6 +114,8 @@ def create_csv(
         properties = era5wrf_csv(data)
     elif endpoint == "fire_weather":
         properties = fire_weather_csv(data, filename_prefix, vars)
+    elif endpoint == "conus_hydrology":
+        properties = conus_hydrology_csv(data, filename_prefix)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -133,6 +135,8 @@ def create_csv(
             filename += place_name
         elif endpoint == "demographics":
             filename += "All communities in Alaska"
+        elif endpoint == "conus_hydrology":
+            filename += "Stream ID"  # TODO: replace with more meaningful title later
         else:
             filename += lat + " " + lon
     filename += ".csv"
@@ -1306,4 +1310,92 @@ def fire_weather_csv(data, filename_prefix, vars):
         "fieldnames": fieldnames,
         "metadata": metadata,
         "filename_data_name": filename,
+    }
+
+
+def conus_hydrology_csv(data, filename_prefix):
+
+    # filename_prefix denotes endpoint ("stats", "modeled_climatology", "observed_climatology") to aid in packaging CSV
+
+    # data structure for all endpoints:
+    # first level of data are strings "data", "id", "latitude", "longitude", "metadata", "name"
+
+    # for stats:
+    # the "data" key contains the hydrology data, with levels "landcover", "model", "scenario", "era", then a dict of variable ids and their values
+    # the "metadata" key contains sub-levels "source"["citation"] and "variables"[<variable_id>]"description" + "units"
+    # all other keys contain single values
+
+    # for modeled daily climatology:
+    # the "data" key contains the hydrology data, with levels "landcover", "model", "scenario", "era", then a list of dicts - one for each DOY, with a "doy" key/doy value and additional keys for variable ids/variable values
+    # the "metadata" key is identical to the stats endpoint
+
+    # for observed daily climatology:
+    # same structure as the modeled daily climatology endpoint, but there is only one landcover/model/scenario combination ("actual"/"usgs"/"observed") and the "metadata" key contains an additional "percent_complete" key/value pair
+
+    csv_dicts = []
+    for key in data.keys():
+        if key != "data":
+            continue
+        for landcover in data["data"].keys():
+            for model in data["data"][landcover].keys():
+                for scenario in data["data"][landcover][model].keys():
+                    for era in data["data"][landcover][model][scenario].keys():
+                        row = {
+                            "landcover": landcover,
+                            "model": model,
+                            "scenario": scenario,
+                            "era": era,
+                        }
+                        if filename_prefix == "stats":
+                            row.update(data["data"][landcover][model][scenario][era])
+                            csv_dicts.append(copy.deepcopy(row))
+                        else:  # modeled or observed daily climatology
+                            for doy_dict in data["data"][landcover][model][scenario][
+                                era
+                            ]:
+                                row["doy"] = doy_dict["doy"]
+                                for var_key in doy_dict.keys():
+                                    if var_key != "doy":
+                                        row[var_key] = doy_dict[var_key]
+                                csv_dicts.append(copy.deepcopy(row))
+    fieldnames = ["landcover", "model", "scenario", "era"]
+    if filename_prefix == "stats":
+        # get variable keys from metadata to use as fieldnames
+        for var_id in data["metadata"]["variables"].keys():
+            fieldnames.append(var_id)
+    else:
+        fieldnames.append("doy")
+        # get variable keys from first doy dict to use as fieldnames
+        sample_doy_dict = data["data"][landcover][model][scenario][era][0]
+        for var_key in sample_doy_dict.keys():
+            if var_key != "doy":
+                fieldnames.append(var_key)
+    metadata = "# CONUS Hydrology Model Outputs\n"
+    if filename_prefix == "stats":
+        metadata += "# Hydrology model outputs for various variables; decadal means of annual values.\n"
+    else:
+        metadata += "# Hydrology model outputs for various variables; daily climatology values.\n"
+    metadata += "# landcover is the landcover type the data is derived from\n"
+    metadata += "# model is the model the data is derived from\n"
+    metadata += "# scenario is the emissions scenario\n"
+    metadata += "# era is the decade over which data are summarized\n"
+    metadata += (
+        "# doy is the day of year (1-366) for which the climatology value is reported\n"
+    )
+    filename_data_name = (
+        "CONUS Hydrology Model Outputs - "
+        + filename_prefix.replace("_", " ").title()
+        + " - "
+    )
+
+    print(csv_dicts[0])
+    print(fieldnames)
+    print(metadata)
+    print(filename_data_name)
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": filename_data_name,
     }
