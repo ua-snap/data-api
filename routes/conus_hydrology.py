@@ -486,6 +486,9 @@ def run_get_conus_hydrology_stats_data(stream_id):
     Returns:
         JSON response with hydrological stats for the requested stream ID.
     """
+    if not stream_id.isdigit():
+        return render_template("400/bad_request.html"), 400
+
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
         return gdf  # return 400 if gdf is a tuple
@@ -540,6 +543,9 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
     Returns:
         JSON response with modeled daily climatology data for the requested stream ID.
     """
+    if not stream_id.isdigit():
+        return render_template("400/bad_request.html"), 400
+
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
         return gdf  # return 400 if gdf is a tuple
@@ -604,6 +610,9 @@ def run_get_conus_hydrology_gauge_data(stream_id):
         the modeled daily climatology data.
         If no gauge is associated with the stream ID, a 404 response is returned.
     """
+    if not stream_id.isdigit():
+        return render_template("400/bad_request.html"), 400
+
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
         return gdf  # return 400 if gdf is a tuple
