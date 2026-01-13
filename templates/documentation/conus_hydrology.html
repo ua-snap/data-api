@@ -145,54 +145,53 @@
 <p>Results from stream ID queries will look like this:</p>
 
 <pre>
-  {
-    "data": {
-      "dynamic": {
-        "ACCESS1-0": {
-          "historical": {
-            "1976-2005": {
-              "dh1": 23274.0,
-              "dh15": 5.04,
-              ...
-              "th1": 354.03,
-              "tl1": 255.11
-            }
-          },
-          ...
+{
+  "data": {
+    "dynamic": {
+      "ACCESS1-0": {
+        "historical": {
+          "1976-2005": {
+            "dh1": 23274.0,
+            "dh15": 5.04,
+            ...
+            "th1": 354.03,
+            "tl1": 255.11
+          }
         },
         ...
-      }
-    },
-    "id": "50563",
-    "latitude": 47.4562,
-    "longitude": -123.8963,
-    "metadata": {
-      "source": {
-        "citation": "LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for Hydrologic Simulations for the Conterminous United States for Historical and Future Conditions Using the National Hydrologic Model Infrastructure (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5), 1950 - 2100: U.S. Geological Survey data release, https://doi.org/10.5066/P9EBKREQ."
       },
-      "variables": {
-        "dh1": {
-          "description": "Annual maximum daily flow. Compute the maximum of a 1-day moving average flow for each year. DH1 is the mean of these values (cubic feet per second - temporal).",
-          "units": "cfs"
-          },
-        "dh15": {
-          "description": "High flow pulse duration. Compute the average duration for flow events with flows above a threshold equal to the 75th percentile value for each year in the flow record. DH15 is the median of the yearly average durations (days/year - temporal).",
-          "units": "days/year"
-          },
-        ...
-        "th1": {
-          "description": "Julian date of annual maximum. Determine the Julian date that the maximum flow occurs for each year. TH1 is the median of these values (Julian day - temporal).",
+      ...
+    }
+  },
+  "id": "50563",
+  "latitude": 47.4562,
+  "longitude": -123.8963,
+  "metadata": {
+    "source": {
+      "citation": "LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for Hydrologic Simulations for the Conterminous United States for Historical and Future Conditions Using the National Hydrologic Model Infrastructure (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5), 1950 - 2100: U.S. Geological Survey data release, https://doi.org/10.5066/P9EBKREQ."
+    },
+    "variables": {
+      "dh1": {
+        "description": "Annual maximum daily flow. Compute the maximum of a 1-day moving average flow for each year. DH1 is the mean of these values (cubic feet per second - temporal).",
+        "units": "cfs"
+        },
+      "dh15": {
+        "description": "High flow pulse duration. Compute the average duration for flow events with flows above a threshold equal to the 75th percentile value for each year in the flow record. DH15 is the median of the yearly average durations (days/year - temporal).",
+        "units": "days/year"
+        },
+      ...
+      "th1": {
+        "description": "Julian date of annual maximum. Determine the Julian date that the maximum flow occurs for each year. TH1 is the median of these values (Julian day - temporal).",
+        "units": "day"
+        },
+      "tl1": {
+          "description": "Julian date of annual minimum. Determine the Julian date that the minimum flow occurs for each water year. TL1 is the median of these values (Julian day - temporal).",
           "units": "day"
-          },
-        "tl1": {
-            "description": "Julian date of annual minimum. Determine the Julian date that the minimum flow occurs for each water year. TL1 is the median of these values (Julian day - temporal).",
-            "units": "day"
-          }
+        }
     },
     "name": "Quinault River"
-    }
   }
-
+}
 </pre>
 
 <p>
@@ -202,15 +201,13 @@
 </p>
 
 <pre>
-  {
-    "data": {
-      &lt;landcover&gt;: {
-        &lt;model&gt;: {
-          &lt;scenario&gt;: {
-            &lt;era&gt;: {
-              &lt;variable&gt;: &lt;value&gt;,
-              ...
-            },
+{
+  "data": {
+    &lt;landcover&gt;: {
+      &lt;model&gt;: {
+        &lt;scenario&gt;: {
+          &lt;era&gt;: {
+            &lt;variable&gt;: &lt;value&gt;,
             ...
           },
           ...
@@ -219,91 +216,93 @@
       },
       ...
     },
-    "id": &lt;stream ID&gt;,
-    "latitude": &lt;latitude of stream segment&gt;,
-    "longitude": &lt;longitude of stream segment&gt;,
-    "metadata": {
-      "source": {
-        "citation": &lt;academic reference for source data&gt;
-      },
-      "variables": {
-        &lt;variable&gt;: {
-          "description": &lt;description of variable&gt;,
-          "units": &lt;units of variable&gt;
-        },
-        ...
-      }
+    ...
+  },
+  "id": &lt;stream ID&gt;,
+  "latitude": &lt;latitude of stream segment&gt;,
+  "longitude": &lt;longitude of stream segment&gt;,
+  "metadata": {
+    "source": {
+      "citation": &lt;academic reference for source data&gt;
     },
-    "name": &lt;name of stream segment&gt;
-  }
+    "variables": {
+      &lt;variable&gt;: {
+        "description": &lt;description of variable&gt;,
+        "units": &lt;units of variable&gt;
+      },
+      ...
+    }
+  },
+  "name": &lt;name of stream segment&gt;
+}
 </pre>
 
 <h4>Modeled daily streamflow climatologies</h4>
 
 <p>Results from stream ID queries will look like this:</p>
 <pre>
-  {
-    "data": {
-       "dynamic": {
-         "ACCESS1-0": {
-           "historical": {
-             "1976-2005": [ 
-              {
-                "doy": 1, 
-                "doy_max": 26920, 
-                "doy_mean": 6121, 
-                "doy_min": 1303
-              }, 
-              {
-                "doy": 2,
-                "doy_max": 28820, 
-                "doy_mean": 5494, 
-                "doy_min": 1275
-              }, 
-                ... 
-              {
-                "doy": 365, 
-                "doy_max": 19190,
-                "doy_mean": 5337,
-                "doy_min": 1246
-              },
-              {
-                "doy": 366, 
-                "doy_max": 12920, 
-                "doy_mean": 4385, 
-                "doy_min": 1706
-              } 
-              ]
+{
+  "data": {
+    "dynamic": {
+      "ACCESS1-0": {
+        "historical": {
+          "1976-2005": [
+            {
+              "doy": 1,
+              "doy_max": 26920,
+              "doy_mean": 6121,
+              "doy_min": 1303
+            },
+            {
+              "doy": 2,
+              "doy_max": 28820,
+              "doy_mean": 5494,
+              "doy_min": 1275
             },
             ...
-          },
-          ...
-        }
+            {
+              "doy": 365,
+              "doy_max": 19190,
+              "doy_mean": 5337,
+              "doy_min": 1246
+            },
+            {
+              "doy": 366,
+              "doy_max": 12920,
+              "doy_mean": 4385,
+              "doy_min": 1706
+            }
+          ]
+        },
+        ...
+      },
+      ...
+    }
+  },
+  "id": "50563",
+  "latitude": 47.4562,
+  "longitude": -123.8963,
+  "metadata": {
+    "source": {
+      "citation": "LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for Hydrologic Simulations for the Conterminous United States for Historical and Future Conditions Using the National Hydrologic Model Infrastructure (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5), 1950 - 2100: U.S. Geological Survey data release, https://doi.org/10.5066/P9EBKREQ."
     },
-    "id": "50563",
-    "latitude": 47.4562,
-    "longitude": -123.8963,
-    "metadata": {
-      "source": {
-        "citation": "LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for Hydrologic Simulations for the Conterminous United States for Historical and Future Conditions Using the National Hydrologic Model Infrastructure (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5), 1950 - 2100: U.S. Geological Survey data release, https://doi.org/10.5066/P9EBKREQ."
+    "variables": {
+      "doy_max": {
+        "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
       },
-      "variables": {
-        "doy_max": {
-          "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
-          "units": "cfs"
-          },
-        "doy_mean": {
-          "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
-          "units": "cfs"
-          },
-        "doy_min": {
-          "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
-          "units": "cfs"
-          }
-        }
+      "doy_mean": {
+        "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
       },
-    "name": "Quinault River"
-  }
+      "doy_min": {
+        "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
+      }
+    }
+  },
+  "name": "Quinault River"
+}
 </pre>
 
 <p>
@@ -313,7 +312,7 @@
 </p>
 
 <pre>
- {
+{
   "data": {
     &lt;landcover&gt;: {
       &lt;model&gt;: {
@@ -349,6 +348,7 @@
     },
     "name": &lt;name of stream segment&gt;
   }
+}
 </pre>
 
 <h4>Observed daily streamflow climatologies</h4>
@@ -356,61 +356,69 @@
 <p>Results from stream ID queries will look like this:</p>
 
 <pre>
-  {
-    "data": {
-       "actual": {
-         "usgs": {
-           "observed": {
-             "1976-2005": [ 
-             {"doy": 1,
+{
+  "data": {
+    "actual": {
+      "usgs": {
+        "observed": {
+          "1976-2005": [
+            {
+              "doy": 1,
               "doy_max": 24000,
               "doy_mean": 3802,
-              "doy_min": 1020}, 
-             {"doy": 2,
+              "doy_min": 1020
+            },
+            {
+              "doy": 2,
               "doy_max": 21400,
               "doy_mean": 3844,
-              "doy_min": 1040}, 
-              ... 
-             {"doy": 365,
-              "doy_max": 12900,
-              "doy_mean": 3730,
-              "doy_min": 950},
-             {"doy": 366,
-              "doy_max": 16100,
-              "doy_mean": 5133,
-              "doy_min": 1780} 
-              ]
+              "doy_min": 1040
             },
             ...
-          },
-          ...
-        }
+            {
+              "doy": 365,
+              "doy_max": 12900,
+              "doy_mean": 3730,
+              "doy_min": 950
+            },
+            {
+              "doy": 366,
+              "doy_max": 16100,
+              "doy_mean": 5133,
+              "doy_min": 1780
+            }
+          ]
+        },
+        ...
+      },
+      ...
+    }
+  },
+  "id": "USGS-12039500",
+  "latitude": 47.4576,
+  "longitude": -123.8893,
+  "metadata": {
+    "percent_complete": 100.0,
+    "source": {
+      "citation": "U.S. Geological Survey, 2026, U.S. Geological Survey National Water Information System database, accessed 2026-01-08, at https://doi.org/10.5066/F7P55KJN. Data download directly accessible at https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&lang=en-US&limit=50000&properties=time,value,unit_of_measure&skipGeometry=true&sortby=%2Btime&offset=0&datetime=1976-10-01/2005-09-30&monitoring_location_id=USGS-12039500&parameter_code=00060&approval_status=Approved"
     },
-    "id": "USGS-12039500",
-    "latitude": 47.4576,
-    "longitude": -123.8893,
-    "metadata": {
-      "percent_complete": 100.0,
-      "source": {
-        "citation": "U.S. Geological Survey, 2026, U.S. Geological Survey National Water Information System database, accessed 2026-01-08, at https://doi.org/10.5066/F7P55KJN. Data download directly accessible at https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&lang=en-US&limit=50000&properties=time,value,unit_of_measure&skipGeometry=true&sortby=%2Btime&offset=0&datetime=1976-10-01/2005-09-30&monitoring_location_id=USGS-12039500&parameter_code=00060&approval_status=Approved"
+    "variables": {
+      "doy_max": {
+        "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
       },
-      "variables": {
-        "doy_max": {
-          "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
-          "units": "cfs"
-          },
-        "doy_mean": {
-          "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
-          "units": "cfs"
-          },
-        "doy_min": {
-          "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
-          "units": "cfs"
-          }
-        }
+      "doy_mean": {
+        "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
       },
-    "name": "QUINAULT RIVER AT QUINAULT LAKE, WA"
-  }
+      "doy_min": {
+        "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
+      }
+    }
+  },
+  "name": "QUINAULT RIVER AT QUINAULT LAKE, WA"
+}
 </pre>
 
 <p>
@@ -422,45 +430,44 @@
 </p>
 
 <pre>
-  {
-    "data": {
-      "actual": {
-        "usgs": {
-          "observed"": {
-            "1976-2005": {
-              [
-                {
-                  "doy": &lt;day of year (1-366)&gt;,
-                  &lt;variable1&gt;: &lt;value1&gt;,
-                },
-                ...
-              ]
-            },
-            ...
+{
+  "data": {
+    "actual": {
+      "usgs": {
+        "observed"": {
+          "1976-2005": {
+            [
+              {
+                "doy": &lt;day of year (1-366)&gt;,
+                &lt;variable1&gt;: &lt;value1&gt;,
+              },
+              ...
+            ]
           },
           ...
         },
         ...
       },
+      ...
     },
-    "id": &lt;USGS stream gauge ID&gt;,
-    "latitude": &lt;latitude of stream gauge&gt;,
-    "longitude": &lt;longitude of stream gauge&gt;,
-    "metadata": {
-      "percent_complete": &lt;percent of data available for period&gt;,
-      "source": {
-        "citation": &lt;academic reference for source data&gt;
+  },
+  "id": &lt;USGS stream gauge ID&gt;,
+  "latitude": &lt;latitude of stream gauge&gt;,
+  "longitude": &lt;longitude of stream gauge&gt;,
+  "metadata": {
+    "percent_complete": &lt;percent of data available for period&gt;,
+    "source": {
+      "citation": &lt;academic reference for source data&gt;
+    },
+    "variables": {
+      &lt;variable1&gt;: {
+        "description": &lt;description of variable1&gt;,
+        "units": &lt;units of variable1&gt;
       },
-      "variables": {
-        &lt;variable1&gt;: {
-          "description": &lt;description of variable1&gt;,
-          "units": &lt;units of variable1&gt;
-        },
-      },
-    }
-    "name": &lt;name of stream gauge&gt;
+    },
   }
-
+  "name": &lt;name of stream gauge&gt;
+}
 </pre>
 
 <h3 id="stats_table">Available Streamflow Statistics</h3>
