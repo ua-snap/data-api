@@ -1442,7 +1442,7 @@ def conus_hydrology_csv(data, filename_prefix, vars):
             metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
         else:
             metadata += "# Climatologies are calculated from from observed daily streamflow data.\n"
-            metadata += "The observation record for this time period is " + vars + ".\n"
+            metadata += "# The observation record for this time period is " + vars + ".\n"
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported.\n"
             metadata += "# doy_min is the minimum streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
             metadata += "# doy_mean is the mean streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
