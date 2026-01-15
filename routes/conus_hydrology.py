@@ -160,7 +160,6 @@ async def get_usgs_gauge_data(gauge_id):
         df["discharge_cfs"] = values_df["discharge_cfs"]
 
     df["DOY"] = df.index.dayofyear
-    df["water_year_index"] = df["DOY"].apply(convert_doy_to_water_year_index)
 
     # calculate percent completeness
     total_days = len(df)
@@ -169,12 +168,11 @@ async def get_usgs_gauge_data(gauge_id):
 
     rows = (
         df.groupby("DOY")["discharge_cfs"]
-        .agg(doy_min="min", doy_mean="mean", doy_max="max", water_year_index="first")
+        .agg(doy_min="min", doy_mean="mean", doy_max="max")
         .reset_index()
         .dropna(subset=["doy_mean"])
         .assign(
             doy=lambda x: x["DOY"].astype(int),
-            water_year_index=lambda x: x["water_year_index"].astype(int),
             doy_min=lambda x: x["doy_min"].astype(int),
             doy_mean=lambda x: x["doy_mean"].astype(int),
             doy_max=lambda x: x["doy_max"].astype(int),
@@ -182,6 +180,10 @@ async def get_usgs_gauge_data(gauge_id):
         .drop(columns="DOY")
         .to_dict("records")
     )
+
+    # in each row, add water_year_index
+    for row in rows:
+        row["water_year_index"] = convert_doy_to_water_year_index(row["doy"])
 
     gauge_data_dict["data"]["actual"] = {}
     gauge_data_dict["data"]["actual"]["usgs"] = {}
