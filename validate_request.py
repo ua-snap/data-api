@@ -515,39 +515,90 @@ def get_coverage_encodings(coverage_metadata):
         raise ValueError(f"Invalid coverage metadata format: {str(e)}")
 
 
-def get_axis_encodings(coverage_axis_metadata):
+def get_axis_coordinate_values(coverage_metadata):
     """
-    Get axis encodings from the JSON output describing a coverage.
+    Get axis coordinate values from the JSON output describing a coverage. These are the literal
+    values defining each axis, and are usually integers e.g., [0, 1, 2, 3, 4] for an axis with 5 positions.
+    This function extracts these coordinate values for each axis defined in the coverage metadata,
+    and returns them in a dictionary format with axis names as keys.
 
     Args:
         coverage_axis_metadata (dict): JSON-like dictionary containing the coverage axes description.
-
     Returns:
         dict: A dictionary where each axis (key) maps to its respective coordinates (value).
-
     Raises:
         ValueError: If required information is missing in the JSON data.
+
+    Example:
+    >>> metadata = await describe_via_wcps("alfresco_relative_flammability_30yr")
+    >>> coord_values = get_axis_coordinate_values(metadata)
+    >>> print(coord_values)
+    {
+        "era": [0, 1, 2, 3, 4],
+        "model": [0, 1, 2, 3, 4, 5, 6],
+        "scenario": [0, 1, 2, 3]
+    }
     """
     try:
-        # Navigate to the generalGrid section which contains the axis encodings
-        domain_set = coverage_axis_metadata.get("domainSet", {})
+        # Navigate to the generalGrid section which contains the axis coordinate values
+        domain_set = coverage_metadata.get("domainSet", {})
         general_grid = domain_set.get("generalGrid", {})
         axes = general_grid.get("axis", [])
 
-        # Extract encodings for each axis
-        encodings = {}
+        # Extract coordinate values for each axis
+        axis_coords = {}
         for axis in axes:
             axis_label = axis.get("axisLabel")
             coordinates = axis.get("coordinate", [])
             if axis_label and coordinates:
-                encodings[axis_label] = coordinates
+                axis_coords[axis_label] = coordinates
 
-        if not encodings:
-            raise ValueError("No axis encodings found in the coverage metadata.")
-        return encodings
+        if not axis_coords:
+            raise ValueError(
+                "No axis coordinate values found in the coverage metadata."
+            )
+        return axis_coords
 
     except (KeyError, TypeError) as e:
         raise ValueError(f"Invalid coverage metadata format: {str(e)}")
+
+
+def get_axis_encodings(coverage_metadata, encoding_attr="encoding"):
+    """
+    Get axis encodings from the JSON output describing a coverage. This is the dictionary that maps
+    integer values used for axis labels and positions to descriptive strings, which can be used
+    to decode the meaning of each axis value.
+
+    Args:
+        coverage_axis_metadata (dict): JSON-like dictionary containing the coverage axes description.
+        encoding_attr (str): The axis attribute that stores the encoding dictionary.
+    Returns:
+        dict: A dictionary with axis names as keys and their encoding dictionaries as values.
+        Encoding attributes are coverted from string to dict.
+        If an axis does not have the specified encoding attribute, it will map to None.
+    Raises:
+        ValueError: If required information is missing in the JSON data.
+    """
+    try:
+        metadata = coverage_metadata.get("metadata", {})
+        axes = metadata.get("axes", {})
+
+        axis_encodings = {}
+        for axis in axes:
+            encoding_str = metadata.get("axes").get(axis).get(encoding_attr, None)
+            # convert the string representation of dict to actual dict
+            try:
+                encodings = ast.literal_eval(encoding_str)
+            except (SyntaxError, ValueError) as e:
+                raise ValueError(f"Failed to parse encoding string: {str(e)}")
+            # convert string keys to ints
+            for dim in encodings:
+                if isinstance(encodings[dim], dict):
+                    encodings[dim] = {int(k): v for k, v in encodings[dim].items()}
+            axis_encodings[axis] = encodings
+    except (KeyError, TypeError) as e:
+        raise ValueError(f"Invalid coverage metadata format: {str(e)}")
+    return axis_encodings
 
 
 def get_coverage_crs_str(coverage_metadata):

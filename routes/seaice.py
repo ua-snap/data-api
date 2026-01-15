@@ -15,7 +15,7 @@ from csv_functions import create_csv
 from validate_request import (
     validate_seaice_latlon,
     project_latlon,
-    get_axis_encodings,
+    get_axis_coordinate_values,
 )
 from validate_data import validate_seaice_timestring
 from postprocessing import postprocess
@@ -28,9 +28,9 @@ seaice_coverage_id = "hsia_arctic_production"
 
 
 async def get_seaice_metadata():
-    """Get the coverage metadata and encodings for HSIA seaice coverage"""
+    """Get the coverage metadata and coordinate values for HSIA seaice coverage"""
     metadata = await describe_via_wcps(seaice_coverage_id)
-    return get_axis_encodings(metadata)
+    return get_axis_coordinate_values(metadata)
 
 
 def package_seaice_data(seaice_resp):

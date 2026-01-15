@@ -6,6 +6,7 @@ from flask_cors import CORS
 from config import SITE_OFFLINE, geojson_names
 from marshmallow import Schema, fields, validate, ValidationError
 import re
+import pyproj
 
 from luts import (
     fire_weather_ops,
@@ -27,6 +28,10 @@ application = app = Flask(__name__)
 CORS(app)
 
 app.register_blueprint(routes)
+
+# Disable PROJ network to fix intermittent bugs converting between EPSGs.
+# This will force pyproj to use its local database instead.
+pyproj.network.set_network_enabled(False)
 
 
 def get_service_categories():
@@ -56,6 +61,7 @@ def get_service_categories():
         ("Wildfire", "/fire"),
         ("WRF Dynamically Downscaled ERA5 Reanalysis", "/era5wrf"),
         ("Demographics", "/demographics"),
+        ("CONUS Hydrology", "/conus_hydrology"),
         ("CMIP6 Fire Weather Indices", "/fire_weather"),
     ]
 
@@ -131,9 +137,7 @@ def validate_get_params():
             Raises: ValidationError: when `value` not a valid vars string
             """
             # 200 is arbitrary, but endpoints (e.g., era5wrf) have many vars
-            climate_var_regex = re.compile(
-                r"^(?=.{1,200}$)[A-Za-z0-9,_]+$"
-            )
+            climate_var_regex = re.compile(r"^(?=.{1,200}$)[A-Za-z0-9,_]+$")
             if not climate_var_regex.match(value):
                 raise ValidationError("Invalid var(s) provided.")
             return True
