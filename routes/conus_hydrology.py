@@ -160,6 +160,7 @@ async def get_usgs_gauge_data(gauge_id):
         df["discharge_cfs"] = values_df["discharge_cfs"]
 
     df["DOY"] = df.index.dayofyear
+    df["water_year_index"] = df["DOY"].apply(convert_doy_to_water_year_index)
 
     # calculate percent completeness
     total_days = len(df)
@@ -168,11 +169,12 @@ async def get_usgs_gauge_data(gauge_id):
 
     rows = (
         df.groupby("DOY")["discharge_cfs"]
-        .agg(doy_min="min", doy_mean="mean", doy_max="max")
+        .agg(doy_min="min", doy_mean="mean", doy_max="max", water_year_index="first")
         .reset_index()
         .dropna(subset=["doy_mean"])
         .assign(
             doy=lambda x: x["DOY"].astype(int),
+            water_year_index=lambda x: x["water_year_index"].astype(int),
             doy_min=lambda x: x["doy_min"].astype(int),
             doy_mean=lambda x: x["doy_mean"].astype(int),
             doy_max=lambda x: x["doy_max"].astype(int),
@@ -195,6 +197,10 @@ async def get_usgs_gauge_data(gauge_id):
         "citation"
     ] = f"U.S. Geological Survey, {current_year}, U.S. Geological Survey National Water Information System database, accessed {current_date}, at https://doi.org/10.5066/F7P55KJN. Data download directly accessible at {data_url}"
     gauge_data_dict["metadata"]["variables"] = {
+        "water_year_index": {
+            "description": "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274).",
+            "units": "dimensionless",
+        },
         "doy_max": {
             "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
             "units": "cfs",
@@ -332,7 +338,12 @@ def package_hydrograph_data(stream_id, datasets):
                             if np.isnan(row).all():
                                 continue
 
-                            entry = {"doy": int(doy_vals[i_doy])}
+                            entry = {
+                                "doy": int(doy_vals[i_doy]),
+                                "water_year_index": convert_doy_to_water_year_index(
+                                    int(doy_vals[i_doy])
+                                ),
+                            }
                             for i_v, val in enumerate(row):
                                 if not np.isnan(val):
                                     entry[vars_[i_v]] = round(float(val), 3)
@@ -385,6 +396,11 @@ def package_metadata(ds, data_dict):
             data_dict["metadata"]["variables"][var][
                 "description"
             ] = "Day of year (1-366); all years are treated as leap years for consistency."
+        elif var == "water_year_index":
+            data_dict["metadata"]["variables"][var]["units"] = "water year day index"
+            data_dict["metadata"]["variables"][var][
+                "description"
+            ] = "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274)."
         elif var in ["doy_min", "doy_mean", "doy_max"]:
             data_dict["metadata"]["variables"][var]["units"] = "cfs"
             if var == "doy_min":
@@ -469,6 +485,22 @@ def prune_missing_scenarios(data_dict):
                 if not scen_dict:
                     del data_dict["data"][landcover][model][scenario]
     return data_dict
+
+
+def convert_doy_to_water_year_index(doy):
+    """
+    Function that takes a given day of year (1-366) and converts it to a water year index (1-366).
+    The water year is defined as starting on October 1 (DOY 275 in a 366 day year) and ending
+    September 30 (DOY 274 in a 366 day year). Note that this function only works for a 366 day year.
+    Args:
+        doy (int): Day of year (1-366)
+    Returns:
+        int: Water year index (1-366)"""
+    if doy >= 275:
+        wy_index = doy - 274
+    else:
+        wy_index = doy + 92
+    return wy_index
 
 
 @routes.route("/conus_hydrology/")
