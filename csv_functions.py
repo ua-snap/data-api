@@ -1331,7 +1331,7 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
     # all other keys contain single values
 
     # for modeled daily climatology:
-    # the "data" key contains the hydrology data, with levels "landcover", "model", "scenario", "era", then a list of dicts - one for each DOY, with a "doy" key/doy value and additional keys for variable ids/variable values
+    # the "data" key contains the hydrology data, with levels "landcover", "model", "scenario", "era", then a list of dicts - one for each DOY, with a "doy" key/value, a "water_year_index" key/value, and additional keys/values for each variable id
     # the "metadata" key is identical to the stats endpoint
 
     # for observed daily climatology:
@@ -1361,8 +1361,12 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
                                 era
                             ]:
                                 row["doy"] = doy_dict["doy"]
+                                row["water_year_index"] = doy_dict["water_year_index"]
                                 for var_key in doy_dict.keys():
-                                    if var_key != "doy":
+                                    if (
+                                        var_key != "doy"
+                                        and var_key != "water_year_index"
+                                    ):
                                         row[var_key] = doy_dict[var_key]
                                 csv_dicts.append(copy.deepcopy(row))
     fieldnames = ["landcover", "model", "scenario", "era"]
@@ -1438,6 +1442,7 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
         if "Modeled" in filename_prefix:
             metadata += "# Climatologies are calculated from from modeled daily streamflow data.\n"
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
+            metadata += "# water_year_index is the water year index (1-366) for which the climatology value is reported. The water year is defined as starting on October 1 (DOY 275 in a 366 day year = water year index 1) and ending September 30 (DOY 274 in a 366 day year = water year index 366).\n"
             metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
@@ -1449,6 +1454,7 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
                 + f"% complete.\n"
             )
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported.\n"
+            metadata += "# water_year_index is the water year index (1-366) for which the climatology value is reported. The water year is defined as starting on October 1 (DOY 275 in a 366 day year = water year index 1) and ending September 30 (DOY 274 in a 366 day year = water year index 366).\n"
             metadata += "# doy_min is the minimum streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
             metadata += "# doy_mean is the mean streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
             metadata += "# doy_max is the maximum streamflow value for the given day of year across all available data in the era (cubic feet per second).\n"
