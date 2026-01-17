@@ -1,6 +1,6 @@
 """A module to generate query URLs"""
 
-from config import RAS_BASE_URL, GS_BASE_URL
+from config import RAS_BASE_URL, GS_BASE_URL, USGS_API_KEY
 from luts import bbox_offset
 
 
@@ -153,6 +153,8 @@ def generate_usgs_gauge_daily_streamflow_data_url(gauge_id, start_date, end_date
     properties = "time,value,unit_of_measure"
     time = start_date + "/" + end_date
     request_str = f"collections/daily/items?f=json&lang=en-US&limit=50000&properties={properties}&skipGeometry=true&sortby=%2Btime&offset=0&datetime={time}&monitoring_location_id={gauge_id}&parameter_code={param}&approval_status=Approved"
+    if USGS_API_KEY is not None:
+        request_str += f"&api_key={USGS_API_KEY}"
     url = base_url + request_str
     return url
 
@@ -167,5 +169,8 @@ def generate_usgs_gauge_metadata_url(gauge_id):
     base_url = "https://api.waterdata.usgs.gov/ogcapi/v0/"
     properties = "monitoring_location_name"
     request_str = f"collections/monitoring-locations/items?f=json&lang=en-US&limit=1&properties={properties}&skipGeometry=false&offset=0&id={gauge_id}"
+    if USGS_API_KEY is not None:
+        print(USGS_API_KEY)
+        request_str += f"&api_key={USGS_API_KEY}"
     url = base_url + request_str
     return url

@@ -11,6 +11,7 @@ EAST_BBOX = [172.4201, 51.3492, 180, 71.3694]
 SEAICE_BBOX = [-180, 30.98, 180, 90]
 INDICATORS_BBOX = [0, 49.94, 359.37, 90]
 WEB_APP_URL = os.getenv("WEB_APP_URL") or "https://northernclimatereports.org/"
+USGS_API_KEY = os.getenv("USGS_API_KEY") or None
 
 if os.getenv("SITE_OFFLINE"):
     SITE_OFFLINE = os.getenv("SITE_OFFLINE").lower() == "true"
