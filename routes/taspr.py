@@ -1629,7 +1629,7 @@ def tas_2km_point_data_endpoint(lat, lon):
         example request: http://localhost:5000/tas2km/point/65.0628/-146.1627
     """
 
-    coverages = ["tas_2km_historical", "tas_2km_projected"]
+    coverages = ["tas_2km_historical_wcs", "tas_2km_projected_wcs"]
     validation = validate_latlon(lat, lon, coverages)
     if validation == 400:
         return render_template("400/bad_request.html"), 400
