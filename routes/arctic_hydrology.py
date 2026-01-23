@@ -18,6 +18,7 @@ from flask import (
 )
 
 from generate_requests import generate_conus_hydrology_wcs_str
+from generate_urls import generate_wfs_arctic_hydrology_url
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
 from postprocessing import prune_nulls_with_max_intensity
@@ -73,27 +74,27 @@ async def fetch_hydro_data(cov_ids, stream_id):
     return datasets
 
 
-# TODO: Implement arctic hydrology feature fetching when WFS layer is available on GeoServer
-# async def get_features(stream_id):
-#     """Function to fetch the vector features from the WFS for a given stream ID.
-#     Creates a valid geodataframe from the features.
-#     Args:
-#         stream_id (str): Stream ID for the hydrology data
-#     Returns:
-#         geopandas GeoDataFrame with the vector features, or 400."""
-#     try:
-#         url = generate_wfs_conus_hydrology_url(stream_id)
+async def get_features(stream_id):
+    """Function to fetch the vector features from the WFS for a given stream ID.
+    Creates a valid geodataframe from the features.
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+    Returns:
+        geopandas GeoDataFrame with the vector features, or 400."""
+    try:
+        url = generate_wfs_arctic_hydrology_url(stream_id)
 
-#         async with ClientSession() as session:
-#             layer_data = await fetch_layer_data(url, session)
-#         gdf = gpd.GeoDataFrame.from_features(
-#             layer_data["features"], crs="EPSG:5070"
-#         ).to_crs(epsg=4326)
-#         gdf["geometry"] = gdf["geometry"].make_valid()
+        async with ClientSession() as session:
+            layer_data = await fetch_layer_data(url, session)
+        gdf = gpd.GeoDataFrame.from_features(
+            layer_data["features"],
+            crs="EPSG:5070",  # TODO: confirm CRS in new WFS layer!
+        ).to_crs(epsg=4326)
+        gdf["geometry"] = gdf["geometry"].make_valid()
 
-#         return gdf
-#     except:
-#         return render_template("400/bad_request.html"), 400
+        return gdf
+    except:
+        return render_template("400/bad_request.html"), 400
 
 
 def package_stats_data(stream_id, ds):
