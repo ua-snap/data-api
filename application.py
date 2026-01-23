@@ -63,6 +63,7 @@ def get_service_categories():
         ("Demographics", "/demographics"),
         ("CONUS Hydrology", "/conus_hydrology"),
         ("CMIP6 Fire Weather Indices", "/fire_weather"),
+        ("Arctic Hydrology", "/arctic_hydrology"),
     ]
 
 
