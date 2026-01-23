@@ -39,7 +39,7 @@ def create_csv(
     """
     if not place_id:
         place_id = request.args.get("community")
-    if endpoint == "conus_hydrology":
+    if endpoint in ["conus_hydrology", "arctic_hydrology"]:
         place_name = "Stream ID " + place_id
         place_id = None
         place_type = "stream"
@@ -121,6 +121,8 @@ def create_csv(
         properties = fire_weather_csv(data, filename_prefix, vars)
     elif endpoint == "conus_hydrology":
         properties = conus_hydrology_csv(data, filename_prefix, source_metadata)
+    elif endpoint == "arctic_hydrology":
+        properties = arctic_hydrology_csv(data, filename_prefix)
 
     else:
         return render_template("500/server_error.html"), 500
@@ -1462,6 +1464,93 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
     metadata += "# landcover is the landcover type used to parameterize the precipitation-runoff model.\n"
     metadata += "# model is the global climate model.\n"
     metadata += "# scenario is the emissions scenario.\n"
+    metadata += "# era is the time period over which data are summarized.\n"
+
+    return {
+        "csv_dicts": csv_dicts,
+        "fieldnames": fieldnames,
+        "metadata": metadata,
+        "filename_data_name": "calculated",
+    }
+
+
+def arctic_hydrology_csv(data, filename_prefix):
+
+    # substrings in filename_prefix denotes endpoint ("Statistics", "Modeled") to aid in packaging CSV
+
+    # data structure for all endpoints:
+    # first level of data are strings "data", "id", "latitude", "longitude", "metadata", "name"
+
+    # for stats:
+    # the "data" key contains the hydrology data, with levels "model", "era", then a dict of variable ids and their values
+    # the "metadata" key contains sub-levels "source"["citation"] and "variables"[<variable_id>]"description" + "units"
+    # all other keys contain single values
+
+    # for modeled daily climatology:
+    # the "data" key contains the hydrology data, with levels "model", "era", then a list of dicts - one for each DOY, with a "doy" key/value, a "water_year_index" key/value, and additional keys/values for each variable id
+    # the "metadata" key is identical to the stats endpoint
+
+    csv_dicts = []
+    for key in data.keys():
+        if key != "data":
+            continue
+        for model in data["data"].keys():
+            for era in data["data"][model].keys():
+                row = {
+                    "model": model,
+                    "era": era,
+                }
+                if "Statistics" in filename_prefix:
+                    row.update(data["data"][model][era])
+                    csv_dicts.append(copy.deepcopy(row))
+                else:  # modeled daily climatology
+                    for doy_dict in data["data"][model][era]:
+                        row["doy"] = doy_dict["doy"]
+                        row["water_year_index"] = doy_dict["water_year_index"]
+                        for var_key in doy_dict.keys():
+                            if var_key != "doy" and var_key != "water_year_index":
+                                row[var_key] = doy_dict[var_key]
+                        csv_dicts.append(copy.deepcopy(row))
+    fieldnames = ["model", "era"]
+    if "Statistics" in filename_prefix:
+        # get variable keys from metadata to use as fieldnames
+        for var_id in data["metadata"]["variables"].keys():
+            fieldnames.append(var_id)
+    else:
+        fieldnames.append("doy")
+        # get variable keys from first doy dict to use as fieldnames
+        sample_doy_dict = data["data"][model][era][0]
+        for var_key in sample_doy_dict.keys():
+            if var_key != "doy":
+                fieldnames.append(var_key)
+
+    metadata = ""
+    if "Statistics" in filename_prefix:
+        metadata += "# The following hydrologic statistics are calculated from modeled daily streamflow data:\n"
+        metadata += "# ma12: Mean of monthly flow values for January (cubic feet per second - temporal).\n"
+        metadata += "# ma13: Mean of monthly flow values for February (cubic feet per second - temporal).\n"
+        metadata += "# ma14: Mean of monthly flow values for March (cubic feet per second - temporal).\n"
+        metadata += "# ma15: Mean of monthly flow values for April (cubic feet per second - temporal).\n"
+        metadata += "# ma16: Mean of monthly flow values for May (cubic feet per second - temporal).\n"
+        metadata += "# ma17: Mean of monthly flow values for June (cubic feet per second - temporal).\n"
+        metadata += "# ma18: Mean of monthly flow values for July (cubic feet per second - temporal).\n"
+        metadata += "# ma19: Mean of monthly flow values for August (cubic feet per second - temporal).\n"
+        metadata += "# ma20: Mean of monthly flow values for September (cubic feet per second - temporal).\n"
+        metadata += "# ma21: Mean of monthly flow values for October (cubic feet per second - temporal).\n"
+        metadata += "# ma22: Mean of monthly flow values for November (cubic feet per second - temporal).\n"
+        metadata += "# ma23: Mean of monthly flow values for December (cubic feet per second - temporal).\n"
+        metadata += "# ma99: Mean of monthly flow values for the entire year. Compute the mean of the monthly mean flows for each month of the year. MA99 is the mean of these 12 values (cubic feet per second - temporal).\n"
+    else:
+        metadata += (
+            "# Climatologies are calculated from from modeled daily streamflow data.\n"
+        )
+        metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
+        metadata += "# water_year_index is the water year index (1-366) for which the climatology value is reported. The water year is defined as starting on October 1 (DOY 275 in a 366 day year = water year index 1) and ending September 30 (DOY 274 in a 366 day year = water year index 366).\n"
+        metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
+        metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
+        metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
+
+    metadata += "# model is the global climate model.\n"
     metadata += "# era is the time period over which data are summarized.\n"
 
     return {
