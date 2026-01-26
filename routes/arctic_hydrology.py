@@ -86,10 +86,7 @@ async def get_features(stream_id):
 
         async with ClientSession() as session:
             layer_data = await fetch_layer_data(url, session)
-        gdf = gpd.GeoDataFrame.from_features(
-            layer_data["features"],
-            crs="EPSG:5070",  # TODO: confirm CRS in new WFS layer!
-        ).to_crs(epsg=4326)
+        gdf = gpd.GeoDataFrame.from_features(layer_data["features"], crs="EPSG:4326")
         gdf["geometry"] = gdf["geometry"].make_valid()
 
         return gdf
@@ -339,13 +336,8 @@ def populate_feature_attributes(data_dict, gdf):
         Data dictionary with the vector attributes populated."""
 
     data_dict["name"] = ""
-    data_dict["latitude"] = np.nan
-    data_dict["longitude"] = np.nan
-
-    if gdf is not None:
-        data_dict["name"] = gdf.loc[0].GNIS_NAME
-        data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
-        data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
+    data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
+    data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
 
     return data_dict
 
@@ -368,11 +360,9 @@ def run_get_arctic_hydrology_stats_data(stream_id):
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
 
-    # TODO: Implement arctic hydrology feature validation when WFS layer is available on GeoServer
-    # gdf = asyncio.run(get_features(stream_id))
-    # if isinstance(gdf, tuple):
-    #     return gdf  # return 400 if gdf is a tuple
-    gdf = None
+    gdf = asyncio.run(get_features(stream_id))
+    if isinstance(gdf, tuple):
+        return gdf  # return 400 if gdf is a tuple
 
     try:
         # fetch data and metadata
@@ -394,7 +384,7 @@ def run_get_arctic_hydrology_stats_data(stream_id):
 
         data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
-        data_dict = populate_feature_attributes(data_dict, gdf=None)
+        data_dict = populate_feature_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
         if request.args.get("format") == "csv":
@@ -431,11 +421,9 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
 
-    # TODO: Implement arctic hydrology feature validation when WFS layer is available on GeoServer
-    # gdf = asyncio.run(get_features(stream_id))
-    # if isinstance(gdf, tuple):
-    #     return gdf  # return 400 if gdf is a tuple
-    gdf = None
+    gdf = asyncio.run(get_features(stream_id))
+    if isinstance(gdf, tuple):
+        return gdf  # return 400 if gdf is a tuple
 
     try:
         # fetch data and metadata
@@ -459,7 +447,7 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
         data_dict = package_metadata(
             datasets[0], data_dict
         )  # all datasets should have same metadata, just use the first one
-        data_dict = populate_feature_attributes(data_dict, gdf=None)
+        data_dict = populate_feature_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
         if request.args.get("format") == "csv":

@@ -137,13 +137,13 @@ def generate_wfs_arctic_hydrology_url(stream_id):
     if stream_id == "":
         wfs_url = (
             GS_BASE_URL
-            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_segments&propertyName=(seg_id_nat,GNIS_NAME,GAUGE_ID)&outputFormat=application/json"
+            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_segments&propertyName=(COMID)&outputFormat=application/json"
         )
         return wfs_url
     else:
         wfs_url = (
             GS_BASE_URL
-            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
+            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_segments&propertyName=(COMID,the_geom)&outputFormat=application/json&cql_filter=(COMID={stream_id})"
         )
     return wfs_url
 
