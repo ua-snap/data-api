@@ -1542,7 +1542,7 @@ def arctic_hydrology_csv(data, filename_prefix):
         metadata += "# ma99: Mean of monthly flow values for the entire year. Compute the mean of the monthly mean flows for each month of the year. MA99 is the mean of these 12 values (cubic feet per second - temporal).\n"
     else:
         metadata += (
-            "# Climatologies are calculated from from modeled daily streamflow data.\n"
+            "# Climatologies are calculated from modeled daily streamflow data.\n"
         )
         metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
         metadata += "# water_year_index is the water year index (1-366) for which the climatology value is reported. The water year is defined as starting on October 1 (DOY 275 in a 366 day year = water year index 1) and ending September 30 (DOY 274 in a 366 day year = water year index 366).\n"
