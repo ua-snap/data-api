@@ -303,9 +303,9 @@ def package_metadata(ds, data_dict):
             data_dict["metadata"]["variables"][var][
                 "description"
             ] = "Day of year (1-366); all years are treated as leap years for consistency."
-        elif var == "water_year_index":
-            data_dict["metadata"]["variables"][var]["units"] = "water year day index"
-            data_dict["metadata"]["variables"][var][
+            # also add water_year_index - not a variable in the ds but will be computed in package_hydrograph_data():
+            data_dict["metadata"]["variables"]["water_year_index"]["units"] = "water year day index"
+            data_dict["metadata"]["variables"]["water_year_index"][
                 "description"
             ] = "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274)."
         elif var in ["doy_min", "doy_mean", "doy_max"]:
