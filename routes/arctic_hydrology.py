@@ -87,7 +87,7 @@ async def get_features(stream_id):
         gdf["geometry"] = gdf["geometry"].make_valid()
 
         return gdf
-    except:
+    except Exception:
         return render_template("400/bad_request.html"), 400
 
 
