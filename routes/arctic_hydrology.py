@@ -3,10 +3,7 @@ import io
 import numpy as np
 import xarray as xr
 import ast
-import pandas as pd
-from datetime import datetime
 import geopandas as gpd
-import copy
 from aiohttp import ClientSession
 from flask import (
     Blueprint,
@@ -326,7 +323,6 @@ def package_metadata(ds, data_dict):
     return data_dict
 
 
-# TODO: Implement arctic hydrology feature attribute population when WFS layer is available on GeoServer
 def populate_feature_attributes(data_dict, gdf):
     """Function to populate the feature attributes in the data dictionary. Only the first feature is used.
     Args:
