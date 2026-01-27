@@ -273,7 +273,7 @@ def package_metadata(ds, data_dict):
         ds_source_dict = ast.literal_eval(ds_source_str)
         citation = ds_source_dict.get("Citation", "")
         data_dict["metadata"]["source"] = {"citation": citation}
-    except Exception as e:
+    except Exception:
         data_dict["metadata"]["source"] = {"citation": ""}
 
     data_dict["metadata"]["variables"] = {}
@@ -298,16 +298,6 @@ def package_metadata(ds, data_dict):
             ] = "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows."
 
         # "doy" vars from hydrograph datasets
-        if var == "doy":
-            data_dict["metadata"]["variables"][var]["units"] = "day of year"
-            data_dict["metadata"]["variables"][var][
-                "description"
-            ] = "Day of year (1-366); all years are treated as leap years for consistency."
-            # also add water_year_index - not a variable in the ds but will be computed in package_hydrograph_data():
-            data_dict["metadata"]["variables"]["water_year_index"]["units"] = "water year day index"
-            data_dict["metadata"]["variables"]["water_year_index"][
-                "description"
-            ] = "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274)."
         elif var in ["doy_min", "doy_mean", "doy_max"]:
             data_dict["metadata"]["variables"][var]["units"] = "cfs"
             if var == "doy_min":
@@ -320,6 +310,20 @@ def package_metadata(ds, data_dict):
                 "description"
             ] = f"{op} streamflow value (cfs) on the specified day of year, aggregated over all years in the era."
 
+            # also add doy and water_year_index metadata:
+            # these will be overwritten multiple times, but the values are the same for all three vars and we will only see them once in the final output
+            data_dict["metadata"]["variables"]["doy"] = {}
+            data_dict["metadata"]["variables"]["doy"]["units"] = "day of year"
+            data_dict["metadata"]["variables"]["doy"][
+                "description"
+            ] = "Day of year (1-366); all years are treated as leap years for consistency."
+            data_dict["metadata"]["variables"]["water_year_index"] = {}
+            data_dict["metadata"]["variables"]["water_year_index"][
+                "units"
+            ] = "water year day index"
+            data_dict["metadata"]["variables"]["water_year_index"][
+                "description"
+            ] = "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274)."
     return data_dict
 
 
@@ -374,8 +378,7 @@ def run_get_arctic_hydrology_stats_data(stream_id):
         # package the stats data + metadata into a dictionary for JSON serialization
         try:
             data_dict = package_stats_data(stream_id, ds)
-        except Exception as exc:
-            print(exc)
+        except Exception:
             return render_template("500/server_error.html"), 500
 
         data_dict = calculate_and_populate_annual_mean_flow(data_dict)
@@ -393,7 +396,7 @@ def run_get_arctic_hydrology_stats_data(stream_id):
                     lat=str(data_dict["latitude"]),
                     lon=str(data_dict["longitude"]),
                 )
-            except Exception as exc:
+            except Exception:
                 return render_template("500/server_error.html"), 500
 
         return jsonify(data_dict)
@@ -456,8 +459,7 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
                     lat=str(data_dict["latitude"]),
                     lon=str(data_dict["longitude"]),
                 )
-            except Exception as exc:
-                print(exc)
+            except Exception:
                 return render_template("500/server_error.html"), 500
 
         return jsonify(data_dict)
