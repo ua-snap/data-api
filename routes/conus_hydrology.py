@@ -393,16 +393,6 @@ def package_metadata(ds, data_dict):
             ] = "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows."
 
         # "doy" vars from hydrograph datasets
-        if var == "doy":
-            data_dict["metadata"]["variables"][var]["units"] = "day of year"
-            data_dict["metadata"]["variables"][var][
-                "description"
-            ] = "Day of year (1-366); all years are treated as leap years for consistency."
-        elif var == "water_year_index":
-            data_dict["metadata"]["variables"][var]["units"] = "water year day index"
-            data_dict["metadata"]["variables"][var][
-                "description"
-            ] = "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274)."
         elif var in ["doy_min", "doy_mean", "doy_max"]:
             data_dict["metadata"]["variables"][var]["units"] = "cfs"
             if var == "doy_min":
@@ -414,6 +404,21 @@ def package_metadata(ds, data_dict):
             data_dict["metadata"]["variables"][var][
                 "description"
             ] = f"{op} streamflow value (cfs) on the specified day of year, aggregated over all years in the era."
+
+            # also add doy and water_year_index metadata:
+            # these will be overwritten multiple times, but the values are the same for all three vars and we will only see them once in the final output
+            data_dict["metadata"]["variables"]["doy"] = {}
+            data_dict["metadata"]["variables"]["doy"]["units"] = "day of year"
+            data_dict["metadata"]["variables"]["doy"][
+                "description"
+            ] = "Day of year (1-366); all years are treated as leap years for consistency."
+            data_dict["metadata"]["variables"]["water_year_index"] = {}
+            data_dict["metadata"]["variables"]["water_year_index"][
+                "units"
+            ] = "water year day index"
+            data_dict["metadata"]["variables"]["water_year_index"][
+                "description"
+            ] = "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274)."
 
     return data_dict
 

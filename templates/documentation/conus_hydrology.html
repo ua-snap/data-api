@@ -249,28 +249,32 @@
           "1976-2005": [
             {
               "doy": 1,
-              "doy_max": 26920,
-              "doy_mean": 6121,
-              "doy_min": 1303
+              "doy_max": 26920.0,
+              "doy_mean": 6121.035,
+              "doy_min": 1303.0,
+              "water_year_index": 93
             },
             {
               "doy": 2,
-              "doy_max": 28820,
-              "doy_mean": 5494,
-              "doy_min": 1275
+              "doy_max": 28820.0,
+              "doy_mean": 5494.138,
+              "doy_min": 1275.0,
+              "water_year_index": 94
             },
             ...
             {
               "doy": 365,
-              "doy_max": 19190,
-              "doy_mean": 5337,
-              "doy_min": 1246
+              "doy_max": 33980.0,
+              "doy_mean": 7701.896,
+              "doy_min": 1445.0,
+              "water_year_index": 91
             },
             {
               "doy": 366,
-              "doy_max": 12920,
-              "doy_mean": 4385,
-              "doy_min": 1706
+              "doy_max": 21440.0,
+              "doy_mean": 7282.857,
+              "doy_min": 1420.0,
+              "water_year_index": 92
             }
           ]
         },
@@ -287,6 +291,10 @@
       "citation": "LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for Hydrologic Simulations for the Conterminous United States for Historical and Future Conditions Using the National Hydrologic Model Infrastructure (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5), 1950 - 2100: U.S. Geological Survey data release, https://doi.org/10.5066/P9EBKREQ."
     },
     "variables": {
+      "doy": {
+        "description": "Day of year (1-366); all years are treated as leap years for consistency.",
+        "units": "day of year"
+      },
       "doy_max": {
         "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
         "units": "cfs"
@@ -298,6 +306,10 @@
       "doy_min": {
         "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
         "units": "cfs"
+      },
+      "water_year_index": {
+        "description": "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274).",
+        "units": "water year day index"
       }
     }
   },
@@ -366,26 +378,30 @@
               "doy": 1,
               "doy_max": 24000,
               "doy_mean": 3802,
-              "doy_min": 1020
+              "doy_min": 1020,
+              water_year_index: 93
             },
             {
               "doy": 2,
               "doy_max": 21400,
               "doy_mean": 3844,
-              "doy_min": 1040
+              "doy_min": 1040,
+              water_year_index: 94
             },
             ...
             {
               "doy": 365,
               "doy_max": 12900,
               "doy_mean": 3730,
-              "doy_min": 950
+              "doy_min": 950,
+              water_year_index: 91
             },
             {
               "doy": 366,
               "doy_max": 16100,
               "doy_mean": 5133,
-              "doy_min": 1780
+              "doy_min": 1780,
+              water_year_index: 92
             }
           ]
         },
@@ -403,6 +419,10 @@
       "citation": "U.S. Geological Survey, 2026, U.S. Geological Survey National Water Information System database, accessed 2026-01-08, at https://doi.org/10.5066/F7P55KJN. Data download directly accessible at https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&lang=en-US&limit=50000&properties=time,value,unit_of_measure&skipGeometry=true&sortby=%2Btime&offset=0&datetime=1976-10-01/2005-09-30&monitoring_location_id=USGS-12039500&parameter_code=00060&approval_status=Approved"
     },
     "variables": {
+      "doy": {
+        "description": "Day of year (1-366); all years are treated as leap years for consistency.",
+        "units": "day of year"
+      },
       "doy_max": {
         "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
         "units": "cfs"
@@ -414,7 +434,10 @@
       "doy_min": {
         "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
         "units": "cfs"
-      }
+      },
+      "water_year_index": {
+        "description": "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274).",
+        "units": "water year day index"
     }
   },
   "name": "QUINAULT RIVER AT QUINAULT LAKE, WA"
