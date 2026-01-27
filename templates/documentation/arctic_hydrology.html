@@ -1,3 +1,351 @@
 {% extends 'base.html' %} {% block content %}
 <h2>Arctic Hydrology</h2>
-{% endblock %}
+ 
+<p>
+  These endpoints provide access to modeled streamflow statistics and daily
+  streamflow climatologies for 34,346 stream network segments in Alaska and 
+  Canada. Stream segments were derived from the MERIT Hydro network, and 
+  streamflow was modeled using the Regional Arctic System Model (RASM)
+  with dynamically downscaled CMIP6 historical (1990&ndash;2021) and projected 
+  mid-century (2034-2065) climate data. A dynamically downscaled ERA5 
+  baseline is available for the historical period.
+</p>
+
+<!-- TODO: create a way for users to find the stream IDs for streams of interest, and reference it here -->
+<!-- <p>Users can search for stream IDs using the ###TBD###</p> -->
+
+<p>
+  For more detailed model information, see the links to academic references and
+  source datasets included at the bottom of this page.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Modeled hydrologic statistics by stream ID</h4>
+
+<p>
+  Query hydrologic statistics for all models and scenarios. Statistics are
+  computed over historical (1990&ndash;2021) and projected 
+  mid-century (2034&ndash;2065) eras. These statistics are defined
+  <a href="#stats_table">below</a>.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hydrologic statistics</td>
+      <td>
+        <a href="/arctic_hydrology/stats/81000004">/arctic_hydrology/stats/81000004</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Modeled daily streamflow climatologies by stream ID</h4>
+
+<p>
+  Query daily streamflow climatologies for all models and scenarios. Useful for
+  constructing hydrographs. Minimum, maximum, and mean values for each day of
+  year are computed over historical (1990&ndash;2021) and projected 
+  mid-century (2034&ndash;2065) eras.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Modeled daily streamflow climatologies</td>
+      <td>
+        <a href="/arctic_hydrology/modeled_climatology/81000004"
+          >/arctic_hydrology/modeled_climatology/81000004</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<h4>Modeled hydrologic statistics</h4>
+
+<p>Results from stream ID queries will look like this:</p>
+
+<pre>
+{
+  "data": {
+    "C2LE2": {
+      "1990-2021": {
+        "ma12": 26.52,
+        "ma13": 26.1,
+        "ma14": 24.67,
+        "ma15": 62.68,
+        "ma16": 5237.25,
+        "ma17": 16313.96,
+        "ma18": 9392.27,
+        "ma19": 5261.32,
+        "ma20": 5504.12,
+        "ma21": 3754.39,
+        "ma22": 351.99,
+        "ma23": 38.11,
+        "ma99": 3832.78
+      },
+      ...
+    },
+    ...
+    "id": "81000004",
+    "latitude": 70.8283,
+    "longitude": -155.4225,
+    "metadata": {
+      "source": {
+        "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
+      },
+      "variables": {
+        "ma12": {
+          "description": "Mean of monthly flow values for January.",
+          "units": "cfs"
+        },
+        ...
+        "ma99": {
+          "description": "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows.",
+          "units": "cfs"
+        }
+      }
+    },
+    "name": ""
+  }
+}
+</pre>
+
+<p>
+  Note that latitude and longitude values represent the approximate centroid of
+  the stream segment. Also note that not all stream segments are named. The
+  above output is structured like this:
+</p>
+
+<pre>
+{
+  "data": {
+    &lt;model&gt;: {
+      &lt;era&gt;: {
+        &lt;variable&gt;: &lt;value&gt;,
+        ...
+        },
+      ...
+    },
+    ...
+  },
+  "id": &lt;stream ID&gt;,
+  "latitude": &lt;latitude of stream segment&gt;,
+  "longitude": &lt;longitude of stream segment&gt;,
+  "metadata": {
+    "source": {
+      "citation": &lt;academic reference for source data&gt;
+    },
+    "variables": {
+      &lt;variable&gt;: {
+        "description": &lt;description of variable&gt;,
+        "units": &lt;units of variable&gt;
+      },
+      ...
+    }
+  },
+  "name": &lt;name of stream segment&gt;
+}
+</pre>
+
+<h4>Modeled daily streamflow climatologies</h4>
+
+<p>Results from stream ID queries will look like this:</p>
+<pre>
+{
+  "data": {
+    "C2LE2": {
+      "1990-2021": { [
+        {
+            "doy": 1,
+            "doy_max": 40.89,
+            "doy_mean": 26.663,
+            "doy_min": 0.222,
+            "water_year_index": 93
+        },
+        {
+            "doy": 2,
+            "doy_max": 40.793,
+            "doy_mean": 26.637,
+            "doy_min": 1.339,
+            "water_year_index": 94
+        },
+        ...
+        {
+            "doy": 365,
+            "doy_max": 40.992,
+            "doy_mean": 27.598,
+            "doy_min": 15.445,
+            "water_year_index": 91
+        },
+        {
+            "doy": 366,
+            "doy_max": 32.638,
+            "doy_mean": 26.632,
+            "doy_min": 15.37,
+            "water_year_index": 92
+        }
+        ]
+      },
+      ...
+    }
+  },
+  "id": "81000004",
+  "latitude": 70.8283,
+  "longitude": -155.4225,
+  "metadata": {
+    "source": {
+      "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
+    },
+    "variables": {
+      "doy_max": {
+        "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
+      },
+      "doy_mean": {
+        "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
+      },
+      "doy_min": {
+        "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "units": "cfs"
+      }
+    }
+  },
+  "name": ""
+}
+</pre>
+
+<p>
+  Note that latitude and longitude values represent the approximate centroid of
+  the stream segment. Also note that not all stream segments are named. Modeled
+  data uses a 366 day year. The above output is structured like this:
+</p>
+
+<pre>
+{
+  "data": {
+    &lt;model&gt;: {
+        &lt;era&gt;: {
+        [
+            {
+            "doy": &lt;day of year (1-366)&gt;,
+            &lt;variable1&gt;: &lt;value1&gt;,
+            },
+            ...
+        ]
+      },
+      ...
+    },
+    "id": &lt;stream ID&gt;,
+    "latitude": &lt;latitude of stream segment&gt;,
+    "longitude": &lt;longitude of stream segment&gt;,
+    "metadata": {
+      "source": {
+        "citation": &lt;academic reference for source data&gt;
+      },
+      "variables": {
+        &lt;variable1&gt;: {
+          "description": &lt;description of variable1&gt;,
+          "units": &lt;units of variable1&gt;
+        },
+      }
+    },
+    "name": &lt;name of stream segment&gt;
+  }
+}
+</pre>
+
+<h3 id="stats_table">Available Streamflow Statistics</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr><td><code>ma12</code></td><td>Mean of monthly flow values for January</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma13</code></td><td>Mean of monthly flow values for February</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma14</code></td><td>Mean of monthly flow values for March</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma15</code></td><td>Mean of monthly flow values for April</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma16</code></td><td>Mean of monthly flow values for May</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma17</code></td><td>Mean of monthly flow values for June</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma18</code></td><td>Mean of monthly flow values for July</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma19</code></td><td>Mean of monthly flow values for August</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma20</code></td><td>Mean of monthly flow values for September</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma21</code></td><td>Mean of monthly flow values for October</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma22</code></td><td>Mean of monthly flow values for November</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma23</code></td><td>Mean of monthly flow values for December</td><td>cubic feet per second</td></tr>
+    <tr><td><code>ma99</code></td><td>Annual mean streamflow, calculated as the mean of the monthly mean flows</td><td>cubic feet per second</td></tr>
+    
+  </tbody>
+</table>
+
+
+      <h3>Source data</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Academic reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+            Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. <a href='https://doi.org/10.18739/A25M62870/'>doi:10.18739/A25M62870</a>.
+            </td>
+          </tr>
+          <tr>
+            <td>
+            Yamazaki D., D. Ikeshima, J. Sosa, P.D. Bates, G.H. Allen, T.M. Pavelsky. MERIT Hydro: A high-resolution global hydrography map based on latest topography datasets. Water Resources Research, vol.55, pp.5053-5073, 2019, doi: <a href='https://doi.org/10.1029/2019WR024873'>10.1029/2019WR024873</a>.
+            </td>
+          </tr>
+          <tr>
+            <td>
+                Cassano, J. J., DuVivier, A., Roberts, A., Hughes, M., Seefeldt, M., Brunke, M., Craig, A., Fisel, B., Gutowski, W., Hamman, J., Higgins, M., Maslowski, W., Nijssen, B., Osinski, R., & Zeng, X. (2017). Development of the Regional Arctic System Model (RASM): Near-Surface Atmospheric Climate Sensitivity. Journal of Climate, 30(15), 5729–5753. doi: <a href='https://doi.org/10.1175/JCLI-D-15-0775.1'>10.1175/JCLI-D-15-0775.1</a>.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      {% endblock %}
+    </tr>
+  </tbody>
+</table> -->
