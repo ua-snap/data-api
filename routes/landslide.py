@@ -35,21 +35,33 @@ def package_landslide_data(landslide_resp, community_data=None):
 
     data = landslide_resp[0] if isinstance(landslide_resp, list) else landslide_resp
 
+    # Extract forecast blocks at 24, 48, and 72 hours
+    forecast_blocks = data.get("forecast_blocks", [])
+    block_24hr = None
+    block_2days = None
+    block_3days = None
+
+    for block in forecast_blocks:
+        if block.get("forecast_hour") == 24:
+            block_24hr = block
+        elif block.get("forecast_hour") == 48:
+            block_2days = block
+        elif block.get("forecast_hour") == 72:
+            block_3days = block
+
     di = {
         "timestamp": str(data.get("ts", "")),
         "expires_at": str(data.get("expires_at", "")),
-        "hour": data.get("hour"),
-        "precipitation_mm": data.get("precip"),
-        "precipitation_inches": data.get("precip_inches"),
-        "precipitation_24hr": data.get("precip24hr"),
-        "precipitation_2days": data.get("precip2days"),
-        "precipitation_3days": data.get("precip3days"),
-        "risk_level": data.get("risk_level"),
-        "risk_probability": data.get("risk_prob"),
-        "risk_24hr": data.get("risk24hr"),
-        "risk_2days": data.get("risk2days"),
-        "risk_3days": data.get("risk3days"),
-        "risk_is_elevated_from_previous": data.get("risk_is_elevated_from_previous"),
+        "place_name": data.get("place_name"),
+        "place_id": data.get("place_id"),
+        "gauge_id": data.get("gauge_id"),
+        "realtime_antecedent_mm": data.get("realtime_antecedent_mm"),
+        "realtime_rainfall_mm": data.get("realtime_rainfall_mm"),
+        "realtime_risk_level": data.get("realtime_risk_level"),
+        "realtime_threshold_upper": data.get("realtime_threshold_upper"),
+        "block_24hr": block_24hr,
+        "block_2days": block_2days,
+        "block_3days": block_3days,
     }
 
     # Add community data if provided
@@ -104,7 +116,7 @@ def run_fetch_landslide_data(community_id):
                     if expires_datetime.tzinfo
                     else datetime.now()
                 )
-                
+
                 # data are stale, return the data + HTTP code 409
                 if expires_datetime < current_datetime:
                     return jsonify(landslide_data), 409

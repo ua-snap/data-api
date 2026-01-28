@@ -83,7 +83,7 @@ def get_landslide_db_row(place_name):
     try:
         with connection.cursor(cursor_factory=RealDictCursor) as cursor:
             query = """
-                SELECT * FROM precip_risk 
+                SELECT * FROM landslide_risk 
                 WHERE place_name = %s
                 ORDER BY ts DESC
                 LIMIT 1
