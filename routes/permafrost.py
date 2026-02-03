@@ -233,7 +233,7 @@ def generate_gipl1km_time_index():
     date_index = pd.date_range(
         start=pd.Timestamp(year_start.split("T")[0]),
         end=pd.Timestamp(year_stop.split("T")[0]),
-        freq="AS",
+        freq="YS",
     )
     return date_index
 
