@@ -51,6 +51,11 @@ for extent in geojson_names:
     extent_filtered_communities[extent] = filtered
 
 
+@routes.route("/search/")
+def search_about():
+    return render_template("/documentation/search.html")
+
+
 @routes.route("/places/search/<lat>/<lon>")
 def find_via_gs(lat, lon):
     """
