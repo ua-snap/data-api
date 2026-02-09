@@ -423,7 +423,7 @@ def package_metadata(ds, data_dict):
     return data_dict
 
 
-def populate_feature_attributes(data_dict, gdf):
+def populate_feature_name_and_location_attributes(data_dict, gdf):
     """Function to populate the feature attributes in the data dictionary. Only the first feature is used.
     Args:
         data_dict (dict): Data dictionary with the hydrology stats populated
@@ -432,8 +432,29 @@ def populate_feature_attributes(data_dict, gdf):
         Data dictionary with the vector attributes populated."""
 
     data_dict["name"] = gdf.loc[0].GNIS_NAME
+    data_dict["huc8"] = gdf.loc[0].huc8
+
+    huc8_flag = gdf.loc[0].huc8_outlet
+    if huc8_flag == 1:
+        data_dict["huc8_outlet"] = True
+    else:
+        data_dict["huc8_outlet"] = False
+
     data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
     data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
+
+    return data_dict
+
+
+def populate_feature_stat_attributes_summary(data_dict, gdf):
+    """Function to populate a summary of stats attributes in the data dictionary. Only the first feature is used.
+    Args:
+        data_dict (dict): Data dictionary with the hydrology data populated
+    Returns:
+        Data dictionary with the summary populated."""
+
+    # TODO: parse stat attributes to sentences
+    # ma12_diff,ma13_diff,ma14_diff,ma15_diff,ma16_diff,ma17_diff,ma18_diff,ma19_diff,ma20_diff,ma21_diff,ma22_diff,ma23_diff,dh1_diff,dl1_diff,dh15_diff,dl16_diff,fh1_diff,fl1_diff,ma99_diff,ma99_hist
 
     return data_dict
 
@@ -547,7 +568,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
         data_dict = package_stats_data(stream_id, ds)
         data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
-        data_dict = populate_feature_attributes(data_dict, gdf)
+        data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
 
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
@@ -563,6 +584,9 @@ def run_get_conus_hydrology_stats_data(stream_id):
                 )
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
+
+        # add stats sentences to metadata: this is not included in the CSV output, but should be in JSON response
+        data_dict = populate_feature_stat_attributes_summary(data_dict, gdf)
 
         return jsonify(data_dict)
 
@@ -611,7 +635,7 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
         data_dict = package_metadata(
             datasets[0], data_dict
         )  # all datasets should have same metadata, just use the first one
-        data_dict = populate_feature_attributes(data_dict, gdf)
+        data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
         if request.args.get("format") == "csv":
