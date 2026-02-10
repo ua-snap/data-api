@@ -434,7 +434,7 @@ def populate_feature_name_and_location_attributes(data_dict, gdf):
     data_dict["name"] = gdf.loc[0].GNIS_NAME
     data_dict["huc8"] = gdf.loc[0].huc8
 
-    huc8_flag = gdf.loc[0].huc8_outlet
+    huc8_flag = gdf.loc[0].h8_outlet
     if huc8_flag == 1:
         data_dict["huc8_outlet"] = True
     else:
@@ -453,8 +453,34 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     Returns:
         Data dictionary with the summary populated."""
 
-    # TODO: parse stat attributes to sentences
-    # ma12_diff,ma13_diff,ma14_diff,ma15_diff,ma16_diff,ma17_diff,ma18_diff,ma19_diff,ma20_diff,ma21_diff,ma22_diff,ma23_diff,dh1_diff,dl1_diff,dh15_diff,dl16_diff,fh1_diff,fl1_diff,ma99_diff,ma99_hist
+    # TODO: parse stat attributes to data sentences
+    # mean flows: ma99_diff,ma99_hist,ma12_diff,ma13_diff,ma14_diff,ma15_diff,ma16_diff,ma17_diff,ma18_diff,ma19_diff,ma20_diff,ma21_diff,ma22_diff,ma23_diff
+    # max and min flows: dh1_diff,dl1_diff
+    # flood count and duration: dh15_diff,dl16_diff,fh1_diff,fl1_diff
+
+    summary_text = ""
+    # mean flows
+    summary_text += f"Historically, this stream has a mean annual flow of {gdf.loc[0].ma99_hist:.2f} cfs. "
+    summary_text += f"Under the RCP 8.5 climate scenario, the mean annual flow is projected to {'increase' if gdf.loc[0].ma99_diff > 0 else 'decrease'} by {gdf.loc[0].ma99_diff:.2f}% by late century (2071-2100). "
+    summary_text += f"January mean flow is projected to {'increase' if gdf.loc[0].ma12_diff > 0 else 'decrease'} by {gdf.loc[0].ma12_diff:.2f}%; "
+    summary_text += f"February mean flow is projected to {'increase' if gdf.loc[0].ma13_diff > 0 else 'decrease'} by {gdf.loc[0].ma13_diff:.2f}%; "
+    summary_text += f"March mean flow is projected to {'increase' if gdf.loc[0].ma14_diff > 0 else 'decrease'} by {gdf.loc[0].ma14_diff:.2f}%; "
+    summary_text += f"April mean flow is projected to {'increase' if gdf.loc[0].ma15_diff > 0 else 'decrease'} by {gdf.loc[0].ma15_diff:.2f}%; "
+    summary_text += f"May mean flow is projected to {'increase' if gdf.loc[0].ma16_diff > 0 else 'decrease'} by {gdf.loc[0].ma16_diff:.2f}%; "
+    summary_text += f"June mean flow is projected to {'increase' if gdf.loc[0].ma17_diff > 0 else 'decrease'} by {gdf.loc[0].ma17_diff:.2f}%; "
+    summary_text += f"July mean flow is projected to {'increase' if gdf.loc[0].ma18_diff > 0 else 'decrease'} by {gdf.loc[0].ma18_diff:.2f}%; "
+    summary_text += f"August mean flow is projected to {'increase' if gdf.loc[0].ma19_diff > 0 else 'decrease'} by {gdf.loc[0].ma19_diff:.2f}%; "
+    summary_text += f"September mean flow is projected to {'increase' if gdf.loc[0].ma20_diff > 0 else 'decrease'} by {gdf.loc[0].ma20_diff:.2f}%; "
+    summary_text += f"October mean flow is projected to {'increase' if gdf.loc[0].ma21_diff > 0 else 'decrease'} by {gdf.loc[0].ma21_diff:.2f}%; "
+    summary_text += f"November mean flow is projected to {'increase' if gdf.loc[0].ma22_diff > 0 else 'decrease'} by {gdf.loc[0].ma22_diff:.2f}%; "
+    summary_text += f"December mean flow is projected to {'increase' if gdf.loc[0].ma23_diff > 0 else 'decrease'} by {gdf.loc[0].ma23_diff:.2f}%. "
+    # max and min flows
+    summary_text += f"Under the RCP 8.5 climate scenario, the maximum single day flow is projected to {'increase' if gdf.loc[0].dh1_diff > 0 else 'decrease'} by {gdf.loc[0].dh1_diff:.2f}% and the minimum single day flow is projected to {'increase' if gdf.loc[0].dl1_diff > 0 else 'decrease'} by {gdf.loc[0].dl1_diff:.2f}% by late century (2071-2100). "
+    # high/low flow pulse duration (change in days) and count of events (change in number of events)
+    summary_text += f"Under the RCP 8.5 climate scenario, the mean number of high flow events is projected to {'increase' if gdf.loc[0].fh1_diff > 0 else 'decrease'} by {gdf.loc[0].fh1_diff:.2f} events per year and the mean duration of high flow events is projected to {'increase' if gdf.loc[0].dh15_diff > 0 else 'decrease'} by {gdf.loc[0].dh15_diff:.2f} days per year by late century (2071-2100). "
+    summary_text += f"The mean number of low flow events is projected to {'increase' if gdf.loc[0].fl1_diff > 0 else 'decrease'} by {gdf.loc[0].fl1_diff:.2f} events per year and the mean duration of low flow events is projected to {'increase' if gdf.loc[0].dl16_diff > 0 else 'decrease'} by {gdf.loc[0].dl16_diff:.2f} days per year. "
+
+    print(summary_text)
 
     return data_dict
 
@@ -591,6 +617,9 @@ def run_get_conus_hydrology_stats_data(stream_id):
         return jsonify(data_dict)
 
     except Exception as exc:
+
+        print(exc)
+
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
