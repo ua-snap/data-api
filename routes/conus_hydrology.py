@@ -453,11 +453,6 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     Returns:
         Data dictionary with the summary populated."""
 
-    # TODO: parse stat attributes to data sentences
-    # mean flows: ma99_diff,ma99_hist,ma12_diff,ma13_diff,ma14_diff,ma15_diff,ma16_diff,ma17_diff,ma18_diff,ma19_diff,ma20_diff,ma21_diff,ma22_diff,ma23_diff
-    # max and min flows: dh1_diff,dl1_diff
-    # flood count and duration: dh15_diff,dl16_diff,fh1_diff,fl1_diff
-
     summary_text = ""
     # mean flows
     summary_text += f"Historically, this stream has a mean annual flow of {gdf.loc[0].ma99_hist:.2f} cfs. "
@@ -480,7 +475,8 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     summary_text += f"Under the RCP 8.5 climate scenario, the mean number of high flow events is projected to {'increase' if gdf.loc[0].fh1_diff > 0 else 'decrease'} by {gdf.loc[0].fh1_diff:.2f} events per year and the mean duration of high flow events is projected to {'increase' if gdf.loc[0].dh15_diff > 0 else 'decrease'} by {gdf.loc[0].dh15_diff:.2f} days per year by late century (2071-2100). "
     summary_text += f"The mean number of low flow events is projected to {'increase' if gdf.loc[0].fl1_diff > 0 else 'decrease'} by {gdf.loc[0].fl1_diff:.2f} events per year and the mean duration of low flow events is projected to {'increase' if gdf.loc[0].dl16_diff > 0 else 'decrease'} by {gdf.loc[0].dl16_diff:.2f} days per year. "
 
-    print(summary_text)
+    # print(summary_text)
+    data_dict["summary"] = summary_text
 
     return data_dict
 
