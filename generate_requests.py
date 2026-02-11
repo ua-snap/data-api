@@ -181,27 +181,6 @@ def generate_netcdf_average_wcps_str(bbox_bounds, generate_average_wcps_str_kwar
     return netcdf_avg_wcps_str
 
 
-def generate_conus_hydrology_wcs_str(cov_id, geom_id):
-    """Generate a WCS GetCoverage request for fetching CONUS hydrology data.
-    Args:
-        cov_id (str): Coverage ID
-        geom_id (str): Geometry ID
-    Returns:
-        request_string (str): WCS GetCoverage Request to append to a query URL
-    """
-
-    request_string = f"ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&"
-    request_string += f"COVERAGEID={cov_id}&"
-
-    # adding the model subset because there is a bug with the default rasql query
-    request_string += f"SUBSET=model(0,12)&"
-
-    request_string += f"SUBSET=geom_id({geom_id})&"
-    request_string += f"FORMAT=application/netcdf"
-
-    return request_string
-
-
 def generate_wcps_describe_coverage_str(cov_id):
     """Generate a WCPS DescribeCoverage request for a given coverage.
 
