@@ -93,33 +93,6 @@ def rasterize_polygon(da_i, x_dim, y_dim, polygon):
     return rasterized_polygon_array
 
 
-def calculate_zonal_means_vectorized(da_i, polygon_array, x_dim, y_dim):
-    """
-    Calculate zonal means for a 3D xarray data array (time, y, x)
-    and a 2D rasterized polygon array of the same shape.
-    Args:
-        da_i (xarray.DataArray): 3D xarray data array, probably interpolated
-        polygon_array (numpy.ndarray): 2D numpy array with the rasterized polygon
-        x_dim (str): name of the x dimension
-        y_dim (str): name of the y dimension
-    Returns:
-        time_series_means (list): list of zonal means for each time slice
-    """
-    # ensure correct dimension order
-    arr = da_i.transpose("time", y_dim, x_dim).values
-
-    # create a boolean mask from the polygon array
-    mask = polygon_array == 1
-
-    # broadcast the 2D mask to the 3D array, selecting pixels within the polygon for all time slices
-    masked_arr = arr[:, mask]
-
-    # compute the mean for each time slice, ignoring NaNs
-    time_series_means = np.nanmean(masked_arr, axis=1)
-
-    return time_series_means.tolist()
-
-
 def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim, compute_full_stats=False):
     """Calculate zonal statistics for an xarray data array and a rasterized polygon array of the same shape.
 
@@ -168,6 +141,33 @@ def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim, compute_full_stats=
             zonal_stats["unique_values_and_counts"] = {}
 
     return zonal_stats
+
+
+def calculate_zonal_means_vectorized(da_i, polygon_array, x_dim, y_dim):
+    """
+    Calculate zonal means for a 3D xarray data array (time, y, x)
+    and a 2D rasterized polygon array of the same shape.
+    Args:
+        da_i (xarray.DataArray): 3D xarray data array, probably interpolated
+        polygon_array (numpy.ndarray): 2D numpy array with the rasterized polygon
+        x_dim (str): name of the x dimension
+        y_dim (str): name of the y dimension
+    Returns:
+        time_series_means (list): list of zonal means for each time slice
+    """
+    # ensure correct dimension order
+    arr = da_i.transpose("time", y_dim, x_dim).values
+
+    # create a boolean mask from the polygon array
+    mask = polygon_array == 1
+
+    # broadcast the 2D mask to the 3D array, selecting pixels within the polygon for all time slices
+    masked_arr = arr[:, mask]
+
+    # compute the mean for each time slice, ignoring NaNs
+    time_series_means = np.nanmean(masked_arr, axis=1)
+
+    return time_series_means.tolist()
 
 
 def interpolate_and_compute_zonal_stats(
