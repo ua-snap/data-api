@@ -129,13 +129,27 @@ def run_aggregate_var_polygon(poly_id):
     )
     aggr_results = generate_nested_dict(dim_combos)
 
-    # fetch each dim combo from the dataset and calculate zonal stats, adding to the results dict
-    for coords, dim_combo in zip(iter_coords, dim_combos):
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        combo_ds = ds.sel(sel_di)
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-            polygon, combo_ds, crs
-        )
+    # Creates list of dictionaries containing all combinations of
+    # dimension names and unique coordinate values
+    dim_combinations = [
+        {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        for coords in iter_coords
+    ]
+
+    beetle_results = interpolate_and_compute_zonal_stats(
+        polygon,
+        ds,
+        crs,
+        dim_combinations,
+        var_name=bandname,
+        x_dim="X",
+        y_dim="Y",
+        compute_full_stats=True,
+    )
+
+    for (combo_dict, combo_zonal_stats_dict), dim_combo in zip(
+        beetle_results, dim_combos
+    ):
         vals_counts_dict = combo_zonal_stats_dict["unique_values_and_counts"]
 
         # if nan is the only value in the subset, set all null results for this dim combo (will get pruned)

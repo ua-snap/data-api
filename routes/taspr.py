@@ -1219,16 +1219,28 @@ def run_aggregate_var_polygon(var_ep, poly_id):
                         for scenario in aggr_results[era][season][model]:
                             aggr_results[era][season][model][scenario] = {varname: {}}
 
-        # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
-        for coords, dim_combo in zip(iter_coords, dim_combos):
-            sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-            combo_ds = ds.sel(sel_di)
-            combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-                polygon,
-                combo_ds,
-                crs="EPSG:3338",  # hard-coded for now, since metadata is not fetched from Rasdaman for any of the 9 (!) taspr coverages
-            )
+        # CRU only needs mean, projected needs min/max too
+        compute_full_stats = not cru
 
+        # Creates list of dictionaries containing all combinations of
+        # dimension names and unique coordinate values
+        dim_combinations = [
+            {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+            for coords in iter_coords
+        ]
+
+        results = interpolate_and_compute_zonal_stats(
+            polygon,
+            ds,
+            "EPSG:3338",
+            dim_combinations,
+            var_name=bandname,
+            x_dim="X",
+            y_dim="Y",
+            compute_full_stats=compute_full_stats,  # CRU only needs mean, projected needs min/max too
+        )
+
+        for (combo_dict, combo_zonal_stats_dict), dim_combo in zip(results, dim_combos):
             # using 0 in round() function will still return a float ... need to drop the digit arg to get an int
             d = (
                 None
