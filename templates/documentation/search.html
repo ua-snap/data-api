@@ -1,0 +1,475 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Places Search</h2>
+
+<p>
+  The Places Search endpoints provide geographic lookup and discovery services for
+  communities and polygon areas within Alaska and Arctic regions. These endpoints
+  allow you to find nearby places by coordinates, search for communities by name,
+  and retrieve detailed geographic metadata for analysis and visualization.
+</p>
+
+<h3>Service Endpoints</h3>
+
+<h4>Geographic Search by Coordinates</h4>
+
+<p>
+  Search for nearby communities and polygon areas using latitude and longitude
+  coordinates. This endpoint returns all geographic features within a proximity
+  threshold, including communities, HUC watersheds, protected areas, and various
+  administrative boundaries.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Geographic search for all nearby communities and areas
+      </td>
+      <td>
+        <a href="/places/search/64.8377/-147.7164"
+          >/places/search/64.8377/-147.7164</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Geographic search filtered by community tags
+      </td>
+      <td>
+        <a href="/places/search/64.8377/-147.7164?tags=park,airport"
+          >/places/search/64.8377/-147.7164?tags=park,airport</a
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h5>Geographic Search Parameters</h5>
+
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>lat</code></td>
+      <td>Float</td>
+      <td>Yes</td>
+      <td>
+        Latitude coordinate in decimal degrees. Must be within the bounding box
+        of the data service's area of interest.
+      </td>
+    </tr>
+    <tr>
+      <td><code>lon</code></td>
+      <td>Float</td>
+      <td>Yes</td>
+      <td>
+        Longitude coordinate in decimal degrees. Must be within the bounding box
+        of the data service's area of interest.
+      </td>
+    </tr>
+    <tr>
+      <td><code>tags</code></td>
+      <td>String</td>
+      <td>No</td>
+      <td>
+        Optional comma-separated list of tags to filter communities. Only
+        communities with at least one matching tag will be returned. Examples:
+        <code>park</code>, <code>airport</code>, <code>school</code>.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h5>Geographic Search Output</h5>
+
+<p>
+  Data are returned as JSON with separate keys for communities and each type of
+  polygon area. The response includes detailed metadata and GeoJSON geometry
+  for each feature, along with a bounding box encompassing all returned features.
+</p>
+
+<pre><code>{
+  "communities": {
+    "0": {
+      "name": "Fairbanks",
+      "alt_name": "Fairbanks, Alaska",
+      "id": "AK124",
+      "region": "Alaska",
+      "country": "US",
+      "type": "community",
+      "latitude": "64.8377",
+      "longitude": "-147.7164",
+      "is_coastal": "f",
+      "ocean_lat1": null,
+      "ocean_lon1": null
+    }
+  },
+  "hucs_near": {
+    "0": {
+      "geojson": {
+        "type": "MultiPolygon",
+        "coordinates": [...]
+      },
+      "id": "19040506",
+      "name": "Tanana Flats",
+      "type": "huc"
+    }
+  },
+  "protected_areas_near": {
+    "0": {
+      "geojson": {
+        "type": "MultiPolygon",
+        "coordinates": [...]
+      },
+      "id": "141",
+      "name": "Creamer's Field Migratory Waterfowl Refuge",
+      "type": "protected_area"
+    }
+  },
+  "ak_boros_near": {},
+  "ak_censusarea_near": {},
+  "climate_divisions_near": {},
+  "corporations_near": {},
+  "ethnolinguistic_regions_near": {},
+  "fire_management_units_near": {},
+  "yt_fire_districts_near": {},
+  "game_management_units_near": {},
+  "yt_game_management_subzones_near": {},
+  "ca_first_nations_near": {},
+  "yt_watersheds_near": {},
+  "ecoregions_near": {},
+  "total_bounds": {
+    "xmin": -147.85,
+    "ymin": 64.75,
+    "xmax": -147.65,
+    "ymax": 64.92
+  }
+}
+</code></pre>
+
+<h5>Area Types in Geographic Search Output</h5>
+
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>communities</code></td>
+      <td>Named communities, villages, towns, and cities</td>
+    </tr>
+    <tr>
+      <td><code>hucs_near</code></td>
+      <td>Hydrologic Unit Code (HUC) watersheds</td>
+    </tr>
+    <tr>
+      <td><code>protected_areas_near</code></td>
+      <td>National parks, wildlife refuges, and other protected areas</td>
+    </tr>
+    <tr>
+      <td><code>ak_boros_near</code></td>
+      <td>Alaska boroughs (county equivalents)</td>
+    </tr>
+    <tr>
+      <td><code>ak_censusarea_near</code></td>
+      <td>Alaska census areas</td>
+    </tr>
+    <tr>
+      <td><code>climate_divisions_near</code></td>
+      <td>NOAA climate divisions</td>
+    </tr>
+    <tr>
+      <td><code>corporations_near</code></td>
+      <td>Alaska Native Regional Corporations</td>
+    </tr>
+    <tr>
+      <td><code>ethnolinguistic_regions_near</code></td>
+      <td>Indigenous language and cultural regions</td>
+    </tr>
+    <tr>
+      <td><code>fire_management_units_near</code></td>
+      <td>Fire management zones</td>
+    </tr>
+    <tr>
+      <td><code>yt_fire_districts_near</code></td>
+      <td>Yukon Territory fire districts</td>
+    </tr>
+    <tr>
+      <td><code>game_management_units_near</code></td>
+      <td>Wildlife game management units</td>
+    </tr>
+    <tr>
+      <td><code>yt_game_management_subzones_near</code></td>
+      <td>Yukon Territory game management subzones</td>
+    </tr>
+    <tr>
+      <td><code>ca_first_nations_near</code></td>
+      <td>Canadian First Nations territories</td>
+    </tr>
+    <tr>
+      <td><code>yt_watersheds_near</code></td>
+      <td>Yukon Territory watersheds</td>
+    </tr>
+    <tr>
+      <td><code>ecoregions_near</code></td>
+      <td>Ecological regions</td>
+    </tr>
+    <tr>
+      <td><code>total_bounds</code></td>
+      <td>Bounding box (xmin, ymin, xmax, ymax) encompassing all returned features</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Community Search by Name</h4>
+
+<p>
+  Search for communities by name using fuzzy string matching. This endpoint
+  supports filtering by geographic extent and uses the Jaro-Winkler algorithm
+  to match community names, making it robust to spelling variations and partial
+  matches.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Search all communities by name substring
+      </td>
+      <td>
+        <a href="/places/search/communities?substring=fair"
+          >/places/search/communities?substring=fair</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Search communities within Alaska extent
+      </td>
+      <td>
+        <a href="/places/search/communities?extent=alaska&substring=anch"
+          >/places/search/communities?extent=alaska&substring=anch</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Get all communities within a specific extent
+      </td>
+      <td>
+        <a href="/places/search/communities?extent=elevation"
+          >/places/search/communities?extent=elevation</a
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h5>Community Search Parameters</h5>
+
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>extent</code></td>
+      <td>String</td>
+      <td>No</td>
+      <td>
+        Geographic region filter. Valid values: <code>alaska</code>,
+        <code>blockyAlaska</code>, <code>elevation</code>, <code>mizukami</code>,
+        <code>slie</code>. If omitted, searches across all available communities.
+      </td>
+    </tr>
+    <tr>
+      <td><code>substring</code></td>
+      <td>String</td>
+      <td>No</td>
+      <td>
+        Search term to match against community names and alternate names. Uses
+        fuzzy matching with the Jaro-Winkler algorithm (minimum similarity
+        threshold of 0.8). Results are sorted by match quality. Case-insensitive.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h5>Community Search Output</h5>
+
+<p>
+  Data are returned as a JSON array of community objects, ordered by match
+  quality when using substring search. Each community includes its name, location,
+  and metadata.
+</p>
+
+<pre><code>[
+  {
+    "name": "Fairbanks",
+    "alt_name": "Fairbanks, Alaska",
+    "id": "AK124",
+    "region": "Alaska",
+    "country": "US",
+    "type": "community",
+    "latitude": "64.8377",
+    "longitude": "-147.7164",
+    "tags": "city,airport",
+    "is_coastal": "f",
+    "ocean_lat1": null,
+    "ocean_lon1": null
+  },
+  {
+    "name": "North Pole",
+    "alt_name": "North Pole, Alaska",
+    "id": "AK234",
+    "region": "Alaska",
+    "country": "US",
+    "type": "community",
+    "latitude": "64.7511",
+    "longitude": "-147.3494",
+    "tags": "city",
+    "is_coastal": "f",
+    "ocean_lat1": null,
+    "ocean_lon1": null
+  }
+]
+</code></pre>
+
+<h5>Community Properties</h5>
+
+<table class="variable-table">
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>name</code></td>
+      <td>String</td>
+      <td>Primary name of the community</td>
+    </tr>
+    <tr>
+      <td><code>alt_name</code></td>
+      <td>String</td>
+      <td>Alternate or official name of the community</td>
+    </tr>
+    <tr>
+      <td><code>id</code></td>
+      <td>String</td>
+      <td>Unique identifier for the community</td>
+    </tr>
+    <tr>
+      <td><code>region</code></td>
+      <td>String</td>
+      <td>Geographic region (e.g., "Alaska", "Yukon Territory")</td>
+    </tr>
+    <tr>
+      <td><code>country</code></td>
+      <td>String</td>
+      <td>Country code (e.g., "US", "CA")</td>
+    </tr>
+    <tr>
+      <td><code>type</code></td>
+      <td>String</td>
+      <td>Feature type (always "community" for this endpoint)</td>
+    </tr>
+    <tr>
+      <td><code>latitude</code></td>
+      <td>String</td>
+      <td>Latitude coordinate in decimal degrees</td>
+    </tr>
+    <tr>
+      <td><code>longitude</code></td>
+      <td>String</td>
+      <td>Longitude coordinate in decimal degrees</td>
+    </tr>
+    <tr>
+      <td><code>tags</code></td>
+      <td>String</td>
+      <td>
+        Comma-separated list of tags describing community features (e.g.,
+        "city,airport,school"). Note: Tags are removed from output when using
+        tag filtering in the geographic search endpoint.
+      </td>
+    </tr>
+    <tr>
+      <td><code>is_coastal</code></td>
+      <td>String</td>
+      <td>Boolean flag ("t" or "f") indicating if community is coastal</td>
+    </tr>
+    <tr>
+      <td><code>ocean_lat1</code></td>
+      <td>String/Null</td>
+      <td>Latitude of nearest ocean point (for coastal communities)</td>
+    </tr>
+    <tr>
+      <td><code>ocean_lon1</code></td>
+      <td>String/Null</td>
+      <td>Longitude of nearest ocean point (for coastal communities)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Use Cases</h3>
+
+<ul>
+  <li>
+    <strong>Location-based queries:</strong> Find all geographic features near a
+    point of interest for contextual analysis
+  </li>
+  <li>
+    <strong>Community discovery:</strong> Search for communities by partial name
+    matches to support user interfaces and autocomplete features
+  </li>
+  <li>
+    <strong>Spatial context:</strong> Retrieve bounding boxes and polygon
+    geometries for mapping and visualization applications
+  </li>
+  <li>
+    <strong>Metadata enrichment:</strong> Obtain detailed information about
+    administrative boundaries, watersheds, and protected areas
+  </li>
+  <li>
+    <strong>Tag-based filtering:</strong> Focus searches on specific types of
+    communities based on their characteristics (airports, schools, etc.)
+  </li>
+</ul>
+
+<h3>Related Resources</h3>
+
+<p>
+  For more information about the types of places available in this API, see the
+  <a href="/places">Places documentation</a>.
+</p>
+
+{% endblock %}
