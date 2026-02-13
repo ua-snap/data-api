@@ -1237,7 +1237,7 @@ def run_aggregate_var_polygon(var_ep, poly_id):
             var_name=bandname,
             x_dim="X",
             y_dim="Y",
-            compute_full_stats=compute_full_stats,  # CRU only needs mean, projected needs min/max too
+            compute_full_stats=compute_full_stats,
         )
 
         for (combo_dict, combo_zonal_stats_dict), dim_combo in zip(results, dim_combos):
