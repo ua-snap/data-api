@@ -103,7 +103,7 @@ def calculate_zonal_stats(da_i, polygon_array, x_dim, y_dim, compute_full_stats=
         y_dim (str): name of the y dimension
         compute_full_stats (bool): if True, compute all stats; if False, only compute mean
     Returns:
-        zonal_stats (dict): dictionary with zonal statistics
+        zonal_stats (dict): dictionary of zonal statistics
     """
     zonal_stats = {}
 
