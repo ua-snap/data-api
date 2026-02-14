@@ -4,7 +4,6 @@ Read more about the Zonal Oversampling Process (ZOP) here: https://github.com/ua
 
 import logging
 import warnings
-import os
 from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import cpu_count
 import numpy as np

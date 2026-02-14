@@ -1,5 +1,4 @@
 import asyncio
-import numpy as np
 from flask import Blueprint, render_template
 import rasterio as rio
 import rioxarray
