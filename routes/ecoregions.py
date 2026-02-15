@@ -29,7 +29,6 @@ def package_epaecoreg(eco_resp):
 
 
 @routes.route("/ecoregions/")
-@routes.route("/ecoregions/abstract/")
 @routes.route("/ecoregions/point/")
 def phys_about():
     return render_template("documentation/ecoregions.html")

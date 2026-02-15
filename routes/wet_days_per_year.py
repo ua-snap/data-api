@@ -274,9 +274,7 @@ async def fetch_wet_days_per_year_point_data(x, y, horp, start_year, end_year):
 
 # CP: consider if routing synonyms (top-level and mmm-nested) make sense for this endpoint. another alternative could be /precip_inidcators/wet_days_per_year...
 @routes.route("/wet_days_per_year/")
-@routes.route("/wet_days_per_year/abstract/")
 @routes.route("/mmm/wet_days_per_year/")
-@routes.route("/mmm/wet_days_per_year/abstract/")
 @routes.route("/mmm/wet_days_per_year/point")
 @routes.route("/wet_days_per_year/point")
 def wet_days_per_year_about():
