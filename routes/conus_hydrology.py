@@ -447,36 +447,103 @@ def populate_feature_name_and_location_attributes(data_dict, gdf):
 
 
 def populate_feature_stat_attributes_summary(data_dict, gdf):
-    """Function to populate a summary of stats attributes in the data dictionary. Only the first feature is used.
+    """Function to populate summaries of stats attributes in the data dictionary. Only the first feature is used.
     Args:
         data_dict (dict): Data dictionary with the hydrology data populated
     Returns:
-        Data dictionary with the summary populated."""
+        Data dictionary with the summaries populated."""
 
-    summary_text = ""
-    # mean flows
-    summary_text += f"Historically, this stream has a mean annual flow of {gdf.loc[0].ma99_hist:.2f} cfs. "
-    summary_text += f"Under the RCP 8.5 climate scenario, the mean annual flow is projected to {'increase' if gdf.loc[0].ma99_diff > 0 else 'decrease'} by {gdf.loc[0].ma99_diff:.2f}% by late century (2071-2100). "
-    summary_text += f"January mean flow is projected to {'increase' if gdf.loc[0].ma12_diff > 0 else 'decrease'} by {gdf.loc[0].ma12_diff:.2f}%; "
-    summary_text += f"February mean flow is projected to {'increase' if gdf.loc[0].ma13_diff > 0 else 'decrease'} by {gdf.loc[0].ma13_diff:.2f}%; "
-    summary_text += f"March mean flow is projected to {'increase' if gdf.loc[0].ma14_diff > 0 else 'decrease'} by {gdf.loc[0].ma14_diff:.2f}%; "
-    summary_text += f"April mean flow is projected to {'increase' if gdf.loc[0].ma15_diff > 0 else 'decrease'} by {gdf.loc[0].ma15_diff:.2f}%; "
-    summary_text += f"May mean flow is projected to {'increase' if gdf.loc[0].ma16_diff > 0 else 'decrease'} by {gdf.loc[0].ma16_diff:.2f}%; "
-    summary_text += f"June mean flow is projected to {'increase' if gdf.loc[0].ma17_diff > 0 else 'decrease'} by {gdf.loc[0].ma17_diff:.2f}%; "
-    summary_text += f"July mean flow is projected to {'increase' if gdf.loc[0].ma18_diff > 0 else 'decrease'} by {gdf.loc[0].ma18_diff:.2f}%; "
-    summary_text += f"August mean flow is projected to {'increase' if gdf.loc[0].ma19_diff > 0 else 'decrease'} by {gdf.loc[0].ma19_diff:.2f}%; "
-    summary_text += f"September mean flow is projected to {'increase' if gdf.loc[0].ma20_diff > 0 else 'decrease'} by {gdf.loc[0].ma20_diff:.2f}%; "
-    summary_text += f"October mean flow is projected to {'increase' if gdf.loc[0].ma21_diff > 0 else 'decrease'} by {gdf.loc[0].ma21_diff:.2f}%; "
-    summary_text += f"November mean flow is projected to {'increase' if gdf.loc[0].ma22_diff > 0 else 'decrease'} by {gdf.loc[0].ma22_diff:.2f}%; "
-    summary_text += f"December mean flow is projected to {'increase' if gdf.loc[0].ma23_diff > 0 else 'decrease'} by {gdf.loc[0].ma23_diff:.2f}%. "
-    # max and min flows
-    summary_text += f"Under the RCP 8.5 climate scenario, the maximum single day flow is projected to {'increase' if gdf.loc[0].dh1_diff > 0 else 'decrease'} by {gdf.loc[0].dh1_diff:.2f}% and the minimum single day flow is projected to {'increase' if gdf.loc[0].dl1_diff > 0 else 'decrease'} by {gdf.loc[0].dl1_diff:.2f}% by late century (2071-2100). "
-    # high/low flow pulse duration (change in days) and count of events (change in number of events)
-    summary_text += f"Under the RCP 8.5 climate scenario, the mean number of high flow events is projected to {'increase' if gdf.loc[0].fh1_diff > 0 else 'decrease'} by {gdf.loc[0].fh1_diff:.2f} events per year and the mean duration of high flow events is projected to {'increase' if gdf.loc[0].dh15_diff > 0 else 'decrease'} by {gdf.loc[0].dh15_diff:.2f} days per year by late century (2071-2100). "
-    summary_text += f"The mean number of low flow events is projected to {'increase' if gdf.loc[0].fl1_diff > 0 else 'decrease'} by {gdf.loc[0].fl1_diff:.2f} events per year and the mean duration of low flow events is projected to {'increase' if gdf.loc[0].dl16_diff > 0 else 'decrease'} by {gdf.loc[0].dl16_diff:.2f} days per year. "
+    summary_values = {}
 
-    # print(summary_text)
-    data_dict["summary"] = summary_text
+    ### MEAN FLOWS:
+    # mean annual flow stat variable deltas in geoserver layer: ma99_hist, ma99_min_d, ma99_avg_d, ma99_max_d,
+
+    # historical mean annual flow (ma99_hist) rounded to nearest whole number
+    # if greater than 5 cfs, round ma99_hist to nearest 5 cfs, else leave as is
+    ma99_hist_value = round(gdf.loc[0].ma99_hist, 0)
+    if ma99_hist_value > 5:
+        ma99_hist_value = round(gdf.loc[0].ma99_hist / 5) * 5
+    summary_values["historical mean annual flow"] = {
+        "value": ma99_hist_value,
+        "range_low": None,
+        "range_high": None,
+        "units": "cfs",
+    }
+
+    # projected change in mean annual flow (ma99_min_d, ma99_avg_d, ma99_max_d)
+    # round to nearest percent change and return as integer
+    summary_values["projected change in mean annual flow"] = {
+        "value": int(round(gdf.loc[0].ma99_avg_d, 0)),
+        "range_low": int(round(gdf.loc[0].ma99_min_d, 0)),
+        "range_high": int(round(gdf.loc[0].ma99_max_d, 0)),
+        "units": "percent",
+    }
+
+    ### MIN AND MAX FLOWS:
+    # min and max 1-day flow stat variable deltas in geoserver layer: dh1_min_d, dh1_max_d, dl1_min_d, dl1_max_d
+
+    # projected change in maximum 1-day flow
+    # here the value is max of model maximums, so there is no range_high; range_low is minimum of model maximums
+    # round to nearest percent change and return as integer
+    summary_values["projected change in maximum 1-day flow"] = {
+        "value": int(round(gdf.loc[0].dh1_max_d, 0)),
+        "range_low": int(round(gdf.loc[0].dh1_min_d, 0)),
+        "range_high": None,
+        "units": "percent",
+    }
+
+    # projected minimum 1-day flow delta
+    # here the value min of model minimums, so there is no range_low; range_high is maximum of model minimums
+    # round to nearest percent change and return as integer
+    summary_values["projected change in minimum 1-day flow"] = {
+        "value": int(round(gdf.loc[0].dl1_min_d, 0)),
+        "range_low": None,
+        "range_high": int(round(gdf.loc[0].dl1_max_d, 0)),
+        "units": "percent",
+    }
+
+    ### FLOOD DURATION:
+    # high/low flood duration stat variable deltas in geoserver layer: dh15_min_d, dh15_avg_d, dh15_max_d, dl16_min_d, dl16_avg_d, dl16_max_d
+
+    # projected change in high flow pulse durations (dh15)
+    # round to whole day number and return as integer
+    summary_values["projected change in high flow pulse duration"] = {
+        "value": int(round(gdf.loc[0].dh15_avg_d, 0)),
+        "range_low": int(round(gdf.loc[0].dh15_min_d, 0)),
+        "range_high": int(round(gdf.loc[0].dh15_max_d, 0)),
+        "units": "days",
+    }
+
+    # projected change in low flow pulse durations (dl16)
+    # round to whole day number and return as integer
+    summary_values["projected change in low flow pulse duration"] = {
+        "value": int(round(gdf.loc[0].dl16_avg_d, 0)),
+        "range_low": int(round(gdf.loc[0].dl16_min_d, 0)),
+        "range_high": int(round(gdf.loc[0].dl16_max_d, 0)),
+        "units": "days",
+    }
+
+    ### FLOOD PULSE COUNT:
+    # high/low flood pulse count stat variable deltas in geoserver layer: fh1_min_d, fh1_avg_d, fh1_max_d, fl1_min_d, fl1_avg_d, fl1_max_d
+    # projected change in high flood pulse count (fh1)
+    # round to whole event number and return as integer
+    summary_values["projected change in high flood pulse count"] = {
+        "value": int(round(gdf.loc[0].fh1_avg_d, 0)),
+        "range_low": int(round(gdf.loc[0].fh1_min_d, 0)),
+        "range_high": int(round(gdf.loc[0].fh1_max_d, 0)),
+        "units": "events",
+    }
+
+    # projected change in low flood pulse count (fl1)
+    # round to whole event number and return as integer
+    summary_values["projected change in low flood pulse count"] = {
+        "value": int(round(gdf.loc[0].fl1_avg_d, 0)),
+        "range_low": int(round(gdf.loc[0].fl1_min_d, 0)),
+        "range_high": int(round(gdf.loc[0].fl1_max_d, 0)),
+        "units": "events",
+    }
+
+    data_dict["summary"] = summary_values
 
     return data_dict
 
@@ -607,7 +674,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
 
-        # add stats sentences to metadata: this is not included in the CSV output, but should be in JSON response
+        # add stats for data sentences to metadata: this is not included in the CSV output, but should be in JSON response
         data_dict = populate_feature_stat_attributes_summary(data_dict, gdf)
 
         return jsonify(data_dict)

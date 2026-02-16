@@ -127,13 +127,13 @@ def generate_wfs_conus_hydrology_url(stream_id):
     if stream_id == "":
         wfs_url = (
             GS_BASE_URL
-            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg_h8_outlet_stats&propertyName=(seg_id_nat,GAUGE_ID,GNIS_NAME,h8_outlet,huc8,ma12_diff,ma13_diff,ma14_diff,ma15_diff,ma16_diff,ma17_diff,ma18_diff,ma19_diff,ma20_diff,ma21_diff,ma22_diff,ma23_diff,dh1_diff,dl1_diff,dh15_diff,dl16_diff,fh1_diff,fl1_diff,ma99_diff,ma99_hist,the_geom)&outputFormat=application/json"
+            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=playground:seg_h8_outlet_stats_simplified&outputFormat=application/json"
         )
         return wfs_url
     else:
         wfs_url = (
             GS_BASE_URL
-            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg_h8_outlet_stats&propertyName=(GAUGE_ID,GNIS_NAME,h8_outlet,huc8,ma12_diff,ma13_diff,ma14_diff,ma15_diff,ma16_diff,ma17_diff,ma18_diff,ma19_diff,ma20_diff,ma21_diff,ma22_diff,ma23_diff,dh1_diff,dl1_diff,dh15_diff,dl16_diff,fh1_diff,fl1_diff,ma99_diff,ma99_hist,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
+            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=playground:seg_h8_outlet_stats_simplified&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
         )
     return wfs_url
 
