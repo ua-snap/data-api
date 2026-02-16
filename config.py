@@ -17,6 +17,8 @@ if os.getenv("SITE_OFFLINE"):
 else:
     SITE_OFFLINE = False
 
+MULTIPROCESSING = os.getenv("MULTIPROCESSING") or False
+
 geojson_names = [
     "alaska",
     "blockyAlaska",

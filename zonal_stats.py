@@ -10,6 +10,7 @@ import numpy as np
 from rasterio.features import rasterize
 from rasterio.crs import CRS
 from flask import render_template
+from config import MULTIPROCESSING
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +227,7 @@ def interpolate_and_compute_zonal_stats(
 
     # Only use parallelization if we have enough combinations
     # to justify overhead of starting them up
-    use_parallel = workers > 1 and len(dimension_combinations) > 20
+    use_parallel = MULTIPROCESSING and workers > 1 and len(dimension_combinations) > 20
 
     if use_parallel:
         with ThreadPoolExecutor(max_workers=workers) as threads:
