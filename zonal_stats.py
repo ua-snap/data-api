@@ -4,13 +4,10 @@ Read more about the Zonal Oversampling Process (ZOP) here: https://github.com/ua
 
 import logging
 import warnings
-from concurrent.futures import ThreadPoolExecutor
-from multiprocessing import cpu_count
 import numpy as np
 from rasterio.features import rasterize
 from rasterio.crs import CRS
 from flask import render_template
-from config import MULTIPROCESSING
 
 logger = logging.getLogger(__name__)
 
@@ -221,44 +218,18 @@ def interpolate_and_compute_zonal_stats(
 
     rasterized_polygon_array = rasterize_polygon(da_i, x_dim, y_dim, polygon)
 
-    # Use threading with a small number of workers for parallel
-    # processing of the zonal statistics
-    workers = min(4, max(1, cpu_count() // 2))
-
-    # Only use parallelization if we have enough combinations
-    # to justify overhead of starting them up
-    use_parallel = MULTIPROCESSING and workers > 1 and len(dimension_combinations) > 20
-
-    if use_parallel:
-        with ThreadPoolExecutor(max_workers=workers) as threads:
-            results = list(
-                threads.map(
-                    lambda combo: (
-                        combo,
-                        calculate_zonal_stats(
-                            da_i.sel(combo),
-                            rasterized_polygon_array,
-                            x_dim,
-                            y_dim,
-                            compute_full_stats,
-                        ),
-                    ),
-                    dimension_combinations,
-                )
-            )
-    else:
-        results = [
-            (
-                combo,
-                calculate_zonal_stats(
-                    da_i.sel(combo),
-                    rasterized_polygon_array,
-                    x_dim,
-                    y_dim,
-                    compute_full_stats,
-                ),
-            )
-            for combo in dimension_combinations
-        ]
+    results = [
+        (
+            combo,
+            calculate_zonal_stats(
+                da_i.sel(combo),
+                rasterized_polygon_array,
+                x_dim,
+                y_dim,
+                compute_full_stats,
+            ),
+        )
+        for combo in dimension_combinations
+    ]
 
     return results
