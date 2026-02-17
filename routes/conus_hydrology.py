@@ -463,20 +463,22 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     ma99_hist_value = round(gdf.loc[0].ma99_hist, 0)
     if ma99_hist_value > 5:
         ma99_hist_value = round(gdf.loc[0].ma99_hist / 5) * 5
-    summary_values["historical mean annual flow"] = {
+    summary_values["ma99_hist"] = {
         "value": ma99_hist_value,
         "range_low": None,
         "range_high": None,
         "units": "cfs",
+        "description": "historical mean annual flow",
     }
 
     # projected change in mean annual flow (ma99_min_d, ma99_avg_d, ma99_max_d)
     # round to nearest percent change and return as integer
-    summary_values["projected change in mean annual flow"] = {
+    summary_values["ma99_delta"] = {
         "value": int(round(gdf.loc[0].ma99_avg_d, 0)),
         "range_low": int(round(gdf.loc[0].ma99_min_d, 0)),
         "range_high": int(round(gdf.loc[0].ma99_max_d, 0)),
         "units": "percent",
+        "description": "projected change in mean annual flow",
     }
 
     ### MIN AND MAX FLOWS:
@@ -485,21 +487,23 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     # projected change in maximum 1-day flow
     # here the value is max of model maximums, so there is no range_high; range_low is minimum of model maximums
     # round to nearest percent change and return as integer
-    summary_values["projected change in maximum 1-day flow"] = {
+    summary_values["dh1_delta"] = {
         "value": int(round(gdf.loc[0].dh1_max_d, 0)),
         "range_low": int(round(gdf.loc[0].dh1_min_d, 0)),
         "range_high": None,
         "units": "percent",
+        "description": "projected change in maximum 1-day flow",
     }
 
     # projected minimum 1-day flow delta
     # here the value min of model minimums, so there is no range_low; range_high is maximum of model minimums
     # round to nearest percent change and return as integer
-    summary_values["projected change in minimum 1-day flow"] = {
+    summary_values["dl1_delta"] = {
         "value": int(round(gdf.loc[0].dl1_min_d, 0)),
         "range_low": None,
         "range_high": int(round(gdf.loc[0].dl1_max_d, 0)),
         "units": "percent",
+        "description": "projected change in minimum 1-day flow",
     }
 
     ### FLOOD DURATION:
@@ -507,40 +511,44 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
 
     # projected change in high flow pulse durations (dh15)
     # round to whole day number and return as integer
-    summary_values["projected change in high flow pulse duration"] = {
+    summary_values["dh15_delta"] = {
         "value": int(round(gdf.loc[0].dh15_avg_d, 0)),
         "range_low": int(round(gdf.loc[0].dh15_min_d, 0)),
         "range_high": int(round(gdf.loc[0].dh15_max_d, 0)),
         "units": "days",
+        "description": "projected change in high flow pulse duration",
     }
 
     # projected change in low flow pulse durations (dl16)
     # round to whole day number and return as integer
-    summary_values["projected change in low flow pulse duration"] = {
+    summary_values["dl16_delta"] = {
         "value": int(round(gdf.loc[0].dl16_avg_d, 0)),
         "range_low": int(round(gdf.loc[0].dl16_min_d, 0)),
         "range_high": int(round(gdf.loc[0].dl16_max_d, 0)),
         "units": "days",
+        "description": "projected change in low flow pulse duration",
     }
 
     ### FLOOD PULSE COUNT:
     # high/low flood pulse count stat variable deltas in geoserver layer: fh1_min_d, fh1_avg_d, fh1_max_d, fl1_min_d, fl1_avg_d, fl1_max_d
     # projected change in high flood pulse count (fh1)
     # round to whole event number and return as integer
-    summary_values["projected change in high flood pulse count"] = {
+    summary_values["fh1_delta"] = {
         "value": int(round(gdf.loc[0].fh1_avg_d, 0)),
         "range_low": int(round(gdf.loc[0].fh1_min_d, 0)),
         "range_high": int(round(gdf.loc[0].fh1_max_d, 0)),
         "units": "events",
+        "description": "projected change in high flood pulse count",
     }
 
     # projected change in low flood pulse count (fl1)
     # round to whole event number and return as integer
-    summary_values["projected change in low flood pulse count"] = {
+    summary_values["fl1_delta"] = {
         "value": int(round(gdf.loc[0].fl1_avg_d, 0)),
         "range_low": int(round(gdf.loc[0].fl1_min_d, 0)),
         "range_high": int(round(gdf.loc[0].fl1_max_d, 0)),
         "units": "events",
+        "description": "projected change in low flood pulse count",
     }
 
     data_dict["summary"] = summary_values
