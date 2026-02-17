@@ -485,22 +485,22 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     # min and max 1-day flow stat variable deltas in geoserver layer: dh1_min_d, dh1_max_d, dl1_min_d, dl1_max_d
 
     # projected change in maximum 1-day flow
-    # here the value is max of model maximums, so there is no range_high; range_low is minimum of model maximums
+    # here the value is max of model maximums, so value = range_high; range_low is minimum of model maximums
     # round to nearest percent change and return as integer
     summary_values["dh1_delta"] = {
         "value": int(round(gdf.loc[0].dh1_max_d, 0)),
         "range_low": int(round(gdf.loc[0].dh1_min_d, 0)),
-        "range_high": None,
+        "range_high": int(round(gdf.loc[0].dh1_max_d, 0)),
         "units": "percent",
         "description": "projected change in maximum 1-day flow",
     }
 
     # projected minimum 1-day flow delta
-    # here the value min of model minimums, so there is no range_low; range_high is maximum of model minimums
+    # here the value min of model minimums, so value = range_low; range_high is maximum of model minimums
     # round to nearest percent change and return as integer
     summary_values["dl1_delta"] = {
         "value": int(round(gdf.loc[0].dl1_min_d, 0)),
-        "range_low": None,
+        "range_low": int(round(gdf.loc[0].dl1_min_d, 0)),
         "range_high": int(round(gdf.loc[0].dl1_max_d, 0)),
         "units": "percent",
         "description": "projected change in minimum 1-day flow",
