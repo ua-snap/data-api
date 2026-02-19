@@ -459,7 +459,8 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     summary_values = {}
 
     ### MEAN FLOWS:
-    # mean annual flow stat variable deltas in geoserver layer: ma99_hist, ma99_min_d, ma99_avg_d, ma99_max_d,
+    # mean annual flow stat variable deltas in geoserver layer: ma99_min_d, ma99_avg_d, ma99_max_d
+    # mean annual flow historical data in geoserver layer: ma99_hist
 
     # historical mean annual flow (ma99_hist) rounded to nearest whole number
     # if greater than 5 cfs, round ma99_hist to nearest 5 cfs, else leave as is
@@ -550,6 +551,20 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
 
     ### FLOOD DURATION:
     # high/low flood duration stat variable deltas in geoserver layer: dh15_min_d, dh15_avg_d, dh15_max_d, dl16_min_d, dl16_avg_d, dl16_max_d
+    # high/low flood duration historical data in geoserver layer: dh15_hist, dl16_hist
+
+    # historical high flow pulse duration (dh15_hist) rounded to nearest whole number
+    summary_values["dh15_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].dh15_hist, 0))
+            if not np.isnan(gdf.loc[0].dh15_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "days",
+        "description": "historical high flow pulse duration",
+    }
 
     # projected change in high flow pulse durations (dh15)
     # round to whole day number and return as integer
@@ -571,6 +586,19 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
         ),
         "units": "days",
         "description": "projected change in high flow pulse duration",
+    }
+
+    # historical low flow pulse duration (dl16_hist) rounded to nearest whole number
+    summary_values["dl16_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].dl16_hist, 0))
+            if not np.isnan(gdf.loc[0].dl16_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "days",
+        "description": "historical low flow pulse duration",
     }
 
     # projected change in low flow pulse durations (dl16)
@@ -597,6 +625,21 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
 
     ### FLOOD PULSE COUNT:
     # high/low flood pulse count stat variable deltas in geoserver layer: fh1_min_d, fh1_avg_d, fh1_max_d, fl1_min_d, fl1_avg_d, fl1_max_d
+    # high/low flood pulse count historical data in geoserver layer: fh1_hist, fl1_hist
+
+    # historical high flood pulse count (fh1_hist) rounded to nearest whole number
+    summary_values["fh1_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].fh1_hist, 0))
+            if not np.isnan(gdf.loc[0].fh1_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "events",
+        "description": "historical high flood pulse count",
+    }
+
     # projected change in high flood pulse count (fh1)
     # round to whole event number and return as integer
     summary_values["fh1_delta"] = {
@@ -617,6 +660,19 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
         ),
         "units": "events",
         "description": "projected change in high flood pulse count",
+    }
+
+    # historical low flood pulse count (fl1_hist) rounded to nearest whole number
+    summary_values["fl1_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].fl1_hist, 0))
+            if not np.isnan(gdf.loc[0].fl1_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "events",
+        "description": "historical low flood pulse count",
     }
 
     # projected change in low flood pulse count (fl1)
