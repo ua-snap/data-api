@@ -431,7 +431,15 @@ def populate_feature_name_and_location_attributes(data_dict, gdf):
     Returns:
         Data dictionary with the vector attributes populated."""
 
-    data_dict["name"] = gdf.loc[0].GNIS_NAME
+    # return empty string if name is None, np.nan, or actual string "nan"
+    if (
+        gdf.loc[0].GNIS_NAME is None
+        or gdf.loc[0].GNIS_NAME == "nan"
+        or (isinstance(gdf.loc[0].GNIS_NAME, float) and np.isnan(gdf.loc[0].GNIS_NAME))
+    ):
+        data_dict["name"] = ""
+    else:
+        data_dict["name"] = gdf.loc[0].GNIS_NAME
     data_dict["huc8"] = gdf.loc[0].huc8
 
     huc8_flag = gdf.loc[0].h8_outlet
