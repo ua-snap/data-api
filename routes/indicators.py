@@ -238,8 +238,26 @@ def run_aggregate_var_polygon(poly_id, var_ep):
     )
     aggr_results = generate_nested_dict(dim_combos)
 
-    # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
-    for coords, dim_combo in zip(iter_coords, dim_combos):
+    # Creates list of dictionaries containing all combinations of
+    # dimension names and unique coordinate values
+    dim_combinations = [
+        {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        for coords in iter_coords
+    ]
+
+    results = interpolate_and_compute_zonal_stats(
+        polygon,
+        ds,
+        crs,
+        dim_combinations,
+        var_name=bandname,
+        x_dim="X",
+        y_dim="Y",
+    )
+
+    for (combo_dict, combo_zonal_stats_dict), (coords, dim_combo) in zip(
+        results, zip(iter_coords, dim_combos)
+    ):
 
         # check for impossible combinations of model and scenario, leaving these unpopulated (will be pruned)
         if dim_combo[1] == "historical" and dim_combo[2] != "Daymet":
@@ -250,12 +268,6 @@ def run_aggregate_var_polygon(poly_id, var_ep):
             continue
         if dim_combo[2] != "Daymet" and dim_combo[3] == "historical":
             continue
-
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        combo_ds = ds.sel(sel_di)
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-            polygon, combo_ds, crs
-        )
 
         # determine the result based on the requested statistic (min, mean, max)
         # the string values for the `combo_zonal_stats_dict` will need to be updated to "min" or "max" for those summaries
