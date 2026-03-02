@@ -129,9 +129,22 @@ def run_area_fetch_all_elevation(var_id):
         "res": "1 kilometer",
     }
     for band in list(ds.data_vars):
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-            polygon, ds, var_name=band, x_dim="x", y_dim="y", crs=target_crs
+        # There are no dimensions for this dataset
+        dimension_combinations = [{}]
+
+        band_results = interpolate_and_compute_zonal_stats(
+            polygon,
+            ds[band].to_dataset(name="Gray"),
+            target_crs,
+            dimension_combinations,
+            var_name="Gray",
+            x_dim="x",
+            y_dim="y",
+            compute_full_stats=True,
         )
+
+        combo_zonal_stats_dict = band_results[0][1]
+
         if band == "min":
             if combo_zonal_stats_dict["min"] is None:
                 results[band] = -9999

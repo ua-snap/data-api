@@ -115,13 +115,24 @@ def run_aggregate_var_polygon(var_ep, poly_id):
     )
     aggr_results = generate_nested_dict(dim_combos)
 
-    # fetch the dim combo from the dataset and calculate zonal stats, adding to the results dict
-    for coords, dim_combo in zip(iter_coords, dim_combos):
-        sel_di = {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
-        combo_ds = ds.sel(sel_di)
-        combo_zonal_stats_dict = interpolate_and_compute_zonal_stats(
-            polygon, combo_ds, crs
-        )
+    # Creates list of dictionaries containing all combinations of
+    # dimension names and unique coordinate values
+    dimension_combinations = [
+        {dimname: int(coord) for dimname, coord in zip(dimnames, coords)}
+        for coords in iter_coords
+    ]
+
+    results = interpolate_and_compute_zonal_stats(
+        polygon,
+        ds,
+        crs,
+        dimension_combinations,
+        var_name=bandname,
+        x_dim="X",
+        y_dim="Y",
+    )
+
+    for (combo_dict, combo_zonal_stats_dict), dim_combo in zip(results, dim_combos):
         result = combo_zonal_stats_dict["mean"]
         if var_ep == "flammability":
             result = round(result, 4)
