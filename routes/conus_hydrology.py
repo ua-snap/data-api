@@ -423,7 +423,7 @@ def package_metadata(ds, data_dict):
     return data_dict
 
 
-def populate_feature_attributes(data_dict, gdf):
+def populate_feature_name_and_location_attributes(data_dict, gdf):
     """Function to populate the feature attributes in the data dictionary. Only the first feature is used.
     Args:
         data_dict (dict): Data dictionary with the hydrology stats populated
@@ -431,9 +431,281 @@ def populate_feature_attributes(data_dict, gdf):
     Returns:
         Data dictionary with the vector attributes populated."""
 
-    data_dict["name"] = gdf.loc[0].GNIS_NAME
+    # return empty string if name is None, np.nan, or actual string "nan"
+    if (
+        gdf.loc[0].GNIS_NAME is None
+        or gdf.loc[0].GNIS_NAME == "nan"
+        or (isinstance(gdf.loc[0].GNIS_NAME, float) and np.isnan(gdf.loc[0].GNIS_NAME))
+    ):
+        data_dict["name"] = ""
+    else:
+        data_dict["name"] = gdf.loc[0].GNIS_NAME
+    data_dict["huc8"] = gdf.loc[0].huc8
+
+    huc8_flag = gdf.loc[0].h8_outlet
+    if huc8_flag == 1:
+        data_dict["huc8_outlet"] = True
+    else:
+        data_dict["huc8_outlet"] = False
+
     data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
     data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
+
+    return data_dict
+
+
+def populate_feature_stat_attributes_summary(data_dict, gdf):
+    """Function to populate summaries of stats attributes in the data dictionary. Only the first feature is used.
+    Args:
+        data_dict (dict): Data dictionary with the hydrology data populated
+    Returns:
+        Data dictionary with the summaries populated."""
+
+    # replace any None values in the gdf with NaN so that we don't get a rounding error
+    gdf = gdf.replace({None: np.nan})
+
+    summary_values = {}
+
+    ### MEAN FLOWS:
+    # mean annual flow stat variable deltas in geoserver layer: ma99_min_d, ma99_avg_d, ma99_max_d
+    # mean annual flow historical data in geoserver layer: ma99_hist
+
+    # historical mean annual flow (ma99_hist) rounded to nearest whole number
+    # if greater than 5 cfs, round ma99_hist to nearest 5 cfs, else leave as is
+
+    ma99_hist_value = (
+        round(gdf.loc[0].ma99_hist, 0) if not np.isnan(gdf.loc[0].ma99_hist) else None
+    )
+    if ma99_hist_value is not None and ma99_hist_value > 5:
+        ma99_hist_value = round(gdf.loc[0].ma99_hist / 5) * 5
+    summary_values["ma99_hist"] = {
+        "value": ma99_hist_value,
+        "range_low": None,
+        "range_high": None,
+        "units": "cfs",
+        "description": "historical mean annual flow",
+    }
+
+    # projected change in mean annual flow (ma99_min_d, ma99_avg_d, ma99_max_d)
+    # round to nearest percent change and return as integer
+    summary_values["ma99_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].ma99_avg_d, 0))
+            if not np.isnan(gdf.loc[0].ma99_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].ma99_min_d, 0))
+            if not np.isnan(gdf.loc[0].ma99_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].ma99_max_d, 0))
+            if not np.isnan(gdf.loc[0].ma99_max_d)
+            else None
+        ),
+        "units": "percent",
+        "description": "projected change in mean annual flow",
+    }
+
+    ### MIN AND MAX FLOWS:
+    # min and max 1-day flow stat variable deltas in geoserver layer: dh1_min_d, dh1_max_d, dl1_min_d, dl1_max_d
+
+    # projected change in maximum 1-day flow
+    # here the value is max of model maximums, so value = range_high; range_low is minimum of model maximums
+    # round to nearest percent change and return as integer
+    summary_values["dh1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dh1_max_d, 0))
+            if not np.isnan(gdf.loc[0].dh1_max_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dh1_min_d, 0))
+            if not np.isnan(gdf.loc[0].dh1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dh1_max_d, 0))
+            if not np.isnan(gdf.loc[0].dh1_max_d)
+            else None
+        ),
+        "units": "percent",
+        "description": "projected change in maximum 1-day flow",
+    }
+
+    # projected minimum 1-day flow delta
+    # here the value min of model minimums, so value = range_low; range_high is maximum of model minimums
+    # round to nearest percent change and return as integer
+    summary_values["dl1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dl1_min_d, 0))
+            if not np.isnan(gdf.loc[0].dl1_min_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dl1_min_d, 0))
+            if not np.isnan(gdf.loc[0].dl1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dl1_max_d, 0))
+            if not np.isnan(gdf.loc[0].dl1_max_d)
+            else None
+        ),
+        "units": "percent",
+        "description": "projected change in minimum 1-day flow",
+    }
+
+    ### FLOOD DURATION:
+    # high/low flood duration stat variable deltas in geoserver layer: dh15_min_d, dh15_avg_d, dh15_max_d, dl16_min_d, dl16_avg_d, dl16_max_d
+    # high/low flood duration historical data in geoserver layer: dh15_hist, dl16_hist
+
+    # historical high flow pulse duration (dh15_hist) rounded to nearest whole number
+    summary_values["dh15_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].dh15_hist, 0))
+            if not np.isnan(gdf.loc[0].dh15_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "days",
+        "description": "historical high flow pulse duration",
+    }
+
+    # projected change in high flow pulse durations (dh15)
+    # round to whole day number and return as integer
+    summary_values["dh15_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dh15_avg_d, 0))
+            if not np.isnan(gdf.loc[0].dh15_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dh15_min_d, 0))
+            if not np.isnan(gdf.loc[0].dh15_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dh15_max_d, 0))
+            if not np.isnan(gdf.loc[0].dh15_max_d)
+            else None
+        ),
+        "units": "days",
+        "description": "projected change in high flow pulse duration",
+    }
+
+    # historical low flow pulse duration (dl16_hist) rounded to nearest whole number
+    summary_values["dl16_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].dl16_hist, 0))
+            if not np.isnan(gdf.loc[0].dl16_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "days",
+        "description": "historical low flow pulse duration",
+    }
+
+    # projected change in low flow pulse durations (dl16)
+    # round to whole day number and return as integer
+    summary_values["dl16_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dl16_avg_d, 0))
+            if not np.isnan(gdf.loc[0].dl16_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dl16_min_d, 0))
+            if not np.isnan(gdf.loc[0].dl16_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dl16_max_d, 0))
+            if not np.isnan(gdf.loc[0].dl16_max_d)
+            else None
+        ),
+        "units": "days",
+        "description": "projected change in low flow pulse duration",
+    }
+
+    ### FLOOD PULSE COUNT:
+    # high/low flood pulse count stat variable deltas in geoserver layer: fh1_min_d, fh1_avg_d, fh1_max_d, fl1_min_d, fl1_avg_d, fl1_max_d
+    # high/low flood pulse count historical data in geoserver layer: fh1_hist, fl1_hist
+
+    # historical high flood pulse count (fh1_hist) rounded to nearest whole number
+    summary_values["fh1_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].fh1_hist, 0))
+            if not np.isnan(gdf.loc[0].fh1_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "events",
+        "description": "historical high flood pulse count",
+    }
+
+    # projected change in high flood pulse count (fh1)
+    # round to whole event number and return as integer
+    summary_values["fh1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].fh1_avg_d, 0))
+            if not np.isnan(gdf.loc[0].fh1_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].fh1_min_d, 0))
+            if not np.isnan(gdf.loc[0].fh1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].fh1_max_d, 0))
+            if not np.isnan(gdf.loc[0].fh1_max_d)
+            else None
+        ),
+        "units": "events",
+        "description": "projected change in high flood pulse count",
+    }
+
+    # historical low flood pulse count (fl1_hist) rounded to nearest whole number
+    summary_values["fl1_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].fl1_hist, 0))
+            if not np.isnan(gdf.loc[0].fl1_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "events",
+        "description": "historical low flood pulse count",
+    }
+
+    # projected change in low flood pulse count (fl1)
+    # round to whole event number and return as integer
+    summary_values["fl1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].fl1_avg_d, 0))
+            if not np.isnan(gdf.loc[0].fl1_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].fl1_min_d, 0))
+            if not np.isnan(gdf.loc[0].fl1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].fl1_max_d, 0))
+            if not np.isnan(gdf.loc[0].fl1_max_d)
+            else None
+        ),
+        "units": "events",
+        "description": "projected change in low flood pulse count",
+    }
+
+    data_dict["summary"] = summary_values
 
     return data_dict
 
@@ -547,7 +819,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
         data_dict = package_stats_data(stream_id, ds)
         data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
-        data_dict = populate_feature_attributes(data_dict, gdf)
+        data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
 
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
@@ -564,9 +836,15 @@ def run_get_conus_hydrology_stats_data(stream_id):
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
 
+        # add stats for data sentences to metadata: this is not included in the CSV output, but should be in JSON response
+        data_dict = populate_feature_stat_attributes_summary(data_dict, gdf)
+
         return jsonify(data_dict)
 
     except Exception as exc:
+
+        print(exc)
+
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -611,7 +889,7 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
         data_dict = package_metadata(
             datasets[0], data_dict
         )  # all datasets should have same metadata, just use the first one
-        data_dict = populate_feature_attributes(data_dict, gdf)
+        data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
         if request.args.get("format") == "csv":

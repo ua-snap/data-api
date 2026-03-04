@@ -119,13 +119,13 @@ def generate_wfs_conus_hydrology_url(stream_id):
     if stream_id == "":
         wfs_url = (
             GS_BASE_URL
-            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_segments&propertyName=(seg_id_nat,GNIS_NAME,GAUGE_ID)&outputFormat=application/json"
+            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg_h8_outlet_stats_simplified&outputFormat=application/json"
         )
         return wfs_url
     else:
         wfs_url = (
             GS_BASE_URL
-            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:conus_segments&propertyName=(GNIS_NAME,GAUGE_ID,the_geom)&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
+            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:seg_h8_outlet_stats_simplified&outputFormat=application/json&cql_filter=(seg_id_nat={stream_id})"
         )
     return wfs_url
 
