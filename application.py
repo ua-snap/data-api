@@ -10,7 +10,7 @@ import pyproj
 
 from luts import (
     fire_weather_ops,
-    all_cmip6_downscaled_models,
+    all_possible_models,
     all_cmip6_downscaled_scenarios,
 )
 
@@ -151,7 +151,7 @@ def validate_get_params():
         # Make sure "models" parameter contains only valid model names.
         def validate_models(value):
             items = value.split(",")
-            if not all(item in all_cmip6_downscaled_models for item in items):
+            if not all(item in all_possible_models for item in items):
                 raise ValidationError("Invalid model(s) provided.")
             return True
 
