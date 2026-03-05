@@ -915,10 +915,10 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
 
         param_filters = get_param_filters()
         if "models" in param_filters:
-            for model in data_dict["data"]["dynamic"].keys():
+            for model in list(data_dict["data"]["dynamic"].keys()):
                 if model not in param_filters["models"]:
                     del data_dict["data"]["dynamic"][model]
-            for model in data_dict["data"]["static"].keys():
+            for model in list(data_dict["data"]["static"].keys()):
                 if model not in param_filters["models"]:
                     del data_dict["data"]["static"][model]
 
