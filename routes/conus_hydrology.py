@@ -38,7 +38,7 @@ coverages = {
 
 
 def get_param_filters():
-    """Function to get the filters from the request arguments for the stats endpoint.
+    """Function to get and validate request parameter filters. Currently only "models" is supported.
     Returns:
         dict: filters for the endpoint
     """
