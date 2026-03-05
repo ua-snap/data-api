@@ -35,19 +35,9 @@ def package_landslide_data(landslide_resp, community_data=None):
 
     data = landslide_resp[0] if isinstance(landslide_resp, list) else landslide_resp
 
-    # Extract forecast blocks at 24, 48, and 72 hours
     forecast_blocks = data.get("forecast_blocks", [])
-    block_24hr = None
-    block_2days = None
-    block_3days = None
 
-    for block in forecast_blocks:
-        if block.get("forecast_hour") == 24:
-            block_24hr = block
-        elif block.get("forecast_hour") == 48:
-            block_2days = block
-        elif block.get("forecast_hour") == 72:
-            block_3days = block
+    sorted_blocks = sorted(forecast_blocks, key=lambda x: x.get("forecast_hour", 0))
 
     di = {
         "timestamp": str(data.get("ts", "")),
@@ -59,9 +49,7 @@ def package_landslide_data(landslide_resp, community_data=None):
         "realtime_rainfall_mm": data.get("realtime_rainfall_mm"),
         "realtime_risk_level": data.get("realtime_risk_level"),
         "realtime_threshold_upper": data.get("realtime_threshold_upper"),
-        "block_24hr": block_24hr,
-        "block_2days": block_2days,
-        "block_3days": block_3days,
+        "forecast_blocks": sorted_blocks,
     }
 
     # Add community data if provided
