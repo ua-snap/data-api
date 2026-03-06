@@ -37,6 +37,12 @@ coverages = {
 }
 
 
+class InvalidGetParameterError(Exception):
+    """Exception raised when provided GET parameters are invalid."""
+
+    pass
+
+
 def get_param_filters():
     """Function to get and validate request parameter filters. Currently only "models" is supported.
     Returns:
@@ -44,10 +50,11 @@ def get_param_filters():
     """
     filters = {}
     if request.args.get("models"):
-        models = request.args.get("models").split(",")
+        model_args = request.args.get("models")
+        models = model_args.split(",")
         # Any model that's not in all_hydroviz_models fails validation.
         if not all(model in all_hydroviz_models for model in models):
-            return render_template("422/invalid_get_parameter.html"), 422
+            raise InvalidGetParameterError()
         filters["models"] = models
     return filters
 
@@ -842,7 +849,12 @@ def run_get_conus_hydrology_stats_data(stream_id):
             ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
 
         # package the stats data + metadata into a dictionary for JSON serialization
-        data_dict = package_stats_data(stream_id, ds)
+
+        try:
+            data_dict = package_stats_data(stream_id, ds)
+        except InvalidGetParameterError:
+            return render_template("422/invalid_get_parameter.html"), 422
+
         data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
@@ -913,7 +925,11 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
         # package the hydrograph datasets into a dictionary for JSON serialization
         data_dict = package_hydrograph_data(stream_id, datasets)
 
-        param_filters = get_param_filters()
+        try:
+            param_filters = get_param_filters()
+        except InvalidGetParameterError:
+            return render_template("422/invalid_get_parameter.html"), 422
+
         if "models" in param_filters:
             for model in list(data_dict["data"]["dynamic"].keys()):
                 if model not in param_filters["models"]:
@@ -966,9 +982,12 @@ def run_get_conus_hydrology_gauge_data(stream_id):
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
 
-    # The observed_climatology endpoint does not support any URL filters.
-    param_filters = get_param_filters()
-    if param_filters != {}:
+    try:
+        param_filters = get_param_filters()
+        # Any URL filter parameter is invalid for this endpoint.
+        if param_filters != {}:
+            return render_template("422/invalid_get_parameter.html"), 422
+    except InvalidGetParameterError:
         return render_template("422/invalid_get_parameter.html"), 422
 
     gdf = asyncio.run(get_features(stream_id))
