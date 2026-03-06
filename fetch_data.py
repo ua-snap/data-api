@@ -49,9 +49,7 @@ def get_landslide_db_connection():
     db_env_var_missing = [var for var in required_vars if not os.getenv(var)]
 
     if db_env_var_missing:
-        error_msg = (
-            f"Missing required environment variables for landslide endpoint: {', '.join(db_env_var_missing)}"
-        )
+        error_msg = f"Missing required environment variables for landslide endpoint: {', '.join(db_env_var_missing)}"
         logger.error(error_msg)
         raise ValueError(error_msg)
 
