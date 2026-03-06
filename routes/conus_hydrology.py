@@ -27,6 +27,7 @@ from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
 from postprocessing import prune_nulls_with_max_intensity
 from csv_functions import create_csv
+from luts import all_hydroviz_models
 from config import RAS_BASE_URL
 from . import routes
 
@@ -34,6 +35,28 @@ coverages = {
     "stats": ["conus_hydro_segments_stats"],
     "doy_climatology": ["conus_hydro_segments_doy_climatology"],
 }
+
+
+class InvalidGetParameterError(Exception):
+    """Exception raised when provided GET parameters are invalid."""
+
+    pass
+
+
+def get_param_filters():
+    """Function to get and validate request parameter filters. Currently only "models" is supported.
+    Returns:
+        dict: filters for the endpoint
+    """
+    filters = {}
+    if request.args.get("models"):
+        model_args = request.args.get("models")
+        models = model_args.split(",")
+        # Any model that's not in all_hydroviz_models fails validation.
+        if not all(model in all_hydroviz_models for model in models):
+            raise InvalidGetParameterError()
+        filters["models"] = models
+    return filters
 
 
 async def get_decode_dicts_from_axis_attributes(cov_ids):
@@ -252,10 +275,15 @@ def package_stats_data(stream_id, ds):
     scenarios = ds.scenario.values
     eras = ds.era.values
 
+    param_filters = get_param_filters()
+
     for i_lc, landcover in enumerate(landcovers):
         land_dict = stats_dict["data"].setdefault(landcover, {})
 
         for i_m, model in enumerate(models):
+            if "models" in param_filters and model not in param_filters["models"]:
+                continue
+
             model_dict = land_dict.setdefault(model, {})
 
             for i_s, scenario in enumerate(scenarios):
@@ -319,10 +347,15 @@ def package_hydrograph_data(stream_id, datasets):
         scenarios = ds.scenario.values
         eras = ds.era.values
 
+        param_filters = get_param_filters()
+
         for i_lc, landcover in enumerate(landcovers):
             land_dict = hydrograph_dict["data"].setdefault(landcover, {})
 
             for i_m, model in enumerate(models):
+                if "models" in param_filters and model not in param_filters["models"]:
+                    continue
+
                 model_dict = land_dict.setdefault(model, {})
 
                 for i_s, scenario in enumerate(scenarios):
@@ -816,7 +849,12 @@ def run_get_conus_hydrology_stats_data(stream_id):
             ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
 
         # package the stats data + metadata into a dictionary for JSON serialization
-        data_dict = package_stats_data(stream_id, ds)
+
+        try:
+            data_dict = package_stats_data(stream_id, ds)
+        except InvalidGetParameterError:
+            return render_template("422/invalid_get_parameter.html"), 422
+
         data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
@@ -886,6 +924,20 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
 
         # package the hydrograph datasets into a dictionary for JSON serialization
         data_dict = package_hydrograph_data(stream_id, datasets)
+
+        try:
+            param_filters = get_param_filters()
+        except InvalidGetParameterError:
+            return render_template("422/invalid_get_parameter.html"), 422
+
+        if "models" in param_filters:
+            for model in list(data_dict["data"]["dynamic"].keys()):
+                if model not in param_filters["models"]:
+                    del data_dict["data"]["dynamic"][model]
+            for model in list(data_dict["data"]["static"].keys()):
+                if model not in param_filters["models"]:
+                    del data_dict["data"]["static"][model]
+
         data_dict = package_metadata(
             datasets[0], data_dict
         )  # all datasets should have same metadata, just use the first one
@@ -929,6 +981,14 @@ def run_get_conus_hydrology_gauge_data(stream_id):
     """
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
+
+    try:
+        param_filters = get_param_filters()
+        # Any URL filter parameter is invalid for this endpoint.
+        if param_filters != {}:
+            return render_template("422/invalid_get_parameter.html"), 422
+    except InvalidGetParameterError:
+        return render_template("422/invalid_get_parameter.html"), 422
 
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):

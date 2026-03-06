@@ -671,3 +671,22 @@ all_cmip6_downscaled_scenarios = set(
     for model in var.values()
     for scenario in model
 )
+
+all_hydroviz_models = [
+    "ACCESS1-0",
+    "BCC-CSM1-1",
+    "BNU-ESM",
+    "CCSM4",
+    "GFDL-ESM2G",
+    "GFDL-ESM2M",
+    "IPSL-CM5A-LR",
+    "IPSL-CM5A-MR",
+    "MIROC-ESM",
+    "MIROC-ESM-CHEM",
+    "MIROC5",
+    "MRI-CGCM3",
+    "Maurer",
+    "NorESM1-M",
+]
+
+all_possible_models = set(all_cmip6_downscaled_models).union(set(all_hydroviz_models))
