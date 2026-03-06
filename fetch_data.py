@@ -38,22 +38,22 @@ from generate_urls import (
 
 logger = logging.getLogger(__name__)
 
-required_vars = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"]
-db_env_var_missing = [var for var in required_vars if not os.getenv(var)]
-
-if db_env_var_missing:
-    error_msg = (
-        f"Missing required environment variables: {', '.join(db_env_var_missing)}"
-    )
-    logger.error(error_msg)
-    raise ValueError(error_msg)
-
 
 def get_landslide_db_connection():
     """
     Create a database connection using environment variables.
     Returns psycopg2 connection object.
+    Raises ValueError if required environment variables are not set.
     """
+    required_vars = ["DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"]
+    db_env_var_missing = [var for var in required_vars if not os.getenv(var)]
+
+    if db_env_var_missing:
+        error_msg = (
+            f"Missing required environment variables for landslide endpoint: {', '.join(db_env_var_missing)}"
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
     try:
         connection = psycopg2.connect(
