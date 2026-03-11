@@ -1010,12 +1010,13 @@ def fetch_all_hydroviz_route(stream_id, model):
         stream_id (str): Stream ID for the hydrology data
         model (str): Model for projected data, only affects stats for tables.
     Returns:
-        JSON response with the following top-level keys, which correspond to four different
-        sections of the hydroviz webapp and contain only the data necessary to populate those
-        sections of the webapp.
+        JSON response with the following top-level keys, which correspond to different sections
+        of the hydroviz webapp and contain only the data necessary to populate those sections.
         {
             "hydrograph": ...,
+            "id": ...,
             "monthly_flow": ...,
+            "name": ...,
             "stats": ...,
             "summary": ...
         }
