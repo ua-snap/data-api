@@ -1041,105 +1041,111 @@ def fetch_all_hydroviz_route(stream_id, model):
     if model not in projected_models:
         return render_template("400/bad_request.html"), 400
 
-    stats = run_get_conus_hydrology_stats_data(stream_id).get_json()
-    modeled = run_get_conus_hydrology_modeled_climatology(stream_id).get_json()
+    try:
+        stats = run_get_conus_hydrology_stats_data(stream_id).get_json()
+        modeled = run_get_conus_hydrology_modeled_climatology(stream_id).get_json()
 
-    # The hydropgraph and monthly mean flow charts use this scenario and era.
-    scenario = "rcp85"
-    era = "2046-2075"
+        # The hydropgraph and monthly mean flow charts use this scenario and era.
+        scenario = "rcp85"
+        era = "2046-2075"
 
-    hydrograph_min = []
-    hydrograph_mean = []
-    hydrograph_max = []
+        hydrograph_min = []
+        hydrograph_mean = []
+        hydrograph_max = []
 
-    doy_min = None
-    doy_max = None
-    doy_mean = None
+        doy_min = None
+        doy_max = None
+        doy_mean = None
 
-    hydrograph_historical = {}
-    historical = modeled["data"]["static"]["Maurer"]["historical"]["1976-2005"]
+        hydrograph_historical = {}
+        historical = modeled["data"]["static"]["Maurer"]["historical"]["1976-2005"]
 
-    hydrograph_historical["doy_min"] = list(map(lambda x: x["doy_min"], historical))
-    hydrograph_historical["doy_mean"] = list(map(lambda x: x["doy_mean"], historical))
-    hydrograph_historical["doy_max"] = list(map(lambda x: x["doy_max"], historical))
+        hydrograph_historical["doy_min"] = list(map(lambda x: x["doy_min"], historical))
+        hydrograph_historical["doy_mean"] = list(
+            map(lambda x: x["doy_mean"], historical)
+        )
+        hydrograph_historical["doy_max"] = list(map(lambda x: x["doy_max"], historical))
 
-    del modeled["data"]["static"]["Maurer"]
+        del modeled["data"]["static"]["Maurer"]
 
-    # Get min/mean/max values for each DOY across all projected models.
-    for i in range(366):
-        unset = True
-        for model_dict in modeled["data"]["static"].values():
-            if unset:
-                doy_min = model_dict[scenario][era][i]["doy_min"]
-                doy_max = model_dict[scenario][era][i]["doy_max"]
-                doy_mean = model_dict[scenario][era][i]["doy_mean"]
-                unset = False
-                continue
-            else:
-                if model_dict[scenario][era][i]["doy_min"] < doy_min:
+        # Get min/mean/max values for each DOY across all projected models.
+        for i in range(366):
+            unset = True
+            for model_dict in modeled["data"]["static"].values():
+                if unset:
                     doy_min = model_dict[scenario][era][i]["doy_min"]
-                if model_dict[scenario][era][i]["doy_max"] > doy_max:
                     doy_max = model_dict[scenario][era][i]["doy_max"]
-                doy_mean += model_dict[scenario][era][i]["doy_mean"]
+                    doy_mean = model_dict[scenario][era][i]["doy_mean"]
+                    unset = False
+                    continue
+                else:
+                    if model_dict[scenario][era][i]["doy_min"] < doy_min:
+                        doy_min = model_dict[scenario][era][i]["doy_min"]
+                    if model_dict[scenario][era][i]["doy_max"] > doy_max:
+                        doy_max = model_dict[scenario][era][i]["doy_max"]
+                    doy_mean += model_dict[scenario][era][i]["doy_mean"]
 
-        hydrograph_min.append(round(doy_min))
-        hydrograph_mean.append(round(doy_mean / len(modeled["data"]["static"]), 3))
-        hydrograph_max.append(round(doy_max))
+            hydrograph_min.append(round(doy_min))
+            hydrograph_mean.append(round(doy_mean / len(modeled["data"]["static"]), 3))
+            hydrograph_max.append(round(doy_max))
 
-    monthly_flow_keys = [
-        "ma12",
-        "ma13",
-        "ma14",
-        "ma15",
-        "ma16",
-        "ma17",
-        "ma18",
-        "ma19",
-        "ma20",
-        "ma21",
-        "ma22",
-        "ma23",
-    ]
+        monthly_flow_keys = [
+            "ma12",
+            "ma13",
+            "ma14",
+            "ma15",
+            "ma16",
+            "ma17",
+            "ma18",
+            "ma19",
+            "ma20",
+            "ma21",
+            "ma22",
+            "ma23",
+        ]
 
-    monthly_flow = {"historical": {}, "projected": {}}
+        monthly_flow = {"historical": {}, "projected": {}}
 
-    # Get historical data for each month.
-    for key in monthly_flow_keys:
-        monthly_flow["historical"][key] = stats["data"]["static"]["Maurer"][
-            "historical"
-        ]["1976-2005"][key]
-
-    # Make a copy and delete Maurer to make iteration through projected models easier.
-    projected_stats = copy.deepcopy(stats)
-    del projected_stats["data"]["static"]["Maurer"]
-
-    # Populate lists of values for each month for each projected model.
-    # These values will be used to generate box plots in the webapp.
-    for model_key in projected_stats["data"]["static"].keys():
+        # Get historical data for each month.
         for key in monthly_flow_keys:
-            if key not in monthly_flow["projected"]:
-                monthly_flow["projected"][key] = []
-            monthly_flow["projected"][key].append(
-                projected_stats["data"]["static"][model_key][scenario][era][key]
-            )
+            monthly_flow["historical"][key] = stats["data"]["static"]["Maurer"][
+                "historical"
+            ]["1976-2005"][key]
 
-    # Stats for the tables in the webapp, only for the requested model.
-    table_stats = {
-        "historical": stats["data"]["static"]["Maurer"]["historical"],
-        "projected": stats["data"]["static"][model][scenario],
-    }
+        # Make a copy and delete Maurer to make iteration through projected models easier.
+        projected_stats = copy.deepcopy(stats)
+        del projected_stats["data"]["static"]["Maurer"]
 
-    response = {
-        "hydrograph": {
-            "historical": hydrograph_historical,
-            "projected": {
-                "doy_min": hydrograph_min,
-                "doy_mean": hydrograph_mean,
-                "doy_max": hydrograph_max,
+        # Populate lists of values for each month for each projected model.
+        # These values will be used to generate box plots in the webapp.
+        for model_key in projected_stats["data"]["static"].keys():
+            for key in monthly_flow_keys:
+                if key not in monthly_flow["projected"]:
+                    monthly_flow["projected"][key] = []
+                monthly_flow["projected"][key].append(
+                    projected_stats["data"]["static"][model_key][scenario][era][key]
+                )
+
+        # Stats for the tables in the webapp, only for the requested model.
+        table_stats = {
+            "historical": stats["data"]["static"]["Maurer"]["historical"],
+            "projected": stats["data"]["static"][model][scenario],
+        }
+
+        response = {
+            "hydrograph": {
+                "historical": hydrograph_historical,
+                "projected": {
+                    "doy_min": hydrograph_min,
+                    "doy_mean": hydrograph_mean,
+                    "doy_max": hydrograph_max,
+                },
             },
-        },
-        "monthly_flow": monthly_flow,
-        "stats": table_stats,
-        "summary": stats["summary"],
-    }
-    return jsonify(response)
+            "monthly_flow": monthly_flow,
+            "stats": table_stats,
+            "summary": stats["summary"],
+        }
+        return jsonify(response)
+
+    except Exception as exc:
+        return render_template("500/server_error.html"), 500
