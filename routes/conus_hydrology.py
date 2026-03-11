@@ -1112,18 +1112,17 @@ def fetch_all_hydroviz_route(stream_id, model):
                 "historical"
             ]["1976-2005"][key]
 
-        # Make a copy and delete Maurer to make iteration through projected models easier.
-        projected_stats = copy.deepcopy(stats)
-        del projected_stats["data"]["static"]["Maurer"]
-
         # Populate lists of values for each month for each projected model.
         # These values will be used to generate box plots in the webapp.
-        for model_key in projected_stats["data"]["static"].keys():
+        for model_key, model_stats in stats["data"]["static"].items():
+            # Skip Maurer, which is used only for historical baselines.
+            if model_key == "Maurer":
+                continue
             for key in monthly_flow_keys:
                 if key not in monthly_flow["projected"]:
                     monthly_flow["projected"][key] = []
                 monthly_flow["projected"][key].append(
-                    projected_stats["data"]["static"][model_key][scenario][era][key]
+                    model_stats[scenario][era][key]
                 )
 
         # Stats for the tables in the webapp, only for the requested model.
