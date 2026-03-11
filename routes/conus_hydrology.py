@@ -1060,11 +1060,15 @@ def fetch_all_hydroviz_route(stream_id, model):
         hydrograph_historical = {}
         historical = modeled["data"]["static"]["Maurer"]["historical"]["1976-2005"]
 
-        hydrograph_historical["doy_min"] = list(map(lambda x: x["doy_min"], historical))
+        hydrograph_historical["doy_min"] = list(
+            map(lambda x: round(x["doy_min"]), historical)
+        )
         hydrograph_historical["doy_mean"] = list(
             map(lambda x: x["doy_mean"], historical)
         )
-        hydrograph_historical["doy_max"] = list(map(lambda x: x["doy_max"], historical))
+        hydrograph_historical["doy_max"] = list(
+            map(lambda x: round(x["doy_max"]), historical)
+        )
 
         del modeled["data"]["static"]["Maurer"]
 
@@ -1121,9 +1125,7 @@ def fetch_all_hydroviz_route(stream_id, model):
             for key in monthly_flow_keys:
                 if key not in monthly_flow["projected"]:
                     monthly_flow["projected"][key] = []
-                monthly_flow["projected"][key].append(
-                    model_stats[scenario][era][key]
-                )
+                monthly_flow["projected"][key].append(model_stats[scenario][era][key])
 
         # Stats for the tables in the webapp, only for the requested model.
         table_stats = {
