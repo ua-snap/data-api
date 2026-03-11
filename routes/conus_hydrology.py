@@ -1045,7 +1045,7 @@ def fetch_all_hydroviz_route(stream_id, model):
         stats = run_get_conus_hydrology_stats_data(stream_id).get_json()
         modeled = run_get_conus_hydrology_modeled_climatology(stream_id).get_json()
 
-        # The hydropgraph and monthly mean flow charts use this scenario and era.
+        # The hydrograph and monthly mean flow charts use this scenario and era.
         scenario = "rcp85"
         era = "2046-2075"
 
