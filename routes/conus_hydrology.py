@@ -1142,6 +1142,8 @@ def fetch_all_hydroviz_route(stream_id, model):
                     "doy_max": hydrograph_max,
                 },
             },
+            "id": stats["id"],
+            "name": stats["name"],
             "monthly_flow": monthly_flow,
             "stats": table_stats,
             "summary": stats["summary"],
