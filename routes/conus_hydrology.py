@@ -1005,7 +1005,7 @@ def run_get_conus_hydrology_gauge_info():
 @routes.route("/conus_hydrology/hydroviz/<stream_id>/<model>")
 def fetch_all_hydroviz_route(stream_id, model):
     """
-    Function to fetch all data for the hydrology visualization for a given stream ID and model.
+    Function to fetch all data for the hydrology visualization for a given stream ID and model. Maurer historical baseline data is included in every return.
     Args:
         stream_id (str): Stream ID for the hydrology data
         model (str): Model for projected data, only affects stats for tables.
