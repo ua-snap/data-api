@@ -1005,7 +1005,8 @@ def run_get_conus_hydrology_gauge_info():
 @routes.route("/conus_hydrology/hydroviz/<stream_id>/<model>")
 def fetch_all_hydroviz_route(stream_id, model):
     """
-    Function to fetch all data for the hydrology visualization for a given stream ID and model. Maurer historical baseline data is included in every return.
+    Function to fetch all data for the hydrology visualization for a given stream ID and model.
+    Maurer historical baseline data is included in every return.
     Args:
         stream_id (str): Stream ID for the hydrology data
         model (str): Model for projected data, only affects stats for tables.
@@ -1042,9 +1043,17 @@ def fetch_all_hydroviz_route(stream_id, model):
     if model not in projected_models:
         return render_template("400/bad_request.html"), 400
 
+    stats_response = run_get_conus_hydrology_stats_data(stream_id)
+    modeled_response = run_get_conus_hydrology_modeled_climatology(stream_id)
+
+    # If either response is an error page, return it.
+    for response in [stats_response, modeled_response]:
+        if isinstance(response, tuple):
+            return response
+
     try:
-        stats = run_get_conus_hydrology_stats_data(stream_id).get_json()
-        modeled = run_get_conus_hydrology_modeled_climatology(stream_id).get_json()
+        stats = stats_response.get_json()
+        modeled = modeled_response.get_json()
 
         # The hydrograph and monthly mean flow charts use this scenario and era.
         scenario = "rcp85"
