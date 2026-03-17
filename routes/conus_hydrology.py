@@ -1070,15 +1070,11 @@ def fetch_all_hydroviz_route(stream_id, model):
         hydrograph_historical = {}
         historical = modeled["data"]["static"]["Maurer"]["historical"]["1976-2005"]
 
-        hydrograph_historical["doy_min"] = list(
-            map(lambda x: round(x["doy_min"]), historical)
-        )
+        hydrograph_historical["doy_min"] = list(map(lambda x: x["doy_min"], historical))
         hydrograph_historical["doy_mean"] = list(
             map(lambda x: x["doy_mean"], historical)
         )
-        hydrograph_historical["doy_max"] = list(
-            map(lambda x: round(x["doy_max"]), historical)
-        )
+        hydrograph_historical["doy_max"] = list(map(lambda x: x["doy_max"], historical))
 
         del modeled["data"]["static"]["Maurer"]
 
@@ -1099,9 +1095,9 @@ def fetch_all_hydroviz_route(stream_id, model):
                         doy_max = model_dict[scenario][era][i]["doy_max"]
                     doy_mean += model_dict[scenario][era][i]["doy_mean"]
 
-            hydrograph_min.append(round(doy_min))
+            hydrograph_min.append(round(doy_min, 3))
             hydrograph_mean.append(round(doy_mean / len(modeled["data"]["static"]), 3))
-            hydrograph_max.append(round(doy_max))
+            hydrograph_max.append(round(doy_max, 3))
 
         monthly_flow_keys = [
             "ma12",
