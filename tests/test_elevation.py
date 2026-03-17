@@ -18,7 +18,7 @@ def test_elevation_area(client):
 
 def test_elevation_area_era5_4km(client):
     """
-    Tests the /elevation/area/era5_4km_GMU23 endpoint to ensure the output
+    Tests the /elevation/area/era5_4km/GMU23 endpoint to ensure the output
     remains consistent with production for the given area ID.
     """
     response = client.get("/elevation/area/era5_4km/GMU23")
