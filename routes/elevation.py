@@ -2,7 +2,6 @@ import asyncio
 import math
 
 from flask import Blueprint, render_template
-import rasterio as rio
 import rioxarray
 
 # local imports
