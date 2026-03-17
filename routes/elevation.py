@@ -308,7 +308,7 @@ def run_fetch_era5_4km_elevation(lat, lon):
         return render_template("500/server_error.html"), 500
 
     elevation = package_era5_4km_elevation(rasdaman_response)
-    return postprocess(elevation, "era5wrf_4km")
+    return postprocess(elevation, "era5wrf_4km_elevation")
 
 
 @routes.route("/elevation/area/era5_4km/<var_id>")
@@ -338,4 +338,4 @@ def run_area_fetch_era5_4km_elevation(var_id):
         return render_template("500/server_error.html"), 500
 
     elevation = package_era5_4km_elevation_area(zonal_stats)
-    return postprocess(elevation, "era5wrf_4km")
+    return postprocess(elevation, "era5wrf_4km_elevation")
