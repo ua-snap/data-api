@@ -1042,7 +1042,7 @@ def fetch_all_hydroviz_route(stream_id):
         hydrograph = {
             "historical": {},
             "projected": {
-                "all": {
+                "extremes": {
                     "doy_min": [],
                     "doy_mean": [],
                     "doy_max": [],
@@ -1091,13 +1091,13 @@ def fetch_all_hydroviz_route(stream_id):
                             model_dict[scenario][chart_era][i]["doy_max"]
                         )
 
-            hydrograph["projected"]["all"]["doy_min"].append(
+            hydrograph["projected"]["extremes"]["doy_min"].append(
                 round(min(doy_mins_all), 3)
             )
-            hydrograph["projected"]["all"]["doy_mean"].append(
+            hydrograph["projected"]["extremes"]["doy_mean"].append(
                 round(sum(doy_means_all) / len(doy_means_all), 3)
             )
-            hydrograph["projected"]["all"]["doy_max"].append(
+            hydrograph["projected"]["extremes"]["doy_max"].append(
                 round(max(doy_maxes_all), 3)
             )
 
@@ -1116,7 +1116,7 @@ def fetch_all_hydroviz_route(stream_id):
         monthly_flow = {
             "historical": {},
             "projected": {
-                "all": {},
+                "extremes": {},
                 "mid": {},
             },
         }
@@ -1149,14 +1149,14 @@ def fetch_all_hydroviz_route(stream_id):
                 if scenario in ["historical", "rcp26"]:
                     continue
                 for key in monthly_flow_keys:
-                    if key not in monthly_flow["projected"]["all"]:
-                        monthly_flow["projected"]["all"][key] = []
+                    if key not in monthly_flow["projected"]["extremes"]:
+                        monthly_flow["projected"]["extremes"][key] = []
                     if (
                         scenario not in model_stats
                         or chart_era not in model_stats[scenario]
                     ):
                         continue
-                    monthly_flow["projected"]["all"][key].append(
+                    monthly_flow["projected"]["extremes"][key].append(
                         model_stats[scenario][chart_era][key]
                     )
                     if scenario == "rcp60":
