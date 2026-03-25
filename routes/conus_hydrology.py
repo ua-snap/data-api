@@ -29,6 +29,7 @@ from postprocessing import prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from config import RAS_BASE_URL
 from . import routes
+import statistics
 
 coverages = {
     "stats": ["conus_hydro_segments_stats"],
@@ -1015,6 +1016,7 @@ def fetch_all_hydroviz_route(stream_id):
             "hydrograph": ...,
             "id": ...,
             "monthly_flow": ...,
+            "min_max_flow_dates": ...,
             "name": ...,
             "stats": ...,
             "summary": ...
@@ -1032,198 +1034,287 @@ def fetch_all_hydroviz_route(stream_id):
         if isinstance(response, tuple):
             return response
 
-    try:
-        # Fetch all needed data.
-        stats = stats_response.get_json()
-        climatology = climatology_response.get_json()
+    # try:
+    # Fetch all needed data.
+    stats = stats_response.get_json()
+    climatology = climatology_response.get_json()
 
-        ########## Populate arrays for hydrograph. ##########
+    ########## Populate arrays for hydrograph. ##########
 
-        hydrograph = {
-            "historical": {},
-            "projected": {
-                "extremes": {
-                    "doy_min": [],
-                    "doy_mean": [],
-                    "doy_max": [],
-                },
-                "mid": {
-                    "doy_min": [],
-                    "doy_mean": [],
-                    "doy_max": [],
-                },
+    hydrograph = {
+        "historical": {},
+        "projected": {
+            "extremes": {
+                "doy_min": [],
+                "doy_mean": [],
+                "doy_max": [],
             },
-        }
-
-        historical_climatology = climatology["data"]["static"]["Maurer"]["historical"][
-            "1976-2005"
-        ]
-        hydrograph_historical = {
-            "doy_min": list(map(lambda x: x["doy_min"], historical_climatology)),
-            "doy_mean": list(map(lambda x: x["doy_mean"], historical_climatology)),
-            "doy_max": list(map(lambda x: x["doy_max"], historical_climatology)),
-        }
-        hydrograph["historical"] = hydrograph_historical
-
-        # Get min/mean/max values for each DOY across all projected models.
-        for i in range(366):
-            doy_mins_all = []
-            doy_means_all = []
-            doy_maxes_all = []
-            doy_mins_mid = []
-            doy_means_mid = []
-            doy_maxes_mid = []
-            for model_dict in climatology["data"]["static"].values():
-                for scenario in model_dict.keys():
-                    if scenario in ["historical", "rcp26"]:
-                        continue
-                    doy_mins_all.append(model_dict[scenario][chart_era][i]["doy_min"])
-                    doy_means_all.append(model_dict[scenario][chart_era][i]["doy_mean"])
-                    doy_maxes_all.append(model_dict[scenario][chart_era][i]["doy_max"])
-                    if scenario == "rcp60":
-                        doy_mins_mid.append(
-                            model_dict[scenario][chart_era][i]["doy_min"]
-                        )
-                        doy_means_mid.append(
-                            model_dict[scenario][chart_era][i]["doy_mean"]
-                        )
-                        doy_maxes_mid.append(
-                            model_dict[scenario][chart_era][i]["doy_max"]
-                        )
-
-            hydrograph["projected"]["extremes"]["doy_min"].append(
-                round(min(doy_mins_all), 3)
-            )
-            hydrograph["projected"]["extremes"]["doy_mean"].append(
-                round(sum(doy_means_all) / len(doy_means_all), 3)
-            )
-            hydrograph["projected"]["extremes"]["doy_max"].append(
-                round(max(doy_maxes_all), 3)
-            )
-
-            hydrograph["projected"]["mid"]["doy_min"].append(
-                round(min(doy_mins_mid), 3)
-            )
-            hydrograph["projected"]["mid"]["doy_mean"].append(
-                round(sum(doy_means_mid) / len(doy_means_mid), 3)
-            )
-            hydrograph["projected"]["mid"]["doy_max"].append(
-                round(max(doy_maxes_mid), 3)
-            )
-
-        ########## Populate arrays for monthly modeled flow rate chart. ##########
-
-        monthly_flow = {
-            "historical": {},
-            "projected": {
-                "extremes": {},
-                "mid": {},
+            "mid": {
+                "doy_min": [],
+                "doy_mean": [],
+                "doy_max": [],
             },
-        }
+        },
+    }
 
-        monthly_flow_keys = [
-            "ma12",
-            "ma13",
-            "ma14",
-            "ma15",
-            "ma16",
-            "ma17",
-            "ma18",
-            "ma19",
-            "ma20",
-            "ma21",
-            "ma22",
-            "ma23",
-        ]
+    historical_climatology = climatology["data"]["static"]["Maurer"]["historical"][
+        "1976-2005"
+    ]
+    hydrograph_historical = {
+        "doy_min": list(map(lambda x: x["doy_min"], historical_climatology)),
+        "doy_mean": list(map(lambda x: x["doy_mean"], historical_climatology)),
+        "doy_max": list(map(lambda x: x["doy_max"], historical_climatology)),
+    }
+    hydrograph["historical"] = hydrograph_historical
 
-        # Get historical data for each month.
-        for key in monthly_flow_keys:
-            monthly_flow["historical"][key] = stats["data"]["static"]["Maurer"][
-                "historical"
-            ]["1976-2005"][key]
-
-        # Populate lists of values for each month for each projected model.
-        # These values will be used to generate box plots in the webapp.
-        for model_stats in stats["data"]["static"].values():
-            for scenario in model_stats.keys():
+    # Get min/mean/max values for each DOY across all projected models.
+    for i in range(366):
+        doy_mins_all = []
+        doy_means_all = []
+        doy_maxes_all = []
+        doy_mins_mid = []
+        doy_means_mid = []
+        doy_maxes_mid = []
+        for model_dict in climatology["data"]["static"].values():
+            for scenario in model_dict.keys():
                 if scenario in ["historical", "rcp26"]:
                     continue
-                for key in monthly_flow_keys:
-                    if key not in monthly_flow["projected"]["extremes"]:
-                        monthly_flow["projected"]["extremes"][key] = []
-                    if (
-                        scenario not in model_stats
-                        or chart_era not in model_stats[scenario]
-                    ):
-                        continue
-                    monthly_flow["projected"]["extremes"][key].append(
-                        model_stats[scenario][chart_era][key]
-                    )
-                    if scenario == "rcp60":
-                        monthly_flow["projected"]["mid"][key] = model_stats["rcp60"][
-                            chart_era
-                        ][key]
+                doy_mins_all.append(model_dict[scenario][chart_era][i]["doy_min"])
+                doy_means_all.append(model_dict[scenario][chart_era][i]["doy_mean"])
+                doy_maxes_all.append(model_dict[scenario][chart_era][i]["doy_max"])
+                if scenario == "rcp60":
+                    doy_mins_mid.append(model_dict[scenario][chart_era][i]["doy_min"])
+                    doy_means_mid.append(model_dict[scenario][chart_era][i]["doy_mean"])
+                    doy_maxes_mid.append(model_dict[scenario][chart_era][i]["doy_max"])
 
-        ########## Calculate stats for the stats table. ##########
+        hydrograph["projected"]["extremes"]["doy_min"].append(
+            round(min(doy_mins_all), 3)
+        )
+        hydrograph["projected"]["extremes"]["doy_mean"].append(
+            round(sum(doy_means_all) / len(doy_means_all), 3)
+        )
+        hydrograph["projected"]["extremes"]["doy_max"].append(
+            round(max(doy_maxes_all), 3)
+        )
 
-        table_stats = {
-            "historical": {},
-            "projected": {
-                "max": {},
-                "mid": {},
-                "min": {},
-            },
-        }
+        hydrograph["projected"]["mid"]["doy_min"].append(round(min(doy_mins_mid), 3))
+        hydrograph["projected"]["mid"]["doy_mean"].append(
+            round(sum(doy_means_mid) / len(doy_means_mid), 3)
+        )
+        hydrograph["projected"]["mid"]["doy_max"].append(round(max(doy_maxes_mid), 3))
 
-        table_stats["historical"] = model_stats["historical"]
+    ########## Populate arrays for monthly modeled flow rate chart. ##########
 
-        all_stats = {}
-        mid_stats = {}
-        for model_stats in stats["data"]["static"].values():
-            for scenario in model_stats.keys():
-                if scenario in ["historical", "rcp26"]:
+    monthly_flow = {
+        "historical": {},
+        "projected": {
+            "extremes": {},
+            "mid": {},
+        },
+    }
+
+    monthly_flow_keys = [
+        "ma12",
+        "ma13",
+        "ma14",
+        "ma15",
+        "ma16",
+        "ma17",
+        "ma18",
+        "ma19",
+        "ma20",
+        "ma21",
+        "ma22",
+        "ma23",
+    ]
+
+    # Get historical data for each month.
+    for key in monthly_flow_keys:
+        monthly_flow["historical"][key] = stats["data"]["static"]["Maurer"][
+            "historical"
+        ]["1976-2005"][key]
+
+    # Populate lists of values for each month for each projected model.
+    # These values will be used to generate box plots in the webapp.
+    for model_stats in stats["data"]["static"].values():
+        for scenario in model_stats.keys():
+            if scenario in ["historical", "rcp26"]:
+                continue
+            for key in monthly_flow_keys:
+                if key not in monthly_flow["projected"]["extremes"]:
+                    monthly_flow["projected"]["extremes"][key] = []
+                if (
+                    scenario not in model_stats
+                    or chart_era not in model_stats[scenario]
+                ):
                     continue
-                for era in model_stats[scenario].keys():
-                    if era not in model_stats[scenario]:
-                        continue
-                    for stat in model_stats[scenario][era].keys():
-                        if era not in all_stats:
-                            all_stats[era] = {}
-                        if stat not in all_stats[era]:
-                            all_stats[era][stat] = []
-                        all_stats[era][stat].append(model_stats[scenario][era][stat])
-                        if scenario == "rcp60":
-                            if era not in mid_stats:
-                                mid_stats[era] = {}
-                            if stat not in mid_stats[era]:
-                                mid_stats[era][stat] = []
-                            mid_stats[era][stat].append(model_stats["rcp60"][era][stat])
-
-        for era in all_stats.keys():
-            for stat in all_stats[era].keys():
-                all_values = all_stats[era][stat]
-                mid_values = mid_stats[era][stat]
-                if era not in table_stats["projected"]["min"]:
-                    table_stats["projected"]["min"][era] = {}
-                if era not in table_stats["projected"]["max"]:
-                    table_stats["projected"]["max"][era] = {}
-                if era not in table_stats["projected"]["mid"]:
-                    table_stats["projected"]["mid"][era] = {}
-                table_stats["projected"]["min"][era][stat] = round(min(all_values), 3)
-                table_stats["projected"]["max"][era][stat] = round(max(all_values), 3)
-                table_stats["projected"]["mid"][era][stat] = round(
-                    sum(mid_values) / len(mid_values), 3
+                monthly_flow["projected"]["extremes"][key].append(
+                    model_stats[scenario][chart_era][key]
                 )
+                if scenario == "rcp60":
+                    monthly_flow["projected"]["mid"][key] = model_stats["rcp60"][
+                        chart_era
+                    ][key]
 
-        response = {
-            "hydrograph": hydrograph,
-            "id": stats["id"],
-            "name": stats["name"],
-            "monthly_flow": monthly_flow,
-            "stats": table_stats,
-            "summary": stats["summary"],
-        }
-        return jsonify(response)
+    ########## Populate arrays for max flow date chart. ##########
 
-    except Exception as exc:
-        return render_template("500/server_error.html"), 500
+    min_max_flow_dates = {
+        "historical": {
+            "min": {
+                "flow": None,
+                "date": None,
+            },
+            "max": {
+                "flow": None,
+                "date": None,
+            },
+        },
+        "projected": {
+            "extremes": {
+                "min": {
+                    "flow": [],
+                    "date": [],
+                },
+                "max": {
+                    "flow": [],
+                    "date": [],
+                },
+            },
+            "mid": {
+                "min": {
+                    "flow": None,
+                    "date": None,
+                },
+                "max": {
+                    "flow": None,
+                    "date": None,
+                },
+            },
+        },
+    }
+
+    # Get historical data for min and max flow date.
+    min_max_flow_dates["historical"]["min"]["flow"] = stats["data"]["static"]["Maurer"][
+        "historical"
+    ]["1976-2005"]["dl1"]
+    min_max_flow_dates["historical"]["min"]["date"] = stats["data"]["static"]["Maurer"][
+        "historical"
+    ]["1976-2005"]["tl1"]
+    min_max_flow_dates["historical"]["max"]["flow"] = stats["data"]["static"]["Maurer"][
+        "historical"
+    ]["1976-2005"]["dh1"]
+    min_max_flow_dates["historical"]["max"]["date"] = stats["data"]["static"]["Maurer"][
+        "historical"
+    ]["1976-2005"]["th1"]
+
+    max_flow_date_array = []
+    max_flow_value_array = []
+    min_flow_date_array = []
+    min_flow_value_array = []
+
+    # Populate lists of values for max flow date for each projected model.
+    for model_stats in stats["data"]["static"].values():
+        for scenario in model_stats.keys():
+            if scenario in ["historical", "rcp26"]:
+                continue
+            if scenario not in model_stats or chart_era not in model_stats[scenario]:
+                continue
+
+            min_max_flow_dates["projected"]["extremes"]["min"]["flow"].append(
+                model_stats[scenario][chart_era]["dl1"]
+            )
+            min_max_flow_dates["projected"]["extremes"]["min"]["date"].append(
+                model_stats[scenario][chart_era]["tl1"]
+            )
+            min_max_flow_dates["projected"]["extremes"]["max"]["flow"].append(
+                model_stats[scenario][chart_era]["dh1"]
+            )
+            min_max_flow_dates["projected"]["extremes"]["max"]["date"].append(
+                model_stats[scenario][chart_era]["th1"]
+            )
+            if scenario == "rcp60":
+                min_flow_date_array.append(model_stats["rcp60"][chart_era]["tl1"])
+                min_flow_value_array.append(model_stats["rcp60"][chart_era]["dl1"])
+                max_flow_date_array.append(model_stats["rcp60"][chart_era]["th1"])
+                max_flow_value_array.append(model_stats["rcp60"][chart_era]["dh1"])
+
+    # Take the median, not mean, of dates. To understand why, consider the mean
+    # of January 1st (doy: 1) and December 31st (doy: 366). The mean would be
+    # July 3rd (doy: 184) which is not representative of either date.
+    min_max_flow_dates["projected"]["mid"]["min"]["date"] = round(
+        statistics.median(min_flow_date_array), 1
+    )
+    min_max_flow_dates["projected"]["mid"]["min"]["flow"] = round(
+        statistics.mean(min_flow_value_array), 1
+    )
+    min_max_flow_dates["projected"]["mid"]["max"]["date"] = round(
+        statistics.median(max_flow_date_array), 1
+    )
+    min_max_flow_dates["projected"]["mid"]["max"]["flow"] = round(
+        statistics.mean(max_flow_value_array), 1
+    )
+
+    ########## Calculate stats for the stats table. ##########
+
+    table_stats = {
+        "historical": {},
+        "projected": {
+            "max": {},
+            "mid": {},
+            "min": {},
+        },
+    }
+
+    table_stats["historical"] = model_stats["historical"]
+
+    all_stats = {}
+    mid_stats = {}
+    for model_stats in stats["data"]["static"].values():
+        for scenario in model_stats.keys():
+            if scenario in ["historical", "rcp26"]:
+                continue
+            for era in model_stats[scenario].keys():
+                if era not in model_stats[scenario]:
+                    continue
+                for stat in model_stats[scenario][era].keys():
+                    if era not in all_stats:
+                        all_stats[era] = {}
+                    if stat not in all_stats[era]:
+                        all_stats[era][stat] = []
+                    all_stats[era][stat].append(model_stats[scenario][era][stat])
+                    if scenario == "rcp60":
+                        if era not in mid_stats:
+                            mid_stats[era] = {}
+                        if stat not in mid_stats[era]:
+                            mid_stats[era][stat] = []
+                        mid_stats[era][stat].append(model_stats["rcp60"][era][stat])
+
+    for era in all_stats.keys():
+        for stat in all_stats[era].keys():
+            all_values = all_stats[era][stat]
+            mid_values = mid_stats[era][stat]
+            if era not in table_stats["projected"]["min"]:
+                table_stats["projected"]["min"][era] = {}
+            if era not in table_stats["projected"]["max"]:
+                table_stats["projected"]["max"][era] = {}
+            if era not in table_stats["projected"]["mid"]:
+                table_stats["projected"]["mid"][era] = {}
+            table_stats["projected"]["min"][era][stat] = round(min(all_values), 3)
+            table_stats["projected"]["max"][era][stat] = round(max(all_values), 3)
+            table_stats["projected"]["mid"][era][stat] = round(
+                statistics.mean(mid_values), 3
+            )
+
+    response = {
+        "hydrograph": hydrograph,
+        "id": stats["id"],
+        "name": stats["name"],
+        "monthly_flow": monthly_flow,
+        "min_max_flow_dates": min_max_flow_dates,
+        "stats": table_stats,
+        "summary": stats["summary"],
+    }
+    return jsonify(response)
+
+    # except Exception as exc:
+    #     return render_template("500/server_error.html"), 500
