@@ -4,9 +4,9 @@
 <p>
   This endpoint provides access to daily CMIP6 data that have been bias-adjusted and downscaled to 4km using <a
     href="/era5wrf">dynamically downscaled ERA5</a>
-  reference data. Twelve models are available with up to four future scenarios available per model. This is a subset of
-  the model and scenario combinations described <a
-    href="https://arcticdatascience.org/item/story-arctic-climate-data-node">here</a>. A 6-model average is also
+  reference data. Thirteen models are available with up to four future scenarios available per model. This is a subset
+  of the model and scenario combinations described <a
+    href="https://arcticdatascience.org/item/story-arctic-climate-data-node">here</a>. A 7-model average is also
   available. This dataset spans years 1965&ndash;2100 and its extent covers most of Alaska and parts of western Canada.
 </p>
 
@@ -36,8 +36,8 @@
     <tr>
       <td>Values at a given latitude and longitude for provided model, scenario, and variable</td>
       <td style="white-space: nowrap;">
-        <a href="/cmip6_downscaled/point/61.5/-147?models=6ModelAvg&scenarios=ssp585&vars=tasmax">
-          /cmip6_downscaled/point/61.5/-147?models=6ModelAvg&scenarios=ssp585&vars=tasmax</a>
+        <a href="/cmip6_downscaled/point/61.5/-147?models=7ModelAvg&scenarios=ssp585&vars=tasmax">
+          /cmip6_downscaled/point/61.5/-147?models=7ModelAvg&scenarios=ssp585&vars=tasmax</a>
       </td>
     </tr>
   </tbody>
@@ -71,10 +71,10 @@
     </tr>
   </thead>
   <tr>
-    <td>6ModelAvg</td>
+    <td>7ModelAvg</td>
     <td>historical, ssp126, ssp245, ssp370, ssp585</td>
     <td>pr, tasmax, tasmin</td>
-    <td>Equal-weighted mean of KACE-1-0-G, MIROC6, MPI-ESM1-2-HR, MRI-ESM2-0, NorESM2-MM, and TaiESM1.</td>
+    <td>Equal-weighted mean of GFDL-ESM4, KACE-1-0-G, MIROC6, MPI-ESM1-2-HR, MRI-ESM2-0, NorESM2-MM, and TaiESM1.</td>
   </tr>
   <tr>
     <td>CESM2</td>
@@ -99,6 +99,12 @@
     <td>historical, ssp126, ssp370, ssp585</td>
     <td>pr, tasmax, tasmin</td>
     <td>ssp126 scenario is only available for the pr variable.</td>
+  </tr>
+  <tr>
+    <td>GFDL-ESM4</td>
+    <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+    <td>pr, tasmax, tasmin</td>
+    <td></td>
   </tr>
   <tr>
     <td>HadGEM3-GC31-LL</td>
@@ -156,7 +162,7 @@
 
 <pre>
 {
-  "6ModelAvg": {
+  "7ModelAvg": {
     "ssp126": {
       "2015-01-01": {
         "pr": 14,

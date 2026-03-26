@@ -229,7 +229,7 @@ def run_fetch_cmip6_downscaled_point_data(lat, lon, varname, model, scenario):
     if validation == 400:
         return render_template("400/bad_request.html"), 400
 
-    cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_wcs"
+    cov_id = f"cmip6_downscaled_{varname}_{model}_{scenario}_v2_wcs"
     cov_id = cov_id.replace("-", "_")
     metadata = asyncio.run(get_cmip6_metadata(cov_id))
     cmip6_downscaled_bbox = construct_latlon_bbox_from_coverage_bounds(metadata)
