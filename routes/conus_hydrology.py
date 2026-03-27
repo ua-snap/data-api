@@ -1305,7 +1305,22 @@ def fetch_all_hydroviz_route(stream_id):
                 statistics.mean(mid_values), 3
             )
 
+    gauge_id = None
+    h8_outlet = False
+    huc8 = None
+
+    gdf = asyncio.run(get_features(stream_id))
+    if not isinstance(gdf, tuple):
+        if gdf.loc[0].h8_outlet == 1:
+            h8_outlet = True
+        if gdf.loc[0].GAUGE_ID != "NA":
+            gauge_id = gdf.loc[0].GAUGE_ID
+        huc8 = gdf.loc[0].huc8
+
     response = {
+        "gauge_id": gauge_id,
+        "h8_outlet": h8_outlet,
+        "huc8": huc8,
         "hydrograph": hydrograph,
         "id": stats["id"],
         "name": stats["name"],
@@ -1314,6 +1329,7 @@ def fetch_all_hydroviz_route(stream_id):
         "stats": table_stats,
         "summary": stats["summary"],
     }
+
     return jsonify(response)
 
     # except Exception as exc:
