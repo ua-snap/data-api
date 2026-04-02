@@ -1067,32 +1067,37 @@ def fetch_all_hydroviz_route(stream_id):
                     projected_delta = modeled_projected - modeled_historical
                     maurer_plus_delta = round(maurer_historical + projected_delta, 3)
 
-                    # These stats represent days per year, so cannot exceed 366.
-                    if (
-                        stat
-                        in [
-                            "dh15",
-                            "dl16",
-                            "lf1",
-                            "ra8",
-                            "spr_ord",
-                            "sum_ord",
-                            "th1",
-                            "tl1",
-                        ]
-                        and maurer_plus_delta > 366
-                    ):
-                        maurer_plus_delta = 366
+                    ### Temporary fallback to raw projected data, not Maurer + delta method.
+                    ### TODO: Figure out how to make the Maurer + delta method work without unrealistic values.
+                    # # These stats represent days per year, so cannot exceed 366.
+                    # if (
+                    #     stat
+                    #     in [
+                    #         "dh15",
+                    #         "dl16",
+                    #         "lf1",
+                    #         "ra8",
+                    #         "spr_ord",
+                    #         "sum_ord",
+                    #         "th1",
+                    #         "tl1",
+                    #     ]
+                    #     and maurer_plus_delta > 366
+                    # ):
+                    #     maurer_plus_delta = 366
 
-                    # No stat can be negative except for ra3.
-                    if stat != "ra3" and maurer_plus_delta < 0:
-                        maurer_plus_delta = 0
-                    elif stat == "ra3" and maurer_plus_delta > 0:
-                        maurer_plus_delta = 0
+                    # # No stat can be negative except for ra3.
+                    # if stat != "ra3" and maurer_plus_delta < 0:
+                    #     maurer_plus_delta = 0
+                    # elif stat == "ra3" and maurer_plus_delta > 0:
+                    #     maurer_plus_delta = 0
 
+                    # maurer_plus_delta_stats[model][scenario][era][
+                    #     stat
+                    # ] = maurer_plus_delta
                     maurer_plus_delta_stats[model][scenario][era][
                         stat
-                    ] = maurer_plus_delta
+                    ] = modeled_projected
 
     # pprint(maurer_plus_delta_stats)
 
@@ -1126,7 +1131,11 @@ def fetch_all_hydroviz_route(stream_id):
                         maurer_plus_delta = round(
                             maurer_historical + projected_delta, 3
                         )
-                        doy_stats[stat] = maurer_plus_delta
+
+                        ### Temporary fallback to raw projected data, not Maurer + delta method.
+                        ### TODO: Figure out how to make the Maurer + delta method work without unrealistic values.
+                        # doy_stats[stat] = maurer_plus_delta
+                        doy_stats[stat] = modeled_projected
                     maurer_plus_delta_climatology[model][scenario][era].append(
                         doy_stats
                     )
