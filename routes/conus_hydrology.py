@@ -1064,8 +1064,10 @@ def fetch_all_hydroviz_route(stream_id):
                         stat
                     ]
                     modeled_projected = static_stats[model][scenario][era][stat]
-                    projected_delta = modeled_projected - modeled_historical
-                    maurer_plus_delta = round(maurer_historical + projected_delta, 3)
+                    if modeled_historical == 0:
+                        modeled_historical = 0.0001
+                    projected_delta = modeled_projected / modeled_historical
+                    maurer_plus_delta = round(maurer_historical * projected_delta, 3)
 
                     ### Temporary fallback to raw projected data, not Maurer + delta method.
                     ### TODO: Figure out how to make the Maurer + delta method work without unrealistic values.
@@ -1127,15 +1129,17 @@ def fetch_all_hydroviz_route(stream_id):
                         modeled_projected = static_climatology[model][scenario][era][i][
                             stat
                         ]
-                        projected_delta = modeled_projected - modeled_historical
+                        if modeled_historical == 0:
+                            modeled_historical = 0.0001
+                        projected_delta = modeled_projected / modeled_historical
                         maurer_plus_delta = round(
-                            maurer_historical + projected_delta, 3
+                            maurer_historical * projected_delta, 3
                         )
 
                         ### Temporary fallback to raw projected data, not Maurer + delta method.
                         ### TODO: Figure out how to make the Maurer + delta method work without unrealistic values.
-                        # doy_stats[stat] = maurer_plus_delta
-                        doy_stats[stat] = modeled_projected
+                        doy_stats[stat] = maurer_plus_delta
+                        # doy_stats[stat] = modeled_projected
                     maurer_plus_delta_climatology[model][scenario][era].append(
                         doy_stats
                     )
