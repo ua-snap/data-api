@@ -1073,8 +1073,9 @@ def fetch_all_hydroviz_route(stream_id):
 
                         # Use modulo adjustment for stats with Julian day units.
                         # This will roll a date over to the next year if necessary.
+                        # Subtracting 1 before, then adding 1 after, prevents days of 0.
                         if stat in ["spr_ord", "sum_ord", "th1", "tl1"]:
-                            maurer_adjusted = maurer_adjusted % 366
+                            maurer_adjusted = ((maurer_adjusted - 1) % 366) + 1
 
                         # Make sure no stats with "number of days" units exceeds 366.
                         if stat in ["dh15", "dl16", "lf1", "ra8"]:
