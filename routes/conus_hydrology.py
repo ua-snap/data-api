@@ -29,6 +29,7 @@ from postprocessing import prune_nulls_with_max_intensity
 from csv_functions import create_csv
 from config import RAS_BASE_URL
 from . import routes
+import statistics
 
 coverages = {
     "stats": ["conus_hydro_segments_stats"],
@@ -1002,14 +1003,12 @@ def run_get_conus_hydrology_gauge_info():
         return render_template("500/server_error.html"), 500
 
 
-@routes.route("/conus_hydrology/hydroviz/<stream_id>/<model>")
-def fetch_all_hydroviz_route(stream_id, model):
+@routes.route("/conus_hydrology/hydroviz/<stream_id>")
+def fetch_all_hydroviz_route(stream_id):
     """
-    Function to fetch all data for the hydrology visualization for a given stream ID and model.
-    Maurer historical baseline data is included in every return.
+    Function to fetch all data for the hydroviz webapp for a given stream ID.
     Args:
         stream_id (str): Stream ID for the hydrology data
-        model (str): Model for projected data, only affects stats for tables.
     Returns:
         JSON response with the following top-level keys, which correspond to different sections
         of the hydroviz webapp and contain only the data necessary to populate those sections.
@@ -1017,87 +1016,176 @@ def fetch_all_hydroviz_route(stream_id, model):
             "hydrograph": ...,
             "id": ...,
             "monthly_flow": ...,
+            "max_flow_dates": ...,
             "name": ...,
             "stats": ...,
             "summary": ...
         }
-
     """
-    # Use this to validate the model provided in the URL.
-    projected_models = [
-        "ACCESS1-0",
-        "BCC-CSM1-1",
-        "BNU-ESM",
-        "CCSM4",
-        "GFDL-ESM2G",
-        "GFDL-ESM2M",
-        "IPSL-CM5A-LR",
-        "IPSL-CM5A-MR",
-        "MIROC-ESM",
-        "MIROC-ESM-CHEM",
-        "MIROC5",
-        "MRI-CGCM3",
-        "NorESM1-M",
-    ]
-
-    if model not in projected_models:
-        return render_template("400/bad_request.html"), 400
 
     stats_response = run_get_conus_hydrology_stats_data(stream_id)
-    modeled_response = run_get_conus_hydrology_modeled_climatology(stream_id)
+    climatology_response = run_get_conus_hydrology_modeled_climatology(stream_id)
+
+    # Projected eras to use for the hydrograph and monthly flow charts.
+    chart_eras = ["2016-2045", "2046-2075", "2071-2100"]
 
     # If either response is an error page, return it.
-    for response in [stats_response, modeled_response]:
+    for response in [stats_response, climatology_response]:
         if isinstance(response, tuple):
             return response
 
     try:
+        # Fetch all needed data.
         stats = stats_response.get_json()
-        modeled = modeled_response.get_json()
+        climatology = climatology_response.get_json()
 
-        # The hydrograph and monthly mean flow charts use this scenario and era.
-        scenario = "rcp85"
-        era = "2046-2075"
+        # Convert static stats to Maurer * (GCM projected / GCM historical).
+        static_stats = stats["data"]["static"]
+        maurer_adjusted_stats = {}
+        for model in static_stats.keys():
+            if model not in maurer_adjusted_stats:
+                maurer_adjusted_stats[model] = {}
+            for scenario in static_stats[model].keys():
+                if scenario in ["historical", "rcp26"]:
+                    continue
+                if scenario not in maurer_adjusted_stats[model]:
+                    maurer_adjusted_stats[model][scenario] = {}
+                for era in static_stats[model][scenario].keys():
+                    if era not in maurer_adjusted_stats[model][scenario]:
+                        maurer_adjusted_stats[model][scenario][era] = {}
+                    for stat in static_stats[model][scenario][era].keys():
+                        maurer_historical = static_stats["Maurer"]["historical"][
+                            "1976-2005"
+                        ][stat]
+                        gcm_historical = static_stats[model]["historical"]["1976-2005"][
+                            stat
+                        ]
+                        gcm_projected = static_stats[model][scenario][era][stat]
 
-        hydrograph_min = []
-        hydrograph_mean = []
-        hydrograph_max = []
+                        denominator = gcm_historical
+                        if denominator == 0:
+                            denominator = 0.0001
+                        projected_quotient = gcm_projected / denominator
+                        maurer_adjusted = round(
+                            maurer_historical * projected_quotient, 3
+                        )
 
-        doy_min = None
-        doy_max = None
-        doy_mean = None
+                        # Use modulo adjustment for stats with Julian day units.
+                        # This will roll a date over to the next year if necessary.
+                        # Subtracting 1 before, then adding 1 after, prevents days of 0.
+                        if stat in ["spr_ord", "sum_ord", "th1", "tl1"]:
+                            maurer_adjusted = ((maurer_adjusted - 1) % 366) + 1
 
-        hydrograph_historical = {}
-        historical = modeled["data"]["static"]["Maurer"]["historical"]["1976-2005"]
+                        # Make sure no stats with "number of days" units exceeds 366.
+                        if stat in ["dh15", "dl16", "lf1", "ra8"]:
+                            if maurer_adjusted > 366:
+                                maurer_adjusted = 366
 
-        hydrograph_historical["doy_min"] = list(map(lambda x: x["doy_min"], historical))
-        hydrograph_historical["doy_mean"] = list(
-            map(lambda x: x["doy_mean"], historical)
-        )
-        hydrograph_historical["doy_max"] = list(map(lambda x: x["doy_max"], historical))
+                        maurer_adjusted_stats[model][scenario][era][
+                            stat
+                        ] = maurer_adjusted
 
-        del modeled["data"]["static"]["Maurer"]
+        # Convert static climatology to Maurer * (GCM projected / GCM historical).
+        static_climatology = climatology["data"]["static"]
+        maurer_adjusted_climatology = {}
+        for model in static_climatology.keys():
+            if model not in maurer_adjusted_climatology:
+                maurer_adjusted_climatology[model] = {}
+            for scenario in static_climatology[model].keys():
+                if scenario in ["historical", "rcp26"]:
+                    continue
+                if scenario not in maurer_adjusted_climatology[model]:
+                    maurer_adjusted_climatology[model][scenario] = {}
+                for era in static_climatology[model][scenario].keys():
+                    if era not in maurer_adjusted_climatology[model][scenario]:
+                        maurer_adjusted_climatology[model][scenario][era] = []
+                    for i in range(len(static_climatology[model][scenario][era])):
+                        doy_stats = {}
+                        for stat in static_climatology[model][scenario][era][i].keys():
+                            maurer_historical = static_climatology["Maurer"][
+                                "historical"
+                            ]["1976-2005"][i][stat]
+                            gcm_historical = static_climatology[model]["historical"][
+                                "1976-2005"
+                            ][i][stat]
+                            gcm_projected = static_climatology[model][scenario][era][i][
+                                stat
+                            ]
+                            denominator = gcm_historical
+                            if denominator == 0:
+                                denominator = 0.0001
+                            projected_quotient = gcm_projected / denominator
+                            maurer_adjusted = round(
+                                maurer_historical * projected_quotient, 3
+                            )
+                            doy_stats[stat] = maurer_adjusted
+                        maurer_adjusted_climatology[model][scenario][era].append(
+                            doy_stats
+                        )
+
+        ########## Populate arrays for hydrograph. ##########
+
+        hydrograph = {
+            "historical": {},
+            "projected": {},
+        }
+
+        historical_climatology = climatology["data"]["static"]["Maurer"]["historical"][
+            "1976-2005"
+        ]
+        hydrograph_historical = {
+            "doy_min": list(map(lambda x: x["doy_min"], historical_climatology)),
+            "doy_mean": list(map(lambda x: x["doy_mean"], historical_climatology)),
+            "doy_max": list(map(lambda x: x["doy_max"], historical_climatology)),
+        }
+        hydrograph["historical"] = hydrograph_historical
 
         # Get min/mean/max values for each DOY across all projected models.
-        for i in range(366):
-            unset = True
-            for model_dict in modeled["data"]["static"].values():
-                if unset:
-                    doy_min = model_dict[scenario][era][i]["doy_min"]
-                    doy_max = model_dict[scenario][era][i]["doy_max"]
-                    doy_mean = model_dict[scenario][era][i]["doy_mean"]
-                    unset = False
-                    continue
-                else:
-                    if model_dict[scenario][era][i]["doy_min"] < doy_min:
-                        doy_min = model_dict[scenario][era][i]["doy_min"]
-                    if model_dict[scenario][era][i]["doy_max"] > doy_max:
-                        doy_max = model_dict[scenario][era][i]["doy_max"]
-                    doy_mean += model_dict[scenario][era][i]["doy_mean"]
+        for era in chart_eras:
+            if era not in hydrograph["projected"]:
+                hydrograph["projected"][era] = {}
+            for scenario in ["rcp45", "rcp60", "rcp85"]:
+                if scenario not in hydrograph["projected"][era]:
+                    hydrograph["projected"][era][scenario] = {
+                        "doy_min_min": [],
+                        "doy_mean_min": [],
+                        "doy_mean_mean": [],
+                        "doy_mean_max": [],
+                        "doy_max_max": [],
+                    }
+                for i in range(366):
+                    doy_mins = []
+                    doy_means = []
+                    doy_maxes = []
+                    for model_dict in maurer_adjusted_climatology.values():
+                        if scenario not in model_dict:
+                            continue
+                        doy_mins.append(model_dict[scenario][era][i]["doy_min"])
+                        doy_means.append(model_dict[scenario][era][i]["doy_mean"])
+                        doy_maxes.append(model_dict[scenario][era][i]["doy_max"])
 
-            hydrograph_min.append(round(doy_min, 3))
-            hydrograph_mean.append(round(doy_mean / len(modeled["data"]["static"]), 3))
-            hydrograph_max.append(round(doy_max, 3))
+                    hydrograph["projected"][era][scenario]["doy_min_min"].append(
+                        round(min(doy_mins), 3)
+                    )
+                    hydrograph["projected"][era][scenario]["doy_mean_min"].append(
+                        round(min(doy_means), 3)
+                    )
+                    hydrograph["projected"][era][scenario]["doy_mean_mean"].append(
+                        round(statistics.mean(doy_means), 3)
+                    )
+                    hydrograph["projected"][era][scenario]["doy_mean_max"].append(
+                        round(max(doy_means), 3)
+                    )
+                    hydrograph["projected"][era][scenario]["doy_max_max"].append(
+                        round(max(doy_maxes), 3)
+                    )
+
+        ########## Populate arrays for monthly modeled flow rate chart. ##########
+
+        monthly_flow = {
+            "historical": {},
+            "projected": {},
+        }
 
         monthly_flow_keys = [
             "ma12",
@@ -1114,8 +1202,6 @@ def fetch_all_hydroviz_route(stream_id, model):
             "ma23",
         ]
 
-        monthly_flow = {"historical": {}, "projected": {}}
-
         # Get historical data for each month.
         for key in monthly_flow_keys:
             monthly_flow["historical"][key] = stats["data"]["static"]["Maurer"][
@@ -1124,36 +1210,124 @@ def fetch_all_hydroviz_route(stream_id, model):
 
         # Populate lists of values for each month for each projected model.
         # These values will be used to generate box plots in the webapp.
-        for model_key, model_stats in stats["data"]["static"].items():
-            # Skip Maurer, which is used only for historical baselines.
-            if model_key == "Maurer":
-                continue
-            for key in monthly_flow_keys:
-                if key not in monthly_flow["projected"]:
-                    monthly_flow["projected"][key] = []
-                monthly_flow["projected"][key].append(model_stats[scenario][era][key])
+        for era in chart_eras:
+            if era not in monthly_flow["projected"]:
+                monthly_flow["projected"][era] = {}
+            for scenario in ["rcp45", "rcp60", "rcp85"]:
+                if scenario not in monthly_flow["projected"][era]:
+                    monthly_flow["projected"][era][scenario] = {}
+                for model_stats in maurer_adjusted_stats.values():
+                    if scenario not in model_stats:
+                        continue
+                    for key in monthly_flow_keys:
+                        if key not in monthly_flow["projected"][era][scenario]:
+                            monthly_flow["projected"][era][scenario][key] = []
+                        monthly_flow["projected"][era][scenario][key].append(
+                            model_stats[scenario][era][key]
+                        )
 
-        # Stats for the tables in the webapp, only for the requested model.
-        table_stats = {
-            "historical": stats["data"]["static"]["Maurer"]["historical"],
-            "projected": stats["data"]["static"][model][scenario],
+        ########## Populate arrays for max flow date chart. ##########
+
+        max_flow_dates = {
+            "historical": {},
+            "projected": {},
         }
 
+        # Get historical data for max flow date.
+        max_flow_dates["historical"]["flow"] = stats["data"]["static"]["Maurer"][
+            "historical"
+        ]["1976-2005"]["dh1"]
+        max_flow_dates["historical"]["date"] = stats["data"]["static"]["Maurer"][
+            "historical"
+        ]["1976-2005"]["th1"]
+
+        # Populate lists of values for max flow date for each projected model.
+        for era in chart_eras:
+            if era not in max_flow_dates["projected"]:
+                max_flow_dates["projected"][era] = {}
+            for scenario in ["rcp45", "rcp60", "rcp85"]:
+                if scenario not in max_flow_dates["projected"][era]:
+                    max_flow_dates["projected"][era][scenario] = {
+                        "flow": [],
+                        "date": [],
+                    }
+                for model_stats in maurer_adjusted_stats.values():
+                    if scenario not in model_stats:
+                        continue
+                    max_flow_dates["projected"][era][scenario]["flow"].append(
+                        model_stats[scenario][era]["dh1"]
+                    )
+                    max_flow_dates["projected"][era][scenario]["date"].append(
+                        model_stats[scenario][era]["th1"]
+                    )
+
+        ########## Calculate stats for the stats table. ##########
+
+        table_stats = {
+            "historical": {},
+            "projected": {},
+        }
+
+        table_stats["historical"] = stats["data"]["static"]["Maurer"]["historical"]
+
+        scenario_stat_arrays = {}
+        for era in chart_eras:
+            for model_stats in maurer_adjusted_stats.values():
+                for scenario in model_stats.keys():
+                    if scenario in ["historical", "rcp26"]:
+                        continue
+                    if scenario not in scenario_stat_arrays:
+                        scenario_stat_arrays[scenario] = {}
+                    if era not in model_stats[scenario]:
+                        continue
+                    if era not in scenario_stat_arrays[scenario]:
+                        scenario_stat_arrays[scenario][era] = {}
+                    for stat in model_stats[scenario][era].keys():
+                        if stat not in scenario_stat_arrays[scenario][era]:
+                            scenario_stat_arrays[scenario][era][stat] = []
+                        scenario_stat_arrays[scenario][era][stat].append(
+                            model_stats[scenario][era][stat]
+                        )
+
+        for scenario in scenario_stat_arrays.keys():
+            for era in scenario_stat_arrays[scenario].keys():
+                if era not in table_stats["projected"]:
+                    table_stats["projected"][era] = {}
+                if scenario not in table_stats["projected"][era]:
+                    table_stats["projected"][era][scenario] = {}
+                for stat in scenario_stat_arrays[scenario][era].keys():
+                    values = scenario_stat_arrays[scenario][era][stat]
+                    table_stats["projected"][era][scenario][stat] = {
+                        "min": round(min(values), 3),
+                        "median": round(statistics.median(values), 3),
+                        "max": round(max(values), 3),
+                    }
+
+        gauge_id = None
+        h8_outlet = False
+        huc8 = None
+
+        gdf = asyncio.run(get_features(stream_id))
+        if not isinstance(gdf, tuple):
+            if gdf.loc[0].h8_outlet == 1:
+                h8_outlet = True
+            if gdf.loc[0].GAUGE_ID != "NA":
+                gauge_id = gdf.loc[0].GAUGE_ID
+            huc8 = gdf.loc[0].huc8
+
         response = {
-            "hydrograph": {
-                "historical": hydrograph_historical,
-                "projected": {
-                    "doy_min": hydrograph_min,
-                    "doy_mean": hydrograph_mean,
-                    "doy_max": hydrograph_max,
-                },
-            },
+            "gauge_id": gauge_id,
+            "h8_outlet": h8_outlet,
+            "huc8": huc8,
+            "hydrograph": hydrograph,
             "id": stats["id"],
             "name": stats["name"],
             "monthly_flow": monthly_flow,
+            "max_flow_dates": max_flow_dates,
             "stats": table_stats,
             "summary": stats["summary"],
         }
+
         return jsonify(response)
 
     except Exception as exc:
