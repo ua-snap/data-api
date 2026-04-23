@@ -1,0 +1,8 @@
+{
+  "max": 2171,
+  "mean": 885,
+  "min": 208,
+  "res": "4 kilometer",
+  "title": "WRF Dynamically Downscaled ERA5 Reanalysis 4 km Elevation Grid",
+  "units": "meters above sea level"
+}
