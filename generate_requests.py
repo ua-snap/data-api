@@ -107,7 +107,7 @@ def generate_netcdf_wcs_getcov_str(bbox_bounds, cov_id, var_coord=None):
     Returns:
         netcdf_wcs_getcov_str (str): WCS GetCoverage Request to append to a query URL
     """
-    (x1, y1, x2, y2) = bbox_bounds
+    x1, y1, x2, y2 = bbox_bounds
     x = f"{x1},{x2}"
     y = f"{y1},{y2}"
     netcdf_wcs_getcov_str = generate_wcs_getcov_str(
@@ -170,7 +170,7 @@ def generate_netcdf_average_wcps_str(bbox_bounds, generate_average_wcps_str_kwar
     Returns:
         netcdf_avg_wcps_str (str): WCPS GetCoverage Request to append to a query URL
     """
-    (x1, y1, x2, y2) = bbox_bounds
+    x1, y1, x2, y2 = bbox_bounds
     x = f"{x1}:{x2}"
     y = f"{y1}:{y2}"
     netcdf_avg_wcps_str = generate_average_wcps_str(
@@ -195,17 +195,21 @@ def generate_wcps_describe_coverage_str(cov_id):
     return quote(query_str)
 
 
-def generate_conus_hydrology_wcs_str(cov_id, stream_id):
+def generate_conus_hydrology_wcs_str(cov_id, stream_id, source=None):
     """Generate a WCS GetCoverage request for fetching CONUS hydrology data as netCDF.
     Args:
         cov_id (str): Coverage ID
         stream_id (str): Stream ID
+        source (str, optional): Source ID (for stats coverage only)
     Returns:
         request_string (str): WCS GetCoverage Request to append to a query URL
     """
     request_string = f"ows?&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&"
     request_string += f"COVERAGEID={cov_id}&"
     request_string += f"SUBSET=stream_id({stream_id})&"
+    if source is not None:
+        request_string += f"SUBSET=source({source})&"
+
     request_string += f"FORMAT=application/netcdf"
 
     return request_string

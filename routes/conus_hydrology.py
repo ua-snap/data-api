@@ -32,8 +32,14 @@ from . import routes
 import statistics
 
 coverages = {
-    "stats": ["conus_hydro_segments_stats"],
+    "stats": ["conus_hydro_segments_stats_combined"],
     "doy_climatology": ["conus_hydro_segments_doy_climatology"],
+}
+
+stat_source_encodings = {
+    "original_gcm": 0,
+    "gcm_diff": 1,
+    "gcm_diff_applied_to_maurer": 2,
 }
 
 
@@ -52,20 +58,27 @@ async def get_decode_dicts_from_axis_attributes(cov_ids):
     return decode_dicts
 
 
-async def fetch_hydro_data(cov_ids, stream_id):
+async def fetch_hydro_data(cov_ids, stream_id, source=None):
     """
     Function to fetch hydrology data from Rasdaman. Data is fetched for one stream ID at a time!
     Args:
         cov_ids (list): list of coverage IDs for the hydrology data
         stream_id (str): Stream ID for the hydrology data
+        source (str, optional): Source ID (for stats coverage only)
 
     Returns:
         results (list): list of responses from Rasdaman for each coverage ID
     """
-    urls = [
-        RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id)
-        for cov_id in cov_ids
-    ]
+    if source is not None:
+        urls = [
+            RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id, source)
+            for cov_id in cov_ids
+        ]
+    else:
+        urls = [
+            RAS_BASE_URL + generate_conus_hydrology_wcs_str(cov_id, stream_id)
+            for cov_id in cov_ids
+        ]
 
     results = await fetch_data(urls)
 
@@ -386,15 +399,15 @@ def package_metadata(ds, data_dict):
 
         # add derived "ma99" annual mean flow stat
         # if "ma12" is present (indicating we are dealing with a stats dataset)
-        if var == "ma12":
-            data_dict["metadata"]["variables"]["ma99"] = {}
-            data_dict["metadata"]["variables"]["ma99"]["units"] = "cfs"
-            data_dict["metadata"]["variables"]["ma99"][
-                "description"
-            ] = "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows."
+        # if var == "ma12":
+        #     data_dict["metadata"]["variables"]["ma99"] = {}
+        #     data_dict["metadata"]["variables"]["ma99"]["units"] = "cfs"
+        #     data_dict["metadata"]["variables"]["ma99"][
+        #         "description"
+        #     ] = "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows."
 
         # "doy" vars from hydrograph datasets
-        elif var in ["doy_min", "doy_mean", "doy_max"]:
+        if var in ["doy_min", "doy_mean", "doy_max"]:
             data_dict["metadata"]["variables"][var]["units"] = "cfs"
             if var == "doy_min":
                 op = "Minimum"
@@ -798,6 +811,11 @@ def run_get_conus_hydrology_stats_data(stream_id):
     Returns:
         JSON response with hydrological stats for the requested stream ID.
     """
+    # validate get request query parameters
+    source = request.args.get("source", None)
+    if source is None:
+        source = "gcm_diff_applied_to_maurer"
+
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
 
@@ -810,15 +828,22 @@ def run_get_conus_hydrology_stats_data(stream_id):
         decode_dict = asyncio.run(
             get_decode_dicts_from_axis_attributes(coverages["stats"])
         )[0]
-        ds = asyncio.run(fetch_hydro_data(coverages["stats"], stream_id))[0]
 
-        # decode the dimension values
+        ds = asyncio.run(
+            fetch_hydro_data(
+                coverages["stats"], stream_id, source=stat_source_encodings[source]
+            )
+        )[0]
+
+        # decode the dimension values, ignoring "source"
         for dim, mapping in decode_dict.items():
+            if dim == "source":
+                continue
             ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
 
         # package the stats data + metadata into a dictionary for JSON serialization
         data_dict = package_stats_data(stream_id, ds)
-        data_dict = calculate_and_populate_annual_mean_flow(data_dict)
+        # data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
 

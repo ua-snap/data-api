@@ -178,6 +178,14 @@ def validate_get_params():
             required=False,
         )
 
+        # Make sure "source" parameter is one of the predefined sources for stats coverage
+        source = fields.Str(
+            validate=validate.OneOf(
+                ["original_gcm", "gcm_diff", "gcm_diff_applied_to_maurer"]
+            ),
+            required=False,
+        )
+
     schema = QueryParamsSchema()
     errors = schema.validate(request.args)
     if errors:
