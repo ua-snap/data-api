@@ -828,6 +828,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
                 return render_template("500/server_error.html"), 500
 
         # add stats for data sentences to metadata: this is not included in the CSV output, but should be in JSON response
+        # TODO: drop the summary if not used in the front end
         data_dict = populate_feature_stat_attributes_summary(data_dict, gdf)
 
         return jsonify(data_dict)
