@@ -68,6 +68,21 @@ titles = {
     "obupfx": "Obu et al. (2018) Permafrost Extent",
 }
 
+# Map variable names from Rasdaman variable name to
+# expected variable names in CSV output and data returns.
+variable_name_map = {
+    "magt05m_degC": "magt0.5m",
+    "magt1m_degC": "magt1m",
+    "magt2m_degC": "magt2m",
+    "magt3m_degC": "magt3m",
+    "magt4m_degC": "magt4m",
+    "magt5m_degC": "magt5m",
+    "magtsurface_degC": "magtsurface",
+    "permafrostbase_m": "permafrostbase",
+    "permafrosttop_m": "permafrosttop",
+    "talikthickness_m": "talikthickness",
+}
+
 
 # packaging functions unique to each query
 def package_obu_magt(obu_magt_resp):
@@ -86,7 +101,7 @@ def package_obu_magt(obu_magt_resp):
 
     nullified_data = nullify_nodata(temp, "permafrost")
     if nullified_data is not None:
-        di = {"year": year, "depth": depth, "temp": temp}
+        di = {"time": year, "depth": depth, "temp": temp}
         return di
 
     return None
@@ -128,7 +143,7 @@ def make_ncr_gipl1km_wcps_request_str(x, y, years, model, scenario, summary_oper
         (
             f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
             f"  return encode ("
-            f"    {summary_operation}($c[model({model}),scenario({scenario}),year({years}),X({x}),Y({y})])"
+            f"    {summary_operation}($c[model({model}),scenario({scenario}),time({years}),X({x}),Y({y})])"
             f', "application/json")'
         )
     )
@@ -162,13 +177,14 @@ def package_ncr_gipl1km_wcps_data(gipl1km_wcps_resp):
                 gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"] = dict()
                 # Step through the variable names and their corresponding values
                 for k, v in zip(variable_names, resp.split()):
+                    csv_name = variable_name_map.get(k, k)
                     if v == "null" or v is None:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
-                            k
+                            csv_name
                         ] = None
                     else:
                         gipl1km_wcps_point_pkg[model][scenario][f"gipl1km{stat_type}"][
-                            k
+                            csv_name
                         ] = round(float(v), 1)
     return gipl1km_wcps_point_pkg
 
@@ -188,7 +204,7 @@ def make_gipl1km_wcps_request_str(x, y, years, summary_operation):
         (
             f"ProcessCoverages&query=for $c in ({gipl_1km_coverage_id}) "
             f"  return encode ("
-            f"    {summary_operation}($c[year({years}),X({x}),Y({y})] )"
+            f"    {summary_operation}($c[time({years}),X({x}),Y({y})] )"
             f', "application/json")'
         )
     )
@@ -213,10 +229,13 @@ def package_gipl1km_wcps_data(gipl1km_wcps_resp):
             gipl1km_dim_encodings["variable"].values(),
             summary_op_resp.split(),
         ):
+            csv_name = variable_name_map.get(k, k)
             if v == "null" or v is None:
-                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = None
+                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][csv_name] = None
             else:
-                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][k] = round(float(v), 1)
+                gipl1km_wcps_point_pkg[f"gipl1km{stat_type}"][csv_name] = round(
+                    float(v), 1
+                )
 
     return gipl1km_wcps_point_pkg
 
@@ -276,9 +295,11 @@ def package_gipl1km_point_data(gipl1km_point_resp, time_slice=None):
                         values.append(None)
                     else:
                         values.append(float(v))
-                # Add the variable values to the packaged data
+
                 gipl1km_point_pkg[model_name][year][scenario_name] = {
-                    var: (round(val, 1) if val is not None else None)
+                    variable_name_map.get(var, var): (
+                        round(val, 1) if val is not None else None
+                    )
                     for var, val in zip(variable_names, values)
                 }
 
@@ -469,7 +490,7 @@ async def fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize, ncr):
         timestring = (
             f'"{start_year}-01-01T00:00:00.000Z":"{end_year}-01-01T00:00:00.000Z"'
         )
-        time_subset = ("year", timestring)
+        time_subset = ("time", timestring)
         gipl_request_str = generate_wcs_getcov_str(
             x, y, gipl_1km_coverage_id, time_slice=time_subset
         )
@@ -680,9 +701,7 @@ def permafrost_eds_request(lat, lon):
 
     # If there are no error responses, include the summary and preview data in the response
     permafrostData["summary"] = summary
-    # permafrostData["permafrost"]["preview"] = [r.data.decode("utf-8") for r in preview]
-
-    preview_string = [r.data.decode("utf-8") for r in preview]
+    preview_string = [r.get_data(as_text=True) for r in preview]
 
     preview_past = preview_string[0].split("\n")[4:10]
     preview_future = preview_string[1].split("\n")[-6:]
