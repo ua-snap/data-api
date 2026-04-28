@@ -397,14 +397,15 @@ def package_metadata(ds, data_dict):
 
         # special cases:
 
-        # add derived "ma99" annual mean flow stat
-        # if "ma12" is present (indicating we are dealing with a stats dataset)
-        # if var == "ma12":
-        #     data_dict["metadata"]["variables"]["ma99"] = {}
-        #     data_dict["metadata"]["variables"]["ma99"]["units"] = "cfs"
-        #     data_dict["metadata"]["variables"]["ma99"][
-        #         "description"
-        #     ] = "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows."
+        # TODO: if stat source is "original_gcm", then we should update the description of the stat variables
+        # to indicate that these are actual stat values derived from the original GCM runs
+
+        # TODO: if stat source is "gcm_diff", then we should update the description of the stat variables
+        # to indicate that these are ratios or absolute diffs, not actual stat values
+
+        # TODO: if the stat source is "gcm_diff_applied_to_maurer", then we should update the description
+        # of the stat variables to indicate that these are actual stat values derived from applying the
+        # GCM-projected changes to the historical Maurer stats
 
         # "doy" vars from hydrograph datasets
         if var in ["doy_min", "doy_mean", "doy_max"]:
@@ -724,45 +725,6 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
     return data_dict
 
 
-def calculate_and_populate_annual_mean_flow(data_dict):
-    """
-    Function to calculate and populate the annual mean flow (ma99) in the stats data dictionary.
-    Args:
-        data_dict (dict): Data dictionary with the stats data populated
-    Returns:
-        Data dictionary with the annual mean flow populated.
-    """
-    monthly_stats_codes = [
-        "ma12",
-        "ma13",
-        "ma14",
-        "ma15",
-        "ma16",
-        "ma17",
-        "ma18",
-        "ma19",
-        "ma20",
-        "ma21",
-        "ma22",
-        "ma23",
-    ]
-    for landcover_, land_dict in data_dict["data"].items():
-        for model_, model_dict in land_dict.items():
-            for scenario_, scen_dict in model_dict.items():
-                for era_, era_dict in scen_dict.items():
-                    # check if all monthly stats are present
-                    if all(code in era_dict for code in monthly_stats_codes):
-                        # calculate annual mean flow
-                        monthly_values = [
-                            era_dict[code] for code in monthly_stats_codes
-                        ]
-                        annual_mean_flow = sum(monthly_values) / len(monthly_values)
-                        # populate the annual mean flow in the stats dictionary
-                        era_dict["ma99"] = round(annual_mean_flow, 2)
-
-    return data_dict
-
-
 def prune_missing_scenarios(data_dict):
     """
     Function to prune scenarios with no data from the data dictionary.
@@ -843,13 +805,16 @@ def run_get_conus_hydrology_stats_data(stream_id):
 
         # package the stats data + metadata into a dictionary for JSON serialization
         data_dict = package_stats_data(stream_id, ds)
-        # data_dict = calculate_and_populate_annual_mean_flow(data_dict)
         data_dict = package_metadata(ds, data_dict)
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
 
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
         if request.args.get("format") == "csv":
+
+            # TODO: pass stat source through to CSV creation function so that an appropriate stat description
+            #  can be included in the metadata of the CSV output metadata
+
             try:
                 return create_csv(
                     data=data_dict,
