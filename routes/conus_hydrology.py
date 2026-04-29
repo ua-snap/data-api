@@ -781,8 +781,8 @@ def convert_doy_to_water_year_index(doy):
 def calculate_and_apply_gcm_diffs_to_maurer_climatology(data_dict):
     """
     Function to calculate the GCM-projected changes in streamflow stats and apply those changes to the historical Maurer climatology stats.
-    This is done by first calculating the percent change between the GCM-projected future stat values and the GCM historical stat values,
-    then applying that percent change to the Maurer historical stat values.
+    This is done by first calculating the ratio between the GCM-projected future stat values and the GCM historical stat values,
+    then applying that scaling factor to the Maurer historical stat values.
     Args:
         data_dict (dict): Data dictionary with the hydrology data populated
     Returns:
