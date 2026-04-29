@@ -369,7 +369,7 @@ def package_hydrograph_data(stream_id, datasets):
     return prune_missing_scenarios(hydrograph_dict)
 
 
-def package_metadata(ds, data_dict):
+def package_metadata(ds, data_dict, source=None):
     """
     Function to package the metadata from the dataset into the data dictionary.
     Args:
@@ -396,16 +396,31 @@ def package_metadata(ds, data_dict):
         )
 
         # special cases:
+        source_notes = {
+            "original_gcm": "Values are derived from the original GCM runs.",
+            "gcm_diff": "Values are derived from the ratio or absolute difference between the original GCM runs and the historical GCM runs; these are not actual statistic values.",
+            "gcm_diff_applied_to_maurer": "Values are derived from applying the GCM-projected changes to the historical Maurer baseline.",
+        }
 
-        # TODO: if stat source is "original_gcm", then we should update the description of the stat variables
-        # to indicate that these are actual stat values derived from the original GCM runs
+        # if source is "original_gcm", update var description to say values are derived from the original GCM runs
+        if source == "original_gcm":
+            data_dict["metadata"]["variables"][var][
+                "description"
+            ] = f"{data_dict['metadata']['variables'][var]['description']} {source_notes['original_gcm']}"
 
-        # TODO: if stat source is "gcm_diff", then we should update the description of the stat variables
-        # to indicate that these are ratios or absolute diffs, not actual stat values
+        # if source is "gcm_diff" (stats only), update var description to say values are ratio or
+        # absolute differences from the original GCM runs, not actual stat values
+        if source == "gcm_diff":
+            data_dict["metadata"]["variables"][var][
+                "description"
+            ] = f"{data_dict['metadata']['variables'][var]['description']} {source_notes['gcm_diff']}"
 
-        # TODO: if the stat source is "gcm_diff_applied_to_maurer", then we should update the description
-        # of the stat variables to indicate that these are actual stat values derived from applying the
-        # GCM-projected changes to the historical Maurer stats
+        # if source is "gcm_diff_applied_to_maurer", update var description to say values are derived from
+        # applying the GCM-projected changes to the historical Maurer stats
+        if source == "gcm_diff_applied_to_maurer":
+            data_dict["metadata"]["variables"][var][
+                "description"
+            ] = f"{data_dict['metadata']['variables'][var]['description']} {source_notes['gcm_diff_applied_to_maurer']}"
 
         # "doy" vars from hydrograph datasets
         if var in ["doy_min", "doy_mean", "doy_max"]:
@@ -419,6 +434,11 @@ def package_metadata(ds, data_dict):
             data_dict["metadata"]["variables"][var][
                 "description"
             ] = f"{op} streamflow value (cfs) on the specified day of year, aggregated over all years in the era."
+            # add source notes
+            if source in source_notes:
+                data_dict["metadata"]["variables"][var][
+                    "description"
+                ] += f" {source_notes[source]}"
 
             # also add doy and water_year_index metadata:
             # these will be overwritten multiple times, but the values are the same for all three vars and we will only see them once in the final output
@@ -758,6 +778,52 @@ def convert_doy_to_water_year_index(doy):
     return wy_index
 
 
+def calculate_and_apply_gcm_diffs_to_maurer_climatology(data_dict):
+    """
+    Function to calculate the GCM-projected changes in streamflow stats and apply those changes to the historical Maurer climatology stats.
+    This is done by first calculating the percent change between the GCM-projected future stat values and the GCM historical stat values,
+    then applying that percent change to the Maurer historical stat values.
+    Args:
+        data_dict (dict): Data dictionary with the hydrology data populated
+    Returns:
+        dict: Data dictionary with the GCM-projected changes applied to the Maurer climatology stats.
+    """
+    adjusted_data_dict = {}
+    for model in data_dict.keys():
+        # no need to adjust Maurer historical stats, so just copy them over to the adjusted data dict
+        if model == "Maurer":
+            adjusted_data_dict[model] = data_dict[model]
+            continue
+        if model not in adjusted_data_dict:
+            adjusted_data_dict[model] = {}
+        for scenario in data_dict[model].keys():
+            if scenario not in adjusted_data_dict[model]:
+                adjusted_data_dict[model][scenario] = {}
+            for era in data_dict[model][scenario].keys():
+                if era not in adjusted_data_dict[model][scenario]:
+                    adjusted_data_dict[model][scenario][era] = []
+                for i in range(len(data_dict[model][scenario][era])):
+                    doy_stats = {}
+                    for stat in data_dict[model][scenario][era][i].keys():
+                        maurer_historical = data_dict["Maurer"]["historical"][
+                            "1976-2005"
+                        ][i][stat]
+                        gcm_historical = data_dict[model]["historical"]["1976-2005"][i][
+                            stat
+                        ]
+                        gcm_projected = data_dict[model][scenario][era][i][stat]
+                        denominator = gcm_historical
+                        if denominator == 0:
+                            denominator = 0.0001
+                        projected_quotient = gcm_projected / denominator
+                        maurer_adjusted = round(
+                            maurer_historical * projected_quotient, 3
+                        )
+                        doy_stats[stat] = maurer_adjusted
+                    adjusted_data_dict[model][scenario][era].append(doy_stats)
+    return adjusted_data_dict
+
+
 @routes.route("/conus_hydrology/")
 def conus_hydrology_about():
     return render_template("/documentation/conus_hydrology.html")
@@ -805,7 +871,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
 
         # package the stats data + metadata into a dictionary for JSON serialization
         data_dict = package_stats_data(stream_id, ds)
-        data_dict = package_metadata(ds, data_dict)
+        data_dict = package_metadata(ds, data_dict, source=source)
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
 
         data_dict = prune_nulls_with_max_intensity(data_dict)
@@ -828,7 +894,6 @@ def run_get_conus_hydrology_stats_data(stream_id):
                 return render_template("500/server_error.html"), 500
 
         # add stats for data sentences to metadata: this is not included in the CSV output, but should be in JSON response
-        # TODO: drop the summary if not used in the front end
         data_dict = populate_feature_stat_attributes_summary(data_dict, gdf)
 
         return jsonify(data_dict)
@@ -852,6 +917,13 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
     Returns:
         JSON response with modeled daily climatology data for the requested stream ID.
     """
+    # validate get request query parameters
+    source = request.args.get("source", None)
+    if source is None:
+        source = "gcm_diff_applied_to_maurer"
+    elif source == "gcm_diff":
+        return render_template("400/bad_request.html"), 400
+
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
 
@@ -879,7 +951,7 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
         # package the hydrograph datasets into a dictionary for JSON serialization
         data_dict = package_hydrograph_data(stream_id, datasets)
         data_dict = package_metadata(
-            datasets[0], data_dict
+            datasets[0], data_dict, source=source
         )  # all datasets should have same metadata, just use the first one
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
@@ -896,6 +968,11 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
                 )
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
+
+        # apply GCM-projected changes to Maurer climatology stats if source is "gcm_diff_applied_to_maurer"
+        # otherwise, if source is "original_gcm", then we are just returning the original GCM stats with no adjustments
+        if source == "gcm_diff_applied_to_maurer":
+            data_dict = calculate_and_apply_gcm_diffs_to_maurer_climatology(data_dict)
 
         return jsonify(data_dict)
 
@@ -1013,8 +1090,10 @@ def fetch_all_hydroviz_route(stream_id):
             "summary": ...
         }
     """
-
+    # fetch stats with default source of "gcm_diff_applied_to_maurer" (Maurer data is also included in this source)
     stats_response = run_get_conus_hydrology_stats_data(stream_id)
+
+    # fetch daily climatology default source of "gcm_diff_applied_to_maurer" (Maurer data is also included in this source)
     climatology_response = run_get_conus_hydrology_modeled_climatology(stream_id)
 
     # Projected eras to use for the hydrograph and monthly flow charts.
@@ -1026,93 +1105,23 @@ def fetch_all_hydroviz_route(stream_id):
             return response
 
     try:
-        # Fetch all needed data.
         stats = stats_response.get_json()
         climatology = climatology_response.get_json()
 
-        # Convert static stats to Maurer * (GCM projected / GCM historical).
-        static_stats = stats["data"]["static"]
-        maurer_adjusted_stats = {}
-        for model in static_stats.keys():
-            if model not in maurer_adjusted_stats:
-                maurer_adjusted_stats[model] = {}
-            for scenario in static_stats[model].keys():
+        # Subset just static data for future eras used in the app
+        # Maurer historical will be added back in below
+
+        maurer_adjusted_stats = stats["data"]["static"]
+        for model in maurer_adjusted_stats.keys():
+            for scenario in maurer_adjusted_stats[model].keys():
                 if scenario in ["historical", "rcp26"]:
-                    continue
-                if scenario not in maurer_adjusted_stats[model]:
-                    maurer_adjusted_stats[model][scenario] = {}
-                for era in static_stats[model][scenario].keys():
-                    if era not in maurer_adjusted_stats[model][scenario]:
-                        maurer_adjusted_stats[model][scenario][era] = {}
-                    for stat in static_stats[model][scenario][era].keys():
-                        maurer_historical = static_stats["Maurer"]["historical"][
-                            "1976-2005"
-                        ][stat]
-                        gcm_historical = static_stats[model]["historical"]["1976-2005"][
-                            stat
-                        ]
-                        gcm_projected = static_stats[model][scenario][era][stat]
+                    del maurer_adjusted_stats[model][scenario]
 
-                        denominator = gcm_historical
-                        if denominator == 0:
-                            denominator = 0.0001
-                        projected_quotient = gcm_projected / denominator
-                        maurer_adjusted = round(
-                            maurer_historical * projected_quotient, 3
-                        )
-
-                        # Use modulo adjustment for stats with Julian day units.
-                        # This will roll a date over to the next year if necessary.
-                        # Subtracting 1 before, then adding 1 after, prevents days of 0.
-                        if stat in ["spr_ord", "sum_ord", "th1", "tl1"]:
-                            maurer_adjusted = ((maurer_adjusted - 1) % 366) + 1
-
-                        # Make sure no stats with "number of days" units exceeds 366.
-                        if stat in ["dh15", "dl16", "lf1", "ra8"]:
-                            if maurer_adjusted > 366:
-                                maurer_adjusted = 366
-
-                        maurer_adjusted_stats[model][scenario][era][
-                            stat
-                        ] = maurer_adjusted
-
-        # Convert static climatology to Maurer * (GCM projected / GCM historical).
-        static_climatology = climatology["data"]["static"]
-        maurer_adjusted_climatology = {}
-        for model in static_climatology.keys():
-            if model not in maurer_adjusted_climatology:
-                maurer_adjusted_climatology[model] = {}
-            for scenario in static_climatology[model].keys():
+        maurer_adjusted_climatology = climatology["data"]["static"]
+        for model in maurer_adjusted_climatology.keys():
+            for scenario in maurer_adjusted_climatology[model].keys():
                 if scenario in ["historical", "rcp26"]:
-                    continue
-                if scenario not in maurer_adjusted_climatology[model]:
-                    maurer_adjusted_climatology[model][scenario] = {}
-                for era in static_climatology[model][scenario].keys():
-                    if era not in maurer_adjusted_climatology[model][scenario]:
-                        maurer_adjusted_climatology[model][scenario][era] = []
-                    for i in range(len(static_climatology[model][scenario][era])):
-                        doy_stats = {}
-                        for stat in static_climatology[model][scenario][era][i].keys():
-                            maurer_historical = static_climatology["Maurer"][
-                                "historical"
-                            ]["1976-2005"][i][stat]
-                            gcm_historical = static_climatology[model]["historical"][
-                                "1976-2005"
-                            ][i][stat]
-                            gcm_projected = static_climatology[model][scenario][era][i][
-                                stat
-                            ]
-                            denominator = gcm_historical
-                            if denominator == 0:
-                                denominator = 0.0001
-                            projected_quotient = gcm_projected / denominator
-                            maurer_adjusted = round(
-                                maurer_historical * projected_quotient, 3
-                            )
-                            doy_stats[stat] = maurer_adjusted
-                        maurer_adjusted_climatology[model][scenario][era].append(
-                            doy_stats
-                        )
+                    del maurer_adjusted_climatology[model][scenario]
 
         ########## Populate arrays for hydrograph. ##########
 
