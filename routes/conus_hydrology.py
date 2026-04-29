@@ -883,10 +883,6 @@ def run_get_conus_hydrology_stats_data(stream_id):
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
         if request.args.get("format") == "csv":
-
-            # TODO: pass source_notes through to CSV creation function so that an appropriate variable
-            #  description can be included in the CSV metadata
-
             try:
                 return create_csv(
                     data=data_dict,
@@ -895,6 +891,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
                     place_id=stream_id,
                     lat=str(data_dict["latitude"]),
                     lon=str(data_dict["longitude"]),
+                    source_metadata=source,
                 )
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
@@ -963,10 +960,6 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
         if request.args.get("format") == "csv":
-
-            # TODO: pass source_notes through to CSV creation function so that an appropriate variable
-            #  description can be included in the CSV metadata
-
             try:
                 return create_csv(
                     data=data_dict,
@@ -975,6 +968,7 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
                     place_id=stream_id,
                     lat=str(data_dict["latitude"]),
                     lon=str(data_dict["longitude"]),
+                    source_metadata=source,
                 )
             except Exception as exc:
                 return render_template("500/server_error.html"), 500

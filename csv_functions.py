@@ -1324,6 +1324,12 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
 
     # substrings in filename_prefix denotes endpoint ("Statistics", "Modeled") to aid in packaging CSV
 
+    source_notes = {
+        "original_gcm": "Values are derived from the original GCM runs.",
+        "gcm_diff": "Values are the ratio or absolute difference between the original GCM runs and the historical GCM runs — these are not actual statistic values. Apply these differences to a historical baseline value to approximate future values. See LaFontaine and Riley (2023) to find each variable's difference method (ratio or absolute).",
+        "gcm_diff_applied_to_maurer": "Values are derived from applying the GCM-projected changes to the historical Maurer baseline.",
+    }
+
     # data structure for all endpoints:
     # first level of data are strings "data", "id", "latitude", "longitude", "metadata", "name"
 
@@ -1440,6 +1446,8 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
         metadata += "# sum_ord: Julian date of summer (July-September) minimum. Determine the Julian date that the minimum flow occurs for each water year. SUM_ORD is the median of these values (Julian day - temporal).\n"
         metadata += "# th1: Julian date of annual maximum. Determine the Julian date that the maximum flow occurs for each year. TH1 is the median of these values (Julian day - temporal).\n"
         metadata += "# tl1: Julian date of annual minimum. Determine the Julian date that the minimum flow occurs for each water year. TL1 is the median of these values (Julian day - temporal).\n"
+        if isinstance(source_metadata, str) and source_metadata in source_notes:
+            metadata += f"# Data source notes: {source_notes[source_metadata]}\n"
     else:
         if "Modeled" in filename_prefix:
             metadata += "# Climatologies are calculated from from modeled daily streamflow data.\n"
@@ -1448,6 +1456,8 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
             metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
+            if isinstance(source_metadata, str) and source_metadata in source_notes:
+                metadata += f"# Data source notes: {source_notes[source_metadata]}\n"
         else:
             metadata += "# Climatologies are calculated from from observed daily streamflow data.\n"
             metadata += (
