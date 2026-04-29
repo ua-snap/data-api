@@ -58,7 +58,27 @@
     <tr>
       <td colspan="2">
         CSV output is also available by appending <code>?format=csv</code> to
-        the URL. <br />
+        the URL.<br />
+        The data source can be controlled with the <code>?source=</code>
+        parameter. Accepted values are:
+        <ul>
+          <li>
+            <code>gcm_diff_applied_to_maurer</code> (default) &mdash; GCM-projected
+            changes applied to the historical Maurer baseline.
+          </li>
+          <li>
+            <code>original_gcm</code> &mdash; raw output from the original GCM
+            runs.
+          </li>
+          <li>
+            <code>gcm_diff</code> &mdash; ratio or absolute difference between
+            the projected and historical GCM runs. These are not actual statistic
+            values; apply them to your own historical baseline to approximate future
+            values.
+          </li>
+        </ul>
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?source=original_gcm&amp;format=csv</code>).
       </td>
     </tr>
   </tfoot>
@@ -94,7 +114,21 @@
     <tr>
       <td colspan="2">
         CSV output is also available by appending <code>?format=csv</code> to
-        the URL. <br />
+        the URL.<br />
+        The data source can be controlled with the <code>?source=</code>
+        parameter. Accepted values are:
+        <ul>
+          <li>
+            <code>gcm_diff_applied_to_maurer</code> (default) &mdash; GCM-projected
+            changes applied to the historical Maurer baseline.
+          </li>
+          <li>
+            <code>original_gcm</code> &mdash; raw output from the original GCM
+            runs.
+          </li>
+        </ul>
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?source=original_gcm&amp;format=csv</code>).
       </td>
     </tr>
   </tfoot>
