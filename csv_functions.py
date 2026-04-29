@@ -1460,16 +1460,16 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
     else:
         if "Modeled" in filename_prefix:
             if isinstance(source_metadata, str) and source_metadata in source_notes:
-                metadata += f"# Climatologies are calculated from from modeled daily streamflow data. {source_notes[source_metadata]}\n"
+                metadata += f"# Climatologies are calculated from modeled daily streamflow data. {source_notes[source_metadata]}\n"
             else:
-                metadata += "# Climatologies are calculated from from modeled daily streamflow data.\n"
+                metadata += "# Climatologies are calculated from modeled daily streamflow data.\n"
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
             metadata += "# water_year_index is the water year index (1-366) for which the climatology value is reported. The water year is defined as starting on October 1 (DOY 275 in a 366 day year = water year index 1) and ending September 30 (DOY 274 in a 366 day year = water year index 366).\n"
             metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
         else:
-            metadata += "# Climatologies are calculated from from observed daily streamflow data.\n"
+            metadata += "# Climatologies are calculated from observed daily streamflow data.\n"
             metadata += (
                 "# The observation record for this time period is "
                 + str(source_metadata["percent_complete"])
