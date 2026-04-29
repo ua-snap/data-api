@@ -1324,6 +1324,12 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
 
     # substrings in filename_prefix denotes endpoint ("Statistics", "Modeled") to aid in packaging CSV
 
+    source_notes = {
+        "original_gcm": "These values are derived from the original GCM runs.",
+        "gcm_diff": "These values are the ratio or absolute difference between the original GCM runs and the historical GCM runs — these are not actual statistic values. Apply these differences to a historical baseline value to approximate future values. See LaFontaine and Riley (2023) to find the difference method for each variable (ratio or absolute).",
+        "gcm_diff_applied_to_maurer": "These values are derived from applying the GCM-projected changes to the historical Maurer baseline.",
+    }
+
     # data structure for all endpoints:
     # first level of data are strings "data", "id", "latitude", "longitude", "metadata", "name"
 
@@ -1346,9 +1352,17 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
         if key != "data":
             continue
         for landcover in data["data"].keys():
+            if data["data"][landcover] is None:
+                continue
             for model in data["data"][landcover].keys():
+                if data["data"][landcover][model] is None:
+                    continue
                 for scenario in data["data"][landcover][model].keys():
+                    if data["data"][landcover][model][scenario] is None:
+                        continue
                     for era in data["data"][landcover][model][scenario].keys():
+                        if data["data"][landcover][model][scenario][era] is None:
+                            continue
                         row = {
                             "landcover": landcover,
                             "model": model,
@@ -1386,7 +1400,10 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
 
     metadata = ""
     if "Statistics" in filename_prefix:
-        metadata += "# The following hydrologic statistics are calculated from modeled daily streamflow data:\n"
+        if isinstance(source_metadata, str) and source_metadata in source_notes:
+            metadata += f"# The following hydrologic statistics are calculated from modeled daily streamflow data. {source_notes[source_metadata]}\n"
+        else:
+            metadata += "# The following hydrologic statistics are calculated from modeled daily streamflow data:\n"
         metadata += "# dh1: Annual maximum daily flow. Compute the maximum of a 1-day moving average flow for each year. DH1 is the mean of these values (cubic feet per second - temporal).\n"
         metadata += "# dh2: Annual maximum of 3-day moving average flows. Compute the maximum of a 3-day moving average flow for each year. DH2 is the mean of these values (cubic feet per second - temporal).\n"
         metadata += "# dh3: Annual maximum of 7-day moving average flows. Compute the maximum of a 7-day moving average flow for each year. DH3 is the mean of these values (cubic feet per second - temporal).\n"
@@ -1442,14 +1459,17 @@ def conus_hydrology_csv(data, filename_prefix, source_metadata):
         metadata += "# tl1: Julian date of annual minimum. Determine the Julian date that the minimum flow occurs for each water year. TL1 is the median of these values (Julian day - temporal).\n"
     else:
         if "Modeled" in filename_prefix:
-            metadata += "# Climatologies are calculated from from modeled daily streamflow data.\n"
+            if isinstance(source_metadata, str) and source_metadata in source_notes:
+                metadata += f"# Climatologies are calculated from modeled daily streamflow data. {source_notes[source_metadata]}\n"
+            else:
+                metadata += "# Climatologies are calculated from modeled daily streamflow data.\n"
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
             metadata += "# water_year_index is the water year index (1-366) for which the climatology value is reported. The water year is defined as starting on October 1 (DOY 275 in a 366 day year = water year index 1) and ending September 30 (DOY 274 in a 366 day year = water year index 366).\n"
             metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_mean is the mean streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
             metadata += "# doy_max is the maximum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
         else:
-            metadata += "# Climatologies are calculated from from observed daily streamflow data.\n"
+            metadata += "# Climatologies are calculated from observed daily streamflow data.\n"
             metadata += (
                 "# The observation record for this time period is "
                 + str(source_metadata["percent_complete"])
