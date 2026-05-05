@@ -181,7 +181,12 @@ def validate_get_params():
         # Make sure "source" parameter is one of the predefined sources for stats coverage
         source = fields.Str(
             validate=validate.OneOf(
-                ["original_gcm", "gcm_diff", "gcm_diff_applied_to_maurer"]
+                [
+                    "original_gcm",
+                    "gcm_diff",
+                    "gcm_diff_applied_to_maurer",
+                    "gcm_diff_applied_to_cheng",
+                ]
             ),
             required=False,
         )
