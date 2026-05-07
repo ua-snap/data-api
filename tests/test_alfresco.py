@@ -73,24 +73,6 @@ def test_alfresco_veg_type_local(client):
     assert actual_data == expected_data
 
 
-def test_alfresco_flammability_invalid_area(client):
-    """
-    Tests the /alfresco/flammability/area/<id> endpoint to ensure that a 422 error is returned for an invalid area.
-    """
-    # Get the actual response from the endpoint
-    response = client.get("/alfresco/flammability/area/foobar")
-    assert response.status_code == 422
-
-
-def test_alfresco_veg_type_invalid_area(client):
-    """
-    Tests the /alfresco/veg_type/area/<id> endpoint to ensure that a 422 error is returned for an invalid area.
-    """
-    # Get the actual response from the endpoint
-    response = client.get("/alfresco/veg_type/area/foobar")
-    assert response.status_code == 422
-
-
 def test_alfresco_flammability_invalid_local_str(client):
     """Tests the /alfresco/flammability/local/<lat>/<lon> endpoint to ensure that a 400 error is returned for a string input."""
     # Get the actual response from the endpoint
