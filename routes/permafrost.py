@@ -101,7 +101,7 @@ def package_obu_magt(obu_magt_resp):
 
     nullified_data = nullify_nodata(temp, "permafrost")
     if nullified_data is not None:
-        di = {"time": year, "depth": depth, "temp": temp}
+        di = {"year": year, "depth": depth, "temp": temp}
         return di
 
     return None
