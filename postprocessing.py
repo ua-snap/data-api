@@ -146,7 +146,7 @@ def prune_nodata_list(data):
     return pruned
 
 
-def prune_nulls_with_max_intensity(data):
+def prune_nulls_with_max_intensity(data, keys_to_keep=[]):
     """
     Recursively remove all None values from dicts and remove any empty dicts that remain.
 
@@ -156,9 +156,10 @@ def prune_nulls_with_max_intensity(data):
         return {
             k: v
             for k, v in (
-                (k, prune_nulls_with_max_intensity(v)) for k, v in data.items()
+                (k, prune_nulls_with_max_intensity(v, keys_to_keep))
+                for k, v in data.items()
             )
-            if v is not None
+            if v is not None or k in keys_to_keep
         }
     else:
         return data

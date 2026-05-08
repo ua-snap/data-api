@@ -285,11 +285,12 @@ def package_stats_data(stream_id, ds):
                     if np.isnan(vals).all():
                         continue
 
-                    scen_dict[era] = {
-                        vars_[i]: round(float(v), 2)
-                        for i, v in enumerate(vals)
-                        if not np.isnan(v)
-                    }
+                    scen_dict[era] = {}
+                    for i, v in enumerate(vals):
+                        if not np.isnan(v):
+                            scen_dict[era][vars_[i]] = round(float(v), 2)
+                        else:
+                            scen_dict[era][vars_[i]] = None
 
     return prune_missing_scenarios(stats_dict)
 
@@ -880,7 +881,9 @@ def run_get_conus_hydrology_stats_data(stream_id):
         data_dict = package_metadata(ds, data_dict, source=source)
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
 
-        data_dict = prune_nulls_with_max_intensity(data_dict)
+        # Get all variable keys and keep them during pruning process.
+        data_vars = list(ds.data_vars)
+        data_dict = prune_nulls_with_max_intensity(data_dict, keys_to_keep=data_vars)
 
         if request.args.get("format") == "csv":
             try:
@@ -1300,11 +1303,20 @@ def fetch_all_hydroviz_route(stream_id):
                     table_stats["projected"][era][scenario] = {}
                 for stat in scenario_stat_arrays[scenario][era].keys():
                     values = scenario_stat_arrays[scenario][era][stat]
-                    table_stats["projected"][era][scenario][stat] = {
-                        "min": round(min(values), 3),
-                        "median": round(statistics.median(values), 3),
-                        "max": round(max(values), 3),
-                    }
+                    if all(v is None for v in values):
+                        table_stats["projected"][era][scenario][stat] = {
+                            "min": None,
+                            "median": None,
+                            "max": None,
+                        }
+                    else:
+                        # If values are not all None, calculate min/median/max using non-None values.
+                        values = [v for v in values if v is not None]
+                        table_stats["projected"][era][scenario][stat] = {
+                            "min": round(min(values), 3),
+                            "median": round(statistics.median(values), 3),
+                            "max": round(max(values), 3),
+                        }
 
         gauge_id = None
         h8_outlet = False
