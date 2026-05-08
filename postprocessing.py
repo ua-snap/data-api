@@ -146,12 +146,17 @@ def prune_nodata_list(data):
     return pruned
 
 
-def prune_nulls_with_max_intensity(data, keys_to_keep=[]):
+def prune_nulls_with_max_intensity(data, keys_to_keep=None):
     """
     Recursively remove all None values from dicts and remove any empty dicts that remain.
 
     In practice, this will trim keys with `null` values from the API response even in the case when a sibling key does have data.
+    The optional keys_to_keep argument allows you to specify keys that should be retained even if their value is None.
     """
+    if keys_to_keep is None:
+        keys_to_keep = set()
+    else:
+        keys_to_keep = set(keys_to_keep)
     if isinstance(data, dict):
         return {
             k: v
