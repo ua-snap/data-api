@@ -26,7 +26,7 @@ from config import RAS_BASE_URL
 from . import routes
 
 coverages = {
-    "stats": ["ak_hydro_segments_stats_combined"],
+    "stats": ["ak_hydro_segments_mhit_stats_combined"],
     "doy_climatology": ["ak_hydro_segments_doy_climatology"],
 }
 
@@ -672,7 +672,9 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
         )[0]
         pgw_ds = asyncio.run(
             fetch_hydro_data(
-                coverages["stats"], stream_id, source=stat_source_encodings["original_gcm"]
+                coverages["stats"],
+                stream_id,
+                source=stat_source_encodings["original_gcm"],
             )
         )[0]
         for dim, mapping in stats_decode_dict.items():
