@@ -17,7 +17,10 @@ from flask import (
 )
 
 from generate_requests import generate_conus_hydrology_wcs_str
-from generate_urls import generate_wfs_arctic_hydrology_url, generate_wfs_arctic_hydrology_stats_url
+from generate_urls import (
+    generate_wfs_arctic_hydrology_url,
+    generate_wfs_arctic_hydrology_stats_url,
+)
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
 from postprocessing import prune_nulls_with_max_intensity
@@ -130,12 +133,15 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
         data_dict (dict): Data dictionary to populate with summary stats
         gdf (GeoDataFrame or None): GeoDataFrame with stat attributes from the stats layer
     Returns:
-        Data dictionary with summary stats populated, or null-valued summary if gdf is unavailable."""
+        Data dictionary with summary stats populated, or null-valued summary if gdf is unavailable.
+    """
     summary_values = {}
 
     ### MEAN FLOWS:
     ma99_hist_value = (
-        int(round(gdf.loc[0].ma99_hist, 0)) if not np.isnan(gdf.loc[0].ma99_hist) else None
+        int(round(gdf.loc[0].ma99_hist, 0))
+        if not np.isnan(gdf.loc[0].ma99_hist)
+        else None
     )
     if ma99_hist_value is not None and ma99_hist_value > 5:
         ma99_hist_value = int(round(gdf.loc[0].ma99_hist / 5) * 5)
@@ -615,11 +621,16 @@ def populate_feature_attributes(data_dict, gdf):
 
     # data_dict["name"] = "" # arctic rivers segments do not have stream names associated
 
+    # gauge ID is blank or null for most features, so default to None if not present or NaN
+    data_dict["gauge_id"] = gdf.loc[0].get("Gauge_ID", None)
+
     # the watershed ID matches the GVV code for HUC8 in Alaska or Yukon watershed in Canada
     # all Yukon watersheds begin with "YTHYDRO" while HUC8s are just numeric
     data_dict["watershed"] = gdf.loc[0].get("ID_1", None)
     outlet = gdf.loc[0].get("outlet", None)
-    data_dict["watershed_outlet"] = bool(outlet) if outlet is not None and not np.isnan(outlet) else None
+    data_dict["watershed_outlet"] = (
+        bool(outlet) if outlet is not None and not np.isnan(outlet) else None
+    )
 
     # copy and convert gdf to WGS84 for lat/lon extraction
     gdf_4326 = gdf.to_crs("EPSG:4326")
@@ -1010,12 +1021,12 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
             }
 
         response = {
-            "gauge_id": None,
-            "huc8": None,
-            "huc8_outlet": None,
+            "gauge_id": stats.get("gauge_id"),
+            "huc8": stats.get("watershed"),
+            "huc8_outlet": stats.get("watershed_outlet"),
             "hydrograph": hydrograph,
             "id": stats["id"],
-            "name": stats["name"],
+            "name": stats.get("name"),
             "monthly_flow": monthly_flow,
             "max_flow_dates": max_flow_dates,
             "stats": table_stats,
