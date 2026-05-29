@@ -133,17 +133,18 @@ def generate_wfs_conus_hydrology_url(stream_id):
 def generate_wfs_arctic_hydrology_url(stream_id):
     """
     Generate a WFS URL for fetching arctic hydrology data for a given stream ID. Returns both attributes and geometry for a single stream ID.
-    If the stream ID is an empty string, returns only attributes for all streams."""
+    If the stream ID is an empty string, returns only COMID attribute for all streams.
+    """
     if stream_id == "":
         wfs_url = (
             GS_BASE_URL
-            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_segments&propertyName=(COMID)&outputFormat=application/json"
+            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_joined_3338&propertyName=(COMID)&outputFormat=application/json"
         )
         return wfs_url
     else:
         wfs_url = (
             GS_BASE_URL
-            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_segments&propertyName=(COMID,the_geom)&outputFormat=application/json&cql_filter=(COMID={stream_id})"
+            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_joined_3338&propertyName=(COMID,the_geom,Gauge_ID,ID_1,ID_2,Name,outlet)&outputFormat=application/json&cql_filter=(COMID={stream_id})"
         )
     return wfs_url
 
