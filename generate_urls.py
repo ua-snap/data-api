@@ -149,6 +149,17 @@ def generate_wfs_arctic_hydrology_url(stream_id):
     return wfs_url
 
 
+def generate_wfs_arctic_hydrology_stats_url(stream_id):
+    """
+    Generate a WFS URL for fetching arctic hydrology summary stats for a given stream ID
+    from the arctic_rivers_segments_stats_simplified layer.
+    """
+    return (
+        GS_BASE_URL
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_stats_simplified&outputFormat=application/json&cql_filter=(COMID={stream_id})"
+    )
+
+
 def generate_usgs_gauge_daily_streamflow_data_url(gauge_id, start_date, end_date):
     """
     Generate a USGS OGC API URL for fetching daily streamflow data for a given gauge ID and date range.
