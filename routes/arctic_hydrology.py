@@ -36,7 +36,7 @@ stat_source_encodings = {
     "gcm_diff_applied_to_cheng": 2,
 }
 
-# TODO: populate this with actual values from the GS layer after computing via MHIT
+# TODO: populate this with actual values from the GS layer after computing via MHIT.
 _SUMMARY_STUB = {
     "ma99_hist": {
         "value": None,
@@ -185,7 +185,7 @@ async def get_features(stream_id):
 
         async with ClientSession() as session:
             layer_data = await fetch_layer_data(url, session)
-        gdf = gpd.GeoDataFrame.from_features(layer_data["features"], crs="EPSG:4326")
+        gdf = gpd.GeoDataFrame.from_features(layer_data["features"], crs="EPSG:3338")
         gdf["geometry"] = gdf["geometry"].make_valid()
 
         return gdf
@@ -462,11 +462,17 @@ def populate_feature_attributes(data_dict, gdf):
     Returns:
         Data dictionary with the vector attributes populated."""
 
-    data_dict["name"] = ""
-    data_dict["huc8"] = None
-    data_dict["huc8_outlet"] = None
-    data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
-    data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
+    # data_dict["name"] = "" # arctic rivers segments do not have stream names associated
+
+    # the watershed ID matches the GVV code for HUC8 in Alaska or Yukon watershed in Canada
+    # all Yukon watersheds begin with "YTHYDRO" while HUC8s are just numeric
+    data_dict["watershed"] = gdf.loc[0].get("ID_1", None)
+    data_dict["watershed_outlet"] = gdf.loc[0].get("outlet", None)
+
+    # copy and convert gdf to WGS84 for lat/lon extraction
+    gdf_4326 = gdf.to_crs("EPSG:4326")
+    data_dict["latitude"] = round(gdf_4326.loc[0].geometry.representative_point().y, 4)
+    data_dict["longitude"] = round(gdf_4326.loc[0].geometry.representative_point().x, 4)
 
     return data_dict
 
