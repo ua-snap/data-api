@@ -135,10 +135,10 @@ def populate_feature_stat_attributes_summary(data_dict, gdf):
 
     ### MEAN FLOWS:
     ma99_hist_value = (
-        round(gdf.loc[0].ma99_hist, 0) if not np.isnan(gdf.loc[0].ma99_hist) else None
+        int(round(gdf.loc[0].ma99_hist, 0)) if not np.isnan(gdf.loc[0].ma99_hist) else None
     )
     if ma99_hist_value is not None and ma99_hist_value > 5:
-        ma99_hist_value = round(gdf.loc[0].ma99_hist / 5) * 5
+        ma99_hist_value = int(round(gdf.loc[0].ma99_hist / 5) * 5)
     summary_values["ma99_hist"] = {
         "value": ma99_hist_value,
         "range_low": None,
@@ -618,7 +618,8 @@ def populate_feature_attributes(data_dict, gdf):
     # the watershed ID matches the GVV code for HUC8 in Alaska or Yukon watershed in Canada
     # all Yukon watersheds begin with "YTHYDRO" while HUC8s are just numeric
     data_dict["watershed"] = gdf.loc[0].get("ID_1", None)
-    data_dict["watershed_outlet"] = gdf.loc[0].get("outlet", None)
+    outlet = gdf.loc[0].get("outlet", None)
+    data_dict["watershed_outlet"] = bool(outlet) if outlet is not None and not np.isnan(outlet) else None
 
     # copy and convert gdf to WGS84 for lat/lon extraction
     gdf_4326 = gdf.to_crs("EPSG:4326")
@@ -704,6 +705,7 @@ def run_get_arctic_hydrology_stats_data(stream_id):
         return jsonify(data_dict)
 
     except Exception as exc:
+
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
