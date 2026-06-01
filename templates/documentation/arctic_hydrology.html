@@ -7,8 +7,11 @@
   Canada. Stream segments were derived from the MERIT Hydro network, and
   streamflow was modeled using the Regional Arctic System Model (RASM) with
   dynamically downscaled CMIP6 historical (1990&ndash;2021) and projected
-  mid-century (2034-2065) climate data. A dynamically downscaled ERA5 baseline
-  is available for the historical period.
+  mid-century (2034-2065) climate data using the SSP3-7.0 scenario. Four
+  Community Earth System Model 2 (CESM2) runs are included, as well as two
+  pseudo-global warming (PGW) runs based on the CESM2 Large Ensemble. A
+  dynamically downscaled ERA5 baseline (Cheng) is available for the historical
+  period.
 </p>
 
 <!-- TODO: create a way for users to find the stream IDs for streams of interest, and reference it here -->
@@ -24,9 +27,9 @@
 <h4>Modeled hydrologic statistics by stream ID</h4>
 
 <p>
-  Query hydrologic statistics for all models and scenarios. Statistics are
-  computed over historical (1990&ndash;2021) and projected mid-century
-  (2034&ndash;2065) eras. These statistics are defined
+  Query hydrologic statistics for all models. Statistics are computed over
+  historical (1990&ndash;2021) and projected mid-century (2034&ndash;2065) eras.
+  These statistics are defined
   <a href="#stats_table">below</a>.
 </p>
 
@@ -51,7 +54,28 @@
     <tr>
       <td colspan="2">
         CSV output is also available by appending <code>?format=csv</code> to
-        the URL. <br />
+        the URL.<br />
+        The data source can be controlled with the <code>?source=</code>
+        parameter. Accepted values are:
+        <ul>
+          <li>
+            <code>gcm_diff_applied_to_cheng</code> (default) &mdash;
+            GCM-projected changes applied to the historical Cheng baseline. PGW
+            models are not included.
+          </li>
+          <li>
+            <code>original_gcm</code> &mdash; raw output from the original GCM
+            runs. Includes PGW models.
+          </li>
+          <li>
+            <code>gcm_diff</code> &mdash; ratio or absolute difference between
+            the projected and historical GCM runs. These are not actual
+            statistic values; apply them to your own historical baseline to
+            approximate future values.
+          </li>
+        </ul>
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?source=original_gcm&amp;format=csv</code>).
       </td>
     </tr>
   </tfoot>
@@ -60,9 +84,9 @@
 <h4>Modeled daily streamflow climatologies by stream ID</h4>
 
 <p>
-  Query daily streamflow climatologies for all models and scenarios. Useful for
-  constructing hydrographs. Minimum, maximum, and mean values for each day of
-  year are computed over historical (1990&ndash;2021) and projected mid-century
+  Query daily streamflow climatologies for all models. Useful for constructing
+  hydrographs. Minimum, maximum, and mean values for each day of year are
+  computed over historical (1990&ndash;2021) and projected mid-century
   (2034&ndash;2065) eras.
 </p>
 
@@ -87,7 +111,22 @@
     <tr>
       <td colspan="2">
         CSV output is also available by appending <code>?format=csv</code> to
-        the URL. <br />
+        the URL.<br />
+        The data source can be controlled with the <code>?source=</code>
+        parameter. Accepted values are:
+        <ul>
+          <li>
+            <code>gcm_diff_applied_to_cheng</code> (default) &mdash;
+            GCM-projected changes applied to the historical Cheng baseline. PGW
+            models are not included.
+          </li>
+          <li>
+            <code>original_gcm</code> &mdash; raw output from the original GCM
+            runs. Includes PGW models.
+          </li>
+        </ul>
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?source=original_gcm&amp;format=csv</code>).
       </td>
     </tr>
   </tfoot>
@@ -103,52 +142,77 @@
 {
   "data": {
     "C2LE2": {
-      "1990-2021": {
-        "ma12": 26.52,
-        "ma13": 26.1,
-        "ma14": 24.67,
-        "ma15": 62.68,
-        "ma16": 5237.25,
-        "ma17": 16313.96,
-        "ma18": 9392.27,
-        "ma19": 5261.32,
-        "ma20": 5504.12,
-        "ma21": 3754.39,
-        "ma22": 351.99,
-        "ma23": 38.11,
-        "ma99": 3832.78
-      },
-      ...
-    },
-    ...
-    "id": "81000004",
-    "latitude": 70.8283,
-    "longitude": -155.4225,
-    "metadata": {
-      "source": {
-        "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
-      },
-      "variables": {
-        "ma12": {
-          "description": "Mean of monthly flow values for January.",
-          "units": "cfs"
-        },
+      "2034-2065": {
+        "dh1": 49214.59,
+        "dh15": 23.0,
         ...
-        "ma99": {
-          "description": "Annual mean streamflow (cfs), calculated as the mean of the monthly mean flows.",
-          "units": "cfs"
-        }
+        "th1": 169.46,
+        "tl1": 129.21
       }
     },
-    "name": ""
-  }
+    ...
+    "historical": {
+      "1990-2021": {
+        "dh1": 39168.64,
+        "dh15": 22.75,
+        ...
+        "th1": 171.26,
+        "tl1": 134.51
+      }
+    }
+  },
+  "id": "81000004",
+  "latitude": 70.8283,
+  "longitude": -155.4225,
+  "metadata": {
+    "source": {
+      "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
+    },
+    "variables": {
+      "dh1": {
+        "description": "Mean annual maximum 1-day average flow.",
+        "units": "cfs"
+      },
+      "dh15": {
+        "description": "Median annual average duration of high flow pulses (above 75th percentile).",
+        "units": "days_per_year"
+      },
+      ...
+      "th1": {
+        "description": "Median Julian date of annual maximum flow.",
+        "units": "julian_day"
+      },
+      "tl1": {
+        "description": "Median Julian date of annual minimum flow.",
+        "units": "julian_day"
+      }
+    }
+  },
+  "summary": {
+    "dh1_delta": {
+      "description": "projected change in maximum 1-day flow",
+      "range_high": 32,
+      "range_low": 4,
+      "units": "percent",
+      "value": 32
+    },
+    ...
+    "ma99_hist": {
+      "description": "historical mean annual flow",
+      "range_high": null,
+      "range_low": null,
+      "units": "cfs",
+      "value": 4160
+    }
+  },
+  "watershed": "19060206",
+  "watershed_outlet": true
 }
 </pre>
 
 <p>
   Note that latitude and longitude values represent the approximate centroid of
-  the stream segment. Also note that not all stream segments are named. The
-  above output is structured like this:
+  the stream segment. The above output is structured like this:
 </p>
 
 <pre>
@@ -158,7 +222,7 @@
       &lt;era&gt;: {
         &lt;variable&gt;: &lt;value&gt;,
         ...
-        },
+      },
       ...
     },
     ...
@@ -178,7 +242,18 @@
       ...
     }
   },
-  "name": &lt;name of stream segment&gt;
+  "summary": {
+    &lt;statistic&gt;: {
+      "description": &lt;description of statistic&gt;,
+      "range_high": &lt;maximum projected change across models&gt;,
+      "range_low": &lt;minimum projected change across models&gt;,
+      "units": &lt;units of statistic&gt;,
+      "value": &lt;central projected value&gt;
+    },
+    ...
+  },
+  "watershed": &lt;HUC8 or Yukon watershed ID&gt;,
+  "watershed_outlet": &lt;true if segment is a watershed outlet&gt;
 }
 </pre>
 
@@ -189,35 +264,35 @@
 {
   "data": {
     "C2LE2": {
-      "1990-2021": [
+      "2034-2065": [
         {
-            "doy": 1,
-            "doy_max": 40.89,
-            "doy_mean": 26.663,
-            "doy_min": 0.222,
-            "water_year_index": 93
+          "doy": 1,
+          "doy_max": 80.02,
+          "doy_mean": 23.776,
+          "doy_min": 0.209,
+          "water_year_index": 93
         },
         {
-            "doy": 2,
-            "doy_max": 40.793,
-            "doy_mean": 26.637,
-            "doy_min": 1.339,
-            "water_year_index": 94
+          "doy": 2,
+          "doy_max": 61.352,
+          "doy_mean": 22.408,
+          "doy_min": 1.247,
+          "water_year_index": 94
         },
         ...
         {
-            "doy": 365,
-            "doy_max": 40.992,
-            "doy_mean": 27.598,
-            "doy_min": 15.445,
-            "water_year_index": 91
+          "doy": 365,
+          "doy_max": 147.04,
+          "doy_mean": 28.096,
+          "doy_min": 14.252,
+          "water_year_index": 91
         },
         {
-            "doy": 366,
-            "doy_max": 32.638,
-            "doy_mean": 26.632,
-            "doy_min": 15.37,
-            "water_year_index": 92
+          "doy": 366,
+          "doy_max": 101.043,
+          "doy_mean": 40.352,
+          "doy_min": 20.524,
+          "water_year_index": 92
         }
       ]
     },
@@ -253,14 +328,15 @@
       }
     }
   },
-  "name": ""
+  "watershed": "19060206",
+  "watershed_outlet": true
 }
 </pre>
 
 <p>
   Note that latitude and longitude values represent the approximate centroid of
-  the stream segment. Also note that not all stream segments are named. Modeled
-  data uses a 366 day year. The above output is structured like this:
+  the stream segment. Modeled data uses a 366 day year. The above output is
+  structured like this:
 </p>
 
 <pre>
@@ -276,23 +352,25 @@
       ],
       ...
     },
-    "id": &lt;stream ID&gt;,
-    "latitude": &lt;latitude of stream segment&gt;,
-    "latitude": &lt;latitude of stream segment&gt;,
-    "longitude": &lt;longitude of stream segment&gt;,
-    "metadata": {
-      "source": {
-        "citation": &lt;academic reference for source data&gt;
-      },
-      "variables": {
-        &lt;variable&gt;: {
-          "description": &lt;description of variable&gt;,
-          "units": &lt;units of variable&gt;
-        },
-      }
+    ...
+  },
+  "id": &lt;stream ID&gt;,
+  "latitude": &lt;latitude of stream segment&gt;,
+  "longitude": &lt;longitude of stream segment&gt;,
+  "metadata": {
+    "source": {
+      "citation": &lt;academic reference for source data&gt;
     },
-    "name": &lt;name of stream segment&gt;
-  }
+    "variables": {
+      &lt;variable&gt;: {
+        "description": &lt;description of variable&gt;,
+        "units": &lt;units of variable&gt;
+      },
+      ...
+    }
+  },
+  "watershed": &lt;HUC8 or Yukon watershed ID&gt;,
+  "watershed_outlet": &lt;true if segment is a watershed outlet&gt;
 }
 </pre>
 
@@ -307,6 +385,175 @@
     </tr>
   </thead>
   <tbody>
+    <tr>
+      <td><code>dh1</code></td>
+      <td>Mean annual maximum 1-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dh2</code></td>
+      <td>Mean annual maximum 3-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dh3</code></td>
+      <td>Mean annual maximum 7-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dh4</code></td>
+      <td>Mean annual maximum 30-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dh5</code></td>
+      <td>Mean annual maximum 90-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dh15</code></td>
+      <td>
+        Median annual average duration of high flow pulses (above 75th
+        percentile)
+      </td>
+      <td>days per year</td>
+    </tr>
+
+    <tr>
+      <td><code>dl1</code></td>
+      <td>Mean annual minimum 1-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dl2</code></td>
+      <td>Mean annual minimum 3-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dl3</code></td>
+      <td>Mean annual minimum 7-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dl4</code></td>
+      <td>Mean annual minimum 30-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dl5</code></td>
+      <td>Mean annual minimum 90-day average flow</td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>dl16</code></td>
+      <td>
+        Median annual average duration of low flow pulses (below 25th
+        percentile)
+      </td>
+      <td>days per year</td>
+    </tr>
+
+    <tr>
+      <td><code>lf1</code></td>
+      <td>
+        Median annual number of days below threshold of 0.1 cfs per square mile
+      </td>
+      <td>days per year</td>
+    </tr>
+
+    <tr>
+      <td><code>spr_dur3</code></td>
+      <td>
+        Median spring (April&ndash;June) maximum 3-day moving average flow
+      </td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>spr_dur7</code></td>
+      <td>
+        Median spring (April&ndash;June) maximum 7-day moving average flow
+      </td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>sum_dur3</code></td>
+      <td>
+        Median summer (July&ndash;September) minimum 3-day moving average flow
+      </td>
+      <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>sum_dur7</code></td>
+      <td>
+        Median summer (July&ndash;September) minimum 7-day moving average flow
+      </td>
+      <td>cubic feet per second</td>
+    </tr>
+
+    <tr>
+      <td><code>fh1</code></td>
+      <td>Mean annual count of high flow pulses above 75th percentile</td>
+      <td>events per year</td>
+    </tr>
+    <tr>
+      <td><code>fh5</code></td>
+      <td>Mean annual flood frequency above median flow</td>
+      <td>events per year</td>
+    </tr>
+    <tr>
+      <td><code>fh6</code></td>
+      <td>Mean annual flood frequency above 3&times; median flow</td>
+      <td>events per year</td>
+    </tr>
+    <tr>
+      <td><code>fh7</code></td>
+      <td>Mean annual flood frequency above 7&times; median flow</td>
+      <td>events per year</td>
+    </tr>
+    <tr>
+      <td><code>fl1</code></td>
+      <td>Mean annual count of low flow pulses below 25th percentile</td>
+      <td>events per year</td>
+    </tr>
+    <tr>
+      <td><code>fl3</code></td>
+      <td>Mean annual count of events below 5 percent of mean flow</td>
+      <td>events per year</td>
+    </tr>
+    <tr>
+      <td><code>spr_freq</code></td>
+      <td>
+        Median spring (April&ndash;June) count of flow events above 10th
+        percentile of full record
+      </td>
+      <td>events per year</td>
+    </tr>
+    <tr>
+      <td><code>sum_freq</code></td>
+      <td>
+        Median summer (July&ndash;September) count of flow events below 90th
+        percentile of full record
+      </td>
+      <td>events per year</td>
+    </tr>
+
+    <tr>
+      <td><code>ma3</code></td>
+      <td>
+        Coefficient of variation (std/mean) of annual daily flows; mean of
+        annual CVs
+      </td>
+      <td>percent</td>
+    </tr>
+    <tr>
+      <td><code>ma4</code></td>
+      <td>
+        Standard deviation of percentiles of log-transformed flow divided by
+        mean of those percentiles
+      </td>
+      <td>percent</td>
+    </tr>
+
     <tr>
       <td><code>ma12</code></td>
       <td>Mean of monthly flow values for January</td>
@@ -369,10 +616,89 @@
     </tr>
     <tr>
       <td><code>ma99</code></td>
-      <td>
-        Annual mean streamflow, calculated as the mean of the monthly mean flows
-      </td>
+      <td>Mean annual flow: average of monthly mean flows (ma12&ndash;ma23)</td>
       <td>cubic feet per second</td>
+    </tr>
+    <tr>
+      <td><code>mh14</code></td>
+      <td>Median of (annual maximum flow / median annual flow) ratios</td>
+      <td>dimensionless</td>
+    </tr>
+    <tr>
+      <td><code>mh20</code></td>
+      <td>
+        Mean annual maximum flow divided by drainage area (specific discharge)
+      </td>
+      <td>cubic feet per second per square mile</td>
+    </tr>
+    <tr>
+      <td><code>ml17</code></td>
+      <td>
+        Base flow index: mean of annual (7-day minimum flow / mean annual flow)
+        ratios
+      </td>
+      <td>dimensionless</td>
+    </tr>
+
+    <tr>
+      <td><code>spr_mag</code></td>
+      <td>
+        Median spring (April&ndash;June) maximum flow divided by drainage area
+      </td>
+      <td>cubic feet per second per square mile</td>
+    </tr>
+    <tr>
+      <td><code>sum_cv</code></td>
+      <td>
+        Median annual coefficient of variation of summer (July&ndash;September)
+        flows
+      </td>
+      <td>percent</td>
+    </tr>
+    <tr>
+      <td><code>sum_mag</code></td>
+      <td>
+        Median summer (July&ndash;September) minimum flow divided by drainage
+        area
+      </td>
+      <td>cubic feet per second per square mile</td>
+    </tr>
+
+    <tr>
+      <td><code>ra1</code></td>
+      <td>Mean rise rate: mean of positive daily flow changes</td>
+      <td>cubic feet per second per day</td>
+    </tr>
+    <tr>
+      <td><code>ra3</code></td>
+      <td>Mean fall rate: mean of negative daily flow changes</td>
+      <td>cubic feet per second per day</td>
+    </tr>
+    <tr>
+      <td><code>ra8</code></td>
+      <td>Median annual number of flow direction reversals</td>
+      <td>days per year</td>
+    </tr>
+
+    <tr>
+      <td><code>spr_ord</code></td>
+      <td>Median Julian date of spring (April&ndash;June) maximum flow</td>
+      <td>Julian day</td>
+    </tr>
+    <tr>
+      <td><code>sum_ord</code></td>
+      <td>Median Julian date of summer (July&ndash;September) minimum flow</td>
+      <td>Julian day</td>
+    </tr>
+    <tr>
+      <td><code>th1</code></td>
+      <td>Median Julian date of annual maximum flow</td>
+      <td>Julian day</td>
+    </tr>
+    <tr>
+      <td><code>tl1</code></td>
+      <td>Median Julian date of annual minimum flow</td>
+      <td>Julian day</td>
     </tr>
   </tbody>
 </table>
