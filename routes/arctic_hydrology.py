@@ -17,7 +17,10 @@ from flask import (
 )
 
 from generate_requests import generate_conus_hydrology_wcs_str
-from generate_urls import generate_wfs_arctic_hydrology_url
+from generate_urls import (
+    generate_wfs_arctic_hydrology_url,
+    generate_wfs_arctic_hydrology_stats_url,
+)
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
 from postprocessing import prune_nulls_with_max_intensity
@@ -26,7 +29,7 @@ from config import RAS_BASE_URL
 from . import routes
 
 coverages = {
-    "stats": ["ak_hydro_segments_stats_combined"],
+    "stats": ["ak_hydro_segments_mhit_stats_combined"],
     "doy_climatology": ["ak_hydro_segments_doy_climatology"],
 }
 
@@ -34,94 +37,6 @@ stat_source_encodings = {
     "original_gcm": 0,
     "gcm_diff": 1,
     "gcm_diff_applied_to_cheng": 2,
-}
-
-# TODO: populate this with actual values from the GS layer after computing via MHIT
-_SUMMARY_STUB = {
-    "ma99_hist": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "cfs",
-        "description": "historical mean annual flow",
-    },
-    "ma99_delta": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "percent",
-        "description": "projected change in mean annual flow",
-    },
-    "dh1_delta": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "percent",
-        "description": "projected change in maximum 1-day flow",
-    },
-    "dl1_delta": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "percent",
-        "description": "projected change in minimum 1-day flow",
-    },
-    "dh15_hist": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "days",
-        "description": "historical high flow pulse duration",
-    },
-    "dh15_delta": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "days",
-        "description": "projected change in high flow pulse duration",
-    },
-    "dl16_hist": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "days",
-        "description": "historical low flow pulse duration",
-    },
-    "dl16_delta": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "days",
-        "description": "projected change in low flow pulse duration",
-    },
-    "fh1_hist": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "events",
-        "description": "historical high flood pulse count",
-    },
-    "fh1_delta": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "events",
-        "description": "projected change in high flood pulse count",
-    },
-    "fl1_hist": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "events",
-        "description": "historical low flood pulse count",
-    },
-    "fl1_delta": {
-        "value": None,
-        "range_low": None,
-        "range_high": None,
-        "units": "events",
-        "description": "projected change in low flood pulse count",
-    },
 }
 
 
@@ -185,12 +100,254 @@ async def get_features(stream_id):
 
         async with ClientSession() as session:
             layer_data = await fetch_layer_data(url, session)
-        gdf = gpd.GeoDataFrame.from_features(layer_data["features"], crs="EPSG:4326")
+        gdf = gpd.GeoDataFrame.from_features(layer_data["features"], crs="EPSG:3338")
         gdf["geometry"] = gdf["geometry"].make_valid()
 
         return gdf
     except Exception:
         return render_template("400/bad_request.html"), 400
+
+
+async def get_stats_features(stream_id):
+    """Function to fetch summary stat attributes from the WFS stats layer for a given stream ID.
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+    Returns:
+        GeoDataFrame with stat attributes, or None if unavailable."""
+    try:
+        url = generate_wfs_arctic_hydrology_stats_url(stream_id)
+        async with ClientSession() as session:
+            layer_data = await fetch_layer_data(url, session)
+        features = layer_data.get("features", [])
+        if not features:
+            return None
+        gdf = gpd.GeoDataFrame([f["properties"] for f in features])
+        return gdf.replace({None: np.nan})
+    except Exception:
+        return None
+
+
+def populate_feature_stat_attributes_summary(data_dict, gdf):
+    """Function to populate the summary stats from the WFS stats layer into the data dictionary.
+    Args:
+        data_dict (dict): Data dictionary to populate with summary stats
+        gdf (GeoDataFrame or None): GeoDataFrame with stat attributes from the stats layer
+    Returns:
+        Data dictionary with summary stats populated, or null-valued summary if gdf is unavailable.
+    """
+    summary_values = {}
+
+    ### MEAN FLOWS:
+    ma99_hist_value = (
+        int(round(gdf.loc[0].ma99_hist, 0))
+        if not np.isnan(gdf.loc[0].ma99_hist)
+        else None
+    )
+    if ma99_hist_value is not None and ma99_hist_value > 5:
+        ma99_hist_value = int(round(gdf.loc[0].ma99_hist / 5) * 5)
+    summary_values["ma99_hist"] = {
+        "value": ma99_hist_value,
+        "range_low": None,
+        "range_high": None,
+        "units": "cfs",
+        "description": "historical mean annual flow",
+    }
+
+    summary_values["ma99_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].ma99_avg_d, 0))
+            if not np.isnan(gdf.loc[0].ma99_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].ma99_min_d, 0))
+            if not np.isnan(gdf.loc[0].ma99_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].ma99_max_d, 0))
+            if not np.isnan(gdf.loc[0].ma99_max_d)
+            else None
+        ),
+        "units": "percent",
+        "description": "projected change in mean annual flow",
+    }
+
+    ### MIN AND MAX FLOWS:
+    # value is max of model maximums (range_high); range_low is minimum of model maximums
+    summary_values["dh1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dh1_max_d, 0))
+            if not np.isnan(gdf.loc[0].dh1_max_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dh1_min_d, 0))
+            if not np.isnan(gdf.loc[0].dh1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dh1_max_d, 0))
+            if not np.isnan(gdf.loc[0].dh1_max_d)
+            else None
+        ),
+        "units": "percent",
+        "description": "projected change in maximum 1-day flow",
+    }
+
+    # value is min of model minimums (range_low); range_high is maximum of model minimums
+    summary_values["dl1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dl1_min_d, 0))
+            if not np.isnan(gdf.loc[0].dl1_min_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dl1_min_d, 0))
+            if not np.isnan(gdf.loc[0].dl1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dl1_max_d, 0))
+            if not np.isnan(gdf.loc[0].dl1_max_d)
+            else None
+        ),
+        "units": "percent",
+        "description": "projected change in minimum 1-day flow",
+    }
+
+    ### FLOOD DURATION:
+    summary_values["dh15_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].dh15_hist, 0))
+            if not np.isnan(gdf.loc[0].dh15_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "days",
+        "description": "historical high flow pulse duration",
+    }
+
+    summary_values["dh15_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dh15_avg_d, 0))
+            if not np.isnan(gdf.loc[0].dh15_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dh15_min_d, 0))
+            if not np.isnan(gdf.loc[0].dh15_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dh15_max_d, 0))
+            if not np.isnan(gdf.loc[0].dh15_max_d)
+            else None
+        ),
+        "units": "days",
+        "description": "projected change in high flow pulse duration",
+    }
+
+    summary_values["dl16_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].dl16_hist, 0))
+            if not np.isnan(gdf.loc[0].dl16_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "days",
+        "description": "historical low flow pulse duration",
+    }
+
+    summary_values["dl16_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].dl16_avg_d, 0))
+            if not np.isnan(gdf.loc[0].dl16_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].dl16_min_d, 0))
+            if not np.isnan(gdf.loc[0].dl16_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].dl16_max_d, 0))
+            if not np.isnan(gdf.loc[0].dl16_max_d)
+            else None
+        ),
+        "units": "days",
+        "description": "projected change in low flow pulse duration",
+    }
+
+    ### FLOOD PULSE COUNT:
+    summary_values["fh1_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].fh1_hist, 0))
+            if not np.isnan(gdf.loc[0].fh1_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "events",
+        "description": "historical high flood pulse count",
+    }
+
+    summary_values["fh1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].fh1_avg_d, 0))
+            if not np.isnan(gdf.loc[0].fh1_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].fh1_min_d, 0))
+            if not np.isnan(gdf.loc[0].fh1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].fh1_max_d, 0))
+            if not np.isnan(gdf.loc[0].fh1_max_d)
+            else None
+        ),
+        "units": "events",
+        "description": "projected change in high flood pulse count",
+    }
+
+    summary_values["fl1_hist"] = {
+        "value": (
+            int(round(gdf.loc[0].fl1_hist, 0))
+            if not np.isnan(gdf.loc[0].fl1_hist)
+            else None
+        ),
+        "range_low": None,
+        "range_high": None,
+        "units": "events",
+        "description": "historical low flood pulse count",
+    }
+
+    summary_values["fl1_delta"] = {
+        "value": (
+            int(round(gdf.loc[0].fl1_avg_d, 0))
+            if not np.isnan(gdf.loc[0].fl1_avg_d)
+            else None
+        ),
+        "range_low": (
+            int(round(gdf.loc[0].fl1_min_d, 0))
+            if not np.isnan(gdf.loc[0].fl1_min_d)
+            else None
+        ),
+        "range_high": (
+            int(round(gdf.loc[0].fl1_max_d, 0))
+            if not np.isnan(gdf.loc[0].fl1_max_d)
+            else None
+        ),
+        "units": "events",
+        "description": "projected change in low flood pulse count",
+    }
+
+    data_dict["summary"] = summary_values
+    return data_dict
 
 
 def package_stats_data(stream_id, ds):
@@ -462,11 +619,24 @@ def populate_feature_attributes(data_dict, gdf):
     Returns:
         Data dictionary with the vector attributes populated."""
 
-    data_dict["name"] = ""
-    data_dict["huc8"] = None
-    data_dict["huc8_outlet"] = None
-    data_dict["latitude"] = round(gdf.loc[0].geometry.representative_point().y, 4)
-    data_dict["longitude"] = round(gdf.loc[0].geometry.representative_point().x, 4)
+    # data_dict["name"] = "" # arctic rivers segments do not have stream names associated
+
+    # gauge ID is blank for most features; normalize None/NaN to "" so the key is always present
+    gauge_id_raw = gdf.loc[0].get("Gauge_ID", None)
+    data_dict["gauge_id"] = gauge_id_raw if isinstance(gauge_id_raw, str) else ""
+
+    # the watershed ID matches the GVV code for HUC8 in Alaska or Yukon watershed in Canada
+    # all Yukon watersheds begin with "YTHYDRO" while HUC8s are just numeric
+    data_dict["watershed"] = gdf.loc[0].get("ID_1", None)
+    outlet = gdf.loc[0].get("outlet", None)
+    data_dict["watershed_outlet"] = (
+        bool(outlet) if outlet is not None and not np.isnan(outlet) else None
+    )
+
+    # copy and convert gdf to WGS84 for lat/lon extraction
+    gdf_4326 = gdf.to_crs("EPSG:4326")
+    data_dict["latitude"] = round(gdf_4326.loc[0].geometry.representative_point().y, 4)
+    data_dict["longitude"] = round(gdf_4326.loc[0].geometry.representative_point().x, 4)
 
     return data_dict
 
@@ -497,6 +667,8 @@ def run_get_arctic_hydrology_stats_data(stream_id):
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
         return gdf  # return 400 if gdf is a tuple
+
+    stats_gdf = asyncio.run(get_stats_features(stream_id))
 
     try:
         # fetch data and metadata
@@ -540,12 +712,12 @@ def run_get_arctic_hydrology_stats_data(stream_id):
             except Exception:
                 return render_template("500/server_error.html"), 500
 
-        # add stub summary dict for frontend interoperability with conus_hydrology
-        data_dict["summary"] = copy.deepcopy(_SUMMARY_STUB)
+        data_dict = populate_feature_stat_attributes_summary(data_dict, stats_gdf)
 
         return jsonify(data_dict)
 
     except Exception as exc:
+
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -672,7 +844,9 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
         )[0]
         pgw_ds = asyncio.run(
             fetch_hydro_data(
-                coverages["stats"], stream_id, source=stat_source_encodings["original_gcm"]
+                coverages["stats"],
+                stream_id,
+                source=stat_source_encodings["original_gcm"],
             )
         )[0]
         for dim, mapping in stats_decode_dict.items():
@@ -848,16 +1022,16 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
             }
 
         response = {
-            "gauge_id": None,
-            "huc8": None,
-            "huc8_outlet": None,
+            "gauge_id": stats.get("gauge_id"),
+            "huc8": stats.get("watershed"),
+            "huc8_outlet": stats.get("watershed_outlet"),
             "hydrograph": hydrograph,
             "id": stats["id"],
-            "name": stats["name"],
+            "name": stats.get("name"),
             "monthly_flow": monthly_flow,
             "max_flow_dates": max_flow_dates,
             "stats": table_stats,
-            "summary": copy.deepcopy(_SUMMARY_STUB),
+            "summary": stats.get("summary"),
         }
 
         return jsonify(response)
