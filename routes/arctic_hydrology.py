@@ -31,6 +31,8 @@ from . import routes
 coverages = {
     "stats": ["ak_hydro_segments_mhit_stats_combined"],
     "doy_climatology": ["ak_hydro_segments_doy_climatology"],
+    "wt_stats": ["ak_hydro_segments_wt_stats"],
+    "doy_wt_climatology": ["ak_hydro_segments_doy_wt_climatology"],
 }
 
 stat_source_encodings = {
@@ -527,7 +529,57 @@ def calculate_and_apply_gcm_diffs_to_cheng_climatology(data_dict):
     return adjusted_data_dict
 
 
-def package_metadata(ds, data_dict, source=None):
+def calculate_and_apply_gcm_diffs_to_cheng_wt_climatology(data_dict):
+    """
+    Applies GCM-projected water temperature changes to the historical Cheng climatology
+    using additive differences rather than the multiplicative ratios used for streamflow.
+
+    Temperature deltas must be additive because water temperature is measured on an
+    absolute scale (C). The upstream processing in the arctic_rivers repo
+    (calculate_wt_stats.py) uses the same additive approach:
+        gcm_diff = future − past
+        gcm_diff_applied_to_cheng = cheng_historical + gcm_diff
+
+    Models without a '1990-2021' era (e.g. PGWh, PGWm) are absent from the returned
+    dict entirely — they receive no entry, not even unadjusted values. A hydroviz-style
+    endpoint that needs PGW coverage should backfill them from original_gcm after calling
+    this function (see the streamflow hydroviz handler for the established pattern).
+    Args:
+        data_dict (dict): DOY climatology data dict keyed by model then era
+    Returns:
+        dict: Adjusted data dict with Cheng baseline applied to all eligible models.
+    """
+    adjusted_data_dict = {}
+    for model in data_dict.keys():
+        if model == "historical":
+            adjusted_data_dict[model] = data_dict[model]
+            continue
+        if "1990-2021" not in data_dict[model]:
+            continue
+        adjusted_data_dict[model] = {}
+        for era in data_dict[model].keys():
+            if era == "1990-2021":
+                continue
+            adjusted_data_dict[model][era] = []
+            for i in range(len(data_dict[model][era])):
+                entry = data_dict[model][era][i]
+                doy_stats = {
+                    "doy": entry["doy"],
+                    "water_year_index": entry["water_year_index"],
+                }
+                for stat in entry.keys():
+                    if stat in ("doy", "water_year_index"):
+                        continue
+                    cheng_historical = data_dict["historical"]["1990-2021"][i][stat]
+                    gcm_historical = data_dict[model]["1990-2021"][i][stat]
+                    gcm_projected = entry[stat]
+                    gcm_delta = gcm_projected - gcm_historical
+                    doy_stats[stat] = round(cheng_historical + gcm_delta, 3)
+                adjusted_data_dict[model][era].append(doy_stats)
+    return adjusted_data_dict
+
+
+def package_metadata(ds, data_dict, source=None, var_context="streamflow"):
     """
     Function to package the metadata from the dataset into the data dictionary.
     Args:
@@ -578,21 +630,20 @@ def package_metadata(ds, data_dict, source=None):
 
         # "doy" vars from hydrograph datasets
         if var in ["doy_min", "doy_mean", "doy_max"]:
-            data_dict["metadata"]["variables"][var]["units"] = "cfs"
-            if var == "doy_min":
-                op = "Minimum"
-            elif var == "doy_mean":
-                op = "Mean"
-            else:
-                op = "Maximum"
-            data_dict["metadata"]["variables"][var][
-                "description"
-            ] = f"{op} streamflow value (cfs) on the specified day of year, aggregated over all years in the era."
-            # add source notes
-            if source in source_notes:
+            if var_context == "streamflow":
+                op = (
+                    "Minimum"
+                    if var == "doy_min"
+                    else ("Mean" if var == "doy_mean" else "Maximum")
+                )
+                data_dict["metadata"]["variables"][var]["units"] = "cfs"
                 data_dict["metadata"]["variables"][var][
                     "description"
-                ] += f" {source_notes[source]}"
+                ] = f"{op} streamflow value (cfs) on the specified day of year, aggregated over all years in the era."
+                if source in source_notes:
+                    data_dict["metadata"]["variables"][var][
+                        "description"
+                    ] += f" {source_notes[source]}"
 
             # also add doy and water_year_index metadata:
             # these will be overwritten multiple times, but the values are the same for all three vars and we will only see them once in the final output
@@ -791,6 +842,146 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
         # they are only available via source=original_gcm.
         if source == "gcm_diff_applied_to_cheng":
             data_dict["data"] = calculate_and_apply_gcm_diffs_to_cheng_climatology(
+                data_dict["data"]
+            )
+
+        return jsonify(data_dict)
+
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+@routes.route("/arctic_hydrology/wt_stats/<stream_id>")
+def run_get_arctic_hydrology_wt_stats_data(stream_id):
+    """
+    Function to fetch water temperature statistics from Rasdaman for a single stream ID.
+    Example URL: http://localhost:5000/arctic_hydrology/wt_stats/81000004
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+    Returns:
+        JSON response with water temperature statistics for the requested stream ID.
+    """
+    source = request.args.get("source", None)
+    if source is None:
+        source = "gcm_diff_applied_to_cheng"
+
+    if not stream_id.isdigit():
+        return render_template("400/bad_request.html"), 400
+
+    gdf = asyncio.run(get_features(stream_id))
+    if isinstance(gdf, tuple):
+        return gdf
+
+    try:
+        decode_dict = asyncio.run(
+            get_decode_dicts_from_axis_attributes(coverages["wt_stats"])
+        )[0]
+
+        ds = asyncio.run(
+            fetch_hydro_data(
+                coverages["wt_stats"], stream_id, source=stat_source_encodings[source]
+            )
+        )[0]
+
+        for dim, mapping in decode_dict.items():
+            if dim == "source":
+                continue
+            ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
+
+        try:
+            data_dict = package_stats_data(stream_id, ds)
+        except Exception:
+            return render_template("500/server_error.html"), 500
+
+        data_dict = package_metadata(ds, data_dict, source=source)
+        data_dict = populate_feature_attributes(data_dict, gdf)
+        data_dict = prune_nulls_with_max_intensity(data_dict)
+
+        if request.args.get("format") == "csv":
+            try:
+                return create_csv(
+                    data=data_dict,
+                    endpoint="arctic_hydrology",
+                    filename_prefix="Water Temperature Statistics",
+                    place_id=stream_id,
+                    lat=str(data_dict["latitude"]),
+                    lon=str(data_dict["longitude"]),
+                    source_metadata=source,
+                )
+            except Exception:
+                return render_template("500/server_error.html"), 500
+
+        return jsonify(data_dict)
+
+    except Exception as exc:
+        if hasattr(exc, "status") and exc.status == 404:
+            return render_template("404/no_data.html"), 404
+        return render_template("500/server_error.html"), 500
+
+
+@routes.route("/arctic_hydrology/wt_modeled_climatology/<stream_id>")
+def run_get_arctic_hydrology_wt_modeled_climatology(stream_id):
+    """
+    Function to fetch water temperature DOY climatology from Rasdaman for a single stream ID.
+    Example URL: http://localhost:5000/arctic_hydrology/wt_modeled_climatology/81000004
+    Args:
+        stream_id (str): Stream ID for the hydrology data
+    Returns:
+        JSON response with modeled daily water temperature climatology for the requested stream ID.
+    """
+    source = request.args.get("source", None)
+    if source is None:
+        source = "gcm_diff_applied_to_cheng"
+    elif source == "gcm_diff":
+        return render_template("400/bad_request.html"), 400
+
+    if not stream_id.isdigit():
+        return render_template("400/bad_request.html"), 400
+
+    gdf = asyncio.run(get_features(stream_id))
+    if isinstance(gdf, tuple):
+        return gdf
+
+    try:
+        datasets = asyncio.run(
+            fetch_hydro_data(coverages["doy_wt_climatology"], stream_id)
+        )
+        decode_dicts = asyncio.run(
+            get_decode_dicts_from_axis_attributes(coverages["doy_wt_climatology"])
+        )
+
+        decoded_datasets = []
+        for ds, decode_dict in zip(datasets, decode_dicts):
+            for dim, mapping in decode_dict.items():
+                ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
+            decoded_datasets.append(ds)
+        datasets = decoded_datasets
+
+        data_dict = package_hydrograph_data(stream_id, datasets)
+        data_dict = package_metadata(
+            datasets[0], data_dict, source=source, var_context="water_temperature"
+        )
+        data_dict = populate_feature_attributes(data_dict, gdf)
+        data_dict = prune_nulls_with_max_intensity(data_dict)
+
+        if request.args.get("format") == "csv":
+            try:
+                return create_csv(
+                    data=data_dict,
+                    endpoint="arctic_hydrology",
+                    filename_prefix="Modeled Water Temperature Climatologies",
+                    place_id=stream_id,
+                    lat=str(data_dict["latitude"]),
+                    lon=str(data_dict["longitude"]),
+                    source_metadata=source,
+                )
+            except Exception:
+                return render_template("500/server_error.html"), 500
+
+        if source == "gcm_diff_applied_to_cheng":
+            data_dict["data"] = calculate_and_apply_gcm_diffs_to_cheng_wt_climatology(
                 data_dict["data"]
             )
 
@@ -1036,5 +1227,5 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
 
         return jsonify(response)
 
-    except Exception as exc:
+    except Exception:
         return render_template("500/server_error.html"), 500

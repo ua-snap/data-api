@@ -2,16 +2,16 @@
 <h2>Arctic Hydrology</h2>
 
 <p>
-  These endpoints provide access to modeled streamflow statistics and daily
-  streamflow climatologies for 34,346 stream network segments in Alaska and
-  Canada. Stream segments were derived from the MERIT Hydro network, and
-  streamflow was modeled using the Regional Arctic System Model (RASM) with
-  dynamically downscaled CMIP6 historical (1990&ndash;2021) and projected
-  mid-century (2034-2065) climate data using the SSP3-7.0 scenario. Four
-  Community Earth System Model 2 (CESM2) runs are included, as well as two
-  pseudo-global warming (PGW) runs based on the CESM2 Large Ensemble. A
-  dynamically downscaled ERA5 baseline (Cheng) is available for the historical
-  period.
+  These endpoints provide access to modeled streamflow statistics, streamflow
+  climatologies, water temperature statistics, and water temperature
+  climatologies for 34,346 stream network segments in Alaska and Canada. Stream
+  segments were derived from the MERIT Hydro network, and streamflow was modeled
+  using the Regional Arctic System Model (RASM) with dynamically downscaled
+  CMIP6 historical (1990&ndash;2021) and projected mid-century (2034-2065)
+  climate data using the SSP3-7.0 scenario. Four Community Earth System Model 2
+  (CESM2) runs are included, as well as two pseudo-global warming (PGW) runs
+  based on the CESM2 Large Ensemble using the SSP2-4.5 scenario. A dynamically
+  downscaled ERA5 baseline (Cheng) is available for the historical period.
 </p>
 
 <!-- TODO: create a way for users to find the stream IDs for streams of interest, and reference it here -->
@@ -103,6 +103,114 @@
       <td>
         <a href="/arctic_hydrology/modeled_climatology/81000004"
           >/arctic_hydrology/modeled_climatology/81000004</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.<br />
+        The data source can be controlled with the <code>?source=</code>
+        parameter. Accepted values are:
+        <ul>
+          <li>
+            <code>gcm_diff_applied_to_cheng</code> (default) &mdash;
+            GCM-projected changes applied to the historical Cheng baseline. PGW
+            models are not included.
+          </li>
+          <li>
+            <code>original_gcm</code> &mdash; raw output from the original GCM
+            runs. Includes PGW models.
+          </li>
+        </ul>
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?source=original_gcm&amp;format=csv</code>).
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Modeled water temperature statistics by stream ID</h4>
+
+<p>
+  Query water temperature statistics for all models. Statistics are computed
+  over historical (1990&ndash;2021) and projected mid-century (2034&ndash;2065)
+  eras. These statistics are defined
+  <a href="#wt_stats_table">below</a>.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Water temperature statistics</td>
+      <td>
+        <a href="/arctic_hydrology/wt_stats/81000004"
+          >/arctic_hydrology/wt_stats/81000004</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.<br />
+        The data source can be controlled with the <code>?source=</code>
+        parameter. Accepted values are:
+        <ul>
+          <li>
+            <code>gcm_diff_applied_to_cheng</code> (default) &mdash;
+            GCM-projected changes applied to the historical Cheng baseline. PGW
+            models are not included.
+          </li>
+          <li>
+            <code>original_gcm</code> &mdash; raw output from the original GCM
+            runs. Includes PGW models.
+          </li>
+          <li>
+            <code>gcm_diff</code> &mdash; additive difference between the
+            projected and historical GCM runs. These are not actual temperature
+            values; add them to your own historical baseline to approximate
+            future values. PGW models are not included.
+          </li>
+        </ul>
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?source=original_gcm&amp;format=csv</code>).
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Modeled daily water temperature climatologies by stream ID</h4>
+
+<p>
+  Query daily water temperature climatologies for all models. Useful for
+  constructing temperature hydrographs. Minimum, maximum, and mean values for
+  each day of year are computed over historical (1990&ndash;2021) and projected
+  mid-century (2034&ndash;2065) eras.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Modeled daily water temperature climatologies</td>
+      <td>
+        <a href="/arctic_hydrology/wt_modeled_climatology/81000004"
+          >/arctic_hydrology/wt_modeled_climatology/81000004</a
         >
       </td>
     </tr>
@@ -321,6 +429,208 @@
       "doy_min": {
         "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
         "units": "cfs"
+      },
+      "water_year_index": {
+        "description": "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274).",
+        "units": "water year day index"
+      }
+    }
+  },
+  "watershed": "19060206",
+  "watershed_outlet": true
+}
+</pre>
+
+<p>
+  Note that latitude and longitude values represent the approximate centroid of
+  the stream segment. Modeled data uses a 366 day year. The above output is
+  structured like this:
+</p>
+
+<pre>
+{
+  "data": {
+    &lt;model&gt;: {
+      &lt;era&gt;: [
+        {
+          &lt;variable&gt;: &lt;value&gt;,
+          ...
+        },
+        ...
+      ],
+      ...
+    },
+    ...
+  },
+  "id": &lt;stream ID&gt;,
+  "latitude": &lt;latitude of stream segment&gt;,
+  "longitude": &lt;longitude of stream segment&gt;,
+  "metadata": {
+    "source": {
+      "citation": &lt;academic reference for source data&gt;
+    },
+    "variables": {
+      &lt;variable&gt;: {
+        "description": &lt;description of variable&gt;,
+        "units": &lt;units of variable&gt;
+      },
+      ...
+    }
+  },
+  "watershed": &lt;HUC8 or Yukon watershed ID&gt;,
+  "watershed_outlet": &lt;true if segment is a watershed outlet&gt;
+}
+</pre>
+
+<h4>Modeled water temperature statistics</h4>
+
+<p>Results from stream ID queries will look like this:</p>
+
+<pre>
+{
+  "data": {
+    "C2LE2": {
+      "2034-2065": {
+        "wt_7d_max_temp_doy_mean": 192.47,
+        "wt_7d_max_temp_mean": 13.44,
+        ...
+        "wt_min_sep": 3.05
+      }
+    },
+    ...
+    "historical": {
+      "1990-2021": {
+        "wt_7d_max_temp_doy_mean": 196.03,
+        "wt_7d_max_temp_mean": 11.92,
+        ...
+        "wt_min_sep": 2.35
+      }
+    }
+  },
+  "id": "81000004",
+  "latitude": 70.8292,
+  "longitude": -155.42,
+  "metadata": {
+    "source": {
+      "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
+    },
+    "variables": {
+      "wt_7d_max_temp_mean": {
+        "description": "Mean (over era years) of the annual maximum 7-day rolling average stream temperature.",
+        "units": "degC"
+      },
+      ...
+    }
+  },
+  "watershed": "19060206",
+  "watershed_outlet": true
+}
+</pre>
+
+<p>
+  Note that latitude and longitude values represent the approximate centroid of
+  the stream segment. Unlike the streamflow statistics endpoint, this response
+  does not include a <code>summary</code> key. The above output is structured
+  like this:
+</p>
+
+<pre>
+{
+  "data": {
+    &lt;model&gt;: {
+      &lt;era&gt;: {
+        &lt;variable&gt;: &lt;value&gt;,
+        ...
+      },
+      ...
+    },
+    ...
+  },
+  "id": &lt;stream ID&gt;,
+  "latitude": &lt;latitude of stream segment&gt;,
+  "longitude": &lt;longitude of stream segment&gt;,
+  "metadata": {
+    "source": {
+      "citation": &lt;academic reference for source data&gt;
+    },
+    "variables": {
+      &lt;variable&gt;: {
+        "description": &lt;description of variable&gt;,
+        "units": &lt;units of variable&gt;
+      },
+      ...
+    }
+  },
+  "watershed": &lt;HUC8 or Yukon watershed ID&gt;,
+  "watershed_outlet": &lt;true if segment is a watershed outlet&gt;
+}
+</pre>
+
+<h4>Modeled daily water temperature climatologies</h4>
+
+<p>Results from stream ID queries will look like this:</p>
+
+<pre>
+{
+  "data": {
+    "C2LE2": {
+      "2034-2065": [
+        {
+          "doy": 1,
+          "doy_max": 2.52,
+          "doy_mean": 0.552,
+          "doy_min": 0.1,
+          "water_year_index": 93
+        },
+        {
+          "doy": 2,
+          "doy_max": 3.05,
+          "doy_mean": 0.558,
+          "doy_min": 0.1,
+          "water_year_index": 94
+        },
+        ...
+        {
+          "doy": 365,
+          "doy_max": 1.02,
+          "doy_mean": 0.224,
+          "doy_min": 0.1,
+          "water_year_index": 91
+        },
+        {
+          "doy": 366,
+          "doy_max": 0.16,
+          "doy_mean": 0.143,
+          "doy_min": 0.1,
+          "water_year_index": 92
+        }
+      ]
+    },
+    ...
+  },
+  "id": "81000004",
+  "latitude": 70.8292,
+  "longitude": -155.42,
+  "metadata": {
+    "source": {
+      "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
+    },
+    "variables": {
+      "doy": {
+        "description": "Day of year (1-366); all years are treated as leap years for consistency.",
+        "units": "day of year"
+      },
+      "doy_max": {
+        "description": "Maximum stream temperature on the specified day of year, aggregated over all years in the era.",
+        "units": "degC"
+      },
+      "doy_mean": {
+        "description": "Mean stream temperature on the specified day of year, aggregated over all years in the era.",
+        "units": "degC"
+      },
+      "doy_min": {
+        "description": "Minimum stream temperature on the specified day of year, aggregated over all years in the era.",
+        "units": "degC"
       },
       "water_year_index": {
         "description": "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274).",
@@ -703,6 +1013,324 @@
   </tbody>
 </table>
 
+<h3 id="wt_stats_table">Available Water Temperature Statistics</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>wt_days_gt13_mean</code></td>
+      <td>Mean annual count of days with stream temperature &gt; 13&deg;C</td>
+      <td>days per year</td>
+    </tr>
+    <tr>
+      <td><code>wt_days_gt18_mean</code></td>
+      <td>Mean annual count of days with stream temperature &gt; 18&deg;C</td>
+      <td>days per year</td>
+    </tr>
+    <tr>
+      <td><code>wt_days_gt20_mean</code></td>
+      <td>Mean annual count of days with stream temperature &gt; 20&deg;C</td>
+      <td>days per year</td>
+    </tr>
+
+    <tr>
+      <td><code>wt_mean_jan</code></td>
+      <td>Mean of monthly mean stream temperatures for January</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_feb</code></td>
+      <td>Mean of monthly mean stream temperatures for February</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_mar</code></td>
+      <td>Mean of monthly mean stream temperatures for March</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_apr</code></td>
+      <td>Mean of monthly mean stream temperatures for April</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_may</code></td>
+      <td>Mean of monthly mean stream temperatures for May</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_jun</code></td>
+      <td>Mean of monthly mean stream temperatures for June</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_jul</code></td>
+      <td>Mean of monthly mean stream temperatures for July</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_aug</code></td>
+      <td>Mean of monthly mean stream temperatures for August</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_sep</code></td>
+      <td>Mean of monthly mean stream temperatures for September</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_oct</code></td>
+      <td>Mean of monthly mean stream temperatures for October</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_nov</code></td>
+      <td>Mean of monthly mean stream temperatures for November</td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_mean_dec</code></td>
+      <td>Mean of monthly mean stream temperatures for December</td>
+      <td>degrees Celsius</td>
+    </tr>
+
+    <tr>
+      <td><code>wt_min_jan</code></td>
+      <td>
+        Minimum monthly mean stream temperature for January across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_feb</code></td>
+      <td>
+        Minimum monthly mean stream temperature for February across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_mar</code></td>
+      <td>
+        Minimum monthly mean stream temperature for March across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_apr</code></td>
+      <td>
+        Minimum monthly mean stream temperature for April across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_may</code></td>
+      <td>
+        Minimum monthly mean stream temperature for May across all years in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_jun</code></td>
+      <td>
+        Minimum monthly mean stream temperature for June across all years in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_jul</code></td>
+      <td>
+        Minimum monthly mean stream temperature for July across all years in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_aug</code></td>
+      <td>
+        Minimum monthly mean stream temperature for August across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_sep</code></td>
+      <td>
+        Minimum monthly mean stream temperature for September across all years
+        in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_oct</code></td>
+      <td>
+        Minimum monthly mean stream temperature for October across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_nov</code></td>
+      <td>
+        Minimum monthly mean stream temperature for November across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_min_dec</code></td>
+      <td>
+        Minimum monthly mean stream temperature for December across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+
+    <tr>
+      <td><code>wt_max_jan</code></td>
+      <td>
+        Maximum monthly mean stream temperature for January across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_feb</code></td>
+      <td>
+        Maximum monthly mean stream temperature for February across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_mar</code></td>
+      <td>
+        Maximum monthly mean stream temperature for March across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_apr</code></td>
+      <td>
+        Maximum monthly mean stream temperature for April across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_may</code></td>
+      <td>
+        Maximum monthly mean stream temperature for May across all years in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_jun</code></td>
+      <td>
+        Maximum monthly mean stream temperature for June across all years in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_jul</code></td>
+      <td>
+        Maximum monthly mean stream temperature for July across all years in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_aug</code></td>
+      <td>
+        Maximum monthly mean stream temperature for August across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_sep</code></td>
+      <td>
+        Maximum monthly mean stream temperature for September across all years
+        in era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_oct</code></td>
+      <td>
+        Maximum monthly mean stream temperature for October across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_nov</code></td>
+      <td>
+        Maximum monthly mean stream temperature for November across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_max_dec</code></td>
+      <td>
+        Maximum monthly mean stream temperature for December across all years in
+        era
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+
+    <tr>
+      <td><code>wt_ann_max_temp_mean</code></td>
+      <td>
+        Mean (over era years) of the annual maximum daily stream temperature
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_ann_max_temp_doy_mean</code></td>
+      <td>
+        Mean (over era years) Julian day of the annual maximum daily stream
+        temperature
+      </td>
+      <td>Julian day</td>
+    </tr>
+    <tr>
+      <td><code>wt_7d_max_temp_mean</code></td>
+      <td>
+        Mean (over era years) of the annual maximum 7-day rolling average stream
+        temperature
+      </td>
+      <td>degrees Celsius</td>
+    </tr>
+    <tr>
+      <td><code>wt_7d_max_temp_doy_mean</code></td>
+      <td>
+        Mean (over era years) Julian day of the center of the annual maximum
+        7-day rolling average
+      </td>
+      <td>Julian day</td>
+    </tr>
+    <tr>
+      <td><code>wt_cdd_may_sept_mean</code></td>
+      <td>
+        Mean (over era years) annual cumulative degree days above 0&deg;C, May
+        through September
+      </td>
+      <td>degree-days Celsius</td>
+    </tr>
+  </tbody>
+</table>
+
 <h3>Source data</h3>
 
 <table>
@@ -738,6 +1366,51 @@
         <a href="https://doi.org/10.1175/JCLI-D-15-0775.1"
           >10.1175/JCLI-D-15-0775.1</a
         >.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Rodgers K. B., S.-S. Lee, N. Rosenbloom, A. Timmermann, G. Danabasoglu,
+        C. Deser, J. Edwards, J.-E. Kim, I. R. Simpson, K. Stein, M. F.
+        Stuecker, R. Yamaguchi, T. B&oacute;dai, E.-S. Chung, L. Huang, W. M.
+        Kim, J.-F. Lamarque, D. L. Lombardozzi, W. R. Wieder, & S. G. Yeager
+        (2021). Ubiquity of human-induced changes in climate variability. Earth
+        System Dynamics. doi:
+        <a href="https://doi.org/10.5194/esd-12-1393-2021"
+          >10.5194/esd-12-1393-2021</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Blaskey D., M. N. Gooseff, Y. Cheng, A. J. Newman, J. C. Koch, & K. N.
+        Musselman (2024). A high-resolution, daily hindcast (1990&ndash;2021) of
+        Alaskan river discharge and temperature from coupled and optimized
+        physical models. Water Resources Research. doi:
+        <a href="https://doi.org/10.1029/2023WR036217"
+          >10.1029/2023WR036217</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Cheng Y., A. Craig, K. Musselman, A. Bennett, M. Seefeldt, J. Hamman,
+        & A. J. Newman (2024). Coupled high-resolution land-atmosphere modeling
+        for hydroclimate and terrestrial hydrology in Alaska and the Yukon River
+        Basin (1990&ndash;2021). Journal of Geophysical Research: Atmospheres.
+        doi:
+        <a href="https://doi.org/10.1029/2024JD041185"
+          >10.1029/2024JD041185</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Cheng Y., A. Craig, K. Musselman, & A. Newman (2024). Multi-decadal
+        historical regional hydroclimate simulation with two mid 21st century
+        pseudo-global warming futures over Alaska and the Yukon at 4 km
+        resolution. NSF National Center for Atmospheric Research. doi:
+        <a href="https://doi.org/10.5065/ZPSB-PS82">10.5065/ZPSB-PS82</a>.
       </td>
     </tr>
   </tbody>
