@@ -38,7 +38,7 @@ coverages = {
 stat_source_encodings = {
     "original_gcm": 0,
     "gcm_diff": 1,
-    "gcm_diff_applied_to_cheng": 2,
+    "gcm_diff_applied_to_blaskey": 2,
 }
 
 
@@ -486,14 +486,14 @@ def convert_doy_to_water_year_index(doy):
     return wy_index
 
 
-def calculate_and_apply_gcm_diffs_to_cheng_climatology(data_dict):
+def calculate_and_apply_gcm_diffs_to_blaskey_climatology(data_dict):
     """
-    Function to calculate GCM-projected changes in streamflow and apply them to the historical Cheng climatology.
+    Function to calculate GCM-projected changes in streamflow and apply them to the historical Blaskey climatology.
     Models without a '1990-2021' era (e.g. PGW models with no historical baseline) are silently skipped.
     Args:
         data_dict (dict): Climatology data dict keyed by model then era
     Returns:
-        dict: Adjusted data dict with Cheng baseline applied to all eligible models.
+        dict: Adjusted data dict with Blaskey baseline applied to all eligible models.
     """
     adjusted_data_dict = {}
     for model in data_dict.keys():
@@ -516,29 +516,29 @@ def calculate_and_apply_gcm_diffs_to_cheng_climatology(data_dict):
                 for stat in entry.keys():
                     if stat in ("doy", "water_year_index"):
                         continue
-                    cheng_historical = data_dict["historical"]["1990-2021"][i][stat]
+                    blaskey_historical = data_dict["historical"]["1990-2021"][i][stat]
                     gcm_historical = data_dict[model]["1990-2021"][i][stat]
                     gcm_projected = entry[stat]
                     denominator = gcm_historical
                     if denominator == 0:
                         denominator = 0.0001
                     projected_quotient = gcm_projected / denominator
-                    cheng_adjusted = round(cheng_historical * projected_quotient, 3)
-                    doy_stats[stat] = cheng_adjusted
+                    blaskey_adjusted = round(blaskey_historical * projected_quotient, 3)
+                    doy_stats[stat] = blaskey_adjusted
                 adjusted_data_dict[model][era].append(doy_stats)
     return adjusted_data_dict
 
 
-def calculate_and_apply_gcm_diffs_to_cheng_wt_climatology(data_dict):
+def calculate_and_apply_gcm_diffs_to_blaskey_wt_climatology(data_dict):
     """
-    Applies GCM-projected water temperature changes to the historical Cheng climatology
+    Applies GCM-projected water temperature changes to the historical Blaskey climatology
     using additive differences rather than the multiplicative ratios used for streamflow.
 
     Temperature deltas must be additive because water temperature is measured on an
     absolute scale (C). The upstream processing in the arctic_rivers repo
     (calculate_wt_stats.py) uses the same additive approach:
         gcm_diff = future − past
-        gcm_diff_applied_to_cheng = cheng_historical + gcm_diff
+        gcm_diff_applied_to_blaskey = blaskey_historical + gcm_diff
 
     Models without a '1990-2021' era (e.g. PGWh, PGWm) are absent from the returned
     dict entirely — they receive no entry, not even unadjusted values. A hydroviz-style
@@ -547,7 +547,7 @@ def calculate_and_apply_gcm_diffs_to_cheng_wt_climatology(data_dict):
     Args:
         data_dict (dict): DOY climatology data dict keyed by model then era
     Returns:
-        dict: Adjusted data dict with Cheng baseline applied to all eligible models.
+        dict: Adjusted data dict with Blaskey baseline applied to all eligible models.
     """
     adjusted_data_dict = {}
     for model in data_dict.keys():
@@ -570,11 +570,11 @@ def calculate_and_apply_gcm_diffs_to_cheng_wt_climatology(data_dict):
                 for stat in entry.keys():
                     if stat in ("doy", "water_year_index"):
                         continue
-                    cheng_historical = data_dict["historical"]["1990-2021"][i][stat]
+                    blaskey_historical = data_dict["historical"]["1990-2021"][i][stat]
                     gcm_historical = data_dict[model]["1990-2021"][i][stat]
                     gcm_projected = entry[stat]
                     gcm_delta = gcm_projected - gcm_historical
-                    doy_stats[stat] = round(cheng_historical + gcm_delta, 3)
+                    doy_stats[stat] = round(blaskey_historical + gcm_delta, 3)
                 adjusted_data_dict[model][era].append(doy_stats)
     return adjusted_data_dict
 
@@ -610,7 +610,7 @@ def package_metadata(ds, data_dict, source=None, var_context="streamflow"):
         source_notes = {
             "original_gcm": "Values are derived from the original GCM or PGW runs.",
             "gcm_diff": "Values are the ratio or absolute difference between the original GCM runs and the historical GCM runs - these are not actual statistic values! Apply these differences to a historical baseline value to approximate future values. PGW runs are not included.",
-            "gcm_diff_applied_to_cheng": "Values are derived from applying the GCM-projected changes to the historical Cheng baseline. PGW runs are not included.",
+            "gcm_diff_applied_to_blaskey": "Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         }
 
         if source == "original_gcm":
@@ -623,10 +623,10 @@ def package_metadata(ds, data_dict, source=None, var_context="streamflow"):
                 "description"
             ] = f"{data_dict['metadata']['variables'][var]['description']} {source_notes['gcm_diff']}"
 
-        if source == "gcm_diff_applied_to_cheng":
+        if source == "gcm_diff_applied_to_blaskey":
             data_dict["metadata"]["variables"][var][
                 "description"
-            ] = f"{data_dict['metadata']['variables'][var]['description']} {source_notes['gcm_diff_applied_to_cheng']}"
+            ] = f"{data_dict['metadata']['variables'][var]['description']} {source_notes['gcm_diff_applied_to_blaskey']}"
 
         # "doy" vars from hydrograph datasets
         if var in ["doy_min", "doy_mean", "doy_max"]:
@@ -710,7 +710,7 @@ def run_get_arctic_hydrology_stats_data(stream_id):
     # validate get request query parameters
     source = request.args.get("source", None)
     if source is None:
-        source = "gcm_diff_applied_to_cheng"
+        source = "gcm_diff_applied_to_blaskey"
 
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
@@ -787,7 +787,7 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
     # validate get request query parameters
     source = request.args.get("source", None)
     if source is None:
-        source = "gcm_diff_applied_to_cheng"
+        source = "gcm_diff_applied_to_blaskey"
     elif source == "gcm_diff":
         return render_template("400/bad_request.html"), 400
 
@@ -837,11 +837,11 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
             except Exception:
                 return render_template("500/server_error.html"), 500
 
-        # apply GCM-projected changes to Cheng climatology if source is "gcm_diff_applied_to_cheng"
+        # apply GCM-projected changes to Blaskey climatology if source is "gcm_diff_applied_to_blaskey"
         # PGW models without a 1990-2021 historical era are silently absent from this source;
         # they are only available via source=original_gcm.
-        if source == "gcm_diff_applied_to_cheng":
-            data_dict["data"] = calculate_and_apply_gcm_diffs_to_cheng_climatology(
+        if source == "gcm_diff_applied_to_blaskey":
+            data_dict["data"] = calculate_and_apply_gcm_diffs_to_blaskey_climatology(
                 data_dict["data"]
             )
 
@@ -865,7 +865,7 @@ def run_get_arctic_hydrology_wt_stats_data(stream_id):
     """
     source = request.args.get("source", None)
     if source is None:
-        source = "gcm_diff_applied_to_cheng"
+        source = "gcm_diff_applied_to_blaskey"
 
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
@@ -933,7 +933,7 @@ def run_get_arctic_hydrology_wt_modeled_climatology(stream_id):
     """
     source = request.args.get("source", None)
     if source is None:
-        source = "gcm_diff_applied_to_cheng"
+        source = "gcm_diff_applied_to_blaskey"
     elif source == "gcm_diff":
         return render_template("400/bad_request.html"), 400
 
@@ -980,8 +980,8 @@ def run_get_arctic_hydrology_wt_modeled_climatology(stream_id):
             except Exception:
                 return render_template("500/server_error.html"), 500
 
-        if source == "gcm_diff_applied_to_cheng":
-            data_dict["data"] = calculate_and_apply_gcm_diffs_to_cheng_wt_climatology(
+        if source == "gcm_diff_applied_to_blaskey":
+            data_dict["data"] = calculate_and_apply_gcm_diffs_to_blaskey_wt_climatology(
                 data_dict["data"]
             )
 
@@ -1019,7 +1019,7 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
     chart_era = "2034-2065"
     historical_era = "1990-2021"
 
-    # fetch stats with default source (gcm_diff_applied_to_cheng)
+    # fetch stats with default source (gcm_diff_applied_to_blaskey)
     stats_response = run_get_arctic_hydrology_stats_data(stream_id)
     if isinstance(stats_response, tuple):
         return stats_response
@@ -1027,7 +1027,7 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
     try:
         stats = stats_response.get_json()
 
-        # Fetch original_gcm stats to get PGW models (absent from gcm_diff_applied_to_cheng).
+        # Fetch original_gcm stats to get PGW models (absent from gcm_diff_applied_to_blaskey).
         # The describe call is a duplicate of what run_get_arctic_hydrology_stats_data already did,
         # but keeping the fetch inline here avoids a larger refactor of the route function.
         stats_decode_dict = asyncio.run(
@@ -1051,7 +1051,7 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
             if chart_era not in stats["data"].get(model, {}):
                 stats["data"][model] = model_data
 
-        # Fetch and decode climatology once; compute both Cheng-adjusted and original_gcm
+        # Fetch and decode climatology once; compute both Blaskey-adjusted and original_gcm
         # versions in memory rather than making two network calls (the doy_climatology coverage
         # has no source dimension, so both versions start from the same raw data).
         datasets = asyncio.run(
@@ -1069,17 +1069,17 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
 
         raw_data_dict = package_hydrograph_data(stream_id, decoded_datasets)
 
-        # Build Cheng-adjusted version; PGW models missing a 1990-2021 era are silently skipped.
-        cheng_adjusted = calculate_and_apply_gcm_diffs_to_cheng_climatology(
+        # Build Blaskey-adjusted version; PGW models missing a 1990-2021 era are silently skipped.
+        blaskey_adjusted = calculate_and_apply_gcm_diffs_to_blaskey_climatology(
             copy.deepcopy(raw_data_dict["data"])
         )
 
-        # Fill in PGW models (absent from cheng_adjusted) using their original_gcm values.
+        # Fill in PGW models (absent from blaskey_adjusted) using their original_gcm values.
         for model, model_data in raw_data_dict["data"].items():
-            if model not in cheng_adjusted:
-                cheng_adjusted[model] = model_data
+            if model not in blaskey_adjusted:
+                blaskey_adjusted[model] = model_data
 
-        climatology_data = cheng_adjusted
+        climatology_data = blaskey_adjusted
 
         historical_climatology = climatology_data["historical"][historical_era]
         historical_stats = stats["data"]["historical"]
