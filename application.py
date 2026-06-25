@@ -185,7 +185,7 @@ def validate_get_params():
                     "original_gcm",
                     "gcm_diff",
                     "gcm_diff_applied_to_maurer",
-                    "gcm_diff_applied_to_cheng",
+                    "gcm_diff_applied_to_blaskey",
                 ]
             ),
             required=False,
