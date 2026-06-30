@@ -672,9 +672,9 @@ def populate_feature_attributes(data_dict, gdf):
 
     # data_dict["name"] = "" # arctic rivers segments do not have stream names associated
 
-    # gauge ID is blank for most features; normalize None/NaN to "" so the key is always present
-    gauge_id_raw = gdf.loc[0].get("Gauge_ID", None)
-    data_dict["gauge_id"] = gauge_id_raw if isinstance(gauge_id_raw, str) else ""
+    # gage ID is blank for most features; normalize None/NaN to "" so the key is always present
+    gage_id_raw = gdf.loc[0].get("Gage_ID", None)
+    data_dict["gage_id"] = gage_id_raw if isinstance(gage_id_raw, str) else ""
 
     # the watershed ID matches the GVV code for HUC8 in Alaska or Yukon watershed in Canada
     # all Yukon watersheds begin with "YTHYDRO" while HUC8s are just numeric
@@ -1002,7 +1002,7 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
     Returns:
         JSON response with the following top-level keys:
         {
-            "gauge_id": null,
+            "gage_id": null,
             "huc8": null,
             "huc8_outlet": null,
             "hydrograph": ...,
@@ -1213,7 +1213,7 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
             }
 
         response = {
-            "gauge_id": stats.get("gauge_id"),
+            "gage_id": stats.get("gage_id"),
             "huc8": stats.get("watershed"),
             "huc8_outlet": stats.get("watershed_outlet"),
             "hydrograph": hydrograph,
