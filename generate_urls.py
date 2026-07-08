@@ -138,13 +138,13 @@ def generate_wfs_arctic_hydrology_url(stream_id):
     if stream_id == "":
         wfs_url = (
             GS_BASE_URL
-            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_joined_3338_simplified&propertyName=(COMID)&outputFormat=application/json"
+            + "wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_joined_3338_simplified_v2&propertyName=(COMID)&outputFormat=application/json"
         )
         return wfs_url
     else:
         wfs_url = (
             GS_BASE_URL
-            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_joined_3338_simplified&propertyName=(COMID,the_geom,Gage_ID,ID_1,ID_2,Name,outlet)&outputFormat=application/json&cql_filter=(COMID={stream_id})"
+            + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_joined_3338_simplified_v2&propertyName=(COMID,the_geom,Gage_ID,ID_1,ID_2,Name,outlet)&outputFormat=application/json&cql_filter=(COMID={stream_id})"
         )
     return wfs_url
 
@@ -152,11 +152,11 @@ def generate_wfs_arctic_hydrology_url(stream_id):
 def generate_wfs_arctic_hydrology_stats_url(stream_id):
     """
     Generate a WFS URL for fetching arctic hydrology summary stats for a given stream ID
-    from the arctic_rivers_segments_stats_simplified layer.
+    from the arctic_rivers_segments_stats_simplified_v2 layer.
     """
     return (
         GS_BASE_URL
-        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_stats_simplified&outputFormat=application/json&cql_filter=(COMID={stream_id})"
+        + f"wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=hydrology:arctic_rivers_segments_stats_simplified_v2&outputFormat=application/json&cql_filter=(COMID={stream_id})"
     )
 
 
