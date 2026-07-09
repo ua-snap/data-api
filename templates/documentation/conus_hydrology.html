@@ -21,11 +21,11 @@
 
 <p>
   We also include endpoints to access daily streamflow climatologies from
-  associated USGS stream gauge data collected over the 1976&ndash;2005
+  associated USGS stream gage data collected over the 1976&ndash;2005
   historical period, for use in comparing with the modeled data. Note that not
-  all modeled stream segments have associated gauge data. See the
-  <a href="/conus_hydrology/gauge_info">/conus_hydrology/gauge_info</a> endpoint
-  for a list of all stream IDs with gauge data.
+  all modeled stream segments have associated gage data. See the
+  <a href="/conus_hydrology/gage_info">/conus_hydrology/gage_info</a> endpoint
+  for a list of all stream IDs with gage data.
 </p>
 
 <h3>Service endpoints</h3>
@@ -137,7 +137,7 @@
 <h4>Observed daily streamflow climatologies by stream ID</h4>
 
 <p>
-  Query daily streamflow climatologies computed from observed USGS stream gauge
+  Query daily streamflow climatologies computed from observed USGS stream gage
   data. Useful for constructing hydrographs. Minimum, maximum, and mean values
   for each day of year are computed over the 1976&ndash;2005 historical era.
 </p>
@@ -165,8 +165,8 @@
         CSV output is also available by appending <code>?format=csv</code> to
         the URL. <br />
         See
-        <a href="/conus_hydrology/gauge_info">/conus_hydrology/gauge_info</a>
-        for a list of all stream IDs with gauge data.
+        <a href="/conus_hydrology/gage_info">/conus_hydrology/gage_info</a>
+        for a list of all stream IDs with gage data.
       </td>
     </tr>
   </tfoot>
@@ -479,8 +479,8 @@
 
 <p>
   Note that the latitude and longitude values represent the location of the
-  stream gauge. Also note that the climatology is constructed from all available
-  data from 1976&ndash;2005, but some gauges may not have a complete record for
+  stream gage. Also note that the climatology is constructed from all available
+  data from 1976&ndash;2005, but some gages may not have a complete record for
   this time period. Use the <code>percent_complete</code> value to assess the
   data completeness. The above output is structured like this:
 </p>
@@ -506,9 +506,9 @@
       ...
     },
   },
-  "id": &lt;USGS stream gauge ID&gt;,
-  "latitude": &lt;latitude of stream gauge&gt;,
-  "longitude": &lt;longitude of stream gauge&gt;,
+  "id": &lt;USGS stream gage ID&gt;,
+  "latitude": &lt;latitude of stream gage&gt;,
+  "longitude": &lt;longitude of stream gage&gt;,
   "metadata": {
     "percent_complete": &lt;percent of data available for period&gt;,
     "source": {
@@ -521,7 +521,7 @@
       },
     },
   }
-  "name": &lt;name of stream gauge&gt;
+  "name": &lt;name of stream gage&gt;
 }
 </pre>
 

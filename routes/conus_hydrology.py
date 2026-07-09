@@ -20,8 +20,8 @@ from flask import (
 from generate_requests import generate_conus_hydrology_wcs_str
 from generate_urls import (
     generate_wfs_conus_hydrology_url,
-    generate_usgs_gauge_daily_streamflow_data_url,
-    generate_usgs_gauge_metadata_url,
+    generate_usgs_gage_daily_streamflow_data_url,
+    generate_usgs_gage_metadata_url,
 )
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
@@ -113,10 +113,10 @@ async def get_features(stream_id):
         return render_template("400/bad_request.html"), 400
 
 
-async def get_usgs_gauge_data(gauge_id):
+async def get_usgs_gage_data(gage_id):
 
-    gauge_data_dict = {
-        "id": gauge_id,
+    gage_data_dict = {
+        "id": gage_id,
         "name": None,
         "latitude": None,
         "longitude": None,
@@ -128,27 +128,27 @@ async def get_usgs_gauge_data(gauge_id):
     end_date = "2005-09-30"
 
     try:
-        metadata_url = generate_usgs_gauge_metadata_url(gauge_id)
-        data_url = generate_usgs_gauge_daily_streamflow_data_url(
-            gauge_id, start_date, end_date
+        metadata_url = generate_usgs_gage_metadata_url(gage_id)
+        data_url = generate_usgs_gage_daily_streamflow_data_url(
+            gage_id, start_date, end_date
         )
         async with ClientSession() as session:
-            gauge_metadata = await fetch_layer_data(metadata_url, session)
-            gauge_data = await fetch_layer_data(data_url, session)
+            gage_metadata = await fetch_layer_data(metadata_url, session)
+            gage_data = await fetch_layer_data(data_url, session)
     except:
         return render_template("400/bad_request.html"), 400
 
     # get metadata from JSON and populate dict
 
-    metadata_features = gauge_metadata.get("features")
+    metadata_features = gage_metadata.get("features")
     if not metadata_features:
         return render_template("400/bad_request.html"), 400
 
     metadata_feature = metadata_features[0]
-    gauge_data_dict["name"] = metadata_feature["properties"]["monitoring_location_name"]
+    gage_data_dict["name"] = metadata_feature["properties"]["monitoring_location_name"]
     coordinates = metadata_feature["geometry"]["coordinates"]
-    gauge_data_dict["longitude"] = round(float(coordinates[0]), 4)
-    gauge_data_dict["latitude"] = round(float(coordinates[1]), 4)
+    gage_data_dict["longitude"] = round(float(coordinates[0]), 4)
+    gage_data_dict["latitude"] = round(float(coordinates[1]), 4)
 
     # get streamflow data from JSON into dataframe
     date_range = pd.date_range(start_date, end=end_date, freq="D")
@@ -156,7 +156,7 @@ async def get_usgs_gauge_data(gauge_id):
     df.set_index("date", inplace=True)
     df["discharge_cfs"] = float("nan")
 
-    data_features = gauge_data.get("features")
+    data_features = gage_data.get("features")
     if not data_features:
         return render_template("400/bad_request.html"), 400
 
@@ -199,20 +199,20 @@ async def get_usgs_gauge_data(gauge_id):
     for row in rows:
         row["water_year_index"] = convert_doy_to_water_year_index(row["doy"])
 
-    gauge_data_dict["data"]["actual"] = {}
-    gauge_data_dict["data"]["actual"]["usgs"] = {}
-    gauge_data_dict["data"]["actual"]["usgs"]["observed"] = {}
-    gauge_data_dict["data"]["actual"]["usgs"]["observed"]["1976-2005"] = rows
+    gage_data_dict["data"]["actual"] = {}
+    gage_data_dict["data"]["actual"]["usgs"] = {}
+    gage_data_dict["data"]["actual"]["usgs"]["observed"] = {}
+    gage_data_dict["data"]["actual"]["usgs"]["observed"]["1976-2005"] = rows
 
     # populate metadata
     current_year = datetime.now().year
     current_date = datetime.now().strftime("%Y-%m-%d")
 
-    gauge_data_dict["metadata"]["source"] = {}
-    gauge_data_dict["metadata"]["source"][
+    gage_data_dict["metadata"]["source"] = {}
+    gage_data_dict["metadata"]["source"][
         "citation"
     ] = f"U.S. Geological Survey, {current_year}, U.S. Geological Survey National Water Information System database, accessed {current_date}, at https://doi.org/10.5066/F7P55KJN. Data download directly accessible at {data_url}"
-    gauge_data_dict["metadata"]["variables"] = {
+    gage_data_dict["metadata"]["variables"] = {
         "water_year_index": {
             "description": "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274).",
             "units": "dimensionless",
@@ -230,9 +230,9 @@ async def get_usgs_gauge_data(gauge_id):
             "units": "cfs",
         },
     }
-    gauge_data_dict["metadata"]["percent_complete"] = round(pct_complete, 2)
+    gage_data_dict["metadata"]["percent_complete"] = round(pct_complete, 2)
 
-    return gauge_data_dict
+    return gage_data_dict
 
 
 def package_stats_data(stream_id, ds):
@@ -995,18 +995,18 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
 
 
 @routes.route("/conus_hydrology/observed_climatology/<stream_id>")
-def run_get_conus_hydrology_gauge_data(stream_id):
+def run_get_conus_hydrology_gage_data(stream_id):
     """
-    Function to fetch USGS stream gauge data associated with a single stream ID.
+    Function to fetch USGS stream gage data associated with a single stream ID.
     Example URL: http://localhost:5000/conus_hydrology/observed_climatology/50563
-    (should fetch associated gauge: USGS-12039500, QUINAULT RIVER AT QUINAULT LAKE, WA)
+    (should fetch associated gage: USGS-12039500, QUINAULT RIVER AT QUINAULT LAKE, WA)
     Args:
         stream_id (str): Stream ID for the hydrology data
     Returns:
-        JSON response with USGS stream gauge data associated with the requested stream ID.
+        JSON response with USGS stream gage data associated with the requested stream ID.
         Results are an observed daily climatology for the period 1976-2005, packaged identically to
         the modeled daily climatology data.
-        If no gauge is associated with the stream ID, a 404 response is returned.
+        If no gage is associated with the stream ID, a 404 response is returned.
     """
     if not stream_id.isdigit():
         return render_template("400/bad_request.html"), 400
@@ -1016,25 +1016,25 @@ def run_get_conus_hydrology_gauge_data(stream_id):
         return gdf  # return 400 if gdf is a tuple
 
     try:
-        gauge_id = gdf.loc[0].GAUGE_ID
-        if gauge_id is None or gauge_id == "NA":
+        gage_id = gdf.loc[0].GAGE_ID
+        if gage_id is None or gage_id == "NA":
             return render_template("404/no_data.html"), 404
 
-        gauge_data_dict = asyncio.run(get_usgs_gauge_data(gauge_id))
-        if isinstance(gauge_data_dict, tuple):
-            return gauge_data_dict  # return 400 if gauge_data_dict is a tuple
+        gage_data_dict = asyncio.run(get_usgs_gage_data(gage_id))
+        if isinstance(gage_data_dict, tuple):
+            return gage_data_dict  # return 400 if gage_data_dict is a tuple
 
         if request.args.get("format") == "csv":
             try:
                 return create_csv(
-                    data=gauge_data_dict,
+                    data=gage_data_dict,
                     endpoint="conus_hydrology",
                     filename_prefix="Observed Daily Climatology",
-                    place_id=stream_id + " (" + gauge_id + ")",
-                    lat=str(gauge_data_dict["latitude"]),
-                    lon=str(gauge_data_dict["longitude"]),
+                    place_id=stream_id + " (" + gage_id + ")",
+                    lat=str(gage_data_dict["latitude"]),
+                    lon=str(gage_data_dict["longitude"]),
                     source_metadata={
-                        "percent_complete": gauge_data_dict["metadata"][
+                        "percent_complete": gage_data_dict["metadata"][
                             "percent_complete"
                         ]
                     },
@@ -1043,7 +1043,7 @@ def run_get_conus_hydrology_gauge_data(stream_id):
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
 
-        return jsonify(gauge_data_dict)
+        return jsonify(gage_data_dict)
 
     except Exception as exc:
         if hasattr(exc, "status") and exc.status == 404:
@@ -1051,31 +1051,31 @@ def run_get_conus_hydrology_gauge_data(stream_id):
         return render_template("500/server_error.html"), 500
 
 
-@routes.route("/conus_hydrology/gauge_info")
-def run_get_conus_hydrology_gauge_info():
+@routes.route("/conus_hydrology/gage_info")
+def run_get_conus_hydrology_gage_info():
     """
-    Function to fetch all stream segment attributes and create a reference to associate USGS stream gauges.
-    Example URL: http://localhost:5000/conus_hydrology/gauge_info
+    Function to fetch all stream segment attributes and create a reference to associate USGS stream gages.
+    Example URL: http://localhost:5000/conus_hydrology/gage_info
     Args:
         None
     Returns:
-        JSON response that lists all stream IDs with associated gauges. Each stream ID key
-        maps to a list of dictionaries with the gauge name and USGS gauge ID. A small number of
-        stream IDs are associated with more than one gauge. If a stream has no associated gauges,
+        JSON response that lists all stream IDs with associated gages. Each stream ID key
+        maps to a list of dictionaries with the gage name and USGS gage ID. A small number of
+        stream IDs are associated with more than one gage. If a stream has no associated gages,
         it is not included in the response.
     """
     try:
         gdf = asyncio.run(get_features(""))  # omit ID to fetch all stream attributes
         if isinstance(gdf, tuple):
             return gdf  # return 400 if gdf is a tuple
-        gauges_gdf = gdf[gdf["GAUGE_ID"].notnull() & (gdf["GAUGE_ID"] != "NA")]
+        gages_gdf = gdf[gdf["GAGE_ID"].notnull() & (gdf["GAGE_ID"] != "NA")]
         result = (
-            gauges_gdf[["seg_id_nat", "GNIS_NAME", "GAUGE_ID"]]
-            .rename(columns={"GNIS_NAME": "name", "GAUGE_ID": "usgs_gauge_id"})
+            gages_gdf[["seg_id_nat", "GNIS_NAME", "GAGE_ID"]]
+            .rename(columns={"GNIS_NAME": "name", "GAGE_ID": "usgs_gage_id"})
             .groupby("seg_id_nat")
             .apply(
                 lambda x: x.drop(columns="seg_id_nat").to_dict(orient="records")
-            )  # allows for >1 gauge per stream, e.g. stream ID 29526
+            )  # allows for >1 gage per stream, e.g. stream ID 29526
             .to_dict()
         )
         return jsonify(result)
@@ -1318,7 +1318,7 @@ def fetch_all_hydroviz_route(stream_id):
                             "max": round(max(values), 3),
                         }
 
-        gauge_id = None
+        gage_id = None
         h8_outlet = False
         huc8 = None
 
@@ -1326,12 +1326,12 @@ def fetch_all_hydroviz_route(stream_id):
         if not isinstance(gdf, tuple):
             if gdf.loc[0].h8_outlet == 1:
                 h8_outlet = True
-            if gdf.loc[0].GAUGE_ID != "NA":
-                gauge_id = gdf.loc[0].GAUGE_ID
+            if gdf.loc[0].GAGE_ID != "NA":
+                gage_id = gdf.loc[0].GAGE_ID
             huc8 = gdf.loc[0].huc8
 
         response = {
-            "gauge_id": gauge_id,
+            "gage_id": gage_id,
             "h8_outlet": h8_outlet,
             "huc8": huc8,
             "hydrograph": hydrograph,

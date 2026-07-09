@@ -1503,7 +1503,7 @@ def arctic_hydrology_csv(data, filename_prefix, source_metadata):
     source_notes = {
         "original_gcm": "These values are derived from the original GCM or PGW runs.",
         "gcm_diff": "These values are the ratio or absolute difference between the original GCM runs and the historical GCM runs — these are not actual statistic values. Apply these differences to a historical baseline value to approximate future values. PGW runs are not included.",
-        "gcm_diff_applied_to_cheng": "These values are derived from applying the GCM-projected changes to the historical Cheng baseline. PGW runs are not included.",
+        "gcm_diff_applied_to_blaskey": "These values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
     }
 
     # data structure for all endpoints:
@@ -1680,9 +1680,7 @@ def arctic_hydrology_csv(data, filename_prefix, source_metadata):
             if isinstance(source_metadata, str) and source_metadata in source_notes:
                 metadata += f"# Climatologies are calculated from modeled daily streamflow data. {source_notes[source_metadata]}\n"
             else:
-                metadata += (
-                    "# Climatologies are calculated from modeled daily streamflow data.\n"
-                )
+                metadata += "# Climatologies are calculated from modeled daily streamflow data.\n"
             metadata += "# doy is the day of year (1-366) for which the climatology value is reported. \n"
             metadata += "# water_year_index is the water year index (1-366) for which the climatology value is reported. The water year is defined as starting on October 1 (DOY 275 in a 366 day year = water year index 1) and ending September 30 (DOY 274 in a 366 day year = water year index 366).\n"
             metadata += "# doy_min is the minimum streamflow value for the given day of year across all years in the era (cubic feet per second).\n"
