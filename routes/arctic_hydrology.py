@@ -1008,9 +1008,13 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
             "hydrograph": ...,
             "id": ...,
             "monthly_flow": ...,
+            "monthly_temperature": ...,
             "max_flow_dates": ...,
+            "max_temp_dates": ...,
             "name": ...,
             "stats": ...,
+            "wt_hydrograph": ...,
+            "wt_stats": ...,
             "summary": ...
         }
         Unlike the CONUS hydroviz, projected data is not nested by scenario since the Arctic
@@ -1024,8 +1028,14 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
     if isinstance(stats_response, tuple):
         return stats_response
 
+    # fetch wt_stats with default source (gcm_diff_applied_to_blaskey)
+    wt_stats_response = run_get_arctic_hydrology_wt_stats_data(stream_id)
+    if isinstance(wt_stats_response, tuple):
+        return wt_stats_response
+
     try:
         stats = stats_response.get_json()
+        wt_stats = wt_stats_response.get_json()
 
         # Fetch original_gcm stats to get PGW models (absent from gcm_diff_applied_to_blaskey).
         # The describe call is a duplicate of what run_get_arctic_hydrology_stats_data already did,
@@ -1050,6 +1060,28 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
         for model, model_data in pgw_stats["data"].items():
             if chart_era not in stats["data"].get(model, {}):
                 stats["data"][model] = model_data
+
+        # Fetch and decode climatology once; compute both Blaskey-adjusted and original_gcm
+        wt_stats_decode_dict = asyncio.run(
+            get_decode_dicts_from_axis_attributes(coverages["wt_stats"])
+        )[0]
+        pgw_wt_ds = asyncio.run(
+            fetch_hydro_data(
+                coverages["wt_stats"],
+                stream_id,
+                source=stat_source_encodings["original_gcm"],
+            )
+        )[0]
+        for dim, mapping in wt_stats_decode_dict.items():
+            if dim == "source":
+                continue
+            pgw_wt_ds = pgw_wt_ds.assign_coords(
+                {dim: [mapping[int(v)] for v in pgw_wt_ds[dim].values]}
+            )
+        pgw_wt_stats = package_stats_data(stream_id, pgw_wt_ds)
+        for model, model_data in pgw_wt_stats["data"].items():
+            if chart_era not in wt_stats["data"].get(model, {}):
+                wt_stats["data"][model] = model_data
 
         # Fetch and decode climatology once; compute both Blaskey-adjusted and original_gcm
         # versions in memory rather than making two network calls (the doy_climatology coverage
@@ -1081,6 +1113,34 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
 
         climatology_data = blaskey_adjusted
 
+        # Fetch and decode water temperature climatology
+        wt_datasets = asyncio.run(
+            fetch_hydro_data(coverages["doy_wt_climatology"], stream_id)
+        )
+        wt_decode_dicts = asyncio.run(
+            get_decode_dicts_from_axis_attributes(coverages["doy_wt_climatology"])
+        )
+
+        wt_decoded_datasets = []
+        for ds, decode_dict in zip(wt_datasets, wt_decode_dicts):
+            for dim, mapping in decode_dict.items():
+                ds = ds.assign_coords({dim: [mapping[int(v)] for v in ds[dim].values]})
+            wt_decoded_datasets.append(ds)
+
+        wt_raw_data_dict = package_hydrograph_data(stream_id, wt_decoded_datasets)
+
+        # Build Blaskey-adjusted version for water temperature
+        wt_blaskey_adjusted = calculate_and_apply_gcm_diffs_to_blaskey_wt_climatology(
+            copy.deepcopy(wt_raw_data_dict["data"])
+        )
+
+        # Fill in PGW models (absent from wt_blaskey_adjusted) using their original_gcm values
+        for model, model_data in wt_raw_data_dict["data"].items():
+            if model not in wt_blaskey_adjusted:
+                wt_blaskey_adjusted[model] = model_data
+
+        wt_climatology_data = wt_blaskey_adjusted
+
         historical_climatology = climatology_data["historical"][historical_era]
         historical_stats = stats["data"]["historical"]
 
@@ -1093,6 +1153,22 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
         projected_stats = {
             model: model_data
             for model, model_data in stats["data"].items()
+            if model != "historical" and chart_era in model_data
+        }
+
+        # Water temperature data
+        wt_historical_climatology = wt_climatology_data["historical"][historical_era]
+        wt_historical_stats = wt_stats["data"]["historical"]
+
+        # Non-"historical" models at the future era only for water temperature
+        wt_projected_climatology = {
+            model: model_data
+            for model, model_data in wt_climatology_data.items()
+            if model != "historical" and chart_era in model_data
+        }
+        wt_projected_stats = {
+            model: model_data
+            for model, model_data in wt_stats["data"].items()
             if model != "historical" and chart_era in model_data
         }
 
@@ -1212,6 +1288,122 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
                 "max": round(max(values), 3),
             }
 
+        ########## Populate arrays for water temperature hydrograph. ##########
+
+        wt_hydrograph = {
+            "historical": {
+                "doy_min": [x["doy_min"] for x in wt_historical_climatology],
+                "doy_mean": [x["doy_mean"] for x in wt_historical_climatology],
+                "doy_max": [x["doy_max"] for x in wt_historical_climatology],
+            },
+            "projected": {
+                chart_era: {
+                    "doy_min_min": [],
+                    "doy_mean_min": [],
+                    "doy_mean_mean": [],
+                    "doy_mean_max": [],
+                    "doy_max_max": [],
+                }
+            },
+        }
+
+        for i in range(366):
+            wt_doy_mins = []
+            wt_doy_means = []
+            wt_doy_maxes = []
+            for model_data in wt_projected_climatology.values():
+                wt_doy_mins.append(model_data[chart_era][i]["doy_min"])
+                wt_doy_means.append(model_data[chart_era][i]["doy_mean"])
+                wt_doy_maxes.append(model_data[chart_era][i]["doy_max"])
+
+            wt_hydrograph["projected"][chart_era]["doy_min_min"].append(
+                round(min(wt_doy_mins), 3)
+            )
+            wt_hydrograph["projected"][chart_era]["doy_mean_min"].append(
+                round(min(wt_doy_means), 3)
+            )
+            wt_hydrograph["projected"][chart_era]["doy_mean_mean"].append(
+                round(statistics.mean(wt_doy_means), 3)
+            )
+            wt_hydrograph["projected"][chart_era]["doy_mean_max"].append(
+                round(max(wt_doy_means), 3)
+            )
+            wt_hydrograph["projected"][chart_era]["doy_max_max"].append(
+                round(max(wt_doy_maxes), 3)
+            )
+
+        ########## Populate arrays for monthly modeled water temperature chart. ##########
+
+        monthly_temperature_keys = [
+            "wt_mean_jan",
+            "wt_mean_feb",
+            "wt_mean_mar",
+            "wt_mean_apr",
+            "wt_mean_may",
+            "wt_mean_jun",
+            "wt_mean_jul",
+            "wt_mean_aug",
+            "wt_mean_sep",
+            "wt_mean_oct",
+            "wt_mean_nov",
+            "wt_mean_dec",
+        ]
+
+        monthly_temperature = {
+            "historical": {},
+            "projected": {chart_era: {}},
+        }
+
+        for key in monthly_temperature_keys:
+            monthly_temperature["historical"][key] = wt_historical_stats[historical_era][key]
+
+        for model_stats in wt_projected_stats.values():
+            for key in monthly_temperature_keys:
+                if key not in monthly_temperature["projected"][chart_era]:
+                    monthly_temperature["projected"][chart_era][key] = []
+                monthly_temperature["projected"][chart_era][key].append(
+                    model_stats[chart_era][key]
+                )
+
+        ########## Populate arrays for max temperature date chart. ##########
+
+        max_temp_dates = {
+            "historical": {
+                "temperature": wt_historical_stats[historical_era].get("wt_ann_max_temp_mean"),
+                "date": wt_historical_stats[historical_era].get("wt_ann_max_temp_doy_mean"),
+            },
+            "projected": {chart_era: {"temperature": [], "date": []}},
+        }
+
+        for model_stats in wt_projected_stats.values():
+            max_temp_dates["projected"][chart_era]["temperature"].append(
+                model_stats[chart_era].get("wt_ann_max_temp_mean")
+            )
+            max_temp_dates["projected"][chart_era]["date"].append(
+                model_stats[chart_era].get("wt_ann_max_temp_doy_mean")
+            )
+
+        ########## Calculate water temperature stats for the stats table. ##########
+
+        wt_table_stats = {
+            "historical": wt_historical_stats,
+            "projected": {chart_era: {}},
+        }
+
+        wt_stat_arrays = {}
+        for model_stats in wt_projected_stats.values():
+            for stat, val in model_stats[chart_era].items():
+                if stat not in wt_stat_arrays:
+                    wt_stat_arrays[stat] = []
+                wt_stat_arrays[stat].append(val)
+
+        for stat, values in wt_stat_arrays.items():
+            wt_table_stats["projected"][chart_era][stat] = {
+                "min": round(min(values), 3),
+                "median": round(statistics.median(values), 3),
+                "max": round(max(values), 3),
+            }
+
         response = {
             "gage_id": stats.get("gage_id"),
             "huc8": stats.get("watershed"),
@@ -1220,8 +1412,12 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
             "id": stats["id"],
             "name": stats.get("name"),
             "monthly_flow": monthly_flow,
+            "monthly_temperature": monthly_temperature,
             "max_flow_dates": max_flow_dates,
+            "max_temp_dates": max_temp_dates,
             "stats": table_stats,
+            "wt_hydrograph": wt_hydrograph,
+            "wt_stats": wt_table_stats,
             "summary": stats.get("summary"),
         }
 
