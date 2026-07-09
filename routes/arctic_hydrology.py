@@ -1037,52 +1037,6 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
         stats = stats_response.get_json()
         wt_stats = wt_stats_response.get_json()
 
-        # Fetch original_gcm stats to get PGW models (absent from gcm_diff_applied_to_blaskey).
-        # The describe call is a duplicate of what run_get_arctic_hydrology_stats_data already did,
-        # but keeping the fetch inline here avoids a larger refactor of the route function.
-        stats_decode_dict = asyncio.run(
-            get_decode_dicts_from_axis_attributes(coverages["stats"])
-        )[0]
-        pgw_ds = asyncio.run(
-            fetch_hydro_data(
-                coverages["stats"],
-                stream_id,
-                source=stat_source_encodings["original_gcm"],
-            )
-        )[0]
-        for dim, mapping in stats_decode_dict.items():
-            if dim == "source":
-                continue
-            pgw_ds = pgw_ds.assign_coords(
-                {dim: [mapping[int(v)] for v in pgw_ds[dim].values]}
-            )
-        pgw_stats = package_stats_data(stream_id, pgw_ds)
-        for model, model_data in pgw_stats["data"].items():
-            if chart_era not in stats["data"].get(model, {}):
-                stats["data"][model] = model_data
-
-        # Fetch and decode climatology once; compute both Blaskey-adjusted and original_gcm
-        wt_stats_decode_dict = asyncio.run(
-            get_decode_dicts_from_axis_attributes(coverages["wt_stats"])
-        )[0]
-        pgw_wt_ds = asyncio.run(
-            fetch_hydro_data(
-                coverages["wt_stats"],
-                stream_id,
-                source=stat_source_encodings["original_gcm"],
-            )
-        )[0]
-        for dim, mapping in wt_stats_decode_dict.items():
-            if dim == "source":
-                continue
-            pgw_wt_ds = pgw_wt_ds.assign_coords(
-                {dim: [mapping[int(v)] for v in pgw_wt_ds[dim].values]}
-            )
-        pgw_wt_stats = package_stats_data(stream_id, pgw_wt_ds)
-        for model, model_data in pgw_wt_stats["data"].items():
-            if chart_era not in wt_stats["data"].get(model, {}):
-                wt_stats["data"][model] = model_data
-
         # Fetch and decode climatology once; compute both Blaskey-adjusted and original_gcm
         # versions in memory rather than making two network calls (the doy_climatology coverage
         # has no source dimension, so both versions start from the same raw data).
@@ -1101,15 +1055,10 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
 
         raw_data_dict = package_hydrograph_data(stream_id, decoded_datasets)
 
-        # Build Blaskey-adjusted version; PGW models missing a 1990-2021 era are silently skipped.
+        # Build Blaskey-adjusted version
         blaskey_adjusted = calculate_and_apply_gcm_diffs_to_blaskey_climatology(
             copy.deepcopy(raw_data_dict["data"])
         )
-
-        # Fill in PGW models (absent from blaskey_adjusted) using their original_gcm values.
-        for model, model_data in raw_data_dict["data"].items():
-            if model not in blaskey_adjusted:
-                blaskey_adjusted[model] = model_data
 
         climatology_data = blaskey_adjusted
 
@@ -1133,11 +1082,6 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
         wt_blaskey_adjusted = calculate_and_apply_gcm_diffs_to_blaskey_wt_climatology(
             copy.deepcopy(wt_raw_data_dict["data"])
         )
-
-        # Fill in PGW models (absent from wt_blaskey_adjusted) using their original_gcm values
-        for model, model_data in wt_raw_data_dict["data"].items():
-            if model not in wt_blaskey_adjusted:
-                wt_blaskey_adjusted[model] = model_data
 
         wt_climatology_data = wt_blaskey_adjusted
 
