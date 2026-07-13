@@ -1,0 +1,172 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Landslide Risk Data</h2>
+
+<p>
+  This service endpoint provides access to landslide risk data based on
+  precipitation measurements. The system monitors precipitation levels and
+  calculates landslide risk probabilities for specific locations in Southeast
+  Alaska (Craig and Kasaan). Data includes current precipitation measurements,
+  accumulated precipitation over multiple time periods (24 hours, 2 days, 3
+  days), and corresponding risk levels.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Location query</h4>
+
+<p>
+  Query landslide risk data for a specific location by community ID. Currently
+  supported communities are Craig (AK91) and Kasaan (AK182).
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Landslide risk data for Craig</td>
+      <td>
+        <a href="/landslide/AK91">/landslide/AK91</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Landslide risk data for Kasaan</td>
+      <td>
+        <a href="/landslide/AK182">/landslide/AK182</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Output</h3>
+
+<p>Results from landslide risk queries will look like this:</p>
+
+<p>
+  <strong>Note:</strong> The response includes both real-time landslide risk
+  data, forecast blocks for the next 3 days, and comprehensive community
+  information.
+</p>
+
+<pre>
+{
+  "timestamp": "2024-12-04T10:00:00Z",
+  "expires_at": "2024-12-04T18:00:00Z",
+  "place_name": "Craig",
+  "place_id": "AK91",
+  "gauge_id": "CRGA2",
+  "realtime_antecedent_mm": 10.5,
+  "realtime_rainfall_mm": 2.3,
+  "realtime_risk_level": 0,
+  "realtime_threshold_upper": 12.5,
+  "forecast_blocks": [
+    {
+      "antecedent_mm": 9.67,
+      "forecast_hour": 24,
+      "intensity_mm": 0.46,
+      "risk_level": 0,
+      "risk_threshold_upper": 12.5,
+      "timestamp": "2024-12-04T10:00:00Z"
+    },
+    {
+      "antecedent_mm": 10.3,
+      "forecast_hour": 48,
+      "intensity_mm": 0.8,
+      "risk_level": 0,
+      "risk_threshold_upper": 12.46,
+      "timestamp": "2024-12-05T10:00:00Z"
+    },
+    {
+      "antecedent_mm": 9.64,
+      "forecast_hour": 72,
+      "intensity_mm": 0.81,
+      "risk_level": 0,
+      "risk_threshold_upper": 12.5,
+      "timestamp": "2024-12-06T10:00:00Z"
+    }
+  ],
+  "community": {
+    "alt_name": "Sháan Séet",
+    "country": "US",
+    "id": "AK91",
+    "is_coastal": 1,
+    "latitude": 55.4764,
+    "longitude": -133.148,
+    "name": "Craig",
+    "ocean_lat1": 55.5688,
+    "ocean_lon1": -133.2313,
+    "region": "Alaska",
+    "tags": "ardac,awe,eds",
+    "type": "community"
+}
+}
+</pre>
+
+<p>The above output is structured like this:</p>
+
+<pre>
+{
+  "timestamp": &lt;ISO 8601 timestamp of the measurement&gt;,
+  "expires_at": &lt;ISO 8601 timestamp when this data expires&gt;,
+  "place_name": &lt;location name where the measurement was taken&gt;,
+  "place_id": &lt;community ID (e.g., AK91, AK182)&gt;,
+  "gauge_id": &lt;weather station gauge ID, or null if not available&gt;,
+  "realtime_antecedent_mm": &lt;current antecedent rainfall in millimeters&gt;,
+  "realtime_rainfall_mm": &lt;current rainfall intensity in millimeters&gt;,
+  "realtime_risk_level": &lt;current risk level (integer, higher values indicate greater risk)&gt;,
+  "realtime_threshold_upper": &lt;upper threshold for current risk level in millimeters&gt;,
+  "forecast_blocks": [
+    {
+      "antecedent_mm": &lt;forecasted antecedent rainfall in millimeters&gt;,
+      "forecast_hour": &lt;forecast time period in hours (24, 48, or 72)&gt;,
+      "intensity_mm": &lt;forecasted rainfall intensity in millimeters&gt;,
+      "risk_level": &lt;forecasted risk level (integer)&gt;,
+      "risk_threshold_upper": &lt;upper threshold for forecasted risk level in millimeters&gt;,
+      "timestamp": &lt;ISO 8601 timestamp for this forecast&gt;
+    },
+    ... &lt;additional forecast blocks for 48 and 72 hours&gt;
+  ],
+  "community": {
+    "id": &lt;community ID (e.g., AK91, AK182)&gt;,
+    "name": &lt;community name&gt;,
+    "alt_name": &lt;alternative/indigenous community name, if any&gt;,
+    "country": &lt;country code&gt;,
+    "type": &lt;location type (typically "community")&gt;,
+    "latitude": &lt;community latitude coordinate&gt;,
+    "longitude": &lt;community longitude coordinate&gt;,
+    "is_coastal": &lt;boolean indicating if community is coastal&gt;,
+    "ocean_lat1": &lt;nearest ocean point latitude&gt;,
+    "ocean_lon1": &lt;nearest ocean point longitude&gt;,
+    "region": &lt;geographic region&gt;,
+    "tags": &lt;array of location tags&gt;
+  }
+}
+</pre>
+
+<h3>Data Structure and Processing</h3>
+
+<p>
+  The landslide risk data processing and data structure definitions are
+  maintained in the
+  <a href="https://github.com/ua-snap/kuti-lambda" target="_blank"
+    >kuti-lambda repository</a
+  >. This repository contains the AWS Lambda function responsible for:
+</p>
+
+<ul>
+  <li>Processing precipitation data from weather monitoring stations</li>
+  <li>Calculating landslide risk probabilities using established thresholds</li>
+  <li>Inserting processed data into the PostgreSQL database</li>
+  <li>Managing data expiration and cleanup processes</li>
+</ul>
+
+<p>
+  The system is designed to update data every 3 hours, with automatic expiration
+  of older records to maintain current and relevant risk assessments.
+</p>
+
+{% endblock %}

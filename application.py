@@ -50,6 +50,7 @@ def get_service_categories():
         ("Flammability and Vegetation Type (ALFRESCO)", "/alfresco"),
         ("Hydrology", "/hydrology"),
         ("Landfast Sea Ice", "/landfastice"),
+        ("Landslide Risk", "/landslide"),
         ("Permafrost", "/permafrost"),
         # ("Physical and Administrative Boundary Polygons", "/boundary"),
         # ("Ecoregions", "/ecoregions"),

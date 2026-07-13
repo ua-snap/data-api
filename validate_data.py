@@ -1,9 +1,7 @@
 """A module to validate fetched data values."""
 
-import asyncio
 from datetime import datetime
-from generate_urls import generate_wfs_places_url
-from fetch_data import fetch_data
+from fetch_data import all_areas_full, all_communities_full
 
 
 def place_name_and_type(place_id):
@@ -20,43 +18,19 @@ def place_name_and_type(place_id):
     if place_id is None:
         return None, None
 
-    place = asyncio.run(
-        fetch_data(
-            [
-                generate_wfs_places_url(
-                    "all_boundaries:all_areas",
-                    "name,alt_name,type",
-                    place_id,
-                    "id",
-                )
-            ]
-        )
-    )
-    if place["numberMatched"] > 0:
-        place = place["features"][0]["properties"]
-        full_place = place["name"]
-        if place["alt_name"] != "":
-            full_place += " (" + place["alt_name"] + ")"
-        return full_place, place["type"]
-    else:
-        place = asyncio.run(
-            fetch_data(
-                [
-                    generate_wfs_places_url(
-                        "all_boundaries:all_communities",
-                        "name,alt_name,type",
-                        place_id,
-                        "id",
-                    )
-                ]
-            )
-        )
-        if place["numberMatched"] > 0:
-            place = place["features"][0]["properties"]
-            full_place = place["name"]
-            if place["alt_name"] != "":
-                full_place += " (" + place["alt_name"] + ")"
-            return full_place, place["type"]
+    if place_id in all_areas_full:
+        place = all_areas_full[place_id]
+        full_name = place["name"]
+        if place.get("alt_name", "") != "":
+            full_name += " (" + place["alt_name"] + ")"
+        return full_name, place["type"]
+
+    if place_id in all_communities_full:
+        place = all_communities_full[place_id]
+        full_name = place["name"]
+        if place.get("alt_name", "") != "":
+            full_name += " (" + place["alt_name"] + ")"
+        return full_name, place["type"]
 
     return None, None
 
