@@ -47,40 +47,62 @@
 <p>Results from landslide risk queries will look like this:</p>
 
 <p>
-  <strong>Note:</strong> The response includes both landslide risk data and
-  comprehensive community information from the places service, providing
-  geographic and administrative details about the queried location.
+  <strong>Note:</strong> The response includes both real-time landslide risk
+  data, forecast blocks for the next 3 days, and comprehensive community
+  information.
 </p>
 
 <pre>
 {
+  "timestamp": "2024-12-04T10:00:00Z",
+  "expires_at": "2024-12-04T18:00:00Z",
   "place_name": "Craig",
-  "timestamp": "2024-12-02 15:30:00",
-  "expires_at": "2024-12-02 18:30:00",
-  "hour": "15:30",
-  "precipitation_mm": 12.5,
-  "precipitation_inches": 0.49,
-  "precipitation_24hr": 45.2,
-  "precipitation_2days": 78.1,
-  "precipitation_3days": 95.6,
-  "risk_level": 2,
-  "risk_probability": 0.25,
-  "risk_24hr": 3,
-  "risk_2days": 4,
-  "risk_3days": 4,
+  "place_id": "AK91",
+  "gauge_id": "CRGA2",
+  "realtime_antecedent_mm": 10.5,
+  "realtime_rainfall_mm": 2.3,
+  "realtime_risk_level": 0,
+  "realtime_threshold_upper": 12.5,
+  "forecast_blocks": [
+    {
+      "antecedent_mm": 9.67,
+      "forecast_hour": 24,
+      "intensity_mm": 0.46,
+      "risk_level": 0,
+      "risk_threshold_upper": 12.5,
+      "timestamp": "2024-12-04T10:00:00Z"
+    },
+    {
+      "antecedent_mm": 10.3,
+      "forecast_hour": 48,
+      "intensity_mm": 0.8,
+      "risk_level": 0,
+      "risk_threshold_upper": 12.46,
+      "timestamp": "2024-12-05T10:00:00Z"
+    },
+    {
+      "antecedent_mm": 9.64,
+      "forecast_hour": 72,
+      "intensity_mm": 0.81,
+      "risk_level": 0,
+      "risk_threshold_upper": 12.5,
+      "timestamp": "2024-12-06T10:00:00Z"
+    }
+  ],
   "community": {
-    "name": "Craig",
-    "alt_name": "",
-    "id": "AK91",
-    "region": "Southeast Alaska",
+    "alt_name": "Sháan Séet",
     "country": "US",
-    "type": "community",
-    "latitude": 55.4769,
-    "longitude": -133.1478,
-    "is_coastal": true,
-    "ocean_lat1": 55.4769,
-    "ocean_lon1": -133.1478
-  }
+    "id": "AK91",
+    "is_coastal": 1,
+    "latitude": 55.4764,
+    "longitude": -133.148,
+    "name": "Craig",
+    "ocean_lat1": 55.5688,
+    "ocean_lon1": -133.2313,
+    "region": "Alaska",
+    "tags": "ardac,awe,eds",
+    "type": "community"
+}
 }
 </pre>
 
@@ -88,33 +110,39 @@
 
 <pre>
 {
+  "timestamp": &lt;ISO 8601 timestamp of the measurement&gt;,
+  "expires_at": &lt;ISO 8601 timestamp when this data expires&gt;,
   "place_name": &lt;location name where the measurement was taken&gt;,
-  "timestamp": &lt;timestamp of the measurement&gt;,
-  "expires_at": &lt;timestamp when this data expires&gt;,
-  "hour": &lt;time of measurement (HH:MM format)&gt;,
-  "precipitation_mm": &lt;current precipitation measurement in millimeters&gt;,
-  "precipitation_inches": &lt;current precipitation measurement in inches&gt;,
-  "precipitation_24hr": &lt;accumulated precipitation over 24 hours (mm)&gt;,
-  "precipitation_2days": &lt;accumulated precipitation over 2 days (mm)&gt;,
-  "precipitation_3days": &lt;accumulated precipitation over 3 days (mm)&gt;,
-  "risk_level": &lt;integer risk level (higher values indicate greater risk)&gt;,
-  "risk_probability": &lt;landslide risk probability (0.0 to 1.0)&gt;,
-  "risk_24hr": &lt;risk level based on 24-hour precipitation&gt;,
-  "risk_2days": &lt;risk level based on 2-day precipitation&gt;,
-  "risk_3days": &lt;risk level based on 3-day precipitation&gt;,
-  "risk_is_elevated_from_previous": &lt;boolean indicating if risk increased&gt;,
+  "place_id": &lt;community ID (e.g., AK91, AK182)&gt;,
+  "gauge_id": &lt;weather station gauge ID, or null if not available&gt;,
+  "realtime_antecedent_mm": &lt;current antecedent rainfall in millimeters&gt;,
+  "realtime_rainfall_mm": &lt;current rainfall intensity in millimeters&gt;,
+  "realtime_risk_level": &lt;current risk level (integer, higher values indicate greater risk)&gt;,
+  "realtime_threshold_upper": &lt;upper threshold for current risk level in millimeters&gt;,
+  "forecast_blocks": [
+    {
+      "antecedent_mm": &lt;forecasted antecedent rainfall in millimeters&gt;,
+      "forecast_hour": &lt;forecast time period in hours (24, 48, or 72)&gt;,
+      "intensity_mm": &lt;forecasted rainfall intensity in millimeters&gt;,
+      "risk_level": &lt;forecasted risk level (integer)&gt;,
+      "risk_threshold_upper": &lt;upper threshold for forecasted risk level in millimeters&gt;,
+      "timestamp": &lt;ISO 8601 timestamp for this forecast&gt;
+    },
+    ... &lt;additional forecast blocks for 48 and 72 hours&gt;
+  ],
   "community": {
-    "name": &lt;community name&gt;,
-    "alt_name": &lt;alternative community name, if any&gt;,
     "id": &lt;community ID (e.g., AK91, AK182)&gt;,
-    "region": &lt;geographic region&gt;,
+    "name": &lt;community name&gt;,
+    "alt_name": &lt;alternative/indigenous community name, if any&gt;,
     "country": &lt;country code&gt;,
     "type": &lt;location type (typically "community")&gt;,
     "latitude": &lt;community latitude coordinate&gt;,
     "longitude": &lt;community longitude coordinate&gt;,
     "is_coastal": &lt;boolean indicating if community is coastal&gt;,
     "ocean_lat1": &lt;nearest ocean point latitude&gt;,
-    "ocean_lon1": &lt;nearest ocean point longitude&gt;
+    "ocean_lon1": &lt;nearest ocean point longitude&gt;,
+    "region": &lt;geographic region&gt;,
+    "tags": &lt;array of location tags&gt;
   }
 }
 </pre>
