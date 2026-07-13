@@ -279,15 +279,16 @@ def test_landslide_ak91(client):
         "realtime_rainfall_mm",
         "realtime_risk_level",
         "realtime_threshold_upper",
-        "block_24hr",
-        "block_2days",
-        "block_3days",
+        "forecast_blocks",
         "timestamp",
     ]
 
     # Check that all required keys exist
     for key in required_keys:
         assert key in actual_data, f"Missing required key: {key}"
+
+    # Verify forecast_blocks is a list
+    assert isinstance(actual_data["forecast_blocks"], list), "forecast_blocks should be a list"
 
     # Required community keys
     required_community_keys = [
@@ -336,15 +337,16 @@ def test_landslide_ak182(client):
         "realtime_rainfall_mm",
         "realtime_risk_level",
         "realtime_threshold_upper",
-        "block_24hr",
-        "block_2days",
-        "block_3days",
+        "forecast_blocks",
         "timestamp",
     ]
 
     # Check that all required keys exist
     for key in required_keys:
         assert key in actual_data, f"Missing required key: {key}"
+
+    # Verify forecast_blocks is a list
+    assert isinstance(actual_data["forecast_blocks"], list), "forecast_blocks should be a list"
 
     # Required community keys
     required_community_keys = [
