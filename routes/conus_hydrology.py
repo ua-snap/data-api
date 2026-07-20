@@ -1295,12 +1295,6 @@ def fetch_all_hydroviz_route(stream_id):
                             model_stats[scenario][era][stat]
                         )
 
-        aggregation_stats = {
-            "rcp45": "min",
-            "rcp60": "median",
-            "rcp85": "max"
-        }
-
         for scenario in scenario_stat_arrays.keys():
             for era in scenario_stat_arrays[scenario].keys():
                 if era not in table_stats["projected"]:
@@ -1310,18 +1304,12 @@ def fetch_all_hydroviz_route(stream_id):
                 for stat in scenario_stat_arrays[scenario][era].keys():
                     table_stats["projected"][era][scenario][stat] = {}
                     values = scenario_stat_arrays[scenario][era][stat]
-                    aggr_stat = aggregation_stats[scenario]
                     if all(v is None for v in values):
-                        table_stats["projected"][era][scenario][stat][aggr_stat] = None
+                        table_stats["projected"][era][scenario][stat]["median"] = None
                         continue
                     values = [v for v in values if v is not None]
-                    if scenario == "rcp45":
-                        aggr_value = round(min(values), 3)
-                    elif scenario == "rcp60":
-                        aggr_value = round(statistics.median(values), 3)
-                    elif scenario == "rcp85":
-                        aggr_value = round(max(values), 3)
-                    table_stats["projected"][era][scenario][stat][aggr_stat] = aggr_value
+                    median_value = round(statistics.median(values), 3)
+                    table_stats["projected"][era][scenario][stat]["median"] = median_value
 
         gage_id = None
         h8_outlet = False
