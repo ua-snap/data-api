@@ -1302,21 +1302,14 @@ def fetch_all_hydroviz_route(stream_id):
                 if scenario not in table_stats["projected"][era]:
                     table_stats["projected"][era][scenario] = {}
                 for stat in scenario_stat_arrays[scenario][era].keys():
+                    table_stats["projected"][era][scenario][stat] = {}
                     values = scenario_stat_arrays[scenario][era][stat]
                     if all(v is None for v in values):
-                        table_stats["projected"][era][scenario][stat] = {
-                            "min": None,
-                            "median": None,
-                            "max": None,
-                        }
-                    else:
-                        # If values are not all None, calculate min/median/max using non-None values.
-                        values = [v for v in values if v is not None]
-                        table_stats["projected"][era][scenario][stat] = {
-                            "min": round(min(values), 3),
-                            "median": round(statistics.median(values), 3),
-                            "max": round(max(values), 3),
-                        }
+                        table_stats["projected"][era][scenario][stat]["median"] = None
+                        continue
+                    values = [v for v in values if v is not None]
+                    median_value = round(statistics.median(values), 3)
+                    table_stats["projected"][era][scenario][stat]["median"] = median_value
 
         gage_id = None
         h8_outlet = False

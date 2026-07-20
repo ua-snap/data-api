@@ -1227,9 +1227,7 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
 
         for stat, values in stat_arrays.items():
             table_stats["projected"][chart_era][stat] = {
-                "min": round(min(values), 3),
                 "median": round(statistics.median(values), 3),
-                "max": round(max(values), 3),
             }
 
         ########## Populate arrays for water temperature hydrograph. ##########
@@ -1343,9 +1341,7 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
 
         for stat, values in wt_stat_arrays.items():
             wt_table_stats["projected"][chart_era][stat] = {
-                "min": round(min(values), 3),
                 "median": round(statistics.median(values), 3),
-                "max": round(max(values), 3),
             }
 
         response = {
