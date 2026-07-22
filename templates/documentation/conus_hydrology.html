@@ -11,6 +11,8 @@
   calibration) is available for the 1976&ndash;2005 period.
 </p>
 
+{% include "documentation/streamflow_stats_table.html" %}
+
 <!-- TODO: create a way for users to find the stream IDs for streams of interest, and reference it here -->
 <!-- <p>Users can search for stream IDs using the ###TBD###</p> -->
 
@@ -21,9 +23,9 @@
 
 <p>
   We also include endpoints to access daily streamflow climatologies from
-  associated USGS stream gage data collected over the 1976&ndash;2005
-  historical period, for use in comparing with the modeled data. Note that not
-  all modeled stream segments have associated gage data. See the
+  associated USGS stream gage data collected over the 1976&ndash;2005 historical
+  period, for use in comparing with the modeled data. Note that not all modeled
+  stream segments have associated gage data. See the
   <a href="/conus_hydrology/gage_info">/conus_hydrology/gage_info</a> endpoint
   for a list of all stream IDs with gage data.
 </p>
@@ -35,8 +37,7 @@
 <p>
   Query hydrologic statistics for all models and scenarios. Statistics are
   computed over historical (1976&ndash;2005) and future (2016&ndash;2045,
-  2046&ndash;2075, and 2071&ndash;2100) eras. These statistics are defined
-  <a href="#stats_table">below</a>.
+  2046&ndash;2075, and 2071&ndash;2100) eras.
 </p>
 
 <table class="endpoints">
@@ -63,8 +64,8 @@
         parameter. Accepted values are:
         <ul>
           <li>
-            <code>gcm_diff_applied_to_maurer</code> (default) &mdash; GCM-projected
-            changes applied to the historical Maurer baseline.
+            <code>gcm_diff_applied_to_maurer</code> (default) &mdash;
+            GCM-projected changes applied to the historical Maurer baseline.
           </li>
           <li>
             <code>original_gcm</code> &mdash; raw output from the original GCM
@@ -72,9 +73,9 @@
           </li>
           <li>
             <code>gcm_diff</code> &mdash; ratio or absolute difference between
-            the projected and historical GCM runs. These are not actual statistic
-            values; apply them to your own historical baseline to approximate future
-            values.
+            the projected and historical GCM runs. These are not actual
+            statistic values; apply them to your own historical baseline to
+            approximate future values.
           </li>
         </ul>
         Chaining of multiple arguments is supported (e.g.,
@@ -119,8 +120,8 @@
         parameter. Accepted values are:
         <ul>
           <li>
-            <code>gcm_diff_applied_to_maurer</code> (default) &mdash; GCM-projected
-            changes applied to the historical Maurer baseline.
+            <code>gcm_diff_applied_to_maurer</code> (default) &mdash;
+            GCM-projected changes applied to the historical Maurer baseline.
           </li>
           <li>
             <code>original_gcm</code> &mdash; raw output from the original GCM
@@ -525,72 +526,62 @@
 }
 </pre>
 
-{% include "documentation/streamflow_stats_table.html" %}
+<h3>Source data</h3>
 
-
-      <h3>Source data</h3>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Academic reference</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output
-              for Hydrologic Simulations for the Conterminous United States for
-              Historical and Future Conditions Using the National Hydrologic
-              Model Infrastructure (NHM) and the Coupled Model Intercomparison
-              Project Phase 5 (CMIP5), 1950&ndash;2100: U.S. Geological Survey
-              data release,
-              <a href="https://doi.org/10.5066/P9EBKREQ"
-                >https://doi.org/10.5066/P9EBKREQ</a
-              >.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              Regan, R.S., Markstrom, S.L., Hay, L.E., Viger, R.J., Norton,
-              P.A., Driscoll, J.M., LaFontaine, J.H., 2018, Description of the
-              National Hydrologic Model for use with the
-              Precipitation&ndash;Runoff Modeling System (PRMS): U.S. Geological
-              Survey Techniques and Methods, book 6, chap B9, 38 p.,
-              <a href="https://doi.org/10.3133/tm6B9"
-                >https://doi.org/10.3133/tm6B9</a
-              >.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              LaFontaine, J.H., Hay, L.E., and Riley, J.R., 2023, Application of
-              the National Hydrologic Model Infrastructure with the
-              Precipitation&ndash;Runoff Modeling System (NHM-PRMS),
-              1950&ndash;2010, Maurer Calibration: U.S. Geological Survey data
-              release,
-              <a href="https://doi.org/10.5066/P9CVHLMB"
-                >https://doi.org/10.5066/P9CVHLMB</a
-              >.
-            </td>
-          </tr>
-          <tr>
-            <td>
-              U.S. Geological Survey, 2025, U.S. Geological Survey National
-              Water Information System database, at
-              <a href="https://doi.org/10.5066/F7P55KJN"
-                >https://doi.org/10.5066/F7P55KJN</a
-              >. Data download directly accessible at
-              <a
-                href="https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily"
-                >https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily</a
-              >.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      {% endblock %}
+<table>
+  <thead>
+    <tr>
+      <th>Academic reference</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        LaFontaine, J.H., and Riley, J.W., 2023, Model Input and Output for
+        Hydrologic Simulations for the Conterminous United States for Historical
+        and Future Conditions Using the National Hydrologic Model Infrastructure
+        (NHM) and the Coupled Model Intercomparison Project Phase 5 (CMIP5),
+        1950&ndash;2100: U.S. Geological Survey data release,
+        <a href="https://doi.org/10.5066/P9EBKREQ"
+          >https://doi.org/10.5066/P9EBKREQ</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Regan, R.S., Markstrom, S.L., Hay, L.E., Viger, R.J., Norton, P.A.,
+        Driscoll, J.M., LaFontaine, J.H., 2018, Description of the National
+        Hydrologic Model for use with the Precipitation&ndash;Runoff Modeling
+        System (PRMS): U.S. Geological Survey Techniques and Methods, book 6,
+        chap B9, 38 p.,
+        <a href="https://doi.org/10.3133/tm6B9">https://doi.org/10.3133/tm6B9</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        LaFontaine, J.H., Hay, L.E., and Riley, J.R., 2023, Application of the
+        National Hydrologic Model Infrastructure with the
+        Precipitation&ndash;Runoff Modeling System (NHM-PRMS), 1950&ndash;2010,
+        Maurer Calibration: U.S. Geological Survey data release,
+        <a href="https://doi.org/10.5066/P9CVHLMB"
+          >https://doi.org/10.5066/P9CVHLMB</a
+        >.
+      </td>
+    </tr>
+    <tr>
+      <td>
+        U.S. Geological Survey, 2025, U.S. Geological Survey National Water
+        Information System database, at
+        <a href="https://doi.org/10.5066/F7P55KJN"
+          >https://doi.org/10.5066/F7P55KJN</a
+        >. Data download directly accessible at
+        <a href="https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily"
+          >https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily</a
+        >.
+      </td>
     </tr>
   </tbody>
 </table>
+
+{% endblock %}
