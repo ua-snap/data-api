@@ -1,0 +1,65 @@
+<!--
+  Climate model runs used for the Arctic hydrology dataset, included by
+  documentation/arctic_hydrology.html. Derived from the model axis metadata
+  of the ak_hydro_segments rasdaman coverages.
+-->
+<h3 id="models_table">Climate models</h3>
+
+<p>
+  Streamflow and water temperature were modeled using climate inputs
+  dynamically downscaled from the following six model runs, all produced at the
+  National Center for Atmospheric Research (NCAR). The historical baseline
+  (reported under the <code>historical</code> key, the Blaskey hindcast) was
+  instead produced by dynamically downscaling ERA5 reanalysis data over the
+  same domain for 1990&ndash;2021.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Description</th>
+      <th>Emissions scenario</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>C2LE2</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 2</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td><code>C2LE4</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 4</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td><code>C2LE7</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 7</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td><code>C2LE9</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 9</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td><code>PGWh</code></td>
+      <td>
+        High hydroclimate change scenario using the pseudo-global warming (PGW)
+        method, derived from the mean perturbations of the 75th&ndash;100th
+        percentile of SSP2-4.5 CMIP6 models
+      </td>
+      <td>SSP2-4.5 (PGW)</td>
+    </tr>
+    <tr>
+      <td><code>PGWm</code></td>
+      <td>
+        Median hydroclimate change scenario using the pseudo-global warming
+        (PGW) method, derived from the mean perturbations of the
+        25th&ndash;75th percentile of SSP2-4.5 CMIP6 models
+      </td>
+      <td>SSP2-4.5 (PGW)</td>
+    </tr>
+  </tbody>
+</table>
