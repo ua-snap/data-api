@@ -962,6 +962,16 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
         data_dict = populate_feature_name_and_location_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
+        # apply GCM-projected changes to Maurer climatology stats if source is "gcm_diff_applied_to_maurer"
+        # otherwise, if source is "original_gcm", then we are just returning the original GCM stats with no adjustments
+        if source == "gcm_diff_applied_to_maurer":
+            for landcover in data_dict["data"]:
+                data_dict["data"][landcover] = (
+                    calculate_and_apply_gcm_diffs_to_maurer_climatology(
+                        data_dict["data"][landcover]
+                    )
+                )
+
         if request.args.get("format") == "csv":
             try:
                 return create_csv(
@@ -975,16 +985,6 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
                 )
             except Exception as exc:
                 return render_template("500/server_error.html"), 500
-
-        # apply GCM-projected changes to Maurer climatology stats if source is "gcm_diff_applied_to_maurer"
-        # otherwise, if source is "original_gcm", then we are just returning the original GCM stats with no adjustments
-        if source == "gcm_diff_applied_to_maurer":
-            for landcover in data_dict["data"]:
-                data_dict["data"][landcover] = (
-                    calculate_and_apply_gcm_diffs_to_maurer_climatology(
-                        data_dict["data"][landcover]
-                    )
-                )
 
         return jsonify(data_dict)
 
