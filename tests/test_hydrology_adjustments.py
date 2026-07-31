@@ -171,3 +171,63 @@ def test_maurer_adjustment_preserves_structure():
     adjusted = calculate_and_apply_gcm_diffs_to_maurer_climatology(_conus_data_dict())
     assert adjusted["Maurer"]["historical"]["1976-2005"][0]["doy_mean"] == 708.793
     assert "rcp45" in adjusted["CCSM4"]
+
+
+####################################
+# 4. min <= mean <= max invariant  #
+####################################
+
+
+def _assert_ordered(entry):
+    assert entry["doy_min"] <= entry["doy_mean"] <= entry["doy_max"]
+
+
+def test_blaskey_adjustment_enforces_stat_ordering():
+    """
+    Each stat is scaled by its own ratio, so a large projected minimum can
+    overtake the adjusted mean. The clamp must restore ordering.
+    """
+    day = {"doy": 200, "water_year_index": 292}
+    data = {
+        "historical": {
+            "1990-2021": [dict(day, doy_min=100.0, doy_mean=200.0, doy_max=1000.0)],
+        },
+        "MODEL": {
+            "1990-2021": [dict(day, doy_min=100.0, doy_mean=200.0, doy_max=4000.0)],
+            "2034-2065": [dict(day, doy_min=400.0, doy_mean=200.0, doy_max=1200.0)],
+        },
+    }
+    adjusted = calculate_and_apply_gcm_diffs_to_blaskey_climatology(data)
+    _assert_ordered(adjusted["MODEL"]["2034-2065"][0])
+
+
+def test_maurer_adjustment_enforces_stat_ordering():
+    """
+    Production values from CONUS stream 50563 (dynamic / CCSM4 / rcp26,
+    doy 214), which yielded adjusted doy_min 353.042 > doy_max 343.703
+    because the GCM historical max held a flood day that does not recur.
+    """
+    day = {"doy": 214, "water_year_index": 306}
+    data = {
+        "Maurer": {
+            "historical": {
+                "1976-2005": [
+                    dict(day, doy_min=296.9, doy_mean=708.793, doy_max=1373.0)
+                ],
+            },
+        },
+        "CCSM4": {
+            "historical": {
+                "1976-2005": [
+                    dict(day, doy_min=286.1, doy_mean=966.628, doy_max=4546.0)
+                ],
+            },
+            "rcp26": {
+                "2016-2045": [
+                    dict(day, doy_min=340.2, doy_mean=627.062, doy_max=1138.0)
+                ],
+            },
+        },
+    }
+    adjusted = calculate_and_apply_gcm_diffs_to_maurer_climatology(data)
+    _assert_ordered(adjusted["CCSM4"]["rcp26"]["2016-2045"][0])

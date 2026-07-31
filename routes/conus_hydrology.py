@@ -842,6 +842,17 @@ def calculate_and_apply_gcm_diffs_to_maurer_climatology(data_dict):
                             maurer_historical * projected_quotient, 3
                         )
                         doy_stats[stat] = maurer_adjusted
+                    # each stat is scaled by its own ratio, so the adjusted
+                    # values can cross; clamp to preserve min <= mean <= max
+                    if all(
+                        k in doy_stats for k in ("doy_min", "doy_mean", "doy_max")
+                    ):
+                        doy_stats["doy_min"] = min(
+                            doy_stats["doy_min"], doy_stats["doy_mean"]
+                        )
+                        doy_stats["doy_max"] = max(
+                            doy_stats["doy_max"], doy_stats["doy_mean"]
+                        )
                     adjusted_data_dict[model][scenario][era].append(doy_stats)
     return adjusted_data_dict
 
