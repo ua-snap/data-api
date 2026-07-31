@@ -25,7 +25,11 @@ from generate_urls import (
 )
 from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
 from validate_request import get_axis_encodings
-from postprocessing import prune_nulls_with_max_intensity
+from postprocessing import (
+    prune_nulls_with_max_intensity,
+    scale_aware_epsilon,
+    stabilized_ratio,
+)
 from csv_functions import create_csv
 from config import RAS_BASE_URL
 from . import routes
@@ -784,6 +788,11 @@ def calculate_and_apply_gcm_diffs_to_maurer_climatology(data_dict):
     Function to calculate the GCM-projected changes in streamflow stats and apply those changes to the historical Maurer climatology stats.
     This is done by first calculating the ratio between the GCM-projected future stat values and the GCM historical stat values,
     then applying that scaling factor to the Maurer historical stat values.
+
+    Change factors are stabilized ratios (see postprocessing.stabilized_ratio):
+    a symmetric offset scaled to the model's historical mean flow keeps the
+    factor near 1 when both values are near zero (e.g. dry-season minimums),
+    and factors are clamped to [1/RATIO_CAP, RATIO_CAP].
     Args:
         data_dict (dict): Data dictionary with the hydrology data populated
     Returns:
@@ -795,6 +804,13 @@ def calculate_and_apply_gcm_diffs_to_maurer_climatology(data_dict):
         if model == "Maurer":
             adjusted_data_dict[model] = data_dict[model]
             continue
+        epsilon = scale_aware_epsilon(
+            [
+                row["doy_mean"]
+                for row in data_dict[model]["historical"]["1976-2005"]
+                if "doy_mean" in row
+            ]
+        )
         if model not in adjusted_data_dict:
             adjusted_data_dict[model] = {}
         for scenario in data_dict[model].keys():
@@ -819,10 +835,9 @@ def calculate_and_apply_gcm_diffs_to_maurer_climatology(data_dict):
                             stat
                         ]
                         gcm_projected = entry[stat]
-                        denominator = gcm_historical
-                        if denominator == 0:
-                            denominator = 0.0001
-                        projected_quotient = gcm_projected / denominator
+                        projected_quotient = stabilized_ratio(
+                            gcm_projected, gcm_historical, epsilon
+                        )
                         maurer_adjusted = round(
                             maurer_historical * projected_quotient, 3
                         )

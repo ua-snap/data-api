@@ -267,3 +267,48 @@ def merge_dicts(dict1, dict2):
         else:
             merged[key] = value
     return merged
+
+
+# Stabilization constants for GCM change factors ("deltas") that are applied to
+# historical baselines as ratios. The epsilon fraction sets the offset relative
+# to the stream's historical mean flow; the floor keeps the offset nonzero for
+# all-zero streams; the cap bounds how much any single statistic can be scaled.
+RATIO_EPSILON_FRACTION = 0.01
+RATIO_EPSILON_FLOOR = 0.0001
+RATIO_CAP = 10.0
+
+
+def scale_aware_epsilon(values):
+    """
+    Compute a stabilizing offset for ratio-based change factors, sized to the
+    magnitude of the historical data so that the same code works for large
+    rivers and small creeks alike.
+    Args:
+        values (list of float): Historical baseline values (e.g. all doy_mean
+            values for one model), used to establish the stream's flow scale
+    Returns:
+        float: RATIO_EPSILON_FRACTION times the mean of values, but never less
+        than RATIO_EPSILON_FLOOR
+    """
+    if not values:
+        return RATIO_EPSILON_FLOOR
+    epsilon = RATIO_EPSILON_FRACTION * (sum(values) / len(values))
+    return max(epsilon, RATIO_EPSILON_FLOOR)
+
+
+def stabilized_ratio(projected, historical, epsilon):
+    """
+    Ratio of projected to historical, stabilized for near-zero baselines.
+    Adding the same epsilon to numerator and denominator makes the ratio
+    approach 1 (no change) as both values approach zero, instead of exploding
+    when only the denominator is small. The result is clamped to
+    [1/RATIO_CAP, RATIO_CAP] as a backstop against noisy statistics.
+    Args:
+        projected (float): Future (projected) statistic value
+        historical (float): Historical statistic value for the same model
+        epsilon (float): Positive stabilizing offset from scale_aware_epsilon()
+    Returns:
+        float: Clamped change factor suitable for scaling a historical baseline
+    """
+    ratio = (projected + epsilon) / (historical + epsilon)
+    return min(max(ratio, 1.0 / RATIO_CAP), RATIO_CAP)
