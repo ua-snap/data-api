@@ -823,6 +823,14 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
         data_dict = populate_feature_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
+        # apply GCM-projected changes to Blaskey climatology if source is "gcm_diff_applied_to_blaskey"
+        # PGW models without a 1990-2021 historical era are silently absent from this source;
+        # they are only available via source=original_gcm.
+        if source == "gcm_diff_applied_to_blaskey":
+            data_dict["data"] = calculate_and_apply_gcm_diffs_to_blaskey_climatology(
+                data_dict["data"]
+            )
+
         if request.args.get("format") == "csv":
             try:
                 return create_csv(
@@ -836,14 +844,6 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
                 )
             except Exception:
                 return render_template("500/server_error.html"), 500
-
-        # apply GCM-projected changes to Blaskey climatology if source is "gcm_diff_applied_to_blaskey"
-        # PGW models without a 1990-2021 historical era are silently absent from this source;
-        # they are only available via source=original_gcm.
-        if source == "gcm_diff_applied_to_blaskey":
-            data_dict["data"] = calculate_and_apply_gcm_diffs_to_blaskey_climatology(
-                data_dict["data"]
-            )
 
         return jsonify(data_dict)
 
@@ -966,6 +966,11 @@ def run_get_arctic_hydrology_wt_modeled_climatology(stream_id):
         data_dict = populate_feature_attributes(data_dict, gdf)
         data_dict = prune_nulls_with_max_intensity(data_dict)
 
+        if source == "gcm_diff_applied_to_blaskey":
+            data_dict["data"] = calculate_and_apply_gcm_diffs_to_blaskey_wt_climatology(
+                data_dict["data"]
+            )
+
         if request.args.get("format") == "csv":
             try:
                 return create_csv(
@@ -979,11 +984,6 @@ def run_get_arctic_hydrology_wt_modeled_climatology(stream_id):
                 )
             except Exception:
                 return render_template("500/server_error.html"), 500
-
-        if source == "gcm_diff_applied_to_blaskey":
-            data_dict["data"] = calculate_and_apply_gcm_diffs_to_blaskey_wt_climatology(
-                data_dict["data"]
-            )
 
         return jsonify(data_dict)
 
