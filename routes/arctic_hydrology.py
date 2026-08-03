@@ -96,18 +96,26 @@ async def get_features(stream_id):
     Args:
         stream_id (str): Stream ID for the hydrology data
     Returns:
-        geopandas GeoDataFrame with the vector features, or 400."""
+        geopandas GeoDataFrame with the vector features, or an error response
+        tuple: 502 if the WFS fetch fails, 404 if the stream ID has no
+        features."""
     try:
         url = generate_wfs_arctic_hydrology_url(stream_id)
 
         async with ClientSession() as session:
             layer_data = await fetch_layer_data(url, session)
-        gdf = gpd.GeoDataFrame.from_features(layer_data["features"], crs="EPSG:3338")
-        gdf["geometry"] = gdf["geometry"].make_valid()
-
-        return gdf
     except Exception:
-        return render_template("400/bad_request.html"), 400
+        # WFS/upstream failure - a server-side problem, not a bad request.
+        return render_template("502/upstream_unreachable.html"), 502
+
+    if not layer_data.get("features"):
+        # Valid query, but no such stream ID.
+        return render_template("404/no_data.html"), 404
+
+    gdf = gpd.GeoDataFrame.from_features(layer_data["features"], crs="EPSG:3338")
+    gdf["geometry"] = gdf["geometry"].make_valid()
+
+    return gdf
 
 
 async def get_stats_features(stream_id):
@@ -717,7 +725,7 @@ def run_get_arctic_hydrology_stats_data(stream_id):
 
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
-        return gdf  # return 400 if gdf is a tuple
+        return gdf  # error response (502/404) if gdf is a tuple
 
     stats_gdf = asyncio.run(get_stats_features(stream_id))
 
@@ -796,7 +804,7 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
 
     gdf = asyncio.run(get_features(stream_id))
     if isinstance(gdf, tuple):
-        return gdf  # return 400 if gdf is a tuple
+        return gdf  # error response (502/404) if gdf is a tuple
 
     try:
         # fetch data and metadata

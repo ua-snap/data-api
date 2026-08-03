@@ -200,8 +200,14 @@ def validate_get_params():
 
 @app.after_request
 def add_cache_control(response):
-    # Set cache control headers here
-    response.cache_control.max_age = 7776000
+    if response.status_code == 200:
+        response.cache_control.max_age = 7776000
+    else:
+        # Errors are often transient (upstream hiccups), so keep them out of
+        # long-lived caches: a cached error would otherwise be served for the
+        # full max-age even after the upstream recovered. The short TTL still
+        # shields upstreams from request storms during a real outage.
+        response.cache_control.max_age = 60
     return response
 
 
