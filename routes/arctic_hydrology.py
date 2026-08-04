@@ -400,6 +400,10 @@ def package_stats_data(stream_id, ds):
                 if not np.isnan(v)
             }
 
+    # Move the historical model above the rest.
+    historical_data = stats_dict["data"].pop("historical")
+    stats_dict["data"] = {"historical": historical_data, **stats_dict["data"]}
+
     return stats_dict
 
 
@@ -466,6 +470,10 @@ def package_hydrograph_data(stream_id, datasets):
                     rows.append(entry)
 
                 model_dict[era] = rows
+
+    # Move the historical model above the rest.
+    historical_data = hydrograph_dict["data"].pop("historical")
+    hydrograph_dict["data"] = {"historical": historical_data, **hydrograph_dict["data"]}
 
     return hydrograph_dict
 
