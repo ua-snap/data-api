@@ -25,6 +25,7 @@ nodata_mappings = {
     "cmip6_indicators": nodata_values["cmip6_indicators"],
     "cmip6_monthly": nodata_values["cmip6_monthly"],
     "era5wrf_4km": nodata_values["era5wrf_4km"],
+    "era5wrf_4km_elevation": nodata_values["era5wrf_4km"],
     "fire_weather": nodata_values["fire_weather"],
     "crrel_gipl": nodata_values["default"],
     "degree_days_below_zero_Fdays": nodata_values["default"],

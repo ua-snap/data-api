@@ -1,76 +1,159 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <h2>Elevation Data</h2>
 
 <p>
-    This service endpoint queries ASTER GDEM elevation data for Alaska and Western Canada. Each query returns three
-    values: minimum, maximum, and mean elevations derived from corresponding interpolations used to resample the source
-    data from 30m spatial resolution to 1km. This technique is used to assure elevation fidelity between the original
-    and downsampled data.
+  This service endpoint queries various elevation data that span Alaska and
+  Western Canada.
 </p>
 
-<p>Links to an academic reference and source dataset are included at the bottom of this page.</p>
+<p>
+  Links to an academic reference and source dataset are included at the bottom
+  of this page.
+</p>
 
 <h3>Service endpoints</h3>
 
 <h4>Point query</h4>
 
-<p>Query the ASTER Global Digital Elevation Model (DEM) at a single point specified by latitude and longitude.</p>
+<h5>ASTER Global Digital Elevation Model (GDEM)</h5>
+
+<p>
+  Query the ASTER GDEM at a single point specified by latitude and longitude.
+  Each query returns three values: minimum, maximum, and mean elevations derived
+  from the corresponding interpolation methods (min, max, and mean) used to
+  resample the original source data from a native spatial resolution of 30m to
+  1km. Use this endpoint to understand elevation variance within a local radius
+  of a single geographic point.
+</p>
 
 <table class="endpoints">
-    <thead>
-        <tr>
-            <th class="endpoint-label">Endpoint</th>
-            <th class="endpoint-url">Example URL</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Elevation data point query</td>
-            <td><a href="/elevation/point/65.0628/-146.1627">/elevation/point/65.0628/-146.1627</a>
-            </td>
-        </tr>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="2"></td>
-        </tr>
-    </tfoot>
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ASTER GDEM point query</td>
+      <td>
+        <a href="/elevation/point/65.0628/-146.1627"
+          >/elevation/point/65.0628/-146.1627</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
+
+<h5>WRF Dynamically Downscaled ERA5 Reanalysis 4 km Elevation Grid</h5>
+
+<p>
+  Query the elevation grid used for the 4 km ERA5-WRF dynamically downscaled
+  reanalysis. Point queries return the grid cell elevation. Use this endpoint to
+  understand how the elevation of a grid cell may impact the climate data
+  variables for the ERA5-WRF 4km and the Downscaled CMIP6 4 km products.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>4 km ERA5-WRF Elevation Grid point query</td>
+      <td>
+        <a href="/elevation/point/era5_4km/65.0628/-146.1627"
+          >/elevation/point/era5_4km/65.0628/-146.1627</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
 </table>
 
 <h4>Area query</h4>
 
-<p>Query zonal statistics for 1 km interpolations of the 30 m resolution ASTER GDEM data for an
-    <a href="/places/all">area of interest polygon ID</a>. A query
-    will return the minimum, mean, and maximum elevations found within a single polygon.
+<h5>ASTER GDEM</h5>
+
+<p>
+  Summarize and query the zonal statistics for the three 1km interpolations
+  (min, mean, and max) of the 30 m resolution ASTER GDEM data for an
+  <a href="/places/all">area of interest polygon ID</a>. A query will return the
+  minimum, mean, and maximum elevations found within the polygon.
 </p>
 
 <table class="endpoints">
-    <thead>
-        <tr>
-            <th class="endpoint-label">Endpoint</th>
-            <th class="endpoint-url">Example URL</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Elevation data area query</td>
-            <td><a href="/elevation/area/19010208">/elevation/area/19010208</a>
-            </td>
-        </tr>
-    </tbody>
-    <tfoot>
-        <tr>
-            <td colspan="2"></td>
-        </tr>
-    </tfoot>
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ASTER GDEM area query</td>
+      <td><a href="/elevation/area/19010208">/elevation/area/19010208</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
 </table>
 
-<h3>Output</h3>
+<h5>WRF Dynamically Downscaled ERA5 Reanalysis 4 km Elevation Grid</h5>
 
-<p>Results from point and area queries will look like this:</p>
+<p>
+  Summarize and query the zonal statistics for the ERA5-WRF 4km elevation grid
+  for an <a href="/places/all">area of interest polygon ID</a>. A query will
+  return the minimum, mean, and maximum elevations found within the polygon.
+</p>
 
-<pre>
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>4 km ERA5-WRF Elevation Grid area query</td>
+      <td>
+        <a href="/elevation/area/era5_4km/GMU23"
+          >/elevation/area/era5_4km/GMU23</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+    </tr>
+  </tfoot>
+</table>
+
+<div class="outputs-section">
+  <div class="table-spacer"></div>
+
+  <h3>Outputs</h3>
+
+  <p>Results from ASTER GDEM point and area queries will look like this:</p>
+
+  <pre>
 {
   "max": 459,
   "mean": 340,
@@ -79,40 +162,132 @@
   "title": "ASTER Global Digital Elevation Model",
   "units": "meters difference from sea level"
 }
-</pre>
+</pre
+  >
 
-<p>The above output is structured like this:</p>
+  <p>The above output is structured like this:</p>
 
-<pre>
+  <pre>
 {
-  "max": &lt;zonal maximum elevation value derived from max DEM interpolation&gt;,,
+  "max": &lt;zonal maximum elevation value derived from max DEM interpolation&gt;,
   "mean": &lt;zonal mean elevation value derived from average DEM interpolation&gt;,
   "min": &lt;zonal minimum elevation value derived from min DEM interpolation&gt;,
   "res": &lt;spatial resolution (pixel size) of the DEM&gt;,
   "title": &lt;title describing these results&gt;,
   "units": &lt;units for elevation values&gt;
 }
-</pre>
+</pre
+  >
 
-<h3>Source data</h3>
-<table>
+  <p>
+    Results from WRF Dynamically Downscaled ERA5 Reanalysis 4 km Elevation Grid
+    point queries will look like this:
+  </p>
+
+  <pre>
+{
+  "elevation": 418,
+  "res": "4 kilometer",
+  "title": "WRF Dynamically Downscaled ERA5 Reanalysis 4 km Elevation Grid",
+  "units": "meters above sea level"
+}
+</pre
+  >
+
+  <p>The above output is structured like this:</p>
+
+  <pre>
+{
+  "elevation": &lt;elevation value for the grid cell&gt;,
+  "res": &lt;spatial resolution (pixel size) of the elevation grid&gt;,
+  "title": &lt;title describing these results&gt;,
+  "units": &lt;units for elevation values&gt;
+}
+</pre
+  >
+
+  <p>
+    Results from WRF Dynamically Downscaled ERA5 Reanalysis 4 km Elevation Grid
+    area queries will look like this:
+  </p>
+
+  <pre>
+{
+    "max": 2171,
+    "mean": 885,
+    "min": 208,
+    "res": "4 kilometer",
+    "title": "WRF Dynamically Downscaled ERA5 Reanalysis 4 km Elevation Grid",
+    "units": "meters above sea level"
+}
+</pre
+  >
+
+  <p>The above output is structured like this:</p>
+
+  <pre>
+{
+  "max": &lt;zonal maximum elevation value&gt;,
+  "mean": &lt;zonal mean elevation value&gt;,
+  "min": &lt;zonal minimum elevation value&gt;,
+  "res": &lt;spatial resolution (pixel size) of the elevation grid&gt;,
+  "title": &lt;title describing these results&gt;,
+  "units": &lt;units for elevation values&gt;
+}
+</pre
+  >
+
+  <h3>Source data</h3>
+  <table>
     <thead>
-        <tr>
-            <th>Dataset source</th>
-            <th>Citation</th>
-            <th>Notes</th>
-        </tr>
+      <tr>
+        <th>Dataset source</th>
+        <th>Citation</th>
+        <th>Notes</th>
+      </tr>
     </thead>
     <tbody>
-        <tr>
-            <td><a href="https://lpdaac.usgs.gov/products/astgtmv003/">The Terra Advanced Spaceborne Thermal Emission
-                    and Reflection Radiometer (ASTER) Global Digital Elevation Model (GDEM) Version 3 (ASTGTM)</a></td>
-            <td>NASA/METI/AIST/Japan Spacesystems and U.S./Japan ASTER Science Team (2019). <i>ASTER Global Digital Elevation Model V003</i> [Data set]. NASA EOSDIS Land Processes Distributed Active Archive Center. Accessed 2023-09-08 from <a href="https://doi.org/10.5067/ASTER/ASTGTM.003">https://doi.org/10.5067/ASTER/ASTGTM.003</a>
-            </td>
-            <td><code>0</code> indicates sea level. Negative values are expected and indicate
-                depressions below sea level.</td>
-        </tr>
+      <tr>
+        <td>
+          <a href="https://lpdaac.usgs.gov/products/astgtmv003/"
+            >The Terra Advanced Spaceborne Thermal Emission and Reflection
+            Radiometer (ASTER) Global Digital Elevation Model (GDEM) Version 3
+            (ASTGTM)</a
+          >
+        </td>
+        <td>
+          NASA/METI/AIST/Japan Spacesystems and U.S./Japan ASTER Science Team
+          (2019). <i>ASTER Global Digital Elevation Model V003</i> [Data set].
+          NASA EOSDIS Land Processes Distributed Active Archive Center. Accessed
+          2023-09-08 from
+          <a href="https://doi.org/10.5067/ASTER/ASTGTM.003"
+            >https://doi.org/10.5067/ASTER/ASTGTM.003</a
+          >
+        </td>
+        <td>
+          <code>0</code> indicates sea level. Negative values are expected and
+          indicate depressions below sea level.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          A High-Resolution, Dynamically Downscaled ERA5 Reanalysis Dataset for
+          Alaska
+        </td>
+        <td>
+          Waigl, C. F., Bieniek, P. A., Lader, R. T., Bennett, A., Littell, J.
+          S., Parr, C., Redilla, K., & Bhatt, U. S. (2026). A new 4 km
+          dynamically downscaled reanalysis dataset from ERA5 for Alaska
+          [Manuscript under review]. Journal of Applied Meteorology and
+          Climatology.
+        </td>
+        <td>
+          Elevation data range between <code>0</code> and
+          <code>5000</code> meters above sea level.
+        </td>
+      </tr>
     </tbody>
-</table>
+  </table>
+</div>
 
 {% endblock %}
