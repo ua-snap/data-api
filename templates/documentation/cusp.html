@@ -1,0 +1,80 @@
+{% extends 'base.html' %} {% block content %}
+<h2>CUSP: CommUnity near-Surface Permafrost Observations</h2>
+
+<p>
+  CUSP combines individual field observations related to near-surface
+  permafrost, active-layer thickness, thaw depth, and related measurements.
+  It is an observation-evidence dataset, not a continuous permafrost map. For complete documentation, see the GitHub repo etc. etc.
+</p>
+
+<h3>Service endpoint</h3>
+
+<p>
+  Query observations within a 0.5&deg; by 0.5&deg; (TBD) WGS84 box centered on a
+  latitude/longitude point. The service returns at most XYZ nearby records.
+  When more records match, GeoJSON's <code>numberMatched</code> value reports
+  the full match count and <code>numberReturned</code> reports the records
+  included in the response. ????
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Nearby CUSP observation point query</td>
+      <td>
+        <a href="/cusp/point/65.0628/-146.1627"
+          >/cusp/point/65.0628/-146.1627</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Append <code>?format=csv</code> to download the same records as a flat
+        CSV file. CSV includes explicit WGS84 <code>longitude</code> and
+        <code>latitude</code> columns.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Output</h3>
+
+<p>
+  JSON output is a GeoJSON FeatureCollection. Each feature has a point
+  geometry and published CUSP properties including <code>cusp_obs_id</code>,
+  <code>source</code>, <code>site_id</code>, <code>observation_date</code>,
+  method and permafrost-observation labels, depth values in centimeters,
+  quality flags, and the source <code>release_version</code>.
+</p>
+
+<pre>
+{
+  "type": "FeatureCollection",
+  "numberMatched": 1,
+  "numberReturned": 1,
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-146.7, 65.1] },
+      "properties": {
+        "cusp_obs_id": "...",
+        "source": "...",
+        "observation_date": "2020-07-01",
+        "method_label": "Ground probe",
+        "pf_observed_label": "Permafrost observed",
+        "thaw_depth_cm": 55.0,
+        "release_version": "..."
+      }
+    }
+  ]
+}
+</pre>
+{% endblock %}
