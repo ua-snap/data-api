@@ -1,0 +1,8 @@
+{
+  "max": 2255,
+  "mean": 1366,
+  "min": 518,
+  "res": "1 kilometer",
+  "title": "ASTER Global Digital Elevation Model Zonal Statistics",
+  "units": "meters difference from sea level"
+}

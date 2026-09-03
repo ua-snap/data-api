@@ -1,0 +1,28 @@
+{
+  "aqi_12": {
+    "aqi": 3,
+    "pm25_conc": 1
+  },
+  "aqi_24": {
+    "aqi": 4,
+    "pm25_conc": 1
+  },
+  "aqi_48": {
+    "aqi": 3,
+    "pm25_conc": 1
+  },
+  "aqi_6": {
+    "aqi": 3,
+    "pm25_conc": 1
+  },
+  "cfd": null,
+  "fire_points": [],
+  "fire_polygons": [],
+  "hist_fire": null,
+  "is_snow": null,
+  "lc": null,
+  "prf": {
+    "flamm": 0.0042,
+    "title": "Projected relative flammability"
+  }
+}

@@ -1,0 +1,860 @@
+{
+  "aqi_12": {
+    "aqi": 12,
+    "pm25_conc": 3
+  },
+  "aqi_24": {
+    "aqi": 8,
+    "pm25_conc": 2
+  },
+  "aqi_48": {
+    "aqi": 9,
+    "pm25_conc": 2
+  },
+  "aqi_6": {
+    "aqi": 8,
+    "pm25_conc": 2
+  },
+  "cfd": {
+    "code": 1,
+    "color": "#2b83ba",
+    "title": "Today's Fire Danger",
+    "type": "Low"
+  },
+  "fire_points": [
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.1",
+      "properties": {
+        "CAUSE": "Human",
+        "NAME": "Kaufman",
+        "OUTDATE": null,
+        "SUMMARY": "Alaska State Troopers reported a garage fire involving fuel tanks with observed fire in the trees moving towards houses in the area of Kaufman Road in Two Rivers. Forestry E-269 responded and reported a consumed structure that spread to the lawn. Resources on scene constructed line and suppressed fire. Incident declared contained and controlled.",
+        "acres": 0.1,
+        "active": "1",
+        "discovered": "1785066404000",
+        "updated": "1785089609000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.3",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Blair Lakes",
+        "OUTDATE": null,
+        "SUMMARY": "",
+        "acres": 0.1,
+        "active": "1",
+        "discovered": "1786424072000",
+        "updated": "1786473616000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.24",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "Shovel",
+        "OUTDATE": null,
+        "SUMMARY": "H-169 checked fire and reported no visible smoke or flame. Fire remains in monitor status.",
+        "acres": 0.25,
+        "active": "1",
+        "discovered": "1785721853000",
+        "updated": "1785893131000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.41",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "Conquest",
+        "OUTDATE": "1778357700000",
+        "SUMMARY": "Forestry resources checked fire and reported no heat or smoke. Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1778285653000",
+        "updated": "1778358025000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.42",
+      "properties": {
+        "CAUSE": "Human",
+        "NAME": "Middle Fork Road",
+        "OUTDATE": "1778892420000",
+        "SUMMARY": "Forestry Prevention checked fire and reported vehicle fire had burned out. Fire called out at 1647.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1778809344000",
+        "updated": "1778895155000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.60",
+      "properties": {
+        "CAUSE": "Human",
+        "NAME": "Grange Hill",
+        "OUTDATE": "1778971140000",
+        "SUMMARY": "At approximately 1250, an aircraft called in white smoke near the Pleasant Valley Store. Upon arrival, Forestry resources reported a 10\u2019x10\u2019 burn pile. Burn pile was extinguished and turned back over to homeowner. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1778964600000",
+        "updated": "1779035296000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.64",
+      "properties": {
+        "CAUSE": "Other causes",
+        "NAME": "Old Valdez",
+        "OUTDATE": "1784079000000",
+        "SUMMARY": "Fire called out. ",
+        "acres": 0.5,
+        "active": "0",
+        "discovered": "1784073438000",
+        "updated": "1784575714000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.66",
+      "properties": {
+        "CAUSE": "Recreation and ceremony",
+        "NAME": "Murphy",
+        "OUTDATE": "1786581600000",
+        "SUMMARY": "E-269 checked fire and reported no heat or smoke. Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1786485706000",
+        "updated": "1786926794000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.67",
+      "properties": {
+        "CAUSE": "Human",
+        "NAME": "Heldiver",
+        "OUTDATE": "1786601280000",
+        "SUMMARY": "Updated cost. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1786599037000",
+        "updated": "1786934176000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.73",
+      "properties": {
+        "CAUSE": "Recreation and ceremony",
+        "NAME": "Mariposa",
+        "OUTDATE": "1779846840000",
+        "SUMMARY": "Forestry resources completed fire check and reported no heat or smoke. Fire called out at 1753.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1779754930000",
+        "updated": "1779847181000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.75",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "Venus",
+        "OUTDATE": "1780447080000",
+        "SUMMARY": "Forestry E-261 checked fire and reported no heat or smoke. Fire called out at 1638. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1780181282000",
+        "updated": "1780447608000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.77",
+      "properties": {
+        "CAUSE": "Power generation / transmission / distribution",
+        "NAME": "9 Mile Hill",
+        "OUTDATE": "1779309600000",
+        "SUMMARY": "Forestry resources checked fire and reported no heat or smoke. Fire called out at 1240. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1778704922000",
+        "updated": "1779309791000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.81",
+      "properties": {
+        "CAUSE": "Firearms and explosives use",
+        "NAME": "MPTR",
+        "OUTDATE": "1778601600000",
+        "SUMMARY": "Fire was called out.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1778256076000",
+        "updated": "1778606188000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.102",
+      "properties": {
+        "CAUSE": "Power generation / transmission / distribution",
+        "NAME": "Stringer",
+        "OUTDATE": "1785017400000",
+        "SUMMARY": "E-269 check fire and reported no heat or smoke. Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1784844319000",
+        "updated": "1785095024000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.121",
+      "properties": {
+        "CAUSE": "Debris and open burning",
+        "NAME": "Scenic",
+        "OUTDATE": "1781646720000",
+        "SUMMARY": "E-269 checked fire and reported no heat or smoke. Fire called out at 1352.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1781416168000",
+        "updated": "1781648084000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.151",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Pipeline",
+        "OUTDATE": "1783992000000",
+        "SUMMARY": "Fairbanks 1 returned and completed a grid of the fire. No new heats or smokes were found. The fire was called out at 1720",
+        "acres": 2,
+        "active": "0",
+        "discovered": "1783466220000",
+        "updated": "1784574472000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.154",
+      "properties": {
+        "CAUSE": "Human",
+        "NAME": "Rosehip",
+        "OUTDATE": "1780265940000",
+        "SUMMARY": "E-268 located an abandoned campfire at Rosehip Campground. The fire was reported as 3'x3' smoldering with campfire fuels. Fire was extinguished and called out. ",
+        "acres": 0.01,
+        "active": "0",
+        "discovered": "1780265804000",
+        "updated": "1781207430000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.164",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "McCloud",
+        "OUTDATE": "1786744800000",
+        "SUMMARY": "All resources demobilized from fire. Fire called out. ",
+        "acres": 0.5,
+        "active": "0",
+        "discovered": "1786562629000",
+        "updated": "1786756183000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.173",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Chisholm",
+        "OUTDATE": "1784585760000",
+        "SUMMARY": "H-169 checked the fire and reported no heat or smoke. Fire called out. ",
+        "acres": 3,
+        "active": "0",
+        "discovered": "1782095012000",
+        "updated": "1784588948000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.182",
+      "properties": {
+        "CAUSE": "Debris and open burning",
+        "NAME": "Truck",
+        "OUTDATE": "1780337400000",
+        "SUMMARY": "Fire called out 6/1/2026 at 1010.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1779823416000",
+        "updated": "1780343276000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.188",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Piledriver",
+        "OUTDATE": "1783722840000",
+        "SUMMARY": "E-216 checked fire and reported no heat or smoke. Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1783197826000",
+        "updated": "1783723765000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.197",
+      "properties": {
+        "CAUSE": "Recreation and ceremony",
+        "NAME": "North Tanana",
+        "OUTDATE": "1785107460000",
+        "SUMMARY": "H-169 checked fire and reported no smoke. Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1784765712000",
+        "updated": "1785113224000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.219",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "Airport Dike",
+        "OUTDATE": "1781473080000",
+        "SUMMARY": "E-269 checked fire and reported no heat or smoke. Fire called out. ",
+        "acres": 0.5,
+        "active": "0",
+        "discovered": "1781221260000",
+        "updated": "1781533564000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.236",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "Airport Way",
+        "OUTDATE": "1783109940000",
+        "SUMMARY": "E-763 checked fire and reported no heat or smoke. Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1782941247000",
+        "updated": "1783129222000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.238",
+      "properties": {
+        "CAUSE": "Human",
+        "NAME": "Henderson",
+        "OUTDATE": "1786685220000",
+        "SUMMARY": "At 2045, H-169 reported seeing smoke in the Henderson Road/Ester Dome Road area with access from Gold Hill Road. CV-273 and E-269 responded to investigate. H-169 patrolled the area and located a vehicle and what appeared to be an extinguished burn pile. E-269 continued into the site on foot and made contact with individuals on scene. A blackened footprint from a previous fire involving spools of copper was located; personnel advised there had not been flame for some time. E-269 provided education regarding current fire restrictions. No active smoke or fire was located requiring suppression action. CV-273, E-269, and H-169 cleared the incident and returned to Forestry at 2137.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1786682703000",
+        "updated": "1786693350000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.253",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Anaconda",
+        "OUTDATE": "1783896360000",
+        "SUMMARY": "E-261 checked fire and reported no heat or smoke. Fire called out. ",
+        "acres": 1,
+        "active": "0",
+        "discovered": "1783290170000",
+        "updated": "1783898770000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.267",
+      "properties": {
+        "CAUSE": "Equipment and vehicle use",
+        "NAME": "Rosie",
+        "OUTDATE": "1780088580000",
+        "SUMMARY": "Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1779432300000",
+        "updated": "1780096077000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.278",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Little Chena",
+        "OUTDATE": "1786990800000",
+        "SUMMARY": "Fire declared contained, controlled and out. Smokejumpers demobilized. ",
+        "acres": 0.2,
+        "active": "0",
+        "discovered": "1786937100000",
+        "updated": "1788215124000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.282",
+      "properties": {
+        "CAUSE": "Equipment and vehicle use",
+        "NAME": "Repp",
+        "OUTDATE": "1779840180000",
+        "SUMMARY": "Forestry resources checked fire and reported no heat or smoke. Fire called out at 1601.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1779658650000",
+        "updated": "1779840408000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.283",
+      "properties": {
+        "CAUSE": "Power generation / transmission / distribution",
+        "NAME": "Bend",
+        "OUTDATE": "1783718400000",
+        "SUMMARY": "E-277 checked the fire and called out at 1321.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1782188557000",
+        "updated": "1783721034000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.304",
+      "properties": {
+        "CAUSE": "Firearms and explosives use",
+        "NAME": "Horner",
+        "OUTDATE": "1779242400000",
+        "SUMMARY": "Despite windy conditions the smokejumpers were able to line and mop-up the entirety of the fire. The fire was called out and the smokejumpers demobilized. ",
+        "acres": 2.75,
+        "active": "0",
+        "discovered": "1779139652000",
+        "updated": "1779252719000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.305",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "Two Rivers",
+        "OUTDATE": "1779267060000",
+        "SUMMARY": "Fairbanks Area Forestry dispatched E-267 and CV-24 following an after-hours report of an individual burning near a tree line with visible flames near mile 17 Chena Hot Springs Road by the Two Rivers School area.\n\nResources located a field that had been freshly burned. Personnel were unable to make contact with the homeowner but did obtain contact information. CV-24 requested Prevention follow-up for tomorrow.\n\nNo visible smoke was observed upon arrival and there was no spread into the surrounding wildland. Firefighters walked the field and determined conditions looked good with no remaining smoke. Hose was in place around the burn area, which is surrounded by hardwoods. Resources cleared and returned to Forestry.",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1779261044000",
+        "updated": "1779669224000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.308",
+      "properties": {
+        "CAUSE": "Debris and open burning",
+        "NAME": "Benson",
+        "OUTDATE": "1787080080000",
+        "SUMMARY": "At 1051 hours on 08/18/26, BC-61 advised FECC that the 0.25-acre fire was intentionally set and appeared to involve someone burning copper wire. BC-61 took action and the fire was extinguished with a fire extinguisher. E-269 copied the update direct on Tac 5 and the fire was called out at 1108. ",
+        "acres": 0.25,
+        "active": "0",
+        "discovered": "1787079095000",
+        "updated": "1787080306000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.311",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Old Richardson",
+        "OUTDATE": "1783562700000",
+        "SUMMARY": "Big State 1 checked fire and reported 24 hours cold. Fire called out. ",
+        "acres": 0.1,
+        "active": "0",
+        "discovered": "1783476670000",
+        "updated": "1783731428000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.315",
+      "properties": {
+        "CAUSE": "Debris and open burning",
+        "NAME": "Goldstream Road",
+        "OUTDATE": "1778726460000",
+        "SUMMARY": "FECC reported a brush fire spreading to the trees off Goldstream Road. Forestry responded and reported a 50\u2019x100\u2019 brush pile that had escaped into the grass. Forestry and Chena Goldstream Fire and Rescue resources extinguished the escapement and called the fire out. Prevention issued a small scale permit. ",
+        "acres": 0.5,
+        "active": "0",
+        "discovered": "1778722560000",
+        "updated": "1778790001000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.317",
+      "properties": {
+        "CAUSE": "Power generation / transmission / distribution",
+        "NAME": "Badger",
+        "OUTDATE": "1779144000000",
+        "SUMMARY": "Forestry engine E-268 responded to a report of a brush fire in the area of Badger Road. Upon arrival, resources reported .25-acre fire caused by a powerline. Resources extinguished fire and declared contained, controlled and out at 1440.",
+        "acres": 0.25,
+        "active": "0",
+        "discovered": "1779141945000",
+        "updated": "1779651136000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.318",
+      "properties": {
+        "CAUSE": "Undetermined",
+        "NAME": "Rifle Range",
+        "OUTDATE": "1780095720000",
+        "SUMMARY": "Fairbanks 1 crew completed a grid of the fire and reported no heat or smoke. Fire called out at 1502.",
+        "acres": 7.5,
+        "active": "0",
+        "discovered": "1779573930000",
+        "updated": "1780119023000"
+      },
+      "type": "Feature"
+    }
+  ],
+  "fire_polygons": [
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "MultiPolygon"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_polygons.25",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Shorty",
+        "OUTDATE": null,
+        "SUMMARY": "Perimeter updated from better mapping. ",
+        "acres": 7.33,
+        "active": "1",
+        "discovered": "1782171089000",
+        "updated": "1782588335000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "MultiPolygon"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_polygons.54",
+      "properties": {
+        "CAUSE": "",
+        "NAME": "Tatlanika",
+        "OUTDATE": null,
+        "SUMMARY": "H-169 removed backhaul from fire today and reported the south side was the most active burning in pockets of spruce with light wispy smoke observed. No action needed. ",
+        "acres": 38420.6,
+        "active": "1",
+        "discovered": "1782021900000",
+        "updated": "1787891571000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "MultiPolygon"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_polygons.74",
+      "properties": {
+        "CAUSE": "Natural",
+        "NAME": "Flag",
+        "OUTDATE": "1783123200000",
+        "SUMMARY": "Tongass Suppression Module demobilized from fire. ",
+        "acres": 35.64,
+        "active": "0",
+        "discovered": "1782091572000",
+        "updated": "1783210097000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "MultiPolygon"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_polygons.77",
+      "properties": {
+        "CAUSE": "Firearms and explosives use",
+        "NAME": "Moose Creek",
+        "OUTDATE": "1782327600000",
+        "SUMMARY": "Fire is out.",
+        "acres": 59,
+        "active": "0",
+        "discovered": "1779134137000",
+        "updated": "1782328180000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "MultiPolygon"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_polygons.135",
+      "properties": {
+        "CAUSE": "Firearms and explosives use",
+        "NAME": "Lynx 2",
+        "OUTDATE": "1782327600000",
+        "SUMMARY": "Fire is out.",
+        "acres": 16.2,
+        "active": "0",
+        "discovered": "1778793185000",
+        "updated": "1782328068000"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [],
+        "type": "MultiPolygon"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_polygons.136",
+      "properties": {
+        "CAUSE": "Firearms and explosives use",
+        "NAME": "Lynx 1",
+        "OUTDATE": "1782327600000",
+        "SUMMARY": "Fire is out.\n",
+        "acres": 27.1,
+        "active": "0",
+        "discovered": "1778790840000",
+        "updated": "1782327794000"
+      },
+      "type": "Feature"
+    }
+  ],
+  "hist_fire": null,
+  "is_snow": {
+    "is_snow": false,
+    "title": "Today's Snow Cover"
+  },
+  "lc": {
+    "code": 17,
+    "color": "#DD40D6",
+    "title": "Land cover types",
+    "type": "Urban and built-up"
+  },
+  "prf": {
+    "flamm": 0,
+    "title": "Projected relative flammability"
+  }
+}

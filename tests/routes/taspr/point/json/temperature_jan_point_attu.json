@@ -1,0 +1,7671 @@
+{
+  "CRU-TS": {
+    "historical": {
+      "1901": {
+        "tasmax": 2,
+        "tasmean": -1.7,
+        "tasmin": -5.2
+      },
+      "1902": {
+        "tasmax": 0.6,
+        "tasmean": -2.9,
+        "tasmin": -6.5
+      },
+      "1903": {
+        "tasmax": 0.6,
+        "tasmean": -3,
+        "tasmin": -6.6
+      },
+      "1904": {
+        "tasmax": -0.9,
+        "tasmean": -4.5,
+        "tasmin": -8
+      },
+      "1905": {
+        "tasmax": 2.9,
+        "tasmean": -0.7,
+        "tasmin": -4.3
+      },
+      "1906": {
+        "tasmax": 3.2,
+        "tasmean": -0.5,
+        "tasmin": -4
+      },
+      "1907": {
+        "tasmax": 0.4,
+        "tasmean": -3.3,
+        "tasmin": -6.9
+      },
+      "1908": {
+        "tasmax": 0.3,
+        "tasmean": -3.3,
+        "tasmin": -6.8
+      },
+      "1909": {
+        "tasmax": 4.6,
+        "tasmean": 0.8,
+        "tasmin": -3
+      },
+      "1910": {
+        "tasmax": -0.3,
+        "tasmean": -4,
+        "tasmin": -7.7
+      },
+      "1911": {
+        "tasmax": 4.7,
+        "tasmean": 0.9,
+        "tasmin": -2.7
+      },
+      "1912": {
+        "tasmax": 1.8,
+        "tasmean": -1.8,
+        "tasmin": -5.5
+      },
+      "1913": {
+        "tasmax": 0.4,
+        "tasmean": -3.2,
+        "tasmin": -6.9
+      },
+      "1914": {
+        "tasmax": -0.3,
+        "tasmean": -4,
+        "tasmin": -7.8
+      },
+      "1915": {
+        "tasmax": 2.3,
+        "tasmean": -1.4,
+        "tasmin": -5.1
+      },
+      "1916": {
+        "tasmax": 0,
+        "tasmean": -3.7,
+        "tasmin": -7.3
+      },
+      "1917": {
+        "tasmax": -0.4,
+        "tasmean": -4.2,
+        "tasmin": -7.8
+      },
+      "1918": {
+        "tasmax": 5.6,
+        "tasmean": 2.1,
+        "tasmin": -1.4
+      },
+      "1919": {
+        "tasmax": 2.8,
+        "tasmean": -0.8,
+        "tasmin": -4.4
+      },
+      "1920": {
+        "tasmax": 6.6,
+        "tasmean": 3.1,
+        "tasmin": -0.4
+      },
+      "1921": {
+        "tasmax": 2.2,
+        "tasmean": -1.5,
+        "tasmin": -5
+      },
+      "1922": {
+        "tasmax": 2.2,
+        "tasmean": -1.5,
+        "tasmin": -5.2
+      },
+      "1923": {
+        "tasmax": 1.8,
+        "tasmean": -1.8,
+        "tasmin": -5.5
+      },
+      "1924": {
+        "tasmax": 1.3,
+        "tasmean": -2.5,
+        "tasmin": -6.1
+      },
+      "1925": {
+        "tasmax": 3.9,
+        "tasmean": 0.3,
+        "tasmin": -3.3
+      },
+      "1926": {
+        "tasmax": 5,
+        "tasmean": 1.5,
+        "tasmin": -2
+      },
+      "1927": {
+        "tasmax": 7.1,
+        "tasmean": 3.4,
+        "tasmin": -0.1
+      },
+      "1928": {
+        "tasmax": 0.6,
+        "tasmean": -2.9,
+        "tasmin": -6.5
+      },
+      "1929": {
+        "tasmax": 6.1,
+        "tasmean": 2.6,
+        "tasmin": -1
+      },
+      "1930": {
+        "tasmax": 2.5,
+        "tasmean": -1.2,
+        "tasmin": -4.9
+      },
+      "1931": {
+        "tasmax": -1.6,
+        "tasmean": -5.3,
+        "tasmin": -9.1
+      },
+      "1932": {
+        "tasmax": -1.9,
+        "tasmean": -5.7,
+        "tasmin": -9.3
+      },
+      "1933": {
+        "tasmax": -2.9,
+        "tasmean": -6.5,
+        "tasmin": -10.2
+      },
+      "1934": {
+        "tasmax": 5.1,
+        "tasmean": 1.6,
+        "tasmin": -1.9
+      },
+      "1935": {
+        "tasmax": 6.1,
+        "tasmean": 2.5,
+        "tasmin": -1.1
+      },
+      "1936": {
+        "tasmax": 2,
+        "tasmean": -1.6,
+        "tasmin": -5.3
+      },
+      "1937": {
+        "tasmax": 4.2,
+        "tasmean": 0.4,
+        "tasmin": -3.4
+      },
+      "1938": {
+        "tasmax": 4.3,
+        "tasmean": 0.6,
+        "tasmin": -3.1
+      },
+      "1939": {
+        "tasmax": 1.8,
+        "tasmean": -1.7,
+        "tasmin": -5.2
+      },
+      "1940": {
+        "tasmax": 6.7,
+        "tasmean": 3,
+        "tasmin": -0.5
+      },
+      "1941": {
+        "tasmax": 4.1,
+        "tasmean": 0.3,
+        "tasmin": -3.3
+      },
+      "1942": {
+        "tasmax": 4.6,
+        "tasmean": 1,
+        "tasmin": -2.6
+      },
+      "1943": {
+        "tasmax": 8.9,
+        "tasmean": 5.4,
+        "tasmin": 1.9
+      },
+      "1944": {
+        "tasmax": 1.3,
+        "tasmean": -2.4,
+        "tasmin": -5.9
+      },
+      "1945": {
+        "tasmax": 3.2,
+        "tasmean": -0.5,
+        "tasmin": -4
+      },
+      "1946": {
+        "tasmax": 1.4,
+        "tasmean": -2.3,
+        "tasmin": -5.9
+      },
+      "1947": {
+        "tasmax": 3.2,
+        "tasmean": -0.6,
+        "tasmin": -4.2
+      },
+      "1948": {
+        "tasmax": 2.6,
+        "tasmean": -1.1,
+        "tasmin": -4.8
+      },
+      "1949": {
+        "tasmax": 2.5,
+        "tasmean": -1.3,
+        "tasmin": -5.1
+      },
+      "1950": {
+        "tasmax": 10.2,
+        "tasmean": 7,
+        "tasmin": 3.8
+      },
+      "1951": {
+        "tasmax": 1.8,
+        "tasmean": -1.8,
+        "tasmin": -5.2
+      },
+      "1952": {
+        "tasmax": 1.7,
+        "tasmean": -2.1,
+        "tasmin": -5.9
+      },
+      "1953": {
+        "tasmax": 0.6,
+        "tasmean": -2.7,
+        "tasmin": -5.9
+      },
+      "1954": {
+        "tasmax": 0.6,
+        "tasmean": -3,
+        "tasmin": -6.6
+      },
+      "1955": {
+        "tasmax": -1,
+        "tasmean": -4.8,
+        "tasmin": -8.7
+      },
+      "1956": {
+        "tasmax": 7.5,
+        "tasmean": 3.9,
+        "tasmin": 0.3
+      },
+      "1957": {
+        "tasmax": 4.1,
+        "tasmean": 0.7,
+        "tasmin": -2.7
+      },
+      "1958": {
+        "tasmax": -0.1,
+        "tasmean": -3.7,
+        "tasmin": -7.3
+      },
+      "1959": {
+        "tasmax": 5.6,
+        "tasmean": 2.3,
+        "tasmin": -1
+      },
+      "1960": {
+        "tasmax": 4.9,
+        "tasmean": 0.9,
+        "tasmin": -3.1
+      },
+      "1961": {
+        "tasmax": 3.6,
+        "tasmean": 0.2,
+        "tasmin": -3.2
+      },
+      "1962": {
+        "tasmax": 4,
+        "tasmean": 0.4,
+        "tasmin": -3.2
+      },
+      "1963": {
+        "tasmax": 7.3,
+        "tasmean": 3.9,
+        "tasmin": 0.5
+      },
+      "1964": {
+        "tasmax": -1.6,
+        "tasmean": -5.3,
+        "tasmin": -9
+      },
+      "1965": {
+        "tasmax": 2.1,
+        "tasmean": -1.6,
+        "tasmin": -5.3
+      },
+      "1966": {
+        "tasmax": 1.7,
+        "tasmean": -2.2,
+        "tasmin": -6
+      },
+      "1967": {
+        "tasmax": 0.8,
+        "tasmean": -3.4,
+        "tasmin": -7.5
+      },
+      "1968": {
+        "tasmax": 6.9,
+        "tasmean": 3.1,
+        "tasmin": -0.7
+      },
+      "1969": {
+        "tasmax": 5.7,
+        "tasmean": 1.7,
+        "tasmin": -2.3
+      },
+      "1970": {
+        "tasmax": 3.5,
+        "tasmean": 0,
+        "tasmin": -3.5
+      },
+      "1971": {
+        "tasmax": 4.1,
+        "tasmean": 0.7,
+        "tasmin": -2.7
+      },
+      "1972": {
+        "tasmax": 1.1,
+        "tasmean": -2.6,
+        "tasmin": -6.2
+      },
+      "1973": {
+        "tasmax": 1,
+        "tasmean": -2.7,
+        "tasmin": -6.4
+      },
+      "1974": {
+        "tasmax": 4.3,
+        "tasmean": 1.7,
+        "tasmin": -0.7
+      },
+      "1975": {
+        "tasmax": 0.9,
+        "tasmean": -3.1,
+        "tasmin": -7.2
+      },
+      "1976": {
+        "tasmax": 5,
+        "tasmean": 1.4,
+        "tasmin": -2
+      },
+      "1977": {
+        "tasmax": 3.4,
+        "tasmean": 0,
+        "tasmin": -3.4
+      },
+      "1978": {
+        "tasmax": 2.5,
+        "tasmean": -1.1,
+        "tasmin": -4.7
+      },
+      "1979": {
+        "tasmax": 1.9,
+        "tasmean": -1.6,
+        "tasmin": -5.1
+      },
+      "1980": {
+        "tasmax": 5.1,
+        "tasmean": 1.7,
+        "tasmin": -1.7
+      },
+      "1981": {
+        "tasmax": 0.6,
+        "tasmean": -3.4,
+        "tasmin": -7.2
+      },
+      "1982": {
+        "tasmax": 1.9,
+        "tasmean": -2,
+        "tasmin": -6
+      },
+      "1983": {
+        "tasmax": 4.5,
+        "tasmean": 0.8,
+        "tasmin": -2.7
+      },
+      "1984": {
+        "tasmax": 2.6,
+        "tasmean": -1,
+        "tasmin": -4.4
+      },
+      "1985": {
+        "tasmax": 1.8,
+        "tasmean": -1.2,
+        "tasmin": -4.3
+      },
+      "1986": {
+        "tasmax": 3.3,
+        "tasmean": 0.2,
+        "tasmin": -2.9
+      },
+      "1987": {
+        "tasmax": 0.7,
+        "tasmean": -2.6,
+        "tasmin": -6
+      },
+      "1988": {
+        "tasmax": 1.5,
+        "tasmean": -2.1,
+        "tasmin": -5.7
+      },
+      "1989": {
+        "tasmax": 0.2,
+        "tasmean": -3.4,
+        "tasmin": -7.1
+      },
+      "1990": {
+        "tasmax": 2.2,
+        "tasmean": -1.2,
+        "tasmin": -4.6
+      },
+      "1991": {
+        "tasmax": 3.8,
+        "tasmean": 0.5,
+        "tasmin": -2.6
+      },
+      "1992": {
+        "tasmax": 1.3,
+        "tasmean": -2.1,
+        "tasmin": -5.5
+      },
+      "1993": {
+        "tasmax": 0.9,
+        "tasmean": -3.2,
+        "tasmin": -7.4
+      },
+      "1994": {
+        "tasmax": 2.9,
+        "tasmean": -0.8,
+        "tasmin": -4.3
+      },
+      "1995": {
+        "tasmax": 0.7,
+        "tasmean": -2.8,
+        "tasmin": -6.3
+      },
+      "1996": {
+        "tasmax": 6.9,
+        "tasmean": 3.3,
+        "tasmin": -0.3
+      },
+      "1997": {
+        "tasmax": 4.4,
+        "tasmean": 0.9,
+        "tasmin": -2.6
+      },
+      "1998": {
+        "tasmax": 3,
+        "tasmean": -0.7,
+        "tasmin": -4.2
+      },
+      "1999": {
+        "tasmax": 3.1,
+        "tasmean": -0.5,
+        "tasmin": -4.1
+      },
+      "2000": {
+        "tasmax": 0.5,
+        "tasmean": -3,
+        "tasmin": -6.6
+      },
+      "2001": {
+        "tasmax": -1.2,
+        "tasmean": -4.8,
+        "tasmin": -8.2
+      },
+      "2002": {
+        "tasmax": 1.8,
+        "tasmean": -1.7,
+        "tasmin": -5.3
+      },
+      "2003": {
+        "tasmax": 3.5,
+        "tasmean": -0.3,
+        "tasmin": -3.9
+      },
+      "2004": {
+        "tasmax": 3.9,
+        "tasmean": 0.2,
+        "tasmin": -3.5
+      },
+      "2005": {
+        "tasmax": 4.6,
+        "tasmean": 1,
+        "tasmin": -2.6
+      },
+      "2006": {
+        "tasmax": 2.1,
+        "tasmean": -1.4,
+        "tasmin": -4.9
+      },
+      "2007": {
+        "tasmax": 2.6,
+        "tasmean": -1,
+        "tasmin": -4.6
+      },
+      "2008": {
+        "tasmax": 3.3,
+        "tasmean": -0.3,
+        "tasmin": -3.9
+      },
+      "2009": {
+        "tasmax": 0.5,
+        "tasmean": -3,
+        "tasmin": -6.5
+      },
+      "2010": {
+        "tasmax": 3.4,
+        "tasmean": -0.3,
+        "tasmin": -3.8
+      },
+      "2011": {
+        "tasmax": 2.5,
+        "tasmean": -1,
+        "tasmin": -4.5
+      },
+      "2012": {
+        "tasmax": 1.1,
+        "tasmean": -2.4,
+        "tasmin": -5.9
+      },
+      "2013": {
+        "tasmax": 4.4,
+        "tasmean": 0.9,
+        "tasmin": -2.6
+      },
+      "2014": {
+        "tasmax": 2.7,
+        "tasmean": -0.8,
+        "tasmin": -4.3
+      },
+      "2015": {
+        "tasmax": 5.6,
+        "tasmean": 2,
+        "tasmin": -1.6
+      }
+    }
+  },
+  "GFDL-CM3": {
+    "rcp45": {
+      "2007": {
+        "tasmax": -0.9,
+        "tasmean": -1.5,
+        "tasmin": -2.1
+      },
+      "2008": {
+        "tasmax": 0.3,
+        "tasmean": -0.5,
+        "tasmin": -1.1
+      },
+      "2009": {
+        "tasmax": -0.4,
+        "tasmean": -1.2,
+        "tasmin": -1.9
+      },
+      "2010": {
+        "tasmax": 0.8,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2011": {
+        "tasmax": -0.4,
+        "tasmean": -1.1,
+        "tasmin": -1.6
+      },
+      "2012": {
+        "tasmax": 1.6,
+        "tasmean": 1,
+        "tasmin": 0.2
+      },
+      "2013": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.8
+      },
+      "2014": {
+        "tasmax": -0.7,
+        "tasmean": -1.4,
+        "tasmin": -2
+      },
+      "2015": {
+        "tasmax": -0.6,
+        "tasmean": -1.3,
+        "tasmin": -1.8
+      },
+      "2016": {
+        "tasmax": 1.1,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2017": {
+        "tasmax": 0.2,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2018": {
+        "tasmax": -0.5,
+        "tasmean": -1.1,
+        "tasmin": -1.7
+      },
+      "2019": {
+        "tasmax": 0.9,
+        "tasmean": 0.2,
+        "tasmin": -0.4
+      },
+      "2020": {
+        "tasmax": 0.4,
+        "tasmean": -0.3,
+        "tasmin": -1
+      },
+      "2021": {
+        "tasmax": 0.8,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2022": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.7
+      },
+      "2023": {
+        "tasmax": 0.1,
+        "tasmean": -0.7,
+        "tasmin": -1.5
+      },
+      "2024": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.5
+      },
+      "2025": {
+        "tasmax": 0.5,
+        "tasmean": -0.2,
+        "tasmin": -1
+      },
+      "2026": {
+        "tasmax": 0.2,
+        "tasmean": -0.4,
+        "tasmin": -0.8
+      },
+      "2027": {
+        "tasmax": 0.5,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2028": {
+        "tasmax": 1.8,
+        "tasmean": 1,
+        "tasmin": 0.4
+      },
+      "2029": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.2
+      },
+      "2030": {
+        "tasmax": 2.7,
+        "tasmean": 1.7,
+        "tasmin": 0.7
+      },
+      "2031": {
+        "tasmax": 0.4,
+        "tasmean": -0.4,
+        "tasmin": -1.2
+      },
+      "2032": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.6
+      },
+      "2033": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 0.8
+      },
+      "2034": {
+        "tasmax": 0.6,
+        "tasmean": -0.1,
+        "tasmin": -0.7
+      },
+      "2035": {
+        "tasmax": 1.8,
+        "tasmean": 0.8,
+        "tasmin": 0
+      },
+      "2036": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2037": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2038": {
+        "tasmax": 2.3,
+        "tasmean": 1.6,
+        "tasmin": 0.8
+      },
+      "2039": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.2
+      },
+      "2040": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0
+      },
+      "2041": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.1
+      },
+      "2042": {
+        "tasmax": 2.7,
+        "tasmean": 2.1,
+        "tasmin": 1.5
+      },
+      "2043": {
+        "tasmax": 0.5,
+        "tasmean": -0.2,
+        "tasmin": -0.8
+      },
+      "2044": {
+        "tasmax": 2.3,
+        "tasmean": 1.7,
+        "tasmin": 1.3
+      },
+      "2045": {
+        "tasmax": 3,
+        "tasmean": 2.5,
+        "tasmin": 2
+      },
+      "2046": {
+        "tasmax": 2.5,
+        "tasmean": 1.6,
+        "tasmin": 0.9
+      },
+      "2047": {
+        "tasmax": 2.4,
+        "tasmean": 1.5,
+        "tasmin": 0.7
+      },
+      "2048": {
+        "tasmax": 3.5,
+        "tasmean": 2.6,
+        "tasmin": 1.8
+      },
+      "2049": {
+        "tasmax": 1.3,
+        "tasmean": 0.6,
+        "tasmin": -0.1
+      },
+      "2050": {
+        "tasmax": 3.2,
+        "tasmean": 2.5,
+        "tasmin": 1.8
+      },
+      "2051": {
+        "tasmax": 1.2,
+        "tasmean": 0.3,
+        "tasmin": -0.6
+      },
+      "2052": {
+        "tasmax": 2.4,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2053": {
+        "tasmax": 3,
+        "tasmean": 2.2,
+        "tasmin": 1.4
+      },
+      "2054": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2055": {
+        "tasmax": 1.8,
+        "tasmean": 0.8,
+        "tasmin": -0.2
+      },
+      "2056": {
+        "tasmax": 3.3,
+        "tasmean": 2.7,
+        "tasmin": 2.3
+      },
+      "2057": {
+        "tasmax": 2.3,
+        "tasmean": 1.6,
+        "tasmin": 1.1
+      },
+      "2058": {
+        "tasmax": 2.7,
+        "tasmean": 1.9,
+        "tasmin": 1.1
+      },
+      "2059": {
+        "tasmax": 3.3,
+        "tasmean": 2.7,
+        "tasmin": 2.1
+      },
+      "2060": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2061": {
+        "tasmax": 3.3,
+        "tasmean": 2.6,
+        "tasmin": 2
+      },
+      "2062": {
+        "tasmax": 3.1,
+        "tasmean": 2.5,
+        "tasmin": 2.1
+      },
+      "2063": {
+        "tasmax": 3.7,
+        "tasmean": 3,
+        "tasmin": 2.5
+      },
+      "2064": {
+        "tasmax": 3.5,
+        "tasmean": 3,
+        "tasmin": 2.5
+      },
+      "2065": {
+        "tasmax": 3.1,
+        "tasmean": 2.5,
+        "tasmin": 1.9
+      },
+      "2066": {
+        "tasmax": 2.9,
+        "tasmean": 2.5,
+        "tasmin": 2
+      },
+      "2067": {
+        "tasmax": 4.5,
+        "tasmean": 4,
+        "tasmin": 3.5
+      },
+      "2068": {
+        "tasmax": 3.1,
+        "tasmean": 2.6,
+        "tasmin": 2
+      },
+      "2069": {
+        "tasmax": 2.9,
+        "tasmean": 2.4,
+        "tasmin": 1.8
+      },
+      "2070": {
+        "tasmax": 2.4,
+        "tasmean": 1.7,
+        "tasmin": 1.2
+      },
+      "2071": {
+        "tasmax": 3.4,
+        "tasmean": 2.7,
+        "tasmin": 1.9
+      },
+      "2072": {
+        "tasmax": 2.3,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2073": {
+        "tasmax": 3.6,
+        "tasmean": 3,
+        "tasmin": 2.4
+      },
+      "2074": {
+        "tasmax": 2.3,
+        "tasmean": 1.5,
+        "tasmin": 0.8
+      },
+      "2075": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2076": {
+        "tasmax": 3.3,
+        "tasmean": 2.7,
+        "tasmin": 2
+      },
+      "2077": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2078": {
+        "tasmax": 2.4,
+        "tasmean": 1.3,
+        "tasmin": 0.7
+      },
+      "2079": {
+        "tasmax": 1.7,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2080": {
+        "tasmax": 1.9,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2081": {
+        "tasmax": 3.1,
+        "tasmean": 2.6,
+        "tasmin": 2.1
+      },
+      "2082": {
+        "tasmax": 3.2,
+        "tasmean": 2.6,
+        "tasmin": 2.1
+      },
+      "2083": {
+        "tasmax": 2.9,
+        "tasmean": 2.2,
+        "tasmin": 1.7
+      },
+      "2084": {
+        "tasmax": 2.6,
+        "tasmean": 1.9,
+        "tasmin": 1.2
+      },
+      "2085": {
+        "tasmax": 3.8,
+        "tasmean": 3,
+        "tasmin": 2.5
+      },
+      "2086": {
+        "tasmax": 2.1,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2087": {
+        "tasmax": 3.1,
+        "tasmean": 2.5,
+        "tasmin": 1.9
+      },
+      "2088": {
+        "tasmax": 3.7,
+        "tasmean": 3.3,
+        "tasmin": 2.9
+      },
+      "2089": {
+        "tasmax": 3.2,
+        "tasmean": 2.6,
+        "tasmin": 1.9
+      },
+      "2090": {
+        "tasmax": 1.5,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2091": {
+        "tasmax": 3.4,
+        "tasmean": 2.8,
+        "tasmin": 2.2
+      },
+      "2092": {
+        "tasmax": 2.5,
+        "tasmean": 1.7,
+        "tasmin": 0.9
+      },
+      "2093": {
+        "tasmax": 2.8,
+        "tasmean": 2.3,
+        "tasmin": 1.8
+      },
+      "2094": {
+        "tasmax": 2.3,
+        "tasmean": 1.7,
+        "tasmin": 1.1
+      },
+      "2095": {
+        "tasmax": 3.1,
+        "tasmean": 2.6,
+        "tasmin": 2
+      },
+      "2096": {
+        "tasmax": 2.9,
+        "tasmean": 2.1,
+        "tasmin": 1.6
+      },
+      "2097": {
+        "tasmax": 3.6,
+        "tasmean": 3.1,
+        "tasmin": 2.6
+      },
+      "2098": {
+        "tasmax": 3.3,
+        "tasmean": 2.7,
+        "tasmin": 2.1
+      },
+      "2099": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2100": {
+        "tasmax": 2.2,
+        "tasmean": 1.1,
+        "tasmin": 0.3
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 0.4,
+        "tasmean": -0.5,
+        "tasmin": -1.2
+      },
+      "2008": {
+        "tasmax": 0.8,
+        "tasmean": 0,
+        "tasmin": -0.7
+      },
+      "2009": {
+        "tasmax": 0.4,
+        "tasmean": -0.3,
+        "tasmin": -0.8
+      },
+      "2010": {
+        "tasmax": 0.8,
+        "tasmean": -0.1,
+        "tasmin": -0.8
+      },
+      "2011": {
+        "tasmax": 0.2,
+        "tasmean": -0.6,
+        "tasmin": -1.5
+      },
+      "2012": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2013": {
+        "tasmax": -0.5,
+        "tasmean": -1.4,
+        "tasmin": -2.3
+      },
+      "2014": {
+        "tasmax": 1.8,
+        "tasmean": 1.1,
+        "tasmin": 0.3
+      },
+      "2015": {
+        "tasmax": -0.5,
+        "tasmean": -1.1,
+        "tasmin": -1.7
+      },
+      "2016": {
+        "tasmax": 0.6,
+        "tasmean": -0.2,
+        "tasmin": -1
+      },
+      "2017": {
+        "tasmax": 0,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2018": {
+        "tasmax": 0.8,
+        "tasmean": 0.2,
+        "tasmin": -0.4
+      },
+      "2019": {
+        "tasmax": 1,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2020": {
+        "tasmax": 0.2,
+        "tasmean": -0.5,
+        "tasmin": -1.2
+      },
+      "2021": {
+        "tasmax": 1.2,
+        "tasmean": 0.5,
+        "tasmin": -0.2
+      },
+      "2022": {
+        "tasmax": 1.3,
+        "tasmean": 0.6,
+        "tasmin": -0.1
+      },
+      "2023": {
+        "tasmax": 2.3,
+        "tasmean": 1.3,
+        "tasmin": 0.7
+      },
+      "2024": {
+        "tasmax": 1.5,
+        "tasmean": 0.7,
+        "tasmin": 0
+      },
+      "2025": {
+        "tasmax": -0.5,
+        "tasmean": -1.1,
+        "tasmin": -1.8
+      },
+      "2026": {
+        "tasmax": 1.6,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2027": {
+        "tasmax": 0.4,
+        "tasmean": -0.4,
+        "tasmin": -1.2
+      },
+      "2028": {
+        "tasmax": 0.5,
+        "tasmean": -0.1,
+        "tasmin": -0.8
+      },
+      "2029": {
+        "tasmax": -0.4,
+        "tasmean": -1.2,
+        "tasmin": -2
+      },
+      "2030": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2031": {
+        "tasmax": 0.6,
+        "tasmean": -0.4,
+        "tasmin": -1.2
+      },
+      "2032": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": -0.4
+      },
+      "2033": {
+        "tasmax": 0.2,
+        "tasmean": -0.6,
+        "tasmin": -1.2
+      },
+      "2034": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.2
+      },
+      "2035": {
+        "tasmax": 0.1,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2036": {
+        "tasmax": 0.5,
+        "tasmean": -0.3,
+        "tasmin": -1.2
+      },
+      "2037": {
+        "tasmax": 2.1,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2038": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2039": {
+        "tasmax": 1.5,
+        "tasmean": 0.7,
+        "tasmin": 0
+      },
+      "2040": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2041": {
+        "tasmax": 2.3,
+        "tasmean": 1.5,
+        "tasmin": 1
+      },
+      "2042": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.2
+      },
+      "2043": {
+        "tasmax": 3.3,
+        "tasmean": 2.6,
+        "tasmin": 1.9
+      },
+      "2044": {
+        "tasmax": 3,
+        "tasmean": 2.4,
+        "tasmin": 1.8
+      },
+      "2045": {
+        "tasmax": 2.9,
+        "tasmean": 2,
+        "tasmin": 1.2
+      },
+      "2046": {
+        "tasmax": 2.3,
+        "tasmean": 1.7,
+        "tasmin": 1.2
+      },
+      "2047": {
+        "tasmax": -0.2,
+        "tasmean": -0.9,
+        "tasmin": -1.6
+      },
+      "2048": {
+        "tasmax": 2.4,
+        "tasmean": 1.8,
+        "tasmin": 1.2
+      },
+      "2049": {
+        "tasmax": 2.6,
+        "tasmean": 2.1,
+        "tasmin": 1.5
+      },
+      "2050": {
+        "tasmax": 2.4,
+        "tasmean": 1.8,
+        "tasmin": 1.2
+      },
+      "2051": {
+        "tasmax": 2.7,
+        "tasmean": 2.1,
+        "tasmin": 1.7
+      },
+      "2052": {
+        "tasmax": 2.1,
+        "tasmean": 1.3,
+        "tasmin": 0.7
+      },
+      "2053": {
+        "tasmax": 2.8,
+        "tasmean": 2,
+        "tasmin": 1.2
+      },
+      "2054": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2055": {
+        "tasmax": 1.5,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2056": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.8
+      },
+      "2057": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0
+      },
+      "2058": {
+        "tasmax": 2.5,
+        "tasmean": 1.9,
+        "tasmin": 1.5
+      },
+      "2059": {
+        "tasmax": 2.2,
+        "tasmean": 1.3,
+        "tasmin": 0.7
+      },
+      "2060": {
+        "tasmax": 1.6,
+        "tasmean": 0.9,
+        "tasmin": 0.2
+      },
+      "2061": {
+        "tasmax": 1,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2062": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 1.2
+      },
+      "2063": {
+        "tasmax": 2.6,
+        "tasmean": 1.9,
+        "tasmin": 1.2
+      },
+      "2064": {
+        "tasmax": 2.1,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2065": {
+        "tasmax": 3,
+        "tasmean": 2.3,
+        "tasmin": 1.7
+      },
+      "2066": {
+        "tasmax": 1.9,
+        "tasmean": 1.3,
+        "tasmin": 0.7
+      },
+      "2067": {
+        "tasmax": 2.1,
+        "tasmean": 1.7,
+        "tasmin": 1.2
+      },
+      "2068": {
+        "tasmax": 1.7,
+        "tasmean": 1.1,
+        "tasmin": 0.5
+      },
+      "2069": {
+        "tasmax": 1.4,
+        "tasmean": 0.7,
+        "tasmin": 0
+      },
+      "2070": {
+        "tasmax": 3.2,
+        "tasmean": 2.6,
+        "tasmin": 2.1
+      },
+      "2071": {
+        "tasmax": 2.8,
+        "tasmean": 2.1,
+        "tasmin": 1.5
+      },
+      "2072": {
+        "tasmax": 2.9,
+        "tasmean": 2.3,
+        "tasmin": 1.7
+      },
+      "2073": {
+        "tasmax": 3.4,
+        "tasmean": 2.7,
+        "tasmin": 2.2
+      },
+      "2074": {
+        "tasmax": 2.5,
+        "tasmean": 1.8,
+        "tasmin": 1.1
+      },
+      "2075": {
+        "tasmax": 2.7,
+        "tasmean": 2.1,
+        "tasmin": 1.5
+      },
+      "2076": {
+        "tasmax": 3.8,
+        "tasmean": 3,
+        "tasmin": 2.4
+      },
+      "2077": {
+        "tasmax": 2.2,
+        "tasmean": 1.4,
+        "tasmin": 0.8
+      },
+      "2078": {
+        "tasmax": 2.3,
+        "tasmean": 1.4,
+        "tasmin": 0.6
+      },
+      "2079": {
+        "tasmax": 1.8,
+        "tasmean": 0.9,
+        "tasmin": 0.2
+      },
+      "2080": {
+        "tasmax": 0.9,
+        "tasmean": -0.2,
+        "tasmin": -1.1
+      },
+      "2081": {
+        "tasmax": 3.7,
+        "tasmean": 3,
+        "tasmin": 2.2
+      },
+      "2082": {
+        "tasmax": 2.1,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2083": {
+        "tasmax": 4.1,
+        "tasmean": 3.5,
+        "tasmin": 2.9
+      },
+      "2084": {
+        "tasmax": 3,
+        "tasmean": 2.6,
+        "tasmin": 2.1
+      },
+      "2085": {
+        "tasmax": 2.4,
+        "tasmean": 1.8,
+        "tasmin": 1.4
+      },
+      "2086": {
+        "tasmax": 2.9,
+        "tasmean": 1.8,
+        "tasmin": 0.8
+      },
+      "2087": {
+        "tasmax": 4.2,
+        "tasmean": 3.7,
+        "tasmin": 3.4
+      },
+      "2088": {
+        "tasmax": 2.5,
+        "tasmean": 1.9,
+        "tasmin": 1.5
+      },
+      "2089": {
+        "tasmax": 2.9,
+        "tasmean": 2.4,
+        "tasmin": 2.1
+      },
+      "2090": {
+        "tasmax": 3.8,
+        "tasmean": 3.3,
+        "tasmin": 2.8
+      },
+      "2091": {
+        "tasmax": 3.7,
+        "tasmean": 3.1,
+        "tasmin": 2.5
+      },
+      "2092": {
+        "tasmax": 4.1,
+        "tasmean": 3.4,
+        "tasmin": 2.9
+      },
+      "2093": {
+        "tasmax": 3.2,
+        "tasmean": 2.5,
+        "tasmin": 2
+      },
+      "2094": {
+        "tasmax": 4.3,
+        "tasmean": 3.6,
+        "tasmin": 3
+      },
+      "2095": {
+        "tasmax": 2.8,
+        "tasmean": 2.3,
+        "tasmin": 1.9
+      },
+      "2096": {
+        "tasmax": 4.7,
+        "tasmean": 4.2,
+        "tasmin": 3.9
+      },
+      "2097": {
+        "tasmax": 4.2,
+        "tasmean": 3.6,
+        "tasmin": 3.1
+      },
+      "2098": {
+        "tasmax": 4,
+        "tasmean": 3.4,
+        "tasmin": 2.8
+      },
+      "2099": {
+        "tasmax": 4.5,
+        "tasmean": 3.9,
+        "tasmin": 3.3
+      },
+      "2100": {
+        "tasmax": 5.6,
+        "tasmean": 4.8,
+        "tasmin": 4.2
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 0.3,
+        "tasmean": -0.4,
+        "tasmin": -1.1
+      },
+      "2008": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.1
+      },
+      "2009": {
+        "tasmax": -0.8,
+        "tasmean": -1.5,
+        "tasmin": -1.9
+      },
+      "2010": {
+        "tasmax": -0.9,
+        "tasmean": -1.7,
+        "tasmin": -2.5
+      },
+      "2011": {
+        "tasmax": -0.2,
+        "tasmean": -0.9,
+        "tasmin": -1.6
+      },
+      "2012": {
+        "tasmax": 0.3,
+        "tasmean": -0.2,
+        "tasmin": -0.8
+      },
+      "2013": {
+        "tasmax": 1.6,
+        "tasmean": 0.8,
+        "tasmin": 0
+      },
+      "2014": {
+        "tasmax": -0.2,
+        "tasmean": -1,
+        "tasmin": -1.6
+      },
+      "2015": {
+        "tasmax": 1,
+        "tasmean": 0.3,
+        "tasmin": -0.5
+      },
+      "2016": {
+        "tasmax": -0.5,
+        "tasmean": -1.2,
+        "tasmin": -1.9
+      },
+      "2017": {
+        "tasmax": 1.5,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2018": {
+        "tasmax": 1,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2019": {
+        "tasmax": 0.9,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2020": {
+        "tasmax": 0.1,
+        "tasmean": -0.6,
+        "tasmin": -1.3
+      },
+      "2021": {
+        "tasmax": 2,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2022": {
+        "tasmax": 0,
+        "tasmean": -0.7,
+        "tasmin": -1.2
+      },
+      "2023": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": -0.2
+      },
+      "2024": {
+        "tasmax": 1.6,
+        "tasmean": 0.9,
+        "tasmin": 0.1
+      },
+      "2025": {
+        "tasmax": 0.4,
+        "tasmean": -0.3,
+        "tasmin": -1
+      },
+      "2026": {
+        "tasmax": 1.2,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2027": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.5
+      },
+      "2028": {
+        "tasmax": 0.8,
+        "tasmean": 0.2,
+        "tasmin": -0.4
+      },
+      "2029": {
+        "tasmax": 2.9,
+        "tasmean": 2.4,
+        "tasmin": 1.9
+      },
+      "2030": {
+        "tasmax": 1.5,
+        "tasmean": 1,
+        "tasmin": 0.5
+      },
+      "2031": {
+        "tasmax": 2.4,
+        "tasmean": 1.7,
+        "tasmin": 1
+      },
+      "2032": {
+        "tasmax": 2.1,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2033": {
+        "tasmax": 0.5,
+        "tasmean": -0.2,
+        "tasmin": -1
+      },
+      "2034": {
+        "tasmax": 1.3,
+        "tasmean": 0.3,
+        "tasmin": -0.5
+      },
+      "2035": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": -0.2
+      },
+      "2036": {
+        "tasmax": 1.4,
+        "tasmean": 0.7,
+        "tasmin": -0.1
+      },
+      "2037": {
+        "tasmax": 2.5,
+        "tasmean": 1.7,
+        "tasmin": 0.9
+      },
+      "2038": {
+        "tasmax": 1.2,
+        "tasmean": 0.2,
+        "tasmin": -0.7
+      },
+      "2039": {
+        "tasmax": 0.8,
+        "tasmean": 0,
+        "tasmin": -0.8
+      },
+      "2040": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.4
+      },
+      "2041": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.4
+      },
+      "2042": {
+        "tasmax": 1.6,
+        "tasmean": 0.8,
+        "tasmin": 0
+      },
+      "2043": {
+        "tasmax": 1.9,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2044": {
+        "tasmax": 2.9,
+        "tasmean": 2.3,
+        "tasmin": 1.7
+      },
+      "2045": {
+        "tasmax": 3.5,
+        "tasmean": 2.8,
+        "tasmin": 2.3
+      },
+      "2046": {
+        "tasmax": 2.4,
+        "tasmean": 1.8,
+        "tasmin": 1.2
+      },
+      "2047": {
+        "tasmax": 3.1,
+        "tasmean": 2.2,
+        "tasmin": 1.3
+      },
+      "2048": {
+        "tasmax": 0.5,
+        "tasmean": -0.1,
+        "tasmin": -0.7
+      },
+      "2049": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": 0
+      },
+      "2050": {
+        "tasmax": 3.6,
+        "tasmean": 3.2,
+        "tasmin": 2.8
+      },
+      "2051": {
+        "tasmax": 3.2,
+        "tasmean": 2.2,
+        "tasmin": 1.5
+      },
+      "2052": {
+        "tasmax": 3.4,
+        "tasmean": 2.8,
+        "tasmin": 2.2
+      },
+      "2053": {
+        "tasmax": 3.9,
+        "tasmean": 3.3,
+        "tasmin": 2.7
+      },
+      "2054": {
+        "tasmax": 4.2,
+        "tasmean": 3.5,
+        "tasmin": 3
+      },
+      "2055": {
+        "tasmax": 3.4,
+        "tasmean": 2.4,
+        "tasmin": 1.5
+      },
+      "2056": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 1.1
+      },
+      "2057": {
+        "tasmax": 2.8,
+        "tasmean": 2,
+        "tasmin": 1.4
+      },
+      "2058": {
+        "tasmax": 2.7,
+        "tasmean": 2,
+        "tasmin": 1.3
+      },
+      "2059": {
+        "tasmax": 3.3,
+        "tasmean": 2.8,
+        "tasmin": 2.3
+      },
+      "2060": {
+        "tasmax": 4.7,
+        "tasmean": 3.9,
+        "tasmin": 3.3
+      },
+      "2061": {
+        "tasmax": 2.8,
+        "tasmean": 2.1,
+        "tasmin": 1.4
+      },
+      "2062": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2063": {
+        "tasmax": 3.4,
+        "tasmean": 2.9,
+        "tasmin": 2.3
+      },
+      "2064": {
+        "tasmax": 3.3,
+        "tasmean": 2.7,
+        "tasmin": 2
+      },
+      "2065": {
+        "tasmax": 4.6,
+        "tasmean": 4.1,
+        "tasmin": 3.7
+      },
+      "2066": {
+        "tasmax": 4.5,
+        "tasmean": 4,
+        "tasmin": 3.5
+      },
+      "2067": {
+        "tasmax": 4.1,
+        "tasmean": 3.5,
+        "tasmin": 2.9
+      },
+      "2068": {
+        "tasmax": 3.4,
+        "tasmean": 2.9,
+        "tasmin": 2.4
+      },
+      "2069": {
+        "tasmax": 4.2,
+        "tasmean": 3.5,
+        "tasmin": 3
+      },
+      "2070": {
+        "tasmax": 4.1,
+        "tasmean": 3.7,
+        "tasmin": 3.3
+      },
+      "2071": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 0.8
+      },
+      "2072": {
+        "tasmax": 3.5,
+        "tasmean": 2.8,
+        "tasmin": 2.1
+      },
+      "2073": {
+        "tasmax": 4.3,
+        "tasmean": 3.7,
+        "tasmin": 3.3
+      },
+      "2074": {
+        "tasmax": 4.3,
+        "tasmean": 3.4,
+        "tasmin": 2.6
+      },
+      "2075": {
+        "tasmax": 3.7,
+        "tasmean": 2.8,
+        "tasmin": 2
+      },
+      "2076": {
+        "tasmax": 5.2,
+        "tasmean": 4.4,
+        "tasmin": 3.9
+      },
+      "2077": {
+        "tasmax": 3.8,
+        "tasmean": 2.9,
+        "tasmin": 2
+      },
+      "2078": {
+        "tasmax": 3.3,
+        "tasmean": 2.9,
+        "tasmin": 2.5
+      },
+      "2079": {
+        "tasmax": 4.1,
+        "tasmean": 3.2,
+        "tasmin": 2.7
+      },
+      "2080": {
+        "tasmax": 3.6,
+        "tasmean": 3.1,
+        "tasmin": 2.6
+      },
+      "2081": {
+        "tasmax": 5.1,
+        "tasmean": 4.8,
+        "tasmin": 4.5
+      },
+      "2082": {
+        "tasmax": 4.6,
+        "tasmean": 4.2,
+        "tasmin": 3.8
+      },
+      "2083": {
+        "tasmax": 4.1,
+        "tasmean": 3.6,
+        "tasmin": 3
+      },
+      "2084": {
+        "tasmax": 5.4,
+        "tasmean": 4.7,
+        "tasmin": 4
+      },
+      "2085": {
+        "tasmax": 4.6,
+        "tasmean": 4,
+        "tasmin": 3.6
+      },
+      "2086": {
+        "tasmax": 4.8,
+        "tasmean": 4.2,
+        "tasmin": 3.6
+      },
+      "2087": {
+        "tasmax": 4.8,
+        "tasmean": 4.2,
+        "tasmin": 3.6
+      },
+      "2088": {
+        "tasmax": 3.7,
+        "tasmean": 3.2,
+        "tasmin": 2.7
+      },
+      "2089": {
+        "tasmax": 5.7,
+        "tasmean": 5.2,
+        "tasmin": 4.7
+      },
+      "2090": {
+        "tasmax": 5.7,
+        "tasmean": 4.7,
+        "tasmin": 3.8
+      },
+      "2091": {
+        "tasmax": 5.2,
+        "tasmean": 4.6,
+        "tasmin": 4.2
+      },
+      "2092": {
+        "tasmax": 4.5,
+        "tasmean": 4.1,
+        "tasmin": 3.6
+      },
+      "2093": {
+        "tasmax": 4.2,
+        "tasmean": 3.6,
+        "tasmin": 3
+      },
+      "2094": {
+        "tasmax": 4.2,
+        "tasmean": 3.7,
+        "tasmin": 3.2
+      },
+      "2095": {
+        "tasmax": 5.5,
+        "tasmean": 5.1,
+        "tasmin": 4.7
+      },
+      "2096": {
+        "tasmax": 4.7,
+        "tasmean": 4.1,
+        "tasmin": 3.7
+      },
+      "2097": {
+        "tasmax": 5.2,
+        "tasmean": 4.5,
+        "tasmin": 4.1
+      },
+      "2098": {
+        "tasmax": 3.6,
+        "tasmean": 3,
+        "tasmin": 2.5
+      },
+      "2099": {
+        "tasmax": 5.4,
+        "tasmean": 4.8,
+        "tasmin": 4.2
+      },
+      "2100": {
+        "tasmax": 6,
+        "tasmean": 5.6,
+        "tasmin": 5.2
+      }
+    }
+  },
+  "GISS-E2-R": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 0.2,
+        "tasmean": -1.1,
+        "tasmin": -2.3
+      },
+      "2008": {
+        "tasmax": 0.7,
+        "tasmean": -0.2,
+        "tasmin": -1.1
+      },
+      "2009": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -1.2
+      },
+      "2010": {
+        "tasmax": -1.4,
+        "tasmean": -2.1,
+        "tasmin": -2.8
+      },
+      "2011": {
+        "tasmax": 0.6,
+        "tasmean": -0.2,
+        "tasmin": -1.1
+      },
+      "2012": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": -0.5
+      },
+      "2013": {
+        "tasmax": 0.4,
+        "tasmean": -0.6,
+        "tasmin": -1.5
+      },
+      "2014": {
+        "tasmax": -1.8,
+        "tasmean": -2.6,
+        "tasmin": -3.4
+      },
+      "2015": {
+        "tasmax": 0.9,
+        "tasmean": 0,
+        "tasmin": -0.9
+      },
+      "2016": {
+        "tasmax": 0.6,
+        "tasmean": -0.4,
+        "tasmin": -1.4
+      },
+      "2017": {
+        "tasmax": -0.3,
+        "tasmean": -1.1,
+        "tasmin": -1.9
+      },
+      "2018": {
+        "tasmax": 1.1,
+        "tasmean": 0.3,
+        "tasmin": -0.7
+      },
+      "2019": {
+        "tasmax": 1.1,
+        "tasmean": 0.5,
+        "tasmin": 0
+      },
+      "2020": {
+        "tasmax": -0.7,
+        "tasmean": -1.6,
+        "tasmin": -2.5
+      },
+      "2021": {
+        "tasmax": 0,
+        "tasmean": -0.9,
+        "tasmin": -1.8
+      },
+      "2022": {
+        "tasmax": 0.9,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2023": {
+        "tasmax": 0.3,
+        "tasmean": -0.6,
+        "tasmin": -1.3
+      },
+      "2024": {
+        "tasmax": 1.4,
+        "tasmean": 0.4,
+        "tasmin": -0.4
+      },
+      "2025": {
+        "tasmax": 1.2,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2026": {
+        "tasmax": -0.1,
+        "tasmean": -0.9,
+        "tasmin": -1.7
+      },
+      "2027": {
+        "tasmax": 0.3,
+        "tasmean": -0.6,
+        "tasmin": -1.5
+      },
+      "2028": {
+        "tasmax": -0.1,
+        "tasmean": -1.2,
+        "tasmin": -2.1
+      },
+      "2029": {
+        "tasmax": -0.3,
+        "tasmean": -1.1,
+        "tasmin": -1.9
+      },
+      "2030": {
+        "tasmax": 1.2,
+        "tasmean": 0.4,
+        "tasmin": -0.3
+      },
+      "2031": {
+        "tasmax": 1.4,
+        "tasmean": 0.4,
+        "tasmin": -0.7
+      },
+      "2032": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2033": {
+        "tasmax": 0.7,
+        "tasmean": -0.3,
+        "tasmin": -1.2
+      },
+      "2034": {
+        "tasmax": 1.7,
+        "tasmean": 0.7,
+        "tasmin": -0.2
+      },
+      "2035": {
+        "tasmax": 1.6,
+        "tasmean": 1.1,
+        "tasmin": 0.4
+      },
+      "2036": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2037": {
+        "tasmax": 0.1,
+        "tasmean": -0.8,
+        "tasmin": -1.7
+      },
+      "2038": {
+        "tasmax": 1.6,
+        "tasmean": 0.6,
+        "tasmin": -0.1
+      },
+      "2039": {
+        "tasmax": 0.7,
+        "tasmean": -0.2,
+        "tasmin": -1.1
+      },
+      "2040": {
+        "tasmax": 0.6,
+        "tasmean": -0.2,
+        "tasmin": -1.1
+      },
+      "2041": {
+        "tasmax": 1.6,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2042": {
+        "tasmax": 0.2,
+        "tasmean": -0.8,
+        "tasmin": -1.8
+      },
+      "2043": {
+        "tasmax": -0.8,
+        "tasmean": -2.4,
+        "tasmin": -3.8
+      },
+      "2044": {
+        "tasmax": 0.1,
+        "tasmean": -0.7,
+        "tasmin": -1.6
+      },
+      "2045": {
+        "tasmax": -0.5,
+        "tasmean": -1.4,
+        "tasmin": -2.3
+      },
+      "2046": {
+        "tasmax": 2.4,
+        "tasmean": 1.6,
+        "tasmin": 0.8
+      },
+      "2047": {
+        "tasmax": 0.4,
+        "tasmean": -0.5,
+        "tasmin": -1.3
+      },
+      "2048": {
+        "tasmax": 1.6,
+        "tasmean": 0.6,
+        "tasmin": -0.3
+      },
+      "2049": {
+        "tasmax": 1.2,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2050": {
+        "tasmax": 1.9,
+        "tasmean": 0.9,
+        "tasmin": 0
+      },
+      "2051": {
+        "tasmax": 1.4,
+        "tasmean": 0.4,
+        "tasmin": -0.3
+      },
+      "2052": {
+        "tasmax": 0,
+        "tasmean": -0.8,
+        "tasmin": -1.6
+      },
+      "2053": {
+        "tasmax": 1.1,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2054": {
+        "tasmax": 1.5,
+        "tasmean": 0.6,
+        "tasmin": -0.4
+      },
+      "2055": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2056": {
+        "tasmax": 1,
+        "tasmean": -0.2,
+        "tasmin": -1.1
+      },
+      "2057": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.4
+      },
+      "2058": {
+        "tasmax": 2.3,
+        "tasmean": 1.4,
+        "tasmin": 0.6
+      },
+      "2059": {
+        "tasmax": 2.4,
+        "tasmean": 1.7,
+        "tasmin": 1
+      },
+      "2060": {
+        "tasmax": 1.6,
+        "tasmean": 0.8,
+        "tasmin": -0.1
+      },
+      "2061": {
+        "tasmax": 0.6,
+        "tasmean": -0.4,
+        "tasmin": -1.3
+      },
+      "2062": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": -0.2
+      },
+      "2063": {
+        "tasmax": 2.7,
+        "tasmean": 1.6,
+        "tasmin": 0.5
+      },
+      "2064": {
+        "tasmax": 1.4,
+        "tasmean": 0.5,
+        "tasmin": -0.4
+      },
+      "2065": {
+        "tasmax": 1.2,
+        "tasmean": 0.3,
+        "tasmin": -0.6
+      },
+      "2066": {
+        "tasmax": 1.2,
+        "tasmean": 0.3,
+        "tasmin": -0.8
+      },
+      "2067": {
+        "tasmax": 0.8,
+        "tasmean": 0.1,
+        "tasmin": -0.6
+      },
+      "2068": {
+        "tasmax": -0.1,
+        "tasmean": -0.8,
+        "tasmin": -1.5
+      },
+      "2069": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.6
+      },
+      "2070": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2071": {
+        "tasmax": 1.7,
+        "tasmean": 0.7,
+        "tasmin": -0.3
+      },
+      "2072": {
+        "tasmax": 2.1,
+        "tasmean": 1,
+        "tasmin": 0.2
+      },
+      "2073": {
+        "tasmax": 1.6,
+        "tasmean": 0.4,
+        "tasmin": -0.6
+      },
+      "2074": {
+        "tasmax": 1.6,
+        "tasmean": 0.9,
+        "tasmin": 0.1
+      },
+      "2075": {
+        "tasmax": 1.6,
+        "tasmean": 0.5,
+        "tasmin": -0.4
+      },
+      "2076": {
+        "tasmax": 0.5,
+        "tasmean": -0.4,
+        "tasmin": -1.1
+      },
+      "2077": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.5
+      },
+      "2078": {
+        "tasmax": 1.1,
+        "tasmean": 0.3,
+        "tasmin": -0.5
+      },
+      "2079": {
+        "tasmax": 1.1,
+        "tasmean": 0.1,
+        "tasmin": -0.7
+      },
+      "2080": {
+        "tasmax": 1.8,
+        "tasmean": 0.9,
+        "tasmin": 0
+      },
+      "2081": {
+        "tasmax": 0.8,
+        "tasmean": -0.3,
+        "tasmin": -1.2
+      },
+      "2082": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": -0.2
+      },
+      "2083": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.8
+      },
+      "2084": {
+        "tasmax": 0.9,
+        "tasmean": 0,
+        "tasmin": -1
+      },
+      "2085": {
+        "tasmax": 1.7,
+        "tasmean": 0.1,
+        "tasmin": -1.6
+      },
+      "2086": {
+        "tasmax": 1.8,
+        "tasmean": 0.9,
+        "tasmin": -0.1
+      },
+      "2087": {
+        "tasmax": 1.6,
+        "tasmean": 0.7,
+        "tasmin": 0
+      },
+      "2088": {
+        "tasmax": 3.4,
+        "tasmean": 2.2,
+        "tasmin": 1
+      },
+      "2089": {
+        "tasmax": 0.9,
+        "tasmean": 0.1,
+        "tasmin": -0.7
+      },
+      "2090": {
+        "tasmax": 1.6,
+        "tasmean": 0.6,
+        "tasmin": -0.3
+      },
+      "2091": {
+        "tasmax": 1.8,
+        "tasmean": 1,
+        "tasmin": 0.2
+      },
+      "2092": {
+        "tasmax": 2.1,
+        "tasmean": 1.2,
+        "tasmin": 0.4
+      },
+      "2093": {
+        "tasmax": -0.1,
+        "tasmean": -1,
+        "tasmin": -1.9
+      },
+      "2094": {
+        "tasmax": 0.6,
+        "tasmean": -0.2,
+        "tasmin": -1
+      },
+      "2095": {
+        "tasmax": 1.5,
+        "tasmean": 0.7,
+        "tasmin": -0.1
+      },
+      "2096": {
+        "tasmax": 1.5,
+        "tasmean": 0.9,
+        "tasmin": 0.2
+      },
+      "2097": {
+        "tasmax": 2.9,
+        "tasmean": 2.2,
+        "tasmin": 1.4
+      },
+      "2098": {
+        "tasmax": 1.3,
+        "tasmean": 0.1,
+        "tasmin": -1.1
+      },
+      "2099": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.7
+      },
+      "2100": {
+        "tasmax": 2.5,
+        "tasmean": 0.8,
+        "tasmin": -0.4
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 0.1,
+        "tasmean": -0.8,
+        "tasmin": -1.6
+      },
+      "2008": {
+        "tasmax": 0.3,
+        "tasmean": -0.9,
+        "tasmin": -1.8
+      },
+      "2009": {
+        "tasmax": -0.8,
+        "tasmean": -2,
+        "tasmin": -2.8
+      },
+      "2010": {
+        "tasmax": 1.9,
+        "tasmean": 0.8,
+        "tasmin": -0.3
+      },
+      "2011": {
+        "tasmax": -0.5,
+        "tasmean": -1.2,
+        "tasmin": -1.9
+      },
+      "2012": {
+        "tasmax": 0.5,
+        "tasmean": -0.1,
+        "tasmin": -0.8
+      },
+      "2013": {
+        "tasmax": 0.8,
+        "tasmean": -0.1,
+        "tasmin": -0.9
+      },
+      "2014": {
+        "tasmax": 0.7,
+        "tasmean": -0.4,
+        "tasmin": -1.4
+      },
+      "2015": {
+        "tasmax": 1.1,
+        "tasmean": 0.2,
+        "tasmin": -0.7
+      },
+      "2016": {
+        "tasmax": -0.6,
+        "tasmean": -1.8,
+        "tasmin": -2.9
+      },
+      "2017": {
+        "tasmax": -0.1,
+        "tasmean": -1.1,
+        "tasmin": -1.9
+      },
+      "2018": {
+        "tasmax": -0.3,
+        "tasmean": -1.5,
+        "tasmin": -2.6
+      },
+      "2019": {
+        "tasmax": 0.5,
+        "tasmean": -0.2,
+        "tasmin": -0.9
+      },
+      "2020": {
+        "tasmax": 1.1,
+        "tasmean": 0,
+        "tasmin": -0.9
+      },
+      "2021": {
+        "tasmax": 0.2,
+        "tasmean": -0.5,
+        "tasmin": -1.3
+      },
+      "2022": {
+        "tasmax": 0.7,
+        "tasmean": -0.9,
+        "tasmin": -2.2
+      },
+      "2023": {
+        "tasmax": 0.9,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2024": {
+        "tasmax": -0.1,
+        "tasmean": -0.8,
+        "tasmin": -1.4
+      },
+      "2025": {
+        "tasmax": 0.3,
+        "tasmean": -0.6,
+        "tasmin": -1.7
+      },
+      "2026": {
+        "tasmax": 0.8,
+        "tasmean": -0.3,
+        "tasmin": -1.1
+      },
+      "2027": {
+        "tasmax": -0.1,
+        "tasmean": -0.9,
+        "tasmin": -1.7
+      },
+      "2028": {
+        "tasmax": -0.3,
+        "tasmean": -1,
+        "tasmin": -1.5
+      },
+      "2029": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2030": {
+        "tasmax": 1.5,
+        "tasmean": 0.7,
+        "tasmin": -0.1
+      },
+      "2031": {
+        "tasmax": 1,
+        "tasmean": 0.1,
+        "tasmin": -0.8
+      },
+      "2032": {
+        "tasmax": 0.5,
+        "tasmean": -0.3,
+        "tasmin": -1.2
+      },
+      "2033": {
+        "tasmax": 0.7,
+        "tasmean": -1.1,
+        "tasmin": -2.7
+      },
+      "2034": {
+        "tasmax": 0,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2035": {
+        "tasmax": 0.4,
+        "tasmean": -0.4,
+        "tasmin": -1.3
+      },
+      "2036": {
+        "tasmax": 0.2,
+        "tasmean": -0.7,
+        "tasmin": -1.7
+      },
+      "2037": {
+        "tasmax": 1.2,
+        "tasmean": 0.1,
+        "tasmin": -0.9
+      },
+      "2038": {
+        "tasmax": 1.2,
+        "tasmean": 0.1,
+        "tasmin": -0.7
+      },
+      "2039": {
+        "tasmax": 1.6,
+        "tasmean": 0.3,
+        "tasmin": -1.2
+      },
+      "2040": {
+        "tasmax": 1.5,
+        "tasmean": 0.3,
+        "tasmin": -0.8
+      },
+      "2041": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.4
+      },
+      "2042": {
+        "tasmax": -0.5,
+        "tasmean": -1.3,
+        "tasmin": -1.9
+      },
+      "2043": {
+        "tasmax": 0.4,
+        "tasmean": -0.5,
+        "tasmin": -1.4
+      },
+      "2044": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": -0.3
+      },
+      "2045": {
+        "tasmax": 0.2,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2046": {
+        "tasmax": 2.4,
+        "tasmean": 1.4,
+        "tasmin": 0.4
+      },
+      "2047": {
+        "tasmax": 0.9,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2048": {
+        "tasmax": 1.3,
+        "tasmean": 0.5,
+        "tasmin": -0.5
+      },
+      "2049": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -1
+      },
+      "2050": {
+        "tasmax": 1.9,
+        "tasmean": 1,
+        "tasmin": 0
+      },
+      "2051": {
+        "tasmax": 1.1,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2052": {
+        "tasmax": 1.7,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2053": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.5
+      },
+      "2054": {
+        "tasmax": 1.3,
+        "tasmean": 0.5,
+        "tasmin": -0.3
+      },
+      "2055": {
+        "tasmax": 0,
+        "tasmean": -1.4,
+        "tasmin": -2.7
+      },
+      "2056": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2057": {
+        "tasmax": 1.8,
+        "tasmean": 1,
+        "tasmin": 0.1
+      },
+      "2058": {
+        "tasmax": 2.6,
+        "tasmean": 1.6,
+        "tasmin": 0.8
+      },
+      "2059": {
+        "tasmax": 1.2,
+        "tasmean": -0.1,
+        "tasmin": -1.5
+      },
+      "2060": {
+        "tasmax": 1,
+        "tasmean": 0,
+        "tasmin": -0.8
+      },
+      "2061": {
+        "tasmax": 0.9,
+        "tasmean": 0,
+        "tasmin": -0.8
+      },
+      "2062": {
+        "tasmax": 1.3,
+        "tasmean": 0.6,
+        "tasmin": 0
+      },
+      "2063": {
+        "tasmax": 1.4,
+        "tasmean": 0.5,
+        "tasmin": -0.2
+      },
+      "2064": {
+        "tasmax": 0.5,
+        "tasmean": -0.2,
+        "tasmin": -0.9
+      },
+      "2065": {
+        "tasmax": 1.9,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2066": {
+        "tasmax": 0.7,
+        "tasmean": 0,
+        "tasmin": -0.7
+      },
+      "2067": {
+        "tasmax": 1.7,
+        "tasmean": 0.4,
+        "tasmin": -0.8
+      },
+      "2068": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.5
+      },
+      "2069": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2070": {
+        "tasmax": 2,
+        "tasmean": 1.2,
+        "tasmin": 0.5
+      },
+      "2071": {
+        "tasmax": 2.4,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2072": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2073": {
+        "tasmax": 2.1,
+        "tasmean": 0.5,
+        "tasmin": -0.7
+      },
+      "2074": {
+        "tasmax": 1.3,
+        "tasmean": 0.5,
+        "tasmin": -0.3
+      },
+      "2075": {
+        "tasmax": 0.7,
+        "tasmean": -0.1,
+        "tasmin": -1
+      },
+      "2076": {
+        "tasmax": 1.3,
+        "tasmean": 0.4,
+        "tasmin": -0.3
+      },
+      "2077": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -1.4
+      },
+      "2078": {
+        "tasmax": 2.5,
+        "tasmean": 1.7,
+        "tasmin": 1
+      },
+      "2079": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2080": {
+        "tasmax": 0.9,
+        "tasmean": -0.3,
+        "tasmin": -1.4
+      },
+      "2081": {
+        "tasmax": 1.4,
+        "tasmean": 0.5,
+        "tasmin": -0.3
+      },
+      "2082": {
+        "tasmax": 1.2,
+        "tasmean": 0.5,
+        "tasmin": -0.1
+      },
+      "2083": {
+        "tasmax": 0.6,
+        "tasmean": -0.7,
+        "tasmin": -1.9
+      },
+      "2084": {
+        "tasmax": 1.7,
+        "tasmean": 0.3,
+        "tasmin": -1
+      },
+      "2085": {
+        "tasmax": 1.4,
+        "tasmean": 0.2,
+        "tasmin": -1
+      },
+      "2086": {
+        "tasmax": 2,
+        "tasmean": 1.1,
+        "tasmin": 0.1
+      },
+      "2087": {
+        "tasmax": 0.9,
+        "tasmean": 0,
+        "tasmin": -0.7
+      },
+      "2088": {
+        "tasmax": 2.1,
+        "tasmean": 1.2,
+        "tasmin": 0.4
+      },
+      "2089": {
+        "tasmax": 2.2,
+        "tasmean": 1.1,
+        "tasmin": 0.1
+      },
+      "2090": {
+        "tasmax": 2.5,
+        "tasmean": 1.4,
+        "tasmin": 0.6
+      },
+      "2091": {
+        "tasmax": 2.1,
+        "tasmean": 1.3,
+        "tasmin": 0.6
+      },
+      "2092": {
+        "tasmax": 1.8,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2093": {
+        "tasmax": 2,
+        "tasmean": 1.3,
+        "tasmin": 0.6
+      },
+      "2094": {
+        "tasmax": 1.7,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2095": {
+        "tasmax": 1.5,
+        "tasmean": 0.6,
+        "tasmin": -0.4
+      },
+      "2096": {
+        "tasmax": 2.3,
+        "tasmean": 1.6,
+        "tasmin": 0.8
+      },
+      "2097": {
+        "tasmax": 0.6,
+        "tasmean": -0.5,
+        "tasmin": -1.3
+      },
+      "2098": {
+        "tasmax": 2.2,
+        "tasmean": 1.1,
+        "tasmin": -0.2
+      },
+      "2099": {
+        "tasmax": 2.8,
+        "tasmean": 2.1,
+        "tasmin": 1.3
+      },
+      "2100": {
+        "tasmax": 1.3,
+        "tasmean": 0.5,
+        "tasmin": -0.1
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": -0.7,
+        "tasmean": -1.5,
+        "tasmin": -2.5
+      },
+      "2008": {
+        "tasmax": 1.3,
+        "tasmean": 0.2,
+        "tasmin": -1
+      },
+      "2009": {
+        "tasmax": -0.2,
+        "tasmean": -1,
+        "tasmin": -1.8
+      },
+      "2010": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": -0.2
+      },
+      "2011": {
+        "tasmax": 0.3,
+        "tasmean": -0.6,
+        "tasmin": -1.4
+      },
+      "2012": {
+        "tasmax": -0.2,
+        "tasmean": -1.2,
+        "tasmin": -2.1
+      },
+      "2013": {
+        "tasmax": 0.7,
+        "tasmean": -0.1,
+        "tasmin": -0.9
+      },
+      "2014": {
+        "tasmax": 1.3,
+        "tasmean": 0.1,
+        "tasmin": -0.9
+      },
+      "2015": {
+        "tasmax": 0.4,
+        "tasmean": -0.5,
+        "tasmin": -1.4
+      },
+      "2016": {
+        "tasmax": 0,
+        "tasmean": -1.1,
+        "tasmin": -2
+      },
+      "2017": {
+        "tasmax": 0.7,
+        "tasmean": -0.1,
+        "tasmin": -0.9
+      },
+      "2018": {
+        "tasmax": 1.6,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2019": {
+        "tasmax": 1,
+        "tasmean": 0.1,
+        "tasmin": -0.8
+      },
+      "2020": {
+        "tasmax": 0.1,
+        "tasmean": -0.8,
+        "tasmin": -1.5
+      },
+      "2021": {
+        "tasmax": 0.4,
+        "tasmean": -0.7,
+        "tasmin": -1.7
+      },
+      "2022": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2023": {
+        "tasmax": 0.1,
+        "tasmean": -0.9,
+        "tasmin": -1.8
+      },
+      "2024": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2025": {
+        "tasmax": 0.4,
+        "tasmean": -0.5,
+        "tasmin": -1.2
+      },
+      "2026": {
+        "tasmax": 0.9,
+        "tasmean": 0.1,
+        "tasmin": -0.4
+      },
+      "2027": {
+        "tasmax": 1.4,
+        "tasmean": 0.3,
+        "tasmin": -0.7
+      },
+      "2028": {
+        "tasmax": -0.2,
+        "tasmean": -0.9,
+        "tasmin": -1.7
+      },
+      "2029": {
+        "tasmax": 3.1,
+        "tasmean": 2.2,
+        "tasmin": 1.4
+      },
+      "2030": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": -0.4
+      },
+      "2031": {
+        "tasmax": 0.9,
+        "tasmean": 0.1,
+        "tasmin": -0.7
+      },
+      "2032": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -1.1
+      },
+      "2033": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.2
+      },
+      "2034": {
+        "tasmax": 0.7,
+        "tasmean": -0.2,
+        "tasmin": -0.9
+      },
+      "2035": {
+        "tasmax": 1.4,
+        "tasmean": 0.4,
+        "tasmin": -0.5
+      },
+      "2036": {
+        "tasmax": 1,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2037": {
+        "tasmax": 0.2,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2038": {
+        "tasmax": 1.1,
+        "tasmean": 0,
+        "tasmin": -0.8
+      },
+      "2039": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.2
+      },
+      "2040": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -1.3
+      },
+      "2041": {
+        "tasmax": 0.7,
+        "tasmean": -0.1,
+        "tasmin": -0.9
+      },
+      "2042": {
+        "tasmax": 0.4,
+        "tasmean": -0.6,
+        "tasmin": -1.7
+      },
+      "2043": {
+        "tasmax": 0.6,
+        "tasmean": -0.4,
+        "tasmin": -1.3
+      },
+      "2044": {
+        "tasmax": 0.6,
+        "tasmean": -0.1,
+        "tasmin": -0.7
+      },
+      "2045": {
+        "tasmax": 0.4,
+        "tasmean": -0.8,
+        "tasmin": -1.9
+      },
+      "2046": {
+        "tasmax": 1.9,
+        "tasmean": 0.9,
+        "tasmin": -0.1
+      },
+      "2047": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2048": {
+        "tasmax": 1.1,
+        "tasmean": 0.3,
+        "tasmin": -0.5
+      },
+      "2049": {
+        "tasmax": 2.2,
+        "tasmean": 1.3,
+        "tasmin": 0.4
+      },
+      "2050": {
+        "tasmax": 1.1,
+        "tasmean": 0.1,
+        "tasmin": -0.7
+      },
+      "2051": {
+        "tasmax": 1.4,
+        "tasmean": 0.5,
+        "tasmin": -0.4
+      },
+      "2052": {
+        "tasmax": 0.8,
+        "tasmean": -0.1,
+        "tasmin": -0.9
+      },
+      "2053": {
+        "tasmax": 1.5,
+        "tasmean": 0.9,
+        "tasmin": 0.2
+      },
+      "2054": {
+        "tasmax": 2.4,
+        "tasmean": 1.3,
+        "tasmin": 0.4
+      },
+      "2055": {
+        "tasmax": 2.3,
+        "tasmean": 1.2,
+        "tasmin": 0.1
+      },
+      "2056": {
+        "tasmax": 1.4,
+        "tasmean": 0.6,
+        "tasmin": -0.1
+      },
+      "2057": {
+        "tasmax": 1.1,
+        "tasmean": 0.2,
+        "tasmin": -0.7
+      },
+      "2058": {
+        "tasmax": 2.8,
+        "tasmean": 2,
+        "tasmin": 1.2
+      },
+      "2059": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0.1
+      },
+      "2060": {
+        "tasmax": 2.5,
+        "tasmean": 1.8,
+        "tasmin": 1.1
+      },
+      "2061": {
+        "tasmax": 2.5,
+        "tasmean": 1.7,
+        "tasmin": 0.8
+      },
+      "2062": {
+        "tasmax": 1.2,
+        "tasmean": 0.6,
+        "tasmin": -0.1
+      },
+      "2063": {
+        "tasmax": 2.3,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2064": {
+        "tasmax": 1.9,
+        "tasmean": 1,
+        "tasmin": 0
+      },
+      "2065": {
+        "tasmax": 1.7,
+        "tasmean": 1.1,
+        "tasmin": 0.3
+      },
+      "2066": {
+        "tasmax": 1.2,
+        "tasmean": 0.1,
+        "tasmin": -1
+      },
+      "2067": {
+        "tasmax": 2.5,
+        "tasmean": 1.6,
+        "tasmin": 0.7
+      },
+      "2068": {
+        "tasmax": 2.2,
+        "tasmean": 1.3,
+        "tasmin": 0.6
+      },
+      "2069": {
+        "tasmax": 2.4,
+        "tasmean": 1.5,
+        "tasmin": 0.7
+      },
+      "2070": {
+        "tasmax": 2.9,
+        "tasmean": 1.6,
+        "tasmin": 0.6
+      },
+      "2071": {
+        "tasmax": 2,
+        "tasmean": 1.1,
+        "tasmin": 0.4
+      },
+      "2072": {
+        "tasmax": 2,
+        "tasmean": 1.1,
+        "tasmin": 0.5
+      },
+      "2073": {
+        "tasmax": 0.8,
+        "tasmean": -0.1,
+        "tasmin": -1
+      },
+      "2074": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": -0.3
+      },
+      "2075": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -1
+      },
+      "2076": {
+        "tasmax": 1.8,
+        "tasmean": 1.1,
+        "tasmin": 0.3
+      },
+      "2077": {
+        "tasmax": 1.5,
+        "tasmean": 0.5,
+        "tasmin": -0.4
+      },
+      "2078": {
+        "tasmax": 2.5,
+        "tasmean": 1.7,
+        "tasmin": 0.9
+      },
+      "2079": {
+        "tasmax": 2.4,
+        "tasmean": 1.3,
+        "tasmin": 0.3
+      },
+      "2080": {
+        "tasmax": 2.3,
+        "tasmean": 1.4,
+        "tasmin": 0.5
+      },
+      "2081": {
+        "tasmax": 1.2,
+        "tasmean": 0.6,
+        "tasmin": -0.1
+      },
+      "2082": {
+        "tasmax": 3,
+        "tasmean": 2.2,
+        "tasmin": 1.4
+      },
+      "2083": {
+        "tasmax": 1.2,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2084": {
+        "tasmax": 1.9,
+        "tasmean": 0.6,
+        "tasmin": -0.5
+      },
+      "2085": {
+        "tasmax": 1.6,
+        "tasmean": 0.6,
+        "tasmin": -0.4
+      },
+      "2086": {
+        "tasmax": 2,
+        "tasmean": 1,
+        "tasmin": -0.1
+      },
+      "2087": {
+        "tasmax": 3,
+        "tasmean": 2.4,
+        "tasmin": 1.7
+      },
+      "2088": {
+        "tasmax": 3.3,
+        "tasmean": 2.1,
+        "tasmin": 1
+      },
+      "2089": {
+        "tasmax": 2,
+        "tasmean": 1.3,
+        "tasmin": 0.8
+      },
+      "2090": {
+        "tasmax": 3.9,
+        "tasmean": 3,
+        "tasmin": 2.3
+      },
+      "2091": {
+        "tasmax": 1.4,
+        "tasmean": 0.5,
+        "tasmin": -0.2
+      },
+      "2092": {
+        "tasmax": 2,
+        "tasmean": 1.2,
+        "tasmin": 0.4
+      },
+      "2093": {
+        "tasmax": 2.8,
+        "tasmean": 1.8,
+        "tasmin": 1
+      },
+      "2094": {
+        "tasmax": 3.3,
+        "tasmean": 2.1,
+        "tasmin": 1.2
+      },
+      "2095": {
+        "tasmax": 1.5,
+        "tasmean": 0.7,
+        "tasmin": 0.1
+      },
+      "2096": {
+        "tasmax": 2.6,
+        "tasmean": 1.6,
+        "tasmin": 0.9
+      },
+      "2097": {
+        "tasmax": 3.7,
+        "tasmean": 2.6,
+        "tasmin": 1.6
+      },
+      "2098": {
+        "tasmax": 1.9,
+        "tasmean": 0.8,
+        "tasmin": -0.3
+      },
+      "2099": {
+        "tasmax": 3.6,
+        "tasmean": 2.3,
+        "tasmin": 1.1
+      },
+      "2100": {
+        "tasmax": 3.1,
+        "tasmean": 2.5,
+        "tasmin": 1.8
+      }
+    }
+  },
+  "IPSL-CM5A-LR": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 3.2,
+        "tasmean": 0.1,
+        "tasmin": -6
+      },
+      "2008": {
+        "tasmax": 3.2,
+        "tasmean": -1.3,
+        "tasmin": -5.6
+      },
+      "2009": {
+        "tasmax": 2.9,
+        "tasmean": -0.1,
+        "tasmin": -4.7
+      },
+      "2010": {
+        "tasmax": 2.9,
+        "tasmean": 0.5,
+        "tasmin": -2.4
+      },
+      "2011": {
+        "tasmax": 3.2,
+        "tasmean": 0.4,
+        "tasmin": -6.9
+      },
+      "2012": {
+        "tasmax": 3.3,
+        "tasmean": 1.1,
+        "tasmin": -2
+      },
+      "2013": {
+        "tasmax": 3.5,
+        "tasmean": -1.6,
+        "tasmin": -6.3
+      },
+      "2014": {
+        "tasmax": 1.6,
+        "tasmean": -0.9,
+        "tasmin": -4.4
+      },
+      "2015": {
+        "tasmax": 3.1,
+        "tasmean": -0.4,
+        "tasmin": -4.2
+      },
+      "2016": {
+        "tasmax": 2.9,
+        "tasmean": -0.3,
+        "tasmin": -4.5
+      },
+      "2017": {
+        "tasmax": 4.3,
+        "tasmean": 0.8,
+        "tasmin": -4.1
+      },
+      "2018": {
+        "tasmax": 3,
+        "tasmean": 0.6,
+        "tasmin": -2.7
+      },
+      "2019": {
+        "tasmax": 3.7,
+        "tasmean": 0.1,
+        "tasmin": -4.6
+      },
+      "2020": {
+        "tasmax": 2.2,
+        "tasmean": -1.3,
+        "tasmin": -6.5
+      },
+      "2021": {
+        "tasmax": 3.8,
+        "tasmean": -0.2,
+        "tasmin": -5
+      },
+      "2022": {
+        "tasmax": 3.6,
+        "tasmean": -0.6,
+        "tasmin": -5
+      },
+      "2023": {
+        "tasmax": 3.1,
+        "tasmean": -0.6,
+        "tasmin": -5.5
+      },
+      "2024": {
+        "tasmax": 4.7,
+        "tasmean": 1,
+        "tasmin": -4.3
+      },
+      "2025": {
+        "tasmax": 3.9,
+        "tasmean": 0.6,
+        "tasmin": -2.6
+      },
+      "2026": {
+        "tasmax": 3,
+        "tasmean": 0.6,
+        "tasmin": -3.1
+      },
+      "2027": {
+        "tasmax": 3.9,
+        "tasmean": 0.6,
+        "tasmin": -3.8
+      },
+      "2028": {
+        "tasmax": 3.1,
+        "tasmean": -0.5,
+        "tasmin": -5.7
+      },
+      "2029": {
+        "tasmax": 3.5,
+        "tasmean": 0.3,
+        "tasmin": -4
+      },
+      "2030": {
+        "tasmax": 2.9,
+        "tasmean": -0.3,
+        "tasmin": -3.8
+      },
+      "2031": {
+        "tasmax": 4,
+        "tasmean": 0.6,
+        "tasmin": -4.1
+      },
+      "2032": {
+        "tasmax": 3.5,
+        "tasmean": -0.6,
+        "tasmin": -5.5
+      },
+      "2033": {
+        "tasmax": 3.5,
+        "tasmean": 0.3,
+        "tasmin": -4.3
+      },
+      "2034": {
+        "tasmax": 2.8,
+        "tasmean": -0.5,
+        "tasmin": -5.4
+      },
+      "2035": {
+        "tasmax": 2.2,
+        "tasmean": -0.1,
+        "tasmin": -3.8
+      },
+      "2036": {
+        "tasmax": 3,
+        "tasmean": -1.5,
+        "tasmin": -5.9
+      },
+      "2037": {
+        "tasmax": 3.2,
+        "tasmean": -0.8,
+        "tasmin": -5.8
+      },
+      "2038": {
+        "tasmax": 3.4,
+        "tasmean": -0.7,
+        "tasmin": -6.3
+      },
+      "2039": {
+        "tasmax": 3.3,
+        "tasmean": 0.1,
+        "tasmin": -4.3
+      },
+      "2040": {
+        "tasmax": 3.2,
+        "tasmean": 0.3,
+        "tasmin": -4.8
+      },
+      "2041": {
+        "tasmax": 3.9,
+        "tasmean": -0.8,
+        "tasmin": -5.9
+      },
+      "2042": {
+        "tasmax": 4.2,
+        "tasmean": 1.1,
+        "tasmin": -4.5
+      },
+      "2043": {
+        "tasmax": 3,
+        "tasmean": 0.1,
+        "tasmin": -6
+      },
+      "2044": {
+        "tasmax": 3.7,
+        "tasmean": -0.5,
+        "tasmin": -4.6
+      },
+      "2045": {
+        "tasmax": 3.1,
+        "tasmean": -0.1,
+        "tasmin": -3.3
+      },
+      "2046": {
+        "tasmax": 3.3,
+        "tasmean": 0.5,
+        "tasmin": -3.8
+      },
+      "2047": {
+        "tasmax": 3.1,
+        "tasmean": 1,
+        "tasmin": -2.8
+      },
+      "2048": {
+        "tasmax": 4.1,
+        "tasmean": 1.2,
+        "tasmin": -1.3
+      },
+      "2049": {
+        "tasmax": 4.2,
+        "tasmean": 0.2,
+        "tasmin": -4.5
+      },
+      "2050": {
+        "tasmax": 2.9,
+        "tasmean": -0.1,
+        "tasmin": -5.3
+      },
+      "2051": {
+        "tasmax": 3.6,
+        "tasmean": 1.2,
+        "tasmin": -2.4
+      },
+      "2052": {
+        "tasmax": 4.7,
+        "tasmean": 1.6,
+        "tasmin": -2.8
+      },
+      "2053": {
+        "tasmax": 3.9,
+        "tasmean": -0.1,
+        "tasmin": -2.6
+      },
+      "2054": {
+        "tasmax": 3.5,
+        "tasmean": 1.2,
+        "tasmin": -1.6
+      },
+      "2055": {
+        "tasmax": 3.5,
+        "tasmean": -0.6,
+        "tasmin": -4.7
+      },
+      "2056": {
+        "tasmax": 3.3,
+        "tasmean": -1,
+        "tasmin": -4.1
+      },
+      "2057": {
+        "tasmax": 3.5,
+        "tasmean": 0.9,
+        "tasmin": -2.4
+      },
+      "2058": {
+        "tasmax": 2.9,
+        "tasmean": 0.3,
+        "tasmin": -3.2
+      },
+      "2059": {
+        "tasmax": 3.5,
+        "tasmean": 0.8,
+        "tasmin": -2.7
+      },
+      "2060": {
+        "tasmax": 4.4,
+        "tasmean": 2.2,
+        "tasmin": -2.6
+      },
+      "2061": {
+        "tasmax": 3.4,
+        "tasmean": 0.9,
+        "tasmin": -4.7
+      },
+      "2062": {
+        "tasmax": 4.5,
+        "tasmean": 0.8,
+        "tasmin": -5.1
+      },
+      "2063": {
+        "tasmax": 4.3,
+        "tasmean": 1,
+        "tasmin": -4.7
+      },
+      "2064": {
+        "tasmax": 4.3,
+        "tasmean": 0.7,
+        "tasmin": -2.9
+      },
+      "2065": {
+        "tasmax": 2.7,
+        "tasmean": -0.7,
+        "tasmin": -5.4
+      },
+      "2066": {
+        "tasmax": 3.4,
+        "tasmean": 0.4,
+        "tasmin": -4.7
+      },
+      "2067": {
+        "tasmax": 2.8,
+        "tasmean": 0.3,
+        "tasmin": -3
+      },
+      "2068": {
+        "tasmax": 3.2,
+        "tasmean": 0.2,
+        "tasmin": -3.4
+      },
+      "2069": {
+        "tasmax": 3.2,
+        "tasmean": 0.5,
+        "tasmin": -2.2
+      },
+      "2070": {
+        "tasmax": 4.9,
+        "tasmean": 0.9,
+        "tasmin": -3.1
+      },
+      "2071": {
+        "tasmax": 3.5,
+        "tasmean": 0.6,
+        "tasmin": -3.1
+      },
+      "2072": {
+        "tasmax": 4.1,
+        "tasmean": 0.9,
+        "tasmin": -2.8
+      },
+      "2073": {
+        "tasmax": 3.8,
+        "tasmean": -0.8,
+        "tasmin": -4.7
+      },
+      "2074": {
+        "tasmax": 4.7,
+        "tasmean": 2.3,
+        "tasmin": -0.9
+      },
+      "2075": {
+        "tasmax": 3.8,
+        "tasmean": 1.4,
+        "tasmin": -2.8
+      },
+      "2076": {
+        "tasmax": 4,
+        "tasmean": 2.3,
+        "tasmin": 0.1
+      },
+      "2077": {
+        "tasmax": 4,
+        "tasmean": 0.9,
+        "tasmin": -2.5
+      },
+      "2078": {
+        "tasmax": 3.8,
+        "tasmean": 0.9,
+        "tasmin": -3
+      },
+      "2079": {
+        "tasmax": 4.7,
+        "tasmean": 1.8,
+        "tasmin": -4.1
+      },
+      "2080": {
+        "tasmax": 3.7,
+        "tasmean": 1.3,
+        "tasmin": -2.7
+      },
+      "2081": {
+        "tasmax": 5.8,
+        "tasmean": 2.7,
+        "tasmin": -2.1
+      },
+      "2082": {
+        "tasmax": 4.3,
+        "tasmean": 1.7,
+        "tasmin": -2.5
+      },
+      "2083": {
+        "tasmax": 4.5,
+        "tasmean": 1.6,
+        "tasmin": -3
+      },
+      "2084": {
+        "tasmax": 4.4,
+        "tasmean": 2.3,
+        "tasmin": -0.8
+      },
+      "2085": {
+        "tasmax": 4.2,
+        "tasmean": 1.9,
+        "tasmin": -0.2
+      },
+      "2086": {
+        "tasmax": 4.6,
+        "tasmean": 1.5,
+        "tasmin": -1.3
+      },
+      "2087": {
+        "tasmax": 4.5,
+        "tasmean": 1.7,
+        "tasmin": -1.7
+      },
+      "2088": {
+        "tasmax": 4.5,
+        "tasmean": 1.9,
+        "tasmin": -1.5
+      },
+      "2089": {
+        "tasmax": 4.7,
+        "tasmean": 1.4,
+        "tasmin": -2.6
+      },
+      "2090": {
+        "tasmax": 4,
+        "tasmean": 0.7,
+        "tasmin": -3.1
+      },
+      "2091": {
+        "tasmax": 5.1,
+        "tasmean": 2.2,
+        "tasmin": -1.5
+      },
+      "2092": {
+        "tasmax": 3.8,
+        "tasmean": 1.1,
+        "tasmin": -1.7
+      },
+      "2093": {
+        "tasmax": 3.4,
+        "tasmean": 0.3,
+        "tasmin": -4.2
+      },
+      "2094": {
+        "tasmax": 4.1,
+        "tasmean": 1,
+        "tasmin": -2.3
+      },
+      "2095": {
+        "tasmax": 4,
+        "tasmean": 0.4,
+        "tasmin": -5.3
+      },
+      "2096": {
+        "tasmax": 3.8,
+        "tasmean": 2.1,
+        "tasmin": -1.4
+      },
+      "2097": {
+        "tasmax": 4.5,
+        "tasmean": 1.3,
+        "tasmin": -3.5
+      },
+      "2098": {
+        "tasmax": 4.8,
+        "tasmean": 2.9,
+        "tasmin": 0.7
+      },
+      "2099": {
+        "tasmax": 5.1,
+        "tasmean": 2.5,
+        "tasmin": -0.8
+      },
+      "2100": {
+        "tasmax": 4.2,
+        "tasmean": 1.9,
+        "tasmin": -0.8
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 3.6,
+        "tasmean": 0.7,
+        "tasmin": -2.6
+      },
+      "2008": {
+        "tasmax": 3,
+        "tasmean": -1.3,
+        "tasmin": -5.7
+      },
+      "2009": {
+        "tasmax": 3,
+        "tasmean": -1,
+        "tasmin": -5.8
+      },
+      "2010": {
+        "tasmax": 3,
+        "tasmean": -1.4,
+        "tasmin": -4.2
+      },
+      "2011": {
+        "tasmax": 2.8,
+        "tasmean": -1.7,
+        "tasmin": -6.9
+      },
+      "2012": {
+        "tasmax": 1.9,
+        "tasmean": -1.3,
+        "tasmin": -5.2
+      },
+      "2013": {
+        "tasmax": 2.7,
+        "tasmean": -0.2,
+        "tasmin": -5.1
+      },
+      "2014": {
+        "tasmax": 4.4,
+        "tasmean": 0.4,
+        "tasmin": -4.9
+      },
+      "2015": {
+        "tasmax": 3,
+        "tasmean": 1.5,
+        "tasmin": 0.1
+      },
+      "2016": {
+        "tasmax": 2.8,
+        "tasmean": -0.5,
+        "tasmin": -4.9
+      },
+      "2017": {
+        "tasmax": 3.1,
+        "tasmean": -0.2,
+        "tasmin": -5.7
+      },
+      "2018": {
+        "tasmax": 3.4,
+        "tasmean": -0.7,
+        "tasmin": -4.8
+      },
+      "2019": {
+        "tasmax": 3.4,
+        "tasmean": -0.2,
+        "tasmin": -4
+      },
+      "2020": {
+        "tasmax": 3.9,
+        "tasmean": -0.3,
+        "tasmin": -4.9
+      },
+      "2021": {
+        "tasmax": 2.7,
+        "tasmean": -0.5,
+        "tasmin": -4.6
+      },
+      "2022": {
+        "tasmax": 3.4,
+        "tasmean": 0.7,
+        "tasmin": -4.1
+      },
+      "2023": {
+        "tasmax": 2.9,
+        "tasmean": 0.6,
+        "tasmin": -2.9
+      },
+      "2024": {
+        "tasmax": 3.6,
+        "tasmean": 0,
+        "tasmin": -3.2
+      },
+      "2025": {
+        "tasmax": 3.7,
+        "tasmean": -0.3,
+        "tasmin": -4
+      },
+      "2026": {
+        "tasmax": 2.9,
+        "tasmean": -0.5,
+        "tasmin": -3.3
+      },
+      "2027": {
+        "tasmax": 3.1,
+        "tasmean": -0.1,
+        "tasmin": -3
+      },
+      "2028": {
+        "tasmax": 2.7,
+        "tasmean": -0.3,
+        "tasmin": -5.4
+      },
+      "2029": {
+        "tasmax": 3.3,
+        "tasmean": 1,
+        "tasmin": -1.2
+      },
+      "2030": {
+        "tasmax": 3.8,
+        "tasmean": 0.9,
+        "tasmin": -3.4
+      },
+      "2031": {
+        "tasmax": 2.5,
+        "tasmean": -0.6,
+        "tasmin": -4.5
+      },
+      "2032": {
+        "tasmax": 3.9,
+        "tasmean": 0.5,
+        "tasmin": -4.2
+      },
+      "2033": {
+        "tasmax": 4.1,
+        "tasmean": 2,
+        "tasmin": -1.6
+      },
+      "2034": {
+        "tasmax": 3.6,
+        "tasmean": 1.3,
+        "tasmin": -2.4
+      },
+      "2035": {
+        "tasmax": 4,
+        "tasmean": 1.8,
+        "tasmin": -1.3
+      },
+      "2036": {
+        "tasmax": 4.8,
+        "tasmean": 1.8,
+        "tasmin": -2.2
+      },
+      "2037": {
+        "tasmax": 4.4,
+        "tasmean": 0.9,
+        "tasmin": -4.8
+      },
+      "2038": {
+        "tasmax": 3.2,
+        "tasmean": -0.5,
+        "tasmin": -5.1
+      },
+      "2039": {
+        "tasmax": 2.6,
+        "tasmean": -0.5,
+        "tasmin": -5.3
+      },
+      "2040": {
+        "tasmax": 3.2,
+        "tasmean": 0.7,
+        "tasmin": -4.7
+      },
+      "2041": {
+        "tasmax": 3.3,
+        "tasmean": -0.8,
+        "tasmin": -6.3
+      },
+      "2042": {
+        "tasmax": 3.3,
+        "tasmean": 0.4,
+        "tasmin": -4
+      },
+      "2043": {
+        "tasmax": 3.4,
+        "tasmean": 1.3,
+        "tasmin": -4.2
+      },
+      "2044": {
+        "tasmax": 3.3,
+        "tasmean": 1,
+        "tasmin": -3.1
+      },
+      "2045": {
+        "tasmax": 3,
+        "tasmean": 0.6,
+        "tasmin": -3.8
+      },
+      "2046": {
+        "tasmax": 3.7,
+        "tasmean": 0.1,
+        "tasmin": -4.5
+      },
+      "2047": {
+        "tasmax": 3.6,
+        "tasmean": 1.4,
+        "tasmin": -2.7
+      },
+      "2048": {
+        "tasmax": 2.8,
+        "tasmean": 0.2,
+        "tasmin": -3.3
+      },
+      "2049": {
+        "tasmax": 3.9,
+        "tasmean": 0.4,
+        "tasmin": -4.3
+      },
+      "2050": {
+        "tasmax": 4.3,
+        "tasmean": 0.9,
+        "tasmin": -5.4
+      },
+      "2051": {
+        "tasmax": 3.7,
+        "tasmean": 0.9,
+        "tasmin": -4.4
+      },
+      "2052": {
+        "tasmax": 4.6,
+        "tasmean": 1.3,
+        "tasmin": -2.4
+      },
+      "2053": {
+        "tasmax": 3.9,
+        "tasmean": 1.8,
+        "tasmin": -2.3
+      },
+      "2054": {
+        "tasmax": 3.1,
+        "tasmean": 0.4,
+        "tasmin": -3
+      },
+      "2055": {
+        "tasmax": 4,
+        "tasmean": 0.9,
+        "tasmin": -3.1
+      },
+      "2056": {
+        "tasmax": 3.6,
+        "tasmean": 0,
+        "tasmin": -4
+      },
+      "2057": {
+        "tasmax": 4.2,
+        "tasmean": 0.1,
+        "tasmin": -3.4
+      },
+      "2058": {
+        "tasmax": 3,
+        "tasmean": -0.2,
+        "tasmin": -5.2
+      },
+      "2059": {
+        "tasmax": 3.2,
+        "tasmean": 0.2,
+        "tasmin": -4.4
+      },
+      "2060": {
+        "tasmax": 4.3,
+        "tasmean": 0.8,
+        "tasmin": -2.4
+      },
+      "2061": {
+        "tasmax": 4.4,
+        "tasmean": 2.3,
+        "tasmin": -0.6
+      },
+      "2062": {
+        "tasmax": 3.8,
+        "tasmean": 0.6,
+        "tasmin": -4.3
+      },
+      "2063": {
+        "tasmax": 3.4,
+        "tasmean": 0.5,
+        "tasmin": -3.8
+      },
+      "2064": {
+        "tasmax": 3.8,
+        "tasmean": 1.8,
+        "tasmin": -0.3
+      },
+      "2065": {
+        "tasmax": 4.5,
+        "tasmean": 2,
+        "tasmin": 0.6
+      },
+      "2066": {
+        "tasmax": 4,
+        "tasmean": 0.8,
+        "tasmin": -4.7
+      },
+      "2067": {
+        "tasmax": 4,
+        "tasmean": 0.8,
+        "tasmin": -3.7
+      },
+      "2068": {
+        "tasmax": 3.6,
+        "tasmean": 1.3,
+        "tasmin": -1.4
+      },
+      "2069": {
+        "tasmax": 3.9,
+        "tasmean": 0.5,
+        "tasmin": -3.9
+      },
+      "2070": {
+        "tasmax": 4.1,
+        "tasmean": 0.6,
+        "tasmin": -3.2
+      },
+      "2071": {
+        "tasmax": 4.1,
+        "tasmean": 1.4,
+        "tasmin": -2.5
+      },
+      "2072": {
+        "tasmax": 5,
+        "tasmean": 1.7,
+        "tasmin": -1.6
+      },
+      "2073": {
+        "tasmax": 3.9,
+        "tasmean": 1.2,
+        "tasmin": -2.7
+      },
+      "2074": {
+        "tasmax": 3.2,
+        "tasmean": -0.1,
+        "tasmin": -3.5
+      },
+      "2075": {
+        "tasmax": 3.7,
+        "tasmean": 1.2,
+        "tasmin": -1.1
+      },
+      "2076": {
+        "tasmax": 4.1,
+        "tasmean": 2.3,
+        "tasmin": -0.1
+      },
+      "2077": {
+        "tasmax": 4.1,
+        "tasmean": 1.6,
+        "tasmin": -3.1
+      },
+      "2078": {
+        "tasmax": 3.6,
+        "tasmean": 1.7,
+        "tasmin": -2.7
+      },
+      "2079": {
+        "tasmax": 4,
+        "tasmean": 1.5,
+        "tasmin": -3.5
+      },
+      "2080": {
+        "tasmax": 3.6,
+        "tasmean": 1,
+        "tasmin": -2.3
+      },
+      "2081": {
+        "tasmax": 4,
+        "tasmean": 1.1,
+        "tasmin": -3.5
+      },
+      "2082": {
+        "tasmax": 6.1,
+        "tasmean": 2,
+        "tasmin": -3.5
+      },
+      "2083": {
+        "tasmax": 4.3,
+        "tasmean": 1.7,
+        "tasmin": -2
+      },
+      "2084": {
+        "tasmax": 4.4,
+        "tasmean": 1.3,
+        "tasmin": -1.5
+      },
+      "2085": {
+        "tasmax": 4.6,
+        "tasmean": 1.8,
+        "tasmin": -2
+      },
+      "2086": {
+        "tasmax": 3.7,
+        "tasmean": 1.7,
+        "tasmin": -1.9
+      },
+      "2087": {
+        "tasmax": 3.4,
+        "tasmean": 1.2,
+        "tasmin": -3.3
+      },
+      "2088": {
+        "tasmax": 4.2,
+        "tasmean": 1.5,
+        "tasmin": -1.1
+      },
+      "2089": {
+        "tasmax": 5.5,
+        "tasmean": 2.3,
+        "tasmin": -1.8
+      },
+      "2090": {
+        "tasmax": 4.8,
+        "tasmean": 2.4,
+        "tasmin": -0.9
+      },
+      "2091": {
+        "tasmax": 4.8,
+        "tasmean": 3,
+        "tasmin": 0.8
+      },
+      "2092": {
+        "tasmax": 5.4,
+        "tasmean": 2.9,
+        "tasmin": 0.4
+      },
+      "2093": {
+        "tasmax": 5.2,
+        "tasmean": 1,
+        "tasmin": -2.8
+      },
+      "2094": {
+        "tasmax": 3.7,
+        "tasmean": 0.5,
+        "tasmin": -3.5
+      },
+      "2095": {
+        "tasmax": 5.3,
+        "tasmean": 2.6,
+        "tasmin": -1.2
+      },
+      "2096": {
+        "tasmax": 4.3,
+        "tasmean": 1.3,
+        "tasmin": -2.4
+      },
+      "2097": {
+        "tasmax": 4.2,
+        "tasmean": 2.6,
+        "tasmin": 0.9
+      },
+      "2098": {
+        "tasmax": 4.2,
+        "tasmean": 1.5,
+        "tasmin": -2.7
+      },
+      "2099": {
+        "tasmax": 5.1,
+        "tasmean": 2.9,
+        "tasmin": -0.6
+      },
+      "2100": {
+        "tasmax": 5.7,
+        "tasmean": 2.8,
+        "tasmin": -1
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 3.7,
+        "tasmean": -2.2,
+        "tasmin": -4.6
+      },
+      "2008": {
+        "tasmax": 3.3,
+        "tasmean": -0.6,
+        "tasmin": -2.1
+      },
+      "2009": {
+        "tasmax": 3.4,
+        "tasmean": -0.7,
+        "tasmin": -5.3
+      },
+      "2010": {
+        "tasmax": 2.3,
+        "tasmean": -0.1,
+        "tasmin": -4
+      },
+      "2011": {
+        "tasmax": 2.6,
+        "tasmean": -0.5,
+        "tasmin": -3.7
+      },
+      "2012": {
+        "tasmax": 3,
+        "tasmean": 0.2,
+        "tasmin": -5.1
+      },
+      "2013": {
+        "tasmax": 2.8,
+        "tasmean": -0.6,
+        "tasmin": -3.5
+      },
+      "2014": {
+        "tasmax": 2.1,
+        "tasmean": 1.4,
+        "tasmin": -4.4
+      },
+      "2015": {
+        "tasmax": 3.5,
+        "tasmean": -0.2,
+        "tasmin": -4.2
+      },
+      "2016": {
+        "tasmax": 2.8,
+        "tasmean": 0.5,
+        "tasmin": -2.7
+      },
+      "2017": {
+        "tasmax": 4.2,
+        "tasmean": -0.8,
+        "tasmin": -4.4
+      },
+      "2018": {
+        "tasmax": 2.9,
+        "tasmean": -1.5,
+        "tasmin": -3.3
+      },
+      "2019": {
+        "tasmax": 3.8,
+        "tasmean": -0.1,
+        "tasmin": -5.3
+      },
+      "2020": {
+        "tasmax": 3.4,
+        "tasmean": 0.2,
+        "tasmin": -4.6
+      },
+      "2021": {
+        "tasmax": 4,
+        "tasmean": 0.5,
+        "tasmin": -2.5
+      },
+      "2022": {
+        "tasmax": 3.5,
+        "tasmean": 0.3,
+        "tasmin": -3.2
+      },
+      "2023": {
+        "tasmax": 3.9,
+        "tasmean": 0,
+        "tasmin": -2.1
+      },
+      "2024": {
+        "tasmax": 3.1,
+        "tasmean": 0.4,
+        "tasmin": -3.4
+      },
+      "2025": {
+        "tasmax": 3.5,
+        "tasmean": 0.8,
+        "tasmin": -2.1
+      },
+      "2026": {
+        "tasmax": 3.3,
+        "tasmean": 0.7,
+        "tasmin": -2
+      },
+      "2027": {
+        "tasmax": 2.8,
+        "tasmean": 1.5,
+        "tasmin": -4.3
+      },
+      "2028": {
+        "tasmax": 4,
+        "tasmean": 1.1,
+        "tasmin": -3.8
+      },
+      "2029": {
+        "tasmax": 2.7,
+        "tasmean": -0.6,
+        "tasmin": -8
+      },
+      "2030": {
+        "tasmax": 2.9,
+        "tasmean": 0.3,
+        "tasmin": -4.5
+      },
+      "2031": {
+        "tasmax": 4.4,
+        "tasmean": 0.9,
+        "tasmin": -2
+      },
+      "2032": {
+        "tasmax": 3.2,
+        "tasmean": 1.6,
+        "tasmin": -3.9
+      },
+      "2033": {
+        "tasmax": 3.4,
+        "tasmean": 0.9,
+        "tasmin": -3.3
+      },
+      "2034": {
+        "tasmax": 3.7,
+        "tasmean": 1.7,
+        "tasmin": -3.4
+      },
+      "2035": {
+        "tasmax": 4.6,
+        "tasmean": 1.1,
+        "tasmin": -0.4
+      },
+      "2036": {
+        "tasmax": 4.1,
+        "tasmean": 0.8,
+        "tasmin": -3.4
+      },
+      "2037": {
+        "tasmax": 4.3,
+        "tasmean": 0.6,
+        "tasmin": -3.4
+      },
+      "2038": {
+        "tasmax": 3.1,
+        "tasmean": 0.3,
+        "tasmin": -3.7
+      },
+      "2039": {
+        "tasmax": 3.7,
+        "tasmean": -0.1,
+        "tasmin": -6.4
+      },
+      "2040": {
+        "tasmax": 3.7,
+        "tasmean": -0.8,
+        "tasmin": -1
+      },
+      "2041": {
+        "tasmax": 4.5,
+        "tasmean": 0.1,
+        "tasmin": -1.7
+      },
+      "2042": {
+        "tasmax": 3.5,
+        "tasmean": 0.5,
+        "tasmin": -1.3
+      },
+      "2043": {
+        "tasmax": 4.5,
+        "tasmean": -0.7,
+        "tasmin": -4
+      },
+      "2044": {
+        "tasmax": 4.2,
+        "tasmean": -0.2,
+        "tasmin": -2.4
+      },
+      "2045": {
+        "tasmax": 4.4,
+        "tasmean": 0.1,
+        "tasmin": -1
+      },
+      "2046": {
+        "tasmax": 3.9,
+        "tasmean": 1.1,
+        "tasmin": -4.1
+      },
+      "2047": {
+        "tasmax": 3.8,
+        "tasmean": 0.6,
+        "tasmin": -2.9
+      },
+      "2048": {
+        "tasmax": 3.4,
+        "tasmean": 1.3,
+        "tasmin": -3.2
+      },
+      "2049": {
+        "tasmax": 3.2,
+        "tasmean": 0.9,
+        "tasmin": -5.3
+      },
+      "2050": {
+        "tasmax": 3.7,
+        "tasmean": 0.5,
+        "tasmin": -3.2
+      },
+      "2051": {
+        "tasmax": 4.6,
+        "tasmean": 0.8,
+        "tasmin": -5.5
+      },
+      "2052": {
+        "tasmax": 3.7,
+        "tasmean": 0.6,
+        "tasmin": -1.3
+      },
+      "2053": {
+        "tasmax": 4.5,
+        "tasmean": 0.8,
+        "tasmin": -2.3
+      },
+      "2054": {
+        "tasmax": 4.1,
+        "tasmean": 1.4,
+        "tasmin": -1
+      },
+      "2055": {
+        "tasmax": 4.6,
+        "tasmean": 2,
+        "tasmin": -2.2
+      },
+      "2056": {
+        "tasmax": 3.1,
+        "tasmean": 0.8,
+        "tasmin": -4.4
+      },
+      "2057": {
+        "tasmax": 5,
+        "tasmean": 0.7,
+        "tasmin": -0.4
+      },
+      "2058": {
+        "tasmax": 3.5,
+        "tasmean": 1,
+        "tasmin": -4.9
+      },
+      "2059": {
+        "tasmax": 4.2,
+        "tasmean": 2.3,
+        "tasmin": -2.4
+      },
+      "2060": {
+        "tasmax": 4,
+        "tasmean": 2.5,
+        "tasmin": -0.3
+      },
+      "2061": {
+        "tasmax": 4.7,
+        "tasmean": 1.2,
+        "tasmin": -2.2
+      },
+      "2062": {
+        "tasmax": 4.6,
+        "tasmean": 2.2,
+        "tasmin": 0.3
+      },
+      "2063": {
+        "tasmax": 3.8,
+        "tasmean": 1.4,
+        "tasmin": -1.1
+      },
+      "2064": {
+        "tasmax": 4.5,
+        "tasmean": 1.1,
+        "tasmin": -2.3
+      },
+      "2065": {
+        "tasmax": 4.5,
+        "tasmean": 1.4,
+        "tasmin": -2.5
+      },
+      "2066": {
+        "tasmax": 3.9,
+        "tasmean": 3.3,
+        "tasmin": -1.8
+      },
+      "2067": {
+        "tasmax": 4.3,
+        "tasmean": 3.4,
+        "tasmin": -2.7
+      },
+      "2068": {
+        "tasmax": 3.3,
+        "tasmean": 2.5,
+        "tasmin": -2.1
+      },
+      "2069": {
+        "tasmax": 4.7,
+        "tasmean": 1.8,
+        "tasmin": -1.9
+      },
+      "2070": {
+        "tasmax": 4.7,
+        "tasmean": 2.5,
+        "tasmin": -2.2
+      },
+      "2071": {
+        "tasmax": 5,
+        "tasmean": 2,
+        "tasmin": -1
+      },
+      "2072": {
+        "tasmax": 4,
+        "tasmean": 2.4,
+        "tasmin": -3.7
+      },
+      "2073": {
+        "tasmax": 4.8,
+        "tasmean": 2.9,
+        "tasmin": -0.5
+      },
+      "2074": {
+        "tasmax": 4,
+        "tasmean": 1.5,
+        "tasmin": -0.7
+      },
+      "2075": {
+        "tasmax": 4.6,
+        "tasmean": 1.9,
+        "tasmin": 0
+      },
+      "2076": {
+        "tasmax": 5.5,
+        "tasmean": 2.3,
+        "tasmin": -2.3
+      },
+      "2077": {
+        "tasmax": 5.8,
+        "tasmean": 1.6,
+        "tasmin": -1.9
+      },
+      "2078": {
+        "tasmax": 5.9,
+        "tasmean": 3.5,
+        "tasmin": -1.8
+      },
+      "2079": {
+        "tasmax": 6.2,
+        "tasmean": 3.4,
+        "tasmin": -3.7
+      },
+      "2080": {
+        "tasmax": 4.4,
+        "tasmean": 3,
+        "tasmin": -0.9
+      },
+      "2081": {
+        "tasmax": 4.6,
+        "tasmean": 3.4,
+        "tasmin": -2
+      },
+      "2082": {
+        "tasmax": 5.9,
+        "tasmean": 2.9,
+        "tasmin": -2.4
+      },
+      "2083": {
+        "tasmax": 4.7,
+        "tasmean": 2.7,
+        "tasmin": -2.2
+      },
+      "2084": {
+        "tasmax": 5.1,
+        "tasmean": 2.9,
+        "tasmin": -1.5
+      },
+      "2085": {
+        "tasmax": 6.1,
+        "tasmean": 4.2,
+        "tasmin": -1.1
+      },
+      "2086": {
+        "tasmax": 6.3,
+        "tasmean": 2.7,
+        "tasmin": -1.5
+      },
+      "2087": {
+        "tasmax": 5.6,
+        "tasmean": 2.6,
+        "tasmin": -1
+      },
+      "2088": {
+        "tasmax": 6.8,
+        "tasmean": 2.6,
+        "tasmin": -2.3
+      },
+      "2089": {
+        "tasmax": 5.2,
+        "tasmean": 2.6,
+        "tasmin": -2.7
+      },
+      "2090": {
+        "tasmax": 5.3,
+        "tasmean": 3.8,
+        "tasmin": -1.2
+      },
+      "2091": {
+        "tasmax": 6,
+        "tasmean": 2.9,
+        "tasmin": 0.1
+      },
+      "2092": {
+        "tasmax": 6.9,
+        "tasmean": 3.4,
+        "tasmin": 0.7
+      },
+      "2093": {
+        "tasmax": 4.9,
+        "tasmean": 3.1,
+        "tasmin": -0.8
+      },
+      "2094": {
+        "tasmax": 5.8,
+        "tasmean": 3.1,
+        "tasmin": 0.7
+      },
+      "2095": {
+        "tasmax": 6.5,
+        "tasmean": 3.3,
+        "tasmin": 0.8
+      },
+      "2096": {
+        "tasmax": 5.3,
+        "tasmean": 3.3,
+        "tasmin": -1.2
+      },
+      "2097": {
+        "tasmax": 5.9,
+        "tasmean": 3.5,
+        "tasmin": -0.6
+      },
+      "2098": {
+        "tasmax": 5.6,
+        "tasmean": 4.3,
+        "tasmin": 1.1
+      },
+      "2099": {
+        "tasmax": 7.6,
+        "tasmean": 4,
+        "tasmin": 0.6
+      },
+      "2100": {
+        "tasmax": 5.3,
+        "tasmean": 3.2,
+        "tasmin": -0.3
+      }
+    }
+  },
+  "MRI-CGCM3": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.8
+      },
+      "2008": {
+        "tasmax": 0.3,
+        "tasmean": -0.4,
+        "tasmin": -1.1
+      },
+      "2009": {
+        "tasmax": 0.9,
+        "tasmean": 0.2,
+        "tasmin": -0.4
+      },
+      "2010": {
+        "tasmax": 0.6,
+        "tasmean": -0.2,
+        "tasmin": -1.1
+      },
+      "2011": {
+        "tasmax": 0.2,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2012": {
+        "tasmax": 0.6,
+        "tasmean": -0.2,
+        "tasmin": -0.7
+      },
+      "2013": {
+        "tasmax": 0.8,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2014": {
+        "tasmax": 0,
+        "tasmean": -0.4,
+        "tasmin": -1
+      },
+      "2015": {
+        "tasmax": 0.6,
+        "tasmean": 0.1,
+        "tasmin": -0.4
+      },
+      "2016": {
+        "tasmax": 0.7,
+        "tasmean": 0,
+        "tasmin": -0.6
+      },
+      "2017": {
+        "tasmax": 0.2,
+        "tasmean": -0.2,
+        "tasmin": -0.6
+      },
+      "2018": {
+        "tasmax": -0.4,
+        "tasmean": -1,
+        "tasmin": -1.4
+      },
+      "2019": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2020": {
+        "tasmax": -0.2,
+        "tasmean": -1.4,
+        "tasmin": -2.3
+      },
+      "2021": {
+        "tasmax": 0.7,
+        "tasmean": 0.2,
+        "tasmin": -0.3
+      },
+      "2022": {
+        "tasmax": 0.9,
+        "tasmean": 0.3,
+        "tasmin": -0.4
+      },
+      "2023": {
+        "tasmax": -0.2,
+        "tasmean": -0.8,
+        "tasmin": -1.4
+      },
+      "2024": {
+        "tasmax": -0.8,
+        "tasmean": -1.6,
+        "tasmin": -2.4
+      },
+      "2025": {
+        "tasmax": 0.5,
+        "tasmean": 0.1,
+        "tasmin": -0.3
+      },
+      "2026": {
+        "tasmax": 0.8,
+        "tasmean": 0.1,
+        "tasmin": -0.6
+      },
+      "2027": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": 0
+      },
+      "2028": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2029": {
+        "tasmax": 1.7,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2030": {
+        "tasmax": 1.1,
+        "tasmean": 0.7,
+        "tasmin": 0.3
+      },
+      "2031": {
+        "tasmax": 2.1,
+        "tasmean": 1.7,
+        "tasmin": 1.1
+      },
+      "2032": {
+        "tasmax": 0.6,
+        "tasmean": 0.2,
+        "tasmin": -0.3
+      },
+      "2033": {
+        "tasmax": 0.6,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2034": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.4
+      },
+      "2035": {
+        "tasmax": 1.4,
+        "tasmean": 0.7,
+        "tasmin": 0
+      },
+      "2036": {
+        "tasmax": 1.4,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2037": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -1.1
+      },
+      "2038": {
+        "tasmax": 0.6,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2039": {
+        "tasmax": 1.4,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2040": {
+        "tasmax": 0.7,
+        "tasmean": 0,
+        "tasmin": -0.6
+      },
+      "2041": {
+        "tasmax": 1,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2042": {
+        "tasmax": -0.1,
+        "tasmean": -0.7,
+        "tasmin": -1.3
+      },
+      "2043": {
+        "tasmax": 1,
+        "tasmean": 0.6,
+        "tasmin": 0.2
+      },
+      "2044": {
+        "tasmax": 0.7,
+        "tasmean": -0.1,
+        "tasmin": -0.9
+      },
+      "2045": {
+        "tasmax": 0.6,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2046": {
+        "tasmax": 1.4,
+        "tasmean": 0.9,
+        "tasmin": 0.4
+      },
+      "2047": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.2
+      },
+      "2048": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0.4
+      },
+      "2049": {
+        "tasmax": 0.8,
+        "tasmean": 0.2,
+        "tasmin": -0.3
+      },
+      "2050": {
+        "tasmax": -0.2,
+        "tasmean": -0.8,
+        "tasmin": -1.2
+      },
+      "2051": {
+        "tasmax": 1.1,
+        "tasmean": 0.6,
+        "tasmin": 0
+      },
+      "2052": {
+        "tasmax": 0.7,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2053": {
+        "tasmax": 0.5,
+        "tasmean": -0.2,
+        "tasmin": -1
+      },
+      "2054": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.2
+      },
+      "2055": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.4
+      },
+      "2056": {
+        "tasmax": 1.3,
+        "tasmean": 0.8,
+        "tasmin": 0.5
+      },
+      "2057": {
+        "tasmax": -0.6,
+        "tasmean": -1.2,
+        "tasmin": -1.5
+      },
+      "2058": {
+        "tasmax": 1,
+        "tasmean": 0.5,
+        "tasmin": 0
+      },
+      "2059": {
+        "tasmax": 0,
+        "tasmean": -0.7,
+        "tasmin": -1.3
+      },
+      "2060": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.1
+      },
+      "2061": {
+        "tasmax": 0.2,
+        "tasmean": -0.4,
+        "tasmin": -0.9
+      },
+      "2062": {
+        "tasmax": 0.3,
+        "tasmean": -0.2,
+        "tasmin": -0.8
+      },
+      "2063": {
+        "tasmax": 0.2,
+        "tasmean": -0.2,
+        "tasmin": -0.8
+      },
+      "2064": {
+        "tasmax": 1.6,
+        "tasmean": 1,
+        "tasmin": 0.6
+      },
+      "2065": {
+        "tasmax": 1.7,
+        "tasmean": 1.1,
+        "tasmin": 0.6
+      },
+      "2066": {
+        "tasmax": 1.1,
+        "tasmean": 0.5,
+        "tasmin": 0
+      },
+      "2067": {
+        "tasmax": 1.7,
+        "tasmean": 1.3,
+        "tasmin": 0.5
+      },
+      "2068": {
+        "tasmax": 1.6,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2069": {
+        "tasmax": 1.3,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2070": {
+        "tasmax": 2,
+        "tasmean": 1.2,
+        "tasmin": 0.6
+      },
+      "2071": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0.3
+      },
+      "2072": {
+        "tasmax": 0.9,
+        "tasmean": 0.2,
+        "tasmin": -0.3
+      },
+      "2073": {
+        "tasmax": 0,
+        "tasmean": -0.5,
+        "tasmin": -1
+      },
+      "2074": {
+        "tasmax": 1.3,
+        "tasmean": 0.6,
+        "tasmin": -0.1
+      },
+      "2075": {
+        "tasmax": 0.2,
+        "tasmean": -0.4,
+        "tasmin": -0.8
+      },
+      "2076": {
+        "tasmax": -0.5,
+        "tasmean": -1,
+        "tasmin": -1.5
+      },
+      "2077": {
+        "tasmax": 1.5,
+        "tasmean": 0.6,
+        "tasmin": 0
+      },
+      "2078": {
+        "tasmax": 0.6,
+        "tasmean": -0.1,
+        "tasmin": -0.6
+      },
+      "2079": {
+        "tasmax": -0.2,
+        "tasmean": -0.7,
+        "tasmin": -1.1
+      },
+      "2080": {
+        "tasmax": 0.5,
+        "tasmean": 0,
+        "tasmin": -0.3
+      },
+      "2081": {
+        "tasmax": 2.4,
+        "tasmean": 2.1,
+        "tasmin": 1.5
+      },
+      "2082": {
+        "tasmax": 0.8,
+        "tasmean": 0.3,
+        "tasmin": 0
+      },
+      "2083": {
+        "tasmax": 1.3,
+        "tasmean": 0.9,
+        "tasmin": 0.4
+      },
+      "2084": {
+        "tasmax": 0.8,
+        "tasmean": 0.2,
+        "tasmin": -0.3
+      },
+      "2085": {
+        "tasmax": 1.2,
+        "tasmean": 0.6,
+        "tasmin": 0.1
+      },
+      "2086": {
+        "tasmax": 1,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2087": {
+        "tasmax": 2.2,
+        "tasmean": 1.7,
+        "tasmin": 1.2
+      },
+      "2088": {
+        "tasmax": 1.6,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2089": {
+        "tasmax": 2.3,
+        "tasmean": 2,
+        "tasmin": 1.4
+      },
+      "2090": {
+        "tasmax": 2,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2091": {
+        "tasmax": 1,
+        "tasmean": 0.7,
+        "tasmin": 0.2
+      },
+      "2092": {
+        "tasmax": 0.5,
+        "tasmean": 0,
+        "tasmin": -0.5
+      },
+      "2093": {
+        "tasmax": 1.2,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2094": {
+        "tasmax": 1,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2095": {
+        "tasmax": 0.9,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2096": {
+        "tasmax": 2.5,
+        "tasmean": 2.1,
+        "tasmin": 1.6
+      },
+      "2097": {
+        "tasmax": 2.3,
+        "tasmean": 1.8,
+        "tasmin": 1.4
+      },
+      "2098": {
+        "tasmax": 1.5,
+        "tasmean": 0.9,
+        "tasmin": 0.5
+      },
+      "2099": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.8
+      },
+      "2100": {
+        "tasmax": 2.4,
+        "tasmean": 1.9,
+        "tasmin": 1.5
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": -0.3,
+        "tasmean": -1,
+        "tasmin": -1.6
+      },
+      "2008": {
+        "tasmax": 0,
+        "tasmean": -0.7,
+        "tasmin": -1.2
+      },
+      "2009": {
+        "tasmax": -1.9,
+        "tasmean": -2.5,
+        "tasmin": -2.9
+      },
+      "2010": {
+        "tasmax": -1,
+        "tasmean": -1.7,
+        "tasmin": -2.3
+      },
+      "2011": {
+        "tasmax": -0.6,
+        "tasmean": -1.2,
+        "tasmin": -1.7
+      },
+      "2012": {
+        "tasmax": -0.9,
+        "tasmean": -1.6,
+        "tasmin": -2.1
+      },
+      "2013": {
+        "tasmax": 0.6,
+        "tasmean": 0,
+        "tasmin": -0.4
+      },
+      "2014": {
+        "tasmax": 0.2,
+        "tasmean": -0.3,
+        "tasmin": -0.6
+      },
+      "2015": {
+        "tasmax": 0,
+        "tasmean": -0.4,
+        "tasmin": -1
+      },
+      "2016": {
+        "tasmax": 0.3,
+        "tasmean": -0.1,
+        "tasmin": -0.8
+      },
+      "2017": {
+        "tasmax": 0.3,
+        "tasmean": -0.2,
+        "tasmin": -0.7
+      },
+      "2018": {
+        "tasmax": 0,
+        "tasmean": -0.5,
+        "tasmin": -1
+      },
+      "2019": {
+        "tasmax": 0.4,
+        "tasmean": -0.3,
+        "tasmin": -0.8
+      },
+      "2020": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.7
+      },
+      "2021": {
+        "tasmax": 0.6,
+        "tasmean": 0,
+        "tasmin": -0.9
+      },
+      "2022": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": -0.1
+      },
+      "2023": {
+        "tasmax": 0.2,
+        "tasmean": -0.3,
+        "tasmin": -0.6
+      },
+      "2024": {
+        "tasmax": -0.9,
+        "tasmean": -1.6,
+        "tasmin": -2
+      },
+      "2025": {
+        "tasmax": 0.5,
+        "tasmean": 0,
+        "tasmin": -0.7
+      },
+      "2026": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": -0.1
+      },
+      "2027": {
+        "tasmax": -0.1,
+        "tasmean": -0.5,
+        "tasmin": -0.8
+      },
+      "2028": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2029": {
+        "tasmax": 0.4,
+        "tasmean": 0,
+        "tasmin": -0.4
+      },
+      "2030": {
+        "tasmax": 0.1,
+        "tasmean": -0.5,
+        "tasmin": -1
+      },
+      "2031": {
+        "tasmax": 0.4,
+        "tasmean": -0.2,
+        "tasmin": -0.6
+      },
+      "2032": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": 0.1
+      },
+      "2033": {
+        "tasmax": -0.2,
+        "tasmean": -0.7,
+        "tasmin": -1.1
+      },
+      "2034": {
+        "tasmax": 1.1,
+        "tasmean": 0.5,
+        "tasmin": 0.1
+      },
+      "2035": {
+        "tasmax": 0.2,
+        "tasmean": -0.6,
+        "tasmin": -1.4
+      },
+      "2036": {
+        "tasmax": 1.5,
+        "tasmean": 1.1,
+        "tasmin": 0.7
+      },
+      "2037": {
+        "tasmax": 1.8,
+        "tasmean": 1.4,
+        "tasmin": 0.8
+      },
+      "2038": {
+        "tasmax": 2.3,
+        "tasmean": 1.9,
+        "tasmin": 1.6
+      },
+      "2039": {
+        "tasmax": 0.5,
+        "tasmean": 0.1,
+        "tasmin": -0.4
+      },
+      "2040": {
+        "tasmax": 1.3,
+        "tasmean": 0.8,
+        "tasmin": 0.3
+      },
+      "2041": {
+        "tasmax": 1.6,
+        "tasmean": 1,
+        "tasmin": 0.7
+      },
+      "2042": {
+        "tasmax": 1.1,
+        "tasmean": 0.8,
+        "tasmin": 0.3
+      },
+      "2043": {
+        "tasmax": 0.9,
+        "tasmean": 0.1,
+        "tasmin": -0.6
+      },
+      "2044": {
+        "tasmax": 1.2,
+        "tasmean": 0.3,
+        "tasmin": -0.5
+      },
+      "2045": {
+        "tasmax": 1.5,
+        "tasmean": 1,
+        "tasmin": 0.5
+      },
+      "2046": {
+        "tasmax": -0.5,
+        "tasmean": -1,
+        "tasmin": -1.8
+      },
+      "2047": {
+        "tasmax": 1.5,
+        "tasmean": 1,
+        "tasmin": 0.5
+      },
+      "2048": {
+        "tasmax": 0.7,
+        "tasmean": 0,
+        "tasmin": -0.5
+      },
+      "2049": {
+        "tasmax": 0.5,
+        "tasmean": -0.3,
+        "tasmin": -0.7
+      },
+      "2050": {
+        "tasmax": -0.7,
+        "tasmean": -1.5,
+        "tasmin": -1.9
+      },
+      "2051": {
+        "tasmax": 0.1,
+        "tasmean": -0.6,
+        "tasmin": -1
+      },
+      "2052": {
+        "tasmax": 0.3,
+        "tasmean": -0.4,
+        "tasmin": -1.1
+      },
+      "2053": {
+        "tasmax": 0.5,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2054": {
+        "tasmax": 0.3,
+        "tasmean": -0.1,
+        "tasmin": -0.7
+      },
+      "2055": {
+        "tasmax": 0.8,
+        "tasmean": 0.2,
+        "tasmin": -0.2
+      },
+      "2056": {
+        "tasmax": 0.9,
+        "tasmean": 0.3,
+        "tasmin": -0.3
+      },
+      "2057": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -1.1
+      },
+      "2058": {
+        "tasmax": 0.8,
+        "tasmean": 0.4,
+        "tasmin": 0
+      },
+      "2059": {
+        "tasmax": 1,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2060": {
+        "tasmax": 0.1,
+        "tasmean": -0.4,
+        "tasmin": -0.9
+      },
+      "2061": {
+        "tasmax": 1.4,
+        "tasmean": 1,
+        "tasmin": 0.6
+      },
+      "2062": {
+        "tasmax": 0.5,
+        "tasmean": -0.2,
+        "tasmin": -0.6
+      },
+      "2063": {
+        "tasmax": 1.7,
+        "tasmean": 0.9,
+        "tasmin": 0.1
+      },
+      "2064": {
+        "tasmax": 1.8,
+        "tasmean": 1.3,
+        "tasmin": 0.6
+      },
+      "2065": {
+        "tasmax": 1.2,
+        "tasmean": 0.6,
+        "tasmin": 0.1
+      },
+      "2066": {
+        "tasmax": 1.7,
+        "tasmean": 1.2,
+        "tasmin": 0.8
+      },
+      "2067": {
+        "tasmax": 1.6,
+        "tasmean": 1.1,
+        "tasmin": 0.6
+      },
+      "2068": {
+        "tasmax": 1.9,
+        "tasmean": 1.3,
+        "tasmin": 0.8
+      },
+      "2069": {
+        "tasmax": 1.8,
+        "tasmean": 1.1,
+        "tasmin": 0.4
+      },
+      "2070": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.1
+      },
+      "2071": {
+        "tasmax": 0,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2072": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2073": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": -0.1
+      },
+      "2074": {
+        "tasmax": 2.8,
+        "tasmean": 2.4,
+        "tasmin": 2
+      },
+      "2075": {
+        "tasmax": 1.3,
+        "tasmean": 1,
+        "tasmin": 0.4
+      },
+      "2076": {
+        "tasmax": 2.5,
+        "tasmean": 2.1,
+        "tasmin": 1.7
+      },
+      "2077": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.9
+      },
+      "2078": {
+        "tasmax": 1.1,
+        "tasmean": 0.5,
+        "tasmin": 0.1
+      },
+      "2079": {
+        "tasmax": 2.1,
+        "tasmean": 1.5,
+        "tasmin": 1.1
+      },
+      "2080": {
+        "tasmax": 1,
+        "tasmean": 0.5,
+        "tasmin": 0.2
+      },
+      "2081": {
+        "tasmax": 1.8,
+        "tasmean": 1.3,
+        "tasmin": 0.9
+      },
+      "2082": {
+        "tasmax": 1.6,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2083": {
+        "tasmax": 2,
+        "tasmean": 1.5,
+        "tasmin": 1
+      },
+      "2084": {
+        "tasmax": 2.1,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2085": {
+        "tasmax": 1.1,
+        "tasmean": 0.6,
+        "tasmin": 0.3
+      },
+      "2086": {
+        "tasmax": 1.8,
+        "tasmean": 1.2,
+        "tasmin": 0.6
+      },
+      "2087": {
+        "tasmax": 2.1,
+        "tasmean": 1.6,
+        "tasmin": 1
+      },
+      "2088": {
+        "tasmax": 1.2,
+        "tasmean": 0.5,
+        "tasmin": 0
+      },
+      "2089": {
+        "tasmax": 1,
+        "tasmean": 0.5,
+        "tasmin": 0
+      },
+      "2090": {
+        "tasmax": 1.6,
+        "tasmean": 1.1,
+        "tasmin": 0.6
+      },
+      "2091": {
+        "tasmax": 0.8,
+        "tasmean": 0,
+        "tasmin": -0.4
+      },
+      "2092": {
+        "tasmax": 2.7,
+        "tasmean": 2.3,
+        "tasmin": 2
+      },
+      "2093": {
+        "tasmax": 1.9,
+        "tasmean": 1.3,
+        "tasmin": 0.8
+      },
+      "2094": {
+        "tasmax": 1.8,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2095": {
+        "tasmax": 2.3,
+        "tasmean": 1.8,
+        "tasmin": 1.3
+      },
+      "2096": {
+        "tasmax": 1.4,
+        "tasmean": 0.8,
+        "tasmin": 0.4
+      },
+      "2097": {
+        "tasmax": 2.6,
+        "tasmean": 2,
+        "tasmin": 1.4
+      },
+      "2098": {
+        "tasmax": 2.4,
+        "tasmean": 2,
+        "tasmin": 1.5
+      },
+      "2099": {
+        "tasmax": 1.8,
+        "tasmean": 1.4,
+        "tasmin": 0.8
+      },
+      "2100": {
+        "tasmax": 2.2,
+        "tasmean": 1.7,
+        "tasmin": 1.5
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 0.6,
+        "tasmean": 0,
+        "tasmin": -0.8
+      },
+      "2008": {
+        "tasmax": -0.8,
+        "tasmean": -1.5,
+        "tasmin": -2.1
+      },
+      "2009": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": -0.1
+      },
+      "2010": {
+        "tasmax": 0.1,
+        "tasmean": -0.6,
+        "tasmin": -1.4
+      },
+      "2011": {
+        "tasmax": 0.3,
+        "tasmean": -0.2,
+        "tasmin": -0.7
+      },
+      "2012": {
+        "tasmax": 0,
+        "tasmean": -0.7,
+        "tasmin": -1.3
+      },
+      "2013": {
+        "tasmax": -1.6,
+        "tasmean": -2.4,
+        "tasmin": -3
+      },
+      "2014": {
+        "tasmax": -0.7,
+        "tasmean": -1.5,
+        "tasmin": -2.2
+      },
+      "2015": {
+        "tasmax": -0.2,
+        "tasmean": -1.1,
+        "tasmin": -1.8
+      },
+      "2016": {
+        "tasmax": 0.3,
+        "tasmean": -0.5,
+        "tasmin": -0.8
+      },
+      "2017": {
+        "tasmax": -0.7,
+        "tasmean": -1.3,
+        "tasmin": -1.7
+      },
+      "2018": {
+        "tasmax": 0.2,
+        "tasmean": -0.4,
+        "tasmin": -1
+      },
+      "2019": {
+        "tasmax": -0.2,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2020": {
+        "tasmax": 0.2,
+        "tasmean": -0.4,
+        "tasmin": -1
+      },
+      "2021": {
+        "tasmax": 0.1,
+        "tasmean": -0.5,
+        "tasmin": -0.9
+      },
+      "2022": {
+        "tasmax": 0.8,
+        "tasmean": 0.4,
+        "tasmin": 0
+      },
+      "2023": {
+        "tasmax": 0.9,
+        "tasmean": 0.3,
+        "tasmin": -0.1
+      },
+      "2024": {
+        "tasmax": 1,
+        "tasmean": 0.6,
+        "tasmin": 0.3
+      },
+      "2025": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.2
+      },
+      "2026": {
+        "tasmax": 0.7,
+        "tasmean": 0.2,
+        "tasmin": -0.3
+      },
+      "2027": {
+        "tasmax": 1.8,
+        "tasmean": 1.3,
+        "tasmin": 0.8
+      },
+      "2028": {
+        "tasmax": 1.2,
+        "tasmean": 0.5,
+        "tasmin": 0.2
+      },
+      "2029": {
+        "tasmax": 1.3,
+        "tasmean": 0.5,
+        "tasmin": 0
+      },
+      "2030": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2031": {
+        "tasmax": 1.1,
+        "tasmean": -0.2,
+        "tasmin": -1.2
+      },
+      "2032": {
+        "tasmax": 1,
+        "tasmean": 0.5,
+        "tasmin": -0.1
+      },
+      "2033": {
+        "tasmax": 1,
+        "tasmean": 0.5,
+        "tasmin": -0.2
+      },
+      "2034": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.8
+      },
+      "2035": {
+        "tasmax": 1.1,
+        "tasmean": 0.6,
+        "tasmin": 0.4
+      },
+      "2036": {
+        "tasmax": 1.1,
+        "tasmean": 0.5,
+        "tasmin": -0.1
+      },
+      "2037": {
+        "tasmax": 1.1,
+        "tasmean": 0.7,
+        "tasmin": 0.3
+      },
+      "2038": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": -0.3
+      },
+      "2039": {
+        "tasmax": 1.7,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2040": {
+        "tasmax": 1.2,
+        "tasmean": 0.7,
+        "tasmin": 0.2
+      },
+      "2041": {
+        "tasmax": 1.1,
+        "tasmean": 0.6,
+        "tasmin": 0.3
+      },
+      "2042": {
+        "tasmax": 1.8,
+        "tasmean": 1.2,
+        "tasmin": 0.6
+      },
+      "2043": {
+        "tasmax": 0.3,
+        "tasmean": -0.3,
+        "tasmin": -0.7
+      },
+      "2044": {
+        "tasmax": 0.5,
+        "tasmean": -0.3,
+        "tasmin": -0.7
+      },
+      "2045": {
+        "tasmax": 1.3,
+        "tasmean": 0.8,
+        "tasmin": 0.4
+      },
+      "2046": {
+        "tasmax": 0.9,
+        "tasmean": 0.6,
+        "tasmin": 0
+      },
+      "2047": {
+        "tasmax": 2.6,
+        "tasmean": 2,
+        "tasmin": 1.6
+      },
+      "2048": {
+        "tasmax": 1.1,
+        "tasmean": 0.6,
+        "tasmin": 0.2
+      },
+      "2049": {
+        "tasmax": 1.4,
+        "tasmean": 0.7,
+        "tasmin": 0.1
+      },
+      "2050": {
+        "tasmax": 1.8,
+        "tasmean": 1.3,
+        "tasmin": 0.8
+      },
+      "2051": {
+        "tasmax": 0.5,
+        "tasmean": 0,
+        "tasmin": -0.5
+      },
+      "2052": {
+        "tasmax": 2.4,
+        "tasmean": 2.1,
+        "tasmin": 1.6
+      },
+      "2053": {
+        "tasmax": 1.7,
+        "tasmean": 1.3,
+        "tasmin": 0.9
+      },
+      "2054": {
+        "tasmax": 1.1,
+        "tasmean": 0.6,
+        "tasmin": 0.1
+      },
+      "2055": {
+        "tasmax": 0.7,
+        "tasmean": 0.2,
+        "tasmin": -0.1
+      },
+      "2056": {
+        "tasmax": 0.8,
+        "tasmean": 0.1,
+        "tasmin": -0.4
+      },
+      "2057": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 1
+      },
+      "2058": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 0.8
+      },
+      "2059": {
+        "tasmax": 1.5,
+        "tasmean": 1.1,
+        "tasmin": 0.7
+      },
+      "2060": {
+        "tasmax": 2.6,
+        "tasmean": 2.1,
+        "tasmin": 1.6
+      },
+      "2061": {
+        "tasmax": 2.7,
+        "tasmean": 2,
+        "tasmin": 1.3
+      },
+      "2062": {
+        "tasmax": 2.8,
+        "tasmean": 2.3,
+        "tasmin": 1.7
+      },
+      "2063": {
+        "tasmax": 1.4,
+        "tasmean": 0.7,
+        "tasmin": 0.3
+      },
+      "2064": {
+        "tasmax": 1.7,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2065": {
+        "tasmax": 2.4,
+        "tasmean": 1.9,
+        "tasmin": 1.3
+      },
+      "2066": {
+        "tasmax": 2.7,
+        "tasmean": 2.1,
+        "tasmin": 1.6
+      },
+      "2067": {
+        "tasmax": 2.2,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2068": {
+        "tasmax": 2.3,
+        "tasmean": 1.9,
+        "tasmin": 1.6
+      },
+      "2069": {
+        "tasmax": 2,
+        "tasmean": 1.5,
+        "tasmin": 1.1
+      },
+      "2070": {
+        "tasmax": 1.8,
+        "tasmean": 1.2,
+        "tasmin": 0.8
+      },
+      "2071": {
+        "tasmax": 1.8,
+        "tasmean": 1.4,
+        "tasmin": 1.2
+      },
+      "2072": {
+        "tasmax": 2.3,
+        "tasmean": 1.8,
+        "tasmin": 1.3
+      },
+      "2073": {
+        "tasmax": 2,
+        "tasmean": 1.2,
+        "tasmin": 0.6
+      },
+      "2074": {
+        "tasmax": 3,
+        "tasmean": 2.5,
+        "tasmin": 2
+      },
+      "2075": {
+        "tasmax": 1.9,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2076": {
+        "tasmax": 2.1,
+        "tasmean": 1.7,
+        "tasmin": 1.3
+      },
+      "2077": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 1
+      },
+      "2078": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 1.1
+      },
+      "2079": {
+        "tasmax": 0.9,
+        "tasmean": 0.3,
+        "tasmin": -0.2
+      },
+      "2080": {
+        "tasmax": 2.2,
+        "tasmean": 1.8,
+        "tasmin": 1.4
+      },
+      "2081": {
+        "tasmax": 1.9,
+        "tasmean": 1.5,
+        "tasmin": 1.1
+      },
+      "2082": {
+        "tasmax": 1.7,
+        "tasmean": 1.2,
+        "tasmin": 0.6
+      },
+      "2083": {
+        "tasmax": 4.4,
+        "tasmean": 3.9,
+        "tasmin": 3.4
+      },
+      "2084": {
+        "tasmax": 2.3,
+        "tasmean": 1.6,
+        "tasmin": 1.1
+      },
+      "2085": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2086": {
+        "tasmax": 2,
+        "tasmean": 1.4,
+        "tasmin": 0.8
+      },
+      "2087": {
+        "tasmax": 2.3,
+        "tasmean": 1.7,
+        "tasmin": 1.3
+      },
+      "2088": {
+        "tasmax": 3.1,
+        "tasmean": 2.4,
+        "tasmin": 1.8
+      },
+      "2089": {
+        "tasmax": 3,
+        "tasmean": 2.5,
+        "tasmin": 2
+      },
+      "2090": {
+        "tasmax": 3.2,
+        "tasmean": 2.7,
+        "tasmin": 2
+      },
+      "2091": {
+        "tasmax": 2.9,
+        "tasmean": 2.6,
+        "tasmin": 2.1
+      },
+      "2092": {
+        "tasmax": 2.5,
+        "tasmean": 2,
+        "tasmin": 1.5
+      },
+      "2093": {
+        "tasmax": 2.7,
+        "tasmean": 2.3,
+        "tasmin": 1.8
+      },
+      "2094": {
+        "tasmax": 1.7,
+        "tasmean": 1.3,
+        "tasmin": 0.9
+      },
+      "2095": {
+        "tasmax": 1.2,
+        "tasmean": 0.6,
+        "tasmin": 0
+      },
+      "2096": {
+        "tasmax": 1.9,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2097": {
+        "tasmax": 2.5,
+        "tasmean": 1.8,
+        "tasmin": 1.4
+      },
+      "2098": {
+        "tasmax": 3.5,
+        "tasmean": 3.1,
+        "tasmin": 2.7
+      },
+      "2099": {
+        "tasmax": 3,
+        "tasmean": 2.5,
+        "tasmin": 2
+      },
+      "2100": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 1
+      }
+    }
+  },
+  "NCAR-CCSM4": {
+    "rcp45": {
+      "2007": {
+        "tasmax": -0.4,
+        "tasmean": -2.6,
+        "tasmin": -1.4
+      },
+      "2008": {
+        "tasmax": 0.9,
+        "tasmean": 0.6,
+        "tasmin": -0.3
+      },
+      "2009": {
+        "tasmax": 0.8,
+        "tasmean": 0.1,
+        "tasmin": -0.9
+      },
+      "2010": {
+        "tasmax": 0.6,
+        "tasmean": -1.4,
+        "tasmin": -0.6
+      },
+      "2011": {
+        "tasmax": 0.1,
+        "tasmean": -1,
+        "tasmin": -1.9
+      },
+      "2012": {
+        "tasmax": 1.5,
+        "tasmean": -0.9,
+        "tasmin": -0.1
+      },
+      "2013": {
+        "tasmax": 3,
+        "tasmean": -0.5,
+        "tasmin": 1.7
+      },
+      "2014": {
+        "tasmax": 0.5,
+        "tasmean": -1.2,
+        "tasmin": -1.5
+      },
+      "2015": {
+        "tasmax": -0.1,
+        "tasmean": -0.8,
+        "tasmin": -1.2
+      },
+      "2016": {
+        "tasmax": 2.1,
+        "tasmean": 0,
+        "tasmin": -0.3
+      },
+      "2017": {
+        "tasmax": -0.2,
+        "tasmean": -0.6,
+        "tasmin": -1.9
+      },
+      "2018": {
+        "tasmax": -0.1,
+        "tasmean": -1.2,
+        "tasmin": -2
+      },
+      "2019": {
+        "tasmax": 0.2,
+        "tasmean": -2.7,
+        "tasmin": -1.8
+      },
+      "2020": {
+        "tasmax": -0.4,
+        "tasmean": -0.6,
+        "tasmin": -2.2
+      },
+      "2021": {
+        "tasmax": 2.4,
+        "tasmean": -1.4,
+        "tasmin": 0.4
+      },
+      "2022": {
+        "tasmax": 0.9,
+        "tasmean": -0.9,
+        "tasmin": -0.3
+      },
+      "2023": {
+        "tasmax": 1.5,
+        "tasmean": 1.5,
+        "tasmin": 0.3
+      },
+      "2024": {
+        "tasmax": -0.6,
+        "tasmean": -2,
+        "tasmin": -2.5
+      },
+      "2025": {
+        "tasmax": -0.6,
+        "tasmean": -0.5,
+        "tasmin": -2.7
+      },
+      "2026": {
+        "tasmax": 1.1,
+        "tasmean": 1.2,
+        "tasmin": 0.1
+      },
+      "2027": {
+        "tasmax": 0.6,
+        "tasmean": -0.2,
+        "tasmin": -0.8
+      },
+      "2028": {
+        "tasmax": 0.7,
+        "tasmean": -1.2,
+        "tasmin": -0.5
+      },
+      "2029": {
+        "tasmax": 0.9,
+        "tasmean": 1.6,
+        "tasmin": -1
+      },
+      "2030": {
+        "tasmax": 1.5,
+        "tasmean": 0.3,
+        "tasmin": 0.3
+      },
+      "2031": {
+        "tasmax": 3.2,
+        "tasmean": -0.1,
+        "tasmin": 1.8
+      },
+      "2032": {
+        "tasmax": 2.1,
+        "tasmean": 1.2,
+        "tasmin": 0.9
+      },
+      "2033": {
+        "tasmax": 2.5,
+        "tasmean": 0.5,
+        "tasmin": 1.3
+      },
+      "2034": {
+        "tasmax": 1.3,
+        "tasmean": 0.2,
+        "tasmin": -1
+      },
+      "2035": {
+        "tasmax": 1.3,
+        "tasmean": -0.5,
+        "tasmin": -0.4
+      },
+      "2036": {
+        "tasmax": 1.6,
+        "tasmean": -0.3,
+        "tasmin": -0.6
+      },
+      "2037": {
+        "tasmax": 3.3,
+        "tasmean": 1.7,
+        "tasmin": 1.6
+      },
+      "2038": {
+        "tasmax": 2.4,
+        "tasmean": 0.3,
+        "tasmin": 1
+      },
+      "2039": {
+        "tasmax": 0.1,
+        "tasmean": 1.6,
+        "tasmin": -1.2
+      },
+      "2040": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.3
+      },
+      "2041": {
+        "tasmax": 0.8,
+        "tasmean": 1.7,
+        "tasmin": -1.1
+      },
+      "2042": {
+        "tasmax": 1.4,
+        "tasmean": -0.1,
+        "tasmin": 0.3
+      },
+      "2043": {
+        "tasmax": 0.5,
+        "tasmean": 1.6,
+        "tasmin": -1.3
+      },
+      "2044": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2045": {
+        "tasmax": 1.3,
+        "tasmean": 0.3,
+        "tasmin": 0
+      },
+      "2046": {
+        "tasmax": 1,
+        "tasmean": -0.2,
+        "tasmin": -0.2
+      },
+      "2047": {
+        "tasmax": 0.4,
+        "tasmean": 1.3,
+        "tasmin": -1.2
+      },
+      "2048": {
+        "tasmax": -0.7,
+        "tasmean": -0.3,
+        "tasmin": -2.1
+      },
+      "2049": {
+        "tasmax": 0.8,
+        "tasmean": -1.6,
+        "tasmin": -0.3
+      },
+      "2050": {
+        "tasmax": 1.6,
+        "tasmean": -1.1,
+        "tasmin": 0.3
+      },
+      "2051": {
+        "tasmax": 5.3,
+        "tasmean": -0.6,
+        "tasmin": 3.5
+      },
+      "2052": {
+        "tasmax": 2.3,
+        "tasmean": -0.6,
+        "tasmin": 0.8
+      },
+      "2053": {
+        "tasmax": 1.1,
+        "tasmean": 2.8,
+        "tasmin": -0.6
+      },
+      "2054": {
+        "tasmax": 2.6,
+        "tasmean": 1.6,
+        "tasmin": 1.6
+      },
+      "2055": {
+        "tasmax": 1.2,
+        "tasmean": 1.8,
+        "tasmin": -0.2
+      },
+      "2056": {
+        "tasmax": 1.1,
+        "tasmean": 2.4,
+        "tasmin": -0.1
+      },
+      "2057": {
+        "tasmax": 1.7,
+        "tasmean": 0.8,
+        "tasmin": 0.5
+      },
+      "2058": {
+        "tasmax": 1.2,
+        "tasmean": 1,
+        "tasmin": -1.1
+      },
+      "2059": {
+        "tasmax": 0.8,
+        "tasmean": 1.6,
+        "tasmin": -1.3
+      },
+      "2060": {
+        "tasmax": 2.6,
+        "tasmean": 1.4,
+        "tasmin": 0.2
+      },
+      "2061": {
+        "tasmax": 1.8,
+        "tasmean": 2.1,
+        "tasmin": 0.5
+      },
+      "2062": {
+        "tasmax": 2.9,
+        "tasmean": 1.2,
+        "tasmin": 1.5
+      },
+      "2063": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.2
+      },
+      "2064": {
+        "tasmax": 2.3,
+        "tasmean": 1.4,
+        "tasmin": 0.2
+      },
+      "2065": {
+        "tasmax": 1.4,
+        "tasmean": 1.9,
+        "tasmin": 0.1
+      },
+      "2066": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.2
+      },
+      "2067": {
+        "tasmax": 2,
+        "tasmean": 1.2,
+        "tasmin": 0.2
+      },
+      "2068": {
+        "tasmax": 1.2,
+        "tasmean": -0.4,
+        "tasmin": -0.2
+      },
+      "2069": {
+        "tasmax": 2.7,
+        "tasmean": 1.3,
+        "tasmin": 1
+      },
+      "2070": {
+        "tasmax": 1.5,
+        "tasmean": -0.5,
+        "tasmin": -0.8
+      },
+      "2071": {
+        "tasmax": 0.6,
+        "tasmean": 0.6,
+        "tasmin": -0.9
+      },
+      "2072": {
+        "tasmax": 0.7,
+        "tasmean": 0.3,
+        "tasmin": -0.6
+      },
+      "2073": {
+        "tasmax": 1.2,
+        "tasmean": 1,
+        "tasmin": -0.3
+      },
+      "2074": {
+        "tasmax": 1.9,
+        "tasmean": 2.4,
+        "tasmin": 0.6
+      },
+      "2075": {
+        "tasmax": 2.5,
+        "tasmean": 2.3,
+        "tasmin": 1
+      },
+      "2076": {
+        "tasmax": 1.8,
+        "tasmean": 2.6,
+        "tasmin": 0.5
+      },
+      "2077": {
+        "tasmax": 2.4,
+        "tasmean": 0.2,
+        "tasmin": 0.9
+      },
+      "2078": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.3
+      },
+      "2079": {
+        "tasmax": 3.5,
+        "tasmean": 1.2,
+        "tasmin": 2.3
+      },
+      "2080": {
+        "tasmax": 5,
+        "tasmean": 2.9,
+        "tasmin": 4
+      },
+      "2081": {
+        "tasmax": 4.4,
+        "tasmean": 2.6,
+        "tasmin": 2.1
+      },
+      "2082": {
+        "tasmax": 1.1,
+        "tasmean": 1.1,
+        "tasmin": -0.4
+      },
+      "2083": {
+        "tasmax": 4.5,
+        "tasmean": 1.7,
+        "tasmin": 3.2
+      },
+      "2084": {
+        "tasmax": 2.8,
+        "tasmean": 1.2,
+        "tasmin": 1
+      },
+      "2085": {
+        "tasmax": 1.6,
+        "tasmean": 3.8,
+        "tasmin": 0.4
+      },
+      "2086": {
+        "tasmax": 3.2,
+        "tasmean": 1.1,
+        "tasmin": 1.8
+      },
+      "2087": {
+        "tasmax": 4.2,
+        "tasmean": 1,
+        "tasmin": 1.8
+      },
+      "2088": {
+        "tasmax": 3.3,
+        "tasmean": 0,
+        "tasmin": 1.2
+      },
+      "2089": {
+        "tasmax": 2.7,
+        "tasmean": 2.9,
+        "tasmin": 1.5
+      },
+      "2090": {
+        "tasmax": 3.4,
+        "tasmean": 2,
+        "tasmin": 1.8
+      },
+      "2091": {
+        "tasmax": 3.6,
+        "tasmean": 2,
+        "tasmin": 2.6
+      },
+      "2092": {
+        "tasmax": 1.8,
+        "tasmean": 1.5,
+        "tasmin": 0.7
+      },
+      "2093": {
+        "tasmax": 1.7,
+        "tasmean": 1,
+        "tasmin": 0.3
+      },
+      "2094": {
+        "tasmax": 3.5,
+        "tasmean": 0.4,
+        "tasmin": 1.3
+      },
+      "2095": {
+        "tasmax": 4,
+        "tasmean": 1.5,
+        "tasmin": 2.9
+      },
+      "2096": {
+        "tasmax": 3.3,
+        "tasmean": 0.4,
+        "tasmin": 1.8
+      },
+      "2097": {
+        "tasmax": 1.9,
+        "tasmean": 0.5,
+        "tasmin": 0.4
+      },
+      "2098": {
+        "tasmax": 5.6,
+        "tasmean": 0.9,
+        "tasmin": 4.2
+      },
+      "2099": {
+        "tasmax": 2.1,
+        "tasmean": 2.7,
+        "tasmin": 1
+      },
+      "2100": {
+        "tasmax": 2.2,
+        "tasmean": 2.3,
+        "tasmin": 0.5
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": -2,
+        "tasmean": -2.9,
+        "tasmin": -3.9
+      },
+      "2008": {
+        "tasmax": -0.8,
+        "tasmean": -1.7,
+        "tasmin": -2.6
+      },
+      "2009": {
+        "tasmax": 0,
+        "tasmean": -1.5,
+        "tasmin": -2.8
+      },
+      "2010": {
+        "tasmax": 0.3,
+        "tasmean": -1.5,
+        "tasmin": -3.4
+      },
+      "2011": {
+        "tasmax": 0.4,
+        "tasmean": -1,
+        "tasmin": -2.3
+      },
+      "2012": {
+        "tasmax": 1.4,
+        "tasmean": 0.2,
+        "tasmin": -1.3
+      },
+      "2013": {
+        "tasmax": 0.1,
+        "tasmean": -0.7,
+        "tasmin": -1.4
+      },
+      "2014": {
+        "tasmax": 1.7,
+        "tasmean": 0.7,
+        "tasmin": -0.2
+      },
+      "2015": {
+        "tasmax": 2.3,
+        "tasmean": 1.8,
+        "tasmin": 1.1
+      },
+      "2016": {
+        "tasmax": 0.4,
+        "tasmean": -0.4,
+        "tasmin": -1
+      },
+      "2017": {
+        "tasmax": 1.4,
+        "tasmean": 0.7,
+        "tasmin": 0.2
+      },
+      "2018": {
+        "tasmax": 1.6,
+        "tasmean": 0.6,
+        "tasmin": -0.5
+      },
+      "2019": {
+        "tasmax": -1.7,
+        "tasmean": -2.5,
+        "tasmin": -3.4
+      },
+      "2020": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2021": {
+        "tasmax": 0.1,
+        "tasmean": -0.8,
+        "tasmin": -1.6
+      },
+      "2022": {
+        "tasmax": 1.1,
+        "tasmean": 0.4,
+        "tasmin": -0.4
+      },
+      "2023": {
+        "tasmax": 0.1,
+        "tasmean": -0.5,
+        "tasmin": -1.2
+      },
+      "2024": {
+        "tasmax": 2.2,
+        "tasmean": 1.6,
+        "tasmin": 0.9
+      },
+      "2025": {
+        "tasmax": 2.4,
+        "tasmean": 1.7,
+        "tasmin": 1
+      },
+      "2026": {
+        "tasmax": -0.4,
+        "tasmean": -1.2,
+        "tasmin": -2.2
+      },
+      "2027": {
+        "tasmax": 0.5,
+        "tasmean": -0.3,
+        "tasmin": -1.2
+      },
+      "2028": {
+        "tasmax": 0.5,
+        "tasmean": -0.1,
+        "tasmin": -0.7
+      },
+      "2029": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.5
+      },
+      "2030": {
+        "tasmax": 1.1,
+        "tasmean": 0.2,
+        "tasmin": -0.9
+      },
+      "2031": {
+        "tasmax": 1.9,
+        "tasmean": 1.3,
+        "tasmin": 0.8
+      },
+      "2032": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.5
+      },
+      "2033": {
+        "tasmax": 1.2,
+        "tasmean": 0.4,
+        "tasmin": -0.4
+      },
+      "2034": {
+        "tasmax": -1,
+        "tasmean": -2,
+        "tasmin": -3.1
+      },
+      "2035": {
+        "tasmax": 2.2,
+        "tasmean": 0.9,
+        "tasmin": -0.1
+      },
+      "2036": {
+        "tasmax": -1.9,
+        "tasmean": -2.9,
+        "tasmin": -4
+      },
+      "2037": {
+        "tasmax": 1.5,
+        "tasmean": 0.7,
+        "tasmin": 0
+      },
+      "2038": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.5
+      },
+      "2039": {
+        "tasmax": -0.3,
+        "tasmean": -0.8,
+        "tasmin": -1.3
+      },
+      "2040": {
+        "tasmax": 1.7,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2041": {
+        "tasmax": 2.5,
+        "tasmean": 1.7,
+        "tasmin": 0.8
+      },
+      "2042": {
+        "tasmax": 1,
+        "tasmean": 0.2,
+        "tasmin": -0.6
+      },
+      "2043": {
+        "tasmax": 0.6,
+        "tasmean": -0.3,
+        "tasmin": -0.8
+      },
+      "2044": {
+        "tasmax": -0.6,
+        "tasmean": -1.6,
+        "tasmin": -2.5
+      },
+      "2045": {
+        "tasmax": -0.2,
+        "tasmean": -0.8,
+        "tasmin": -1.4
+      },
+      "2046": {
+        "tasmax": 2,
+        "tasmean": 1.2,
+        "tasmin": 0.5
+      },
+      "2047": {
+        "tasmax": 0.8,
+        "tasmean": 0.2,
+        "tasmin": -0.7
+      },
+      "2048": {
+        "tasmax": 3.6,
+        "tasmean": 3,
+        "tasmin": 2.4
+      },
+      "2049": {
+        "tasmax": 2.1,
+        "tasmean": 1.5,
+        "tasmin": 0.9
+      },
+      "2050": {
+        "tasmax": 4.1,
+        "tasmean": 3.2,
+        "tasmin": 2.4
+      },
+      "2051": {
+        "tasmax": 1.3,
+        "tasmean": 0.7,
+        "tasmin": 0.2
+      },
+      "2052": {
+        "tasmax": 2.2,
+        "tasmean": 1.4,
+        "tasmin": 0.9
+      },
+      "2053": {
+        "tasmax": 1.8,
+        "tasmean": 1.1,
+        "tasmin": 0.4
+      },
+      "2054": {
+        "tasmax": 0.9,
+        "tasmean": 0,
+        "tasmin": -0.7
+      },
+      "2055": {
+        "tasmax": 2.5,
+        "tasmean": 1.6,
+        "tasmin": 0.7
+      },
+      "2056": {
+        "tasmax": 1,
+        "tasmean": 0.4,
+        "tasmin": -0.1
+      },
+      "2057": {
+        "tasmax": 1,
+        "tasmean": 0.3,
+        "tasmin": -0.6
+      },
+      "2058": {
+        "tasmax": 1,
+        "tasmean": 0.4,
+        "tasmin": -0.2
+      },
+      "2059": {
+        "tasmax": 2.7,
+        "tasmean": 2.1,
+        "tasmin": 1.6
+      },
+      "2060": {
+        "tasmax": 2.3,
+        "tasmean": 1.2,
+        "tasmin": 0.3
+      },
+      "2061": {
+        "tasmax": 1.8,
+        "tasmean": 0.7,
+        "tasmin": -0.5
+      },
+      "2062": {
+        "tasmax": 2.9,
+        "tasmean": 2.3,
+        "tasmin": 1.7
+      },
+      "2063": {
+        "tasmax": 2.6,
+        "tasmean": 1.4,
+        "tasmin": 0.3
+      },
+      "2064": {
+        "tasmax": 1,
+        "tasmean": 0.4,
+        "tasmin": -0.1
+      },
+      "2065": {
+        "tasmax": 2,
+        "tasmean": 1.3,
+        "tasmin": 0.7
+      },
+      "2066": {
+        "tasmax": 2.5,
+        "tasmean": 1.8,
+        "tasmin": 1.1
+      },
+      "2067": {
+        "tasmax": 1.6,
+        "tasmean": 0.9,
+        "tasmin": 0.3
+      },
+      "2068": {
+        "tasmax": 0.6,
+        "tasmean": 0,
+        "tasmin": -0.6
+      },
+      "2069": {
+        "tasmax": 1.3,
+        "tasmean": 0.5,
+        "tasmin": -0.3
+      },
+      "2070": {
+        "tasmax": 3.3,
+        "tasmean": 2.6,
+        "tasmin": 1.8
+      },
+      "2071": {
+        "tasmax": 1.5,
+        "tasmean": 0.8,
+        "tasmin": 0
+      },
+      "2072": {
+        "tasmax": 2.6,
+        "tasmean": 1.9,
+        "tasmin": 1.2
+      },
+      "2073": {
+        "tasmax": 2,
+        "tasmean": 1.1,
+        "tasmin": 0.5
+      },
+      "2074": {
+        "tasmax": 1.8,
+        "tasmean": 1.1,
+        "tasmin": 0.7
+      },
+      "2075": {
+        "tasmax": 1.9,
+        "tasmean": 1.2,
+        "tasmin": 0.7
+      },
+      "2076": {
+        "tasmax": 2.4,
+        "tasmean": 1.6,
+        "tasmin": 0.9
+      },
+      "2077": {
+        "tasmax": 3.3,
+        "tasmean": 2.4,
+        "tasmin": 1.9
+      },
+      "2078": {
+        "tasmax": 3.1,
+        "tasmean": 2.5,
+        "tasmin": 1.9
+      },
+      "2079": {
+        "tasmax": 1.8,
+        "tasmean": 1.1,
+        "tasmin": 0.6
+      },
+      "2080": {
+        "tasmax": 2.2,
+        "tasmean": 1.7,
+        "tasmin": 1.1
+      },
+      "2081": {
+        "tasmax": 2.3,
+        "tasmean": 1.2,
+        "tasmin": 0.2
+      },
+      "2082": {
+        "tasmax": 1.7,
+        "tasmean": 1.1,
+        "tasmin": 0.4
+      },
+      "2083": {
+        "tasmax": 3.2,
+        "tasmean": 2.3,
+        "tasmin": 1.6
+      },
+      "2084": {
+        "tasmax": 2.8,
+        "tasmean": 2.1,
+        "tasmin": 1.4
+      },
+      "2085": {
+        "tasmax": 3.1,
+        "tasmean": 2.1,
+        "tasmin": 1.2
+      },
+      "2086": {
+        "tasmax": 3,
+        "tasmean": 2.1,
+        "tasmin": 1.1
+      },
+      "2087": {
+        "tasmax": 4.7,
+        "tasmean": 4.2,
+        "tasmin": 3.4
+      },
+      "2088": {
+        "tasmax": 5.2,
+        "tasmean": 4.5,
+        "tasmin": 3.9
+      },
+      "2089": {
+        "tasmax": 4.5,
+        "tasmean": 3.9,
+        "tasmin": 3.5
+      },
+      "2090": {
+        "tasmax": 2.9,
+        "tasmean": 2.2,
+        "tasmin": 1.5
+      },
+      "2091": {
+        "tasmax": 2.7,
+        "tasmean": 2,
+        "tasmin": 1.2
+      },
+      "2092": {
+        "tasmax": 3.4,
+        "tasmean": 2.7,
+        "tasmin": 2.2
+      },
+      "2093": {
+        "tasmax": 2.2,
+        "tasmean": 1.5,
+        "tasmin": 0.8
+      },
+      "2094": {
+        "tasmax": 4.1,
+        "tasmean": 3.4,
+        "tasmin": 2.7
+      },
+      "2095": {
+        "tasmax": 2.3,
+        "tasmean": 1.8,
+        "tasmin": 1.3
+      },
+      "2096": {
+        "tasmax": 2.7,
+        "tasmean": 2,
+        "tasmin": 1.5
+      },
+      "2097": {
+        "tasmax": 2.9,
+        "tasmean": 2.3,
+        "tasmin": 1.7
+      },
+      "2098": {
+        "tasmax": 2.7,
+        "tasmean": 2,
+        "tasmin": 1.3
+      },
+      "2099": {
+        "tasmax": 2.7,
+        "tasmean": 2,
+        "tasmin": 1.3
+      },
+      "2100": {
+        "tasmax": 2.8,
+        "tasmean": 2.2,
+        "tasmin": 1.8
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 0.7,
+        "tasmean": 0.1,
+        "tasmin": -0.7
+      },
+      "2008": {
+        "tasmax": 1.7,
+        "tasmean": 0.2,
+        "tasmin": 0.4
+      },
+      "2009": {
+        "tasmax": -0.7,
+        "tasmean": 0.7,
+        "tasmin": -2.2
+      },
+      "2010": {
+        "tasmax": -1.9,
+        "tasmean": 0.9,
+        "tasmin": -3.3
+      },
+      "2011": {
+        "tasmax": 0.7,
+        "tasmean": -0.7,
+        "tasmin": -0.5
+      },
+      "2012": {
+        "tasmax": 0.9,
+        "tasmean": 0.4,
+        "tasmin": -1
+      },
+      "2013": {
+        "tasmax": 1.5,
+        "tasmean": 0.7,
+        "tasmin": -0.5
+      },
+      "2014": {
+        "tasmax": 1.6,
+        "tasmean": -0.7,
+        "tasmin": 0.4
+      },
+      "2015": {
+        "tasmax": 0.9,
+        "tasmean": 1.3,
+        "tasmin": -0.9
+      },
+      "2016": {
+        "tasmax": 0.7,
+        "tasmean": 0.5,
+        "tasmin": -0.9
+      },
+      "2017": {
+        "tasmax": -1.1,
+        "tasmean": -1.4,
+        "tasmin": -2.6
+      },
+      "2018": {
+        "tasmax": 1.2,
+        "tasmean": -1.3,
+        "tasmin": -0.2
+      },
+      "2019": {
+        "tasmax": 0.7,
+        "tasmean": -0.5,
+        "tasmin": -0.9
+      },
+      "2020": {
+        "tasmax": 1.1,
+        "tasmean": 0.3,
+        "tasmin": -1
+      },
+      "2021": {
+        "tasmax": -0.2,
+        "tasmean": -0.2,
+        "tasmin": -1.8
+      },
+      "2022": {
+        "tasmax": 2,
+        "tasmean": -0.6,
+        "tasmin": 0.6
+      },
+      "2023": {
+        "tasmax": 0.4,
+        "tasmean": 1.9,
+        "tasmin": -0.9
+      },
+      "2024": {
+        "tasmax": 1.3,
+        "tasmean": 0.2,
+        "tasmin": 0
+      },
+      "2025": {
+        "tasmax": 3.4,
+        "tasmean": 2.7,
+        "tasmin": 1.8
+      },
+      "2026": {
+        "tasmax": 1.7,
+        "tasmean": -1.3,
+        "tasmin": 0.3
+      },
+      "2027": {
+        "tasmax": 1.5,
+        "tasmean": -0.9,
+        "tasmin": -0.4
+      },
+      "2028": {
+        "tasmax": 1.8,
+        "tasmean": -1,
+        "tasmin": 0.8
+      },
+      "2029": {
+        "tasmax": 3.5,
+        "tasmean": 1.1,
+        "tasmin": 1.9
+      },
+      "2030": {
+        "tasmax": 1.2,
+        "tasmean": 0,
+        "tasmin": -0.1
+      },
+      "2031": {
+        "tasmax": 3.6,
+        "tasmean": -0.5,
+        "tasmin": 2.4
+      },
+      "2032": {
+        "tasmax": 3.1,
+        "tasmean": 0,
+        "tasmin": 0.7
+      },
+      "2033": {
+        "tasmax": 0.7,
+        "tasmean": -0.1,
+        "tasmin": -0.5
+      },
+      "2034": {
+        "tasmax": 2.1,
+        "tasmean": 1.7,
+        "tasmin": 0.9
+      },
+      "2035": {
+        "tasmax": 1.2,
+        "tasmean": 1.5,
+        "tasmin": 0.2
+      },
+      "2036": {
+        "tasmax": 4.8,
+        "tasmean": -2.1,
+        "tasmin": 3.2
+      },
+      "2037": {
+        "tasmax": 2.4,
+        "tasmean": 0.2,
+        "tasmin": 1.1
+      },
+      "2038": {
+        "tasmax": 1.9,
+        "tasmean": 0.6,
+        "tasmin": 0.8
+      },
+      "2039": {
+        "tasmax": 5.6,
+        "tasmean": 0.3,
+        "tasmin": 3
+      },
+      "2040": {
+        "tasmax": 2.3,
+        "tasmean": 1.2,
+        "tasmin": 1
+      },
+      "2041": {
+        "tasmax": 0.5,
+        "tasmean": -0.1,
+        "tasmin": -0.7
+      },
+      "2042": {
+        "tasmax": 0.5,
+        "tasmean": 0.2,
+        "tasmin": -0.9
+      },
+      "2043": {
+        "tasmax": 3.7,
+        "tasmean": 1.7,
+        "tasmin": 2.3
+      },
+      "2044": {
+        "tasmax": 1.6,
+        "tasmean": 0.6,
+        "tasmin": 0.2
+      },
+      "2045": {
+        "tasmax": 2.7,
+        "tasmean": 0.5,
+        "tasmin": 0.2
+      },
+      "2046": {
+        "tasmax": 2.2,
+        "tasmean": 0.2,
+        "tasmin": 0.8
+      },
+      "2047": {
+        "tasmax": 2.5,
+        "tasmean": 0.3,
+        "tasmin": 1.5
+      },
+      "2048": {
+        "tasmax": 1.2,
+        "tasmean": 0.6,
+        "tasmin": -0.2
+      },
+      "2049": {
+        "tasmax": 0.9,
+        "tasmean": -0.6,
+        "tasmin": -0.6
+      },
+      "2050": {
+        "tasmax": 0.5,
+        "tasmean": 1.8,
+        "tasmin": -0.7
+      },
+      "2051": {
+        "tasmax": 1.4,
+        "tasmean": 1.1,
+        "tasmin": 0.1
+      },
+      "2052": {
+        "tasmax": 1.8,
+        "tasmean": 0.9,
+        "tasmin": 0.7
+      },
+      "2053": {
+        "tasmax": 2.7,
+        "tasmean": 2.2,
+        "tasmin": 1.5
+      },
+      "2054": {
+        "tasmax": 2.8,
+        "tasmean": -0.6,
+        "tasmin": 0.5
+      },
+      "2055": {
+        "tasmax": 2.9,
+        "tasmean": 2.9,
+        "tasmin": 1.4
+      },
+      "2056": {
+        "tasmax": 1.3,
+        "tasmean": 1.6,
+        "tasmin": -0.2
+      },
+      "2057": {
+        "tasmax": 4,
+        "tasmean": 1.2,
+        "tasmin": 1.9
+      },
+      "2058": {
+        "tasmax": 3.3,
+        "tasmean": 1.6,
+        "tasmin": 1.8
+      },
+      "2059": {
+        "tasmax": 4.2,
+        "tasmean": 0.8,
+        "tasmin": 2.5
+      },
+      "2060": {
+        "tasmax": 1.9,
+        "tasmean": 2,
+        "tasmin": 0.7
+      },
+      "2061": {
+        "tasmax": 3.4,
+        "tasmean": 1.3,
+        "tasmin": 1.9
+      },
+      "2062": {
+        "tasmax": 4,
+        "tasmean": 1.3,
+        "tasmin": 2.8
+      },
+      "2063": {
+        "tasmax": 3.8,
+        "tasmean": 0.8,
+        "tasmin": 2.3
+      },
+      "2064": {
+        "tasmax": 3.7,
+        "tasmean": 2.3,
+        "tasmin": 2.3
+      },
+      "2065": {
+        "tasmax": 3.7,
+        "tasmean": 3,
+        "tasmin": 2.7
+      },
+      "2066": {
+        "tasmax": 3.1,
+        "tasmean": 3.9,
+        "tasmin": 1.7
+      },
+      "2067": {
+        "tasmax": 4,
+        "tasmean": 3.5,
+        "tasmin": 2
+      },
+      "2068": {
+        "tasmax": 5.4,
+        "tasmean": 2.8,
+        "tasmin": 4.1
+      },
+      "2069": {
+        "tasmax": 1.7,
+        "tasmean": 3.3,
+        "tasmin": 0.4
+      },
+      "2070": {
+        "tasmax": 2.6,
+        "tasmean": 1.7,
+        "tasmin": 1.3
+      },
+      "2071": {
+        "tasmax": 2.6,
+        "tasmean": 1.6,
+        "tasmin": 1.2
+      },
+      "2072": {
+        "tasmax": 1.6,
+        "tasmean": 0.3,
+        "tasmin": 0
+      },
+      "2073": {
+        "tasmax": 3.8,
+        "tasmean": 2.2,
+        "tasmin": 2.2
+      },
+      "2074": {
+        "tasmax": 4.7,
+        "tasmean": 3.6,
+        "tasmin": 2.8
+      },
+      "2075": {
+        "tasmax": 3.1,
+        "tasmean": 3.1,
+        "tasmin": 2
+      },
+      "2076": {
+        "tasmax": 3.9,
+        "tasmean": 1,
+        "tasmin": 2.1
+      },
+      "2077": {
+        "tasmax": 3.4,
+        "tasmean": 3.4,
+        "tasmin": 2
+      },
+      "2078": {
+        "tasmax": 3.8,
+        "tasmean": 3,
+        "tasmin": 2.5
+      },
+      "2079": {
+        "tasmax": 2.4,
+        "tasmean": 2.8,
+        "tasmin": 1.2
+      },
+      "2080": {
+        "tasmax": 4.7,
+        "tasmean": 2.7,
+        "tasmin": 3.3
+      },
+      "2081": {
+        "tasmax": 5.2,
+        "tasmean": 2.3,
+        "tasmin": 3.7
+      },
+      "2082": {
+        "tasmax": 3.7,
+        "tasmean": 2.5,
+        "tasmin": 2.7
+      },
+      "2083": {
+        "tasmax": 2.2,
+        "tasmean": 4.9,
+        "tasmin": 0.4
+      },
+      "2084": {
+        "tasmax": 4,
+        "tasmean": 4.3,
+        "tasmin": 2.6
+      },
+      "2085": {
+        "tasmax": 4.4,
+        "tasmean": 4,
+        "tasmin": 3.2
+      },
+      "2086": {
+        "tasmax": 5.6,
+        "tasmean": 3.1,
+        "tasmin": 4.5
+      },
+      "2087": {
+        "tasmax": 2.7,
+        "tasmean": 3.6,
+        "tasmin": 1.4
+      },
+      "2088": {
+        "tasmax": 3.1,
+        "tasmean": 2.1,
+        "tasmin": 2
+      },
+      "2089": {
+        "tasmax": 5.2,
+        "tasmean": 3.1,
+        "tasmin": 3.9
+      },
+      "2090": {
+        "tasmax": 4.1,
+        "tasmean": 3.4,
+        "tasmin": 3.1
+      },
+      "2091": {
+        "tasmax": 4.9,
+        "tasmean": 5.5,
+        "tasmin": 3.5
+      },
+      "2092": {
+        "tasmax": 4.4,
+        "tasmean": 4.6,
+        "tasmin": 3.4
+      },
+      "2093": {
+        "tasmax": 3.4,
+        "tasmean": 3.6,
+        "tasmin": 2.2
+      },
+      "2094": {
+        "tasmax": 6,
+        "tasmean": 4.6,
+        "tasmin": 4
+      },
+      "2095": {
+        "tasmax": 5.9,
+        "tasmean": 5.3,
+        "tasmin": 4.6
+      },
+      "2096": {
+        "tasmax": 5.1,
+        "tasmean": 4,
+        "tasmin": 3.7
+      },
+      "2097": {
+        "tasmax": 6,
+        "tasmean": 3.4,
+        "tasmin": 3.9
+      },
+      "2098": {
+        "tasmax": 4.6,
+        "tasmean": 4.4,
+        "tasmin": 3.6
+      },
+      "2099": {
+        "tasmax": 4.1,
+        "tasmean": 3.2,
+        "tasmin": 3.3
+      },
+      "2100": {
+        "tasmax": 3.9,
+        "tasmean": 5.5,
+        "tasmin": 2.6
+      }
+    }
+  }
+}

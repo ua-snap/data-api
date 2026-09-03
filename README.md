@@ -87,18 +87,15 @@ The test client is created from the same Flask "app" object that a local develop
 
 ### Adding Tests
 
-#### Area Query JSON Integrity Blueprint
+#### Place Route Tests
 
-- test name must be prefixed with `test_`
-- match the name to the routing, exactly
-  - e.g. `test_alfresco_flammability_area` maps to `/alfresco/flammability/area`
-- assert the expected HTTP status code
-- assert the response from the local client maps to the reference JSON
-  - add reference JSON via `curl`
-  - `curl -sS https://earthmaps.io/taspr/area/19010208 -o tests/taspr_area_19010208.json`
-  - ensure the reference JSON file name maps exactly to the route
+To add pytests for routes that serve community locations or area/polygon boundaries (e.g. `/places/<type>`, `/boundary/area/<id>`), invoke the `pytests-for-place-routes` Claude skill (`.claude/skills/pytests-for-place-routes/SKILL.md`). Ask Claude (via GitHub Copilot or Claude Code) to "add tests for place routes" or "test the `<route>` endpoint". These tests only confirm a 200 status and a parseable JSON response since the underlying dataset is more likely to change over time (places manually added or removed) and unlikely to change due to postprocessing operations, etc.
 
-### Test Guidance
+#### Data Route Tests
+
+To add pytests for route reponses (expected JSON and/or HTTP status codes), invoke the `pytests-for-data-routes` Claude skill (`.claude/skills/pytests-for-data-routes/SKILL.md`). Ask Claude (via GitHub Copilot or Claude Code) to "add pytest tests for the `<route>` endpoint" or "backfill missing point/area tests for `<route>`". The skill defines the standard test locations/areas and pytest directory structure, so it can generate the test files directly.
+
+#### Test Guidance
 
 - Keep it simple
 - Favor integration-scope over unit-scope
