@@ -52,6 +52,13 @@ Only test the stream-based endpoints that are actually **listed as an example UR
 
 Do not invent additional stream IDs or substitute different ones (e.g. do not reuse the doc page's own example ID like `81000004` or `50563` — use the fixed IDs from the table above instead).
 
+### Volatile-data exceptions (no fixture comparison)
+Some endpoints return data that changes regularly (e.g. active/current fire perimeter or detection data), so a golden JSON fixture would go stale and cause spurious failures. For these, skip the fixture-save/fixture-compare step entirely — do not create a `json/` fixture file at all. Instead, for every location's test:
+- Assert the expected HTTP status code (run the request and observe it, same as any other endpoint — don't assume 200).
+- If the endpoint returns a body expected to be JSON, assert it's parseable, e.g. `response.get_json()` returns without raising (or is not `None`) — do not assert on its contents.
+
+The confirmed case in this repo: `fire`'s point endpoint (`/fire/point/<lat>/<lon>`) — all `test_fire_point_*` tests (`test_fire_point_fairbanks`, `test_fire_point_ocean`, `test_fire_point_attu`, `test_fire_point_dawson_city`, and `test_fire_point_reykjavik` if applicable) use this status-code-and-parseable-only pattern instead of the golden-fixture pattern. If asked to test another route whose data is similarly described as live/regularly-updated (check `templates/documentation/<route>.html` for language like "current", "active", "updated daily/annually"), confirm with the user before applying this exception rather than assuming it.
+
 ### CSV export tests (`?format=csv`)
 If the route file (`routes/<route>.py`) contains `request.args.get("format") == "csv"` anywhere for a given endpoint, that endpoint supports CSV export and needs exactly **one** additional test — do not add the full 4/5-location matrix for CSV, just a single smoke test at Fairbanks (`lat=64.8378, lon=-147.7164`), or the route's single fixed stream ID for stream-based endpoints.
 
@@ -102,6 +109,7 @@ Location slugs: `fairbanks`, `ocean`, `attu`, `dawson_city`, and (when applicabl
 2. Use the fixed lat/lon coordinates (or stream IDs) from the tables above directly as request inputs — no place-ID resolution step is needed. Include Reykjavík only if step 1 confirms pan-Arctic/international scope.
 3. For every location/area, hit the real endpoint through the Flask test client (see `tests/conftest.py`'s `client` fixture) — do not hand-write expected JSON.
 4. Classify the live response:
+   - **Route is a confirmed volatile-data exception** (see "Volatile-data exceptions" above): skip fixture save/compare — assert only the status code and (if JSON) that the body is parseable.
    - **200 with a real payload under 25MB**: save the actual JSON response as a golden fixture under the matching `json/` folder, and assert the live response equals the loaded fixture (matches the existing golden-file pattern used elsewhere in `tests/routes`).
    - **200 with a real payload of 25MB or larger**: do not save the full payload — save and assert against a bounded subset instead (see "Fixture size limits" above).
    - **Non-200 (400/404/422/502/etc.)**: this is expected for out-of-bounds points, nodata ocean points, or coverages that don't extend into Canada — assert the exact status code the live endpoint actually returns. Do not guess the code; run the request and observe it.
