@@ -87,13 +87,12 @@ The test client is created from the same Flask "app" object that a local develop
 
 ### Adding Tests
 
-#### Place Route Tests
+#### Route Tests
 
-To add pytests for routes that serve community locations or area/polygon boundaries (e.g. `/places/<type>`, `/boundary/area/<id>`), invoke the `pytests-for-place-routes` Claude skill (`.claude/skills/pytests-for-place-routes/SKILL.md`). Ask Claude (via GitHub Copilot or Claude Code) to "add tests for place routes" or "test the `<route>` endpoint". These tests only confirm a 200 status and a parseable JSON response since the underlying dataset is more likely to change over time (places manually added or removed) and unlikely to change due to postprocessing operations, etc.
+To add pytests for a route, invoke the `pytests-for-routes` Claude skill (`.claude/skills/pytests-for-routes/SKILL.md`). Ask Claude (via GitHub Copilot or Claude Code) to "add pytest tests for the `<route>` endpoint", "backfill missing point/area tests for `<route>`", or "add tests for place routes". The skill picks the right style per route and defines the standard test locations/areas/pytest directory structure, so it can generate the test files directly:
 
-#### Data Route Tests
-
-To add pytests for route reponses (expected JSON and/or HTTP status codes), invoke the `pytests-for-data-routes` Claude skill (`.claude/skills/pytests-for-data-routes/SKILL.md`). Ask Claude (via GitHub Copilot or Claude Code) to "add pytest tests for the `<route>` endpoint" or "backfill missing point/area tests for `<route>`". The skill defines the standard test locations/areas and pytest directory structure, so it can generate the test files directly.
+- **Data routes** (routes that return modeled climate/environmental data, e.g. temperature, precipitation, streamflow): golden-fixture tests — the expected JSON response (and/or HTTP status code) is saved and compared exactly.
+- **Place routes** (routes that serve community locations or area/polygon boundaries, e.g. `/places/<type>`, `/boundary/area/<id>`): smoke tests only — a 200 status and a parseable JSON response, since the underlying dataset is more likely to change over time (places manually added or removed) and unlikely to change due to postprocessing operations, etc.
 
 #### Test Guidance
 
