@@ -1,0 +1,386 @@
+{
+  "1988-2017": {
+    "Daymet": {
+      "Historical": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      }
+    }
+  },
+  "2010-2039": {
+    "GFDL-ESM2M": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      }
+    },
+    "HadGEM2-ES": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      }
+    }
+  },
+  "2040-2069": {
+    "GFDL-ESM2M": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 91,
+          "percent-minimal-protection": 9,
+          "percent-no-protection": 0
+        }
+      }
+    },
+    "HadGEM2-ES": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 95,
+          "percent-minimal-protection": 5,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 87,
+          "percent-minimal-protection": 13,
+          "percent-no-protection": 0
+        }
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 87,
+          "percent-minimal-protection": 13,
+          "percent-no-protection": 0
+        }
+      }
+    }
+  },
+  "2070-2099": {
+    "GFDL-ESM2M": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 99,
+          "percent-minimal-protection": 1,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "minimal",
+          "percent-high-protection": 26,
+          "percent-minimal-protection": 72,
+          "percent-no-protection": 1
+        }
+      }
+    },
+    "HadGEM2-ES": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 81,
+          "percent-minimal-protection": 19,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 99,
+          "percent-minimal-protection": 1,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 46,
+          "percent-minimal-protection": 11,
+          "percent-no-protection": 43
+        }
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        }
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "minimal",
+          "percent-high-protection": 14,
+          "percent-minimal-protection": 86,
+          "percent-no-protection": 0
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high",
+          "percent-high-protection": 100,
+          "percent-minimal-protection": 0,
+          "percent-no-protection": 0
+        },
+        "medium": {
+          "climate-protection": "none",
+          "percent-high-protection": 0,
+          "percent-minimal-protection": 31,
+          "percent-no-protection": 69
+        }
+      }
+    }
+  }
+}

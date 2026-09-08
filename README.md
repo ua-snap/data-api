@@ -87,18 +87,14 @@ The test client is created from the same Flask "app" object that a local develop
 
 ### Adding Tests
 
-#### Area Query JSON Integrity Blueprint
+#### Route Tests
 
-- test name must be prefixed with `test_`
-- match the name to the routing, exactly
-  - e.g. `test_alfresco_flammability_area` maps to `/alfresco/flammability/area`
-- assert the expected HTTP status code
-- assert the response from the local client maps to the reference JSON
-  - add reference JSON via `curl`
-  - `curl -sS https://earthmaps.io/taspr/area/19010208 -o tests/taspr_area_19010208.json`
-  - ensure the reference JSON file name maps exactly to the route
+To add pytests for a route, invoke the `pytests-for-routes` Claude skill (`.claude/skills/pytests-for-routes/SKILL.md`). Ask Claude (via GitHub Copilot or Claude Code) to "add pytest tests for the `<route>` endpoint", "backfill missing point/area tests for `<route>`", or "add tests for place routes". The skill picks the right style per route and defines the standard test locations/areas/pytest directory structure, so it can generate the test files directly:
 
-### Test Guidance
+- **Data routes** (routes that return modeled climate/environmental data, e.g. temperature, precipitation, streamflow): golden-fixture tests — the expected JSON response (and/or HTTP status code) is saved and compared exactly.
+- **Place routes** (routes that serve community locations or area/polygon boundaries, e.g. `/places/<type>`, `/boundary/area/<id>`): smoke tests only — a 200 status and a parseable JSON response, since the underlying dataset is more likely to change over time (places manually added or removed) and unlikely to change due to postprocessing operations, etc.
+
+#### Test Guidance
 
 - Keep it simple
 - Favor integration-scope over unit-scope

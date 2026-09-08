@@ -1,0 +1,44 @@
+[
+  {
+    "id": "AK124",
+    "name": "Fairbanks",
+    "alt_name": "",
+    "region": "Alaska",
+    "country": "US",
+    "latitude": 64.8378,
+    "longitude": -147.716,
+    "tags": "ardac,awe,eds,ncr",
+    "is_coastal": 0,
+    "ocean_lat1": 60.9834,
+    "ocean_lon1": -147.2769,
+    "type": "community"
+  },
+  {
+    "id": "AK574",
+    "name": "Fairbanks Eielson Pipeline",
+    "alt_name": "",
+    "region": "Alaska",
+    "country": "US",
+    "latitude": 64.6656,
+    "longitude": -147.1014,
+    "tags": "eds",
+    "is_coastal": 0,
+    "ocean_lat1": 60.9884,
+    "ocean_lon1": -147.0353,
+    "type": "community"
+  },
+  {
+    "id": "AK575",
+    "name": "Fairbanks Permafrost Station",
+    "alt_name": "",
+    "region": "Alaska",
+    "country": "US",
+    "latitude": 64.8743,
+    "longitude": -147.68,
+    "tags": "eds",
+    "is_coastal": 0,
+    "ocean_lat1": 61.0197,
+    "ocean_lon1": -147.2447,
+    "type": "community"
+  }
+]

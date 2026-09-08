@@ -1,0 +1,7671 @@
+{
+  "CRU-TS": {
+    "historical": {
+      "1901": {
+        "tasmax": 22.1,
+        "tasmean": 15.9,
+        "tasmin": 9.1
+      },
+      "1902": {
+        "tasmax": 22,
+        "tasmean": 16.8,
+        "tasmin": 11.1
+      },
+      "1903": {
+        "tasmax": 21.2,
+        "tasmean": 15.5,
+        "tasmin": 9.3
+      },
+      "1904": {
+        "tasmax": 22.9,
+        "tasmean": 18,
+        "tasmin": 12.6
+      },
+      "1905": {
+        "tasmax": 19.1,
+        "tasmean": 15.2,
+        "tasmin": 11
+      },
+      "1906": {
+        "tasmax": 20.5,
+        "tasmean": 15.6,
+        "tasmin": 10.2
+      },
+      "1907": {
+        "tasmax": 19.7,
+        "tasmean": 15.3,
+        "tasmin": 10.3
+      },
+      "1908": {
+        "tasmax": 21.1,
+        "tasmean": 16.8,
+        "tasmin": 12
+      },
+      "1909": {
+        "tasmax": 21.5,
+        "tasmean": 16.4,
+        "tasmin": 10.8
+      },
+      "1910": {
+        "tasmax": 20.7,
+        "tasmean": 15.2,
+        "tasmin": 9.1
+      },
+      "1911": {
+        "tasmax": 21.7,
+        "tasmean": 16.4,
+        "tasmin": 10.6
+      },
+      "1912": {
+        "tasmax": 19.4,
+        "tasmean": 15.5,
+        "tasmin": 11.1
+      },
+      "1913": {
+        "tasmax": 21,
+        "tasmean": 15.5,
+        "tasmin": 9.5
+      },
+      "1914": {
+        "tasmax": 20.6,
+        "tasmean": 16.1,
+        "tasmin": 11.2
+      },
+      "1915": {
+        "tasmax": 23,
+        "tasmean": 17.8,
+        "tasmin": 12.2
+      },
+      "1916": {
+        "tasmax": 21.1,
+        "tasmean": 15.6,
+        "tasmin": 9.6
+      },
+      "1917": {
+        "tasmax": 18.2,
+        "tasmean": 14.1,
+        "tasmin": 9.4
+      },
+      "1918": {
+        "tasmax": 22.8,
+        "tasmean": 17.1,
+        "tasmin": 10.9
+      },
+      "1919": {
+        "tasmax": 20.9,
+        "tasmean": 16.4,
+        "tasmin": 11.4
+      },
+      "1920": {
+        "tasmax": 19.8,
+        "tasmean": 14.7,
+        "tasmin": 9.1
+      },
+      "1921": {
+        "tasmax": 20.6,
+        "tasmean": 15.8,
+        "tasmin": 10.4
+      },
+      "1922": {
+        "tasmax": 18.9,
+        "tasmean": 14.4,
+        "tasmin": 9.5
+      },
+      "1923": {
+        "tasmax": 22.9,
+        "tasmean": 16.9,
+        "tasmin": 10.4
+      },
+      "1924": {
+        "tasmax": 18.7,
+        "tasmean": 14,
+        "tasmin": 8.7
+      },
+      "1925": {
+        "tasmax": 19.9,
+        "tasmean": 14.6,
+        "tasmin": 8.8
+      },
+      "1926": {
+        "tasmax": 21.1,
+        "tasmean": 16.1,
+        "tasmin": 10.6
+      },
+      "1927": {
+        "tasmax": 22.3,
+        "tasmean": 16.8,
+        "tasmin": 10.7
+      },
+      "1928": {
+        "tasmax": 20.3,
+        "tasmean": 15.3,
+        "tasmin": 9.8
+      },
+      "1929": {
+        "tasmax": 19.3,
+        "tasmean": 14.8,
+        "tasmin": 9.7
+      },
+      "1930": {
+        "tasmax": 20.7,
+        "tasmean": 15.6,
+        "tasmin": 9.9
+      },
+      "1931": {
+        "tasmax": 19.3,
+        "tasmean": 14.5,
+        "tasmin": 9.1
+      },
+      "1932": {
+        "tasmax": 20.6,
+        "tasmean": 15.2,
+        "tasmin": 9.2
+      },
+      "1933": {
+        "tasmax": 20.7,
+        "tasmean": 14.8,
+        "tasmin": 8.6
+      },
+      "1934": {
+        "tasmax": 19.4,
+        "tasmean": 14.1,
+        "tasmin": 8.3
+      },
+      "1935": {
+        "tasmax": 21,
+        "tasmean": 16,
+        "tasmin": 10.4
+      },
+      "1936": {
+        "tasmax": 20.6,
+        "tasmean": 15.8,
+        "tasmin": 10.5
+      },
+      "1937": {
+        "tasmax": 21.7,
+        "tasmean": 15.7,
+        "tasmin": 9.2
+      },
+      "1938": {
+        "tasmax": 20.9,
+        "tasmean": 15.2,
+        "tasmin": 9
+      },
+      "1939": {
+        "tasmax": 21.8,
+        "tasmean": 16,
+        "tasmin": 9.7
+      },
+      "1940": {
+        "tasmax": 23.1,
+        "tasmean": 16.5,
+        "tasmin": 9.4
+      },
+      "1941": {
+        "tasmax": 19.5,
+        "tasmean": 15,
+        "tasmin": 9.9
+      },
+      "1942": {
+        "tasmax": 21.7,
+        "tasmean": 16.1,
+        "tasmin": 9.9
+      },
+      "1943": {
+        "tasmax": 21.6,
+        "tasmean": 16,
+        "tasmin": 9.8
+      },
+      "1944": {
+        "tasmax": 21.9,
+        "tasmean": 16.6,
+        "tasmin": 10.8
+      },
+      "1945": {
+        "tasmax": 20.4,
+        "tasmean": 15.3,
+        "tasmin": 9.8
+      },
+      "1946": {
+        "tasmax": 22.7,
+        "tasmean": 16.9,
+        "tasmin": 10.7
+      },
+      "1947": {
+        "tasmax": 22.6,
+        "tasmean": 16.8,
+        "tasmin": 10.5
+      },
+      "1948": {
+        "tasmax": 19.6,
+        "tasmean": 14.7,
+        "tasmin": 9.4
+      },
+      "1949": {
+        "tasmax": 20.7,
+        "tasmean": 15.4,
+        "tasmin": 9.8
+      },
+      "1950": {
+        "tasmax": 22.8,
+        "tasmean": 16.8,
+        "tasmin": 10.2
+      },
+      "1951": {
+        "tasmax": 21.6,
+        "tasmean": 16.2,
+        "tasmin": 10.4
+      },
+      "1952": {
+        "tasmax": 20.3,
+        "tasmean": 15.5,
+        "tasmin": 10.3
+      },
+      "1953": {
+        "tasmax": 23.1,
+        "tasmean": 17,
+        "tasmin": 10.6
+      },
+      "1954": {
+        "tasmax": 19.8,
+        "tasmean": 15,
+        "tasmin": 9.8
+      },
+      "1955": {
+        "tasmax": 22.4,
+        "tasmean": 16.6,
+        "tasmin": 10.4
+      },
+      "1956": {
+        "tasmax": 21.7,
+        "tasmean": 16,
+        "tasmin": 9.9
+      },
+      "1957": {
+        "tasmax": 21.6,
+        "tasmean": 16,
+        "tasmin": 10
+      },
+      "1958": {
+        "tasmax": 22.4,
+        "tasmean": 16.8,
+        "tasmin": 10.6
+      },
+      "1959": {
+        "tasmax": 18.3,
+        "tasmean": 13.7,
+        "tasmin": 8.7
+      },
+      "1960": {
+        "tasmax": 21.6,
+        "tasmean": 16.2,
+        "tasmin": 10.2
+      },
+      "1961": {
+        "tasmax": 20.2,
+        "tasmean": 15.1,
+        "tasmin": 9.5
+      },
+      "1962": {
+        "tasmax": 22.8,
+        "tasmean": 17.2,
+        "tasmin": 11.3
+      },
+      "1963": {
+        "tasmax": 20.8,
+        "tasmean": 15.7,
+        "tasmin": 10.2
+      },
+      "1964": {
+        "tasmax": 21.4,
+        "tasmean": 15.9,
+        "tasmin": 10
+      },
+      "1965": {
+        "tasmax": 20.3,
+        "tasmean": 15.5,
+        "tasmin": 10.2
+      },
+      "1966": {
+        "tasmax": 21.4,
+        "tasmean": 15.8,
+        "tasmin": 9.8
+      },
+      "1967": {
+        "tasmax": 19.7,
+        "tasmean": 15.6,
+        "tasmin": 11
+      },
+      "1968": {
+        "tasmax": 24.3,
+        "tasmean": 17.9,
+        "tasmin": 10.9
+      },
+      "1969": {
+        "tasmax": 19.8,
+        "tasmean": 15.1,
+        "tasmin": 9.8
+      },
+      "1970": {
+        "tasmax": 20.9,
+        "tasmean": 15.8,
+        "tasmin": 10.2
+      },
+      "1971": {
+        "tasmax": 21.2,
+        "tasmean": 15.9,
+        "tasmin": 10
+      },
+      "1972": {
+        "tasmax": 23.7,
+        "tasmean": 17.7,
+        "tasmin": 11.2
+      },
+      "1973": {
+        "tasmax": 20.8,
+        "tasmean": 15.8,
+        "tasmin": 10.5
+      },
+      "1974": {
+        "tasmax": 21.8,
+        "tasmean": 16.4,
+        "tasmin": 10.5
+      },
+      "1975": {
+        "tasmax": 23.6,
+        "tasmean": 18,
+        "tasmin": 11.8
+      },
+      "1976": {
+        "tasmax": 22.3,
+        "tasmean": 16.6,
+        "tasmin": 10.3
+      },
+      "1977": {
+        "tasmax": 23.7,
+        "tasmean": 17.3,
+        "tasmin": 10.4
+      },
+      "1978": {
+        "tasmax": 22.9,
+        "tasmean": 17.2,
+        "tasmin": 10.9
+      },
+      "1979": {
+        "tasmax": 21.7,
+        "tasmean": 16.3,
+        "tasmin": 10.6
+      },
+      "1980": {
+        "tasmax": 21.5,
+        "tasmean": 16.4,
+        "tasmin": 10.8
+      },
+      "1981": {
+        "tasmax": 18.1,
+        "tasmean": 14.3,
+        "tasmin": 10.2
+      },
+      "1982": {
+        "tasmax": 21.8,
+        "tasmean": 16.6,
+        "tasmin": 10.8
+      },
+      "1983": {
+        "tasmax": 21.9,
+        "tasmean": 16.9,
+        "tasmin": 11.3
+      },
+      "1984": {
+        "tasmax": 20,
+        "tasmean": 15.7,
+        "tasmin": 10.8
+      },
+      "1985": {
+        "tasmax": 22.1,
+        "tasmean": 16.8,
+        "tasmin": 10.9
+      },
+      "1986": {
+        "tasmax": 21.7,
+        "tasmean": 16.6,
+        "tasmin": 10.9
+      },
+      "1987": {
+        "tasmax": 21.9,
+        "tasmean": 17,
+        "tasmin": 11.6
+      },
+      "1988": {
+        "tasmax": 23.5,
+        "tasmean": 17.8,
+        "tasmin": 11.7
+      },
+      "1989": {
+        "tasmax": 22.8,
+        "tasmean": 17.4,
+        "tasmin": 11.6
+      },
+      "1990": {
+        "tasmax": 23.7,
+        "tasmean": 18,
+        "tasmin": 11.7
+      },
+      "1991": {
+        "tasmax": 20.8,
+        "tasmean": 15.7,
+        "tasmin": 10.2
+      },
+      "1992": {
+        "tasmax": 22.7,
+        "tasmean": 17.5,
+        "tasmin": 11.7
+      },
+      "1993": {
+        "tasmax": 24.3,
+        "tasmean": 18.4,
+        "tasmin": 12
+      },
+      "1994": {
+        "tasmax": 23.2,
+        "tasmean": 17.5,
+        "tasmin": 11.3
+      },
+      "1995": {
+        "tasmax": 22,
+        "tasmean": 16.8,
+        "tasmin": 11.1
+      },
+      "1996": {
+        "tasmax": 22,
+        "tasmean": 16.8,
+        "tasmin": 11.3
+      },
+      "1997": {
+        "tasmax": 23,
+        "tasmean": 17.8,
+        "tasmin": 12.2
+      },
+      "1998": {
+        "tasmax": 21.3,
+        "tasmean": 16.7,
+        "tasmin": 11.6
+      },
+      "1999": {
+        "tasmax": 21.5,
+        "tasmean": 16.7,
+        "tasmin": 11.4
+      },
+      "2000": {
+        "tasmax": 19.9,
+        "tasmean": 15.5,
+        "tasmin": 10.7
+      },
+      "2001": {
+        "tasmax": 19.6,
+        "tasmean": 15.8,
+        "tasmin": 11.4
+      },
+      "2002": {
+        "tasmax": 21.7,
+        "tasmean": 16.6,
+        "tasmin": 11.1
+      },
+      "2003": {
+        "tasmax": 21.3,
+        "tasmean": 16.7,
+        "tasmin": 11.8
+      },
+      "2004": {
+        "tasmax": 23.3,
+        "tasmean": 18.3,
+        "tasmin": 12.7
+      },
+      "2005": {
+        "tasmax": 22.1,
+        "tasmean": 17.2,
+        "tasmin": 11.8
+      },
+      "2006": {
+        "tasmax": 21.3,
+        "tasmean": 16.7,
+        "tasmin": 11.5
+      },
+      "2007": {
+        "tasmax": 22.3,
+        "tasmean": 17.5,
+        "tasmin": 12.2
+      },
+      "2008": {
+        "tasmax": 19.8,
+        "tasmean": 15.8,
+        "tasmin": 11.3
+      },
+      "2009": {
+        "tasmax": 24.1,
+        "tasmean": 18.4,
+        "tasmin": 12.1
+      },
+      "2010": {
+        "tasmax": 20.5,
+        "tasmean": 16.1,
+        "tasmin": 11.1
+      },
+      "2011": {
+        "tasmax": 20.6,
+        "tasmean": 15.9,
+        "tasmin": 10.7
+      },
+      "2012": {
+        "tasmax": 19.9,
+        "tasmean": 15.5,
+        "tasmin": 10.6
+      },
+      "2013": {
+        "tasmax": 22.6,
+        "tasmean": 17.4,
+        "tasmin": 11.9
+      },
+      "2014": {
+        "tasmax": 20.6,
+        "tasmean": 15.9,
+        "tasmin": 10.9
+      },
+      "2015": {
+        "tasmax": 21.6,
+        "tasmean": 16.7,
+        "tasmin": 11.2
+      }
+    }
+  },
+  "GFDL-CM3": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 21.3,
+        "tasmean": 17.7,
+        "tasmin": 13.7
+      },
+      "2008": {
+        "tasmax": 22.2,
+        "tasmean": 18.3,
+        "tasmin": 12.4
+      },
+      "2009": {
+        "tasmax": 22.3,
+        "tasmean": 18.7,
+        "tasmin": 14
+      },
+      "2010": {
+        "tasmax": 22.9,
+        "tasmean": 18.6,
+        "tasmin": 13.5
+      },
+      "2011": {
+        "tasmax": 22,
+        "tasmean": 18.3,
+        "tasmin": 13.7
+      },
+      "2012": {
+        "tasmax": 20,
+        "tasmean": 16.4,
+        "tasmin": 12.4
+      },
+      "2013": {
+        "tasmax": 22,
+        "tasmean": 18.4,
+        "tasmin": 13.6
+      },
+      "2014": {
+        "tasmax": 21.1,
+        "tasmean": 18,
+        "tasmin": 14.1
+      },
+      "2015": {
+        "tasmax": 22.4,
+        "tasmean": 18.3,
+        "tasmin": 12.5
+      },
+      "2016": {
+        "tasmax": 19.2,
+        "tasmean": 15.7,
+        "tasmin": 11.8
+      },
+      "2017": {
+        "tasmax": 19.9,
+        "tasmean": 16.8,
+        "tasmin": 12.8
+      },
+      "2018": {
+        "tasmax": 19.9,
+        "tasmean": 16.5,
+        "tasmin": 12.8
+      },
+      "2019": {
+        "tasmax": 20.9,
+        "tasmean": 17.5,
+        "tasmin": 13.7
+      },
+      "2020": {
+        "tasmax": 21.6,
+        "tasmean": 17.9,
+        "tasmin": 13
+      },
+      "2021": {
+        "tasmax": 22.8,
+        "tasmean": 18.9,
+        "tasmin": 13.6
+      },
+      "2022": {
+        "tasmax": 23.5,
+        "tasmean": 19.6,
+        "tasmin": 14.2
+      },
+      "2023": {
+        "tasmax": 22.2,
+        "tasmean": 18.4,
+        "tasmin": 13.7
+      },
+      "2024": {
+        "tasmax": 20.1,
+        "tasmean": 17.3,
+        "tasmin": 14.1
+      },
+      "2025": {
+        "tasmax": 22.5,
+        "tasmean": 18.8,
+        "tasmin": 14.2
+      },
+      "2026": {
+        "tasmax": 22.6,
+        "tasmean": 18.7,
+        "tasmin": 13.8
+      },
+      "2027": {
+        "tasmax": 23.3,
+        "tasmean": 19.8,
+        "tasmin": 15.6
+      },
+      "2028": {
+        "tasmax": 22.9,
+        "tasmean": 19.1,
+        "tasmin": 13.9
+      },
+      "2029": {
+        "tasmax": 23.4,
+        "tasmean": 19.7,
+        "tasmin": 14.9
+      },
+      "2030": {
+        "tasmax": 21.2,
+        "tasmean": 17.7,
+        "tasmin": 13.7
+      },
+      "2031": {
+        "tasmax": 23.1,
+        "tasmean": 19,
+        "tasmin": 13.9
+      },
+      "2032": {
+        "tasmax": 23.7,
+        "tasmean": 19.8,
+        "tasmin": 14.7
+      },
+      "2033": {
+        "tasmax": 24.5,
+        "tasmean": 20.6,
+        "tasmin": 15.1
+      },
+      "2034": {
+        "tasmax": 23.2,
+        "tasmean": 19.5,
+        "tasmin": 14.7
+      },
+      "2035": {
+        "tasmax": 20.9,
+        "tasmean": 17.3,
+        "tasmin": 13.3
+      },
+      "2036": {
+        "tasmax": 24,
+        "tasmean": 20,
+        "tasmin": 14.5
+      },
+      "2037": {
+        "tasmax": 23.7,
+        "tasmean": 20,
+        "tasmin": 14.9
+      },
+      "2038": {
+        "tasmax": 22.1,
+        "tasmean": 18,
+        "tasmin": 13
+      },
+      "2039": {
+        "tasmax": 21.3,
+        "tasmean": 17.9,
+        "tasmin": 14.4
+      },
+      "2040": {
+        "tasmax": 23.7,
+        "tasmean": 20,
+        "tasmin": 15.8
+      },
+      "2041": {
+        "tasmax": 24.3,
+        "tasmean": 20.8,
+        "tasmin": 16.3
+      },
+      "2042": {
+        "tasmax": 23.9,
+        "tasmean": 20.1,
+        "tasmin": 15
+      },
+      "2043": {
+        "tasmax": 24.6,
+        "tasmean": 21,
+        "tasmin": 16.2
+      },
+      "2044": {
+        "tasmax": 24.3,
+        "tasmean": 20.6,
+        "tasmin": 15.4
+      },
+      "2045": {
+        "tasmax": 24.8,
+        "tasmean": 20.9,
+        "tasmin": 15.4
+      },
+      "2046": {
+        "tasmax": 24.6,
+        "tasmean": 20.7,
+        "tasmin": 15.4
+      },
+      "2047": {
+        "tasmax": 23.1,
+        "tasmean": 19.4,
+        "tasmin": 14.3
+      },
+      "2048": {
+        "tasmax": 23.8,
+        "tasmean": 20,
+        "tasmin": 15
+      },
+      "2049": {
+        "tasmax": 24.2,
+        "tasmean": 20.5,
+        "tasmin": 15.6
+      },
+      "2050": {
+        "tasmax": 22.3,
+        "tasmean": 19,
+        "tasmin": 15.1
+      },
+      "2051": {
+        "tasmax": 24.7,
+        "tasmean": 20.8,
+        "tasmin": 15.3
+      },
+      "2052": {
+        "tasmax": 21.9,
+        "tasmean": 18.5,
+        "tasmin": 14
+      },
+      "2053": {
+        "tasmax": 24.2,
+        "tasmean": 20.6,
+        "tasmin": 15.9
+      },
+      "2054": {
+        "tasmax": 22.8,
+        "tasmean": 19.2,
+        "tasmin": 15.5
+      },
+      "2055": {
+        "tasmax": 23,
+        "tasmean": 19.9,
+        "tasmin": 16.7
+      },
+      "2056": {
+        "tasmax": 22.7,
+        "tasmean": 19.2,
+        "tasmin": 15.2
+      },
+      "2057": {
+        "tasmax": 23.1,
+        "tasmean": 19.4,
+        "tasmin": 14.4
+      },
+      "2058": {
+        "tasmax": 24.1,
+        "tasmean": 20.4,
+        "tasmin": 15.6
+      },
+      "2059": {
+        "tasmax": 26,
+        "tasmean": 22,
+        "tasmin": 16.3
+      },
+      "2060": {
+        "tasmax": 23.5,
+        "tasmean": 20.1,
+        "tasmin": 15.4
+      },
+      "2061": {
+        "tasmax": 21.8,
+        "tasmean": 18.8,
+        "tasmin": 15.1
+      },
+      "2062": {
+        "tasmax": 23.4,
+        "tasmean": 19.8,
+        "tasmin": 15.5
+      },
+      "2063": {
+        "tasmax": 22.7,
+        "tasmean": 18.9,
+        "tasmin": 13.5
+      },
+      "2064": {
+        "tasmax": 22.8,
+        "tasmean": 19.3,
+        "tasmin": 15.6
+      },
+      "2065": {
+        "tasmax": 23.5,
+        "tasmean": 19.8,
+        "tasmin": 14.8
+      },
+      "2066": {
+        "tasmax": 24.7,
+        "tasmean": 21.3,
+        "tasmin": 16.9
+      },
+      "2067": {
+        "tasmax": 23.7,
+        "tasmean": 20.3,
+        "tasmin": 15.5
+      },
+      "2068": {
+        "tasmax": 25.5,
+        "tasmean": 21.8,
+        "tasmin": 16.9
+      },
+      "2069": {
+        "tasmax": 24.7,
+        "tasmean": 21.5,
+        "tasmin": 17.7
+      },
+      "2070": {
+        "tasmax": 24.1,
+        "tasmean": 20.4,
+        "tasmin": 15.5
+      },
+      "2071": {
+        "tasmax": 22,
+        "tasmean": 18.7,
+        "tasmin": 15
+      },
+      "2072": {
+        "tasmax": 25.4,
+        "tasmean": 21.5,
+        "tasmin": 16.7
+      },
+      "2073": {
+        "tasmax": 25.2,
+        "tasmean": 21.8,
+        "tasmin": 17.7
+      },
+      "2074": {
+        "tasmax": 24.9,
+        "tasmean": 21.3,
+        "tasmin": 16.6
+      },
+      "2075": {
+        "tasmax": 25.3,
+        "tasmean": 21.9,
+        "tasmin": 17.8
+      },
+      "2076": {
+        "tasmax": 23.2,
+        "tasmean": 19.8,
+        "tasmin": 15.2
+      },
+      "2077": {
+        "tasmax": 25.1,
+        "tasmean": 21.5,
+        "tasmin": 17.2
+      },
+      "2078": {
+        "tasmax": 23.1,
+        "tasmean": 20,
+        "tasmin": 16.8
+      },
+      "2079": {
+        "tasmax": 24.2,
+        "tasmean": 20.4,
+        "tasmin": 15.5
+      },
+      "2080": {
+        "tasmax": 25.9,
+        "tasmean": 22,
+        "tasmin": 16.9
+      },
+      "2081": {
+        "tasmax": 24.3,
+        "tasmean": 20.9,
+        "tasmin": 16.4
+      },
+      "2082": {
+        "tasmax": 23.4,
+        "tasmean": 19.6,
+        "tasmin": 15.8
+      },
+      "2083": {
+        "tasmax": 26.1,
+        "tasmean": 22.4,
+        "tasmin": 17.6
+      },
+      "2084": {
+        "tasmax": 24.1,
+        "tasmean": 20.7,
+        "tasmin": 16.3
+      },
+      "2085": {
+        "tasmax": 23.8,
+        "tasmean": 20.4,
+        "tasmin": 16
+      },
+      "2086": {
+        "tasmax": 23.6,
+        "tasmean": 20.6,
+        "tasmin": 17.5
+      },
+      "2087": {
+        "tasmax": 23.4,
+        "tasmean": 19.9,
+        "tasmin": 15.6
+      },
+      "2088": {
+        "tasmax": 23.2,
+        "tasmean": 20,
+        "tasmin": 15.9
+      },
+      "2089": {
+        "tasmax": 24.6,
+        "tasmean": 21.2,
+        "tasmin": 16.9
+      },
+      "2090": {
+        "tasmax": 25.4,
+        "tasmean": 21.8,
+        "tasmin": 17.6
+      },
+      "2091": {
+        "tasmax": 25.1,
+        "tasmean": 21.5,
+        "tasmin": 16.8
+      },
+      "2092": {
+        "tasmax": 25.5,
+        "tasmean": 21.7,
+        "tasmin": 17.2
+      },
+      "2093": {
+        "tasmax": 24.5,
+        "tasmean": 21.1,
+        "tasmin": 16.7
+      },
+      "2094": {
+        "tasmax": 25,
+        "tasmean": 21.9,
+        "tasmin": 18.3
+      },
+      "2095": {
+        "tasmax": 23.5,
+        "tasmean": 19.6,
+        "tasmin": 15
+      },
+      "2096": {
+        "tasmax": 23.5,
+        "tasmean": 20.3,
+        "tasmin": 16.7
+      },
+      "2097": {
+        "tasmax": 23.8,
+        "tasmean": 20.6,
+        "tasmin": 17.1
+      },
+      "2098": {
+        "tasmax": 24.7,
+        "tasmean": 21.5,
+        "tasmin": 17.1
+      },
+      "2099": {
+        "tasmax": 23.4,
+        "tasmean": 20,
+        "tasmin": 15.5
+      },
+      "2100": {
+        "tasmax": 22.9,
+        "tasmean": 19.6,
+        "tasmin": 15.4
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 22.2,
+        "tasmean": 18.2,
+        "tasmin": 12.6
+      },
+      "2008": {
+        "tasmax": 21.7,
+        "tasmean": 18.1,
+        "tasmin": 13
+      },
+      "2009": {
+        "tasmax": 22.4,
+        "tasmean": 18.5,
+        "tasmin": 12.8
+      },
+      "2010": {
+        "tasmax": 21.5,
+        "tasmean": 18,
+        "tasmin": 13.3
+      },
+      "2011": {
+        "tasmax": 20.8,
+        "tasmean": 17.1,
+        "tasmin": 12.3
+      },
+      "2012": {
+        "tasmax": 21.6,
+        "tasmean": 18.1,
+        "tasmin": 13.9
+      },
+      "2013": {
+        "tasmax": 19.9,
+        "tasmean": 16.4,
+        "tasmin": 12.3
+      },
+      "2014": {
+        "tasmax": 20.8,
+        "tasmean": 17.2,
+        "tasmin": 13.2
+      },
+      "2015": {
+        "tasmax": 20.4,
+        "tasmean": 16.9,
+        "tasmin": 12.1
+      },
+      "2016": {
+        "tasmax": 21.2,
+        "tasmean": 17.8,
+        "tasmin": 12.9
+      },
+      "2017": {
+        "tasmax": 23.4,
+        "tasmean": 19.5,
+        "tasmin": 14.2
+      },
+      "2018": {
+        "tasmax": 22,
+        "tasmean": 18.3,
+        "tasmin": 13.9
+      },
+      "2019": {
+        "tasmax": 23,
+        "tasmean": 19.2,
+        "tasmin": 14.1
+      },
+      "2020": {
+        "tasmax": 21.7,
+        "tasmean": 17.8,
+        "tasmin": 13.5
+      },
+      "2021": {
+        "tasmax": 23.9,
+        "tasmean": 20,
+        "tasmin": 15.4
+      },
+      "2022": {
+        "tasmax": 20.6,
+        "tasmean": 17.1,
+        "tasmin": 13.1
+      },
+      "2023": {
+        "tasmax": 22.3,
+        "tasmean": 18.6,
+        "tasmin": 13.8
+      },
+      "2024": {
+        "tasmax": 22.8,
+        "tasmean": 18.8,
+        "tasmin": 13.6
+      },
+      "2025": {
+        "tasmax": 21.3,
+        "tasmean": 17.6,
+        "tasmin": 13.5
+      },
+      "2026": {
+        "tasmax": 22.3,
+        "tasmean": 18.9,
+        "tasmin": 14.6
+      },
+      "2027": {
+        "tasmax": 21.1,
+        "tasmean": 17.6,
+        "tasmin": 13.1
+      },
+      "2028": {
+        "tasmax": 21.5,
+        "tasmean": 18.2,
+        "tasmin": 13.9
+      },
+      "2029": {
+        "tasmax": 23,
+        "tasmean": 18.9,
+        "tasmin": 13.4
+      },
+      "2030": {
+        "tasmax": 23.2,
+        "tasmean": 19.2,
+        "tasmin": 14
+      },
+      "2031": {
+        "tasmax": 22.1,
+        "tasmean": 18.2,
+        "tasmin": 13.4
+      },
+      "2032": {
+        "tasmax": 21.5,
+        "tasmean": 18.2,
+        "tasmin": 13.8
+      },
+      "2033": {
+        "tasmax": 19.5,
+        "tasmean": 16.2,
+        "tasmin": 12.8
+      },
+      "2034": {
+        "tasmax": 23.6,
+        "tasmean": 19.7,
+        "tasmin": 14.1
+      },
+      "2035": {
+        "tasmax": 20.6,
+        "tasmean": 17.8,
+        "tasmin": 14.5
+      },
+      "2036": {
+        "tasmax": 21.1,
+        "tasmean": 17.4,
+        "tasmin": 13.4
+      },
+      "2037": {
+        "tasmax": 21.9,
+        "tasmean": 18.3,
+        "tasmin": 13.7
+      },
+      "2038": {
+        "tasmax": 24,
+        "tasmean": 20.2,
+        "tasmin": 15
+      },
+      "2039": {
+        "tasmax": 23.8,
+        "tasmean": 20.2,
+        "tasmin": 16.2
+      },
+      "2040": {
+        "tasmax": 23.5,
+        "tasmean": 19.4,
+        "tasmin": 14
+      },
+      "2041": {
+        "tasmax": 22.9,
+        "tasmean": 19.2,
+        "tasmin": 14.8
+      },
+      "2042": {
+        "tasmax": 22.9,
+        "tasmean": 19.4,
+        "tasmin": 15.2
+      },
+      "2043": {
+        "tasmax": 21.7,
+        "tasmean": 18.7,
+        "tasmin": 15.4
+      },
+      "2044": {
+        "tasmax": 24.2,
+        "tasmean": 20.4,
+        "tasmin": 14.6
+      },
+      "2045": {
+        "tasmax": 20.7,
+        "tasmean": 17.5,
+        "tasmin": 14.3
+      },
+      "2046": {
+        "tasmax": 22.1,
+        "tasmean": 18.7,
+        "tasmin": 15
+      },
+      "2047": {
+        "tasmax": 22.2,
+        "tasmean": 18.6,
+        "tasmin": 13.6
+      },
+      "2048": {
+        "tasmax": 24,
+        "tasmean": 20.2,
+        "tasmin": 15.3
+      },
+      "2049": {
+        "tasmax": 23.3,
+        "tasmean": 19.7,
+        "tasmin": 15
+      },
+      "2050": {
+        "tasmax": 22.9,
+        "tasmean": 19.6,
+        "tasmin": 15.6
+      },
+      "2051": {
+        "tasmax": 24.8,
+        "tasmean": 21.1,
+        "tasmin": 16.4
+      },
+      "2052": {
+        "tasmax": 23.5,
+        "tasmean": 19.9,
+        "tasmin": 14.7
+      },
+      "2053": {
+        "tasmax": 24.3,
+        "tasmean": 20.8,
+        "tasmin": 15.5
+      },
+      "2054": {
+        "tasmax": 22.1,
+        "tasmean": 18.4,
+        "tasmin": 14.1
+      },
+      "2055": {
+        "tasmax": 23.3,
+        "tasmean": 20.1,
+        "tasmin": 15.9
+      },
+      "2056": {
+        "tasmax": 22.4,
+        "tasmean": 18.7,
+        "tasmin": 14.3
+      },
+      "2057": {
+        "tasmax": 22.9,
+        "tasmean": 19,
+        "tasmin": 14
+      },
+      "2058": {
+        "tasmax": 24.8,
+        "tasmean": 21.2,
+        "tasmin": 16.3
+      },
+      "2059": {
+        "tasmax": 24.3,
+        "tasmean": 20.4,
+        "tasmin": 15.4
+      },
+      "2060": {
+        "tasmax": 23.9,
+        "tasmean": 20.1,
+        "tasmin": 15
+      },
+      "2061": {
+        "tasmax": 23.6,
+        "tasmean": 19.7,
+        "tasmin": 14.4
+      },
+      "2062": {
+        "tasmax": 24.8,
+        "tasmean": 21,
+        "tasmin": 15.7
+      },
+      "2063": {
+        "tasmax": 25.3,
+        "tasmean": 21.4,
+        "tasmin": 15.5
+      },
+      "2064": {
+        "tasmax": 24.5,
+        "tasmean": 20.8,
+        "tasmin": 16
+      },
+      "2065": {
+        "tasmax": 22.2,
+        "tasmean": 18.9,
+        "tasmin": 15
+      },
+      "2066": {
+        "tasmax": 23.4,
+        "tasmean": 20,
+        "tasmin": 15.9
+      },
+      "2067": {
+        "tasmax": 21.7,
+        "tasmean": 18.8,
+        "tasmin": 15.4
+      },
+      "2068": {
+        "tasmax": 23.1,
+        "tasmean": 19.5,
+        "tasmin": 15.4
+      },
+      "2069": {
+        "tasmax": 24.4,
+        "tasmean": 20.6,
+        "tasmin": 15.5
+      },
+      "2070": {
+        "tasmax": 24.3,
+        "tasmean": 20.8,
+        "tasmin": 16.8
+      },
+      "2071": {
+        "tasmax": 22.6,
+        "tasmean": 19,
+        "tasmin": 15.3
+      },
+      "2072": {
+        "tasmax": 25.5,
+        "tasmean": 21.6,
+        "tasmin": 16.6
+      },
+      "2073": {
+        "tasmax": 24.4,
+        "tasmean": 20.7,
+        "tasmin": 15.7
+      },
+      "2074": {
+        "tasmax": 24.5,
+        "tasmean": 21,
+        "tasmin": 16.6
+      },
+      "2075": {
+        "tasmax": 25.2,
+        "tasmean": 21.4,
+        "tasmin": 16.8
+      },
+      "2076": {
+        "tasmax": 23.3,
+        "tasmean": 20.2,
+        "tasmin": 16.8
+      },
+      "2077": {
+        "tasmax": 23.2,
+        "tasmean": 19.9,
+        "tasmin": 16
+      },
+      "2078": {
+        "tasmax": 21.2,
+        "tasmean": 18.1,
+        "tasmin": 15.2
+      },
+      "2079": {
+        "tasmax": 24.2,
+        "tasmean": 20.6,
+        "tasmin": 16.8
+      },
+      "2080": {
+        "tasmax": 24.6,
+        "tasmean": 21.1,
+        "tasmin": 16.9
+      },
+      "2081": {
+        "tasmax": 25.8,
+        "tasmean": 22.1,
+        "tasmin": 17.8
+      },
+      "2082": {
+        "tasmax": 27.2,
+        "tasmean": 23.3,
+        "tasmin": 17.2
+      },
+      "2083": {
+        "tasmax": 24.1,
+        "tasmean": 20.8,
+        "tasmin": 16.4
+      },
+      "2084": {
+        "tasmax": 22.8,
+        "tasmean": 19.8,
+        "tasmin": 16.3
+      },
+      "2085": {
+        "tasmax": 23.2,
+        "tasmean": 20.1,
+        "tasmin": 16.8
+      },
+      "2086": {
+        "tasmax": 25.2,
+        "tasmean": 21.8,
+        "tasmin": 17.4
+      },
+      "2087": {
+        "tasmax": 24.8,
+        "tasmean": 21.3,
+        "tasmin": 16.9
+      },
+      "2088": {
+        "tasmax": 24,
+        "tasmean": 20.6,
+        "tasmin": 17
+      },
+      "2089": {
+        "tasmax": 24.7,
+        "tasmean": 21.1,
+        "tasmin": 16
+      },
+      "2090": {
+        "tasmax": 25.4,
+        "tasmean": 21.7,
+        "tasmin": 16.9
+      },
+      "2091": {
+        "tasmax": 24.6,
+        "tasmean": 21.4,
+        "tasmin": 17.7
+      },
+      "2092": {
+        "tasmax": 25,
+        "tasmean": 21.9,
+        "tasmin": 18.1
+      },
+      "2093": {
+        "tasmax": 25.7,
+        "tasmean": 22.3,
+        "tasmin": 17.3
+      },
+      "2094": {
+        "tasmax": 26.9,
+        "tasmean": 23,
+        "tasmin": 18
+      },
+      "2095": {
+        "tasmax": 26.3,
+        "tasmean": 22.5,
+        "tasmin": 18.2
+      },
+      "2096": {
+        "tasmax": 24.4,
+        "tasmean": 20.6,
+        "tasmin": 16.1
+      },
+      "2097": {
+        "tasmax": 24.7,
+        "tasmean": 21.7,
+        "tasmin": 18.2
+      },
+      "2098": {
+        "tasmax": 26,
+        "tasmean": 22.6,
+        "tasmin": 18
+      },
+      "2099": {
+        "tasmax": 26.7,
+        "tasmean": 23.2,
+        "tasmin": 18.2
+      },
+      "2100": {
+        "tasmax": 24.5,
+        "tasmean": 21,
+        "tasmin": 16.8
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 20.6,
+        "tasmean": 17.1,
+        "tasmin": 12.6
+      },
+      "2008": {
+        "tasmax": 21.4,
+        "tasmean": 17.7,
+        "tasmin": 13.1
+      },
+      "2009": {
+        "tasmax": 20.7,
+        "tasmean": 16.7,
+        "tasmin": 11.1
+      },
+      "2010": {
+        "tasmax": 21,
+        "tasmean": 17.3,
+        "tasmin": 13.3
+      },
+      "2011": {
+        "tasmax": 22.5,
+        "tasmean": 18.4,
+        "tasmin": 13.3
+      },
+      "2012": {
+        "tasmax": 21.7,
+        "tasmean": 18.2,
+        "tasmin": 14.1
+      },
+      "2013": {
+        "tasmax": 22,
+        "tasmean": 18.6,
+        "tasmin": 14.7
+      },
+      "2014": {
+        "tasmax": 22.6,
+        "tasmean": 18.7,
+        "tasmin": 13.5
+      },
+      "2015": {
+        "tasmax": 21,
+        "tasmean": 17.6,
+        "tasmin": 13.6
+      },
+      "2016": {
+        "tasmax": 24,
+        "tasmean": 20.3,
+        "tasmin": 15
+      },
+      "2017": {
+        "tasmax": 22.5,
+        "tasmean": 18.6,
+        "tasmin": 13
+      },
+      "2018": {
+        "tasmax": 22.5,
+        "tasmean": 18.9,
+        "tasmin": 15
+      },
+      "2019": {
+        "tasmax": 22.3,
+        "tasmean": 18.9,
+        "tasmin": 14.7
+      },
+      "2020": {
+        "tasmax": 21.8,
+        "tasmean": 18,
+        "tasmin": 13
+      },
+      "2021": {
+        "tasmax": 20.2,
+        "tasmean": 16.7,
+        "tasmin": 12.9
+      },
+      "2022": {
+        "tasmax": 21.8,
+        "tasmean": 18.5,
+        "tasmin": 14
+      },
+      "2023": {
+        "tasmax": 23.2,
+        "tasmean": 19.3,
+        "tasmin": 14.6
+      },
+      "2024": {
+        "tasmax": 23.5,
+        "tasmean": 19.8,
+        "tasmin": 15.4
+      },
+      "2025": {
+        "tasmax": 20.7,
+        "tasmean": 17.3,
+        "tasmin": 13.8
+      },
+      "2026": {
+        "tasmax": 23.2,
+        "tasmean": 19.5,
+        "tasmin": 14.6
+      },
+      "2027": {
+        "tasmax": 24,
+        "tasmean": 20,
+        "tasmin": 14.3
+      },
+      "2028": {
+        "tasmax": 21.7,
+        "tasmean": 18.1,
+        "tasmin": 13.5
+      },
+      "2029": {
+        "tasmax": 22.2,
+        "tasmean": 18.7,
+        "tasmin": 14.6
+      },
+      "2030": {
+        "tasmax": 23.7,
+        "tasmean": 19.7,
+        "tasmin": 14.5
+      },
+      "2031": {
+        "tasmax": 20.1,
+        "tasmean": 16.6,
+        "tasmin": 12.1
+      },
+      "2032": {
+        "tasmax": 22.3,
+        "tasmean": 18.8,
+        "tasmin": 14.6
+      },
+      "2033": {
+        "tasmax": 23.6,
+        "tasmean": 19.5,
+        "tasmin": 13.9
+      },
+      "2034": {
+        "tasmax": 20.8,
+        "tasmean": 17.5,
+        "tasmin": 14.3
+      },
+      "2035": {
+        "tasmax": 22.9,
+        "tasmean": 19.1,
+        "tasmin": 15
+      },
+      "2036": {
+        "tasmax": 25.8,
+        "tasmean": 21.7,
+        "tasmin": 15.1
+      },
+      "2037": {
+        "tasmax": 24.5,
+        "tasmean": 20.5,
+        "tasmin": 15.6
+      },
+      "2038": {
+        "tasmax": 23.9,
+        "tasmean": 20.2,
+        "tasmin": 15.8
+      },
+      "2039": {
+        "tasmax": 21.9,
+        "tasmean": 18.3,
+        "tasmin": 14.3
+      },
+      "2040": {
+        "tasmax": 23.1,
+        "tasmean": 19.5,
+        "tasmin": 15.1
+      },
+      "2041": {
+        "tasmax": 23.3,
+        "tasmean": 19.7,
+        "tasmin": 15.1
+      },
+      "2042": {
+        "tasmax": 24,
+        "tasmean": 20,
+        "tasmin": 14.8
+      },
+      "2043": {
+        "tasmax": 23.3,
+        "tasmean": 19.3,
+        "tasmin": 14.3
+      },
+      "2044": {
+        "tasmax": 24.9,
+        "tasmean": 21,
+        "tasmin": 15.8
+      },
+      "2045": {
+        "tasmax": 23.7,
+        "tasmean": 20,
+        "tasmin": 15.4
+      },
+      "2046": {
+        "tasmax": 23.3,
+        "tasmean": 19.9,
+        "tasmin": 15.8
+      },
+      "2047": {
+        "tasmax": 23.2,
+        "tasmean": 19.7,
+        "tasmin": 15.5
+      },
+      "2048": {
+        "tasmax": 24.5,
+        "tasmean": 21.2,
+        "tasmin": 17.2
+      },
+      "2049": {
+        "tasmax": 21.3,
+        "tasmean": 17.9,
+        "tasmin": 14.6
+      },
+      "2050": {
+        "tasmax": 25.3,
+        "tasmean": 21.6,
+        "tasmin": 16.5
+      },
+      "2051": {
+        "tasmax": 25.5,
+        "tasmean": 22,
+        "tasmin": 17.4
+      },
+      "2052": {
+        "tasmax": 23.8,
+        "tasmean": 20.4,
+        "tasmin": 16.3
+      },
+      "2053": {
+        "tasmax": 24.9,
+        "tasmean": 21.6,
+        "tasmin": 17.3
+      },
+      "2054": {
+        "tasmax": 23.2,
+        "tasmean": 19.8,
+        "tasmin": 15.6
+      },
+      "2055": {
+        "tasmax": 24.7,
+        "tasmean": 20.8,
+        "tasmin": 16
+      },
+      "2056": {
+        "tasmax": 24.6,
+        "tasmean": 21.2,
+        "tasmin": 16.8
+      },
+      "2057": {
+        "tasmax": 23.7,
+        "tasmean": 19.9,
+        "tasmin": 15.1
+      },
+      "2058": {
+        "tasmax": 25.1,
+        "tasmean": 21.6,
+        "tasmin": 17.5
+      },
+      "2059": {
+        "tasmax": 25.2,
+        "tasmean": 21.6,
+        "tasmin": 17.2
+      },
+      "2060": {
+        "tasmax": 25.5,
+        "tasmean": 21.8,
+        "tasmin": 17
+      },
+      "2061": {
+        "tasmax": 26.6,
+        "tasmean": 22.9,
+        "tasmin": 18.5
+      },
+      "2062": {
+        "tasmax": 25.7,
+        "tasmean": 22.1,
+        "tasmin": 17.9
+      },
+      "2063": {
+        "tasmax": 25.7,
+        "tasmean": 22.2,
+        "tasmin": 17.3
+      },
+      "2064": {
+        "tasmax": 23.2,
+        "tasmean": 19.9,
+        "tasmin": 15.8
+      },
+      "2065": {
+        "tasmax": 25.5,
+        "tasmean": 22.1,
+        "tasmin": 18.3
+      },
+      "2066": {
+        "tasmax": 25.2,
+        "tasmean": 22,
+        "tasmin": 18.5
+      },
+      "2067": {
+        "tasmax": 26.8,
+        "tasmean": 23.2,
+        "tasmin": 19.3
+      },
+      "2068": {
+        "tasmax": 24,
+        "tasmean": 20.9,
+        "tasmin": 17.5
+      },
+      "2069": {
+        "tasmax": 25.5,
+        "tasmean": 21.6,
+        "tasmin": 16.6
+      },
+      "2070": {
+        "tasmax": 24.8,
+        "tasmean": 21.5,
+        "tasmin": 17.8
+      },
+      "2071": {
+        "tasmax": 25.6,
+        "tasmean": 22.4,
+        "tasmin": 18.7
+      },
+      "2072": {
+        "tasmax": 26.5,
+        "tasmean": 23,
+        "tasmin": 18
+      },
+      "2073": {
+        "tasmax": 24.1,
+        "tasmean": 20.7,
+        "tasmin": 17.1
+      },
+      "2074": {
+        "tasmax": 26.1,
+        "tasmean": 22.4,
+        "tasmin": 17.7
+      },
+      "2075": {
+        "tasmax": 25.5,
+        "tasmean": 22.1,
+        "tasmin": 18.4
+      },
+      "2076": {
+        "tasmax": 26.8,
+        "tasmean": 23.6,
+        "tasmin": 19.5
+      },
+      "2077": {
+        "tasmax": 26.5,
+        "tasmean": 23.1,
+        "tasmin": 18.7
+      },
+      "2078": {
+        "tasmax": 24.9,
+        "tasmean": 21.5,
+        "tasmin": 17.7
+      },
+      "2079": {
+        "tasmax": 26.5,
+        "tasmean": 23.1,
+        "tasmin": 19.5
+      },
+      "2080": {
+        "tasmax": 28.1,
+        "tasmean": 24.5,
+        "tasmin": 19.1
+      },
+      "2081": {
+        "tasmax": 26.7,
+        "tasmean": 23.2,
+        "tasmin": 18.2
+      },
+      "2082": {
+        "tasmax": 25.5,
+        "tasmean": 22.2,
+        "tasmin": 18.8
+      },
+      "2083": {
+        "tasmax": 26.7,
+        "tasmean": 23.5,
+        "tasmin": 20.1
+      },
+      "2084": {
+        "tasmax": 26.7,
+        "tasmean": 23.9,
+        "tasmin": 20.9
+      },
+      "2085": {
+        "tasmax": 27.1,
+        "tasmean": 23.3,
+        "tasmin": 18.8
+      },
+      "2086": {
+        "tasmax": 27,
+        "tasmean": 23.5,
+        "tasmin": 19
+      },
+      "2087": {
+        "tasmax": 28,
+        "tasmean": 24.4,
+        "tasmin": 20.3
+      },
+      "2088": {
+        "tasmax": 27.5,
+        "tasmean": 23.9,
+        "tasmin": 19.8
+      },
+      "2089": {
+        "tasmax": 27.9,
+        "tasmean": 24,
+        "tasmin": 19.3
+      },
+      "2090": {
+        "tasmax": 25.2,
+        "tasmean": 21.6,
+        "tasmin": 18.2
+      },
+      "2091": {
+        "tasmax": 30.4,
+        "tasmean": 26,
+        "tasmin": 21.2
+      },
+      "2092": {
+        "tasmax": 27.4,
+        "tasmean": 24.2,
+        "tasmin": 20.3
+      },
+      "2093": {
+        "tasmax": 27.2,
+        "tasmean": 23.6,
+        "tasmin": 19.9
+      },
+      "2094": {
+        "tasmax": 27.2,
+        "tasmean": 23.8,
+        "tasmin": 19.5
+      },
+      "2095": {
+        "tasmax": 27.9,
+        "tasmean": 24.7,
+        "tasmin": 20.8
+      },
+      "2096": {
+        "tasmax": 27.7,
+        "tasmean": 24.3,
+        "tasmin": 20
+      },
+      "2097": {
+        "tasmax": 28.7,
+        "tasmean": 25.2,
+        "tasmin": 21
+      },
+      "2098": {
+        "tasmax": 29.4,
+        "tasmean": 26,
+        "tasmin": 22
+      },
+      "2099": {
+        "tasmax": 27.5,
+        "tasmean": 24,
+        "tasmin": 19.2
+      },
+      "2100": {
+        "tasmax": 26.4,
+        "tasmean": 23.2,
+        "tasmin": 19.2
+      }
+    }
+  },
+  "GISS-E2-R": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 22.1,
+        "tasmean": 18.3,
+        "tasmin": 15.2
+      },
+      "2008": {
+        "tasmax": 21.6,
+        "tasmean": 18.2,
+        "tasmin": 15
+      },
+      "2009": {
+        "tasmax": 23,
+        "tasmean": 18.9,
+        "tasmin": 14.8
+      },
+      "2010": {
+        "tasmax": 22.3,
+        "tasmean": 18.8,
+        "tasmin": 15.7
+      },
+      "2011": {
+        "tasmax": 23.8,
+        "tasmean": 19.9,
+        "tasmin": 16.3
+      },
+      "2012": {
+        "tasmax": 20.1,
+        "tasmean": 16.3,
+        "tasmin": 12.9
+      },
+      "2013": {
+        "tasmax": 19.1,
+        "tasmean": 15.4,
+        "tasmin": 12.5
+      },
+      "2014": {
+        "tasmax": 21.9,
+        "tasmean": 17.8,
+        "tasmin": 14.3
+      },
+      "2015": {
+        "tasmax": 19.1,
+        "tasmean": 15.7,
+        "tasmin": 12.6
+      },
+      "2016": {
+        "tasmax": 18.9,
+        "tasmean": 15.4,
+        "tasmin": 11.9
+      },
+      "2017": {
+        "tasmax": 21.1,
+        "tasmean": 17.2,
+        "tasmin": 13.8
+      },
+      "2018": {
+        "tasmax": 19.1,
+        "tasmean": 15.6,
+        "tasmin": 12.2
+      },
+      "2019": {
+        "tasmax": 19.7,
+        "tasmean": 16,
+        "tasmin": 12.6
+      },
+      "2020": {
+        "tasmax": 20.4,
+        "tasmean": 16.8,
+        "tasmin": 13.3
+      },
+      "2021": {
+        "tasmax": 19.5,
+        "tasmean": 15.8,
+        "tasmin": 12.4
+      },
+      "2022": {
+        "tasmax": 20.1,
+        "tasmean": 16.4,
+        "tasmin": 13.3
+      },
+      "2023": {
+        "tasmax": 23.1,
+        "tasmean": 19.1,
+        "tasmin": 15.2
+      },
+      "2024": {
+        "tasmax": 22.2,
+        "tasmean": 18.5,
+        "tasmin": 15.5
+      },
+      "2025": {
+        "tasmax": 18.9,
+        "tasmean": 15.5,
+        "tasmin": 12.3
+      },
+      "2026": {
+        "tasmax": 19.6,
+        "tasmean": 16,
+        "tasmin": 12.8
+      },
+      "2027": {
+        "tasmax": 21.2,
+        "tasmean": 17.7,
+        "tasmin": 14.6
+      },
+      "2028": {
+        "tasmax": 21.1,
+        "tasmean": 17.6,
+        "tasmin": 14.4
+      },
+      "2029": {
+        "tasmax": 20.2,
+        "tasmean": 17.2,
+        "tasmin": 14.3
+      },
+      "2030": {
+        "tasmax": 21.3,
+        "tasmean": 17.5,
+        "tasmin": 14.4
+      },
+      "2031": {
+        "tasmax": 21.8,
+        "tasmean": 18,
+        "tasmin": 14.8
+      },
+      "2032": {
+        "tasmax": 20,
+        "tasmean": 16.1,
+        "tasmin": 12.7
+      },
+      "2033": {
+        "tasmax": 20.7,
+        "tasmean": 16.7,
+        "tasmin": 13.3
+      },
+      "2034": {
+        "tasmax": 22.4,
+        "tasmean": 18.8,
+        "tasmin": 15.3
+      },
+      "2035": {
+        "tasmax": 19.3,
+        "tasmean": 15.6,
+        "tasmin": 12.4
+      },
+      "2036": {
+        "tasmax": 22.1,
+        "tasmean": 18.7,
+        "tasmin": 15.8
+      },
+      "2037": {
+        "tasmax": 22.3,
+        "tasmean": 18.6,
+        "tasmin": 15.4
+      },
+      "2038": {
+        "tasmax": 20.8,
+        "tasmean": 17.1,
+        "tasmin": 13.8
+      },
+      "2039": {
+        "tasmax": 22.4,
+        "tasmean": 18.4,
+        "tasmin": 15
+      },
+      "2040": {
+        "tasmax": 21,
+        "tasmean": 17.4,
+        "tasmin": 13.9
+      },
+      "2041": {
+        "tasmax": 21.3,
+        "tasmean": 17.7,
+        "tasmin": 14.4
+      },
+      "2042": {
+        "tasmax": 19.6,
+        "tasmean": 16.1,
+        "tasmin": 12.7
+      },
+      "2043": {
+        "tasmax": 22.1,
+        "tasmean": 18.2,
+        "tasmin": 14.6
+      },
+      "2044": {
+        "tasmax": 22.2,
+        "tasmean": 18.5,
+        "tasmin": 15.1
+      },
+      "2045": {
+        "tasmax": 20.4,
+        "tasmean": 17,
+        "tasmin": 13.9
+      },
+      "2046": {
+        "tasmax": 19.8,
+        "tasmean": 16.2,
+        "tasmin": 13.2
+      },
+      "2047": {
+        "tasmax": 19.3,
+        "tasmean": 15.8,
+        "tasmin": 12.6
+      },
+      "2048": {
+        "tasmax": 21.1,
+        "tasmean": 17.6,
+        "tasmin": 14.5
+      },
+      "2049": {
+        "tasmax": 21.7,
+        "tasmean": 18.1,
+        "tasmin": 14.9
+      },
+      "2050": {
+        "tasmax": 20.7,
+        "tasmean": 16.7,
+        "tasmin": 13.4
+      },
+      "2051": {
+        "tasmax": 21.2,
+        "tasmean": 17.6,
+        "tasmin": 14.6
+      },
+      "2052": {
+        "tasmax": 20.8,
+        "tasmean": 17.2,
+        "tasmin": 14.3
+      },
+      "2053": {
+        "tasmax": 22.2,
+        "tasmean": 18.6,
+        "tasmin": 15.2
+      },
+      "2054": {
+        "tasmax": 20.4,
+        "tasmean": 16.8,
+        "tasmin": 13.5
+      },
+      "2055": {
+        "tasmax": 22.8,
+        "tasmean": 19.1,
+        "tasmin": 15.7
+      },
+      "2056": {
+        "tasmax": 22.6,
+        "tasmean": 19.1,
+        "tasmin": 16
+      },
+      "2057": {
+        "tasmax": 20.8,
+        "tasmean": 17.3,
+        "tasmin": 14.4
+      },
+      "2058": {
+        "tasmax": 20.6,
+        "tasmean": 16.9,
+        "tasmin": 13.8
+      },
+      "2059": {
+        "tasmax": 22.8,
+        "tasmean": 19,
+        "tasmin": 15.2
+      },
+      "2060": {
+        "tasmax": 22.4,
+        "tasmean": 18.9,
+        "tasmin": 15.6
+      },
+      "2061": {
+        "tasmax": 24.2,
+        "tasmean": 20.6,
+        "tasmin": 17.2
+      },
+      "2062": {
+        "tasmax": 21.9,
+        "tasmean": 18.1,
+        "tasmin": 14.5
+      },
+      "2063": {
+        "tasmax": 22,
+        "tasmean": 18.1,
+        "tasmin": 14.6
+      },
+      "2064": {
+        "tasmax": 21.4,
+        "tasmean": 17.9,
+        "tasmin": 14.7
+      },
+      "2065": {
+        "tasmax": 19.6,
+        "tasmean": 16.2,
+        "tasmin": 13.1
+      },
+      "2066": {
+        "tasmax": 21.9,
+        "tasmean": 18.3,
+        "tasmin": 14.9
+      },
+      "2067": {
+        "tasmax": 21.7,
+        "tasmean": 18.2,
+        "tasmin": 14.9
+      },
+      "2068": {
+        "tasmax": 22.8,
+        "tasmean": 19.2,
+        "tasmin": 16.2
+      },
+      "2069": {
+        "tasmax": 21,
+        "tasmean": 17.7,
+        "tasmin": 14.4
+      },
+      "2070": {
+        "tasmax": 19.6,
+        "tasmean": 16.2,
+        "tasmin": 13
+      },
+      "2071": {
+        "tasmax": 19.4,
+        "tasmean": 15.8,
+        "tasmin": 12.5
+      },
+      "2072": {
+        "tasmax": 21,
+        "tasmean": 17.7,
+        "tasmin": 14.6
+      },
+      "2073": {
+        "tasmax": 22,
+        "tasmean": 18.4,
+        "tasmin": 15.2
+      },
+      "2074": {
+        "tasmax": 21.4,
+        "tasmean": 17.8,
+        "tasmin": 14.8
+      },
+      "2075": {
+        "tasmax": 22.6,
+        "tasmean": 18.8,
+        "tasmin": 15.3
+      },
+      "2076": {
+        "tasmax": 22.8,
+        "tasmean": 18.8,
+        "tasmin": 15.2
+      },
+      "2077": {
+        "tasmax": 24,
+        "tasmean": 20.5,
+        "tasmin": 17.2
+      },
+      "2078": {
+        "tasmax": 20.7,
+        "tasmean": 17.1,
+        "tasmin": 13.8
+      },
+      "2079": {
+        "tasmax": 19.8,
+        "tasmean": 16.4,
+        "tasmin": 13.5
+      },
+      "2080": {
+        "tasmax": 22.8,
+        "tasmean": 19.1,
+        "tasmin": 15.8
+      },
+      "2081": {
+        "tasmax": 21.3,
+        "tasmean": 17.5,
+        "tasmin": 14.1
+      },
+      "2082": {
+        "tasmax": 21,
+        "tasmean": 17.4,
+        "tasmin": 14.3
+      },
+      "2083": {
+        "tasmax": 21.4,
+        "tasmean": 17.9,
+        "tasmin": 14.7
+      },
+      "2084": {
+        "tasmax": 21.6,
+        "tasmean": 18,
+        "tasmin": 14.9
+      },
+      "2085": {
+        "tasmax": 22.8,
+        "tasmean": 19.3,
+        "tasmin": 15.9
+      },
+      "2086": {
+        "tasmax": 21.6,
+        "tasmean": 17.7,
+        "tasmin": 14.2
+      },
+      "2087": {
+        "tasmax": 21.3,
+        "tasmean": 18,
+        "tasmin": 14.9
+      },
+      "2088": {
+        "tasmax": 20.4,
+        "tasmean": 17,
+        "tasmin": 13.9
+      },
+      "2089": {
+        "tasmax": 20.3,
+        "tasmean": 16.7,
+        "tasmin": 13.5
+      },
+      "2090": {
+        "tasmax": 19.8,
+        "tasmean": 16,
+        "tasmin": 12.7
+      },
+      "2091": {
+        "tasmax": 21.5,
+        "tasmean": 17.8,
+        "tasmin": 14.5
+      },
+      "2092": {
+        "tasmax": 20.1,
+        "tasmean": 16.7,
+        "tasmin": 13.7
+      },
+      "2093": {
+        "tasmax": 20.9,
+        "tasmean": 17.2,
+        "tasmin": 14
+      },
+      "2094": {
+        "tasmax": 21.8,
+        "tasmean": 18.3,
+        "tasmin": 15.1
+      },
+      "2095": {
+        "tasmax": 21.9,
+        "tasmean": 18.3,
+        "tasmin": 15.2
+      },
+      "2096": {
+        "tasmax": 21.7,
+        "tasmean": 18.1,
+        "tasmin": 14.9
+      },
+      "2097": {
+        "tasmax": 22.4,
+        "tasmean": 18.8,
+        "tasmin": 15.4
+      },
+      "2098": {
+        "tasmax": 21.1,
+        "tasmean": 17.6,
+        "tasmin": 14.3
+      },
+      "2099": {
+        "tasmax": 19.2,
+        "tasmean": 15.7,
+        "tasmin": 12.6
+      },
+      "2100": {
+        "tasmax": 22.1,
+        "tasmean": 18.4,
+        "tasmin": 15.1
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 19.8,
+        "tasmean": 16.4,
+        "tasmin": 13.4
+      },
+      "2008": {
+        "tasmax": 23.7,
+        "tasmean": 19.9,
+        "tasmin": 16.1
+      },
+      "2009": {
+        "tasmax": 20.9,
+        "tasmean": 16.9,
+        "tasmin": 13.4
+      },
+      "2010": {
+        "tasmax": 21.7,
+        "tasmean": 17.8,
+        "tasmin": 14.1
+      },
+      "2011": {
+        "tasmax": 19.4,
+        "tasmean": 15.8,
+        "tasmin": 12.5
+      },
+      "2012": {
+        "tasmax": 20.1,
+        "tasmean": 16.7,
+        "tasmin": 13.7
+      },
+      "2013": {
+        "tasmax": 20.7,
+        "tasmean": 16.9,
+        "tasmin": 13.4
+      },
+      "2014": {
+        "tasmax": 20.8,
+        "tasmean": 17.6,
+        "tasmin": 14.5
+      },
+      "2015": {
+        "tasmax": 21.1,
+        "tasmean": 17.9,
+        "tasmin": 14.9
+      },
+      "2016": {
+        "tasmax": 21.4,
+        "tasmean": 17.6,
+        "tasmin": 13.9
+      },
+      "2017": {
+        "tasmax": 21.4,
+        "tasmean": 17.8,
+        "tasmin": 14.2
+      },
+      "2018": {
+        "tasmax": 20.5,
+        "tasmean": 17,
+        "tasmin": 13.7
+      },
+      "2019": {
+        "tasmax": 22.5,
+        "tasmean": 18.8,
+        "tasmin": 15.4
+      },
+      "2020": {
+        "tasmax": 20.8,
+        "tasmean": 17.1,
+        "tasmin": 13.6
+      },
+      "2021": {
+        "tasmax": 18.7,
+        "tasmean": 15,
+        "tasmin": 11.7
+      },
+      "2022": {
+        "tasmax": 19,
+        "tasmean": 15.3,
+        "tasmin": 12.2
+      },
+      "2023": {
+        "tasmax": 22.6,
+        "tasmean": 18.7,
+        "tasmin": 15.3
+      },
+      "2024": {
+        "tasmax": 19.6,
+        "tasmean": 16.1,
+        "tasmin": 13.2
+      },
+      "2025": {
+        "tasmax": 20.6,
+        "tasmean": 16.9,
+        "tasmin": 13.5
+      },
+      "2026": {
+        "tasmax": 20.7,
+        "tasmean": 17.3,
+        "tasmin": 14.2
+      },
+      "2027": {
+        "tasmax": 20.9,
+        "tasmean": 17.4,
+        "tasmin": 14.1
+      },
+      "2028": {
+        "tasmax": 21.4,
+        "tasmean": 17.7,
+        "tasmin": 14.3
+      },
+      "2029": {
+        "tasmax": 22,
+        "tasmean": 18.3,
+        "tasmin": 15.3
+      },
+      "2030": {
+        "tasmax": 19.9,
+        "tasmean": 16.4,
+        "tasmin": 13.1
+      },
+      "2031": {
+        "tasmax": 21.7,
+        "tasmean": 17.9,
+        "tasmin": 14.4
+      },
+      "2032": {
+        "tasmax": 21.7,
+        "tasmean": 17.9,
+        "tasmin": 14.8
+      },
+      "2033": {
+        "tasmax": 20.2,
+        "tasmean": 16.3,
+        "tasmin": 13.1
+      },
+      "2034": {
+        "tasmax": 20.5,
+        "tasmean": 17,
+        "tasmin": 13.7
+      },
+      "2035": {
+        "tasmax": 22.1,
+        "tasmean": 18.7,
+        "tasmin": 15.9
+      },
+      "2036": {
+        "tasmax": 20.3,
+        "tasmean": 16.8,
+        "tasmin": 13.4
+      },
+      "2037": {
+        "tasmax": 22.9,
+        "tasmean": 19.3,
+        "tasmin": 16
+      },
+      "2038": {
+        "tasmax": 21.1,
+        "tasmean": 17.4,
+        "tasmin": 14.1
+      },
+      "2039": {
+        "tasmax": 22.3,
+        "tasmean": 18.6,
+        "tasmin": 15
+      },
+      "2040": {
+        "tasmax": 20.1,
+        "tasmean": 16.5,
+        "tasmin": 13.1
+      },
+      "2041": {
+        "tasmax": 21.6,
+        "tasmean": 17.7,
+        "tasmin": 14
+      },
+      "2042": {
+        "tasmax": 21.9,
+        "tasmean": 18.3,
+        "tasmin": 15.1
+      },
+      "2043": {
+        "tasmax": 20.9,
+        "tasmean": 16.9,
+        "tasmin": 13.5
+      },
+      "2044": {
+        "tasmax": 25.1,
+        "tasmean": 20.8,
+        "tasmin": 17
+      },
+      "2045": {
+        "tasmax": 24.3,
+        "tasmean": 19.9,
+        "tasmin": 16.1
+      },
+      "2046": {
+        "tasmax": 22,
+        "tasmean": 18.7,
+        "tasmin": 15.4
+      },
+      "2047": {
+        "tasmax": 21.2,
+        "tasmean": 17.7,
+        "tasmin": 14.5
+      },
+      "2048": {
+        "tasmax": 20.4,
+        "tasmean": 16.8,
+        "tasmin": 13.8
+      },
+      "2049": {
+        "tasmax": 21.5,
+        "tasmean": 17.8,
+        "tasmin": 14.7
+      },
+      "2050": {
+        "tasmax": 21.3,
+        "tasmean": 17.8,
+        "tasmin": 14.9
+      },
+      "2051": {
+        "tasmax": 22,
+        "tasmean": 18.4,
+        "tasmin": 15.2
+      },
+      "2052": {
+        "tasmax": 23.7,
+        "tasmean": 19.8,
+        "tasmin": 16.1
+      },
+      "2053": {
+        "tasmax": 22.8,
+        "tasmean": 19,
+        "tasmin": 15.8
+      },
+      "2054": {
+        "tasmax": 21.1,
+        "tasmean": 17.6,
+        "tasmin": 14.5
+      },
+      "2055": {
+        "tasmax": 20.2,
+        "tasmean": 16.6,
+        "tasmin": 13.6
+      },
+      "2056": {
+        "tasmax": 21.7,
+        "tasmean": 18.4,
+        "tasmin": 15.7
+      },
+      "2057": {
+        "tasmax": 23.6,
+        "tasmean": 19.9,
+        "tasmin": 16.3
+      },
+      "2058": {
+        "tasmax": 22.3,
+        "tasmean": 18.3,
+        "tasmin": 15
+      },
+      "2059": {
+        "tasmax": 20.4,
+        "tasmean": 16.7,
+        "tasmin": 13.1
+      },
+      "2060": {
+        "tasmax": 22,
+        "tasmean": 18.4,
+        "tasmin": 15.3
+      },
+      "2061": {
+        "tasmax": 22.6,
+        "tasmean": 19.2,
+        "tasmin": 15.9
+      },
+      "2062": {
+        "tasmax": 21,
+        "tasmean": 17.3,
+        "tasmin": 14.2
+      },
+      "2063": {
+        "tasmax": 22.4,
+        "tasmean": 18.8,
+        "tasmin": 15.6
+      },
+      "2064": {
+        "tasmax": 21.1,
+        "tasmean": 17.5,
+        "tasmin": 14.1
+      },
+      "2065": {
+        "tasmax": 22.4,
+        "tasmean": 18.5,
+        "tasmin": 14.9
+      },
+      "2066": {
+        "tasmax": 20.5,
+        "tasmean": 16.9,
+        "tasmin": 13.7
+      },
+      "2067": {
+        "tasmax": 18.8,
+        "tasmean": 15.7,
+        "tasmin": 12.8
+      },
+      "2068": {
+        "tasmax": 22.9,
+        "tasmean": 19,
+        "tasmin": 15.6
+      },
+      "2069": {
+        "tasmax": 24,
+        "tasmean": 20.3,
+        "tasmin": 17
+      },
+      "2070": {
+        "tasmax": 24.9,
+        "tasmean": 20.8,
+        "tasmin": 17.1
+      },
+      "2071": {
+        "tasmax": 21.9,
+        "tasmean": 18,
+        "tasmin": 14.2
+      },
+      "2072": {
+        "tasmax": 23.3,
+        "tasmean": 19.2,
+        "tasmin": 15.5
+      },
+      "2073": {
+        "tasmax": 25.2,
+        "tasmean": 21.4,
+        "tasmin": 17.8
+      },
+      "2074": {
+        "tasmax": 21.6,
+        "tasmean": 17.7,
+        "tasmin": 14.3
+      },
+      "2075": {
+        "tasmax": 21.5,
+        "tasmean": 18,
+        "tasmin": 15
+      },
+      "2076": {
+        "tasmax": 23.8,
+        "tasmean": 20.3,
+        "tasmin": 17
+      },
+      "2077": {
+        "tasmax": 21.7,
+        "tasmean": 18,
+        "tasmin": 14.9
+      },
+      "2078": {
+        "tasmax": 21.2,
+        "tasmean": 17.5,
+        "tasmin": 14.5
+      },
+      "2079": {
+        "tasmax": 19.8,
+        "tasmean": 16.2,
+        "tasmin": 12.9
+      },
+      "2080": {
+        "tasmax": 23.3,
+        "tasmean": 19.7,
+        "tasmin": 16
+      },
+      "2081": {
+        "tasmax": 20.9,
+        "tasmean": 17.1,
+        "tasmin": 13.8
+      },
+      "2082": {
+        "tasmax": 21.9,
+        "tasmean": 18.2,
+        "tasmin": 15
+      },
+      "2083": {
+        "tasmax": 22.7,
+        "tasmean": 19.2,
+        "tasmin": 15.8
+      },
+      "2084": {
+        "tasmax": 20.7,
+        "tasmean": 16.9,
+        "tasmin": 13.7
+      },
+      "2085": {
+        "tasmax": 20.6,
+        "tasmean": 16.9,
+        "tasmin": 13.8
+      },
+      "2086": {
+        "tasmax": 23.2,
+        "tasmean": 19.6,
+        "tasmin": 16.3
+      },
+      "2087": {
+        "tasmax": 24.6,
+        "tasmean": 20.7,
+        "tasmin": 17.3
+      },
+      "2088": {
+        "tasmax": 21.5,
+        "tasmean": 17.9,
+        "tasmin": 14.6
+      },
+      "2089": {
+        "tasmax": 21.3,
+        "tasmean": 17.6,
+        "tasmin": 14.5
+      },
+      "2090": {
+        "tasmax": 21.1,
+        "tasmean": 17.3,
+        "tasmin": 13.7
+      },
+      "2091": {
+        "tasmax": 22.4,
+        "tasmean": 18.5,
+        "tasmin": 15.3
+      },
+      "2092": {
+        "tasmax": 19.4,
+        "tasmean": 15.7,
+        "tasmin": 12.5
+      },
+      "2093": {
+        "tasmax": 23.9,
+        "tasmean": 20,
+        "tasmin": 16.6
+      },
+      "2094": {
+        "tasmax": 20.5,
+        "tasmean": 17,
+        "tasmin": 13.8
+      },
+      "2095": {
+        "tasmax": 24.5,
+        "tasmean": 20.8,
+        "tasmin": 17.5
+      },
+      "2096": {
+        "tasmax": 20.1,
+        "tasmean": 16.7,
+        "tasmin": 13.5
+      },
+      "2097": {
+        "tasmax": 24.4,
+        "tasmean": 20.7,
+        "tasmin": 17.6
+      },
+      "2098": {
+        "tasmax": 23.6,
+        "tasmean": 19.9,
+        "tasmin": 16.5
+      },
+      "2099": {
+        "tasmax": 24.2,
+        "tasmean": 20.6,
+        "tasmin": 17.3
+      },
+      "2100": {
+        "tasmax": 21.2,
+        "tasmean": 17.5,
+        "tasmin": 14.4
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 19.5,
+        "tasmean": 15.4,
+        "tasmin": 12.1
+      },
+      "2008": {
+        "tasmax": 22.3,
+        "tasmean": 18.1,
+        "tasmin": 14.5
+      },
+      "2009": {
+        "tasmax": 20,
+        "tasmean": 16.2,
+        "tasmin": 12.7
+      },
+      "2010": {
+        "tasmax": 22.4,
+        "tasmean": 18.8,
+        "tasmin": 15.5
+      },
+      "2011": {
+        "tasmax": 20.6,
+        "tasmean": 16.9,
+        "tasmin": 13.7
+      },
+      "2012": {
+        "tasmax": 21.8,
+        "tasmean": 18.1,
+        "tasmin": 14.7
+      },
+      "2013": {
+        "tasmax": 22.4,
+        "tasmean": 18.4,
+        "tasmin": 14.6
+      },
+      "2014": {
+        "tasmax": 22.8,
+        "tasmean": 18.7,
+        "tasmin": 15.1
+      },
+      "2015": {
+        "tasmax": 23.3,
+        "tasmean": 19.4,
+        "tasmin": 15.7
+      },
+      "2016": {
+        "tasmax": 23.6,
+        "tasmean": 19.5,
+        "tasmin": 15.7
+      },
+      "2017": {
+        "tasmax": 24.6,
+        "tasmean": 20.6,
+        "tasmin": 17
+      },
+      "2018": {
+        "tasmax": 19.8,
+        "tasmean": 16,
+        "tasmin": 12.6
+      },
+      "2019": {
+        "tasmax": 22.3,
+        "tasmean": 18.5,
+        "tasmin": 15
+      },
+      "2020": {
+        "tasmax": 22.3,
+        "tasmean": 18.5,
+        "tasmin": 15
+      },
+      "2021": {
+        "tasmax": 21.3,
+        "tasmean": 17.6,
+        "tasmin": 14.4
+      },
+      "2022": {
+        "tasmax": 20.6,
+        "tasmean": 16.8,
+        "tasmin": 13.4
+      },
+      "2023": {
+        "tasmax": 20.5,
+        "tasmean": 17,
+        "tasmin": 13.8
+      },
+      "2024": {
+        "tasmax": 20.9,
+        "tasmean": 17.1,
+        "tasmin": 13.5
+      },
+      "2025": {
+        "tasmax": 21,
+        "tasmean": 17.6,
+        "tasmin": 14.3
+      },
+      "2026": {
+        "tasmax": 19.6,
+        "tasmean": 16,
+        "tasmin": 12.7
+      },
+      "2027": {
+        "tasmax": 21.9,
+        "tasmean": 18.1,
+        "tasmin": 14.9
+      },
+      "2028": {
+        "tasmax": 20.7,
+        "tasmean": 17.4,
+        "tasmin": 14.6
+      },
+      "2029": {
+        "tasmax": 18.5,
+        "tasmean": 15,
+        "tasmin": 11.8
+      },
+      "2030": {
+        "tasmax": 19.7,
+        "tasmean": 16.1,
+        "tasmin": 12.8
+      },
+      "2031": {
+        "tasmax": 22.5,
+        "tasmean": 18.4,
+        "tasmin": 14.9
+      },
+      "2032": {
+        "tasmax": 20.1,
+        "tasmean": 16.5,
+        "tasmin": 13.5
+      },
+      "2033": {
+        "tasmax": 20.7,
+        "tasmean": 17.3,
+        "tasmin": 14.2
+      },
+      "2034": {
+        "tasmax": 20.6,
+        "tasmean": 17.2,
+        "tasmin": 14.1
+      },
+      "2035": {
+        "tasmax": 20.7,
+        "tasmean": 17,
+        "tasmin": 14
+      },
+      "2036": {
+        "tasmax": 20,
+        "tasmean": 16.6,
+        "tasmin": 13.5
+      },
+      "2037": {
+        "tasmax": 21.5,
+        "tasmean": 17.9,
+        "tasmin": 14.6
+      },
+      "2038": {
+        "tasmax": 20.8,
+        "tasmean": 16.9,
+        "tasmin": 13.5
+      },
+      "2039": {
+        "tasmax": 19.8,
+        "tasmean": 15.9,
+        "tasmin": 12.6
+      },
+      "2040": {
+        "tasmax": 19.1,
+        "tasmean": 15.4,
+        "tasmin": 12.2
+      },
+      "2041": {
+        "tasmax": 22.9,
+        "tasmean": 19,
+        "tasmin": 15.8
+      },
+      "2042": {
+        "tasmax": 23.5,
+        "tasmean": 19.8,
+        "tasmin": 16.6
+      },
+      "2043": {
+        "tasmax": 21.5,
+        "tasmean": 17.7,
+        "tasmin": 14.6
+      },
+      "2044": {
+        "tasmax": 21.7,
+        "tasmean": 18.1,
+        "tasmin": 14.9
+      },
+      "2045": {
+        "tasmax": 22.2,
+        "tasmean": 18.7,
+        "tasmin": 15.7
+      },
+      "2046": {
+        "tasmax": 22.4,
+        "tasmean": 18.6,
+        "tasmin": 15.2
+      },
+      "2047": {
+        "tasmax": 21.5,
+        "tasmean": 18,
+        "tasmin": 15.1
+      },
+      "2048": {
+        "tasmax": 22.8,
+        "tasmean": 19,
+        "tasmin": 15.4
+      },
+      "2049": {
+        "tasmax": 23,
+        "tasmean": 19.3,
+        "tasmin": 16.1
+      },
+      "2050": {
+        "tasmax": 19,
+        "tasmean": 15.5,
+        "tasmin": 12.3
+      },
+      "2051": {
+        "tasmax": 22.5,
+        "tasmean": 19.1,
+        "tasmin": 16.1
+      },
+      "2052": {
+        "tasmax": 22.3,
+        "tasmean": 18.9,
+        "tasmin": 16
+      },
+      "2053": {
+        "tasmax": 22.1,
+        "tasmean": 18.6,
+        "tasmin": 15.4
+      },
+      "2054": {
+        "tasmax": 21.2,
+        "tasmean": 17.5,
+        "tasmin": 14
+      },
+      "2055": {
+        "tasmax": 22.5,
+        "tasmean": 19,
+        "tasmin": 15.7
+      },
+      "2056": {
+        "tasmax": 21.7,
+        "tasmean": 18.1,
+        "tasmin": 15.1
+      },
+      "2057": {
+        "tasmax": 22.4,
+        "tasmean": 19.1,
+        "tasmin": 15.8
+      },
+      "2058": {
+        "tasmax": 21.1,
+        "tasmean": 17.9,
+        "tasmin": 14.8
+      },
+      "2059": {
+        "tasmax": 23.7,
+        "tasmean": 20.2,
+        "tasmin": 17
+      },
+      "2060": {
+        "tasmax": 21.7,
+        "tasmean": 18.6,
+        "tasmin": 15.7
+      },
+      "2061": {
+        "tasmax": 22.6,
+        "tasmean": 18.6,
+        "tasmin": 15.3
+      },
+      "2062": {
+        "tasmax": 24.4,
+        "tasmean": 20.7,
+        "tasmin": 17.2
+      },
+      "2063": {
+        "tasmax": 22.6,
+        "tasmean": 19.1,
+        "tasmin": 15.8
+      },
+      "2064": {
+        "tasmax": 23.9,
+        "tasmean": 20.2,
+        "tasmin": 16.8
+      },
+      "2065": {
+        "tasmax": 21.3,
+        "tasmean": 17.8,
+        "tasmin": 14.9
+      },
+      "2066": {
+        "tasmax": 20.8,
+        "tasmean": 17.4,
+        "tasmin": 14.2
+      },
+      "2067": {
+        "tasmax": 20.2,
+        "tasmean": 17,
+        "tasmin": 14.2
+      },
+      "2068": {
+        "tasmax": 22.4,
+        "tasmean": 18.9,
+        "tasmin": 15.9
+      },
+      "2069": {
+        "tasmax": 22,
+        "tasmean": 18.2,
+        "tasmin": 14.8
+      },
+      "2070": {
+        "tasmax": 22.2,
+        "tasmean": 18.9,
+        "tasmin": 15.9
+      },
+      "2071": {
+        "tasmax": 22.5,
+        "tasmean": 18.9,
+        "tasmin": 15.5
+      },
+      "2072": {
+        "tasmax": 21.4,
+        "tasmean": 17.9,
+        "tasmin": 14.5
+      },
+      "2073": {
+        "tasmax": 23.6,
+        "tasmean": 20,
+        "tasmin": 16.6
+      },
+      "2074": {
+        "tasmax": 23.1,
+        "tasmean": 19.4,
+        "tasmin": 16.1
+      },
+      "2075": {
+        "tasmax": 22.6,
+        "tasmean": 18.7,
+        "tasmin": 15.1
+      },
+      "2076": {
+        "tasmax": 24.4,
+        "tasmean": 20.7,
+        "tasmin": 17
+      },
+      "2077": {
+        "tasmax": 22.6,
+        "tasmean": 18.9,
+        "tasmin": 15.6
+      },
+      "2078": {
+        "tasmax": 22.1,
+        "tasmean": 18.1,
+        "tasmin": 14.8
+      },
+      "2079": {
+        "tasmax": 22.4,
+        "tasmean": 18.7,
+        "tasmin": 15.4
+      },
+      "2080": {
+        "tasmax": 23.5,
+        "tasmean": 19.8,
+        "tasmin": 16.9
+      },
+      "2081": {
+        "tasmax": 23.7,
+        "tasmean": 19.6,
+        "tasmin": 16.1
+      },
+      "2082": {
+        "tasmax": 24.3,
+        "tasmean": 20.8,
+        "tasmin": 17.5
+      },
+      "2083": {
+        "tasmax": 20.6,
+        "tasmean": 17.2,
+        "tasmin": 14
+      },
+      "2084": {
+        "tasmax": 23.4,
+        "tasmean": 19.6,
+        "tasmin": 16.5
+      },
+      "2085": {
+        "tasmax": 24.2,
+        "tasmean": 20.2,
+        "tasmin": 16.9
+      },
+      "2086": {
+        "tasmax": 24.1,
+        "tasmean": 20.6,
+        "tasmin": 17.3
+      },
+      "2087": {
+        "tasmax": 22.5,
+        "tasmean": 18.7,
+        "tasmin": 15.6
+      },
+      "2088": {
+        "tasmax": 23.2,
+        "tasmean": 20,
+        "tasmin": 16.9
+      },
+      "2089": {
+        "tasmax": 22.1,
+        "tasmean": 18.4,
+        "tasmin": 14.8
+      },
+      "2090": {
+        "tasmax": 21.7,
+        "tasmean": 18.5,
+        "tasmin": 15.4
+      },
+      "2091": {
+        "tasmax": 25,
+        "tasmean": 21.1,
+        "tasmin": 17.7
+      },
+      "2092": {
+        "tasmax": 22.5,
+        "tasmean": 19.1,
+        "tasmin": 16.1
+      },
+      "2093": {
+        "tasmax": 24.9,
+        "tasmean": 21.2,
+        "tasmin": 17.4
+      },
+      "2094": {
+        "tasmax": 23.3,
+        "tasmean": 19.7,
+        "tasmin": 16.6
+      },
+      "2095": {
+        "tasmax": 20.7,
+        "tasmean": 17.3,
+        "tasmin": 14.5
+      },
+      "2096": {
+        "tasmax": 21.7,
+        "tasmean": 18.2,
+        "tasmin": 15.3
+      },
+      "2097": {
+        "tasmax": 24.4,
+        "tasmean": 20.9,
+        "tasmin": 17.7
+      },
+      "2098": {
+        "tasmax": 25,
+        "tasmean": 21.2,
+        "tasmin": 17.9
+      },
+      "2099": {
+        "tasmax": 24.5,
+        "tasmean": 20.9,
+        "tasmin": 17.3
+      },
+      "2100": {
+        "tasmax": 22.4,
+        "tasmean": 18.4,
+        "tasmin": 15
+      }
+    }
+  },
+  "IPSL-CM5A-LR": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 22.7,
+        "tasmean": 17.3,
+        "tasmin": 10.7
+      },
+      "2008": {
+        "tasmax": 22.5,
+        "tasmean": 18.1,
+        "tasmin": 9.7
+      },
+      "2009": {
+        "tasmax": 24,
+        "tasmean": 18.8,
+        "tasmin": 11.9
+      },
+      "2010": {
+        "tasmax": 26.3,
+        "tasmean": 18.6,
+        "tasmin": 9.7
+      },
+      "2011": {
+        "tasmax": 22.9,
+        "tasmean": 18.6,
+        "tasmin": 11.4
+      },
+      "2012": {
+        "tasmax": 25.8,
+        "tasmean": 20,
+        "tasmin": 11.5
+      },
+      "2013": {
+        "tasmax": 23.6,
+        "tasmean": 17.5,
+        "tasmin": 10
+      },
+      "2014": {
+        "tasmax": 23.5,
+        "tasmean": 17,
+        "tasmin": 9.7
+      },
+      "2015": {
+        "tasmax": 27.6,
+        "tasmean": 19.5,
+        "tasmin": 8.4
+      },
+      "2016": {
+        "tasmax": 21.7,
+        "tasmean": 15.5,
+        "tasmin": 10.2
+      },
+      "2017": {
+        "tasmax": 22.7,
+        "tasmean": 15.4,
+        "tasmin": 8.2
+      },
+      "2018": {
+        "tasmax": 26.3,
+        "tasmean": 19.6,
+        "tasmin": 10.5
+      },
+      "2019": {
+        "tasmax": 25.4,
+        "tasmean": 19.6,
+        "tasmin": 11.9
+      },
+      "2020": {
+        "tasmax": 26.4,
+        "tasmean": 19.6,
+        "tasmin": 12.8
+      },
+      "2021": {
+        "tasmax": 26.7,
+        "tasmean": 18.6,
+        "tasmin": 9.6
+      },
+      "2022": {
+        "tasmax": 23.2,
+        "tasmean": 16.8,
+        "tasmin": 8.5
+      },
+      "2023": {
+        "tasmax": 23.9,
+        "tasmean": 17.6,
+        "tasmin": 9
+      },
+      "2024": {
+        "tasmax": 24,
+        "tasmean": 18.8,
+        "tasmin": 11.5
+      },
+      "2025": {
+        "tasmax": 24.1,
+        "tasmean": 18.4,
+        "tasmin": 11.3
+      },
+      "2026": {
+        "tasmax": 24.3,
+        "tasmean": 18.1,
+        "tasmin": 9.8
+      },
+      "2027": {
+        "tasmax": 24.5,
+        "tasmean": 19.8,
+        "tasmin": 13
+      },
+      "2028": {
+        "tasmax": 23.9,
+        "tasmean": 18.5,
+        "tasmin": 8.6
+      },
+      "2029": {
+        "tasmax": 23.4,
+        "tasmean": 18.9,
+        "tasmin": 10.9
+      },
+      "2030": {
+        "tasmax": 26.5,
+        "tasmean": 18.3,
+        "tasmin": 10.9
+      },
+      "2031": {
+        "tasmax": 25.4,
+        "tasmean": 19.7,
+        "tasmin": 11
+      },
+      "2032": {
+        "tasmax": 22.9,
+        "tasmean": 18.7,
+        "tasmin": 12.7
+      },
+      "2033": {
+        "tasmax": 26.6,
+        "tasmean": 20.6,
+        "tasmin": 11.9
+      },
+      "2034": {
+        "tasmax": 23.4,
+        "tasmean": 19.1,
+        "tasmin": 12.7
+      },
+      "2035": {
+        "tasmax": 24.5,
+        "tasmean": 18.2,
+        "tasmin": 11.2
+      },
+      "2036": {
+        "tasmax": 23,
+        "tasmean": 17.2,
+        "tasmin": 6.5
+      },
+      "2037": {
+        "tasmax": 25.8,
+        "tasmean": 18.9,
+        "tasmin": 11.1
+      },
+      "2038": {
+        "tasmax": 24,
+        "tasmean": 18.6,
+        "tasmin": 12.1
+      },
+      "2039": {
+        "tasmax": 26.5,
+        "tasmean": 20.3,
+        "tasmin": 12.9
+      },
+      "2040": {
+        "tasmax": 25.5,
+        "tasmean": 17.4,
+        "tasmin": 9.7
+      },
+      "2041": {
+        "tasmax": 26.1,
+        "tasmean": 17.9,
+        "tasmin": 10
+      },
+      "2042": {
+        "tasmax": 26,
+        "tasmean": 20.2,
+        "tasmin": 9.9
+      },
+      "2043": {
+        "tasmax": 24.5,
+        "tasmean": 19.5,
+        "tasmin": 12.4
+      },
+      "2044": {
+        "tasmax": 22.7,
+        "tasmean": 14.9,
+        "tasmin": 5.8
+      },
+      "2045": {
+        "tasmax": 25.5,
+        "tasmean": 19.3,
+        "tasmin": 10.3
+      },
+      "2046": {
+        "tasmax": 24.8,
+        "tasmean": 17.9,
+        "tasmin": 7.9
+      },
+      "2047": {
+        "tasmax": 25.9,
+        "tasmean": 19.7,
+        "tasmin": 11.4
+      },
+      "2048": {
+        "tasmax": 25.6,
+        "tasmean": 18.6,
+        "tasmin": 10
+      },
+      "2049": {
+        "tasmax": 26.5,
+        "tasmean": 20.7,
+        "tasmin": 13.2
+      },
+      "2050": {
+        "tasmax": 26.4,
+        "tasmean": 21,
+        "tasmin": 14.4
+      },
+      "2051": {
+        "tasmax": 24.6,
+        "tasmean": 18.8,
+        "tasmin": 10.3
+      },
+      "2052": {
+        "tasmax": 25,
+        "tasmean": 18.4,
+        "tasmin": 8.4
+      },
+      "2053": {
+        "tasmax": 26.7,
+        "tasmean": 20.1,
+        "tasmin": 12.1
+      },
+      "2054": {
+        "tasmax": 28.3,
+        "tasmean": 20.1,
+        "tasmin": 12.1
+      },
+      "2055": {
+        "tasmax": 28.2,
+        "tasmean": 21.1,
+        "tasmin": 14.1
+      },
+      "2056": {
+        "tasmax": 25.3,
+        "tasmean": 19.9,
+        "tasmin": 12.9
+      },
+      "2057": {
+        "tasmax": 24.8,
+        "tasmean": 19,
+        "tasmin": 12.5
+      },
+      "2058": {
+        "tasmax": 24.8,
+        "tasmean": 19.1,
+        "tasmin": 11.3
+      },
+      "2059": {
+        "tasmax": 24.3,
+        "tasmean": 17.6,
+        "tasmin": 9.6
+      },
+      "2060": {
+        "tasmax": 23.9,
+        "tasmean": 17.4,
+        "tasmin": 10
+      },
+      "2061": {
+        "tasmax": 26,
+        "tasmean": 20.4,
+        "tasmin": 12.3
+      },
+      "2062": {
+        "tasmax": 25.4,
+        "tasmean": 20.2,
+        "tasmin": 12.7
+      },
+      "2063": {
+        "tasmax": 27.1,
+        "tasmean": 21.7,
+        "tasmin": 14.5
+      },
+      "2064": {
+        "tasmax": 27.3,
+        "tasmean": 19.6,
+        "tasmin": 11.3
+      },
+      "2065": {
+        "tasmax": 25.9,
+        "tasmean": 18.4,
+        "tasmin": 9.7
+      },
+      "2066": {
+        "tasmax": 28.8,
+        "tasmean": 20.9,
+        "tasmin": 13.7
+      },
+      "2067": {
+        "tasmax": 28.8,
+        "tasmean": 20.3,
+        "tasmin": 8.6
+      },
+      "2068": {
+        "tasmax": 24.8,
+        "tasmean": 20.3,
+        "tasmin": 13.1
+      },
+      "2069": {
+        "tasmax": 26.2,
+        "tasmean": 21.2,
+        "tasmin": 13.4
+      },
+      "2070": {
+        "tasmax": 26.6,
+        "tasmean": 21.3,
+        "tasmin": 14.8
+      },
+      "2071": {
+        "tasmax": 27.1,
+        "tasmean": 20,
+        "tasmin": 11.4
+      },
+      "2072": {
+        "tasmax": 26.5,
+        "tasmean": 19.9,
+        "tasmin": 11.4
+      },
+      "2073": {
+        "tasmax": 26.3,
+        "tasmean": 19.7,
+        "tasmin": 12.1
+      },
+      "2074": {
+        "tasmax": 27.9,
+        "tasmean": 20.6,
+        "tasmin": 12.3
+      },
+      "2075": {
+        "tasmax": 26.1,
+        "tasmean": 21.2,
+        "tasmin": 15.3
+      },
+      "2076": {
+        "tasmax": 24.7,
+        "tasmean": 19.2,
+        "tasmin": 12.5
+      },
+      "2077": {
+        "tasmax": 28,
+        "tasmean": 21.9,
+        "tasmin": 14.6
+      },
+      "2078": {
+        "tasmax": 25.9,
+        "tasmean": 18.4,
+        "tasmin": 11.3
+      },
+      "2079": {
+        "tasmax": 24.4,
+        "tasmean": 18.9,
+        "tasmin": 11.4
+      },
+      "2080": {
+        "tasmax": 27.5,
+        "tasmean": 21.7,
+        "tasmin": 14
+      },
+      "2081": {
+        "tasmax": 27.8,
+        "tasmean": 18.1,
+        "tasmin": 11.2
+      },
+      "2082": {
+        "tasmax": 25.4,
+        "tasmean": 19.7,
+        "tasmin": 13.1
+      },
+      "2083": {
+        "tasmax": 27.2,
+        "tasmean": 21.3,
+        "tasmin": 12.7
+      },
+      "2084": {
+        "tasmax": 24.3,
+        "tasmean": 16.9,
+        "tasmin": 8.5
+      },
+      "2085": {
+        "tasmax": 27.2,
+        "tasmean": 21.6,
+        "tasmin": 13.2
+      },
+      "2086": {
+        "tasmax": 27.3,
+        "tasmean": 21,
+        "tasmin": 12.6
+      },
+      "2087": {
+        "tasmax": 28.3,
+        "tasmean": 20.3,
+        "tasmin": 13.1
+      },
+      "2088": {
+        "tasmax": 27.4,
+        "tasmean": 21.1,
+        "tasmin": 12.3
+      },
+      "2089": {
+        "tasmax": 25.9,
+        "tasmean": 19.3,
+        "tasmin": 10
+      },
+      "2090": {
+        "tasmax": 27.7,
+        "tasmean": 21.3,
+        "tasmin": 11.3
+      },
+      "2091": {
+        "tasmax": 26.6,
+        "tasmean": 20.9,
+        "tasmin": 14.1
+      },
+      "2092": {
+        "tasmax": 26.6,
+        "tasmean": 20,
+        "tasmin": 11.1
+      },
+      "2093": {
+        "tasmax": 25.6,
+        "tasmean": 19.8,
+        "tasmin": 13.1
+      },
+      "2094": {
+        "tasmax": 27.3,
+        "tasmean": 18.6,
+        "tasmin": 9.1
+      },
+      "2095": {
+        "tasmax": 26.5,
+        "tasmean": 16.9,
+        "tasmin": 7.6
+      },
+      "2096": {
+        "tasmax": 25.1,
+        "tasmean": 20.2,
+        "tasmin": 12.3
+      },
+      "2097": {
+        "tasmax": 27.9,
+        "tasmean": 21.3,
+        "tasmin": 13
+      },
+      "2098": {
+        "tasmax": 25.5,
+        "tasmean": 20.4,
+        "tasmin": 13.1
+      },
+      "2099": {
+        "tasmax": 27.4,
+        "tasmean": 20.4,
+        "tasmin": 13.3
+      },
+      "2100": {
+        "tasmax": 28.2,
+        "tasmean": 21.3,
+        "tasmin": 13.4
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 24.4,
+        "tasmean": 19.1,
+        "tasmin": 12.1
+      },
+      "2008": {
+        "tasmax": 23.7,
+        "tasmean": 18,
+        "tasmin": 9.2
+      },
+      "2009": {
+        "tasmax": 23.5,
+        "tasmean": 15.9,
+        "tasmin": 7.8
+      },
+      "2010": {
+        "tasmax": 25.4,
+        "tasmean": 19.2,
+        "tasmin": 11.8
+      },
+      "2011": {
+        "tasmax": 23,
+        "tasmean": 18.5,
+        "tasmin": 10.7
+      },
+      "2012": {
+        "tasmax": 25.6,
+        "tasmean": 18.6,
+        "tasmin": 11.7
+      },
+      "2013": {
+        "tasmax": 24.6,
+        "tasmean": 19.6,
+        "tasmin": 12
+      },
+      "2014": {
+        "tasmax": 25.3,
+        "tasmean": 19.2,
+        "tasmin": 11.1
+      },
+      "2015": {
+        "tasmax": 23.4,
+        "tasmean": 15.3,
+        "tasmin": 4.2
+      },
+      "2016": {
+        "tasmax": 25.4,
+        "tasmean": 19.1,
+        "tasmin": 11.7
+      },
+      "2017": {
+        "tasmax": 25.5,
+        "tasmean": 17.5,
+        "tasmin": 5.1
+      },
+      "2018": {
+        "tasmax": 26.7,
+        "tasmean": 20.1,
+        "tasmin": 11.7
+      },
+      "2019": {
+        "tasmax": 21,
+        "tasmean": 14.3,
+        "tasmin": 5.3
+      },
+      "2020": {
+        "tasmax": 25.7,
+        "tasmean": 19.8,
+        "tasmin": 12.1
+      },
+      "2021": {
+        "tasmax": 26.7,
+        "tasmean": 20,
+        "tasmin": 10.7
+      },
+      "2022": {
+        "tasmax": 26.6,
+        "tasmean": 20.2,
+        "tasmin": 11.9
+      },
+      "2023": {
+        "tasmax": 24.2,
+        "tasmean": 16.9,
+        "tasmin": 9.2
+      },
+      "2024": {
+        "tasmax": 24.1,
+        "tasmean": 17.9,
+        "tasmin": 10.6
+      },
+      "2025": {
+        "tasmax": 25,
+        "tasmean": 18.6,
+        "tasmin": 8.5
+      },
+      "2026": {
+        "tasmax": 25.5,
+        "tasmean": 16.5,
+        "tasmin": 8.1
+      },
+      "2027": {
+        "tasmax": 24.1,
+        "tasmean": 18.3,
+        "tasmin": 11.4
+      },
+      "2028": {
+        "tasmax": 25.9,
+        "tasmean": 18.5,
+        "tasmin": 11.9
+      },
+      "2029": {
+        "tasmax": 26.4,
+        "tasmean": 19.4,
+        "tasmin": 11.7
+      },
+      "2030": {
+        "tasmax": 27.1,
+        "tasmean": 19,
+        "tasmin": 11.9
+      },
+      "2031": {
+        "tasmax": 27.8,
+        "tasmean": 20.4,
+        "tasmin": 12.1
+      },
+      "2032": {
+        "tasmax": 25.9,
+        "tasmean": 20.7,
+        "tasmin": 14
+      },
+      "2033": {
+        "tasmax": 25.9,
+        "tasmean": 21.2,
+        "tasmin": 14.2
+      },
+      "2034": {
+        "tasmax": 26.1,
+        "tasmean": 20.1,
+        "tasmin": 12.2
+      },
+      "2035": {
+        "tasmax": 24.8,
+        "tasmean": 19.2,
+        "tasmin": 12
+      },
+      "2036": {
+        "tasmax": 24.7,
+        "tasmean": 18,
+        "tasmin": 11.6
+      },
+      "2037": {
+        "tasmax": 27.9,
+        "tasmean": 20.3,
+        "tasmin": 8.1
+      },
+      "2038": {
+        "tasmax": 26.8,
+        "tasmean": 19.3,
+        "tasmin": 10.8
+      },
+      "2039": {
+        "tasmax": 23,
+        "tasmean": 17.8,
+        "tasmin": 10.6
+      },
+      "2040": {
+        "tasmax": 24.6,
+        "tasmean": 19.4,
+        "tasmin": 11.9
+      },
+      "2041": {
+        "tasmax": 25.3,
+        "tasmean": 19.2,
+        "tasmin": 11.9
+      },
+      "2042": {
+        "tasmax": 22.7,
+        "tasmean": 17.5,
+        "tasmin": 11
+      },
+      "2043": {
+        "tasmax": 22.3,
+        "tasmean": 17.4,
+        "tasmin": 11.4
+      },
+      "2044": {
+        "tasmax": 26.9,
+        "tasmean": 21.1,
+        "tasmin": 13.8
+      },
+      "2045": {
+        "tasmax": 27,
+        "tasmean": 19.5,
+        "tasmin": 11
+      },
+      "2046": {
+        "tasmax": 25.1,
+        "tasmean": 20.7,
+        "tasmin": 13.6
+      },
+      "2047": {
+        "tasmax": 24.3,
+        "tasmean": 19.4,
+        "tasmin": 13.5
+      },
+      "2048": {
+        "tasmax": 23.7,
+        "tasmean": 18.5,
+        "tasmin": 10.8
+      },
+      "2049": {
+        "tasmax": 25.5,
+        "tasmean": 19.5,
+        "tasmin": 13.1
+      },
+      "2050": {
+        "tasmax": 26.6,
+        "tasmean": 20,
+        "tasmin": 11.8
+      },
+      "2051": {
+        "tasmax": 25.5,
+        "tasmean": 19.2,
+        "tasmin": 12.5
+      },
+      "2052": {
+        "tasmax": 25.2,
+        "tasmean": 17.6,
+        "tasmin": 11
+      },
+      "2053": {
+        "tasmax": 27.2,
+        "tasmean": 20.8,
+        "tasmin": 11.9
+      },
+      "2054": {
+        "tasmax": 24.1,
+        "tasmean": 17.2,
+        "tasmin": 8.3
+      },
+      "2055": {
+        "tasmax": 24.5,
+        "tasmean": 18.2,
+        "tasmin": 10.5
+      },
+      "2056": {
+        "tasmax": 27.3,
+        "tasmean": 21.4,
+        "tasmin": 12.5
+      },
+      "2057": {
+        "tasmax": 24.8,
+        "tasmean": 16.5,
+        "tasmin": 3.2
+      },
+      "2058": {
+        "tasmax": 23.1,
+        "tasmean": 18.3,
+        "tasmin": 11.9
+      },
+      "2059": {
+        "tasmax": 27.6,
+        "tasmean": 21.6,
+        "tasmin": 14
+      },
+      "2060": {
+        "tasmax": 24.8,
+        "tasmean": 15.7,
+        "tasmin": 4.2
+      },
+      "2061": {
+        "tasmax": 25.9,
+        "tasmean": 19,
+        "tasmin": 12
+      },
+      "2062": {
+        "tasmax": 24,
+        "tasmean": 18.9,
+        "tasmin": 12.3
+      },
+      "2063": {
+        "tasmax": 26.7,
+        "tasmean": 21.4,
+        "tasmin": 14.8
+      },
+      "2064": {
+        "tasmax": 27.4,
+        "tasmean": 21.8,
+        "tasmin": 12.8
+      },
+      "2065": {
+        "tasmax": 23.9,
+        "tasmean": 17.8,
+        "tasmin": 9.1
+      },
+      "2066": {
+        "tasmax": 26.1,
+        "tasmean": 20.6,
+        "tasmin": 12
+      },
+      "2067": {
+        "tasmax": 25.8,
+        "tasmean": 19.3,
+        "tasmin": 11.8
+      },
+      "2068": {
+        "tasmax": 26.1,
+        "tasmean": 19.1,
+        "tasmin": 9.1
+      },
+      "2069": {
+        "tasmax": 25,
+        "tasmean": 19.7,
+        "tasmin": 14.7
+      },
+      "2070": {
+        "tasmax": 30.1,
+        "tasmean": 22.4,
+        "tasmin": 13.3
+      },
+      "2071": {
+        "tasmax": 24.2,
+        "tasmean": 17.6,
+        "tasmin": 11.1
+      },
+      "2072": {
+        "tasmax": 25.9,
+        "tasmean": 21.3,
+        "tasmin": 14.6
+      },
+      "2073": {
+        "tasmax": 24.7,
+        "tasmean": 16.1,
+        "tasmin": 6.5
+      },
+      "2074": {
+        "tasmax": 26.3,
+        "tasmean": 20.9,
+        "tasmin": 14.1
+      },
+      "2075": {
+        "tasmax": 25.2,
+        "tasmean": 19.6,
+        "tasmin": 12.3
+      },
+      "2076": {
+        "tasmax": 27.6,
+        "tasmean": 21.1,
+        "tasmin": 12.6
+      },
+      "2077": {
+        "tasmax": 26.6,
+        "tasmean": 19.2,
+        "tasmin": 12.5
+      },
+      "2078": {
+        "tasmax": 27.5,
+        "tasmean": 22.1,
+        "tasmin": 15.8
+      },
+      "2079": {
+        "tasmax": 28,
+        "tasmean": 20.5,
+        "tasmin": 10.7
+      },
+      "2080": {
+        "tasmax": 28.1,
+        "tasmean": 22,
+        "tasmin": 15
+      },
+      "2081": {
+        "tasmax": 26.6,
+        "tasmean": 19.6,
+        "tasmin": 13
+      },
+      "2082": {
+        "tasmax": 29,
+        "tasmean": 21.8,
+        "tasmin": 14.6
+      },
+      "2083": {
+        "tasmax": 25.7,
+        "tasmean": 19.1,
+        "tasmin": 7.7
+      },
+      "2084": {
+        "tasmax": 27.5,
+        "tasmean": 22.2,
+        "tasmin": 14.6
+      },
+      "2085": {
+        "tasmax": 25.4,
+        "tasmean": 20.2,
+        "tasmin": 14.4
+      },
+      "2086": {
+        "tasmax": 28.6,
+        "tasmean": 21.2,
+        "tasmin": 12.8
+      },
+      "2087": {
+        "tasmax": 25.8,
+        "tasmean": 20.1,
+        "tasmin": 13
+      },
+      "2088": {
+        "tasmax": 27.9,
+        "tasmean": 22.5,
+        "tasmin": 14.6
+      },
+      "2089": {
+        "tasmax": 27.2,
+        "tasmean": 22,
+        "tasmin": 15.8
+      },
+      "2090": {
+        "tasmax": 25.9,
+        "tasmean": 19.5,
+        "tasmin": 13
+      },
+      "2091": {
+        "tasmax": 27.3,
+        "tasmean": 19.3,
+        "tasmin": 12.4
+      },
+      "2092": {
+        "tasmax": 26.2,
+        "tasmean": 20,
+        "tasmin": 11.1
+      },
+      "2093": {
+        "tasmax": 25,
+        "tasmean": 19.8,
+        "tasmin": 12.9
+      },
+      "2094": {
+        "tasmax": 26.1,
+        "tasmean": 17.6,
+        "tasmin": 7.6
+      },
+      "2095": {
+        "tasmax": 27.9,
+        "tasmean": 22.2,
+        "tasmin": 15.2
+      },
+      "2096": {
+        "tasmax": 25.5,
+        "tasmean": 16.7,
+        "tasmin": 6.1
+      },
+      "2097": {
+        "tasmax": 28.7,
+        "tasmean": 21.2,
+        "tasmin": 12.2
+      },
+      "2098": {
+        "tasmax": 27.4,
+        "tasmean": 21,
+        "tasmin": 6.6
+      },
+      "2099": {
+        "tasmax": 27.5,
+        "tasmean": 20,
+        "tasmin": 10.3
+      },
+      "2100": {
+        "tasmax": 25.8,
+        "tasmean": 18.9,
+        "tasmin": 11.4
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 24.9,
+        "tasmean": 17.9,
+        "tasmin": 10.3
+      },
+      "2008": {
+        "tasmax": 24.9,
+        "tasmean": 17.7,
+        "tasmin": 9.2
+      },
+      "2009": {
+        "tasmax": 25.5,
+        "tasmean": 18.7,
+        "tasmin": 11.4
+      },
+      "2010": {
+        "tasmax": 25,
+        "tasmean": 15.5,
+        "tasmin": 12.2
+      },
+      "2011": {
+        "tasmax": 23.4,
+        "tasmean": 18.5,
+        "tasmin": 8.8
+      },
+      "2012": {
+        "tasmax": 25.3,
+        "tasmean": 18.5,
+        "tasmin": 9.6
+      },
+      "2013": {
+        "tasmax": 24.1,
+        "tasmean": 18.7,
+        "tasmin": 9.2
+      },
+      "2014": {
+        "tasmax": 25,
+        "tasmean": 19.8,
+        "tasmin": 8.7
+      },
+      "2015": {
+        "tasmax": 24.7,
+        "tasmean": 19.1,
+        "tasmin": 10.9
+      },
+      "2016": {
+        "tasmax": 25.5,
+        "tasmean": 18.1,
+        "tasmin": 11.2
+      },
+      "2017": {
+        "tasmax": 23,
+        "tasmean": 18.1,
+        "tasmin": 11.4
+      },
+      "2018": {
+        "tasmax": 23.6,
+        "tasmean": 18.3,
+        "tasmin": 12.7
+      },
+      "2019": {
+        "tasmax": 23,
+        "tasmean": 17.3,
+        "tasmin": 11.7
+      },
+      "2020": {
+        "tasmax": 25.1,
+        "tasmean": 17.3,
+        "tasmin": 12.5
+      },
+      "2021": {
+        "tasmax": 25.1,
+        "tasmean": 16,
+        "tasmin": 10.3
+      },
+      "2022": {
+        "tasmax": 25.1,
+        "tasmean": 20.7,
+        "tasmin": 12.8
+      },
+      "2023": {
+        "tasmax": 24,
+        "tasmean": 18.7,
+        "tasmin": 10.3
+      },
+      "2024": {
+        "tasmax": 25.2,
+        "tasmean": 19.1,
+        "tasmin": 7.1
+      },
+      "2025": {
+        "tasmax": 23,
+        "tasmean": 19.6,
+        "tasmin": 11.4
+      },
+      "2026": {
+        "tasmax": 25.3,
+        "tasmean": 21,
+        "tasmin": 10.3
+      },
+      "2027": {
+        "tasmax": 25.9,
+        "tasmean": 19.7,
+        "tasmin": 11.3
+      },
+      "2028": {
+        "tasmax": 24.1,
+        "tasmean": 19.1,
+        "tasmin": 10.2
+      },
+      "2029": {
+        "tasmax": 23.7,
+        "tasmean": 19.5,
+        "tasmin": 11.4
+      },
+      "2030": {
+        "tasmax": 24.2,
+        "tasmean": 19.9,
+        "tasmin": 8.4
+      },
+      "2031": {
+        "tasmax": 28.2,
+        "tasmean": 19,
+        "tasmin": 8.7
+      },
+      "2032": {
+        "tasmax": 24.2,
+        "tasmean": 16.9,
+        "tasmin": 9.9
+      },
+      "2033": {
+        "tasmax": 24.9,
+        "tasmean": 19.4,
+        "tasmin": 7.4
+      },
+      "2034": {
+        "tasmax": 25.4,
+        "tasmean": 18.2,
+        "tasmin": 10.4
+      },
+      "2035": {
+        "tasmax": 23.5,
+        "tasmean": 16.7,
+        "tasmin": 11.7
+      },
+      "2036": {
+        "tasmax": 26.4,
+        "tasmean": 19.1,
+        "tasmin": 7.7
+      },
+      "2037": {
+        "tasmax": 26.3,
+        "tasmean": 19.2,
+        "tasmin": 10.3
+      },
+      "2038": {
+        "tasmax": 28,
+        "tasmean": 20.1,
+        "tasmin": 13.8
+      },
+      "2039": {
+        "tasmax": 26.9,
+        "tasmean": 20.7,
+        "tasmin": 14.3
+      },
+      "2040": {
+        "tasmax": 26.6,
+        "tasmean": 19.5,
+        "tasmin": 14.1
+      },
+      "2041": {
+        "tasmax": 25.5,
+        "tasmean": 20.3,
+        "tasmin": 11.4
+      },
+      "2042": {
+        "tasmax": 26.9,
+        "tasmean": 19.6,
+        "tasmin": 14.7
+      },
+      "2043": {
+        "tasmax": 25.9,
+        "tasmean": 16.9,
+        "tasmin": 11.3
+      },
+      "2044": {
+        "tasmax": 23.9,
+        "tasmean": 19.6,
+        "tasmin": 9.5
+      },
+      "2045": {
+        "tasmax": 27.6,
+        "tasmean": 18.5,
+        "tasmin": 10.9
+      },
+      "2046": {
+        "tasmax": 26.7,
+        "tasmean": 18.1,
+        "tasmin": 9.5
+      },
+      "2047": {
+        "tasmax": 26.9,
+        "tasmean": 19.6,
+        "tasmin": 3.6
+      },
+      "2048": {
+        "tasmax": 23.1,
+        "tasmean": 20.5,
+        "tasmin": 11
+      },
+      "2049": {
+        "tasmax": 28.8,
+        "tasmean": 20,
+        "tasmin": 14.4
+      },
+      "2050": {
+        "tasmax": 26.9,
+        "tasmean": 18.9,
+        "tasmin": 13.2
+      },
+      "2051": {
+        "tasmax": 23.8,
+        "tasmean": 18.6,
+        "tasmin": 11.1
+      },
+      "2052": {
+        "tasmax": 26,
+        "tasmean": 19.4,
+        "tasmin": 11.4
+      },
+      "2053": {
+        "tasmax": 26.8,
+        "tasmean": 20.5,
+        "tasmin": 13.8
+      },
+      "2054": {
+        "tasmax": 27.7,
+        "tasmean": 18.4,
+        "tasmin": 13.4
+      },
+      "2055": {
+        "tasmax": 27.2,
+        "tasmean": 23,
+        "tasmin": 14.5
+      },
+      "2056": {
+        "tasmax": 27.5,
+        "tasmean": 21.4,
+        "tasmin": 9.4
+      },
+      "2057": {
+        "tasmax": 26.3,
+        "tasmean": 19.1,
+        "tasmin": 6.1
+      },
+      "2058": {
+        "tasmax": 26.1,
+        "tasmean": 19.8,
+        "tasmin": 13.4
+      },
+      "2059": {
+        "tasmax": 26.7,
+        "tasmean": 17.8,
+        "tasmin": 12.9
+      },
+      "2060": {
+        "tasmax": 28.4,
+        "tasmean": 21.1,
+        "tasmin": 11.2
+      },
+      "2061": {
+        "tasmax": 27.1,
+        "tasmean": 19.5,
+        "tasmin": 12.8
+      },
+      "2062": {
+        "tasmax": 27.3,
+        "tasmean": 20.4,
+        "tasmin": 14.3
+      },
+      "2063": {
+        "tasmax": 26.7,
+        "tasmean": 19.9,
+        "tasmin": 11.2
+      },
+      "2064": {
+        "tasmax": 27.9,
+        "tasmean": 19.8,
+        "tasmin": 14.3
+      },
+      "2065": {
+        "tasmax": 28.7,
+        "tasmean": 21.6,
+        "tasmin": 15.5
+      },
+      "2066": {
+        "tasmax": 29,
+        "tasmean": 19.9,
+        "tasmin": 13.4
+      },
+      "2067": {
+        "tasmax": 27.3,
+        "tasmean": 18.7,
+        "tasmin": 9.9
+      },
+      "2068": {
+        "tasmax": 30.1,
+        "tasmean": 21.3,
+        "tasmin": 15.9
+      },
+      "2069": {
+        "tasmax": 27.5,
+        "tasmean": 22.4,
+        "tasmin": 14.6
+      },
+      "2070": {
+        "tasmax": 28.7,
+        "tasmean": 19.2,
+        "tasmin": 12.7
+      },
+      "2071": {
+        "tasmax": 28,
+        "tasmean": 22.5,
+        "tasmin": 10.2
+      },
+      "2072": {
+        "tasmax": 28.2,
+        "tasmean": 22.2,
+        "tasmin": 13.4
+      },
+      "2073": {
+        "tasmax": 27.1,
+        "tasmean": 21,
+        "tasmin": 13.9
+      },
+      "2074": {
+        "tasmax": 29.2,
+        "tasmean": 20.1,
+        "tasmin": 12
+      },
+      "2075": {
+        "tasmax": 30.3,
+        "tasmean": 23.1,
+        "tasmin": 13.5
+      },
+      "2076": {
+        "tasmax": 28.9,
+        "tasmean": 22.4,
+        "tasmin": 9.8
+      },
+      "2077": {
+        "tasmax": 30.3,
+        "tasmean": 21.2,
+        "tasmin": 13.9
+      },
+      "2078": {
+        "tasmax": 26.7,
+        "tasmean": 23.2,
+        "tasmin": 10.3
+      },
+      "2079": {
+        "tasmax": 26.3,
+        "tasmean": 23.1,
+        "tasmin": 8.7
+      },
+      "2080": {
+        "tasmax": 28.7,
+        "tasmean": 21.1,
+        "tasmin": 8.7
+      },
+      "2081": {
+        "tasmax": 28.5,
+        "tasmean": 19.2,
+        "tasmin": 8.9
+      },
+      "2082": {
+        "tasmax": 24.3,
+        "tasmean": 23.3,
+        "tasmin": 8.8
+      },
+      "2083": {
+        "tasmax": 25.6,
+        "tasmean": 20.3,
+        "tasmin": 10.7
+      },
+      "2084": {
+        "tasmax": 28.2,
+        "tasmean": 20.7,
+        "tasmin": 15.5
+      },
+      "2085": {
+        "tasmax": 27.1,
+        "tasmean": 20.3,
+        "tasmin": 13.3
+      },
+      "2086": {
+        "tasmax": 30.4,
+        "tasmean": 22.3,
+        "tasmin": 15.9
+      },
+      "2087": {
+        "tasmax": 29.5,
+        "tasmean": 23.2,
+        "tasmin": 9.3
+      },
+      "2088": {
+        "tasmax": 28.7,
+        "tasmean": 20.5,
+        "tasmin": 11.7
+      },
+      "2089": {
+        "tasmax": 29.1,
+        "tasmean": 24.3,
+        "tasmin": 15.1
+      },
+      "2090": {
+        "tasmax": 29.2,
+        "tasmean": 20.3,
+        "tasmin": 15.7
+      },
+      "2091": {
+        "tasmax": 31.1,
+        "tasmean": 21.7,
+        "tasmin": 15.9
+      },
+      "2092": {
+        "tasmax": 24,
+        "tasmean": 21.9,
+        "tasmin": 8.4
+      },
+      "2093": {
+        "tasmax": 30.1,
+        "tasmean": 22.3,
+        "tasmin": 14.1
+      },
+      "2094": {
+        "tasmax": 28.6,
+        "tasmean": 23.7,
+        "tasmin": 11.5
+      },
+      "2095": {
+        "tasmax": 31.5,
+        "tasmean": 22.5,
+        "tasmin": 16.3
+      },
+      "2096": {
+        "tasmax": 33.5,
+        "tasmean": 23.1,
+        "tasmin": 18
+      },
+      "2097": {
+        "tasmax": 30,
+        "tasmean": 24.9,
+        "tasmin": 15.6
+      },
+      "2098": {
+        "tasmax": 31.1,
+        "tasmean": 23.8,
+        "tasmin": 17.2
+      },
+      "2099": {
+        "tasmax": 28.1,
+        "tasmean": 22.6,
+        "tasmin": 14.6
+      },
+      "2100": {
+        "tasmax": 31.8,
+        "tasmean": 23.2,
+        "tasmin": 15.8
+      }
+    }
+  },
+  "MRI-CGCM3": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 24.5,
+        "tasmean": 19.1,
+        "tasmin": 13.3
+      },
+      "2008": {
+        "tasmax": 19.8,
+        "tasmean": 15.4,
+        "tasmin": 11
+      },
+      "2009": {
+        "tasmax": 22.1,
+        "tasmean": 16.7,
+        "tasmin": 11.3
+      },
+      "2010": {
+        "tasmax": 19.6,
+        "tasmean": 15,
+        "tasmin": 10.3
+      },
+      "2011": {
+        "tasmax": 22.9,
+        "tasmean": 18.6,
+        "tasmin": 13.8
+      },
+      "2012": {
+        "tasmax": 22.9,
+        "tasmean": 17.6,
+        "tasmin": 12.1
+      },
+      "2013": {
+        "tasmax": 23.4,
+        "tasmean": 18.3,
+        "tasmin": 12.1
+      },
+      "2014": {
+        "tasmax": 22.2,
+        "tasmean": 17.5,
+        "tasmin": 12.6
+      },
+      "2015": {
+        "tasmax": 22.9,
+        "tasmean": 16.7,
+        "tasmin": 10.8
+      },
+      "2016": {
+        "tasmax": 21.4,
+        "tasmean": 16.2,
+        "tasmin": 10.5
+      },
+      "2017": {
+        "tasmax": 22,
+        "tasmean": 17.3,
+        "tasmin": 12.7
+      },
+      "2018": {
+        "tasmax": 19.4,
+        "tasmean": 13.9,
+        "tasmin": 9.1
+      },
+      "2019": {
+        "tasmax": 20.8,
+        "tasmean": 15.4,
+        "tasmin": 9.8
+      },
+      "2020": {
+        "tasmax": 21.6,
+        "tasmean": 16.6,
+        "tasmin": 10.9
+      },
+      "2021": {
+        "tasmax": 20.4,
+        "tasmean": 15.8,
+        "tasmin": 11.4
+      },
+      "2022": {
+        "tasmax": 20.8,
+        "tasmean": 16.1,
+        "tasmin": 11.5
+      },
+      "2023": {
+        "tasmax": 24,
+        "tasmean": 18.9,
+        "tasmin": 13.4
+      },
+      "2024": {
+        "tasmax": 23.1,
+        "tasmean": 18,
+        "tasmin": 12.5
+      },
+      "2025": {
+        "tasmax": 20.7,
+        "tasmean": 15.9,
+        "tasmin": 11
+      },
+      "2026": {
+        "tasmax": 23.5,
+        "tasmean": 18.2,
+        "tasmin": 12.4
+      },
+      "2027": {
+        "tasmax": 20.5,
+        "tasmean": 15.8,
+        "tasmin": 11.1
+      },
+      "2028": {
+        "tasmax": 22,
+        "tasmean": 17.2,
+        "tasmin": 12.1
+      },
+      "2029": {
+        "tasmax": 21.4,
+        "tasmean": 16.6,
+        "tasmin": 11.9
+      },
+      "2030": {
+        "tasmax": 22,
+        "tasmean": 17,
+        "tasmin": 12.3
+      },
+      "2031": {
+        "tasmax": 21.5,
+        "tasmean": 17.3,
+        "tasmin": 13
+      },
+      "2032": {
+        "tasmax": 20.6,
+        "tasmean": 16.6,
+        "tasmin": 12.4
+      },
+      "2033": {
+        "tasmax": 23,
+        "tasmean": 17.8,
+        "tasmin": 12.5
+      },
+      "2034": {
+        "tasmax": 22,
+        "tasmean": 17,
+        "tasmin": 12.7
+      },
+      "2035": {
+        "tasmax": 22,
+        "tasmean": 17,
+        "tasmin": 12.3
+      },
+      "2036": {
+        "tasmax": 22.4,
+        "tasmean": 17.2,
+        "tasmin": 12.2
+      },
+      "2037": {
+        "tasmax": 22.1,
+        "tasmean": 17.7,
+        "tasmin": 12.8
+      },
+      "2038": {
+        "tasmax": 20.6,
+        "tasmean": 15.5,
+        "tasmin": 10.5
+      },
+      "2039": {
+        "tasmax": 22.7,
+        "tasmean": 17,
+        "tasmin": 12
+      },
+      "2040": {
+        "tasmax": 19.4,
+        "tasmean": 15.9,
+        "tasmin": 12.5
+      },
+      "2041": {
+        "tasmax": 20.8,
+        "tasmean": 16.3,
+        "tasmin": 11.6
+      },
+      "2042": {
+        "tasmax": 22.7,
+        "tasmean": 17.3,
+        "tasmin": 12.3
+      },
+      "2043": {
+        "tasmax": 20.1,
+        "tasmean": 15.6,
+        "tasmin": 11
+      },
+      "2044": {
+        "tasmax": 24.6,
+        "tasmean": 19.4,
+        "tasmin": 13.9
+      },
+      "2045": {
+        "tasmax": 22.6,
+        "tasmean": 17.6,
+        "tasmin": 12.6
+      },
+      "2046": {
+        "tasmax": 22.5,
+        "tasmean": 17.7,
+        "tasmin": 12.8
+      },
+      "2047": {
+        "tasmax": 22.8,
+        "tasmean": 17.7,
+        "tasmin": 12.4
+      },
+      "2048": {
+        "tasmax": 20.7,
+        "tasmean": 16.6,
+        "tasmin": 12.8
+      },
+      "2049": {
+        "tasmax": 21.5,
+        "tasmean": 17.1,
+        "tasmin": 12.5
+      },
+      "2050": {
+        "tasmax": 22.2,
+        "tasmean": 17.7,
+        "tasmin": 13.4
+      },
+      "2051": {
+        "tasmax": 22.1,
+        "tasmean": 17.7,
+        "tasmin": 13.3
+      },
+      "2052": {
+        "tasmax": 21.7,
+        "tasmean": 17.3,
+        "tasmin": 12.8
+      },
+      "2053": {
+        "tasmax": 21.1,
+        "tasmean": 16.5,
+        "tasmin": 11.7
+      },
+      "2054": {
+        "tasmax": 23.1,
+        "tasmean": 18.2,
+        "tasmin": 13.1
+      },
+      "2055": {
+        "tasmax": 21.3,
+        "tasmean": 16.7,
+        "tasmin": 12
+      },
+      "2056": {
+        "tasmax": 20.7,
+        "tasmean": 16.4,
+        "tasmin": 11.8
+      },
+      "2057": {
+        "tasmax": 21.8,
+        "tasmean": 17.1,
+        "tasmin": 12.4
+      },
+      "2058": {
+        "tasmax": 21.8,
+        "tasmean": 17.4,
+        "tasmin": 13
+      },
+      "2059": {
+        "tasmax": 19.7,
+        "tasmean": 15.4,
+        "tasmin": 11.1
+      },
+      "2060": {
+        "tasmax": 21,
+        "tasmean": 16.7,
+        "tasmin": 12.6
+      },
+      "2061": {
+        "tasmax": 22.2,
+        "tasmean": 17.2,
+        "tasmin": 13.1
+      },
+      "2062": {
+        "tasmax": 23.6,
+        "tasmean": 17.8,
+        "tasmin": 12.4
+      },
+      "2063": {
+        "tasmax": 21,
+        "tasmean": 16.8,
+        "tasmin": 12.7
+      },
+      "2064": {
+        "tasmax": 21.3,
+        "tasmean": 16.9,
+        "tasmin": 12.7
+      },
+      "2065": {
+        "tasmax": 22.4,
+        "tasmean": 17.5,
+        "tasmin": 12.4
+      },
+      "2066": {
+        "tasmax": 24.8,
+        "tasmean": 19.9,
+        "tasmin": 15.2
+      },
+      "2067": {
+        "tasmax": 22.2,
+        "tasmean": 18,
+        "tasmin": 14.2
+      },
+      "2068": {
+        "tasmax": 21.9,
+        "tasmean": 17.2,
+        "tasmin": 12.8
+      },
+      "2069": {
+        "tasmax": 21.9,
+        "tasmean": 17.5,
+        "tasmin": 12.8
+      },
+      "2070": {
+        "tasmax": 20.3,
+        "tasmean": 16.1,
+        "tasmin": 12.4
+      },
+      "2071": {
+        "tasmax": 22.7,
+        "tasmean": 18.2,
+        "tasmin": 13.9
+      },
+      "2072": {
+        "tasmax": 20.5,
+        "tasmean": 16.1,
+        "tasmin": 11.7
+      },
+      "2073": {
+        "tasmax": 20.8,
+        "tasmean": 16.4,
+        "tasmin": 12.4
+      },
+      "2074": {
+        "tasmax": 22.2,
+        "tasmean": 17.4,
+        "tasmin": 12.9
+      },
+      "2075": {
+        "tasmax": 21.7,
+        "tasmean": 17.8,
+        "tasmin": 13.4
+      },
+      "2076": {
+        "tasmax": 21.6,
+        "tasmean": 17.3,
+        "tasmin": 12.9
+      },
+      "2077": {
+        "tasmax": 20.3,
+        "tasmean": 16.2,
+        "tasmin": 12.5
+      },
+      "2078": {
+        "tasmax": 22,
+        "tasmean": 17.7,
+        "tasmin": 13.3
+      },
+      "2079": {
+        "tasmax": 20.9,
+        "tasmean": 16.5,
+        "tasmin": 12.2
+      },
+      "2080": {
+        "tasmax": 24.5,
+        "tasmean": 19.7,
+        "tasmin": 14.6
+      },
+      "2081": {
+        "tasmax": 23.5,
+        "tasmean": 18.8,
+        "tasmin": 13.8
+      },
+      "2082": {
+        "tasmax": 22,
+        "tasmean": 17.6,
+        "tasmin": 12.9
+      },
+      "2083": {
+        "tasmax": 23.2,
+        "tasmean": 18.5,
+        "tasmin": 13.8
+      },
+      "2084": {
+        "tasmax": 22.3,
+        "tasmean": 17.8,
+        "tasmin": 12.8
+      },
+      "2085": {
+        "tasmax": 20.9,
+        "tasmean": 17,
+        "tasmin": 12.8
+      },
+      "2086": {
+        "tasmax": 21.3,
+        "tasmean": 17.2,
+        "tasmin": 12.9
+      },
+      "2087": {
+        "tasmax": 22.3,
+        "tasmean": 17.4,
+        "tasmin": 12.6
+      },
+      "2088": {
+        "tasmax": 22.4,
+        "tasmean": 17.7,
+        "tasmin": 13.1
+      },
+      "2089": {
+        "tasmax": 21.6,
+        "tasmean": 17.6,
+        "tasmin": 13.7
+      },
+      "2090": {
+        "tasmax": 22.4,
+        "tasmean": 17.6,
+        "tasmin": 12.8
+      },
+      "2091": {
+        "tasmax": 23.5,
+        "tasmean": 19,
+        "tasmin": 14.2
+      },
+      "2092": {
+        "tasmax": 21.5,
+        "tasmean": 17.6,
+        "tasmin": 13.9
+      },
+      "2093": {
+        "tasmax": 20.6,
+        "tasmean": 16.7,
+        "tasmin": 13
+      },
+      "2094": {
+        "tasmax": 20.2,
+        "tasmean": 14.8,
+        "tasmin": 9.6
+      },
+      "2095": {
+        "tasmax": 20.6,
+        "tasmean": 16.2,
+        "tasmin": 12.5
+      },
+      "2096": {
+        "tasmax": 21.5,
+        "tasmean": 17.3,
+        "tasmin": 13
+      },
+      "2097": {
+        "tasmax": 21.8,
+        "tasmean": 17.5,
+        "tasmin": 13
+      },
+      "2098": {
+        "tasmax": 20.6,
+        "tasmean": 16.2,
+        "tasmin": 12.3
+      },
+      "2099": {
+        "tasmax": 20.9,
+        "tasmean": 16.7,
+        "tasmin": 12.2
+      },
+      "2100": {
+        "tasmax": 21.3,
+        "tasmean": 16.8,
+        "tasmin": 12.8
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 20.1,
+        "tasmean": 14.4,
+        "tasmin": 8.8
+      },
+      "2008": {
+        "tasmax": 21.8,
+        "tasmean": 16.5,
+        "tasmin": 10.4
+      },
+      "2009": {
+        "tasmax": 20.1,
+        "tasmean": 14.7,
+        "tasmin": 8.9
+      },
+      "2010": {
+        "tasmax": 23.9,
+        "tasmean": 18.5,
+        "tasmin": 12
+      },
+      "2011": {
+        "tasmax": 20.4,
+        "tasmean": 15.6,
+        "tasmin": 10.7
+      },
+      "2012": {
+        "tasmax": 20.3,
+        "tasmean": 15.3,
+        "tasmin": 11
+      },
+      "2013": {
+        "tasmax": 21.2,
+        "tasmean": 16.7,
+        "tasmin": 11.4
+      },
+      "2014": {
+        "tasmax": 21,
+        "tasmean": 16.6,
+        "tasmin": 11.9
+      },
+      "2015": {
+        "tasmax": 22.3,
+        "tasmean": 17.5,
+        "tasmin": 12.4
+      },
+      "2016": {
+        "tasmax": 20.6,
+        "tasmean": 15.6,
+        "tasmin": 10.3
+      },
+      "2017": {
+        "tasmax": 20.5,
+        "tasmean": 16.5,
+        "tasmin": 12.5
+      },
+      "2018": {
+        "tasmax": 18.7,
+        "tasmean": 13.9,
+        "tasmin": 9.5
+      },
+      "2019": {
+        "tasmax": 20.6,
+        "tasmean": 16.3,
+        "tasmin": 12.3
+      },
+      "2020": {
+        "tasmax": 23.4,
+        "tasmean": 18.1,
+        "tasmin": 12.7
+      },
+      "2021": {
+        "tasmax": 19.6,
+        "tasmean": 15.6,
+        "tasmin": 11.7
+      },
+      "2022": {
+        "tasmax": 22,
+        "tasmean": 16.8,
+        "tasmin": 11.5
+      },
+      "2023": {
+        "tasmax": 20.6,
+        "tasmean": 16.4,
+        "tasmin": 12.3
+      },
+      "2024": {
+        "tasmax": 19.7,
+        "tasmean": 15.7,
+        "tasmin": 11.6
+      },
+      "2025": {
+        "tasmax": 20.8,
+        "tasmean": 16.7,
+        "tasmin": 12.3
+      },
+      "2026": {
+        "tasmax": 21.6,
+        "tasmean": 16.8,
+        "tasmin": 11.7
+      },
+      "2027": {
+        "tasmax": 23.2,
+        "tasmean": 17.7,
+        "tasmin": 12.4
+      },
+      "2028": {
+        "tasmax": 21.5,
+        "tasmean": 17.4,
+        "tasmin": 13.1
+      },
+      "2029": {
+        "tasmax": 20.5,
+        "tasmean": 16,
+        "tasmin": 11.7
+      },
+      "2030": {
+        "tasmax": 20.7,
+        "tasmean": 16.7,
+        "tasmin": 12.5
+      },
+      "2031": {
+        "tasmax": 19.4,
+        "tasmean": 15.6,
+        "tasmin": 11.7
+      },
+      "2032": {
+        "tasmax": 21.6,
+        "tasmean": 17.3,
+        "tasmin": 13
+      },
+      "2033": {
+        "tasmax": 22.9,
+        "tasmean": 17.1,
+        "tasmin": 12
+      },
+      "2034": {
+        "tasmax": 20.8,
+        "tasmean": 16.5,
+        "tasmin": 11.9
+      },
+      "2035": {
+        "tasmax": 21.1,
+        "tasmean": 16.8,
+        "tasmin": 12.6
+      },
+      "2036": {
+        "tasmax": 21.8,
+        "tasmean": 17.7,
+        "tasmin": 13
+      },
+      "2037": {
+        "tasmax": 22.4,
+        "tasmean": 18.1,
+        "tasmin": 13.2
+      },
+      "2038": {
+        "tasmax": 25.9,
+        "tasmean": 19.5,
+        "tasmin": 13
+      },
+      "2039": {
+        "tasmax": 21.7,
+        "tasmean": 16.9,
+        "tasmin": 11.9
+      },
+      "2040": {
+        "tasmax": 22.6,
+        "tasmean": 17.9,
+        "tasmin": 12.7
+      },
+      "2041": {
+        "tasmax": 20.3,
+        "tasmean": 16.4,
+        "tasmin": 12.2
+      },
+      "2042": {
+        "tasmax": 25.4,
+        "tasmean": 19.1,
+        "tasmin": 12.5
+      },
+      "2043": {
+        "tasmax": 21.6,
+        "tasmean": 17.1,
+        "tasmin": 12.3
+      },
+      "2044": {
+        "tasmax": 20.8,
+        "tasmean": 16,
+        "tasmin": 11.4
+      },
+      "2045": {
+        "tasmax": 19.4,
+        "tasmean": 15.2,
+        "tasmin": 11.8
+      },
+      "2046": {
+        "tasmax": 22.6,
+        "tasmean": 17.9,
+        "tasmin": 12.8
+      },
+      "2047": {
+        "tasmax": 20.8,
+        "tasmean": 15.7,
+        "tasmin": 11.1
+      },
+      "2048": {
+        "tasmax": 22.7,
+        "tasmean": 17.6,
+        "tasmin": 11.9
+      },
+      "2049": {
+        "tasmax": 20.9,
+        "tasmean": 16.2,
+        "tasmin": 11.6
+      },
+      "2050": {
+        "tasmax": 20.1,
+        "tasmean": 15.3,
+        "tasmin": 11.1
+      },
+      "2051": {
+        "tasmax": 20,
+        "tasmean": 15.3,
+        "tasmin": 10.8
+      },
+      "2052": {
+        "tasmax": 21.4,
+        "tasmean": 17.2,
+        "tasmin": 13.1
+      },
+      "2053": {
+        "tasmax": 20.5,
+        "tasmean": 15.8,
+        "tasmin": 11.8
+      },
+      "2054": {
+        "tasmax": 21.9,
+        "tasmean": 17.3,
+        "tasmin": 12.9
+      },
+      "2055": {
+        "tasmax": 20.9,
+        "tasmean": 16.2,
+        "tasmin": 11.6
+      },
+      "2056": {
+        "tasmax": 22.1,
+        "tasmean": 17.1,
+        "tasmin": 12.1
+      },
+      "2057": {
+        "tasmax": 20.3,
+        "tasmean": 16,
+        "tasmin": 11.8
+      },
+      "2058": {
+        "tasmax": 20.2,
+        "tasmean": 16.3,
+        "tasmin": 12.2
+      },
+      "2059": {
+        "tasmax": 20.2,
+        "tasmean": 15.9,
+        "tasmin": 12
+      },
+      "2060": {
+        "tasmax": 22.3,
+        "tasmean": 18.2,
+        "tasmin": 13.6
+      },
+      "2061": {
+        "tasmax": 22.6,
+        "tasmean": 17.8,
+        "tasmin": 13.8
+      },
+      "2062": {
+        "tasmax": 21.8,
+        "tasmean": 17.7,
+        "tasmin": 13.4
+      },
+      "2063": {
+        "tasmax": 22.5,
+        "tasmean": 18,
+        "tasmin": 13.3
+      },
+      "2064": {
+        "tasmax": 22.2,
+        "tasmean": 17.9,
+        "tasmin": 13.4
+      },
+      "2065": {
+        "tasmax": 19.5,
+        "tasmean": 15,
+        "tasmin": 10.5
+      },
+      "2066": {
+        "tasmax": 20.2,
+        "tasmean": 16,
+        "tasmin": 11.7
+      },
+      "2067": {
+        "tasmax": 23.2,
+        "tasmean": 18.5,
+        "tasmin": 13.8
+      },
+      "2068": {
+        "tasmax": 20.9,
+        "tasmean": 16.5,
+        "tasmin": 12.2
+      },
+      "2069": {
+        "tasmax": 20.1,
+        "tasmean": 16.6,
+        "tasmin": 12.2
+      },
+      "2070": {
+        "tasmax": 21.4,
+        "tasmean": 17,
+        "tasmin": 12.9
+      },
+      "2071": {
+        "tasmax": 22.2,
+        "tasmean": 18,
+        "tasmin": 14
+      },
+      "2072": {
+        "tasmax": 22.2,
+        "tasmean": 17.3,
+        "tasmin": 12.3
+      },
+      "2073": {
+        "tasmax": 23.1,
+        "tasmean": 18.1,
+        "tasmin": 12.9
+      },
+      "2074": {
+        "tasmax": 23.8,
+        "tasmean": 19.7,
+        "tasmin": 15.2
+      },
+      "2075": {
+        "tasmax": 21.2,
+        "tasmean": 17.3,
+        "tasmin": 13.3
+      },
+      "2076": {
+        "tasmax": 19.9,
+        "tasmean": 15.3,
+        "tasmin": 11.3
+      },
+      "2077": {
+        "tasmax": 22.9,
+        "tasmean": 18.2,
+        "tasmin": 13.4
+      },
+      "2078": {
+        "tasmax": 22.1,
+        "tasmean": 17.5,
+        "tasmin": 12.8
+      },
+      "2079": {
+        "tasmax": 21.1,
+        "tasmean": 17,
+        "tasmin": 13.1
+      },
+      "2080": {
+        "tasmax": 22.6,
+        "tasmean": 18.4,
+        "tasmin": 14.2
+      },
+      "2081": {
+        "tasmax": 22.6,
+        "tasmean": 18.8,
+        "tasmin": 15.1
+      },
+      "2082": {
+        "tasmax": 22.2,
+        "tasmean": 18.1,
+        "tasmin": 14
+      },
+      "2083": {
+        "tasmax": 22.5,
+        "tasmean": 18.3,
+        "tasmin": 13.7
+      },
+      "2084": {
+        "tasmax": 21.2,
+        "tasmean": 17.6,
+        "tasmin": 14
+      },
+      "2085": {
+        "tasmax": 22.3,
+        "tasmean": 17.3,
+        "tasmin": 12.6
+      },
+      "2086": {
+        "tasmax": 23.3,
+        "tasmean": 19,
+        "tasmin": 14.7
+      },
+      "2087": {
+        "tasmax": 23,
+        "tasmean": 17.7,
+        "tasmin": 12.9
+      },
+      "2088": {
+        "tasmax": 21.8,
+        "tasmean": 17.7,
+        "tasmin": 13.6
+      },
+      "2089": {
+        "tasmax": 22.1,
+        "tasmean": 17.7,
+        "tasmin": 13
+      },
+      "2090": {
+        "tasmax": 22.4,
+        "tasmean": 17.9,
+        "tasmin": 13.1
+      },
+      "2091": {
+        "tasmax": 22.5,
+        "tasmean": 18.1,
+        "tasmin": 13.4
+      },
+      "2092": {
+        "tasmax": 21.6,
+        "tasmean": 17.5,
+        "tasmin": 13.3
+      },
+      "2093": {
+        "tasmax": 20.1,
+        "tasmean": 15.6,
+        "tasmin": 11.7
+      },
+      "2094": {
+        "tasmax": 22.8,
+        "tasmean": 18.2,
+        "tasmin": 13.5
+      },
+      "2095": {
+        "tasmax": 22.9,
+        "tasmean": 18.3,
+        "tasmin": 13.8
+      },
+      "2096": {
+        "tasmax": 22.6,
+        "tasmean": 18,
+        "tasmin": 13.7
+      },
+      "2097": {
+        "tasmax": 22.5,
+        "tasmean": 18.6,
+        "tasmin": 14
+      },
+      "2098": {
+        "tasmax": 22.4,
+        "tasmean": 18.5,
+        "tasmin": 14.6
+      },
+      "2099": {
+        "tasmax": 20.7,
+        "tasmean": 16.5,
+        "tasmin": 12.7
+      },
+      "2100": {
+        "tasmax": 20.3,
+        "tasmean": 16.7,
+        "tasmin": 13
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 21.5,
+        "tasmean": 16.8,
+        "tasmin": 12.2
+      },
+      "2008": {
+        "tasmax": 20.7,
+        "tasmean": 16.2,
+        "tasmin": 11.4
+      },
+      "2009": {
+        "tasmax": 21.4,
+        "tasmean": 17.3,
+        "tasmin": 12.9
+      },
+      "2010": {
+        "tasmax": 19.3,
+        "tasmean": 15.1,
+        "tasmin": 10.7
+      },
+      "2011": {
+        "tasmax": 22.1,
+        "tasmean": 17.1,
+        "tasmin": 11.6
+      },
+      "2012": {
+        "tasmax": 23,
+        "tasmean": 17.8,
+        "tasmin": 11.7
+      },
+      "2013": {
+        "tasmax": 20.1,
+        "tasmean": 15,
+        "tasmin": 10.3
+      },
+      "2014": {
+        "tasmax": 21.1,
+        "tasmean": 16.8,
+        "tasmin": 12.4
+      },
+      "2015": {
+        "tasmax": 21,
+        "tasmean": 16.3,
+        "tasmin": 11.3
+      },
+      "2016": {
+        "tasmax": 21.3,
+        "tasmean": 16.5,
+        "tasmin": 11.5
+      },
+      "2017": {
+        "tasmax": 21.9,
+        "tasmean": 16.9,
+        "tasmin": 12.5
+      },
+      "2018": {
+        "tasmax": 20.7,
+        "tasmean": 16,
+        "tasmin": 11.4
+      },
+      "2019": {
+        "tasmax": 20.9,
+        "tasmean": 16.1,
+        "tasmin": 11.1
+      },
+      "2020": {
+        "tasmax": 21.8,
+        "tasmean": 17.2,
+        "tasmin": 12.7
+      },
+      "2021": {
+        "tasmax": 21.5,
+        "tasmean": 17.1,
+        "tasmin": 12
+      },
+      "2022": {
+        "tasmax": 21.7,
+        "tasmean": 16.7,
+        "tasmin": 11.6
+      },
+      "2023": {
+        "tasmax": 22.4,
+        "tasmean": 17.7,
+        "tasmin": 12.8
+      },
+      "2024": {
+        "tasmax": 19.9,
+        "tasmean": 15.7,
+        "tasmin": 11.4
+      },
+      "2025": {
+        "tasmax": 22.2,
+        "tasmean": 17.1,
+        "tasmin": 11.8
+      },
+      "2026": {
+        "tasmax": 22.8,
+        "tasmean": 17.8,
+        "tasmin": 13.1
+      },
+      "2027": {
+        "tasmax": 20.4,
+        "tasmean": 15.9,
+        "tasmin": 11.7
+      },
+      "2028": {
+        "tasmax": 21.3,
+        "tasmean": 16.2,
+        "tasmin": 11.2
+      },
+      "2029": {
+        "tasmax": 21.6,
+        "tasmean": 17.5,
+        "tasmin": 13.5
+      },
+      "2030": {
+        "tasmax": 21.7,
+        "tasmean": 17.1,
+        "tasmin": 12.8
+      },
+      "2031": {
+        "tasmax": 23.2,
+        "tasmean": 18.3,
+        "tasmin": 13.2
+      },
+      "2032": {
+        "tasmax": 21.7,
+        "tasmean": 17,
+        "tasmin": 12.7
+      },
+      "2033": {
+        "tasmax": 19.6,
+        "tasmean": 14.7,
+        "tasmin": 10.4
+      },
+      "2034": {
+        "tasmax": 21.6,
+        "tasmean": 16.9,
+        "tasmin": 12.3
+      },
+      "2035": {
+        "tasmax": 21.3,
+        "tasmean": 16.9,
+        "tasmin": 11.9
+      },
+      "2036": {
+        "tasmax": 19.3,
+        "tasmean": 15.3,
+        "tasmin": 11.2
+      },
+      "2037": {
+        "tasmax": 23.8,
+        "tasmean": 18.7,
+        "tasmin": 13.3
+      },
+      "2038": {
+        "tasmax": 21,
+        "tasmean": 16.5,
+        "tasmin": 12.3
+      },
+      "2039": {
+        "tasmax": 19.5,
+        "tasmean": 15.4,
+        "tasmin": 11.3
+      },
+      "2040": {
+        "tasmax": 22.7,
+        "tasmean": 17.4,
+        "tasmin": 12
+      },
+      "2041": {
+        "tasmax": 23.5,
+        "tasmean": 18.2,
+        "tasmin": 13.3
+      },
+      "2042": {
+        "tasmax": 21.5,
+        "tasmean": 17.1,
+        "tasmin": 12.7
+      },
+      "2043": {
+        "tasmax": 21.6,
+        "tasmean": 17.1,
+        "tasmin": 12.5
+      },
+      "2044": {
+        "tasmax": 21.3,
+        "tasmean": 16.9,
+        "tasmin": 12.6
+      },
+      "2045": {
+        "tasmax": 23.2,
+        "tasmean": 17.6,
+        "tasmin": 12
+      },
+      "2046": {
+        "tasmax": 20.5,
+        "tasmean": 16.2,
+        "tasmin": 11.8
+      },
+      "2047": {
+        "tasmax": 22.3,
+        "tasmean": 17.6,
+        "tasmin": 13.1
+      },
+      "2048": {
+        "tasmax": 21.3,
+        "tasmean": 16.9,
+        "tasmin": 12.4
+      },
+      "2049": {
+        "tasmax": 23.5,
+        "tasmean": 19.2,
+        "tasmin": 14.5
+      },
+      "2050": {
+        "tasmax": 24.4,
+        "tasmean": 18.9,
+        "tasmin": 13.4
+      },
+      "2051": {
+        "tasmax": 21,
+        "tasmean": 16.3,
+        "tasmin": 12.5
+      },
+      "2052": {
+        "tasmax": 22,
+        "tasmean": 17.9,
+        "tasmin": 14.2
+      },
+      "2053": {
+        "tasmax": 21.7,
+        "tasmean": 17.9,
+        "tasmin": 13.8
+      },
+      "2054": {
+        "tasmax": 24.6,
+        "tasmean": 19.1,
+        "tasmin": 13
+      },
+      "2055": {
+        "tasmax": 25.9,
+        "tasmean": 21.5,
+        "tasmin": 17.3
+      },
+      "2056": {
+        "tasmax": 22.1,
+        "tasmean": 17.9,
+        "tasmin": 13.7
+      },
+      "2057": {
+        "tasmax": 21.9,
+        "tasmean": 16.9,
+        "tasmin": 12.2
+      },
+      "2058": {
+        "tasmax": 21.7,
+        "tasmean": 17.1,
+        "tasmin": 12.7
+      },
+      "2059": {
+        "tasmax": 22.4,
+        "tasmean": 18.1,
+        "tasmin": 13.6
+      },
+      "2060": {
+        "tasmax": 22,
+        "tasmean": 17.8,
+        "tasmin": 13.1
+      },
+      "2061": {
+        "tasmax": 21.9,
+        "tasmean": 17.4,
+        "tasmin": 13
+      },
+      "2062": {
+        "tasmax": 20.9,
+        "tasmean": 16.8,
+        "tasmin": 12.6
+      },
+      "2063": {
+        "tasmax": 24.9,
+        "tasmean": 19.9,
+        "tasmin": 14.2
+      },
+      "2064": {
+        "tasmax": 21.9,
+        "tasmean": 17.5,
+        "tasmin": 13.6
+      },
+      "2065": {
+        "tasmax": 21.4,
+        "tasmean": 17.8,
+        "tasmin": 14.1
+      },
+      "2066": {
+        "tasmax": 22.3,
+        "tasmean": 18.1,
+        "tasmin": 14.3
+      },
+      "2067": {
+        "tasmax": 21.9,
+        "tasmean": 17.8,
+        "tasmin": 13.7
+      },
+      "2068": {
+        "tasmax": 20.7,
+        "tasmean": 16.3,
+        "tasmin": 12.2
+      },
+      "2069": {
+        "tasmax": 24.4,
+        "tasmean": 20.1,
+        "tasmin": 15.5
+      },
+      "2070": {
+        "tasmax": 22.3,
+        "tasmean": 17.8,
+        "tasmin": 13.4
+      },
+      "2071": {
+        "tasmax": 25.1,
+        "tasmean": 20.4,
+        "tasmin": 15.5
+      },
+      "2072": {
+        "tasmax": 20.1,
+        "tasmean": 16.3,
+        "tasmin": 13.3
+      },
+      "2073": {
+        "tasmax": 21.7,
+        "tasmean": 17.1,
+        "tasmin": 13.3
+      },
+      "2074": {
+        "tasmax": 21.3,
+        "tasmean": 17.1,
+        "tasmin": 12.8
+      },
+      "2075": {
+        "tasmax": 21.4,
+        "tasmean": 17.3,
+        "tasmin": 13.3
+      },
+      "2076": {
+        "tasmax": 22.4,
+        "tasmean": 18.8,
+        "tasmin": 15
+      },
+      "2077": {
+        "tasmax": 24.3,
+        "tasmean": 19.5,
+        "tasmin": 15
+      },
+      "2078": {
+        "tasmax": 23.2,
+        "tasmean": 18.1,
+        "tasmin": 13.3
+      },
+      "2079": {
+        "tasmax": 24.7,
+        "tasmean": 20.2,
+        "tasmin": 15.8
+      },
+      "2080": {
+        "tasmax": 20.4,
+        "tasmean": 16.5,
+        "tasmin": 13
+      },
+      "2081": {
+        "tasmax": 19.1,
+        "tasmean": 15.5,
+        "tasmin": 12.2
+      },
+      "2082": {
+        "tasmax": 23.3,
+        "tasmean": 18.9,
+        "tasmin": 14.6
+      },
+      "2083": {
+        "tasmax": 23.4,
+        "tasmean": 18.5,
+        "tasmin": 13.9
+      },
+      "2084": {
+        "tasmax": 20.7,
+        "tasmean": 16.3,
+        "tasmin": 12.4
+      },
+      "2085": {
+        "tasmax": 23,
+        "tasmean": 18.9,
+        "tasmin": 14.9
+      },
+      "2086": {
+        "tasmax": 22.9,
+        "tasmean": 18.7,
+        "tasmin": 14.4
+      },
+      "2087": {
+        "tasmax": 23.5,
+        "tasmean": 19.3,
+        "tasmin": 14.7
+      },
+      "2088": {
+        "tasmax": 21.7,
+        "tasmean": 17.5,
+        "tasmin": 13.7
+      },
+      "2089": {
+        "tasmax": 23.5,
+        "tasmean": 19.4,
+        "tasmin": 15.3
+      },
+      "2090": {
+        "tasmax": 22.5,
+        "tasmean": 18.2,
+        "tasmin": 14.3
+      },
+      "2091": {
+        "tasmax": 25.1,
+        "tasmean": 20.4,
+        "tasmin": 15.8
+      },
+      "2092": {
+        "tasmax": 22,
+        "tasmean": 17.8,
+        "tasmin": 13.9
+      },
+      "2093": {
+        "tasmax": 22.8,
+        "tasmean": 18.2,
+        "tasmin": 14.1
+      },
+      "2094": {
+        "tasmax": 21.8,
+        "tasmean": 17.6,
+        "tasmin": 13.9
+      },
+      "2095": {
+        "tasmax": 24.4,
+        "tasmean": 19.7,
+        "tasmin": 14.8
+      },
+      "2096": {
+        "tasmax": 22.8,
+        "tasmean": 19.2,
+        "tasmin": 15.9
+      },
+      "2097": {
+        "tasmax": 24.3,
+        "tasmean": 19.8,
+        "tasmin": 15.8
+      },
+      "2098": {
+        "tasmax": 23.4,
+        "tasmean": 19.1,
+        "tasmin": 15.2
+      },
+      "2099": {
+        "tasmax": 20.1,
+        "tasmean": 16.7,
+        "tasmin": 13.1
+      },
+      "2100": {
+        "tasmax": 25.3,
+        "tasmean": 20.7,
+        "tasmin": 16.2
+      }
+    }
+  },
+  "NCAR-CCSM4": {
+    "rcp45": {
+      "2007": {
+        "tasmax": 22.6,
+        "tasmean": 14.9,
+        "tasmin": 13.3
+      },
+      "2008": {
+        "tasmax": 25.4,
+        "tasmean": 18,
+        "tasmin": 14.4
+      },
+      "2009": {
+        "tasmax": 24.6,
+        "tasmean": 16.6,
+        "tasmin": 14.7
+      },
+      "2010": {
+        "tasmax": 20.2,
+        "tasmean": 16.3,
+        "tasmin": 12.5
+      },
+      "2011": {
+        "tasmax": 21.3,
+        "tasmean": 18.7,
+        "tasmin": 13.7
+      },
+      "2012": {
+        "tasmax": 24.8,
+        "tasmean": 16.2,
+        "tasmin": 13.2
+      },
+      "2013": {
+        "tasmax": 23.6,
+        "tasmean": 15.6,
+        "tasmin": 13.5
+      },
+      "2014": {
+        "tasmax": 27.9,
+        "tasmean": 14.1,
+        "tasmin": 15
+      },
+      "2015": {
+        "tasmax": 27.9,
+        "tasmean": 17,
+        "tasmin": 15.4
+      },
+      "2016": {
+        "tasmax": 19.1,
+        "tasmean": 23,
+        "tasmin": 12.1
+      },
+      "2017": {
+        "tasmax": 23.3,
+        "tasmean": 20.9,
+        "tasmin": 13.8
+      },
+      "2018": {
+        "tasmax": 20.9,
+        "tasmean": 16.6,
+        "tasmin": 13.7
+      },
+      "2019": {
+        "tasmax": 23.7,
+        "tasmean": 14.7,
+        "tasmin": 13
+      },
+      "2020": {
+        "tasmax": 23,
+        "tasmean": 19.9,
+        "tasmin": 14.1
+      },
+      "2021": {
+        "tasmax": 25.2,
+        "tasmean": 16.7,
+        "tasmin": 13.9
+      },
+      "2022": {
+        "tasmax": 23.9,
+        "tasmean": 18,
+        "tasmin": 13.2
+      },
+      "2023": {
+        "tasmax": 21.1,
+        "tasmean": 17.8,
+        "tasmin": 12.2
+      },
+      "2024": {
+        "tasmax": 24.6,
+        "tasmean": 20.9,
+        "tasmin": 13.7
+      },
+      "2025": {
+        "tasmax": 24.2,
+        "tasmean": 16.9,
+        "tasmin": 13.4
+      },
+      "2026": {
+        "tasmax": 27.1,
+        "tasmean": 21,
+        "tasmin": 15.8
+      },
+      "2027": {
+        "tasmax": 18.9,
+        "tasmean": 18.2,
+        "tasmin": 11.6
+      },
+      "2028": {
+        "tasmax": 20.6,
+        "tasmean": 18.6,
+        "tasmin": 12.3
+      },
+      "2029": {
+        "tasmax": 19.4,
+        "tasmean": 17.2,
+        "tasmin": 12.2
+      },
+      "2030": {
+        "tasmax": 27.8,
+        "tasmean": 20.7,
+        "tasmin": 13.4
+      },
+      "2031": {
+        "tasmax": 25,
+        "tasmean": 18,
+        "tasmin": 13.9
+      },
+      "2032": {
+        "tasmax": 28.9,
+        "tasmean": 13.5,
+        "tasmin": 17.4
+      },
+      "2033": {
+        "tasmax": 25.5,
+        "tasmean": 18.3,
+        "tasmin": 15.5
+      },
+      "2034": {
+        "tasmax": 24.4,
+        "tasmean": 19.8,
+        "tasmin": 13
+      },
+      "2035": {
+        "tasmax": 27.5,
+        "tasmean": 18.3,
+        "tasmin": 15
+      },
+      "2036": {
+        "tasmax": 24.3,
+        "tasmean": 15.1,
+        "tasmin": 12.4
+      },
+      "2037": {
+        "tasmax": 23.5,
+        "tasmean": 16.5,
+        "tasmin": 14.4
+      },
+      "2038": {
+        "tasmax": 28,
+        "tasmean": 20.1,
+        "tasmin": 13.5
+      },
+      "2039": {
+        "tasmax": 26.2,
+        "tasmean": 20,
+        "tasmin": 15
+      },
+      "2040": {
+        "tasmax": 24.7,
+        "tasmean": 18.2,
+        "tasmin": 12.2
+      },
+      "2041": {
+        "tasmax": 31.1,
+        "tasmean": 22.3,
+        "tasmin": 16.4
+      },
+      "2042": {
+        "tasmax": 18.3,
+        "tasmean": 17.9,
+        "tasmin": 11
+      },
+      "2043": {
+        "tasmax": 25.5,
+        "tasmean": 25,
+        "tasmin": 12.8
+      },
+      "2044": {
+        "tasmax": 21.9,
+        "tasmean": 16.4,
+        "tasmin": 13.7
+      },
+      "2045": {
+        "tasmax": 25.4,
+        "tasmean": 16.8,
+        "tasmin": 14.7
+      },
+      "2046": {
+        "tasmax": 19.3,
+        "tasmean": 20.6,
+        "tasmin": 11.4
+      },
+      "2047": {
+        "tasmax": 20.8,
+        "tasmean": 17.7,
+        "tasmin": 13.8
+      },
+      "2048": {
+        "tasmax": 24.6,
+        "tasmean": 16.9,
+        "tasmin": 14.4
+      },
+      "2049": {
+        "tasmax": 24.8,
+        "tasmean": 18.8,
+        "tasmin": 13.5
+      },
+      "2050": {
+        "tasmax": 20,
+        "tasmean": 18,
+        "tasmin": 13.6
+      },
+      "2051": {
+        "tasmax": 22.2,
+        "tasmean": 22.3,
+        "tasmin": 13.2
+      },
+      "2052": {
+        "tasmax": 22.7,
+        "tasmean": 21.9,
+        "tasmin": 13
+      },
+      "2053": {
+        "tasmax": 22.8,
+        "tasmean": 20,
+        "tasmin": 14.3
+      },
+      "2054": {
+        "tasmax": 28.1,
+        "tasmean": 21.4,
+        "tasmin": 14.1
+      },
+      "2055": {
+        "tasmax": 21.4,
+        "tasmean": 15.3,
+        "tasmin": 13.8
+      },
+      "2056": {
+        "tasmax": 18,
+        "tasmean": 19.3,
+        "tasmin": 11.1
+      },
+      "2057": {
+        "tasmax": 22,
+        "tasmean": 15.2,
+        "tasmin": 14.2
+      },
+      "2058": {
+        "tasmax": 19.1,
+        "tasmean": 16.5,
+        "tasmin": 11.3
+      },
+      "2059": {
+        "tasmax": 23.7,
+        "tasmean": 19.1,
+        "tasmin": 13.1
+      },
+      "2060": {
+        "tasmax": 22.6,
+        "tasmean": 17.1,
+        "tasmin": 12.6
+      },
+      "2061": {
+        "tasmax": 27.9,
+        "tasmean": 18.2,
+        "tasmin": 15.7
+      },
+      "2062": {
+        "tasmax": 24.8,
+        "tasmean": 16.4,
+        "tasmin": 14.4
+      },
+      "2063": {
+        "tasmax": 27.2,
+        "tasmean": 20,
+        "tasmin": 14.1
+      },
+      "2064": {
+        "tasmax": 27.1,
+        "tasmean": 16.5,
+        "tasmin": 14
+      },
+      "2065": {
+        "tasmax": 18.8,
+        "tasmean": 23,
+        "tasmin": 12.4
+      },
+      "2066": {
+        "tasmax": 25.7,
+        "tasmean": 21.8,
+        "tasmin": 15.2
+      },
+      "2067": {
+        "tasmax": 25.6,
+        "tasmean": 16.2,
+        "tasmin": 16.6
+      },
+      "2068": {
+        "tasmax": 26.8,
+        "tasmean": 19.8,
+        "tasmin": 14.6
+      },
+      "2069": {
+        "tasmax": 20.8,
+        "tasmean": 20.2,
+        "tasmin": 14.6
+      },
+      "2070": {
+        "tasmax": 27.2,
+        "tasmean": 17.4,
+        "tasmin": 15.7
+      },
+      "2071": {
+        "tasmax": 21.2,
+        "tasmean": 18.1,
+        "tasmin": 13.2
+      },
+      "2072": {
+        "tasmax": 23.2,
+        "tasmean": 19.8,
+        "tasmin": 14.4
+      },
+      "2073": {
+        "tasmax": 21.2,
+        "tasmean": 19.4,
+        "tasmin": 12.6
+      },
+      "2074": {
+        "tasmax": 23.5,
+        "tasmean": 19.1,
+        "tasmin": 14.2
+      },
+      "2075": {
+        "tasmax": 24.6,
+        "tasmean": 19.5,
+        "tasmin": 14.3
+      },
+      "2076": {
+        "tasmax": 21.9,
+        "tasmean": 23,
+        "tasmin": 14.3
+      },
+      "2077": {
+        "tasmax": 24.6,
+        "tasmean": 22.8,
+        "tasmin": 12.7
+      },
+      "2078": {
+        "tasmax": 23.3,
+        "tasmean": 19.7,
+        "tasmin": 11.7
+      },
+      "2079": {
+        "tasmax": 19.5,
+        "tasmean": 17.2,
+        "tasmin": 12.5
+      },
+      "2080": {
+        "tasmax": 25.1,
+        "tasmean": 23.1,
+        "tasmin": 15.1
+      },
+      "2081": {
+        "tasmax": 25.7,
+        "tasmean": 20.1,
+        "tasmin": 15.8
+      },
+      "2082": {
+        "tasmax": 22.8,
+        "tasmean": 14.4,
+        "tasmin": 14.4
+      },
+      "2083": {
+        "tasmax": 21.2,
+        "tasmean": 19.4,
+        "tasmin": 10.6
+      },
+      "2084": {
+        "tasmax": 22.2,
+        "tasmean": 14.2,
+        "tasmin": 13.6
+      },
+      "2085": {
+        "tasmax": 25.8,
+        "tasmean": 15.5,
+        "tasmin": 15.2
+      },
+      "2086": {
+        "tasmax": 23.1,
+        "tasmean": 22.7,
+        "tasmin": 14.9
+      },
+      "2087": {
+        "tasmax": 21,
+        "tasmean": 21.6,
+        "tasmin": 13.2
+      },
+      "2088": {
+        "tasmax": 26.2,
+        "tasmean": 16.8,
+        "tasmin": 15.2
+      },
+      "2089": {
+        "tasmax": 23.8,
+        "tasmean": 19.4,
+        "tasmin": 14.3
+      },
+      "2090": {
+        "tasmax": 25.5,
+        "tasmean": 22.6,
+        "tasmin": 14.1
+      },
+      "2091": {
+        "tasmax": 22.5,
+        "tasmean": 18.4,
+        "tasmin": 13
+      },
+      "2092": {
+        "tasmax": 30.1,
+        "tasmean": 21.9,
+        "tasmin": 15.8
+      },
+      "2093": {
+        "tasmax": 21.2,
+        "tasmean": 19.8,
+        "tasmin": 15.3
+      },
+      "2094": {
+        "tasmax": 30,
+        "tasmean": 19.4,
+        "tasmin": 15.6
+      },
+      "2095": {
+        "tasmax": 28.8,
+        "tasmean": 24.7,
+        "tasmin": 16.5
+      },
+      "2096": {
+        "tasmax": 31,
+        "tasmean": 24.7,
+        "tasmin": 17
+      },
+      "2097": {
+        "tasmax": 22.6,
+        "tasmean": 18.9,
+        "tasmin": 14.6
+      },
+      "2098": {
+        "tasmax": 27.3,
+        "tasmean": 20.1,
+        "tasmin": 16.9
+      },
+      "2099": {
+        "tasmax": 26.1,
+        "tasmean": 17.5,
+        "tasmin": 14.9
+      },
+      "2100": {
+        "tasmax": 18.4,
+        "tasmean": 16,
+        "tasmin": 13.2
+      }
+    },
+    "rcp60": {
+      "2007": {
+        "tasmax": 22,
+        "tasmean": 17.5,
+        "tasmin": 13
+      },
+      "2008": {
+        "tasmax": 23.7,
+        "tasmean": 18.4,
+        "tasmin": 13.3
+      },
+      "2009": {
+        "tasmax": 24.1,
+        "tasmean": 19.1,
+        "tasmin": 14.2
+      },
+      "2010": {
+        "tasmax": 29.3,
+        "tasmean": 22.6,
+        "tasmin": 14.6
+      },
+      "2011": {
+        "tasmax": 23.7,
+        "tasmean": 18.8,
+        "tasmin": 13.1
+      },
+      "2012": {
+        "tasmax": 30.3,
+        "tasmean": 23.2,
+        "tasmin": 14.4
+      },
+      "2013": {
+        "tasmax": 24.3,
+        "tasmean": 18.8,
+        "tasmin": 13
+      },
+      "2014": {
+        "tasmax": 21.2,
+        "tasmean": 17.2,
+        "tasmin": 12.6
+      },
+      "2015": {
+        "tasmax": 21.7,
+        "tasmean": 17.2,
+        "tasmin": 12.7
+      },
+      "2016": {
+        "tasmax": 20.7,
+        "tasmean": 16.2,
+        "tasmin": 11.1
+      },
+      "2017": {
+        "tasmax": 25.9,
+        "tasmean": 20.5,
+        "tasmin": 13.9
+      },
+      "2018": {
+        "tasmax": 20,
+        "tasmean": 15.7,
+        "tasmin": 11
+      },
+      "2019": {
+        "tasmax": 22.4,
+        "tasmean": 17.6,
+        "tasmin": 12.5
+      },
+      "2020": {
+        "tasmax": 29.7,
+        "tasmean": 23.7,
+        "tasmin": 16.1
+      },
+      "2021": {
+        "tasmax": 24.7,
+        "tasmean": 19.2,
+        "tasmin": 13.3
+      },
+      "2022": {
+        "tasmax": 27,
+        "tasmean": 21.4,
+        "tasmin": 14.4
+      },
+      "2023": {
+        "tasmax": 21.2,
+        "tasmean": 16.3,
+        "tasmin": 10.9
+      },
+      "2024": {
+        "tasmax": 20.8,
+        "tasmean": 16.3,
+        "tasmin": 12.4
+      },
+      "2025": {
+        "tasmax": 26.2,
+        "tasmean": 19.7,
+        "tasmin": 12.5
+      },
+      "2026": {
+        "tasmax": 17.6,
+        "tasmean": 14.5,
+        "tasmin": 11
+      },
+      "2027": {
+        "tasmax": 21.4,
+        "tasmean": 16.8,
+        "tasmin": 12.4
+      },
+      "2028": {
+        "tasmax": 31,
+        "tasmean": 22.6,
+        "tasmin": 16.7
+      },
+      "2029": {
+        "tasmax": 28.2,
+        "tasmean": 21.5,
+        "tasmin": 13.8
+      },
+      "2030": {
+        "tasmax": 23.2,
+        "tasmean": 18.2,
+        "tasmin": 12.8
+      },
+      "2031": {
+        "tasmax": 28.2,
+        "tasmean": 22.5,
+        "tasmin": 16.9
+      },
+      "2032": {
+        "tasmax": 26.6,
+        "tasmean": 21,
+        "tasmin": 14.8
+      },
+      "2033": {
+        "tasmax": 27.2,
+        "tasmean": 21.4,
+        "tasmin": 14.7
+      },
+      "2034": {
+        "tasmax": 16.4,
+        "tasmean": 13.6,
+        "tasmin": 9.6
+      },
+      "2035": {
+        "tasmax": 26.5,
+        "tasmean": 20.4,
+        "tasmin": 14.2
+      },
+      "2036": {
+        "tasmax": 25.4,
+        "tasmean": 20.1,
+        "tasmin": 14.7
+      },
+      "2037": {
+        "tasmax": 22,
+        "tasmean": 17.4,
+        "tasmin": 12.4
+      },
+      "2038": {
+        "tasmax": 20.3,
+        "tasmean": 15.4,
+        "tasmin": 10.8
+      },
+      "2039": {
+        "tasmax": 26.7,
+        "tasmean": 20.3,
+        "tasmin": 14.1
+      },
+      "2040": {
+        "tasmax": 26.1,
+        "tasmean": 20.9,
+        "tasmin": 15.4
+      },
+      "2041": {
+        "tasmax": 20.9,
+        "tasmean": 16.7,
+        "tasmin": 12.6
+      },
+      "2042": {
+        "tasmax": 24.6,
+        "tasmean": 19.5,
+        "tasmin": 13.5
+      },
+      "2043": {
+        "tasmax": 24,
+        "tasmean": 19.1,
+        "tasmin": 13.8
+      },
+      "2044": {
+        "tasmax": 24.4,
+        "tasmean": 18.8,
+        "tasmin": 12.9
+      },
+      "2045": {
+        "tasmax": 20,
+        "tasmean": 16.1,
+        "tasmin": 12.4
+      },
+      "2046": {
+        "tasmax": 28.8,
+        "tasmean": 22.3,
+        "tasmin": 14.4
+      },
+      "2047": {
+        "tasmax": 18.7,
+        "tasmean": 15.3,
+        "tasmin": 12.1
+      },
+      "2048": {
+        "tasmax": 20.9,
+        "tasmean": 16.7,
+        "tasmin": 12.4
+      },
+      "2049": {
+        "tasmax": 24.1,
+        "tasmean": 19.2,
+        "tasmin": 13.9
+      },
+      "2050": {
+        "tasmax": 29.5,
+        "tasmean": 22.7,
+        "tasmin": 15.7
+      },
+      "2051": {
+        "tasmax": 24.9,
+        "tasmean": 20.3,
+        "tasmin": 15.3
+      },
+      "2052": {
+        "tasmax": 24.7,
+        "tasmean": 19.1,
+        "tasmin": 13.4
+      },
+      "2053": {
+        "tasmax": 22.2,
+        "tasmean": 18.2,
+        "tasmin": 13.6
+      },
+      "2054": {
+        "tasmax": 27.9,
+        "tasmean": 22,
+        "tasmin": 15.8
+      },
+      "2055": {
+        "tasmax": 21,
+        "tasmean": 17.4,
+        "tasmin": 14.3
+      },
+      "2056": {
+        "tasmax": 24.1,
+        "tasmean": 19,
+        "tasmin": 13.8
+      },
+      "2057": {
+        "tasmax": 22.5,
+        "tasmean": 18.3,
+        "tasmin": 14
+      },
+      "2058": {
+        "tasmax": 25.9,
+        "tasmean": 20,
+        "tasmin": 13.4
+      },
+      "2059": {
+        "tasmax": 23.9,
+        "tasmean": 19,
+        "tasmin": 13.6
+      },
+      "2060": {
+        "tasmax": 24.1,
+        "tasmean": 18.9,
+        "tasmin": 13.6
+      },
+      "2061": {
+        "tasmax": 20.6,
+        "tasmean": 16.4,
+        "tasmin": 12.8
+      },
+      "2062": {
+        "tasmax": 28.1,
+        "tasmean": 22.8,
+        "tasmin": 16.3
+      },
+      "2063": {
+        "tasmax": 24.2,
+        "tasmean": 19.7,
+        "tasmin": 14.5
+      },
+      "2064": {
+        "tasmax": 26.6,
+        "tasmean": 21.1,
+        "tasmin": 14.1
+      },
+      "2065": {
+        "tasmax": 24,
+        "tasmean": 19.1,
+        "tasmin": 14.3
+      },
+      "2066": {
+        "tasmax": 21,
+        "tasmean": 16.8,
+        "tasmin": 12.5
+      },
+      "2067": {
+        "tasmax": 26.7,
+        "tasmean": 21,
+        "tasmin": 14.2
+      },
+      "2068": {
+        "tasmax": 26.6,
+        "tasmean": 20.4,
+        "tasmin": 15.2
+      },
+      "2069": {
+        "tasmax": 21.2,
+        "tasmean": 17.1,
+        "tasmin": 12.9
+      },
+      "2070": {
+        "tasmax": 19.2,
+        "tasmean": 16,
+        "tasmin": 12.3
+      },
+      "2071": {
+        "tasmax": 30.8,
+        "tasmean": 23.6,
+        "tasmin": 16.6
+      },
+      "2072": {
+        "tasmax": 25.5,
+        "tasmean": 20.7,
+        "tasmin": 15.8
+      },
+      "2073": {
+        "tasmax": 29.7,
+        "tasmean": 24.2,
+        "tasmin": 17.9
+      },
+      "2074": {
+        "tasmax": 26.9,
+        "tasmean": 21.6,
+        "tasmin": 15.6
+      },
+      "2075": {
+        "tasmax": 25.1,
+        "tasmean": 20.8,
+        "tasmin": 16
+      },
+      "2076": {
+        "tasmax": 20.6,
+        "tasmean": 16.6,
+        "tasmin": 13.4
+      },
+      "2077": {
+        "tasmax": 24.6,
+        "tasmean": 20.3,
+        "tasmin": 15.5
+      },
+      "2078": {
+        "tasmax": 24.9,
+        "tasmean": 19.7,
+        "tasmin": 14.2
+      },
+      "2079": {
+        "tasmax": 25.5,
+        "tasmean": 20,
+        "tasmin": 13.9
+      },
+      "2080": {
+        "tasmax": 22.7,
+        "tasmean": 18.8,
+        "tasmin": 14.3
+      },
+      "2081": {
+        "tasmax": 22.7,
+        "tasmean": 18.2,
+        "tasmin": 13.3
+      },
+      "2082": {
+        "tasmax": 23.5,
+        "tasmean": 18,
+        "tasmin": 12.4
+      },
+      "2083": {
+        "tasmax": 26.6,
+        "tasmean": 21.5,
+        "tasmin": 16.2
+      },
+      "2084": {
+        "tasmax": 24.4,
+        "tasmean": 19.2,
+        "tasmin": 13.3
+      },
+      "2085": {
+        "tasmax": 22.5,
+        "tasmean": 18.2,
+        "tasmin": 13.6
+      },
+      "2086": {
+        "tasmax": 31.3,
+        "tasmean": 24.5,
+        "tasmin": 17.2
+      },
+      "2087": {
+        "tasmax": 23.6,
+        "tasmean": 19,
+        "tasmin": 14.4
+      },
+      "2088": {
+        "tasmax": 27.3,
+        "tasmean": 21.6,
+        "tasmin": 15.6
+      },
+      "2089": {
+        "tasmax": 24.5,
+        "tasmean": 20,
+        "tasmin": 15.5
+      },
+      "2090": {
+        "tasmax": 23.7,
+        "tasmean": 19.3,
+        "tasmin": 14.4
+      },
+      "2091": {
+        "tasmax": 29.3,
+        "tasmean": 23.5,
+        "tasmin": 16.2
+      },
+      "2092": {
+        "tasmax": 23.7,
+        "tasmean": 19.4,
+        "tasmin": 15.1
+      },
+      "2093": {
+        "tasmax": 23.5,
+        "tasmean": 19.5,
+        "tasmin": 14.5
+      },
+      "2094": {
+        "tasmax": 23.6,
+        "tasmean": 18.2,
+        "tasmin": 12.8
+      },
+      "2095": {
+        "tasmax": 22.1,
+        "tasmean": 18.2,
+        "tasmin": 14.8
+      },
+      "2096": {
+        "tasmax": 20.3,
+        "tasmean": 16.6,
+        "tasmin": 13.1
+      },
+      "2097": {
+        "tasmax": 24,
+        "tasmean": 19.2,
+        "tasmin": 14.2
+      },
+      "2098": {
+        "tasmax": 20.4,
+        "tasmean": 16.3,
+        "tasmin": 12.3
+      },
+      "2099": {
+        "tasmax": 23.2,
+        "tasmean": 18.6,
+        "tasmin": 13.9
+      },
+      "2100": {
+        "tasmax": 24.3,
+        "tasmean": 19.6,
+        "tasmin": 15.1
+      }
+    },
+    "rcp85": {
+      "2007": {
+        "tasmax": 24.7,
+        "tasmean": 18.5,
+        "tasmin": 12.7
+      },
+      "2008": {
+        "tasmax": 25,
+        "tasmean": 16,
+        "tasmin": 13
+      },
+      "2009": {
+        "tasmax": 31.5,
+        "tasmean": 19.6,
+        "tasmin": 15.3
+      },
+      "2010": {
+        "tasmax": 24.3,
+        "tasmean": 18.3,
+        "tasmin": 12.4
+      },
+      "2011": {
+        "tasmax": 22.2,
+        "tasmean": 18.8,
+        "tasmin": 10.7
+      },
+      "2012": {
+        "tasmax": 19.1,
+        "tasmean": 21.4,
+        "tasmin": 11.3
+      },
+      "2013": {
+        "tasmax": 20.3,
+        "tasmean": 16.9,
+        "tasmin": 11.2
+      },
+      "2014": {
+        "tasmax": 27.8,
+        "tasmean": 19,
+        "tasmin": 13.9
+      },
+      "2015": {
+        "tasmax": 25.6,
+        "tasmean": 15.8,
+        "tasmin": 14.4
+      },
+      "2016": {
+        "tasmax": 24.7,
+        "tasmean": 16.7,
+        "tasmin": 14.1
+      },
+      "2017": {
+        "tasmax": 18,
+        "tasmean": 16.6,
+        "tasmin": 9.8
+      },
+      "2018": {
+        "tasmax": 22,
+        "tasmean": 14.1,
+        "tasmin": 12.8
+      },
+      "2019": {
+        "tasmax": 21.8,
+        "tasmean": 16.3,
+        "tasmin": 12.7
+      },
+      "2020": {
+        "tasmax": 21.4,
+        "tasmean": 17.3,
+        "tasmin": 11.5
+      },
+      "2021": {
+        "tasmax": 22.3,
+        "tasmean": 15.5,
+        "tasmin": 13.5
+      },
+      "2022": {
+        "tasmax": 24.6,
+        "tasmean": 17.3,
+        "tasmin": 14
+      },
+      "2023": {
+        "tasmax": 23.9,
+        "tasmean": 16.6,
+        "tasmin": 13.7
+      },
+      "2024": {
+        "tasmax": 17.5,
+        "tasmean": 17.9,
+        "tasmin": 10.4
+      },
+      "2025": {
+        "tasmax": 21.2,
+        "tasmean": 16.7,
+        "tasmin": 10.5
+      },
+      "2026": {
+        "tasmax": 25.1,
+        "tasmean": 17.2,
+        "tasmin": 14.3
+      },
+      "2027": {
+        "tasmax": 27.4,
+        "tasmean": 18.5,
+        "tasmin": 14.6
+      },
+      "2028": {
+        "tasmax": 21.6,
+        "tasmean": 15.4,
+        "tasmin": 11.7
+      },
+      "2029": {
+        "tasmax": 21,
+        "tasmean": 16.8,
+        "tasmin": 12.5
+      },
+      "2030": {
+        "tasmax": 25.7,
+        "tasmean": 19.4,
+        "tasmin": 13.4
+      },
+      "2031": {
+        "tasmax": 21.8,
+        "tasmean": 17,
+        "tasmin": 12
+      },
+      "2032": {
+        "tasmax": 21.3,
+        "tasmean": 13.8,
+        "tasmin": 12.5
+      },
+      "2033": {
+        "tasmax": 29.4,
+        "tasmean": 17.8,
+        "tasmin": 16.5
+      },
+      "2034": {
+        "tasmax": 25.6,
+        "tasmean": 19.5,
+        "tasmin": 14.1
+      },
+      "2035": {
+        "tasmax": 22.7,
+        "tasmean": 18.9,
+        "tasmin": 13.9
+      },
+      "2036": {
+        "tasmax": 27.4,
+        "tasmean": 14.6,
+        "tasmin": 14.3
+      },
+      "2037": {
+        "tasmax": 22.9,
+        "tasmean": 19,
+        "tasmin": 15.2
+      },
+      "2038": {
+        "tasmax": 28.2,
+        "tasmean": 15.8,
+        "tasmin": 13.8
+      },
+      "2039": {
+        "tasmax": 24,
+        "tasmean": 17,
+        "tasmin": 14.2
+      },
+      "2040": {
+        "tasmax": 21.1,
+        "tasmean": 22.4,
+        "tasmin": 13.2
+      },
+      "2041": {
+        "tasmax": 19,
+        "tasmean": 21.2,
+        "tasmin": 13
+      },
+      "2042": {
+        "tasmax": 23.9,
+        "tasmean": 23.4,
+        "tasmin": 15.3
+      },
+      "2043": {
+        "tasmax": 26.9,
+        "tasmean": 22.1,
+        "tasmin": 14.1
+      },
+      "2044": {
+        "tasmax": 26.6,
+        "tasmean": 22.8,
+        "tasmin": 14.7
+      },
+      "2045": {
+        "tasmax": 26.4,
+        "tasmean": 21.2,
+        "tasmin": 15.7
+      },
+      "2046": {
+        "tasmax": 20.6,
+        "tasmean": 18.9,
+        "tasmin": 12.6
+      },
+      "2047": {
+        "tasmax": 23.4,
+        "tasmean": 18.2,
+        "tasmin": 14.7
+      },
+      "2048": {
+        "tasmax": 22.5,
+        "tasmean": 17.4,
+        "tasmin": 13.8
+      },
+      "2049": {
+        "tasmax": 18.9,
+        "tasmean": 17.4,
+        "tasmin": 12.2
+      },
+      "2050": {
+        "tasmax": 26,
+        "tasmean": 21.4,
+        "tasmin": 16.2
+      },
+      "2051": {
+        "tasmax": 21.8,
+        "tasmean": 16.7,
+        "tasmin": 13.1
+      },
+      "2052": {
+        "tasmax": 28.8,
+        "tasmean": 18.5,
+        "tasmin": 17.1
+      },
+      "2053": {
+        "tasmax": 25.8,
+        "tasmean": 15.3,
+        "tasmin": 16.3
+      },
+      "2054": {
+        "tasmax": 25.4,
+        "tasmean": 17.6,
+        "tasmin": 14.2
+      },
+      "2055": {
+        "tasmax": 23.5,
+        "tasmean": 15.6,
+        "tasmin": 14.8
+      },
+      "2056": {
+        "tasmax": 31.4,
+        "tasmean": 21.9,
+        "tasmin": 17.1
+      },
+      "2057": {
+        "tasmax": 23.3,
+        "tasmean": 24,
+        "tasmin": 14.8
+      },
+      "2058": {
+        "tasmax": 20.7,
+        "tasmean": 19.7,
+        "tasmin": 13.2
+      },
+      "2059": {
+        "tasmax": 22.9,
+        "tasmean": 21,
+        "tasmin": 13.5
+      },
+      "2060": {
+        "tasmax": 25.7,
+        "tasmean": 21.4,
+        "tasmin": 16.5
+      },
+      "2061": {
+        "tasmax": 26.9,
+        "tasmean": 20,
+        "tasmin": 17
+      },
+      "2062": {
+        "tasmax": 29.4,
+        "tasmean": 19.3,
+        "tasmin": 17.6
+      },
+      "2063": {
+        "tasmax": 32.9,
+        "tasmean": 20.6,
+        "tasmin": 18.8
+      },
+      "2064": {
+        "tasmax": 27.8,
+        "tasmean": 20.2,
+        "tasmin": 17.1
+      },
+      "2065": {
+        "tasmax": 23.3,
+        "tasmean": 20,
+        "tasmin": 14.4
+      },
+      "2066": {
+        "tasmax": 26.5,
+        "tasmean": 19.7,
+        "tasmin": 16.4
+      },
+      "2067": {
+        "tasmax": 23.8,
+        "tasmean": 18.8,
+        "tasmin": 15.1
+      },
+      "2068": {
+        "tasmax": 28.3,
+        "tasmean": 17.4,
+        "tasmin": 16
+      },
+      "2069": {
+        "tasmax": 17.6,
+        "tasmean": 17.6,
+        "tasmin": 11.4
+      },
+      "2070": {
+        "tasmax": 22.2,
+        "tasmean": 22.1,
+        "tasmin": 14.6
+      },
+      "2071": {
+        "tasmax": 26.2,
+        "tasmean": 19.2,
+        "tasmin": 14.9
+      },
+      "2072": {
+        "tasmax": 27.6,
+        "tasmean": 19.1,
+        "tasmin": 17.2
+      },
+      "2073": {
+        "tasmax": 27.9,
+        "tasmean": 24.7,
+        "tasmin": 17.2
+      },
+      "2074": {
+        "tasmax": 21.8,
+        "tasmean": 18.8,
+        "tasmin": 13
+      },
+      "2075": {
+        "tasmax": 28.3,
+        "tasmean": 21.4,
+        "tasmin": 17.5
+      },
+      "2076": {
+        "tasmax": 32.8,
+        "tasmean": 21,
+        "tasmin": 18
+      },
+      "2077": {
+        "tasmax": 28,
+        "tasmean": 17.8,
+        "tasmin": 16.9
+      },
+      "2078": {
+        "tasmax": 30.5,
+        "tasmean": 22.8,
+        "tasmin": 18.2
+      },
+      "2079": {
+        "tasmax": 23.6,
+        "tasmean": 19.4,
+        "tasmin": 14.9
+      },
+      "2080": {
+        "tasmax": 26.6,
+        "tasmean": 21.7,
+        "tasmin": 15.9
+      },
+      "2081": {
+        "tasmax": 29.8,
+        "tasmean": 19.4,
+        "tasmin": 17.2
+      },
+      "2082": {
+        "tasmax": 28.1,
+        "tasmean": 19.9,
+        "tasmin": 17.1
+      },
+      "2083": {
+        "tasmax": 21.4,
+        "tasmean": 21.7,
+        "tasmin": 15.6
+      },
+      "2084": {
+        "tasmax": 28.8,
+        "tasmean": 19.7,
+        "tasmin": 17.6
+      },
+      "2085": {
+        "tasmax": 24.9,
+        "tasmean": 17.7,
+        "tasmin": 14.8
+      },
+      "2086": {
+        "tasmax": 29.1,
+        "tasmean": 21.7,
+        "tasmin": 18.1
+      },
+      "2087": {
+        "tasmax": 28.8,
+        "tasmean": 22.7,
+        "tasmin": 17.8
+      },
+      "2088": {
+        "tasmax": 28.8,
+        "tasmean": 17.5,
+        "tasmin": 19.2
+      },
+      "2089": {
+        "tasmax": 30.3,
+        "tasmean": 21,
+        "tasmin": 20
+      },
+      "2090": {
+        "tasmax": 28.1,
+        "tasmean": 23.4,
+        "tasmin": 18.5
+      },
+      "2091": {
+        "tasmax": 24.6,
+        "tasmean": 18,
+        "tasmin": 15.7
+      },
+      "2092": {
+        "tasmax": 21.6,
+        "tasmean": 21.7,
+        "tasmin": 15.3
+      },
+      "2093": {
+        "tasmax": 24.1,
+        "tasmean": 22.7,
+        "tasmin": 14.9
+      },
+      "2094": {
+        "tasmax": 30.1,
+        "tasmean": 22.7,
+        "tasmin": 17.6
+      },
+      "2095": {
+        "tasmax": 30.4,
+        "tasmean": 20.7,
+        "tasmin": 18.2
+      },
+      "2096": {
+        "tasmax": 24.6,
+        "tasmean": 20.9,
+        "tasmin": 17.4
+      },
+      "2097": {
+        "tasmax": 21.6,
+        "tasmean": 20.3,
+        "tasmin": 13.6
+      },
+      "2098": {
+        "tasmax": 22.8,
+        "tasmean": 21.8,
+        "tasmin": 16.8
+      },
+      "2099": {
+        "tasmax": 25.8,
+        "tasmean": 21.7,
+        "tasmin": 17.7
+      },
+      "2100": {
+        "tasmax": 24.5,
+        "tasmean": 19.6,
+        "tasmin": 16
+      }
+    }
+  }
+}
