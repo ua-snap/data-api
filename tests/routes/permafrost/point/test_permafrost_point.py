@@ -63,6 +63,13 @@ def test_permafrost_point_all_dawson_city(client):
     assert response.status_code == 404
 
 
+def test_permafrost_point_gipl_summarize(client):
+    """Tests /permafrost/point/gipl/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/permafrost/point/gipl/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_permafrost_point_gipl_csv(client):
     """Tests /permafrost/point/gipl/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/permafrost/point/gipl/64.8378/-147.7164?format=csv")

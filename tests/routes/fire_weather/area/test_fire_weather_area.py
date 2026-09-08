@@ -27,6 +27,20 @@ def test_fire_weather_area_invalid_huc10(client):
     assert response.status_code == 404
 
 
+def test_fire_weather_area_vars(client):
+    """Tests /fire_weather/area/<id>?vars= for the 19080309 HUC8 polygon returns a parseable response."""
+    response = client.get("/fire_weather/area/19080309?op=3_day_rolling_average&vars=bui")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_fire_weather_area_op(client):
+    """Tests /fire_weather/area/<id>?op= for the 19080309 HUC8 polygon with a non-default operation returns a parseable response."""
+    response = client.get("/fire_weather/area/19080309?op=summer_fire_danger_rating_days")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_fire_weather_area_csv(client):
     """Tests /fire_weather/area/<id>?op=3_day_rolling_average&format=csv for the 19080309 HUC8 polygon returns a parseable CSV."""
     response = client.get("/fire_weather/area/19080309?op=3_day_rolling_average&format=csv")

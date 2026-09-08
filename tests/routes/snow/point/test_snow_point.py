@@ -39,6 +39,13 @@ def test_snow_point_dawson_city(client):
     assert response.status_code == 404
 
 
+def test_snow_point_summarize(client):
+    """Tests /snow/snowfallequivalent/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/snow/snowfallequivalent/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_snow_point_csv(client):
     """Tests /snow/snowfallequivalent/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/snow/snowfallequivalent/64.8378/-147.7164?format=csv")

@@ -33,6 +33,13 @@ def test_era5wrf_point_attu(client):
     assert response.status_code == 422
 
 
+def test_era5wrf_point_vars(client):
+    """Tests /era5wrf/point/<lat>/<lon>?vars= at Fairbanks, AK returns a parseable response."""
+    response = client.get("/era5wrf/point/64.8378/-147.7164?vars=t2_mean")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_era5wrf_point_csv(client):
     """Tests /era5wrf/point/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/era5wrf/point/64.8378/-147.7164?format=csv")

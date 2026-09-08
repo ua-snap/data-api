@@ -41,6 +41,13 @@ def test_hydrology_point_dawson_city(client):
     assert actual_data == expected_data
 
 
+def test_hydrology_point_summarize(client):
+    """Tests /hydrology/point/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/hydrology/point/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_hydrology_point_csv(client):
     """Tests /hydrology/point/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/hydrology/point/64.8378/-147.7164?format=csv")

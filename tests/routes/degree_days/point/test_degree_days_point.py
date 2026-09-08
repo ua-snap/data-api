@@ -147,6 +147,34 @@ def test_degree_days_freezing_index_dawson_city(client):
     assert actual_data == expected_data
 
 
+def test_degree_days_heating_summarize(client):
+    """Tests /degree_days/heating/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/degree_days/heating/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_degree_days_below_zero_summarize(client):
+    """Tests /degree_days/below_zero/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/degree_days/below_zero/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_degree_days_thawing_index_summarize(client):
+    """Tests /degree_days/thawing_index/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/degree_days/thawing_index/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_degree_days_freezing_index_summarize(client):
+    """Tests /degree_days/freezing_index/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/degree_days/freezing_index/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_degree_days_heating_csv(client):
     """Tests /degree_days/heating/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/degree_days/heating/64.8378/-147.7164?format=csv")

@@ -77,6 +77,17 @@ This test only needs to confirm the response is a valid, parseable CSV — it do
 
 Name this test `test_<route>_<point|area|local|stream>_csv` and place it in the same test file as the other tests for that endpoint type (no separate file/folder needed).
 
+### Optional GET parameter tests (e.g. `?vars=`, `?models=`, `?scenarios=`, `?summarize=mmm`, `?source=`, `?op=`)
+If an endpoint accepts optional HTTP GET parameters beyond `format` — check `routes/<route>.py` for `request.args.get(...)`/`request.args` calls, and cross-reference `templates/documentation/<route>.html` for a documented example value of each — add exactly **one** additional smoke test per parameter. Do not build a combinatorial matrix (don't cross multiple parameters together, and don't repeat a parameter across every point/area/stream location); one parameter, one valid example value, one location is enough.
+
+- Pull the example value straight from the route's own documentation page (e.g. `?vars=tasmax`, `?models=6ModelAvg`, `?scenarios=ssp585`, `?summarize=mmm`, `?source=original_gcm`, `?op=3_day_rolling_average`). Do not invent a value that isn't documented.
+- Apply it at the route's single fixed Fairbanks point/local location (or the route's single fixed stream ID for stream-based endpoints) — reuse the same coordinates/ID as the route's other tests, not a new location.
+- Run the request live through the Flask test client and assert the exact status code observed (usually 200 — don't assume it, run it and see).
+- If the endpoint returns a body expected to be JSON, assert it's parseable, e.g. `response.get_json()` returns without raising (or is not `None`) — do not save a fixture and do not assert on the JSON's contents.
+- Skip `format` — that's already covered by the CSV export test above. Skip `community` — it only affects CSV filename/place metadata, not the JSON payload shape, so it doesn't need its own test.
+
+Name this test `test_<route>_<point|area|local|stream>_<param>` (e.g. `test_cmip6_downscaled_point_vars`, `test_cmip6_downscaled_point_models`, `test_cmip6_downscaled_point_scenarios`) and place it in the same test file as the other tests for that endpoint type (no separate file/folder needed).
+
 ### Fixture size limits
 JSON fixtures must never exceed **25MB** on disk (never let one anywhere near the 50MB danger zone). Before saving a fixture, check the serialized size of the live response (e.g. `len(json.dumps(actual_data))`, or just check the saved file's size with `os.path.getsize`/`ls -la` and delete/redo it if it's too big).
 
@@ -105,7 +116,7 @@ tests/routes/<route>/stream/json/<route>_stream_<endpoint-name>.json
 Location slugs: `fairbanks`, `ocean`, `attu`, `dawson_city`, and (when applicable) `reykjavik`. For stream-based endpoints, name fixtures/tests after the endpoint segment instead of a location slug (e.g. `<route>_stream_stats.json`, `<route>_stream_wt_modeled_climatology.json`), since there's only ever one stream ID per route family.
 
 ## Step-by-step procedure
-1. Read `routes/<route>.py` and `templates/documentation/<route>.html` to find the actual point/area/local/stream URL patterns (e.g. `/<route>/point/<lat>/<lon>`, `/<route>/area/<var_id>`, `/<route>/stats/<stream_id>`), any accepted coverages, and the documented spatial extent — this tells you which validators (`validate_latlon`, `validate_var_id`, bbox checks, `stream_id.isdigit()`) apply and whether the Reykjavík location is applicable (see above). For stream-based routes, enumerate every endpoint from the doc page's "Example URL" table entries (not every route decorator in `routes/*.py` — some are undocumented/internal). While reading the route file, also check for `request.args.get("format") == "csv"` to know whether a CSV smoke test is needed (see above).
+1. Read `routes/<route>.py` and `templates/documentation/<route>.html` to find the actual point/area/local/stream URL patterns (e.g. `/<route>/point/<lat>/<lon>`, `/<route>/area/<var_id>`, `/<route>/stats/<stream_id>`), any accepted coverages, and the documented spatial extent — this tells you which validators (`validate_latlon`, `validate_var_id`, bbox checks, `stream_id.isdigit()`) apply and whether the Reykjavík location is applicable (see above). For stream-based routes, enumerate every endpoint from the doc page's "Example URL" table entries (not every route decorator in `routes/*.py` — some are undocumented/internal). While reading the route file, also check for `request.args.get("format") == "csv"` to know whether a CSV smoke test is needed, and for any other `request.args.get(...)`/`request.args` optional parameters (see "Optional GET parameter tests" above) to know whether per-parameter smoke tests are needed.
 2. Use the fixed lat/lon coordinates (or stream IDs) from the tables above directly as request inputs — no place-ID resolution step is needed. Include Reykjavík only if step 1 confirms pan-Arctic/international scope.
 3. For every location/area, hit the real endpoint through the Flask test client (see `tests/conftest.py`'s `client` fixture) — do not hand-write expected JSON.
 4. Classify the live response:
@@ -114,5 +125,5 @@ Location slugs: `fairbanks`, `ocean`, `attu`, `dawson_city`, and (when applicabl
    - **200 with a real payload of 25MB or larger**: do not save the full payload — save and assert against a bounded subset instead (see "Fixture size limits" above).
    - **Non-200 (400/404/422/502/etc.)**: this is expected for out-of-bounds points, nodata ocean points, or coverages that don't extend into Canada — assert the exact status code the live endpoint actually returns. Do not guess the code; run the request and observe it.
    - **Endpoint/operation not supported at all** (no such route): don't fabricate a test for it.
-5. Write the test file(s) using the observed status codes/fixtures, one test function per location/area/stream-endpoint, named `test_<route>_<point|area|local>_<location-slug>` (or `test_<route>_stream_<endpoint-name>` for stream-based endpoints, e.g. `test_conus_hydrology_stream_gage_info`), plus one `test_<route>_<point|area|local|stream>_csv` per CSV-capable endpoint (see above).
+5. Write the test file(s) using the observed status codes/fixtures, one test function per location/area/stream-endpoint, named `test_<route>_<point|area|local>_<location-slug>` (or `test_<route>_stream_<endpoint-name>` for stream-based endpoints, e.g. `test_conus_hydrology_stream_gage_info`), plus one `test_<route>_<point|area|local|stream>_csv` per CSV-capable endpoint, plus one `test_<route>_<point|area|local|stream>_<param>` per optional GET parameter (see above).
 6. Run `micromamba run -n api-env pytest tests/routes/<route> -q` and confirm everything passes before reporting completion.

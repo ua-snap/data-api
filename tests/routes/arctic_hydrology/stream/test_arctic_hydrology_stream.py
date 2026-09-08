@@ -63,6 +63,34 @@ def test_arctic_hydrology_stream_hydroviz(client):
     assert actual_data == expected_data
 
 
+def test_arctic_hydrology_stream_stats_source(client):
+    """Tests /arctic_hydrology/stats/<stream_id>?source= for stream 81014458 returns a parseable response."""
+    response = client.get("/arctic_hydrology/stats/81014458?source=original_gcm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_arctic_hydrology_stream_modeled_climatology_source(client):
+    """Tests /arctic_hydrology/modeled_climatology/<stream_id>?source= for stream 81014458 returns a parseable response."""
+    response = client.get("/arctic_hydrology/modeled_climatology/81014458?source=original_gcm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_arctic_hydrology_stream_wt_stats_source(client):
+    """Tests /arctic_hydrology/wt_stats/<stream_id>?source= for stream 81014458 returns a parseable response."""
+    response = client.get("/arctic_hydrology/wt_stats/81014458?source=original_gcm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_arctic_hydrology_stream_wt_modeled_climatology_source(client):
+    """Tests /arctic_hydrology/wt_modeled_climatology/<stream_id>?source= for stream 81014458 returns a parseable response."""
+    response = client.get("/arctic_hydrology/wt_modeled_climatology/81014458?source=original_gcm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_arctic_hydrology_stream_stats_csv(client):
     """Tests /arctic_hydrology/stats/<stream_id>?format=csv for stream 81014458 returns a parseable CSV."""
     response = client.get("/arctic_hydrology/stats/81014458?format=csv")

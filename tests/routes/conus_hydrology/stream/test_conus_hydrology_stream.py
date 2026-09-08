@@ -57,6 +57,20 @@ def test_conus_hydrology_stream_hydroviz(client):
     assert actual_data == expected_data
 
 
+def test_conus_hydrology_stream_stats_source(client):
+    """Tests /conus_hydrology/stats/<stream_id>?source= for stream 50101 returns a parseable response."""
+    response = client.get("/conus_hydrology/stats/50101?source=original_gcm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_conus_hydrology_stream_modeled_climatology_source(client):
+    """Tests /conus_hydrology/modeled_climatology/<stream_id>?source= for stream 50101 returns a parseable response."""
+    response = client.get("/conus_hydrology/modeled_climatology/50101?source=original_gcm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_conus_hydrology_stream_stats_csv(client):
     """Tests /conus_hydrology/stats/<stream_id>?format=csv for stream 50101 returns a parseable CSV."""
     response = client.get("/conus_hydrology/stats/50101?format=csv")

@@ -33,6 +33,13 @@ def test_era5wrf_area_invalid_huc10(client):
     assert response.status_code == 404
 
 
+def test_era5wrf_area_vars(client):
+    """Tests /era5wrf/area/<id>?vars= for the 19080309 HUC8 polygon returns a parseable response."""
+    response = client.get("/era5wrf/area/19080309?vars=t2_mean")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_era5wrf_area_csv(client):
     """Tests /era5wrf/area/<id>?format=csv for the 19080309 HUC8 polygon returns a parseable CSV."""
     response = client.get("/era5wrf/area/19080309?format=csv")

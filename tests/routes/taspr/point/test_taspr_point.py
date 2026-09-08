@@ -324,6 +324,20 @@ def test_taspr_point_dawson_city(client):
     assert actual_data == expected_data
 
 
+def test_temperature_jan_summarize(client):
+    """Tests /temperature/jan/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/temperature/jan/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_temperature_july_summarize(client):
+    """Tests /temperature/july/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/temperature/july/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_temperature_point_csv(client):
     """Tests /temperature/point/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/temperature/point/64.8378/-147.7164?format=csv")

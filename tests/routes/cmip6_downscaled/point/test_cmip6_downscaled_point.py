@@ -63,6 +63,27 @@ def test_cmip6_downscaled_point_dawson_city(client):
     assert actual_subset == expected_subset
 
 
+def test_cmip6_downscaled_point_vars(client):
+    """Tests /cmip6_downscaled/point/<lat>/<lon>?vars= at Fairbanks, AK returns a parseable response."""
+    response = client.get("/cmip6_downscaled/point/64.8378/-147.7164?vars=tasmax")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_cmip6_downscaled_point_models(client):
+    """Tests /cmip6_downscaled/point/<lat>/<lon>?models= at Fairbanks, AK returns a parseable response."""
+    response = client.get("/cmip6_downscaled/point/64.8378/-147.7164?models=7ModelAvg")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_cmip6_downscaled_point_scenarios(client):
+    """Tests /cmip6_downscaled/point/<lat>/<lon>?scenarios= at Fairbanks, AK returns a parseable response."""
+    response = client.get("/cmip6_downscaled/point/64.8378/-147.7164?scenarios=ssp585")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_cmip6_downscaled_point_csv(client):
     """Tests /cmip6_downscaled/point/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/cmip6_downscaled/point/64.8378/-147.7164?format=csv")

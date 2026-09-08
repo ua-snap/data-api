@@ -114,6 +114,13 @@ def test_indicators_cmip6_point_reykjavik(client):
     assert actual_data == expected_data
 
 
+def test_indicators_cmip6_point_summarize(client):
+    """Tests /indicators/cmip6/point/<lat>/<lon>?summarize=mmm at Fairbanks, AK returns a parseable response."""
+    response = client.get("/indicators/cmip6/point/64.8378/-147.7164?summarize=mmm")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_indicators_cmip6_point_csv(client):
     """Tests /indicators/cmip6/point/<lat>/<lon>?format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/indicators/cmip6/point/64.8378/-147.7164?format=csv")

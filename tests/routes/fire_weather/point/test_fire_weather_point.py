@@ -39,6 +39,20 @@ def test_fire_weather_point_dawson_city(client):
     assert actual_data == expected_data
 
 
+def test_fire_weather_point_vars(client):
+    """Tests /fire_weather/point/<lat>/<lon>?vars= at Fairbanks, AK returns a parseable response."""
+    response = client.get("/fire_weather/point/64.8378/-147.7164?op=3_day_rolling_average&vars=bui")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
+def test_fire_weather_point_op(client):
+    """Tests /fire_weather/point/<lat>/<lon>?op= at Fairbanks, AK with a non-default operation returns a parseable response."""
+    response = client.get("/fire_weather/point/64.8378/-147.7164?op=summer_fire_danger_rating_days")
+    assert response.status_code == 200
+    assert response.get_json() is not None
+
+
 def test_fire_weather_point_csv(client):
     """Tests /fire_weather/point/<lat>/<lon>?op=3_day_rolling_average&format=csv at Fairbanks, AK returns a parseable CSV."""
     response = client.get("/fire_weather/point/64.8378/-147.7164?op=3_day_rolling_average&format=csv")
