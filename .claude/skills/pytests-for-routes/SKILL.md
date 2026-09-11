@@ -70,11 +70,11 @@ Some endpoints return data that changes regularly (e.g. active/current fire peri
 The confirmed case in this repo: `fire`'s point endpoint (`/fire/point/<lat>/<lon>`) — all `test_fire_point_*` tests (`test_fire_point_fairbanks`, `test_fire_point_ocean`, `test_fire_point_attu`, `test_fire_point_dawson_city`, and `test_fire_point_reykjavik` if applicable) use this status-code-and-parseable-only pattern instead of the golden-fixture pattern. If asked to test another route whose data is similarly described as live/regularly-updated (check `templates/documentation/<route>.html` for language like "current", "active", "updated daily/annually"), confirm with the user before applying this exception rather than assuming it.
 
 ### CSV export tests (`?format=csv`)
-If the route file (`routes/<route>.py`) contains `request.args.get("format") == "csv"` anywhere for a given endpoint, that endpoint supports CSV export and needs exactly **one** additional test — do not add the full 4/5-location matrix for CSV, just a single smoke test at Fairbanks (`lat=64.8378, lon=-147.7164`), or the route's single fixed stream ID for stream-based endpoints.
+If the route file (`routes/<route>.py`) contains `request.args.get("format") == "csv"` anywhere for a given endpoint, that endpoint supports CSV export and needs exactly **one** additional test — do not add the full 4/5-location matrix for CSV. Use a single smoke test at the first location/area/stream ID that returned **200** in this endpoint's location (or area/stream) tests. That is usually Fairbanks (`lat=64.8378, lon=-147.7164`), or the route's single fixed stream ID for stream-based endpoints — but not always. If Fairbanks (or the default area/stream ID) was out of bounds, use the first in-bounds location instead (e.g. `landfastice` CSV uses the ocean point because Fairbanks returns 422).
 
 This test only needs to confirm the response is a valid, parseable CSV — it does **not** need a saved fixture and does **not** need its contents compared:
-- Append `&format=csv` (or `?format=csv` if no other query params) to the endpoint URL. If the endpoint requires another query param to produce meaningful output (e.g. `fire_weather`'s `?op=...`), chain both per the doc page's own examples (e.g. `?op=3_day_rolling_average&format=csv`).
-- Assert `response.status_code == 200`.
+- Append `&format=csv` (or `?format=csv` if no other query params) to that same in-bounds endpoint URL. If the endpoint requires another query param to produce meaningful output (e.g. `fire_weather`'s `?op=...`), chain both per the doc page's own examples (e.g. `?op=3_day_rolling_average&format=csv`).
+- Assert the observed status code (should be 200 if the location was in-bounds — don't assume Fairbanks; don't snapshot a 422/404 as a CSV success).
 - Assert the response is parseable as CSV, e.g.:
   ```python
   import csv
@@ -83,7 +83,7 @@ This test only needs to confirm the response is a valid, parseable CSV — it do
   rows = list(csv.reader(io.StringIO(response.get_data(as_text=True))))
   assert len(rows) > 0
   ```
-- Do not assert on `content_type`/mimetype specifics or exact row contents — different endpoints attach metadata header rows before the data rows, so the shape varies; just confirm it parses into at least one row without raising and returns 200.
+- Do not assert on `content_type`/mimetype specifics or exact row contents — different endpoints attach metadata header rows before the data rows, so the shape varies; just confirm it parses into at least one row without raising.
 
 Name this test `test_<route>_<point|area|local|stream>_csv` and place it in the same test file as the other tests for that endpoint type (no separate file/folder needed).
 
@@ -91,7 +91,7 @@ Name this test `test_<route>_<point|area|local|stream>_csv` and place it in the 
 If an endpoint accepts optional HTTP GET parameters beyond `format` — check `routes/<route>.py` for `request.args.get(...)`/`request.args` calls, and cross-reference `templates/documentation/<route>.html` for a documented example value of each — add exactly **one** additional smoke test per parameter. Do not build a combinatorial matrix (don't cross multiple parameters together, and don't repeat a parameter across every point/area/stream location); one parameter, one valid example value, one location is enough.
 
 - Pull the example value straight from the route's own documentation page (e.g. `?vars=tasmax`, `?models=7ModelAvg`, `?scenarios=ssp585`, `?summarize=mmm`, `?source=original_gcm`, `?op=3_day_rolling_average`). Do not invent a value that isn't documented.
-- Apply it at the route's single fixed Fairbanks point/local location (or the route's single fixed stream ID for stream-based endpoints) — reuse the same coordinates/ID as the route's other tests, not a new location.
+- Apply it at the same in-bounds location used for this endpoint's CSV test (the first location/area/stream ID that returned 200 in the location tests). That is usually Fairbanks, or the route's single fixed stream ID — reuse an existing in-bounds coordinate/ID, not a new location.
 - Run the request live through the Flask test client and assert the exact status code observed (usually 200 — don't assume it, run it and see).
 - If the endpoint returns a body expected to be JSON, assert it's parseable, e.g. `response.get_json()` returns without raising (or is not `None`) — do not save a fixture and do not assert on the JSON's contents.
 - Skip `format` — that's already covered by the CSV export test above. Skip `community` — it only affects CSV filename/place metadata, not the JSON payload shape, so it doesn't need its own test.
