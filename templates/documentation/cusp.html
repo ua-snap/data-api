@@ -2,19 +2,33 @@
 <h2>CUSP: CommUnity near-Surface Permafrost Observations</h2>
 
 <p>
-  CUSP combines individual field observations related to near-surface
-  permafrost, active-layer thickness, thaw depth, and related measurements.
-  It is an observation-evidence dataset, not a continuous permafrost map. For complete documentation, see the GitHub repo etc. etc.
+  CUSP combines individual field observations of near-surface permafrost,
+  active-layer thickness, thaw depth, and related measurements. Each returned
+  feature is source observation evidence at a point; it is not a continuous
+  permafrost map or a modeled prediction.
+</p>
+
+<p>
+  This endpoint exposes the CUSP observation resource as GeoJSON and adds the
+  source bibliography entry directly to every record as
+  <code>citation</code>. For the canonical release-table contract, method
+  codes, and quality-flag definitions, consult the
+  <a href="https://jonschwenk.github.io/cusp/user/data-schema/"
+    >CUSP data schema</a
+  >. The CUSP
+  <a href="https://jonschwenk.github.io/cusp/user/data-use-and-attribution/"
+    >attribution guidance</a
+  > explains how to cite CUSP, its release, and the original data sources.
 </p>
 
 <h3>Service endpoint</h3>
 
 <p>
-  Query observations within a 0.5&deg; by 0.5&deg; (TBD) WGS84 box centered on a
-  latitude/longitude point. The service returns at most XYZ nearby records.
-  When more records match, GeoJSON's <code>numberMatched</code> value reports
-  the full match count and <code>numberReturned</code> reports the records
-  included in the response. ????
+  Query observations in a 0.5&deg; by 0.5&deg; WGS84 (EPSG:4326) bounding box centered
+  on a latitude/longitude point. In other words, the box extends 0.25&deg; north,
+  south, east, and west of the supplied coordinate. The service returns every
+  matching record. GeoJSON's <code>numberMatched</code> and
+  <code>numberReturned</code> report the match and returned-record counts.
 </p>
 
 <table class="endpoints">
@@ -28,8 +42,8 @@
     <tr>
       <td>Nearby CUSP observation point query</td>
       <td>
-        <a href="/cusp/point/65.0628/-146.1627"
-          >/cusp/point/65.0628/-146.1627</a
+        <a href="/cusp/point/65.0461/-146.0673"
+          >/cusp/point/65.0461/-146.0673</a
         >
       </td>
     </tr>
@@ -39,20 +53,59 @@
       <td colspan="2">
         Append <code>?format=csv</code> to download the same records as a flat
         CSV file. CSV includes explicit WGS84 <code>longitude</code> and
-        <code>latitude</code> columns.
+        <code>latitude</code> columns, the record-level <code>citation</code>
+        column, and a <code>quality_flag_descriptions</code> column.
       </td>
     </tr>
   </tfoot>
 </table>
 
+<h4>Path and query parameters</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>latitude</code></td>
+      <td>Yes</td>
+      <td>WGS84 latitude in decimal degrees, from -90 through 90.</td>
+    </tr>
+    <tr>
+      <td><code>longitude</code></td>
+      <td>Yes</td>
+      <td>WGS84 longitude in decimal degrees, from -180 through 180.</td>
+    </tr>
+    <tr>
+      <td><code>format</code></td>
+      <td>No</td>
+      <td>
+        Set to <code>csv</code> for a flat CSV download. Omit it for GeoJSON;
+        no other query parameters or output formats are supported.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  Malformed or out-of-range coordinates return HTTP 400. Unsupported query
+  parameters or values return HTTP 422. If the upstream CUSP service cannot
+  be reached, the endpoint returns HTTP 502.
+</p>
+
 <h3>Output</h3>
 
 <p>
-  JSON output is a GeoJSON FeatureCollection. Each feature has a point
-  geometry and published CUSP properties including <code>cusp_obs_id</code>,
-  <code>source</code>, <code>site_id</code>, <code>observation_date</code>,
-  method and permafrost-observation labels, depth values in centimeters,
-  quality flags, and the source <code>release_version</code>.
+  JSON output is a GeoJSON <code>FeatureCollection</code>. Every feature has a
+  WGS84 point geometry, CUSP observation properties, human-readable labels,
+  a source-level <code>citation</code>, and a top-level
+  <code>quality_flag_definitions</code> lookup keyed by CUSP flag code.
+  GeoServer may also include a <code>crs</code> member identifying EPSG:4326.
 </p>
 
 <pre>
@@ -63,18 +116,143 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [-146.7, 65.1] },
+      "id": "cusp_observations.6364",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-146.06725088, 65.04609815]
+      },
       "properties": {
-        "cusp_obs_id": "...",
-        "source": "...",
-        "observation_date": "2020-07-01",
-        "method_label": "Ground probe",
+        "cusp_obs_id": "obs_ae4ec27d6f06c2fe",
+        "source": "Hollingsworth_2005",
+        "citation": "Hollingsworth, Teresa Nettleton (2005). Active layer depths: 150 mature black spruce sites in interior Alaska (2000-2003), Bonanza Creek LTER - University of Alaska Fairbanks. Bonanza Creek LTER. https://doi.org/10.6073/pasta/2fbece708e6552adb8ba6dcbc817ebb1",
+        "site_id": "TKN0009",
+        "observation_date": "2002-09-04",
+        "method": "tp",
+        "method_label": "Thaw probe",
+        "pf_observed": 1,
         "pf_observed_label": "Permafrost observed",
-        "thaw_depth_cm": 55.0,
-        "release_version": "..."
+        "thaw_depth_cm": 43.333333333333336,
+        "pf_depth_cm": 43.333333333333336,
+        "obs_limit_cm": 130,
+        "has_thaw_depth": true,
+        "has_pf_depth": true,
+        "has_obs_limit": true,
+        "quality_flags": "SS;PA",
+        "release_version": "1.1"
       }
     }
   ]
 }
 </pre>
+
+<h4>GeoJSON fields</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>geometry.coordinates</code></td>
+      <td>array</td>
+      <td>Point coordinates in <code>[longitude, latitude]</code> order, WGS84 decimal degrees.</td>
+    </tr>
+    <tr>
+      <td><code>cusp_obs_id</code></td>
+      <td>string</td>
+      <td>Deterministic opaque identifier for the canonical observation content.</td>
+    </tr>
+    <tr>
+      <td><code>source</code></td>
+      <td>string</td>
+      <td>Canonical CUSP source key.</td>
+    </tr>
+    <tr>
+      <td><code>citation</code></td>
+      <td>string</td>
+      <td>Bibliographic citation for the original source represented by the record.</td>
+    </tr>
+    <tr>
+      <td><code>site_id</code></td>
+      <td>string or null</td>
+      <td>Site or point identifier supplied by the original source.</td>
+    </tr>
+    <tr>
+      <td><code>observation_date</code>, <code>obs_month</code></td>
+      <td><code>YYYY-MM-DD</code> string, integer</td>
+      <td>Observation date and its represented calendar month.</td>
+    </tr>
+    <tr>
+      <td><code>method</code>, <code>method_label</code></td>
+      <td>string</td>
+      <td>Controlled observation-method code and its human-readable label.</td>
+    </tr>
+    <tr>
+      <td><code>pf_observed</code>, <code>pf_observed_label</code></td>
+      <td>integer, string</td>
+      <td>Permafrost-presence indicator (<code>1</code> or <code>0</code>) and its human-readable label.</td>
+    </tr>
+    <tr>
+      <td><code>thaw_depth_cm</code>, <code>pf_depth_cm</code>, <code>obs_limit_cm</code></td>
+      <td>number or null</td>
+      <td>Thaw depth, depth to permafrost, and observation limit in centimeters below ground surface.</td>
+    </tr>
+    <tr>
+      <td><code>has_thaw_depth</code>, <code>has_pf_depth</code>, <code>has_obs_limit</code></td>
+      <td>boolean</td>
+      <td>Whether the corresponding depth or observation-limit value is available for that record.</td>
+    </tr>
+    <tr>
+      <td><code>quality_flags</code></td>
+      <td>string or null</td>
+      <td>Semicolon-delimited CUSP quality-flag codes; blank or null means no current flag applies.</td>
+    </tr>
+    <tr>
+      <td><code>quality_flag_definitions</code></td>
+      <td>object</td>
+      <td>Top-level lookup from each CUSP quality-flag code to its category and descriptive text.</td>
+    </tr>
+    <tr>
+      <td><code>release_version</code></td>
+      <td>string</td>
+      <td>CUSP release version represented by the resource record.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  A value of <code>pf_observed: 0</code> normally means permafrost was not
+  observed down to the positive <code>obs_limit_cm</code>; it does not mean
+  permafrost is absent at all depths. Null depth values mean the corresponding
+  measurement was not reported or could not be determined. See the
+  <a href="https://jonschwenk.github.io/cusp/user/data-schema/">CUSP data schema</a>
+  for the complete canonical-field definitions and caveats.
+</p>
+
+<h3>Citation and attribution</h3>
+
+<p>
+  The API repeats the original-source bibliography text in each feature's
+  <code>citation</code> field and in each CSV row. This makes it possible to
+  retain provenance after filtering records, but it does not replace the full
+  attribution requirements: analyses should cite CUSP itself, the exact CUSP
+  release, and every original source represented by the records used. When
+  multiple records use the same <code>source</code>, deduplicate that source's
+  citation in the final bibliography.
+</p>
+
+<h3>CSV output</h3>
+
+<p>
+  Append <code>?format=csv</code> to the point URL to download the same
+  returned records in a flat table. The CSV replaces GeoJSON geometry with
+  <code>longitude</code> and <code>latitude</code> columns and preserves all
+  published observation fields, including <code>citation</code>. Text
+  citations are CSV-escaped when necessary, so they can contain commas and
+  URLs without changing the column layout.
+</p>
 {% endblock %}

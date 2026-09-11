@@ -748,12 +748,35 @@ def permafrost_csv(data, source_metadata):
     }
 
 
+def cusp_quality_flag_descriptions(
+    quality_flags: object, quality_flag_definitions: object
+) -> str:
+    """Format known CUSP quality-flag definitions for a CSV cell."""
+    if not isinstance(quality_flags, str) or not isinstance(
+        quality_flag_definitions, dict
+    ):
+        return ""
+
+    descriptions = []
+    for code in quality_flags.split(";"):
+        code = code.strip()
+        definition = quality_flag_definitions.get(code)
+        if not isinstance(definition, dict):
+            continue
+
+        description = definition.get("description")
+        if isinstance(description, str):
+            descriptions.append(f"{code}: {description}")
+
+    return " | ".join(descriptions)
+
+
 def cusp_observations_csv(
     feature_collection: dict[str, object],
     lat: str,
     lon: str,
     half_box_degrees: float,
-    record_limit: int,
+    record_limit: int | None,
 ) -> Response:
     """Return a flat CSV export of a CUSP WFS FeatureCollection.
 
@@ -767,6 +790,7 @@ def cusp_observations_csv(
         "latitude",
         "cusp_obs_id",
         "source",
+        "citation",
         "site_id",
         "observation_date",
         "obs_month",
@@ -781,9 +805,11 @@ def cusp_observations_csv(
         "has_pf_depth",
         "has_obs_limit",
         "quality_flags",
+        "quality_flag_descriptions",
         "release_version",
     ]
     rows = []
+    quality_flag_definitions = feature_collection.get("quality_flag_definitions")
 
     for feature in feature_collection.get("features", []):
         if not isinstance(feature, dict):
@@ -800,6 +826,9 @@ def cusp_observations_csv(
         longitude = coordinates[0] if len(coordinates) >= 2 else None
         latitude = coordinates[1] if len(coordinates) >= 2 else None
         row = {field: properties.get(field) for field in fieldnames[2:]}
+        row["quality_flag_descriptions"] = cusp_quality_flag_descriptions(
+            properties.get("quality_flags"), quality_flag_definitions
+        )
         row.update({"longitude": longitude, "latitude": latitude})
         rows.append(row)
 
@@ -812,7 +841,10 @@ def cusp_observations_csv(
         f"# Search area: a {2 * half_box_degrees:g} degree by "
         f"{2 * half_box_degrees:g} degree WGS84 box centered on the requested point.\n"
     )
-    metadata += f"# Record limit: {record_limit}\n"
+    if record_limit is None:
+        metadata += "# Record limit: none\n"
+    else:
+        metadata += f"# Record limit: {record_limit}\n"
 
     return write_csv(
         {
