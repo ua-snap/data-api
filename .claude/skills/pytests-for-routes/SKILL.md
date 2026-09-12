@@ -98,15 +98,49 @@ If an endpoint accepts optional HTTP GET parameters beyond `format` — check `r
 
 Name this test `test_<route>_<point|area|local|stream>_<param>` (e.g. `test_cmip6_downscaled_point_vars`, `test_cmip6_downscaled_point_models`, `test_cmip6_downscaled_point_scenarios`) and place it in the same test file as the other tests for that endpoint type (no separate file/folder needed).
 
+### Comparing downloaded JSON to fixtures with numpy.isclose
+Never compare live JSON to a saved fixture with plain `==`/`assert actual_data == expected_data` — floating-point values returned by the live API can differ from the saved fixture by tiny rounding noise (platform/library version differences) even when nothing meaningfully changed, causing spurious failures. Instead, walk the structure and compare numeric leaves with `numpy.isclose`, while still comparing non-numeric leaves (strings, `None`, booleans) and the overall shape (dict keys, list lengths) exactly.
+
+Use (or create, if it doesn't already exist) a shared helper in `tests/json_compare.py`:
+
+```python
+import numpy as np
+
+
+def assert_json_allclose(actual, expected, rtol=1e-5, atol=1e-8, path="root"):
+    """Recursively assert actual == expected, comparing numbers with numpy.isclose."""
+    if isinstance(expected, dict):
+        assert isinstance(actual, dict), f"{path}: expected dict, got {type(actual)}"
+        assert actual.keys() == expected.keys(), f"{path}: key mismatch"
+        for key in expected:
+            assert_json_allclose(actual[key], expected[key], rtol, atol, f"{path}.{key}")
+    elif isinstance(expected, list):
+        assert isinstance(actual, list), f"{path}: expected list, got {type(actual)}"
+        assert len(actual) == len(expected), f"{path}: length mismatch"
+        for i, (a, e) in enumerate(zip(actual, expected)):
+            assert_json_allclose(a, e, rtol, atol, f"{path}[{i}]")
+    elif isinstance(expected, bool) or expected is None:
+        assert actual == expected, f"{path}: {actual!r} != {expected!r}"
+    elif isinstance(expected, (int, float)):
+        assert isinstance(actual, (int, float)), f"{path}: expected number, got {type(actual)}"
+        assert np.isclose(actual, expected, rtol=rtol, atol=atol), f"{path}: {actual!r} != {expected!r}"
+    else:
+        assert actual == expected, f"{path}: {actual!r} != {expected!r}"
+```
+
+Note: check `bool` before `(int, float)` — in Python `bool` is a subclass of `int`, and `True`/`False` should be compared exactly, not with `numpy.isclose`.
+
+Use this helper for every golden-fixture comparison in this skill — full-payload comparisons, subset comparisons (see "Fixture size limits" below), and any other place these instructions say to assert live JSON equals saved/expected JSON. Import it as `from tests.json_compare import assert_json_allclose` and call `assert_json_allclose(actual_data, expected_data)` in place of `assert actual_data == expected_data`. This applies to data-route golden-fixture tests only — place-route smoke tests never compare JSON contents, so they're unaffected.
+
 ### Fixture size limits
 JSON fixtures must never exceed **25MB** on disk (never let one anywhere near the 50MB danger zone). Before saving a fixture, check the serialized size of the live response (e.g. `len(json.dumps(actual_data))`, or just check the saved file's size with `os.path.getsize`/`ls -la` and delete/redo it if it's too big).
 
-If a live response is **under 25MB**: save it as a full golden fixture as normal, and assert full equality against it (existing behavior, unchanged).
+If a live response is **under 25MB**: save it as a full golden fixture as normal, and assert full equality against it using `assert_json_allclose` (see "Comparing downloaded JSON to fixtures with numpy.isclose" above) rather than plain `==`.
 
 If a live response is **over 25MB** (this mostly affects large-polygon area/zonal-stats endpoints or endpoints returning many nested models/scenarios/dates): do not save the full payload. Instead:
 1. Take a bounded, deterministic subset of the response that still exercises real structure — e.g. the first 5 top-level keys of a dict (`{k: actual_data[k] for k in list(actual_data)[:5]}`), or the first 5 items of a list. Pick whatever slice keeps the saved subset well under 25MB.
 2. Save that subset as the fixture, named with a `_subset` suffix (e.g. `<route>_point_<location-slug>_subset.json`) so it's obvious at a glance that it isn't the full response.
-3. In the test, take the *same* slice from the live response and assert that slice equals the saved subset — do not compare the full live response against the subset fixture (they won't match). Also assert something cheap about the overall shape of the full response (e.g. `isinstance(actual_data, dict)` and it's non-empty) so a gross regression (empty response, wrong type) is still caught even though the full payload isn't diffed.
+3. In the test, take the *same* slice from the live response and assert that slice equals the saved subset using `assert_json_allclose` (see above) — do not compare the full live response against the subset fixture (they won't match). Also assert something cheap about the overall shape of the full response (e.g. `isinstance(actual_data, dict)` and it's non-empty) so a gross regression (empty response, wrong type) is still caught even though the full payload isn't diffed.
 4. Add a one-line comment in the test explaining why only a subset is compared (payload exceeds the 25MB fixture cap).
 
 ### Directory and fixture layout
@@ -131,7 +165,7 @@ Location slugs: `fairbanks`, `ocean`, `attu`, `dawson_city`, and (when applicabl
 3. For every location/area, hit the real endpoint through the Flask test client (see `tests/conftest.py`'s `client` fixture) — do not hand-write expected JSON.
 4. Classify the live response:
    - **Route is a confirmed volatile-data exception** (see "Volatile-data exceptions" above): skip fixture save/compare — assert only the status code and (if JSON) that the body is parseable.
-   - **200 with a real payload under 25MB**: save the actual JSON response as a golden fixture under the matching `json/` folder, and assert the live response equals the loaded fixture (matches the existing golden-file pattern used elsewhere in `tests/routes`).
+   - **200 with a real payload under 25MB**: save the actual JSON response as a golden fixture under the matching `json/` folder, and assert the live response equals the loaded fixture using `assert_json_allclose` (matches the existing golden-file pattern used elsewhere in `tests/routes`, updated to tolerate floating-point noise).
    - **200 with a real payload of 25MB or larger**: do not save the full payload — save and assert against a bounded subset instead (see "Fixture size limits" above).
    - **Non-200 (400/404/422/502/etc.)**: this is expected for out-of-bounds points, nodata ocean points, or coverages that don't extend into Canada — assert the exact status code the live endpoint actually returns. Do not guess the code; run the request and observe it.
    - **Endpoint/operation not supported at all** (no such route): don't fabricate a test for it.
