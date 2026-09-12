@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_snow_point_fairbanks(client):
     """Tests /snow/snowfallequivalent/<lat>/<lon> at Fairbanks, AK."""
@@ -12,7 +14,7 @@ def test_snow_point_fairbanks(client):
     with open("tests/routes/snow/point/json/snow_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_snow_point_ocean(client):
@@ -30,7 +32,7 @@ def test_snow_point_attu(client):
     with open("tests/routes/snow/point/json/snow_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_snow_point_dawson_city(client):

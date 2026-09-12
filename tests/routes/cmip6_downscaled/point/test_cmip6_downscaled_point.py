@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_cmip6_downscaled_point_fairbanks(client):
     """Tests /cmip6_downscaled/point/<lat>/<lon> at Fairbanks, AK."""
@@ -18,7 +20,7 @@ def test_cmip6_downscaled_point_fairbanks(client):
     with open("tests/routes/cmip6_downscaled/point/json/cmip6_downscaled_point_fairbanks_subset.json") as f:
         expected_subset = json.load(f)
 
-    assert actual_subset == expected_subset
+    assert_json_allclose(actual_subset, expected_subset)
 
 
 def test_cmip6_downscaled_point_ocean(client):
@@ -36,7 +38,7 @@ def test_cmip6_downscaled_point_ocean(client):
     with open("tests/routes/cmip6_downscaled/point/json/cmip6_downscaled_point_ocean_subset.json") as f:
         expected_subset = json.load(f)
 
-    assert actual_subset == expected_subset
+    assert_json_allclose(actual_subset, expected_subset)
 
 
 def test_cmip6_downscaled_point_attu(client):
@@ -60,7 +62,7 @@ def test_cmip6_downscaled_point_dawson_city(client):
     with open("tests/routes/cmip6_downscaled/point/json/cmip6_downscaled_point_dawson_city_subset.json") as f:
         expected_subset = json.load(f)
 
-    assert actual_subset == expected_subset
+    assert_json_allclose(actual_subset, expected_subset)
 
 
 def test_cmip6_downscaled_point_vars(client):

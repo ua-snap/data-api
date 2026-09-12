@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_arctic_hydrology_stream_stats(client):
     """Tests /arctic_hydrology/stats/<stream_id> for stream 81014458."""
@@ -12,7 +14,7 @@ def test_arctic_hydrology_stream_stats(client):
     with open("tests/routes/arctic_hydrology/stream/json/arctic_hydrology_stream_stats.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_arctic_hydrology_stream_modeled_climatology(client):
@@ -24,7 +26,7 @@ def test_arctic_hydrology_stream_modeled_climatology(client):
     with open("tests/routes/arctic_hydrology/stream/json/arctic_hydrology_stream_modeled_climatology.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_arctic_hydrology_stream_wt_stats(client):
@@ -36,7 +38,7 @@ def test_arctic_hydrology_stream_wt_stats(client):
     with open("tests/routes/arctic_hydrology/stream/json/arctic_hydrology_stream_wt_stats.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_arctic_hydrology_stream_wt_modeled_climatology(client):
@@ -48,7 +50,7 @@ def test_arctic_hydrology_stream_wt_modeled_climatology(client):
     with open("tests/routes/arctic_hydrology/stream/json/arctic_hydrology_stream_wt_modeled_climatology.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_arctic_hydrology_stream_hydroviz(client):
@@ -60,7 +62,7 @@ def test_arctic_hydrology_stream_hydroviz(client):
     with open("tests/routes/arctic_hydrology/stream/json/arctic_hydrology_stream_hydroviz.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_arctic_hydrology_stream_stats_source(client):

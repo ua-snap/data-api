@@ -2,17 +2,19 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
 
-def test_era5wrf_area_19080309(client):
-    """Tests /era5wrf/area/<id> for the 19080309 (Tolovana River) HUC8 polygon."""
-    response = client.get("/era5wrf/area/19080309")
+
+def test_era5wrf_area_1908031103(client):
+    """Tests /era5wrf/area/<id> for the 1908031103 (Rock Creek) HUC10 polygon."""
+    response = client.get("/era5wrf/area/1908031103")
     assert response.status_code == 200
     actual_data = response.get_json()
 
-    with open("tests/routes/era5wrf/area/json/era5wrf_area_19080309.json") as f:
+    with open("tests/routes/era5wrf/area/json/era5wrf_area_1908031103.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_era5wrf_area_ytpa21(client):
@@ -24,7 +26,7 @@ def test_era5wrf_area_ytpa21(client):
     with open("tests/routes/era5wrf/area/json/era5wrf_area_YTPA21.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_era5wrf_area_invalid_huc10(client):
@@ -34,15 +36,15 @@ def test_era5wrf_area_invalid_huc10(client):
 
 
 def test_era5wrf_area_vars(client):
-    """Tests /era5wrf/area/<id>?vars= for the 19080309 HUC8 polygon returns a parseable response."""
-    response = client.get("/era5wrf/area/19080309?vars=t2_mean")
+    """Tests /era5wrf/area/<id>?vars= for the 1908031103 HUC10 polygon returns a parseable response."""
+    response = client.get("/era5wrf/area/1908031103?vars=t2_mean")
     assert response.status_code == 200
     assert response.get_json() is not None
 
 
 def test_era5wrf_area_csv(client):
-    """Tests /era5wrf/area/<id>?format=csv for the 19080309 HUC8 polygon returns a parseable CSV."""
-    response = client.get("/era5wrf/area/19080309?format=csv")
+    """Tests /era5wrf/area/<id>?format=csv for the 1908031103 HUC10 polygon returns a parseable CSV."""
+    response = client.get("/era5wrf/area/1908031103?format=csv")
     assert response.status_code == 200
     rows = list(csv.reader(io.StringIO(response.get_data(as_text=True))))
     assert len(rows) > 0

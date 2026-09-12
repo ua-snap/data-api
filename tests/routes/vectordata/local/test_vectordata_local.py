@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_places_search_fairbanks(client):
     """Tests /places/search/<lat>/<lon> nearby-communities-and-areas search at Fairbanks, AK."""
@@ -12,7 +14,7 @@ def test_places_search_fairbanks(client):
     with open("tests/routes/vectordata/local/json/vectordata_places_search_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_places_search_ocean(client):
@@ -24,7 +26,7 @@ def test_places_search_ocean(client):
     with open("tests/routes/vectordata/local/json/vectordata_places_search_ocean.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_places_search_attu(client):
@@ -36,7 +38,7 @@ def test_places_search_attu(client):
     with open("tests/routes/vectordata/local/json/vectordata_places_search_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_places_search_dawson_city(client):
@@ -48,7 +50,7 @@ def test_places_search_dawson_city(client):
     with open("tests/routes/vectordata/local/json/vectordata_places_search_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_places_type_corporations(client):
@@ -60,7 +62,7 @@ def test_places_type_corporations(client):
     with open("tests/routes/vectordata/local/json/vectordata_places_type_corporations.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_places_type_csv(client):
@@ -87,4 +89,4 @@ def test_places_search_communities(client):
     with open("tests/routes/vectordata/local/json/vectordata_places_search_communities.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)

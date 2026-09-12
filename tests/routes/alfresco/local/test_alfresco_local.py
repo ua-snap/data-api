@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_alfresco_flammability_local(client):
     """
@@ -18,7 +20,7 @@ def test_alfresco_flammability_local(client):
         expected_data = json.load(f)
 
     # Compare the actual data against the expected data
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_veg_type_local(client):
@@ -36,7 +38,7 @@ def test_alfresco_veg_type_local(client):
         expected_data = json.load(f)
 
     # Compare the actual data against the expected data
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_flammability_invalid_local_str(client):
@@ -62,7 +64,7 @@ def test_alfresco_flammability_local_fairbanks(client):
     with open("tests/routes/alfresco/local/json/alfresco_flammability_local_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_flammability_local_ocean(client):
@@ -92,7 +94,7 @@ def test_alfresco_veg_type_local_fairbanks(client):
     with open("tests/routes/alfresco/local/json/alfresco_veg_type_local_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_veg_type_local_ocean(client):

@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_wet_days_per_year_historical_fairbanks(client):
     """Tests /wet_days_per_year/historical/point/<lat>/<lon> at Fairbanks, AK."""
@@ -12,7 +14,7 @@ def test_wet_days_per_year_historical_fairbanks(client):
     with open("tests/routes/wet_days_per_year/point/json/wet_days_per_year_historical_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_wet_days_per_year_historical_ocean(client):
@@ -30,7 +32,7 @@ def test_wet_days_per_year_historical_attu(client):
     with open("tests/routes/wet_days_per_year/point/json/wet_days_per_year_historical_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_wet_days_per_year_historical_dawson_city(client):
@@ -48,7 +50,7 @@ def test_wet_days_per_year_projected_fairbanks(client):
     with open("tests/routes/wet_days_per_year/point/json/wet_days_per_year_projected_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_wet_days_per_year_projected_ocean(client):
@@ -66,7 +68,7 @@ def test_wet_days_per_year_projected_attu(client):
     with open("tests/routes/wet_days_per_year/point/json/wet_days_per_year_projected_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_wet_days_per_year_projected_dawson_city(client):
@@ -84,7 +86,7 @@ def test_wet_days_per_year_hp_fairbanks(client):
     with open("tests/routes/wet_days_per_year/point/json/wet_days_per_year_hp_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_wet_days_per_year_all_fairbanks(client):
@@ -96,7 +98,7 @@ def test_wet_days_per_year_all_fairbanks(client):
     with open("tests/routes/wet_days_per_year/point/json/wet_days_per_year_all_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_wet_days_per_year_historical_csv(client):

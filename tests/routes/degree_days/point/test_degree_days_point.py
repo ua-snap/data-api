@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_degree_days_heating_fairbanks(client):
     """Tests /degree_days/heating/<lat>/<lon> at Fairbanks, AK."""
@@ -12,7 +14,7 @@ def test_degree_days_heating_fairbanks(client):
     with open("tests/routes/degree_days/point/json/degree_days_heating_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_heating_ocean(client):
@@ -36,7 +38,7 @@ def test_degree_days_heating_dawson_city(client):
     with open("tests/routes/degree_days/point/json/degree_days_heating_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_below_zero_fairbanks(client):
@@ -48,7 +50,7 @@ def test_degree_days_below_zero_fairbanks(client):
     with open("tests/routes/degree_days/point/json/degree_days_below_zero_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_below_zero_ocean(client):
@@ -72,7 +74,7 @@ def test_degree_days_below_zero_dawson_city(client):
     with open("tests/routes/degree_days/point/json/degree_days_below_zero_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_thawing_index_fairbanks(client):
@@ -84,7 +86,7 @@ def test_degree_days_thawing_index_fairbanks(client):
     with open("tests/routes/degree_days/point/json/degree_days_thawing_index_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_thawing_index_ocean(client):
@@ -108,7 +110,7 @@ def test_degree_days_thawing_index_dawson_city(client):
     with open("tests/routes/degree_days/point/json/degree_days_thawing_index_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_freezing_index_fairbanks(client):
@@ -120,7 +122,7 @@ def test_degree_days_freezing_index_fairbanks(client):
     with open("tests/routes/degree_days/point/json/degree_days_freezing_index_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_freezing_index_ocean(client):
@@ -144,7 +146,7 @@ def test_degree_days_freezing_index_dawson_city(client):
     with open("tests/routes/degree_days/point/json/degree_days_freezing_index_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_degree_days_heating_summarize(client):

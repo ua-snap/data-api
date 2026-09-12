@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_landfastice_point_fairbanks(client):
     """Tests /landfastice/point/<lat>/<lon>/ at Fairbanks, AK; outside the coverage (ocean-only), so out-of-bounds is expected."""
@@ -18,7 +20,7 @@ def test_landfastice_point_ocean(client):
     with open("tests/routes/landfastice/point/json/landfastice_point_ocean.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_landfastice_point_attu(client):

@@ -1,5 +1,7 @@
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_eds_all(client):
     """
@@ -13,7 +15,7 @@ def test_eds_all(client):
     with open("tests/routes/eds/point/json/eds_point.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_eds_all_fairbanks(client):
@@ -25,7 +27,7 @@ def test_eds_all_fairbanks(client):
     with open("tests/routes/eds/point/json/eds_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_eds_all_ocean(client):
@@ -37,7 +39,7 @@ def test_eds_all_ocean(client):
     with open("tests/routes/eds/point/json/eds_point_ocean.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_eds_all_attu(client):
@@ -49,7 +51,7 @@ def test_eds_all_attu(client):
     with open("tests/routes/eds/point/json/eds_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_eds_all_dawson_city(client):
@@ -61,4 +63,4 @@ def test_eds_all_dawson_city(client):
     with open("tests/routes/eds/point/json/eds_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)

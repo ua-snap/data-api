@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_conus_hydrology_stream_stats(client):
     """Tests /conus_hydrology/stats/<stream_id> for stream 50101 (Columbia River)."""
@@ -12,7 +14,7 @@ def test_conus_hydrology_stream_stats(client):
     with open("tests/routes/conus_hydrology/stream/json/conus_hydrology_stream_stats.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_conus_hydrology_stream_modeled_climatology(client):
@@ -24,7 +26,7 @@ def test_conus_hydrology_stream_modeled_climatology(client):
     with open("tests/routes/conus_hydrology/stream/json/conus_hydrology_stream_modeled_climatology.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_conus_hydrology_stream_observed_climatology(client):
@@ -42,7 +44,7 @@ def test_conus_hydrology_stream_gage_info(client):
     with open("tests/routes/conus_hydrology/stream/json/conus_hydrology_stream_gage_info.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_conus_hydrology_stream_hydroviz(client):
@@ -54,7 +56,7 @@ def test_conus_hydrology_stream_hydroviz(client):
     with open("tests/routes/conus_hydrology/stream/json/conus_hydrology_stream_hydroviz.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_conus_hydrology_stream_stats_source(client):

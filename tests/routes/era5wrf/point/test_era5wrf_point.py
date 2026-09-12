@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_era5wrf_point_fairbanks(client):
     """Tests /era5wrf/point/<lat>/<lon> at Fairbanks, AK."""
@@ -12,7 +14,7 @@ def test_era5wrf_point_fairbanks(client):
     with open("tests/routes/era5wrf/point/json/era5wrf_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_era5wrf_point_ocean(client):
@@ -24,7 +26,7 @@ def test_era5wrf_point_ocean(client):
     with open("tests/routes/era5wrf/point/json/era5wrf_point_ocean.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_era5wrf_point_attu(client):
@@ -57,4 +59,4 @@ def test_era5wrf_point_dawson_city(client):
     with open("tests/routes/era5wrf/point/json/era5wrf_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)

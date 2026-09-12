@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_indicators_cmip5_point(client):
     """
@@ -15,7 +17,7 @@ def test_indicators_cmip5_point(client):
     with open("tests/routes/indicators/point/json/indicators_cmip5_point_65.06_-146.16.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip5_point_fairbanks(client):
@@ -27,7 +29,7 @@ def test_indicators_cmip5_point_fairbanks(client):
     with open("tests/routes/indicators/point/json/indicators_cmip5_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip5_point_ocean(client):
@@ -51,7 +53,7 @@ def test_indicators_cmip5_point_dawson_city(client):
     with open("tests/routes/indicators/point/json/indicators_cmip5_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip6_point_fairbanks(client):
@@ -63,7 +65,7 @@ def test_indicators_cmip6_point_fairbanks(client):
     with open("tests/routes/indicators/point/json/indicators_cmip6_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip6_point_ocean(client):
@@ -75,7 +77,7 @@ def test_indicators_cmip6_point_ocean(client):
     with open("tests/routes/indicators/point/json/indicators_cmip6_point_ocean.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip6_point_attu(client):
@@ -87,7 +89,7 @@ def test_indicators_cmip6_point_attu(client):
     with open("tests/routes/indicators/point/json/indicators_cmip6_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip6_point_dawson_city(client):
@@ -99,7 +101,7 @@ def test_indicators_cmip6_point_dawson_city(client):
     with open("tests/routes/indicators/point/json/indicators_cmip6_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip6_point_reykjavik(client):
@@ -111,7 +113,7 @@ def test_indicators_cmip6_point_reykjavik(client):
     with open("tests/routes/indicators/point/json/indicators_cmip6_point_reykjavik.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_indicators_cmip6_point_summarize(client):

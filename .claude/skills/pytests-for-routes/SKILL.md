@@ -44,7 +44,7 @@ Test these three area IDs in the route's area-based test script:
 
 | Area ID | Notes |
 |---|---|
-| `1908031103` | Alaska HUC8 watershed. |
+| `1908031103` | Alaska HUC10 watershed (Rock Creek). |
 | `YTPA21` | Yukon, Canada polygon. |
 | `1903010300` | HUC10-level watershed that crosses the antimeridian. |
 

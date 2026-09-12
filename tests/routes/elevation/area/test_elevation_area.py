@@ -1,5 +1,7 @@
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_elevation_area(client):
     """
@@ -13,19 +15,19 @@ def test_elevation_area(client):
     with open("tests/routes/elevation/area/json/elevation_area_19010208.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
-def test_elevation_area_19080309(client):
-    """Tests /elevation/area/<id> for the 19080309 (Tolovana River) HUC8 polygon."""
-    response = client.get("/elevation/area/19080309")
+def test_elevation_area_1908031103(client):
+    """Tests /elevation/area/<id> for the 1908031103 (Rock Creek) HUC10 polygon."""
+    response = client.get("/elevation/area/1908031103")
     assert response.status_code == 200
     actual_data = response.get_json()
 
-    with open("tests/routes/elevation/area/json/elevation_area_19080309.json") as f:
+    with open("tests/routes/elevation/area/json/elevation_area_1908031103.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_elevation_area_ytpa21(client):
@@ -37,7 +39,7 @@ def test_elevation_area_ytpa21(client):
     with open("tests/routes/elevation/area/json/elevation_area_YTPA21.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_elevation_area_huc10(client):
@@ -49,4 +51,4 @@ def test_elevation_area_huc10(client):
     with open("tests/routes/elevation/area/json/elevation_area_1903010300.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)

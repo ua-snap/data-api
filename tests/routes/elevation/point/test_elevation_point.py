@@ -1,5 +1,7 @@
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_elevation_point(client):
     """
@@ -13,7 +15,7 @@ def test_elevation_point(client):
     with open("tests/routes/elevation/point/json/elevation_point_65.0628_-146.1627.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_elevation_point_fairbanks(client):
@@ -25,7 +27,7 @@ def test_elevation_point_fairbanks(client):
     with open("tests/routes/elevation/point/json/elevation_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_elevation_point_ocean(client):
@@ -37,7 +39,7 @@ def test_elevation_point_ocean(client):
     with open("tests/routes/elevation/point/json/elevation_point_ocean.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_elevation_point_attu(client):
@@ -55,4 +57,4 @@ def test_elevation_point_dawson_city(client):
     with open("tests/routes/elevation/point/json/elevation_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)

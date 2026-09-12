@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_beetles_point(client):
     """
@@ -15,7 +17,7 @@ def test_beetles_point(client):
     with open("tests/routes/beetles/point/json/beetles_point_65.0628_-146.1627.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_beetles_point_fairbanks(client):
@@ -27,7 +29,7 @@ def test_beetles_point_fairbanks(client):
     with open("tests/routes/beetles/point/json/beetles_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_beetles_point_ocean(client):

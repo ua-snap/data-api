@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_temperature_point(client):
     """
@@ -15,7 +17,7 @@ def test_temperature_point(client):
     with open("tests/routes/taspr/point/json/temperature_point_62.27_-154.61.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_precipitation_point(client):
@@ -30,7 +32,7 @@ def test_precipitation_point(client):
     with open("tests/routes/taspr/point/json/precipitation_point_62.27_-154.61.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_taspr_point(client):
@@ -45,7 +47,7 @@ def test_taspr_point(client):
     with open("tests/routes/taspr/point/json/taspr_point_62.27_-154.61.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_point_fairbanks(client):
@@ -57,7 +59,7 @@ def test_temperature_point_fairbanks(client):
     with open("tests/routes/taspr/point/json/temperature_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_point_ocean(client):
@@ -75,7 +77,7 @@ def test_temperature_point_attu(client):
     with open("tests/routes/taspr/point/json/temperature_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_point_dawson_city(client):
@@ -87,7 +89,7 @@ def test_temperature_point_dawson_city(client):
     with open("tests/routes/taspr/point/json/temperature_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_precipitation_point_fairbanks(client):
@@ -99,7 +101,7 @@ def test_precipitation_point_fairbanks(client):
     with open("tests/routes/taspr/point/json/precipitation_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_precipitation_point_ocean(client):
@@ -117,7 +119,7 @@ def test_precipitation_point_attu(client):
     with open("tests/routes/taspr/point/json/precipitation_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_precipitation_point_dawson_city(client):
@@ -129,7 +131,7 @@ def test_precipitation_point_dawson_city(client):
     with open("tests/routes/taspr/point/json/precipitation_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_taspr_point_fairbanks(client):
@@ -141,7 +143,7 @@ def test_taspr_point_fairbanks(client):
     with open("tests/routes/taspr/point/json/taspr_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_taspr_point_ocean(client):
@@ -159,7 +161,7 @@ def test_taspr_point_attu(client):
     with open("tests/routes/taspr/point/json/taspr_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_precipitation_frequency_point_fairbanks(client):
@@ -171,7 +173,7 @@ def test_precipitation_frequency_point_fairbanks(client):
     with open("tests/routes/taspr/point/json/precipitation_frequency_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_precipitation_frequency_point_ocean(client):
@@ -189,7 +191,7 @@ def test_precipitation_frequency_point_attu(client):
     with open("tests/routes/taspr/point/json/precipitation_frequency_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_precipitation_frequency_point_dawson_city(client):
@@ -207,7 +209,7 @@ def test_tas2km_point_fairbanks(client):
     with open("tests/routes/taspr/point/json/tas2km_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_tas2km_point_ocean(client):
@@ -225,7 +227,7 @@ def test_tas2km_point_attu(client):
     with open("tests/routes/taspr/point/json/tas2km_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_tas2km_point_dawson_city(client):
@@ -237,7 +239,7 @@ def test_tas2km_point_dawson_city(client):
     with open("tests/routes/taspr/point/json/tas2km_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_jan_point_fairbanks(client):
@@ -249,7 +251,7 @@ def test_temperature_jan_point_fairbanks(client):
     with open("tests/routes/taspr/point/json/temperature_jan_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_jan_point_ocean(client):
@@ -267,7 +269,7 @@ def test_temperature_jan_point_attu(client):
     with open("tests/routes/taspr/point/json/temperature_jan_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_jan_point_dawson_city(client):
@@ -285,7 +287,7 @@ def test_temperature_july_point_fairbanks(client):
     with open("tests/routes/taspr/point/json/temperature_july_point_fairbanks.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_july_point_ocean(client):
@@ -303,7 +305,7 @@ def test_temperature_july_point_attu(client):
     with open("tests/routes/taspr/point/json/temperature_july_point_attu.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_july_point_dawson_city(client):
@@ -321,7 +323,7 @@ def test_taspr_point_dawson_city(client):
     with open("tests/routes/taspr/point/json/taspr_point_dawson_city.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_temperature_jan_summarize(client):

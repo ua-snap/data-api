@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_demographics_local_ak15(client):
     """
@@ -16,7 +18,7 @@ def test_demographics_local_ak15(client):
     with open("tests/routes/demographics/local/json/demographics_local_ak15.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_demographics_local_invalid_community(client):

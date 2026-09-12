@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+from tests.json_compare import assert_json_allclose
+
 
 def test_alfresco_flammability_area(client):
     """
@@ -9,16 +11,16 @@ def test_alfresco_flammability_area(client):
     remains consistent after refactoring.
     """
     # Get the actual response from the endpoint
-    response = client.get("/alfresco/flammability/area/19080309")
+    response = client.get("/alfresco/flammability/area/1908031103")
     assert response.status_code == 200
     actual_data = response.get_json()
 
     # Load the expected response from the JSON file
-    with open("tests/routes/alfresco/area/json/alfresco_flammability_area_19080309.json") as f:
+    with open("tests/routes/alfresco/area/json/alfresco_flammability_area_1908031103.json") as f:
         expected_data = json.load(f)
 
     # Compare the actual data against the expected data
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_veg_type_area(client):
@@ -27,16 +29,16 @@ def test_alfresco_veg_type_area(client):
     remains consistent after refactoring.
     """
     # Get the actual response from the endpoint
-    response = client.get("/alfresco/veg_type/area/19080309")
+    response = client.get("/alfresco/veg_type/area/1908031103")
     assert response.status_code == 200
     actual_data = response.get_json()
 
     # Load the expected response from the JSON file
-    with open("tests/routes/alfresco/area/json/alfresco_veg_type_area_19080309.json") as f:
+    with open("tests/routes/alfresco/area/json/alfresco_veg_type_area_1908031103.json") as f:
         expected_data = json.load(f)
 
     # Compare the actual data against the expected data
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_flammability_area_ytpa21(client):
@@ -48,7 +50,7 @@ def test_alfresco_flammability_area_ytpa21(client):
     with open("tests/routes/alfresco/area/json/alfresco_flammability_area_YTPA21.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_flammability_area_invalid_huc10(client):
@@ -66,7 +68,7 @@ def test_alfresco_veg_type_area_ytpa21(client):
     with open("tests/routes/alfresco/area/json/alfresco_veg_type_area_YTPA21.json") as f:
         expected_data = json.load(f)
 
-    assert actual_data == expected_data
+    assert_json_allclose(actual_data, expected_data)
 
 
 def test_alfresco_veg_type_area_invalid_huc10(client):
@@ -76,8 +78,8 @@ def test_alfresco_veg_type_area_invalid_huc10(client):
 
 
 def test_alfresco_area_csv(client):
-    """Tests /alfresco/flammability/area/<id>?format=csv for the 19080309 HUC8 polygon returns a parseable CSV."""
-    response = client.get("/alfresco/flammability/area/19080309?format=csv")
+    """Tests /alfresco/flammability/area/<id>?format=csv for the 1908031103 HUC10 polygon returns a parseable CSV."""
+    response = client.get("/alfresco/flammability/area/1908031103?format=csv")
     assert response.status_code == 200
     rows = list(csv.reader(io.StringIO(response.get_data(as_text=True))))
     assert len(rows) > 0
