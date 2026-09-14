@@ -71,3 +71,14 @@ def test_seaice_point_csv(client):
     assert response.status_code == 200
     rows = list(csv.reader(io.StringIO(response.get_data(as_text=True))))
     assert len(rows) > 0
+
+
+def test_seaice_enddate(client):
+    """Tests /seaice/enddate/, a flat metadata endpoint with no lat/lon parameters.
+
+    No fixture comparison: this reports the latest available data date, which
+    advances over time as new data is ingested, so a saved value would go stale.
+    """
+    response = client.get("/seaice/enddate/")
+    assert response.status_code == 200
+    assert response.get_json() is not None
