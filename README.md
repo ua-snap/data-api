@@ -81,9 +81,25 @@ Explicit instructions for creating and updating the API can be found here:
 
 ### Running Tests
 
+The test client is created from the same Flask "app" object that a local development instance uses (see `conftest.py`). Basically everything is the same, except there is no actual network socket opened. Stuff that is inbound to the API happens in-memory (no server or port), but the outbound stuff (requests to Rasdaman and Geoserver) still creates normal HTTP requests.
+
+#### Running all tests
+
 Run `pytest` or `pytest -v` from the root directory of this repository.
 
-The test client is created from the same Flask "app" object that a local development instance uses (see `conftest.py`). Basically everything is the same, except there is no actual network socket opened. Stuff that is inbound to the API happens in-memory (no server or port), but the outbound stuff (requests to Rasdaman and Geoserver) still creates normal HTTP requests.
+#### Running a subset of tests
+
+To run all tests in a folder, run the following from the root directory of this repository, for example:
+
+```
+pytest tests/routes/taspr
+```
+
+Or to run a single test script, for example:
+
+```
+pytest tests/routes/taspr/area/test_taspr_area.py
+```
 
 ### Adding Tests
 
