@@ -101,34 +101,7 @@ Name this test `test_<route>_<point|area|local|stream>_<param>` (e.g. `test_cmip
 ### Comparing downloaded JSON to fixtures with numpy.isclose
 Never compare live JSON to a saved fixture with plain `==`/`assert actual_data == expected_data` — floating-point values returned by the live API can differ from the saved fixture by tiny rounding noise (platform/library version differences) even when nothing meaningfully changed, causing spurious failures. Instead, walk the structure and compare numeric leaves with `numpy.isclose`, while still comparing non-numeric leaves (strings, `None`, booleans) and the overall shape (dict keys, list lengths) exactly.
 
-Use (or create, if it doesn't already exist) a shared helper in `tests/json_compare.py`:
-
-```python
-import numpy as np
-
-
-def assert_json_allclose(actual, expected, rtol=1e-5, atol=1e-8, path="root"):
-    """Recursively assert actual == expected, comparing numbers with numpy.isclose."""
-    if isinstance(expected, dict):
-        assert isinstance(actual, dict), f"{path}: expected dict, got {type(actual)}"
-        assert actual.keys() == expected.keys(), f"{path}: key mismatch"
-        for key in expected:
-            assert_json_allclose(actual[key], expected[key], rtol, atol, f"{path}.{key}")
-    elif isinstance(expected, list):
-        assert isinstance(actual, list), f"{path}: expected list, got {type(actual)}"
-        assert len(actual) == len(expected), f"{path}: length mismatch"
-        for i, (a, e) in enumerate(zip(actual, expected)):
-            assert_json_allclose(a, e, rtol, atol, f"{path}[{i}]")
-    elif isinstance(expected, bool) or expected is None:
-        assert actual == expected, f"{path}: {actual!r} != {expected!r}"
-    elif isinstance(expected, (int, float)):
-        assert isinstance(actual, (int, float)), f"{path}: expected number, got {type(actual)}"
-        assert np.isclose(actual, expected, rtol=rtol, atol=atol), f"{path}: {actual!r} != {expected!r}"
-    else:
-        assert actual == expected, f"{path}: {actual!r} != {expected!r}"
-```
-
-Note: check `bool` before `(int, float)` — in Python `bool` is a subclass of `int`, and `True`/`False` should be compared exactly, not with `numpy.isclose`.
+Use the existing shared helper in `tests/json_compare.py` — do not reimplement it inline or copy its body into a test file. If it's ever missing, look at its git history rather than writing a new version from scratch.
 
 Use this helper for every golden-fixture comparison in this skill — full-payload comparisons, subset comparisons (see "Fixture size limits" below), and any other place these instructions say to assert live JSON equals saved/expected JSON. Import it as `from tests.json_compare import assert_json_allclose` and call `assert_json_allclose(actual_data, expected_data)` in place of `assert actual_data == expected_data`. This applies to data-route golden-fixture tests only — place-route smoke tests never compare JSON contents, so they're unaffected.
 
