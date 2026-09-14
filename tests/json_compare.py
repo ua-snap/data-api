@@ -18,11 +18,7 @@ def assert_json_allclose(actual, expected, path="root"):
     elif isinstance(expected, (int, float)):
         assert isinstance(actual, (int, float)), f"{path}: expected number, got {type(actual)}"
         magnitude = abs(expected)
-        if magnitude < 1:
-            rtol, atol = 2, 0
-        else:
-            exponent = np.floor(np.log10(magnitude))
-            atol, rtol = (0.5 if exponent == 0 else 10 ** (exponent - 1)), 0
+        rtol, atol = (2, 0) if magnitude < 1 else (0.01, 0)
         assert np.isclose(actual, expected, rtol=rtol, atol=atol), f"{path}: {actual!r} != {expected!r}"
     else:
         assert actual == expected, f"{path}: {actual!r} != {expected!r}"
