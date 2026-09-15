@@ -1,0 +1,7808 @@
+{
+  "5ModelAvg": {
+    "2021": {
+      "RCP 4.5": {
+        "magt0.5m": -0.6,
+        "magt1m": -1.0,
+        "magt2m": -1.8,
+        "magt3m": -2.0,
+        "magt4m": -2.0,
+        "magt5m": -1.9,
+        "magtsurface": 0.9,
+        "permafrostbase": 66.0,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 1.2,
+        "permafrostbase": 62.8,
+        "permafrosttop": 1.9,
+        "talikthickness": 0.0
+      }
+    },
+    "2022": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.5,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 2.0,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.4,
+        "magt2m": -0.9,
+        "magt3m": -0.9,
+        "magt4m": -0.8,
+        "magt5m": -0.8,
+        "magtsurface": 1.9,
+        "permafrostbase": 62.1,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2023": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.4,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.4,
+        "permafrostbase": 61.4,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.2
+      }
+    },
+    "2024": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.9,
+        "magt3m": -0.9,
+        "magt4m": -0.9,
+        "magt5m": -0.9,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.5,
+        "permafrostbase": 60.9,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2025": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.5,
+        "magt2m": 0.0,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.4,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 2.6,
+        "permafrostbase": 60.1,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.8
+      }
+    },
+    "2026": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.3,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 1.2,
+        "permafrostbase": 65.5,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.5,
+        "magt1m": -0.4,
+        "magt2m": -0.3,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.3,
+        "magtsurface": 1.2,
+        "permafrostbase": 59.6,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      }
+    },
+    "2027": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.8,
+        "magt3m": -0.8,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 65.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.8,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.6,
+        "magtsurface": 1.4,
+        "permafrostbase": 58.9,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.0
+      }
+    },
+    "2028": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.2,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 0.7,
+        "permafrostbase": 64.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.4,
+        "magt1m": -0.5,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 0.7,
+        "permafrostbase": 58.4,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      }
+    },
+    "2029": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.4,
+        "magt2m": -0.8,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 64.2,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.8,
+        "magt3m": -0.8,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 57.9,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2030": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.1,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.3,
+        "permafrostbase": 63.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.4,
+        "magtsurface": 2.2,
+        "permafrostbase": 57.3,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2031": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 1.4,
+        "permafrostbase": 62.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.4,
+        "magt1m": -0.5,
+        "magt2m": -0.6,
+        "magt3m": -0.6,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 1.3,
+        "permafrostbase": 56.8,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2032": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 1.3,
+        "permafrostbase": 62.0,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.4,
+        "magt1m": -0.5,
+        "magt2m": -0.7,
+        "magt3m": -0.6,
+        "magt4m": -0.6,
+        "magt5m": -0.6,
+        "magtsurface": 1.2,
+        "permafrostbase": 56.3,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      }
+    },
+    "2033": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.5,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.6,
+        "magtsurface": 1.7,
+        "permafrostbase": 61.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.6,
+        "magtsurface": 1.7,
+        "permafrostbase": 55.9,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2034": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.2,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.1,
+        "permafrostbase": 60.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.0,
+        "permafrostbase": 55.5,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2035": {
+      "RCP 4.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.6,
+        "permafrostbase": 60.1,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.2,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.7,
+        "permafrostbase": 55.2,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      }
+    },
+    "2036": {
+      "RCP 4.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.8,
+        "permafrostbase": 59.6,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": -0.4,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.6,
+        "permafrostbase": 54.9,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.1
+      }
+    },
+    "2037": {
+      "RCP 4.5": {
+        "magt0.5m": 0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.1,
+        "permafrostbase": 59.0,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.3,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.2,
+        "permafrostbase": 54.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.2
+      }
+    },
+    "2038": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.4,
+        "magt2m": -0.6,
+        "magt3m": -0.6,
+        "magt4m": -0.6,
+        "magt5m": -0.6,
+        "magtsurface": 2.0,
+        "permafrostbase": 58.3,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.0,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.2,
+        "magtsurface": 2.6,
+        "permafrostbase": 54.4,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2039": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.5,
+        "magt3m": -0.6,
+        "magt4m": -0.6,
+        "magt5m": -0.5,
+        "magtsurface": 2.0,
+        "permafrostbase": 57.7,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.3,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 2.8,
+        "permafrostbase": 54.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.4
+      }
+    },
+    "2040": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.5,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 1.8,
+        "permafrostbase": 57.5,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 2.8,
+        "permafrostbase": 54.0,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      }
+    },
+    "2041": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.2,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.6,
+        "magtsurface": 2.4,
+        "permafrostbase": 57.0,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 2.1,
+        "permafrostbase": 53.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.3
+      }
+    },
+    "2042": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.1,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.2,
+        "permafrostbase": 56.7,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.1,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.1
+      }
+    },
+    "2043": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.0,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.0,
+        "permafrostbase": 56.4,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.3,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2044": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.5,
+        "permafrostbase": 56.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.4,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      }
+    },
+    "2045": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.0,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 2.6,
+        "permafrostbase": 55.9,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.2,
+        "magtsurface": 2.9,
+        "permafrostbase": 53.6,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.1
+      }
+    },
+    "2046": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.4,
+        "permafrostbase": 55.5,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.6,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.2
+      }
+    },
+    "2047": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.1,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.1,
+        "permafrostbase": 55.2,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.6,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      }
+    },
+    "2048": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.2,
+        "magtsurface": 2.9,
+        "permafrostbase": 54.8,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.4,
+        "permafrostbase": 53.6,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.0
+      }
+    },
+    "2049": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.4,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.1,
+        "permafrostbase": 54.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.3,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.5,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      }
+    },
+    "2050": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.0,
+        "permafrostbase": 54.2,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.4,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.5,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.6
+      }
+    },
+    "2051": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.0,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.0,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.4,
+        "permafrostbase": 53.5,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2052": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 3.6,
+        "permafrostbase": 53.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.4,
+        "permafrostbase": 53.4,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2053": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 53.4,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      }
+    },
+    "2054": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.6,
+        "permafrostbase": 53.3,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.1
+      }
+    },
+    "2055": {
+      "RCP 4.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 1.9,
+        "permafrostbase": 53.6,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": -0.0,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.6,
+        "permafrostbase": 53.3,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      }
+    },
+    "2056": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 53.6,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.4,
+        "permafrostbase": 53.2,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      }
+    },
+    "2057": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 53.6,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.6,
+        "permafrostbase": 53.2,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.2
+      }
+    },
+    "2058": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.4,
+        "magt2m": 0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.5,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 53.1,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.1
+      }
+    },
+    "2059": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 53.5,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.1,
+        "permafrostbase": 53.1,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.3
+      }
+    },
+    "2060": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.8,
+        "magt2m": 0.2,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.5,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.0,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.2
+      }
+    },
+    "2061": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.2,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.4,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.0,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.4,
+        "permafrostbase": 53.0,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.4
+      }
+    },
+    "2062": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.0,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.4,
+        "permafrosttop": 2.7,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.9,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.4
+      }
+    },
+    "2063": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.0,
+        "permafrostbase": 53.3,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.0,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.2,
+        "permafrostbase": 52.9,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.3
+      }
+    },
+    "2064": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.3,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.3,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.8,
+        "magt2m": 0.2,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 52.9,
+        "permafrosttop": 2.8,
+        "talikthickness": 1.2
+      }
+    },
+    "2065": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 53.2,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 52.8,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.8
+      }
+    },
+    "2066": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.8,
+        "permafrostbase": 53.2,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.1,
+        "permafrostbase": 52.8,
+        "permafrosttop": 3.0,
+        "talikthickness": 1.4
+      }
+    },
+    "2067": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.7,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.1,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 52.8,
+        "permafrosttop": 3.0,
+        "talikthickness": 0.8
+      }
+    },
+    "2068": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 53.1,
+        "permafrosttop": 2.7,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 52.7,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.9
+      }
+    },
+    "2069": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.0,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 52.7,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.3
+      }
+    },
+    "2070": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.0,
+        "permafrostbase": 53.0,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.8,
+        "magt2m": 0.3,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 52.6,
+        "permafrosttop": 3.4,
+        "talikthickness": 1.5
+      }
+    },
+    "2071": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 53.0,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.5,
+        "permafrostbase": 52.6,
+        "permafrosttop": 3.5,
+        "talikthickness": 1.7
+      }
+    },
+    "2072": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.9,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.8,
+        "permafrostbase": 52.6,
+        "permafrosttop": 3.6,
+        "talikthickness": 1.4
+      }
+    },
+    "2073": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 52.9,
+        "permafrosttop": 2.7,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 52.5,
+        "permafrosttop": 3.7,
+        "talikthickness": 2.0
+      }
+    },
+    "2074": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 52.8,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.7,
+        "permafrostbase": 52.5,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.7
+      }
+    },
+    "2075": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.2,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.8,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.9,
+        "permafrostbase": 52.4,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.8
+      }
+    },
+    "2076": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.6,
+        "permafrostbase": 52.7,
+        "permafrosttop": 2.7,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.2,
+        "magt1m": 1.7,
+        "magt2m": 1.0,
+        "magt3m": 0.4,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 52.4,
+        "permafrosttop": 4.1,
+        "talikthickness": 2.6
+      }
+    },
+    "2077": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.0,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 52.7,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.8,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 52.3,
+        "permafrosttop": 4.3,
+        "talikthickness": 2.3
+      }
+    },
+    "2078": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.4,
+        "permafrostbase": 52.6,
+        "permafrosttop": 3.0,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.7,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 52.3,
+        "permafrosttop": 4.4,
+        "talikthickness": 2.5
+      }
+    },
+    "2079": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 52.6,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 52.3,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.9
+      }
+    },
+    "2080": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 52.5,
+        "permafrosttop": 2.7,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.6,
+        "permafrostbase": 52.2,
+        "permafrosttop": 4.7,
+        "talikthickness": 2.9
+      }
+    },
+    "2081": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.2,
+        "magt2m": 0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 52.5,
+        "permafrosttop": 3.0,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.8,
+        "permafrostbase": 52.2,
+        "permafrosttop": 4.7,
+        "talikthickness": 2.9
+      }
+    },
+    "2082": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.5,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 1.1,
+        "magt2m": 0.7,
+        "magt3m": 0.4,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.4,
+        "permafrostbase": 52.1,
+        "permafrosttop": 4.8,
+        "talikthickness": 3.1
+      }
+    },
+    "2083": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 52.4,
+        "permafrosttop": 3.0,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.3,
+        "magt1m": 2.4,
+        "magt2m": 1.5,
+        "magt3m": 0.8,
+        "magt4m": 0.3,
+        "magt5m": -0.0,
+        "magtsurface": 6.5,
+        "permafrostbase": 52.1,
+        "permafrosttop": 5.1,
+        "talikthickness": 3.5
+      }
+    },
+    "2084": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.6,
+        "permafrostbase": 52.4,
+        "permafrosttop": 3.1,
+        "talikthickness": 1.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.3,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 5.3,
+        "permafrostbase": 52.0,
+        "permafrosttop": 5.4,
+        "talikthickness": 3.5
+      }
+    },
+    "2085": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.6,
+        "magt2m": 0.2,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.1,
+        "permafrostbase": 52.3,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.2,
+        "magt2m": 0.7,
+        "magt3m": 0.4,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 5.4,
+        "permafrostbase": 52.0,
+        "permafrosttop": 5.5,
+        "talikthickness": 3.8
+      }
+    },
+    "2086": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.7,
+        "permafrostbase": 52.3,
+        "permafrosttop": 3.4,
+        "talikthickness": 1.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.3,
+        "magt2m": 0.9,
+        "magt3m": 0.5,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 5.4,
+        "permafrostbase": 52.0,
+        "permafrosttop": 5.8,
+        "talikthickness": 4.2
+      }
+    },
+    "2087": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 52.2,
+        "permafrosttop": 3.6,
+        "talikthickness": 1.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 51.9,
+        "permafrosttop": 5.9,
+        "talikthickness": 3.9
+      }
+    },
+    "2088": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": -0.0,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.2,
+        "permafrosttop": 3.5,
+        "talikthickness": 1.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.5,
+        "magt3m": 0.3,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 4.5,
+        "permafrostbase": 51.9,
+        "permafrosttop": 5.9,
+        "talikthickness": 4.0
+      }
+    },
+    "2089": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.3,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 52.2,
+        "permafrosttop": 3.6,
+        "talikthickness": 2.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.3,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 4.9,
+        "permafrostbase": 51.8,
+        "permafrosttop": 5.9,
+        "talikthickness": 4.1
+      }
+    },
+    "2090": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.1,
+        "permafrosttop": 3.6,
+        "talikthickness": 1.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.4,
+        "magt2m": 0.9,
+        "magt3m": 0.5,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 5.3,
+        "permafrostbase": 51.8,
+        "permafrosttop": 6.0,
+        "talikthickness": 4.3
+      }
+    },
+    "2091": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 52.1,
+        "permafrosttop": 3.8,
+        "talikthickness": 2.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.8,
+        "magt2m": 0.5,
+        "magt3m": 0.4,
+        "magt4m": 0.2,
+        "magt5m": 0.2,
+        "magtsurface": 4.9,
+        "permafrostbase": 51.7,
+        "permafrosttop": 6.3,
+        "talikthickness": 4.4
+      }
+    },
+    "2092": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.8,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.0,
+        "permafrosttop": 3.9,
+        "talikthickness": 2.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 51.7,
+        "permafrosttop": 6.6,
+        "talikthickness": 4.5
+      }
+    },
+    "2093": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.7,
+        "permafrostbase": 52.0,
+        "permafrosttop": 4.1,
+        "talikthickness": 1.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.3,
+        "magt2m": 0.8,
+        "magt3m": 0.5,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 5.4,
+        "permafrostbase": 51.6,
+        "permafrosttop": 6.7,
+        "talikthickness": 5.0
+      }
+    },
+    "2094": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 1.0,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 51.9,
+        "permafrosttop": 4.1,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.9,
+        "magt2m": 0.5,
+        "magt3m": 0.4,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 5.3,
+        "permafrostbase": 51.5,
+        "permafrosttop": 6.9,
+        "talikthickness": 5.1
+      }
+    },
+    "2095": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.6,
+        "magt2m": 0.3,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.5,
+        "permafrostbase": 51.9,
+        "permafrosttop": 4.2,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 1.0,
+        "magt2m": 0.6,
+        "magt3m": 0.4,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 5.2,
+        "permafrostbase": 51.4,
+        "permafrosttop": 7.3,
+        "talikthickness": 5.5
+      }
+    },
+    "2096": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.8,
+        "magt2m": 0.5,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 51.9,
+        "permafrosttop": 4.3,
+        "talikthickness": 2.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.2,
+        "magt2m": 0.7,
+        "magt3m": 0.5,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 6.2,
+        "permafrostbase": 51.3,
+        "permafrosttop": 7.6,
+        "talikthickness": 5.8
+      }
+    },
+    "2097": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 51.8,
+        "permafrosttop": 4.4,
+        "talikthickness": 2.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.3,
+        "magt2m": 0.7,
+        "magt3m": 0.5,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 6.0,
+        "permafrostbase": 51.2,
+        "permafrosttop": 7.7,
+        "talikthickness": 5.8
+      }
+    },
+    "2098": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 3.4,
+        "permafrostbase": 51.7,
+        "permafrosttop": 4.5,
+        "talikthickness": 2.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.2,
+        "magt1m": 1.7,
+        "magt2m": 1.3,
+        "magt3m": 0.8,
+        "magt4m": 0.6,
+        "magt5m": 0.4,
+        "magtsurface": 6.2,
+        "permafrostbase": 51.1,
+        "permafrosttop": 7.9,
+        "talikthickness": 6.6
+      }
+    },
+    "2099": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": -0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 3.7,
+        "permafrostbase": 51.7,
+        "permafrosttop": 4.5,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.7,
+        "magt2m": 0.2,
+        "magt3m": 0.4,
+        "magt4m": 0.3,
+        "magt5m": 0.3,
+        "magtsurface": 5.3,
+        "permafrostbase": 51.0,
+        "permafrosttop": 8.0,
+        "talikthickness": 5.7
+      }
+    },
+    "2100": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": -0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.2,
+        "permafrostbase": 51.6,
+        "permafrosttop": 4.5,
+        "talikthickness": 1.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.5,
+        "magt2m": 0.9,
+        "magt3m": 0.5,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 5.5,
+        "permafrostbase": 50.8,
+        "permafrosttop": 7.8,
+        "talikthickness": 6.1
+      }
+    },
+    "2101": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.1,
+        "permafrostbase": 51.5,
+        "permafrosttop": 4.5,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.2,
+        "magt4m": 0.2,
+        "magt5m": 0.2,
+        "magtsurface": 5.4,
+        "permafrostbase": 50.2,
+        "permafrosttop": 8.1,
+        "talikthickness": 5.9
+      }
+    },
+    "2102": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.7,
+        "magt2m": 0.3,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.4,
+        "permafrostbase": 51.5,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.3,
+        "magt2m": 1.5,
+        "magt3m": 0.9,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 5.8,
+        "permafrostbase": 49.9,
+        "permafrosttop": 8.0,
+        "talikthickness": 6.8
+      }
+    },
+    "2103": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.2,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.1,
+        "permafrostbase": 51.4,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 0.8,
+        "magt2m": 0.4,
+        "magt3m": 0.5,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 5.4,
+        "permafrostbase": 49.7,
+        "permafrosttop": 8.4,
+        "talikthickness": 6.3
+      }
+    },
+    "2104": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.6,
+        "permafrostbase": 51.3,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.2,
+        "magt1m": 2.3,
+        "magt2m": 1.6,
+        "magt3m": 1.0,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 6.9,
+        "permafrostbase": 49.5,
+        "permafrosttop": 8.5,
+        "talikthickness": 7.2
+      }
+    },
+    "2105": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.7,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.4,
+        "permafrostbase": 51.2,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.3,
+        "magt1m": 1.4,
+        "magt2m": 1.0,
+        "magt3m": 0.8,
+        "magt4m": 0.7,
+        "magt5m": 0.5,
+        "magtsurface": 6.5,
+        "permafrostbase": 49.3,
+        "permafrosttop": 8.9,
+        "talikthickness": 7.2
+      }
+    },
+    "2106": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.3,
+        "permafrostbase": 51.0,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.7,
+        "magt2m": 1.3,
+        "magt3m": 0.9,
+        "magt4m": 0.7,
+        "magt5m": 0.5,
+        "magtsurface": 6.5,
+        "permafrostbase": 49.0,
+        "permafrosttop": 9.2,
+        "talikthickness": 7.8
+      }
+    },
+    "2107": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.8,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.4,
+        "permafrostbase": 50.6,
+        "permafrosttop": 4.7,
+        "talikthickness": 3.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 1.8,
+        "magt2m": 1.3,
+        "magt3m": 1.0,
+        "magt4m": 0.8,
+        "magt5m": 0.6,
+        "magtsurface": 6.5,
+        "permafrostbase": 48.8,
+        "permafrosttop": 9.6,
+        "talikthickness": 8.0
+      }
+    },
+    "2108": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 3.9,
+        "permafrostbase": 50.4,
+        "permafrosttop": 4.8,
+        "talikthickness": 2.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 2.1,
+        "magt2m": 1.6,
+        "magt3m": 1.2,
+        "magt4m": 0.9,
+        "magt5m": 0.7,
+        "magtsurface": 6.5,
+        "permafrostbase": 48.5,
+        "permafrosttop": 9.7,
+        "talikthickness": 8.4
+      }
+    },
+    "2109": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.7,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.5,
+        "permafrostbase": 50.2,
+        "permafrosttop": 4.8,
+        "talikthickness": 3.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.1,
+        "magt1m": 2.3,
+        "magt2m": 1.8,
+        "magt3m": 1.3,
+        "magt4m": 1.0,
+        "magt5m": 0.8,
+        "magtsurface": 7.5,
+        "permafrostbase": 48.0,
+        "permafrosttop": 9.8,
+        "talikthickness": 8.6
+      }
+    },
+    "2110": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 3.8,
+        "permafrostbase": 50.1,
+        "permafrosttop": 4.9,
+        "talikthickness": 2.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.6,
+        "magt1m": 2.9,
+        "magt2m": 2.2,
+        "magt3m": 1.6,
+        "magt4m": 1.2,
+        "magt5m": 1.0,
+        "magtsurface": 6.3,
+        "permafrostbase": 47.7,
+        "permafrosttop": 10.0,
+        "talikthickness": 8.5
+      }
+    },
+    "2111": {
+      "RCP 4.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 0.9,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.0,
+        "permafrostbase": 49.9,
+        "permafrosttop": 4.9,
+        "talikthickness": 3.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.6,
+        "magt2m": 0.9,
+        "magt3m": 0.9,
+        "magt4m": 0.8,
+        "magt5m": 0.7,
+        "magtsurface": 6.4,
+        "permafrostbase": 47.4,
+        "permafrosttop": 10.2,
+        "talikthickness": 8.1
+      }
+    },
+    "2112": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.6,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 4.3,
+        "permafrostbase": 49.7,
+        "permafrosttop": 5.0,
+        "talikthickness": 3.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 1.9,
+        "magt2m": 1.3,
+        "magt3m": 1.0,
+        "magt4m": 0.7,
+        "magt5m": 0.6,
+        "magtsurface": 6.5,
+        "permafrostbase": 47.3,
+        "permafrosttop": 10.2,
+        "talikthickness": 8.7
+      }
+    },
+    "2113": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 3.9,
+        "permafrostbase": 49.2,
+        "permafrosttop": 5.0,
+        "talikthickness": 3.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 1.8,
+        "magt2m": 1.3,
+        "magt3m": 1.0,
+        "magt4m": 0.8,
+        "magt5m": 0.7,
+        "magtsurface": 6.6,
+        "permafrostbase": 47.1,
+        "permafrosttop": 10.4,
+        "talikthickness": 8.9
+      }
+    },
+    "2114": {
+      "RCP 4.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 1.0,
+        "magt2m": 0.5,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 4.5,
+        "permafrostbase": 48.9,
+        "permafrosttop": 5.1,
+        "talikthickness": 3.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.2,
+        "magt2m": 1.6,
+        "magt3m": 1.2,
+        "magt4m": 0.9,
+        "magt5m": 0.8,
+        "magtsurface": 6.5,
+        "permafrostbase": 46.9,
+        "permafrosttop": 10.6,
+        "talikthickness": 9.2
+      }
+    },
+    "2115": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 4.2,
+        "permafrostbase": 48.6,
+        "permafrosttop": 5.2,
+        "talikthickness": 3.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.3,
+        "magt1m": 1.5,
+        "magt2m": 1.1,
+        "magt3m": 0.9,
+        "magt4m": 0.8,
+        "magt5m": 0.7,
+        "magtsurface": 6.3,
+        "permafrostbase": 46.8,
+        "permafrosttop": 10.8,
+        "talikthickness": 9.0
+      }
+    },
+    "2116": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.5,
+        "magt3m": 0.3,
+        "magt4m": 0.2,
+        "magt5m": 0.0,
+        "magtsurface": 4.3,
+        "permafrostbase": 48.0,
+        "permafrosttop": 5.3,
+        "talikthickness": 3.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.2,
+        "magt2m": 0.9,
+        "magt3m": 0.7,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 6.8,
+        "permafrostbase": 46.6,
+        "permafrosttop": 11.0,
+        "talikthickness": 9.5
+      }
+    },
+    "2117": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 4.3,
+        "permafrostbase": 47.8,
+        "permafrosttop": 5.4,
+        "talikthickness": 3.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.1,
+        "magt1m": 2.4,
+        "magt2m": 1.7,
+        "magt3m": 1.2,
+        "magt4m": 0.9,
+        "magt5m": 0.7,
+        "magtsurface": 6.8,
+        "permafrostbase": 46.5,
+        "permafrosttop": 11.1,
+        "talikthickness": 9.7
+      }
+    },
+    "2118": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 4.2,
+        "permafrostbase": 47.5,
+        "permafrosttop": 5.5,
+        "talikthickness": 3.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.7,
+        "magt2m": 1.3,
+        "magt3m": 1.1,
+        "magt4m": 0.9,
+        "magt5m": 0.8,
+        "magtsurface": 6.9,
+        "permafrostbase": 46.4,
+        "permafrosttop": 11.4,
+        "talikthickness": 9.7
+      }
+    },
+    "2119": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 4.2,
+        "permafrostbase": 47.3,
+        "permafrosttop": 5.5,
+        "talikthickness": 3.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.4,
+        "magt1m": 2.6,
+        "magt2m": 2.0,
+        "magt3m": 1.5,
+        "magt4m": 1.1,
+        "magt5m": 0.9,
+        "magtsurface": 7.2,
+        "permafrostbase": 46.3,
+        "permafrosttop": 11.9,
+        "talikthickness": 10.6
+      }
+    },
+    "2120": {
+      "RCP 4.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.9,
+        "magt2m": 0.5,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 5.0,
+        "permafrostbase": 47.2,
+        "permafrosttop": 5.6,
+        "talikthickness": 3.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.7,
+        "magt2m": 1.3,
+        "magt3m": 1.1,
+        "magt4m": 1.0,
+        "magt5m": 0.9,
+        "magtsurface": 7.0,
+        "permafrostbase": 46.2,
+        "permafrosttop": 12.3,
+        "talikthickness": 10.6
+      }
+    }
+  },
+  "GFDL-CM3": {
+    "2021": {
+      "RCP 4.5": {
+        "magt0.5m": -0.6,
+        "magt1m": -1.0,
+        "magt2m": -1.8,
+        "magt3m": -2.0,
+        "magt4m": -2.0,
+        "magt5m": -1.9,
+        "magtsurface": 0.9,
+        "permafrostbase": 66.0,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.0,
+        "magt1m": -0.4,
+        "magt2m": -0.9,
+        "magt3m": -1.0,
+        "magt4m": -0.9,
+        "magt5m": -0.9,
+        "magtsurface": 1.9,
+        "permafrostbase": 65.2,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      }
+    },
+    "2022": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.5,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 2.0,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.2,
+        "magt2m": -0.0,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.5,
+        "permafrostbase": 64.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.3
+      }
+    },
+    "2023": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.4,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.0,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.4,
+        "magtsurface": 2.6,
+        "permafrostbase": 64.3,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2024": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.9,
+        "magt3m": -0.9,
+        "magt4m": -0.9,
+        "magt5m": -0.9,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.3,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 2.6,
+        "permafrostbase": 63.7,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.6
+      }
+    },
+    "2025": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.5,
+        "magt2m": 0.0,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.4,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.1,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 1.2,
+        "permafrostbase": 63.2,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      }
+    },
+    "2026": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.3,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 1.2,
+        "permafrostbase": 65.5,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.4,
+        "magt2m": -0.7,
+        "magt3m": -0.6,
+        "magt4m": -0.6,
+        "magt5m": -0.5,
+        "magtsurface": 1.4,
+        "permafrostbase": 62.4,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2027": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.8,
+        "magt3m": -0.8,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 65.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.8,
+        "magt1m": -0.5,
+        "magt2m": -0.3,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 0.7,
+        "permafrostbase": 61.6,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2028": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.2,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 0.7,
+        "permafrostbase": 64.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.5,
+        "magt1m": -0.7,
+        "magt2m": -1.1,
+        "magt3m": -1.1,
+        "magt4m": -1.0,
+        "magt5m": -0.9,
+        "magtsurface": 1.3,
+        "permafrostbase": 60.9,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2029": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.4,
+        "magt2m": -0.8,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 64.2,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.4,
+        "permafrostbase": 60.1,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2030": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.1,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.3,
+        "permafrostbase": 63.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 1.4,
+        "permafrostbase": 59.4,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      }
+    },
+    "2031": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 1.4,
+        "permafrostbase": 62.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.6,
+        "magt5m": -0.6,
+        "magtsurface": 1.3,
+        "permafrostbase": 58.7,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2032": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 1.3,
+        "permafrostbase": 62.0,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 1.7,
+        "permafrostbase": 58.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2033": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.5,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.6,
+        "magtsurface": 1.7,
+        "permafrostbase": 61.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.0,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.3,
+        "magtsurface": 2.1,
+        "permafrostbase": 57.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2034": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.2,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.1,
+        "permafrostbase": 60.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.1,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.7,
+        "permafrostbase": 57.3,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      }
+    },
+    "2035": {
+      "RCP 4.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.6,
+        "permafrostbase": 60.1,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.9,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 5.1,
+        "permafrostbase": 56.9,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.2
+      }
+    },
+    "2036": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.6,
+        "magt3m": -0.6,
+        "magt4m": -0.6,
+        "magt5m": -0.6,
+        "magtsurface": 2.8,
+        "permafrostbase": 59.6,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 56.4,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.8
+      }
+    },
+    "2037": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.2,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 1.7,
+        "permafrostbase": 59.0,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 56.0,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.5
+      }
+    },
+    "2038": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.0,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.5,
+        "permafrostbase": 58.3,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.5,
+        "permafrostbase": 55.6,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.3
+      }
+    },
+    "2039": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.4,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.0,
+        "permafrostbase": 57.7,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.4,
+        "permafrostbase": 55.2,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.8
+      }
+    },
+    "2040": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.4,
+        "permafrostbase": 57.3,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 1.7,
+        "permafrostbase": 54.7,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      }
+    },
+    "2041": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": -0.0,
+        "magt2m": -0.6,
+        "magt3m": -0.6,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 3.3,
+        "permafrostbase": 56.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 54.4,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      }
+    },
+    "2042": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.9,
+        "permafrostbase": 56.4,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 54.1,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.4
+      }
+    },
+    "2043": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.0,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 55.9,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.9,
+        "permafrostbase": 53.9,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      }
+    },
+    "2044": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 55.5,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 53.8,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.8
+      }
+    },
+    "2045": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 54.9,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.1,
+        "magt2m": 0.9,
+        "magt3m": 0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 6.6,
+        "permafrostbase": 53.8,
+        "permafrosttop": 3.4,
+        "talikthickness": 2.3
+      }
+    },
+    "2046": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 54.5,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.6,
+        "magt2m": 1.0,
+        "magt3m": 0.4,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 53.7,
+        "permafrosttop": 3.9,
+        "talikthickness": 2.4
+      }
+    },
+    "2047": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.7,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 54.1,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.5,
+        "magt2m": -0.3,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 2.2,
+        "permafrostbase": 53.6,
+        "permafrosttop": 4.0,
+        "talikthickness": 1.2
+      }
+    },
+    "2048": {
+      "RCP 4.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 0.8,
+        "magt2m": 0.2,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 53.9,
+        "permafrosttop": 3.1,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.1,
+        "magt2m": -0.0,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 53.6,
+        "permafrosttop": 3.9,
+        "talikthickness": 0.9
+      }
+    },
+    "2049": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.3,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.4,
+        "permafrostbase": 53.8,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.8,
+        "magt2m": 0.2,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.9,
+        "permafrostbase": 53.5,
+        "permafrosttop": 3.4,
+        "talikthickness": 0.9
+      }
+    },
+    "2050": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.1,
+        "magt2m": 0.0,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.6,
+        "permafrostbase": 53.8,
+        "permafrosttop": 3.4,
+        "talikthickness": 1.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 1.4,
+        "permafrostbase": 53.4,
+        "permafrosttop": 3.6,
+        "talikthickness": 1.2
+      }
+    },
+    "2051": {
+      "RCP 4.5": {
+        "magt0.5m": 2.2,
+        "magt1m": 1.3,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 5.7,
+        "permafrostbase": 53.7,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.2,
+        "magt2m": -0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.6,
+        "permafrostbase": 53.4,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.0
+      }
+    },
+    "2052": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 1.1,
+        "magt2m": 0.6,
+        "magt3m": 0.2,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.1,
+        "permafrostbase": 53.7,
+        "permafrosttop": 3.7,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.7,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.1,
+        "permafrostbase": 53.3,
+        "permafrosttop": 3.6,
+        "talikthickness": 1.3
+      }
+    },
+    "2053": {
+      "RCP 4.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 0.9,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.8,
+        "permafrostbase": 53.6,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 2.2,
+        "permafrostbase": 53.3,
+        "permafrosttop": 3.6,
+        "talikthickness": 1.1
+      }
+    },
+    "2054": {
+      "RCP 4.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 1.2,
+        "magt2m": 0.7,
+        "magt3m": 0.3,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 53.6,
+        "permafrosttop": 4.1,
+        "talikthickness": 2.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 0.7,
+        "magt2m": 0.0,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.4,
+        "permafrostbase": 53.2,
+        "permafrosttop": 3.4,
+        "talikthickness": 0.7
+      }
+    },
+    "2055": {
+      "RCP 4.5": {
+        "magt0.5m": -0.8,
+        "magt1m": -1.0,
+        "magt2m": -0.6,
+        "magt3m": -0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 1.8,
+        "permafrostbase": 53.5,
+        "permafrosttop": 4.2,
+        "talikthickness": 1.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.3,
+        "magt1m": 1.7,
+        "magt2m": 0.8,
+        "magt3m": 0.2,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.1,
+        "permafrostbase": 53.2,
+        "permafrosttop": 3.7,
+        "talikthickness": 2.1
+      }
+    },
+    "2056": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.8,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 53.4,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 53.1,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.8
+      }
+    },
+    "2057": {
+      "RCP 4.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.8,
+        "magt2m": 0.3,
+        "magt3m": 0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.0,
+        "permafrostbase": 53.4,
+        "permafrosttop": 4.0,
+        "talikthickness": 1.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.7,
+        "magt2m": 0.3,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.1,
+        "permafrostbase": 53.0,
+        "permafrosttop": 4.0,
+        "talikthickness": 2.1
+      }
+    },
+    "2058": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.3,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 53.3,
+        "permafrosttop": 4.1,
+        "talikthickness": 2.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.5,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 53.0,
+        "permafrosttop": 4.0,
+        "talikthickness": 2.4
+      }
+    },
+    "2059": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 53.3,
+        "permafrosttop": 4.1,
+        "talikthickness": 1.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.1,
+        "magt2m": -0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.7,
+        "permafrostbase": 52.9,
+        "permafrosttop": 4.2,
+        "talikthickness": 1.9
+      }
+    },
+    "2060": {
+      "RCP 4.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.1,
+        "magt2m": 1.2,
+        "magt3m": 0.4,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 6.3,
+        "permafrostbase": 53.2,
+        "permafrosttop": 4.2,
+        "talikthickness": 3.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.6,
+        "magt2m": 0.7,
+        "magt3m": 0.3,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.5,
+        "permafrostbase": 52.9,
+        "permafrosttop": 4.3,
+        "talikthickness": 2.3
+      }
+    },
+    "2061": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 53.2,
+        "permafrosttop": 4.3,
+        "talikthickness": 2.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.3,
+        "permafrostbase": 52.8,
+        "permafrosttop": 4.4,
+        "talikthickness": 2.5
+      }
+    },
+    "2062": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.1,
+        "magt2m": 0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.1,
+        "permafrostbase": 53.1,
+        "permafrosttop": 4.5,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.9,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.0,
+        "permafrostbase": 52.8,
+        "permafrosttop": 4.5,
+        "talikthickness": 2.6
+      }
+    },
+    "2063": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.9,
+        "magt2m": 0.3,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.4,
+        "permafrostbase": 53.0,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.3,
+        "magt1m": 1.6,
+        "magt2m": 1.0,
+        "magt3m": 0.5,
+        "magt4m": 0.2,
+        "magt5m": -0.0,
+        "magtsurface": 6.3,
+        "permafrostbase": 52.7,
+        "permafrosttop": 4.7,
+        "talikthickness": 3.2
+      }
+    },
+    "2064": {
+      "RCP 4.5": {
+        "magt0.5m": 2.2,
+        "magt1m": 1.7,
+        "magt2m": 1.0,
+        "magt3m": 0.5,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 6.0,
+        "permafrostbase": 53.0,
+        "permafrosttop": 4.6,
+        "talikthickness": 3.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.7,
+        "permafrostbase": 52.7,
+        "permafrosttop": 4.9,
+        "talikthickness": 2.9
+      }
+    },
+    "2065": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.2,
+        "magt2m": -0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.3,
+        "permafrostbase": 52.9,
+        "permafrosttop": 4.9,
+        "talikthickness": 2.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 1.0,
+        "magt2m": 0.6,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.1,
+        "permafrostbase": 52.6,
+        "permafrosttop": 4.9,
+        "talikthickness": 3.3
+      }
+    },
+    "2066": {
+      "RCP 4.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.2,
+        "magt2m": 1.0,
+        "magt3m": 0.4,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 6.0,
+        "permafrostbase": 52.9,
+        "permafrosttop": 4.8,
+        "talikthickness": 3.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 1.9,
+        "magt2m": 1.2,
+        "magt3m": 0.7,
+        "magt4m": 0.3,
+        "magt5m": 0.0,
+        "magtsurface": 6.5,
+        "permafrostbase": 52.6,
+        "permafrosttop": 5.1,
+        "talikthickness": 3.6
+      }
+    },
+    "2067": {
+      "RCP 4.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.1,
+        "magt2m": 0.6,
+        "magt3m": 0.4,
+        "magt4m": 0.2,
+        "magt5m": -0.0,
+        "magtsurface": 5.9,
+        "permafrostbase": 52.8,
+        "permafrosttop": 5.0,
+        "talikthickness": 3.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.1,
+        "magt2m": 1.4,
+        "magt3m": 0.8,
+        "magt4m": 0.4,
+        "magt5m": 0.1,
+        "magtsurface": 6.6,
+        "permafrostbase": 52.6,
+        "permafrosttop": 5.5,
+        "talikthickness": 4.1
+      }
+    },
+    "2068": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 1.1,
+        "magt2m": 0.7,
+        "magt3m": 0.4,
+        "magt4m": 0.2,
+        "magt5m": 0.0,
+        "magtsurface": 5.1,
+        "permafrostbase": 52.8,
+        "permafrosttop": 5.2,
+        "talikthickness": 3.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 52.5,
+        "permafrosttop": 5.9,
+        "talikthickness": 3.9
+      }
+    },
+    "2069": {
+      "RCP 4.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.9,
+        "magt2m": 0.6,
+        "magt3m": 0.3,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 5.1,
+        "permafrostbase": 52.7,
+        "permafrosttop": 5.4,
+        "talikthickness": 3.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.6,
+        "magt2m": 0.9,
+        "magt3m": 0.5,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 6.4,
+        "permafrostbase": 52.5,
+        "permafrosttop": 5.8,
+        "talikthickness": 4.1
+      }
+    },
+    "2070": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.2,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.7,
+        "permafrosttop": 5.5,
+        "talikthickness": 3.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.1,
+        "magt2m": 1.3,
+        "magt3m": 0.8,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 6.7,
+        "permafrostbase": 52.4,
+        "permafrosttop": 6.0,
+        "talikthickness": 4.5
+      }
+    },
+    "2071": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.4,
+        "magt2m": 0.8,
+        "magt3m": 0.4,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 5.6,
+        "permafrostbase": 52.7,
+        "permafrosttop": 5.5,
+        "talikthickness": 3.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.8,
+        "magt1m": 0.9,
+        "magt2m": 0.5,
+        "magt3m": 0.4,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 6.2,
+        "permafrostbase": 52.4,
+        "permafrosttop": 6.4,
+        "talikthickness": 4.5
+      }
+    },
+    "2072": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.4,
+        "magt2m": 0.8,
+        "magt3m": 0.5,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 5.4,
+        "permafrostbase": 52.6,
+        "permafrosttop": 5.8,
+        "talikthickness": 3.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.1,
+        "magt1m": 2.4,
+        "magt2m": 1.6,
+        "magt3m": 1.0,
+        "magt4m": 0.6,
+        "magt5m": 0.3,
+        "magtsurface": 6.7,
+        "permafrostbase": 52.3,
+        "permafrosttop": 6.8,
+        "talikthickness": 5.5
+      }
+    },
+    "2073": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 52.6,
+        "permafrosttop": 5.8,
+        "talikthickness": 3.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.2,
+        "magt3m": 0.3,
+        "magt4m": 0.3,
+        "magt5m": 0.3,
+        "magtsurface": 4.1,
+        "permafrostbase": 52.3,
+        "permafrosttop": 7.7,
+        "talikthickness": 5.3
+      }
+    },
+    "2074": {
+      "RCP 4.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.0,
+        "magt2m": 1.2,
+        "magt3m": 0.6,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 6.2,
+        "permafrostbase": 52.5,
+        "permafrosttop": 5.8,
+        "talikthickness": 4.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.2,
+        "magt1m": 1.3,
+        "magt2m": 0.7,
+        "magt3m": 0.4,
+        "magt4m": 0.2,
+        "magt5m": 0.2,
+        "magtsurface": 6.4,
+        "permafrostbase": 52.2,
+        "permafrosttop": 7.2,
+        "talikthickness": 5.4
+      }
+    },
+    "2075": {
+      "RCP 4.5": {
+        "magt0.5m": 3.2,
+        "magt1m": 2.6,
+        "magt2m": 1.8,
+        "magt3m": 1.1,
+        "magt4m": 0.6,
+        "magt5m": 0.3,
+        "magtsurface": 6.7,
+        "permafrostbase": 52.5,
+        "permafrosttop": 6.2,
+        "talikthickness": 5.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 2.0,
+        "magt2m": 1.3,
+        "magt3m": 0.8,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 6.4,
+        "permafrostbase": 52.2,
+        "permafrosttop": 7.6,
+        "talikthickness": 6.0
+      }
+    },
+    "2076": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.9,
+        "magt2m": 0.6,
+        "magt3m": 0.5,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 5.7,
+        "permafrostbase": 52.4,
+        "permafrosttop": 7.1,
+        "talikthickness": 5.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.3,
+        "magt2m": 0.9,
+        "magt3m": 0.7,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 5.6,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.8,
+        "talikthickness": 6.1
+      }
+    },
+    "2077": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.4,
+        "magt2m": 1.0,
+        "magt3m": 0.7,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 6.0,
+        "permafrostbase": 52.4,
+        "permafrosttop": 7.2,
+        "talikthickness": 5.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.1,
+        "magt2m": 0.5,
+        "magt3m": 0.4,
+        "magt4m": 0.3,
+        "magt5m": 0.3,
+        "magtsurface": 6.5,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.9,
+        "talikthickness": 5.9
+      }
+    },
+    "2078": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.2,
+        "magt2m": 0.1,
+        "magt3m": 0.2,
+        "magt4m": 0.2,
+        "magt5m": 0.2,
+        "magtsurface": 3.4,
+        "permafrostbase": 52.3,
+        "permafrosttop": 7.5,
+        "talikthickness": 5.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 2.0,
+        "magt2m": 1.4,
+        "magt3m": 0.9,
+        "magt4m": 0.6,
+        "magt5m": 0.4,
+        "magtsurface": 6.6,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.9,
+        "talikthickness": 6.7
+      }
+    },
+    "2079": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.7,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 6.2,
+        "permafrostbase": 52.3,
+        "permafrosttop": 7.1,
+        "talikthickness": 5.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.9,
+        "magt2m": 0.6,
+        "magt3m": 0.6,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 5.3,
+        "permafrostbase": 52.0,
+        "permafrosttop": 8.1,
+        "talikthickness": 6.3
+      }
+    },
+    "2080": {
+      "RCP 4.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 2.0,
+        "magt2m": 1.3,
+        "magt3m": 0.8,
+        "magt4m": 0.5,
+        "magt5m": 0.3,
+        "magtsurface": 6.5,
+        "permafrostbase": 52.2,
+        "permafrosttop": 7.3,
+        "talikthickness": 5.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 1.7,
+        "magt2m": 0.9,
+        "magt3m": 0.6,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 7.3,
+        "permafrostbase": 52.0,
+        "permafrosttop": 8.5,
+        "talikthickness": 6.7
+      }
+    },
+    "2081": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.8,
+        "magt2m": 0.3,
+        "magt3m": 0.4,
+        "magt4m": 0.3,
+        "magt5m": 0.3,
+        "magtsurface": 5.6,
+        "permafrostbase": 52.2,
+        "permafrosttop": 7.6,
+        "talikthickness": 5.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.0,
+        "magt1m": 2.2,
+        "magt2m": 1.5,
+        "magt3m": 1.1,
+        "magt4m": 0.7,
+        "magt5m": 0.6,
+        "magtsurface": 7.4,
+        "permafrostbase": 51.9,
+        "permafrosttop": 8.6,
+        "talikthickness": 7.2
+      }
+    },
+    "2082": {
+      "RCP 4.5": {
+        "magt0.5m": 3.7,
+        "magt1m": 3.1,
+        "magt2m": 2.1,
+        "magt3m": 1.3,
+        "magt4m": 0.8,
+        "magt5m": 0.6,
+        "magtsurface": 7.4,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.6,
+        "talikthickness": 6.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.9,
+        "magt1m": 3.3,
+        "magt2m": 2.5,
+        "magt3m": 1.8,
+        "magt4m": 1.3,
+        "magt5m": 1.0,
+        "magtsurface": 7.6,
+        "permafrostbase": 51.9,
+        "permafrosttop": 9.2,
+        "talikthickness": 8.3
+      }
+    },
+    "2083": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.4,
+        "magt2m": 0.9,
+        "magt3m": 0.8,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 6.2,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.9,
+        "talikthickness": 6.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.2,
+        "magt1m": 2.6,
+        "magt2m": 2.2,
+        "magt3m": 1.7,
+        "magt4m": 1.3,
+        "magt5m": 1.1,
+        "magtsurface": 7.1,
+        "permafrostbase": 51.8,
+        "permafrosttop": 9.9,
+        "talikthickness": 8.7
+      }
+    },
+    "2084": {
+      "RCP 4.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.7,
+        "magt2m": 1.1,
+        "magt3m": 0.7,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 5.7,
+        "permafrostbase": 52.1,
+        "permafrosttop": 8.4,
+        "talikthickness": 6.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.2,
+        "magt1m": 1.3,
+        "magt2m": 0.8,
+        "magt3m": 0.8,
+        "magt4m": 0.8,
+        "magt5m": 0.7,
+        "magtsurface": 6.9,
+        "permafrostbase": 51.8,
+        "permafrosttop": 9.9,
+        "talikthickness": 7.9
+      }
+    },
+    "2085": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.7,
+        "magt2m": 1.3,
+        "magt3m": 0.9,
+        "magt4m": 0.7,
+        "magt5m": 0.5,
+        "magtsurface": 5.4,
+        "permafrostbase": 52.0,
+        "permafrosttop": 8.8,
+        "talikthickness": 7.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.3,
+        "magt1m": 3.6,
+        "magt2m": 2.6,
+        "magt3m": 1.7,
+        "magt4m": 1.2,
+        "magt5m": 0.9,
+        "magtsurface": 7.8,
+        "permafrostbase": 51.8,
+        "permafrosttop": 9.7,
+        "talikthickness": 8.8
+      }
+    },
+    "2086": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.8,
+        "magt2m": 0.3,
+        "magt3m": 0.4,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 5.8,
+        "permafrostbase": 52.0,
+        "permafrosttop": 9.3,
+        "talikthickness": 7.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.2,
+        "magt1m": 2.4,
+        "magt2m": 2.1,
+        "magt3m": 1.7,
+        "magt4m": 1.4,
+        "magt5m": 1.2,
+        "magtsurface": 7.3,
+        "permafrostbase": 51.7,
+        "permafrosttop": 9.9,
+        "talikthickness": 8.6
+      }
+    },
+    "2087": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.5,
+        "magt2m": -0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.2,
+        "magt5m": 0.2,
+        "magtsurface": 3.1,
+        "permafrostbase": 51.9,
+        "permafrosttop": 9.0,
+        "talikthickness": 6.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 1.7,
+        "magt2m": 1.3,
+        "magt3m": 1.1,
+        "magt4m": 0.9,
+        "magt5m": 0.8,
+        "magtsurface": 7.2,
+        "permafrostbase": 51.7,
+        "permafrosttop": 10.0,
+        "talikthickness": 8.2
+      }
+    },
+    "2088": {
+      "RCP 4.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.5,
+        "magt2m": 0.5,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 6.6,
+        "permafrostbase": 51.9,
+        "permafrosttop": 8.8,
+        "talikthickness": 6.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.1,
+        "magt1m": 2.5,
+        "magt2m": 1.8,
+        "magt3m": 1.3,
+        "magt4m": 1.0,
+        "magt5m": 0.8,
+        "magtsurface": 6.2,
+        "permafrostbase": 51.6,
+        "permafrosttop": 10.0,
+        "talikthickness": 8.5
+      }
+    },
+    "2089": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.4,
+        "magt2m": 1.0,
+        "magt3m": 0.6,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 5.6,
+        "permafrostbase": 51.8,
+        "permafrosttop": 8.8,
+        "talikthickness": 7.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.0,
+        "magt2m": 0.4,
+        "magt3m": 0.6,
+        "magt4m": 0.6,
+        "magt5m": 0.6,
+        "magtsurface": 6.6,
+        "permafrostbase": 51.5,
+        "permafrosttop": 10.3,
+        "talikthickness": 7.8
+      }
+    },
+    "2090": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.3,
+        "magt2m": 0.7,
+        "magt3m": 0.5,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 6.0,
+        "permafrostbase": 51.8,
+        "permafrosttop": 9.2,
+        "talikthickness": 7.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.3,
+        "magt1m": 3.5,
+        "magt2m": 2.4,
+        "magt3m": 1.5,
+        "magt4m": 1.0,
+        "magt5m": 0.8,
+        "magtsurface": 8.0,
+        "permafrostbase": 51.4,
+        "permafrosttop": 10.4,
+        "talikthickness": 9.5
+      }
+    },
+    "2091": {
+      "RCP 4.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 2.0,
+        "magt2m": 1.4,
+        "magt3m": 0.9,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 6.1,
+        "permafrostbase": 51.8,
+        "permafrosttop": 9.3,
+        "talikthickness": 8.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.7,
+        "magt1m": 3.1,
+        "magt2m": 2.5,
+        "magt3m": 2.0,
+        "magt4m": 1.5,
+        "magt5m": 1.3,
+        "magtsurface": 7.3,
+        "permafrostbase": 51.3,
+        "permafrosttop": 10.9,
+        "talikthickness": 9.9
+      }
+    },
+    "2092": {
+      "RCP 4.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 2.0,
+        "magt2m": 1.6,
+        "magt3m": 1.2,
+        "magt4m": 0.9,
+        "magt5m": 0.7,
+        "magtsurface": 6.5,
+        "permafrostbase": 51.7,
+        "permafrosttop": 9.5,
+        "talikthickness": 8.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.4,
+        "magt2m": 0.9,
+        "magt3m": 1.0,
+        "magt4m": 0.9,
+        "magt5m": 0.8,
+        "magtsurface": 7.0,
+        "permafrostbase": 51.2,
+        "permafrosttop": 12.2,
+        "talikthickness": 10.2
+      }
+    },
+    "2093": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.5,
+        "magt4m": 0.5,
+        "magt5m": 0.5,
+        "magtsurface": 6.5,
+        "permafrostbase": 51.7,
+        "permafrosttop": 9.7,
+        "talikthickness": 7.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.4,
+        "magt1m": 3.7,
+        "magt2m": 2.7,
+        "magt3m": 1.9,
+        "magt4m": 1.3,
+        "magt5m": 1.1,
+        "magtsurface": 7.6,
+        "permafrostbase": 51.1,
+        "permafrosttop": 12.7,
+        "talikthickness": 11.8
+      }
+    },
+    "2094": {
+      "RCP 4.5": {
+        "magt0.5m": 2.2,
+        "magt1m": 1.7,
+        "magt2m": 1.1,
+        "magt3m": 0.7,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 5.9,
+        "permafrostbase": 51.6,
+        "permafrosttop": 9.4,
+        "talikthickness": 7.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.4,
+        "magt1m": 2.8,
+        "magt2m": 2.4,
+        "magt3m": 2.0,
+        "magt4m": 1.8,
+        "magt5m": 1.6,
+        "magtsurface": 7.1,
+        "permafrostbase": 50.9,
+        "permafrosttop": 14.1,
+        "talikthickness": 12.9
+      }
+    },
+    "2095": {
+      "RCP 4.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 0.8,
+        "magt2m": 0.4,
+        "magt3m": 0.5,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 6.6,
+        "permafrostbase": 51.5,
+        "permafrosttop": 9.7,
+        "talikthickness": 7.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.5,
+        "magt1m": 3.9,
+        "magt2m": 3.2,
+        "magt3m": 2.5,
+        "magt4m": 2.0,
+        "magt5m": 1.8,
+        "magtsurface": 8.4,
+        "permafrostbase": 50.8,
+        "permafrosttop": 14.4,
+        "talikthickness": 13.5
+      }
+    },
+    "2096": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.4,
+        "magt2m": 0.8,
+        "magt3m": 0.5,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 5.8,
+        "permafrostbase": 51.4,
+        "permafrosttop": 9.5,
+        "talikthickness": 7.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.5,
+        "magt1m": 2.4,
+        "magt2m": 1.9,
+        "magt3m": 1.8,
+        "magt4m": 1.7,
+        "magt5m": 1.6,
+        "magtsurface": 8.1,
+        "permafrostbase": 50.6,
+        "permafrosttop": 14.8,
+        "talikthickness": 13.0
+      }
+    },
+    "2097": {
+      "RCP 4.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 1.8,
+        "magt2m": 1.2,
+        "magt3m": 0.8,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 6.9,
+        "permafrostbase": 51.3,
+        "permafrosttop": 9.6,
+        "talikthickness": 7.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.0,
+        "magt1m": 3.4,
+        "magt2m": 2.8,
+        "magt3m": 2.2,
+        "magt4m": 1.9,
+        "magt5m": 1.7,
+        "magtsurface": 7.8,
+        "permafrostbase": 50.2,
+        "permafrosttop": 14.9,
+        "talikthickness": 13.8
+      }
+    },
+    "2098": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.4,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 4.3,
+        "permafrostbase": 51.2,
+        "permafrosttop": 9.8,
+        "talikthickness": 7.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.6,
+        "magt1m": 4.8,
+        "magt2m": 3.9,
+        "magt3m": 3.1,
+        "magt4m": 2.5,
+        "magt5m": 2.2,
+        "magtsurface": 8.7,
+        "permafrostbase": 49.9,
+        "permafrosttop": 15.0,
+        "talikthickness": 14.0
+      }
+    },
+    "2099": {
+      "RCP 4.5": {
+        "magt0.5m": 2.3,
+        "magt1m": 1.7,
+        "magt2m": 1.1,
+        "magt3m": 0.7,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 5.7,
+        "permafrostbase": 51.1,
+        "permafrosttop": 9.4,
+        "talikthickness": 7.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.1,
+        "magt1m": 4.5,
+        "magt2m": 3.9,
+        "magt3m": 3.3,
+        "magt4m": 2.8,
+        "magt5m": 2.6,
+        "magtsurface": 8.8,
+        "permafrostbase": 49.3,
+        "permafrosttop": 15.5,
+        "talikthickness": 14.5
+      }
+    },
+    "2100": {
+      "RCP 4.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.0,
+        "magt2m": 1.4,
+        "magt3m": 1.0,
+        "magt4m": 0.8,
+        "magt5m": 0.6,
+        "magtsurface": 7.3,
+        "permafrostbase": 50.9,
+        "permafrosttop": 9.7,
+        "talikthickness": 8.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.1,
+        "magt1m": 2.2,
+        "magt2m": 1.9,
+        "magt3m": 2.0,
+        "magt4m": 2.0,
+        "magt5m": 2.0,
+        "magtsurface": 7.0,
+        "permafrostbase": 48.8,
+        "permafrosttop": 16.1,
+        "talikthickness": 14.3
+      }
+    },
+    "2101": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 1.0,
+        "magt2m": 0.6,
+        "magt3m": 0.6,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 5.4,
+        "permafrostbase": 50.8,
+        "permafrosttop": 9.9,
+        "talikthickness": 7.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.4,
+        "magt1m": 3.7,
+        "magt2m": 2.9,
+        "magt3m": 2.3,
+        "magt4m": 1.9,
+        "magt5m": 1.7,
+        "magtsurface": 8.6,
+        "permafrostbase": 48.5,
+        "permafrosttop": 16.7,
+        "talikthickness": 15.7
+      }
+    },
+    "2102": {
+      "RCP 4.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.9,
+        "magt2m": 1.3,
+        "magt3m": 0.8,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 5.7,
+        "permafrostbase": 50.6,
+        "permafrosttop": 9.7,
+        "talikthickness": 8.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.5,
+        "magt1m": 5.0,
+        "magt2m": 4.1,
+        "magt3m": 3.3,
+        "magt4m": 2.7,
+        "magt5m": 2.4,
+        "magtsurface": 8.9,
+        "permafrostbase": 48.3,
+        "permafrosttop": 17.1,
+        "talikthickness": 16.4
+      }
+    },
+    "2103": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.5,
+        "magt2m": 0.4,
+        "magt3m": 0.5,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 6.0,
+        "permafrostbase": 50.2,
+        "permafrosttop": 9.8,
+        "talikthickness": 8.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 6.3,
+        "magt1m": 5.8,
+        "magt2m": 4.8,
+        "magt3m": 4.0,
+        "magt4m": 3.4,
+        "magt5m": 3.1,
+        "magtsurface": 9.0,
+        "permafrostbase": 48.0,
+        "permafrosttop": 18.7,
+        "talikthickness": 18.2
+      }
+    },
+    "2104": {
+      "RCP 4.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.7,
+        "magt2m": 1.0,
+        "magt3m": 0.6,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 6.2,
+        "permafrostbase": 49.9,
+        "permafrosttop": 9.7,
+        "talikthickness": 8.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.6,
+        "magt1m": 4.1,
+        "magt2m": 3.8,
+        "magt3m": 3.5,
+        "magt4m": 3.2,
+        "magt5m": 3.0,
+        "magtsurface": 8.5,
+        "permafrostbase": 47.7,
+        "permafrosttop": 19.5,
+        "talikthickness": 18.5
+      }
+    },
+    "2105": {
+      "RCP 4.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.7,
+        "magt2m": 1.1,
+        "magt3m": 0.8,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 6.5,
+        "permafrostbase": 49.5,
+        "permafrosttop": 9.9,
+        "talikthickness": 8.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.8,
+        "magt1m": 5.4,
+        "magt2m": 4.6,
+        "magt3m": 3.9,
+        "magt4m": 3.4,
+        "magt5m": 3.2,
+        "magtsurface": 9.0,
+        "permafrostbase": 47.4,
+        "permafrosttop": 19.8,
+        "talikthickness": 19.1
+      }
+    },
+    "2106": {
+      "RCP 4.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.5,
+        "magt2m": 0.9,
+        "magt3m": 0.7,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 7.0,
+        "permafrostbase": 49.1,
+        "permafrosttop": 9.9,
+        "talikthickness": 8.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.3,
+        "magt1m": 4.8,
+        "magt2m": 4.3,
+        "magt3m": 3.8,
+        "magt4m": 3.5,
+        "magt5m": 3.2,
+        "magtsurface": 8.6,
+        "permafrostbase": 47.2,
+        "permafrosttop": 19.9,
+        "talikthickness": 18.9
+      }
+    },
+    "2107": {
+      "RCP 4.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 1.9,
+        "magt2m": 1.4,
+        "magt3m": 1.0,
+        "magt4m": 0.8,
+        "magt5m": 0.6,
+        "magtsurface": 6.1,
+        "permafrostbase": 48.5,
+        "permafrosttop": 10.0,
+        "talikthickness": 8.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.1,
+        "magt1m": 4.7,
+        "magt2m": 4.3,
+        "magt3m": 3.8,
+        "magt4m": 3.5,
+        "magt5m": 3.3,
+        "magtsurface": 8.5,
+        "permafrostbase": 47.1,
+        "permafrosttop": 20.2,
+        "talikthickness": 19.3
+      }
+    },
+    "2108": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.3,
+        "magt2m": -0.0,
+        "magt3m": 0.3,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 4.5,
+        "permafrostbase": 48.1,
+        "permafrosttop": 10.2,
+        "talikthickness": 7.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 6.6,
+        "magt1m": 6.0,
+        "magt2m": 5.2,
+        "magt3m": 4.4,
+        "magt4m": 3.8,
+        "magt5m": 3.5,
+        "magtsurface": 10.0,
+        "permafrostbase": 46.9,
+        "permafrosttop": 21.0,
+        "talikthickness": 20.3
+      }
+    },
+    "2109": {
+      "RCP 4.5": {
+        "magt0.5m": 1.8,
+        "magt1m": 1.0,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 6.0,
+        "permafrostbase": 47.9,
+        "permafrosttop": 10.3,
+        "talikthickness": 7.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.9,
+        "magt1m": 3.8,
+        "magt2m": 3.8,
+        "magt3m": 3.7,
+        "magt4m": 3.5,
+        "magt5m": 3.4,
+        "magtsurface": 6.8,
+        "permafrostbase": 46.8,
+        "permafrosttop": 22.4,
+        "talikthickness": 21.5
+      }
+    },
+    "2110": {
+      "RCP 4.5": {
+        "magt0.5m": 2.3,
+        "magt1m": 1.6,
+        "magt2m": 0.9,
+        "magt3m": 0.5,
+        "magt4m": 0.3,
+        "magt5m": 0.2,
+        "magtsurface": 6.1,
+        "permafrostbase": 47.6,
+        "permafrosttop": 10.3,
+        "talikthickness": 8.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.1,
+        "magt1m": 3.3,
+        "magt2m": 3.0,
+        "magt3m": 2.8,
+        "magt4m": 2.7,
+        "magt5m": 2.6,
+        "magtsurface": 9.0,
+        "permafrostbase": 46.7,
+        "permafrosttop": 23.6,
+        "talikthickness": 22.4
+      }
+    },
+    "2111": {
+      "RCP 4.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 1.8,
+        "magt2m": 1.2,
+        "magt3m": 0.8,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 6.4,
+        "permafrostbase": 47.4,
+        "permafrosttop": 10.4,
+        "talikthickness": 8.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.8,
+        "magt1m": 5.3,
+        "magt2m": 4.4,
+        "magt3m": 3.7,
+        "magt4m": 3.2,
+        "magt5m": 2.9,
+        "magtsurface": 9.4,
+        "permafrostbase": 46.5,
+        "permafrosttop": 25.4,
+        "talikthickness": 24.6
+      }
+    },
+    "2112": {
+      "RCP 4.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 1.8,
+        "magt2m": 1.4,
+        "magt3m": 1.0,
+        "magt4m": 0.8,
+        "magt5m": 0.6,
+        "magtsurface": 6.5,
+        "permafrostbase": 47.2,
+        "permafrosttop": 10.7,
+        "talikthickness": 9.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 6.2,
+        "magt1m": 5.9,
+        "magt2m": 5.1,
+        "magt3m": 4.4,
+        "magt4m": 3.9,
+        "magt5m": 3.6,
+        "magtsurface": 9.5,
+        "permafrostbase": 46.4,
+        "permafrosttop": 27.8,
+        "talikthickness": 27.2
+      }
+    },
+    "2113": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.2,
+        "magt2m": 0.0,
+        "magt3m": 0.3,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 5.3,
+        "permafrostbase": 47.1,
+        "permafrosttop": 10.9,
+        "talikthickness": 8.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 6.6,
+        "magt1m": 6.2,
+        "magt2m": 5.4,
+        "magt3m": 4.7,
+        "magt4m": 4.2,
+        "magt5m": 4.0,
+        "magtsurface": 9.4,
+        "permafrostbase": 46.3,
+        "permafrosttop": 28.6,
+        "talikthickness": 28.1
+      }
+    },
+    "2114": {
+      "RCP 4.5": {
+        "magt0.5m": 2.8,
+        "magt1m": 2.3,
+        "magt2m": 1.3,
+        "magt3m": 0.6,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 6.2,
+        "permafrostbase": 46.9,
+        "permafrosttop": 11.1,
+        "talikthickness": 10.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.8,
+        "magt1m": 5.3,
+        "magt2m": 4.9,
+        "magt3m": 4.5,
+        "magt4m": 4.2,
+        "magt5m": 4.0,
+        "magtsurface": 9.3,
+        "permafrostbase": 46.2,
+        "permafrosttop": 29.3,
+        "talikthickness": 28.3
+      }
+    },
+    "2115": {
+      "RCP 4.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.2,
+        "magt2m": 0.7,
+        "magt3m": 0.6,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 5.9,
+        "permafrostbase": 46.7,
+        "permafrosttop": 11.2,
+        "talikthickness": 9.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.1,
+        "magt1m": 5.0,
+        "magt2m": 4.7,
+        "magt3m": 4.3,
+        "magt4m": 4.1,
+        "magt5m": 3.9,
+        "magtsurface": 8.4,
+        "permafrostbase": 46.1,
+        "permafrosttop": 29.5,
+        "talikthickness": 28.8
+      }
+    },
+    "2116": {
+      "RCP 4.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.5,
+        "magt2m": 0.9,
+        "magt3m": 0.7,
+        "magt4m": 0.5,
+        "magt5m": 0.4,
+        "magtsurface": 6.7,
+        "permafrostbase": 46.6,
+        "permafrosttop": 11.4,
+        "talikthickness": 9.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 6.1,
+        "magt1m": 5.7,
+        "magt2m": 5.1,
+        "magt3m": 4.5,
+        "magt4m": 4.2,
+        "magt5m": 4.0,
+        "magtsurface": 9.4,
+        "permafrostbase": 46.0,
+        "permafrosttop": 29.7,
+        "talikthickness": 29.1
+      }
+    },
+    "2117": {
+      "RCP 4.5": {
+        "magt0.5m": 2.8,
+        "magt1m": 1.9,
+        "magt2m": 1.2,
+        "magt3m": 0.9,
+        "magt4m": 0.7,
+        "magt5m": 0.6,
+        "magtsurface": 7.0,
+        "permafrostbase": 46.5,
+        "permafrosttop": 11.5,
+        "talikthickness": 9.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 7.0,
+        "magt1m": 6.6,
+        "magt2m": 5.8,
+        "magt3m": 5.2,
+        "magt4m": 4.7,
+        "magt5m": 4.4,
+        "magtsurface": 10.1,
+        "permafrostbase": 45.9,
+        "permafrosttop": 29.8,
+        "talikthickness": 29.1
+      }
+    },
+    "2118": {
+      "RCP 4.5": {
+        "magt0.5m": 3.1,
+        "magt1m": 2.2,
+        "magt2m": 1.5,
+        "magt3m": 1.1,
+        "magt4m": 0.9,
+        "magt5m": 0.7,
+        "magtsurface": 7.1,
+        "permafrostbase": 46.4,
+        "permafrosttop": 12.2,
+        "talikthickness": 10.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 8.9,
+        "magt1m": 8.3,
+        "magt2m": 7.2,
+        "magt3m": 6.3,
+        "magt4m": 5.6,
+        "magt5m": 5.3,
+        "magtsurface": 10.7,
+        "permafrostbase": 45.9,
+        "permafrosttop": 29.8,
+        "talikthickness": 29.7
+      }
+    },
+    "2119": {
+      "RCP 4.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 1.9,
+        "magt2m": 1.4,
+        "magt3m": 1.1,
+        "magt4m": 0.9,
+        "magt5m": 0.8,
+        "magtsurface": 6.7,
+        "permafrostbase": 46.3,
+        "permafrosttop": 12.6,
+        "talikthickness": 10.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 7.3,
+        "magt1m": 7.0,
+        "magt2m": 6.5,
+        "magt3m": 6.0,
+        "magt4m": 5.6,
+        "magt5m": 5.4,
+        "magtsurface": 9.9,
+        "permafrostbase": 45.8,
+        "permafrosttop": 29.9,
+        "talikthickness": 29.3
+      }
+    },
+    "2120": {
+      "RCP 4.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 1.1,
+        "magt2m": 1.0,
+        "magt3m": 0.9,
+        "magt4m": 0.8,
+        "magt5m": 0.8,
+        "magtsurface": 5.4,
+        "permafrostbase": 46.2,
+        "permafrosttop": 12.9,
+        "talikthickness": 11.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 7.3,
+        "magt1m": 7.0,
+        "magt2m": 6.5,
+        "magt3m": 6.0,
+        "magt4m": 5.6,
+        "magt5m": 5.4,
+        "magtsurface": 9.9,
+        "permafrostbase": 45.8,
+        "permafrosttop": 29.9,
+        "talikthickness": 29.3
+      }
+    }
+  },
+  "NCAR-CCSM4": {
+    "2021": {
+      "RCP 4.5": {
+        "magt0.5m": -0.6,
+        "magt1m": -1.0,
+        "magt2m": -1.8,
+        "magt3m": -2.0,
+        "magt4m": -2.0,
+        "magt5m": -1.9,
+        "magtsurface": 0.9,
+        "permafrostbase": 66.0,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.6,
+        "magt1m": -1.0,
+        "magt2m": -1.8,
+        "magt3m": -2.0,
+        "magt4m": -2.0,
+        "magt5m": -1.9,
+        "magtsurface": 0.9,
+        "permafrostbase": 66.0,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.0
+      }
+    },
+    "2022": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": -0.1,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.3,
+        "permafrostbase": 63.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.3,
+        "magtsurface": 3.5,
+        "permafrostbase": 59.0,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.4
+      }
+    },
+    "2023": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.5,
+        "magt2m": 0.8,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 6.3,
+        "permafrostbase": 46.2,
+        "permafrosttop": 5.4,
+        "talikthickness": 3.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.1,
+        "magt1m": 3.5,
+        "magt2m": 2.8,
+        "magt3m": 2.2,
+        "magt4m": 1.8,
+        "magt5m": 1.6,
+        "magtsurface": 8.3,
+        "permafrostbase": 47.1,
+        "permafrosttop": 17.8,
+        "talikthickness": 16.9
+      }
+    },
+    "2024": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 1.4,
+        "permafrostbase": 62.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 2.9,
+        "permafrostbase": 58.4,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2025": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": -0.3,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 1.3,
+        "permafrostbase": 62.0,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.2,
+        "magt2m": -0.4,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.1,
+        "permafrostbase": 57.7,
+        "permafrosttop": 1.9,
+        "talikthickness": 0.0
+      }
+    },
+    "2026": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.5,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.6,
+        "magtsurface": 1.7,
+        "permafrostbase": 61.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.5,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 2.0,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2027": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.2,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.1,
+        "permafrostbase": 60.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.5,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.6,
+        "magt5m": -0.6,
+        "magtsurface": 1.6,
+        "permafrostbase": 57.4,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      }
+    },
+    "2028": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.6,
+        "permafrostbase": 60.1,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.2,
+        "magt2m": -0.6,
+        "magt3m": -0.6,
+        "magt4m": -0.6,
+        "magt5m": -0.6,
+        "magtsurface": 2.0,
+        "permafrostbase": 57.0,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      }
+    },
+    "2029": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": -0.2,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.6,
+        "magt5m": -0.6,
+        "magtsurface": 1.8,
+        "permafrostbase": 59.6,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.2,
+        "magt2m": -0.2,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 3.4,
+        "permafrostbase": 56.6,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.1
+      }
+    },
+    "2030": {
+      "RCP 4.5": {
+        "magt0.5m": -0.5,
+        "magt1m": 0.4,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.3,
+        "magtsurface": 3.5,
+        "permafrostbase": 59.0,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.2,
+        "magt2m": 0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.2,
+        "magtsurface": 3.7,
+        "permafrostbase": 56.2,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.3
+      }
+    },
+    "2031": {
+      "RCP 4.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 0.7,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.2,
+        "magtsurface": 3.2,
+        "permafrostbase": 58.3,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.5,
+        "magt1m": -0.7,
+        "magt2m": -0.6,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.4,
+        "magtsurface": 1.0,
+        "permafrostbase": 55.8,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      }
+    },
+    "2032": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.0,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.2,
+        "magtsurface": 2.7,
+        "permafrostbase": 57.7,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.6,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.9,
+        "permafrostbase": 55.4,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2033": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.5,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 2.0,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.1,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.3,
+        "permafrostbase": 63.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2034": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": -0.2,
+        "magt2m": -0.4,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.2,
+        "permafrostbase": 57.3,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.6,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.2,
+        "magtsurface": 5.1,
+        "permafrostbase": 55.1,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.1
+      }
+    },
+    "2035": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 2.6,
+        "permafrostbase": 56.8,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.9,
+        "magt2m": 0.3,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.7,
+        "permafrostbase": 54.8,
+        "permafrosttop": 2.8,
+        "talikthickness": 1.0
+      }
+    },
+    "2036": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.3,
+        "magt2m": -0.1,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 3.1,
+        "permafrostbase": 56.4,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.4,
+        "magt1m": -0.6,
+        "magt2m": -0.5,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.2,
+        "magtsurface": 1.1,
+        "permafrostbase": 54.5,
+        "permafrosttop": 3.0,
+        "talikthickness": 0.2
+      }
+    },
+    "2037": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.5,
+        "magt2m": -0.4,
+        "magt3m": -0.2,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 1.0,
+        "permafrostbase": 55.9,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.7,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.9,
+        "permafrostbase": 54.2,
+        "permafrosttop": 2.7,
+        "talikthickness": 0.6
+      }
+    },
+    "2038": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.7,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.2,
+        "magt5m": -0.2,
+        "magtsurface": 5.2,
+        "permafrostbase": 55.4,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.4,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      }
+    },
+    "2039": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 1.0,
+        "magt2m": 0.4,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 54.9,
+        "permafrosttop": 2.8,
+        "talikthickness": 1.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.0,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 53.9,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.2
+      }
+    },
+    "2040": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.5,
+        "permafrostbase": 54.4,
+        "permafrosttop": 3.0,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.8,
+        "magt1m": -0.9,
+        "magt2m": -0.9,
+        "magt3m": -0.6,
+        "magt4m": -0.5,
+        "magt5m": -0.4,
+        "magtsurface": 1.0,
+        "permafrostbase": 53.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      }
+    },
+    "2041": {
+      "RCP 4.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 54.0,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 1.0,
+        "magt2m": 0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.2,
+        "magtsurface": 5.0,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.4
+      }
+    },
+    "2042": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 53.9,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.1,
+        "magt2m": 0.4,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 5.8,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.9
+      }
+    },
+    "2043": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.5,
+        "permafrostbase": 53.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.6,
+        "magt2m": 0.2,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 53.7,
+        "permafrosttop": 3.1,
+        "talikthickness": 1.0
+      }
+    },
+    "2044": {
+      "RCP 4.5": {
+        "magt0.5m": 2.5,
+        "magt1m": 0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.4,
+        "permafrostbase": 65.7,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.2,
+        "magt1m": 2.4,
+        "magt2m": 2.0,
+        "magt3m": 1.8,
+        "magt4m": 1.7,
+        "magt5m": 1.6,
+        "magtsurface": 7.4,
+        "permafrostbase": 46.9,
+        "permafrosttop": 18.0,
+        "talikthickness": 16.3
+      }
+    },
+    "2045": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": 0.4,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.0,
+        "permafrostbase": 53.8,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 1.0,
+        "magt2m": 0.4,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 53.6,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.9
+      }
+    },
+    "2046": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 53.7,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.4,
+        "magt2m": -0.2,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.3,
+        "permafrostbase": 53.6,
+        "permafrosttop": 3.5,
+        "talikthickness": 1.0
+      }
+    },
+    "2047": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 1.6,
+        "magt2m": 0.5,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 6.3,
+        "permafrostbase": 53.7,
+        "permafrosttop": 3.0,
+        "talikthickness": 1.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.0,
+        "magt2m": 0.2,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 6.0,
+        "permafrostbase": 53.6,
+        "permafrosttop": 3.1,
+        "talikthickness": 0.9
+      }
+    },
+    "2048": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 0.3,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 53.6,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.5,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.1
+      }
+    },
+    "2049": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 53.6,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 1.0,
+        "magt2m": 0.5,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 53.5,
+        "permafrosttop": 3.5,
+        "talikthickness": 2.2
+      }
+    },
+    "2050": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.4,
+        "magt2m": -0.2,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 2.0,
+        "permafrostbase": 53.5,
+        "permafrosttop": 3.4,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.9,
+        "magt3m": -0.9,
+        "magt4m": -0.9,
+        "magt5m": -0.9,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2051": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.3,
+        "magt2m": -0.0,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.5,
+        "permafrosttop": 3.1,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 0.9,
+        "magt2m": 0.5,
+        "magt3m": 0.2,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.0,
+        "permafrostbase": 53.4,
+        "permafrosttop": 3.8,
+        "talikthickness": 2.2
+      }
+    },
+    "2052": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.6,
+        "permafrostbase": 53.4,
+        "permafrosttop": 3.1,
+        "talikthickness": 1.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.5,
+        "magt2m": 0.3,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.4,
+        "permafrosttop": 3.9,
+        "talikthickness": 2.2
+      }
+    },
+    "2053": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.3,
+        "permafrosttop": 2.8,
+        "talikthickness": 1.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 53.3,
+        "permafrosttop": 4.0,
+        "talikthickness": 1.9
+      }
+    },
+    "2054": {
+      "RCP 4.5": {
+        "magt0.5m": 0.0,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 53.3,
+        "permafrosttop": 3.0,
+        "talikthickness": 1.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.2,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 1.9,
+        "permafrostbase": 53.3,
+        "permafrosttop": 4.1,
+        "talikthickness": 1.8
+      }
+    },
+    "2055": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.9,
+        "magt3m": -0.9,
+        "magt4m": -0.9,
+        "magt5m": -0.9,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 1.4,
+        "permafrostbase": 62.8,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2056": {
+      "RCP 4.5": {
+        "magt0.5m": -0.0,
+        "magt1m": 1.1,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.0,
+        "permafrostbase": 53.2,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 53.2,
+        "permafrosttop": 4.1,
+        "talikthickness": 2.1
+      }
+    },
+    "2057": {
+      "RCP 4.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 53.2,
+        "permafrosttop": 3.4,
+        "talikthickness": 0.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.6,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.6,
+        "permafrostbase": 53.2,
+        "permafrosttop": 4.1,
+        "talikthickness": 2.1
+      }
+    },
+    "2058": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.4,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 1.7,
+        "permafrostbase": 53.1,
+        "permafrosttop": 3.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.9,
+        "magt2m": 0.6,
+        "magt3m": 0.3,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 2.3,
+        "permafrostbase": 53.1,
+        "permafrosttop": 4.2,
+        "talikthickness": 2.5
+      }
+    },
+    "2059": {
+      "RCP 4.5": {
+        "magt0.5m": 0.1,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.2,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 1.9,
+        "permafrostbase": 53.1,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.4,
+        "magt2m": -0.4,
+        "magt3m": 0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 53.1,
+        "permafrosttop": 4.4,
+        "talikthickness": 1.5
+      }
+    },
+    "2060": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.2,
+        "permafrostbase": 53.0,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.5,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 53.0,
+        "permafrosttop": 4.3,
+        "talikthickness": 1.3
+      }
+    },
+    "2061": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.3,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 52.9,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": 0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 3.9,
+        "permafrostbase": 53.0,
+        "permafrosttop": 4.3,
+        "talikthickness": 1.4
+      }
+    },
+    "2062": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": -0.0,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 1.9,
+        "permafrostbase": 52.9,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.5,
+        "magt2m": 0.0,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.4,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.4
+      }
+    },
+    "2063": {
+      "RCP 4.5": {
+        "magt0.5m": 0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.8,
+        "permafrostbase": 52.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.7,
+        "magt2m": 0.2,
+        "magt3m": 0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 3.3,
+        "permafrostbase": 52.9,
+        "permafrosttop": 4.2,
+        "talikthickness": 1.9
+      }
+    },
+    "2064": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": 0.9,
+        "magt2m": 0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 5.7,
+        "permafrostbase": 52.8,
+        "permafrosttop": 2.7,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.2,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.2,
+        "permafrostbase": 52.9,
+        "permafrosttop": 4.3,
+        "talikthickness": 2.5
+      }
+    },
+    "2065": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.6,
+        "magt2m": 0.2,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 52.8,
+        "permafrosttop": 2.9,
+        "talikthickness": 1.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.0,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 6.3,
+        "permafrostbase": 52.9,
+        "permafrosttop": 4.2,
+        "talikthickness": 1.4
+      }
+    },
+    "2066": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": 0.5,
+        "magt2m": 0.0,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.4,
+        "magtsurface": 2.5,
+        "permafrostbase": 65.8,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.5,
+        "magt3m": -0.5,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 1.3,
+        "permafrostbase": 62.0,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2067": {
+      "RCP 4.5": {
+        "magt0.5m": 1.4,
+        "magt1m": -0.0,
+        "magt2m": -0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 1.9,
+        "permafrostbase": 52.7,
+        "permafrosttop": 3.0,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.7,
+        "permafrostbase": 52.8,
+        "permafrosttop": 4.3,
+        "talikthickness": 2.2
+      }
+    },
+    "2068": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": -0.3,
+        "magt2m": -0.2,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 1.1,
+        "permafrostbase": 52.7,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.4,
+        "magt2m": -0.2,
+        "magt3m": 0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 1.2,
+        "permafrostbase": 52.8,
+        "permafrosttop": 4.1,
+        "talikthickness": 1.5
+      }
+    },
+    "2069": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": -0.0,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 52.6,
+        "permafrosttop": 2.5,
+        "talikthickness": 0.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.5,
+        "magt1m": -0.1,
+        "magt2m": -0.3,
+        "magt3m": -0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 3.9,
+        "permafrostbase": 52.7,
+        "permafrosttop": 4.0,
+        "talikthickness": 0.8
+      }
+    },
+    "2070": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": 0.7,
+        "magt2m": 0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 52.6,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.3,
+        "magt1m": 1.5,
+        "magt2m": 0.5,
+        "magt3m": -0.0,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 5.6,
+        "permafrostbase": 52.7,
+        "permafrosttop": 4.2,
+        "talikthickness": 1.6
+      }
+    },
+    "2071": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.5,
+        "permafrostbase": 52.5,
+        "permafrosttop": 2.8,
+        "talikthickness": 0.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 1.8,
+        "magt2m": 1.0,
+        "magt3m": 0.3,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 6.8,
+        "permafrostbase": 52.6,
+        "permafrosttop": 4.3,
+        "talikthickness": 2.8
+      }
+    },
+    "2072": {
+      "RCP 4.5": {
+        "magt0.5m": -0.6,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.7,
+        "permafrostbase": 52.5,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.6,
+        "magt2m": 0.4,
+        "magt3m": 0.2,
+        "magt4m": 0.0,
+        "magt5m": -0.0,
+        "magtsurface": 4.1,
+        "permafrostbase": 52.6,
+        "permafrosttop": 4.4,
+        "talikthickness": 2.9
+      }
+    },
+    "2073": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.1,
+        "permafrostbase": 52.4,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.9,
+        "magt2m": 0.6,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.4,
+        "permafrostbase": 52.5,
+        "permafrosttop": 4.7,
+        "talikthickness": 3.1
+      }
+    },
+    "2074": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": 0.5,
+        "magt2m": -0.0,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.9,
+        "permafrostbase": 52.4,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.3,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 1.2,
+        "permafrostbase": 65.5,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      }
+    },
+    "2075": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.5,
+        "magt2m": -0.2,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 0.5,
+        "permafrostbase": 52.3,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 2.0,
+        "magt2m": 1.3,
+        "magt3m": 0.7,
+        "magt4m": 0.2,
+        "magt5m": -0.0,
+        "magtsurface": 6.2,
+        "permafrostbase": 52.5,
+        "permafrosttop": 5.0,
+        "talikthickness": 4.0
+      }
+    },
+    "2076": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": -0.2,
+        "magt2m": -0.4,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.9,
+        "permafrostbase": 52.3,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.7,
+        "magt2m": 0.2,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 5.0,
+        "permafrostbase": 52.4,
+        "permafrosttop": 5.2,
+        "talikthickness": 3.0
+      }
+    },
+    "2077": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.3,
+        "magt3m": -0.3,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 1.2,
+        "permafrostbase": 65.5,
+        "permafrosttop": 2.4,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.5,
+        "magt2m": -0.7,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.6,
+        "magtsurface": 1.7,
+        "permafrostbase": 61.5,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2078": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": -0.5,
+        "magt2m": -0.6,
+        "magt3m": -0.2,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 2.4,
+        "permafrostbase": 52.2,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.0,
+        "magt1m": 2.3,
+        "magt2m": 1.5,
+        "magt3m": 0.8,
+        "magt4m": 0.3,
+        "magt5m": 0.1,
+        "magtsurface": 7.6,
+        "permafrostbase": 52.4,
+        "permafrosttop": 5.4,
+        "talikthickness": 4.3
+      }
+    },
+    "2079": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 0.5,
+        "magt2m": -0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 5.1,
+        "permafrostbase": 52.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.1,
+        "magt1m": 4.4,
+        "magt2m": 3.0,
+        "magt3m": 1.8,
+        "magt4m": 0.9,
+        "magt5m": 0.4,
+        "magtsurface": 8.8,
+        "permafrostbase": 52.4,
+        "permafrosttop": 5.9,
+        "talikthickness": 5.2
+      }
+    },
+    "2080": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": -0.1,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 52.2,
+        "permafrosttop": 2.6,
+        "talikthickness": 0.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.8,
+        "magt1m": 1.8,
+        "magt2m": 1.2,
+        "magt3m": 0.9,
+        "magt4m": 0.6,
+        "magt5m": 0.4,
+        "magtsurface": 7.8,
+        "permafrostbase": 52.3,
+        "permafrosttop": 6.6,
+        "talikthickness": 5.0
+      }
+    },
+    "2081": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.8,
+        "magt2m": 0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 5.4,
+        "permafrostbase": 52.1,
+        "permafrosttop": 2.9,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 2.2,
+        "magt2m": 1.6,
+        "magt3m": 1.1,
+        "magt4m": 0.7,
+        "magt5m": 0.4,
+        "magtsurface": 5.9,
+        "permafrostbase": 52.3,
+        "permafrosttop": 6.9,
+        "talikthickness": 5.7
+      }
+    },
+    "2082": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 0.3,
+        "magt2m": 0.2,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.2,
+        "permafrostbase": 52.1,
+        "permafrosttop": 3.0,
+        "talikthickness": 1.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.0,
+        "magt1m": 0.2,
+        "magt2m": -0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.2,
+        "magt5m": 0.2,
+        "magtsurface": 4.5,
+        "permafrostbase": 52.2,
+        "permafrosttop": 7.5,
+        "talikthickness": 4.5
+      }
+    },
+    "2083": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.0,
+        "permafrosttop": 3.2,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 0.3,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 52.2,
+        "permafrosttop": 7.3,
+        "talikthickness": 5.0
+      }
+    },
+    "2084": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.2,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.4,
+        "permafrostbase": 52.0,
+        "permafrosttop": 3.3,
+        "talikthickness": 1.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 4.5,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.3,
+        "talikthickness": 5.0
+      }
+    },
+    "2085": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.6,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 51.9,
+        "permafrosttop": 3.4,
+        "talikthickness": 1.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.2,
+        "magt2m": 0.5,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 5.7,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.3,
+        "talikthickness": 6.0
+      }
+    },
+    "2086": {
+      "RCP 4.5": {
+        "magt0.5m": -0.1,
+        "magt1m": 0.3,
+        "magt2m": -0.1,
+        "magt3m": -0.0,
+        "magt4m": -0.1,
+        "magt5m": -0.1,
+        "magtsurface": 4.2,
+        "permafrostbase": 51.9,
+        "permafrosttop": 3.3,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.1,
+        "magt1m": -0.3,
+        "magt2m": -0.8,
+        "magt3m": -0.8,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 65.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2087": {
+      "RCP 4.5": {
+        "magt0.5m": 0.4,
+        "magt1m": 0.7,
+        "magt2m": 0.3,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.8,
+        "permafrostbase": 51.9,
+        "permafrosttop": 3.1,
+        "talikthickness": 1.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.8,
+        "magt1m": 2.2,
+        "magt2m": 1.3,
+        "magt3m": 0.6,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 6.1,
+        "permafrostbase": 52.1,
+        "permafrosttop": 7.3,
+        "talikthickness": 6.3
+      }
+    },
+    "2088": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.3,
+        "magt2m": -0.8,
+        "magt3m": -0.8,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 65.2,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.2,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.5,
+        "magt5m": -0.5,
+        "magtsurface": 2.1,
+        "permafrostbase": 60.8,
+        "permafrosttop": 2.1,
+        "talikthickness": 0.1
+      }
+    },
+    "2089": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.1,
+        "permafrostbase": 51.8,
+        "permafrosttop": 3.3,
+        "talikthickness": 0.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.4,
+        "magt1m": 0.6,
+        "magt2m": 0.3,
+        "magt3m": 0.3,
+        "magt4m": 0.2,
+        "magt5m": 0.2,
+        "magtsurface": 4.9,
+        "permafrostbase": 52.0,
+        "permafrosttop": 7.5,
+        "talikthickness": 5.4
+      }
+    },
+    "2090": {
+      "RCP 4.5": {
+        "magt0.5m": 0.6,
+        "magt1m": 1.2,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 5.6,
+        "permafrostbase": 51.8,
+        "permafrosttop": 3.4,
+        "talikthickness": 1.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.5,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 4.0,
+        "permafrostbase": 52.0,
+        "permafrosttop": 7.5,
+        "talikthickness": 5.0
+      }
+    },
+    "2091": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.2,
+        "magt2m": 0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.5,
+        "permafrostbase": 51.7,
+        "permafrosttop": 3.5,
+        "talikthickness": 1.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.4,
+        "magt2m": 0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 4.1,
+        "permafrostbase": 51.9,
+        "permafrosttop": 7.5,
+        "talikthickness": 5.0
+      }
+    },
+    "2092": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.1,
+        "magt2m": -0.1,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 2.8,
+        "permafrostbase": 51.7,
+        "permafrosttop": 3.4,
+        "talikthickness": 0.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.4,
+        "magt1m": 1.5,
+        "magt2m": 0.7,
+        "magt3m": 0.3,
+        "magt4m": 0.2,
+        "magt5m": 0.1,
+        "magtsurface": 6.4,
+        "permafrostbase": 51.9,
+        "permafrosttop": 7.5,
+        "talikthickness": 5.6
+      }
+    },
+    "2093": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 0.3,
+        "magt2m": -0.0,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.1,
+        "permafrostbase": 51.6,
+        "permafrosttop": 3.2,
+        "talikthickness": 1.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.7,
+        "magt1m": 2.9,
+        "magt2m": 2.1,
+        "magt3m": 1.3,
+        "magt4m": 0.8,
+        "magt5m": 0.6,
+        "magtsurface": 7.0,
+        "permafrostbase": 51.8,
+        "permafrosttop": 7.7,
+        "talikthickness": 6.5
+      }
+    },
+    "2094": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 1.0,
+        "magt2m": 0.3,
+        "magt3m": 0.0,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 6.5,
+        "permafrostbase": 51.5,
+        "permafrosttop": 3.5,
+        "talikthickness": 1.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.4,
+        "magt1m": 2.4,
+        "magt2m": 1.8,
+        "magt3m": 1.3,
+        "magt4m": 0.9,
+        "magt5m": 0.7,
+        "magtsurface": 8.0,
+        "permafrostbase": 51.8,
+        "permafrosttop": 8.1,
+        "talikthickness": 6.9
+      }
+    },
+    "2095": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.7,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 51.5,
+        "permafrosttop": 3.8,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.5,
+        "magt1m": 2.7,
+        "magt2m": 2.0,
+        "magt3m": 1.4,
+        "magt4m": 1.0,
+        "magt5m": 0.8,
+        "magtsurface": 7.7,
+        "permafrostbase": 51.7,
+        "permafrosttop": 8.7,
+        "talikthickness": 7.3
+      }
+    },
+    "2096": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.7,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.4,
+        "permafrostbase": 51.3,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.7
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.3,
+        "magt1m": 3.5,
+        "magt2m": 2.7,
+        "magt3m": 1.9,
+        "magt4m": 1.4,
+        "magt5m": 1.1,
+        "magtsurface": 8.8,
+        "permafrostbase": 51.7,
+        "permafrosttop": 9.3,
+        "talikthickness": 8.2
+      }
+    },
+    "2097": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 0.3,
+        "magt2m": 0.1,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 51.2,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.4,
+        "magt2m": 2.1,
+        "magt3m": 1.7,
+        "magt4m": 1.4,
+        "magt5m": 1.2,
+        "magtsurface": 6.1,
+        "permafrostbase": 51.6,
+        "permafrosttop": 9.8,
+        "talikthickness": 8.6
+      }
+    },
+    "2098": {
+      "RCP 4.5": {
+        "magt0.5m": -0.3,
+        "magt1m": 0.1,
+        "magt2m": -0.0,
+        "magt3m": 0.1,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 3.3,
+        "permafrostbase": 51.1,
+        "permafrosttop": 3.9,
+        "talikthickness": 1.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.3,
+        "magt1m": -0.2,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 0.7,
+        "permafrostbase": 64.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2099": {
+      "RCP 4.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.2,
+        "magt2m": -0.2,
+        "magt3m": -0.2,
+        "magt4m": -0.3,
+        "magt5m": -0.3,
+        "magtsurface": 0.7,
+        "permafrostbase": 64.7,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.0,
+        "magt1m": -0.3,
+        "magt2m": -0.4,
+        "magt3m": -0.4,
+        "magt4m": -0.4,
+        "magt5m": -0.4,
+        "magtsurface": 2.6,
+        "permafrostbase": 60.1,
+        "permafrosttop": 2.0,
+        "talikthickness": 0.0
+      }
+    },
+    "2100": {
+      "RCP 4.5": {
+        "magt0.5m": 1.6,
+        "magt1m": 1.2,
+        "magt2m": 0.5,
+        "magt3m": 0.2,
+        "magt4m": -0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.3,
+        "permafrostbase": 51.0,
+        "permafrosttop": 4.0,
+        "talikthickness": 2.2
+      },
+      "RCP 8.5": {
+        "magt0.5m": 0.4,
+        "magt1m": -0.2,
+        "magt2m": -0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.4,
+        "magt5m": 0.4,
+        "magtsurface": 3.9,
+        "permafrostbase": 51.6,
+        "permafrosttop": 9.9,
+        "talikthickness": 6.8
+      }
+    },
+    "2101": {
+      "RCP 4.5": {
+        "magt0.5m": 1.2,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.6,
+        "permafrostbase": 50.8,
+        "permafrosttop": 4.1,
+        "talikthickness": 2.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.9,
+        "magt1m": 1.0,
+        "magt2m": 0.2,
+        "magt3m": -0.0,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 6.3,
+        "permafrostbase": 51.5,
+        "permafrosttop": 9.3,
+        "talikthickness": 6.8
+      }
+    },
+    "2102": {
+      "RCP 4.5": {
+        "magt0.5m": 1.7,
+        "magt1m": 1.3,
+        "magt2m": 0.8,
+        "magt3m": 0.4,
+        "magt4m": 0.0,
+        "magt5m": -0.1,
+        "magtsurface": 4.7,
+        "permafrostbase": 50.7,
+        "permafrosttop": 4.2,
+        "talikthickness": 2.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.3,
+        "magt2m": 0.6,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.1,
+        "magtsurface": 6.0,
+        "permafrostbase": 51.4,
+        "permafrosttop": 9.3,
+        "talikthickness": 7.2
+      }
+    },
+    "2103": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.1,
+        "magtsurface": 3.0,
+        "permafrostbase": 50.2,
+        "permafrosttop": 4.5,
+        "talikthickness": 1.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.6,
+        "magt1m": 2.2,
+        "magt2m": 1.4,
+        "magt3m": 0.8,
+        "magt4m": 0.4,
+        "magt5m": 0.3,
+        "magtsurface": 6.4,
+        "permafrostbase": 51.3,
+        "permafrosttop": 9.3,
+        "talikthickness": 8.3
+      }
+    },
+    "2104": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.2,
+        "magt2m": 0.4,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.6,
+        "permafrostbase": 50.0,
+        "permafrosttop": 4.5,
+        "talikthickness": 3.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 1.8,
+        "magt2m": 1.2,
+        "magt3m": 0.8,
+        "magt4m": 0.6,
+        "magt5m": 0.5,
+        "magtsurface": 7.5,
+        "permafrostbase": 51.2,
+        "permafrosttop": 9.4,
+        "talikthickness": 7.8
+      }
+    },
+    "2105": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.6,
+        "magt2m": 0.3,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.3,
+        "permafrostbase": 49.7,
+        "permafrosttop": 4.5,
+        "talikthickness": 2.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.7,
+        "magt1m": 1.8,
+        "magt2m": 1.2,
+        "magt3m": 0.9,
+        "magt4m": 0.7,
+        "magt5m": 0.6,
+        "magtsurface": 7.6,
+        "permafrostbase": 51.0,
+        "permafrosttop": 9.7,
+        "talikthickness": 8.1
+      }
+    },
+    "2106": {
+      "RCP 4.5": {
+        "magt0.5m": 0.7,
+        "magt1m": 0.3,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 3.6,
+        "permafrostbase": 49.0,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 2.9,
+        "magt1m": 2.2,
+        "magt2m": 1.7,
+        "magt3m": 1.2,
+        "magt4m": 0.9,
+        "magt5m": 0.8,
+        "magtsurface": 7.5,
+        "permafrostbase": 50.7,
+        "permafrosttop": 10.0,
+        "talikthickness": 8.8
+      }
+    },
+    "2107": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.5,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 4.7,
+        "permafrostbase": 48.7,
+        "permafrosttop": 4.6,
+        "talikthickness": 2.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 5.0,
+        "magt1m": 4.2,
+        "magt2m": 3.1,
+        "magt3m": 2.2,
+        "magt4m": 1.6,
+        "magt5m": 1.3,
+        "magtsurface": 8.9,
+        "permafrostbase": 50.5,
+        "permafrosttop": 10.3,
+        "talikthickness": 9.3
+      }
+    },
+    "2108": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 1.5,
+        "magt2m": 0.9,
+        "magt3m": 0.4,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.2,
+        "permafrostbase": 48.2,
+        "permafrosttop": 4.7,
+        "talikthickness": 3.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 6.4,
+        "magt1m": 5.7,
+        "magt2m": 4.6,
+        "magt3m": 3.4,
+        "magt4m": 2.6,
+        "magt5m": 2.2,
+        "magtsurface": 9.0,
+        "permafrostbase": 50.3,
+        "permafrosttop": 10.9,
+        "talikthickness": 10.6
+      }
+    },
+    "2109": {
+      "RCP 4.5": {
+        "magt0.5m": 1.3,
+        "magt1m": 0.4,
+        "magt2m": -0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.3,
+        "permafrostbase": 47.9,
+        "permafrosttop": 4.9,
+        "talikthickness": 2.3
+      },
+      "RCP 8.5": {
+        "magt0.5m": 7.3,
+        "magt1m": 6.6,
+        "magt2m": 5.4,
+        "magt3m": 4.2,
+        "magt4m": 3.3,
+        "magt5m": 2.8,
+        "magtsurface": 9.9,
+        "permafrostbase": 50.2,
+        "permafrosttop": 12.8,
+        "talikthickness": 12.2
+      }
+    },
+    "2110": {
+      "RCP 4.5": {
+        "magt0.5m": 0.2,
+        "magt1m": -0.4,
+        "magt2m": -0.8,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 64.2,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.6,
+        "magt2m": -1.0,
+        "magt3m": -1.0,
+        "magt4m": -0.9,
+        "magt5m": -0.8,
+        "magtsurface": 1.5,
+        "permafrostbase": 59.6,
+        "permafrosttop": 2.3,
+        "talikthickness": 0.0
+      }
+    },
+    "2111": {
+      "RCP 4.5": {
+        "magt0.5m": -0.2,
+        "magt1m": 0.3,
+        "magt2m": 0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 3.9,
+        "permafrostbase": 47.7,
+        "permafrosttop": 4.8,
+        "talikthickness": 2.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": -0.2,
+        "magt1m": -0.4,
+        "magt2m": -0.8,
+        "magt3m": -0.7,
+        "magt4m": -0.7,
+        "magt5m": -0.7,
+        "magtsurface": 1.4,
+        "permafrostbase": 64.2,
+        "permafrosttop": 2.2,
+        "talikthickness": 0.0
+      }
+    },
+    "2112": {
+      "RCP 4.5": {
+        "magt0.5m": 0.9,
+        "magt1m": 1.1,
+        "magt2m": 0.5,
+        "magt3m": 0.2,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 6.7,
+        "permafrostbase": 47.5,
+        "permafrosttop": 4.8,
+        "talikthickness": 3.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.7,
+        "magt1m": 3.3,
+        "magt2m": 3.3,
+        "magt3m": 3.0,
+        "magt4m": 2.8,
+        "magt5m": 2.6,
+        "magtsurface": 7.4,
+        "permafrostbase": 49.9,
+        "permafrosttop": 14.9,
+        "talikthickness": 13.5
+      }
+    },
+    "2113": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": 0.4,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.1,
+        "permafrostbase": 47.3,
+        "permafrosttop": 4.9,
+        "talikthickness": 2.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 1.5,
+        "magt1m": 0.4,
+        "magt2m": 0.1,
+        "magt3m": 0.8,
+        "magt4m": 1.1,
+        "magt5m": 1.2,
+        "magtsurface": 6.6,
+        "permafrostbase": 49.3,
+        "permafrosttop": 14.9,
+        "talikthickness": 12.7
+      }
+    },
+    "2114": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 1.0,
+        "magt2m": 0.7,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 3.8,
+        "permafrostbase": 47.1,
+        "permafrosttop": 4.9,
+        "talikthickness": 3.5
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.8,
+        "magt1m": 3.9,
+        "magt2m": 2.6,
+        "magt3m": 1.7,
+        "magt4m": 1.2,
+        "magt5m": 0.9,
+        "magtsurface": 8.6,
+        "permafrostbase": 49.1,
+        "permafrosttop": 14.9,
+        "talikthickness": 14.2
+      }
+    },
+    "2115": {
+      "RCP 4.5": {
+        "magt0.5m": 1.1,
+        "magt1m": 0.0,
+        "magt2m": -0.1,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": -0.0,
+        "magtsurface": 5.0,
+        "permafrostbase": 46.9,
+        "permafrosttop": 5.0,
+        "talikthickness": 2.6
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.6,
+        "magt1m": 3.3,
+        "magt2m": 2.9,
+        "magt3m": 2.5,
+        "magt4m": 2.1,
+        "magt5m": 1.9,
+        "magtsurface": 7.1,
+        "permafrostbase": 48.8,
+        "permafrosttop": 15.2,
+        "talikthickness": 14.3
+      }
+    },
+    "2116": {
+      "RCP 4.5": {
+        "magt0.5m": 0.8,
+        "magt1m": 1.6,
+        "magt2m": 0.7,
+        "magt3m": 0.3,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 5.1,
+        "permafrostbase": 46.8,
+        "permafrosttop": 5.0,
+        "talikthickness": 3.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 4.1,
+        "magt1m": 3.7,
+        "magt2m": 3.1,
+        "magt3m": 2.5,
+        "magt4m": 2.2,
+        "magt5m": 1.9,
+        "magtsurface": 6.9,
+        "permafrostbase": 48.2,
+        "permafrosttop": 15.4,
+        "talikthickness": 14.7
+      }
+    },
+    "2117": {
+      "RCP 4.5": {
+        "magt0.5m": 2.1,
+        "magt1m": 1.4,
+        "magt2m": 0.8,
+        "magt3m": 0.4,
+        "magt4m": 0.2,
+        "magt5m": 0.0,
+        "magtsurface": 6.3,
+        "permafrostbase": 46.7,
+        "permafrosttop": 5.2,
+        "talikthickness": 3.4
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.1,
+        "magt1m": 2.1,
+        "magt2m": 1.7,
+        "magt3m": 1.7,
+        "magt4m": 1.7,
+        "magt5m": 1.6,
+        "magtsurface": 8.2,
+        "permafrostbase": 47.9,
+        "permafrosttop": 15.9,
+        "talikthickness": 14.1
+      }
+    },
+    "2118": {
+      "RCP 4.5": {
+        "magt0.5m": 2.0,
+        "magt1m": -0.1,
+        "magt2m": -0.0,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 3.5,
+        "permafrostbase": 46.5,
+        "permafrosttop": 5.3,
+        "talikthickness": 3.1
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.8,
+        "magt1m": 2.8,
+        "magt2m": 2.2,
+        "magt3m": 1.8,
+        "magt4m": 1.5,
+        "magt5m": 1.4,
+        "magtsurface": 8.7,
+        "permafrostbase": 47.7,
+        "permafrosttop": 16.3,
+        "talikthickness": 15.1
+      }
+    },
+    "2119": {
+      "RCP 4.5": {
+        "magt0.5m": 0.3,
+        "magt1m": -0.1,
+        "magt2m": -0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 3.6,
+        "permafrostbase": 46.4,
+        "permafrosttop": 5.4,
+        "talikthickness": 2.8
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.6,
+        "magt1m": 3.4,
+        "magt2m": 2.9,
+        "magt3m": 2.4,
+        "magt4m": 2.0,
+        "magt5m": 1.8,
+        "magtsurface": 6.9,
+        "permafrostbase": 47.5,
+        "permafrosttop": 16.9,
+        "talikthickness": 15.8
+      }
+    },
+    "2120": {
+      "RCP 4.5": {
+        "magt0.5m": 0.5,
+        "magt1m": 1.2,
+        "magt2m": 0.2,
+        "magt3m": 0.1,
+        "magt4m": 0.1,
+        "magt5m": 0.0,
+        "magtsurface": 5.7,
+        "permafrostbase": 46.3,
+        "permafrosttop": 5.4,
+        "talikthickness": 2.9
+      },
+      "RCP 8.5": {
+        "magt0.5m": 3.3,
+        "magt1m": 2.2,
+        "magt2m": 1.4,
+        "magt3m": 1.5,
+        "magt4m": 1.5,
+        "magt5m": 1.4,
+        "magtsurface": 7.7,
+        "permafrostbase": 47.3,
+        "permafrosttop": 17.5,
+        "talikthickness": 15.5
+      }
+    }
+  }
+}

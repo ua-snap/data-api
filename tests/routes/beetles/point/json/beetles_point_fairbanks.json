@@ -1,0 +1,236 @@
+{
+  "1988-2017": {
+    "Daymet": {
+      "Historical": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    }
+  },
+  "2010-2039": {
+    "GFDL-ESM2M": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "HadGEM2-ES": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    }
+  },
+  "2040-2069": {
+    "GFDL-ESM2M": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "HadGEM2-ES": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    }
+  },
+  "2070-2099": {
+    "GFDL-ESM2M": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "minimal"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "minimal"
+        }
+      }
+    },
+    "HadGEM2-ES": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "high"
+        }
+      },
+      "rcp85": {
+        "low": {
+          "climate-protection": "high"
+        },
+        "medium": {
+          "climate-protection": "none"
+        }
+      }
+    }
+  }
+}

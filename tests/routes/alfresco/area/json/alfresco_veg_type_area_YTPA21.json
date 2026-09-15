@@ -1,0 +1,548 @@
+{
+  "1950-2008": {
+    "MODEL-SPINUP": {
+      "historical": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.46,
+        "deciduous_forest": 1.69,
+        "graminoid_tundra": 60.21,
+        "not_modeled": 12.4,
+        "shrub_tundra": 13.46,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 4.19
+      }
+    }
+  },
+  "2010-2039": {
+    "GFDL-CM3": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.03,
+        "deciduous_forest": 2.72,
+        "graminoid_tundra": 46.78,
+        "not_modeled": 12.4,
+        "shrub_tundra": 26.86,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.6
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.02,
+        "deciduous_forest": 2.75,
+        "graminoid_tundra": 46.63,
+        "not_modeled": 12.4,
+        "shrub_tundra": 27.02,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.59
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.96,
+        "deciduous_forest": 2.91,
+        "graminoid_tundra": 46.34,
+        "not_modeled": 12.4,
+        "shrub_tundra": 27.31,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.49
+      }
+    },
+    "GISS-E2-R": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.03,
+        "deciduous_forest": 2.73,
+        "graminoid_tundra": 48.17,
+        "not_modeled": 12.4,
+        "shrub_tundra": 25.49,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.59
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.01,
+        "deciduous_forest": 2.78,
+        "graminoid_tundra": 47.53,
+        "not_modeled": 12.4,
+        "shrub_tundra": 26.12,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.56
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.01,
+        "deciduous_forest": 2.76,
+        "graminoid_tundra": 47.63,
+        "not_modeled": 12.4,
+        "shrub_tundra": 26.02,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.58
+      }
+    },
+    "IPSL-CM5A-LR": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.99,
+        "deciduous_forest": 2.82,
+        "graminoid_tundra": 46.87,
+        "not_modeled": 12.4,
+        "shrub_tundra": 26.77,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.55
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.97,
+        "deciduous_forest": 2.87,
+        "graminoid_tundra": 47.18,
+        "not_modeled": 12.4,
+        "shrub_tundra": 26.48,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.51
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.91,
+        "deciduous_forest": 3.04,
+        "graminoid_tundra": 46.75,
+        "not_modeled": 12.4,
+        "shrub_tundra": 26.89,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.4
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.07,
+        "deciduous_forest": 2.63,
+        "graminoid_tundra": 49.34,
+        "not_modeled": 12.4,
+        "shrub_tundra": 24.32,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.64
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.07,
+        "deciduous_forest": 2.64,
+        "graminoid_tundra": 49.39,
+        "not_modeled": 12.4,
+        "shrub_tundra": 24.27,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.63
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.09,
+        "deciduous_forest": 2.58,
+        "graminoid_tundra": 49.25,
+        "not_modeled": 12.4,
+        "shrub_tundra": 24.41,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.67
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.75,
+        "deciduous_forest": 3.45,
+        "graminoid_tundra": 47.36,
+        "not_modeled": 12.4,
+        "shrub_tundra": 26.3,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.14
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.96,
+        "deciduous_forest": 2.88,
+        "graminoid_tundra": 47.72,
+        "not_modeled": 12.4,
+        "shrub_tundra": 25.94,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.5
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.97,
+        "deciduous_forest": 2.88,
+        "graminoid_tundra": 47.93,
+        "not_modeled": 12.4,
+        "shrub_tundra": 25.73,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.49
+      }
+    }
+  },
+  "2040-2069": {
+    "GFDL-CM3": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.92,
+        "deciduous_forest": 3.05,
+        "graminoid_tundra": 34.81,
+        "not_modeled": 12.4,
+        "shrub_tundra": 38.76,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.46
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.89,
+        "deciduous_forest": 3.13,
+        "graminoid_tundra": 34.77,
+        "not_modeled": 12.4,
+        "shrub_tundra": 38.77,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.44
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.77,
+        "deciduous_forest": 3.43,
+        "graminoid_tundra": 34.44,
+        "not_modeled": 12.4,
+        "shrub_tundra": 39.13,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.23
+      }
+    },
+    "GISS-E2-R": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.14,
+        "deciduous_forest": 2.55,
+        "graminoid_tundra": 38.24,
+        "not_modeled": 12.4,
+        "shrub_tundra": 35.34,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.75
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.98,
+        "deciduous_forest": 2.93,
+        "graminoid_tundra": 37.7,
+        "not_modeled": 12.4,
+        "shrub_tundra": 35.87,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.53
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.97,
+        "deciduous_forest": 2.92,
+        "graminoid_tundra": 37.16,
+        "not_modeled": 12.4,
+        "shrub_tundra": 36.4,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.55
+      }
+    },
+    "IPSL-CM5A-LR": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.79,
+        "deciduous_forest": 3.42,
+        "graminoid_tundra": 35.28,
+        "not_modeled": 12.4,
+        "shrub_tundra": 38.26,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.25
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.63,
+        "deciduous_forest": 3.8,
+        "graminoid_tundra": 35.61,
+        "not_modeled": 12.4,
+        "shrub_tundra": 37.95,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.01
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.54,
+        "deciduous_forest": 4.1,
+        "graminoid_tundra": 35.45,
+        "not_modeled": 12.4,
+        "shrub_tundra": 38.12,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.8
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.21,
+        "deciduous_forest": 2.37,
+        "graminoid_tundra": 42.74,
+        "not_modeled": 12.4,
+        "shrub_tundra": 30.87,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.81
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.16,
+        "deciduous_forest": 2.46,
+        "graminoid_tundra": 43.59,
+        "not_modeled": 12.4,
+        "shrub_tundra": 30.02,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.76
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.21,
+        "deciduous_forest": 2.34,
+        "graminoid_tundra": 42.34,
+        "not_modeled": 12.4,
+        "shrub_tundra": 31.26,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.84
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.35,
+        "deciduous_forest": 4.54,
+        "graminoid_tundra": 37.67,
+        "not_modeled": 12.4,
+        "shrub_tundra": 35.94,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.49
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.82,
+        "deciduous_forest": 3.25,
+        "graminoid_tundra": 37.92,
+        "not_modeled": 12.4,
+        "shrub_tundra": 35.7,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.31
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.46,
+        "deciduous_forest": 4.22,
+        "graminoid_tundra": 37.34,
+        "not_modeled": 12.4,
+        "shrub_tundra": 36.27,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.71
+      }
+    }
+  },
+  "2070-2099": {
+    "GFDL-CM3": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.7,
+        "deciduous_forest": 3.81,
+        "graminoid_tundra": 25.73,
+        "not_modeled": 12.4,
+        "shrub_tundra": 47.8,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.96
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.62,
+        "deciduous_forest": 4.03,
+        "graminoid_tundra": 25.76,
+        "not_modeled": 12.4,
+        "shrub_tundra": 47.75,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.84
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.59,
+        "deciduous_forest": 4.12,
+        "graminoid_tundra": 25.48,
+        "not_modeled": 12.4,
+        "shrub_tundra": 48.09,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.73
+      }
+    },
+    "GISS-E2-R": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.27,
+        "deciduous_forest": 2.42,
+        "graminoid_tundra": 29.97,
+        "not_modeled": 12.4,
+        "shrub_tundra": 43.55,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.8
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.81,
+        "deciduous_forest": 3.57,
+        "graminoid_tundra": 29.41,
+        "not_modeled": 12.4,
+        "shrub_tundra": 44.11,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.11
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.9,
+        "deciduous_forest": 3.23,
+        "graminoid_tundra": 27.86,
+        "not_modeled": 12.4,
+        "shrub_tundra": 45.64,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.36
+      }
+    },
+    "IPSL-CM5A-LR": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.59,
+        "deciduous_forest": 4.12,
+        "graminoid_tundra": 26.19,
+        "not_modeled": 12.4,
+        "shrub_tundra": 47.31,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.79
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.44,
+        "deciduous_forest": 4.53,
+        "graminoid_tundra": 26.72,
+        "not_modeled": 12.4,
+        "shrub_tundra": 46.8,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.51
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.23,
+        "deciduous_forest": 5.18,
+        "graminoid_tundra": 26.33,
+        "not_modeled": 12.4,
+        "shrub_tundra": 47.22,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.05
+      }
+    },
+    "MRI-CGCM3": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.24,
+        "deciduous_forest": 2.44,
+        "graminoid_tundra": 35.79,
+        "not_modeled": 12.4,
+        "shrub_tundra": 37.75,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.78
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.2,
+        "deciduous_forest": 2.5,
+        "graminoid_tundra": 36.63,
+        "not_modeled": 12.4,
+        "shrub_tundra": 36.93,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.75
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 2.28,
+        "deciduous_forest": 2.29,
+        "graminoid_tundra": 34.21,
+        "not_modeled": 12.4,
+        "shrub_tundra": 39.32,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 3.89
+      }
+    },
+    "NCAR-CCSM4": {
+      "rcp45": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.45,
+        "deciduous_forest": 4.56,
+        "graminoid_tundra": 29.1,
+        "not_modeled": 12.4,
+        "shrub_tundra": 44.44,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.46
+      },
+      "rcp60": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.45,
+        "deciduous_forest": 4.43,
+        "graminoid_tundra": 28.74,
+        "not_modeled": 12.4,
+        "shrub_tundra": 44.8,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.58
+      },
+      "rcp85": {
+        "barren_lichen_moss": 5.6,
+        "black_spruce": 1.16,
+        "deciduous_forest": 5.23,
+        "graminoid_tundra": 28.02,
+        "not_modeled": 12.4,
+        "shrub_tundra": 45.56,
+        "temperate_rainforest": 0.0,
+        "wetland_tundra": 0.0,
+        "white_spruce": 2.04
+      }
+    }
+  }
+}

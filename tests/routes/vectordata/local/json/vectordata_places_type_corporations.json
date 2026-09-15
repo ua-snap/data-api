@@ -1,0 +1,98 @@
+[
+  {
+    "id": "NC1",
+    "name": "Ahtna, Incorporated",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC2",
+    "name": "Arctic Slope Regional Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC3",
+    "name": "Bering Straits Native Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC4",
+    "name": "Bristol Bay Native Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC5",
+    "name": "Calista Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC6",
+    "name": "Chugach Alaska Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC7",
+    "name": "Cook Inlet Region, Incorporated",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC8",
+    "name": "Doyon, Limited",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC9",
+    "name": "Koniag, Incorporated",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC10",
+    "name": "NANA Regional Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC11",
+    "name": "Sealaska Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  },
+  {
+    "id": "NC12",
+    "name": "The Aleut Corporation",
+    "type": "corporation",
+    "alt_name": "",
+    "zone": null,
+    "subzone": null
+  }
+]

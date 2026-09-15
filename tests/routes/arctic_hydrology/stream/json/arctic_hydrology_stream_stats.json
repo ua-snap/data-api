@@ -1,0 +1,602 @@
+{
+  "data": {
+    "C2LE2": {
+      "2034-2065": {
+        "dh1": 6654.03,
+        "dh15": 6.75,
+        "dh2": 5905.88,
+        "dh3": 4706.52,
+        "dh4": 2877.09,
+        "dh5": 1556.8,
+        "dl1": 0.0,
+        "dl16": 11.2,
+        "dl2": 0.0,
+        "dl3": 0.0,
+        "dl4": 0.83,
+        "dl5": 17.93,
+        "fh1": 13.52,
+        "fh5": 13.0,
+        "fh6": 12.84,
+        "fh7": 13.23,
+        "fl1": 7.84,
+        "fl3": 8.84,
+        "lf1": 168.5,
+        "ma12": 63.84,
+        "ma13": 33.03,
+        "ma14": 89.22,
+        "ma15": 1260.1,
+        "ma16": 2281.53,
+        "ma17": 787.01,
+        "ma18": 711.74,
+        "ma19": 866.24,
+        "ma20": 746.31,
+        "ma21": 346.36,
+        "ma22": 26.07,
+        "ma23": 18.55,
+        "ma3": 180.71,
+        "ma4": 165.68,
+        "ma99": 604.68,
+        "mh14": 53.45,
+        "mh20": 3327.01,
+        "ml17": 0.0,
+        "ra1": 273.86,
+        "ra3": -155.16,
+        "ra8": 103.28,
+        "spr_dur3": 4831.84,
+        "spr_dur7": 3771.58,
+        "spr_freq": 1.0,
+        "spr_mag": 5.49,
+        "spr_ord": 131.0,
+        "sum_cv": 130.87,
+        "sum_dur3": 20.44,
+        "sum_dur7": 43.95,
+        "sum_freq": 5.0,
+        "sum_mag": 0.02,
+        "sum_ord": 212.0,
+        "th1": 164.2,
+        "tl1": 35.85
+      }
+    },
+    "C2LE4": {
+      "2034-2065": {
+        "dh1": 5616.07,
+        "dh15": 6.25,
+        "dh2": 4919.15,
+        "dh3": 3903.4,
+        "dh4": 2477.13,
+        "dh5": 1364.59,
+        "dl1": 0.0,
+        "dl16": 12.66,
+        "dl2": 0.0,
+        "dl3": 0.01,
+        "dl4": 0.37,
+        "dl5": 20.05,
+        "fh1": 13.65,
+        "fh5": 12.77,
+        "fh6": 14.16,
+        "fh7": 13.35,
+        "fl1": 7.61,
+        "fl3": 9.94,
+        "lf1": 179.5,
+        "ma12": 15.1,
+        "ma13": 27.25,
+        "ma14": 113.07,
+        "ma15": 1772.86,
+        "ma16": 1823.24,
+        "ma17": 733.19,
+        "ma18": 483.76,
+        "ma19": 819.63,
+        "ma20": 857.78,
+        "ma21": 307.11,
+        "ma22": 59.03,
+        "ma23": 26.05,
+        "ma3": 170.31,
+        "ma4": 157.0,
+        "ma99": 557.61,
+        "mh14": 59.3,
+        "mh20": 2808.03,
+        "ml17": 0.0,
+        "ra1": 257.17,
+        "ra3": -147.59,
+        "ra8": 99.55,
+        "spr_dur3": 3378.01,
+        "spr_dur7": 2882.26,
+        "spr_freq": 1.0,
+        "spr_mag": 3.9,
+        "spr_ord": 124.0,
+        "sum_cv": 133.72,
+        "sum_dur3": 2.97,
+        "sum_dur7": 27.34,
+        "sum_freq": 6.0,
+        "sum_mag": -0.05,
+        "sum_ord": 217.0,
+        "th1": 184.43,
+        "tl1": 51.45
+      }
+    },
+    "C2LE7": {
+      "2034-2065": {
+        "dh1": 6836.46,
+        "dh15": 7.59,
+        "dh2": 6067.28,
+        "dh3": 4785.3,
+        "dh4": 2746.74,
+        "dh5": 1523.98,
+        "dl1": 0.0,
+        "dl16": 10.36,
+        "dl2": 0.0,
+        "dl3": 0.0,
+        "dl4": 0.28,
+        "dl5": 23.99,
+        "fh1": 13.87,
+        "fh5": 13.77,
+        "fh6": 14.94,
+        "fh7": 11.61,
+        "fl1": 7.94,
+        "fl3": 9.32,
+        "lf1": 173.0,
+        "ma12": 61.9,
+        "ma13": 40.45,
+        "ma14": 96.37,
+        "ma15": 1429.08,
+        "ma16": 2057.05,
+        "ma17": 773.72,
+        "ma18": 737.29,
+        "ma19": 831.38,
+        "ma20": 651.44,
+        "ma21": 383.26,
+        "ma22": 57.03,
+        "ma23": 39.65,
+        "ma3": 178.48,
+        "ma4": 157.53,
+        "ma99": 589.91,
+        "mh14": 58.19,
+        "mh20": 3418.23,
+        "ml17": 0.0,
+        "ra1": 263.04,
+        "ra3": -155.83,
+        "ra8": 101.69,
+        "spr_dur3": 3421.87,
+        "spr_dur7": 3239.31,
+        "spr_freq": 1.0,
+        "spr_mag": 3.95,
+        "spr_ord": 130.0,
+        "sum_cv": 124.56,
+        "sum_dur3": 10.9,
+        "sum_dur7": 39.08,
+        "sum_freq": 5.0,
+        "sum_mag": -0.01,
+        "sum_ord": 220.0,
+        "th1": 183.97,
+        "tl1": 33.22
+      }
+    },
+    "C2LE9": {
+      "2034-2065": {
+        "dh1": 7692.62,
+        "dh15": 5.89,
+        "dh2": 6842.09,
+        "dh3": 5592.72,
+        "dh4": 3475.8,
+        "dh5": 1805.96,
+        "dl1": 0.0,
+        "dl16": 7.27,
+        "dl2": 0.0,
+        "dl3": 0.01,
+        "dl4": 1.06,
+        "dl5": 25.91,
+        "fh1": 13.61,
+        "fh5": 13.68,
+        "fh6": 13.77,
+        "fh7": 12.1,
+        "fl1": 10.29,
+        "fl3": 10.97,
+        "lf1": 173.5,
+        "ma12": 67.43,
+        "ma13": 38.73,
+        "ma14": 156.14,
+        "ma15": 1337.19,
+        "ma16": 2460.89,
+        "ma17": 915.41,
+        "ma18": 797.92,
+        "ma19": 1057.51,
+        "ma20": 727.62,
+        "ma21": 375.03,
+        "ma22": 51.99,
+        "ma23": 66.25,
+        "ma3": 180.35,
+        "ma4": 158.76,
+        "ma99": 678.34,
+        "mh14": 58.03,
+        "mh20": 3846.31,
+        "ml17": 0.0,
+        "ra1": 275.63,
+        "ra3": -162.15,
+        "ra8": 98.51,
+        "spr_dur3": 4053.19,
+        "spr_dur7": 3610.31,
+        "spr_freq": 1.0,
+        "spr_mag": 4.46,
+        "spr_ord": 118.0,
+        "sum_cv": 125.3,
+        "sum_dur3": 12.77,
+        "sum_dur7": 44.15,
+        "sum_freq": 6.0,
+        "sum_mag": 0.0,
+        "sum_ord": 206.0,
+        "th1": 179.17,
+        "tl1": 34.42
+      }
+    },
+    "PGWh": {},
+    "PGWm": {},
+    "historical": {
+      "1990-2021": {
+        "dh1": 6681.39,
+        "dh15": 7.58,
+        "dh2": 5989.69,
+        "dh3": 4883.2,
+        "dh4": 3009.09,
+        "dh5": 1638.64,
+        "dl1": 0.0,
+        "dl16": 11.62,
+        "dl2": 0.0,
+        "dl3": 0.0,
+        "dl4": 0.15,
+        "dl5": 8.43,
+        "fh1": 11.97,
+        "fh5": 10.39,
+        "fh6": 11.97,
+        "fh7": 12.29,
+        "fl1": 7.48,
+        "fl3": 8.32,
+        "lf1": 179.5,
+        "ma12": 21.21,
+        "ma13": 20.0,
+        "ma14": 63.6,
+        "ma15": 1037.37,
+        "ma16": 2459.49,
+        "ma17": 997.15,
+        "ma18": 779.58,
+        "ma19": 918.38,
+        "ma20": 648.35,
+        "ma21": 271.86,
+        "ma22": 31.47,
+        "ma23": 13.37,
+        "ma3": 182.17,
+        "ma4": 164.55,
+        "ma99": 605.15,
+        "mh14": 70.33,
+        "mh20": 3340.69,
+        "ml17": 0.0,
+        "ra1": 257.72,
+        "ra3": -145.91,
+        "ra8": 97.97,
+        "spr_dur3": 4709.58,
+        "spr_dur7": 4120.06,
+        "spr_freq": 1.0,
+        "spr_mag": 5.49,
+        "spr_ord": 130.0,
+        "sum_cv": 115.77,
+        "sum_dur3": 20.67,
+        "sum_dur7": 60.2,
+        "sum_freq": 5.0,
+        "sum_mag": 0.01,
+        "sum_ord": 217.0,
+        "th1": 161.17,
+        "tl1": 41.64
+      }
+    }
+  },
+  "gage_id": "15493000",
+  "id": "81014458",
+  "latitude": 64.9033,
+  "longitude": -146.4192,
+  "metadata": {
+    "source": {
+      "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
+    },
+    "variables": {
+      "dh1": {
+        "description": "Mean annual maximum 1-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dh15": {
+        "description": "Median annual average duration of high flow pulses (above 75th percentile). Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "days_per_year"
+      },
+      "dh2": {
+        "description": "Mean annual maximum 3-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dh3": {
+        "description": "Mean annual maximum 7-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dh4": {
+        "description": "Mean annual maximum 30-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dh5": {
+        "description": "Mean annual maximum 90-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dl1": {
+        "description": "Mean annual minimum 1-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dl16": {
+        "description": "Median annual average duration of low flow pulses (below 25th percentile). Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "days_per_year"
+      },
+      "dl2": {
+        "description": "Mean annual minimum 3-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dl3": {
+        "description": "Mean annual minimum 7-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dl4": {
+        "description": "Mean annual minimum 30-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "dl5": {
+        "description": "Mean annual minimum 90-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "fh1": {
+        "description": "Mean annual count of high flow pulses above 75th percentile. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "fh5": {
+        "description": "Mean annual flood frequency above median flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "fh6": {
+        "description": "Mean annual flood frequency above 3 times median flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "fh7": {
+        "description": "Mean annual flood frequency above 7 times median flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "fl1": {
+        "description": "Mean annual count of low flow pulses below 25th percentile. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "fl3": {
+        "description": "Mean annual count of events below 5 percent of mean flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "lf1": {
+        "description": "Median annual number of days below threshold of 0.1 cfs per square mile. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "days_per_year"
+      },
+      "ma12": {
+        "description": "Mean of monthly flow values for January. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma13": {
+        "description": "Mean of monthly flow values for February. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma14": {
+        "description": "Mean of monthly flow values for March. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma15": {
+        "description": "Mean of monthly flow values for April. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma16": {
+        "description": "Mean of monthly flow values for May. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma17": {
+        "description": "Mean of monthly flow values for June. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma18": {
+        "description": "Mean of monthly flow values for July. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma19": {
+        "description": "Mean of monthly flow values for August. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma20": {
+        "description": "Mean of monthly flow values for September. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma21": {
+        "description": "Mean of monthly flow values for October. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma22": {
+        "description": "Mean of monthly flow values for November. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma23": {
+        "description": "Mean of monthly flow values for December. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "ma3": {
+        "description": "Coefficient of variation (std/mean) of annual daily flows; mean of annual CVs. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "percent"
+      },
+      "ma4": {
+        "description": "Standard deviation of percentiles of log-transformed flow divided by mean of those percentiles. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "percent"
+      },
+      "ma99": {
+        "description": "Mean annual flow: average of monthly mean flows (ma12-ma23). Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "mh14": {
+        "description": "Median of (annual maximum flow / median annual flow) ratios. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "dimensionless"
+      },
+      "mh20": {
+        "description": "Mean annual maximum flow divided by drainage area (specific discharge). Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs_per_sqmi"
+      },
+      "ml17": {
+        "description": "Base flow index: mean of annual (7-day minimum flow / mean annual flow) ratios. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "dimensionless"
+      },
+      "ra1": {
+        "description": "Mean rise rate: mean of positive daily flow changes. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs_per_day"
+      },
+      "ra3": {
+        "description": "Mean fall rate: mean of negative daily flow changes. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs_per_day"
+      },
+      "ra8": {
+        "description": "Median annual number of flow direction reversals. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "days_per_year"
+      },
+      "spr_dur3": {
+        "description": "Median spring (April-June) maximum 3-day moving average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "spr_dur7": {
+        "description": "Median spring (April-June) maximum 7-day moving average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "spr_freq": {
+        "description": "Median spring (April-June) count of flow events above 10th percentile of full record. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "spr_mag": {
+        "description": "Median spring (April-June) maximum flow divided by drainage area. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs_per_sqmi"
+      },
+      "spr_ord": {
+        "description": "Median Julian date of spring (April-June) maximum flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "julian_day"
+      },
+      "sum_cv": {
+        "description": "Median annual coefficient of variation of summer (July-September) flows. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "percent"
+      },
+      "sum_dur3": {
+        "description": "Median summer (July-September) minimum 3-day moving average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "sum_dur7": {
+        "description": "Median summer (July-September) minimum 7-day moving average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs"
+      },
+      "sum_freq": {
+        "description": "Median summer (July-September) count of flow events below 90th percentile of full record. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "events_per_year"
+      },
+      "sum_mag": {
+        "description": "Median summer (July-September) minimum flow divided by drainage area. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "cfs_per_sqmi"
+      },
+      "sum_ord": {
+        "description": "Median Julian date of summer (July-September) minimum flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "julian_day"
+      },
+      "th1": {
+        "description": "Median Julian date of annual maximum flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "julian_day"
+      },
+      "tl1": {
+        "description": "Median Julian date of annual minimum flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "julian_day"
+      }
+    }
+  },
+  "summary": {
+    "dh15_delta": {
+      "description": "projected change in high flow pulse duration",
+      "range_high": 0,
+      "range_low": -2,
+      "units": "days",
+      "value": -1
+    },
+    "dh15_hist": {
+      "description": "historical high flow pulse duration",
+      "range_high": null,
+      "range_low": null,
+      "units": "days",
+      "value": 8
+    },
+    "dh1_delta": {
+      "description": "projected change in maximum 1-day flow",
+      "range_high": 15,
+      "range_low": -16,
+      "units": "percent",
+      "value": 15
+    },
+    "dl16_delta": {
+      "description": "projected change in low flow pulse duration",
+      "range_high": 1,
+      "range_low": -4,
+      "units": "days",
+      "value": -1
+    },
+    "dl16_hist": {
+      "description": "historical low flow pulse duration",
+      "range_high": null,
+      "range_low": null,
+      "units": "days",
+      "value": 12
+    },
+    "dl1_delta": {
+      "description": "projected change in minimum 1-day flow",
+      "range_high": 438,
+      "range_low": 24,
+      "units": "percent",
+      "value": 24
+    },
+    "fh1_delta": {
+      "description": "projected change in high flood pulse count",
+      "range_high": 2,
+      "range_low": 1,
+      "units": "events",
+      "value": 2
+    },
+    "fh1_hist": {
+      "description": "historical high flood pulse count",
+      "range_high": null,
+      "range_low": null,
+      "units": "events",
+      "value": 12
+    },
+    "fl1_delta": {
+      "description": "projected change in low flood pulse count",
+      "range_high": 3,
+      "range_low": 0,
+      "units": "events",
+      "value": 1
+    },
+    "fl1_hist": {
+      "description": "historical low flood pulse count",
+      "range_high": null,
+      "range_low": null,
+      "units": "events",
+      "value": 7
+    },
+    "ma99_delta": {
+      "description": "projected change in mean annual flow",
+      "range_high": 17,
+      "range_low": -8,
+      "units": "percent",
+      "value": 5
+    },
+    "ma99_hist": {
+      "description": "historical mean annual flow",
+      "range_high": null,
+      "range_low": null,
+      "units": "cfs",
+      "value": 605
+    }
+  },
+  "watershed": "19080306",
+  "watershed_outlet": false
+}

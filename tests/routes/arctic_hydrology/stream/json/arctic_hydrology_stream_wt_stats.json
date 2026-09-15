@@ -1,0 +1,435 @@
+{
+  "data": {
+    "C2LE2": {
+      "2034-2065": {
+        "wt_7d_max_temp_doy_mean": 190.62,
+        "wt_7d_max_temp_mean": 14.84,
+        "wt_ann_max_temp_doy_mean": 192.66,
+        "wt_ann_max_temp_mean": 15.24,
+        "wt_cdd_may_sept_mean": 1649.58,
+        "wt_days_gt13_mean": 44.0,
+        "wt_days_gt18_mean": 0.0,
+        "wt_days_gt20_mean": 0.0,
+        "wt_max_apr": 4.41,
+        "wt_max_aug": 13.75,
+        "wt_max_dec": 1.88,
+        "wt_max_feb": 1.89,
+        "wt_max_jan": 1.63,
+        "wt_max_jul": 15.07,
+        "wt_max_jun": 13.26,
+        "wt_max_mar": 2.06,
+        "wt_max_may": 9.21,
+        "wt_max_nov": 2.86,
+        "wt_max_oct": 10.16,
+        "wt_max_sep": 9.21,
+        "wt_mean_apr": 3.28,
+        "wt_mean_aug": 12.18,
+        "wt_mean_dec": 1.29,
+        "wt_mean_feb": 1.48,
+        "wt_mean_jan": 1.45,
+        "wt_mean_jul": 14.05,
+        "wt_mean_jun": 12.18,
+        "wt_mean_mar": 1.69,
+        "wt_mean_may": 6.95,
+        "wt_mean_nov": 1.68,
+        "wt_mean_oct": 3.98,
+        "wt_mean_sep": 8.54,
+        "wt_min_apr": 2.25,
+        "wt_min_aug": 11.48,
+        "wt_min_dec": 1.01,
+        "wt_min_feb": 1.24,
+        "wt_min_jan": 0.96,
+        "wt_min_jul": 13.43,
+        "wt_min_jun": 10.5,
+        "wt_min_mar": 1.43,
+        "wt_min_may": 4.47,
+        "wt_min_nov": 0.8,
+        "wt_min_oct": 1.99,
+        "wt_min_sep": 7.88
+      }
+    },
+    "C2LE4": {
+      "2034-2065": {
+        "wt_7d_max_temp_doy_mean": 194.84,
+        "wt_7d_max_temp_mean": 14.75,
+        "wt_ann_max_temp_doy_mean": 197.5,
+        "wt_ann_max_temp_mean": 15.19,
+        "wt_cdd_may_sept_mean": 1685.18,
+        "wt_days_gt13_mean": 50.25,
+        "wt_days_gt18_mean": 0.0,
+        "wt_days_gt20_mean": 0.0,
+        "wt_max_apr": 5.25,
+        "wt_max_aug": 14.4,
+        "wt_max_dec": 2.26,
+        "wt_max_feb": 2.43,
+        "wt_max_jan": 2.21,
+        "wt_max_jul": 14.14,
+        "wt_max_jun": 13.66,
+        "wt_max_mar": 2.5,
+        "wt_max_may": 11.25,
+        "wt_max_nov": 3.2,
+        "wt_max_oct": 4.9,
+        "wt_max_sep": 9.05,
+        "wt_mean_apr": 3.71,
+        "wt_mean_aug": 12.66,
+        "wt_mean_dec": 1.35,
+        "wt_mean_feb": 1.5,
+        "wt_mean_jan": 1.38,
+        "wt_mean_jul": 14.26,
+        "wt_mean_jun": 12.18,
+        "wt_mean_mar": 1.74,
+        "wt_mean_may": 7.71,
+        "wt_mean_nov": 1.75,
+        "wt_mean_oct": 3.41,
+        "wt_mean_sep": 8.21,
+        "wt_min_apr": 2.0,
+        "wt_min_aug": 9.23,
+        "wt_min_dec": 1.16,
+        "wt_min_feb": 1.12,
+        "wt_min_jan": 1.24,
+        "wt_min_jul": 11.64,
+        "wt_min_jun": 9.4,
+        "wt_min_mar": 1.03,
+        "wt_min_may": 4.24,
+        "wt_min_nov": 1.16,
+        "wt_min_oct": 1.86,
+        "wt_min_sep": 5.22
+      }
+    },
+    "C2LE7": {
+      "2034-2065": {
+        "wt_7d_max_temp_doy_mean": 192.53,
+        "wt_7d_max_temp_mean": 14.66,
+        "wt_ann_max_temp_doy_mean": 196.59,
+        "wt_ann_max_temp_mean": 15.04,
+        "wt_cdd_may_sept_mean": 1629.66,
+        "wt_days_gt13_mean": 41.66,
+        "wt_days_gt18_mean": 0.0,
+        "wt_days_gt20_mean": 0.0,
+        "wt_max_apr": 4.52,
+        "wt_max_aug": 15.3,
+        "wt_max_dec": 1.97,
+        "wt_max_feb": 1.99,
+        "wt_max_jan": 1.99,
+        "wt_max_jul": 15.77,
+        "wt_max_jun": 13.26,
+        "wt_max_mar": 3.45,
+        "wt_max_may": 9.74,
+        "wt_max_nov": 3.13,
+        "wt_max_oct": 5.36,
+        "wt_max_sep": 10.02,
+        "wt_mean_apr": 3.41,
+        "wt_mean_aug": 12.53,
+        "wt_mean_dec": 1.29,
+        "wt_mean_feb": 1.33,
+        "wt_mean_jan": 1.31,
+        "wt_mean_jul": 13.84,
+        "wt_mean_jun": 11.67,
+        "wt_mean_mar": 1.74,
+        "wt_mean_may": 6.95,
+        "wt_mean_nov": 1.73,
+        "wt_mean_oct": 3.52,
+        "wt_mean_sep": 8.23,
+        "wt_min_apr": 2.36,
+        "wt_min_aug": 8.34,
+        "wt_min_dec": 0.82,
+        "wt_min_feb": 0.86,
+        "wt_min_jan": 0.86,
+        "wt_min_jul": 12.77,
+        "wt_min_jun": 10.74,
+        "wt_min_mar": 1.03,
+        "wt_min_may": 3.96,
+        "wt_min_nov": 1.22,
+        "wt_min_oct": 2.26,
+        "wt_min_sep": 6.2
+      }
+    },
+    "C2LE9": {
+      "2034-2065": {
+        "wt_7d_max_temp_doy_mean": 188.97,
+        "wt_7d_max_temp_mean": 14.68,
+        "wt_ann_max_temp_doy_mean": 195.91,
+        "wt_ann_max_temp_mean": 14.96,
+        "wt_cdd_may_sept_mean": 1688.69,
+        "wt_days_gt13_mean": 45.19,
+        "wt_days_gt18_mean": 0.0,
+        "wt_days_gt20_mean": 0.0,
+        "wt_max_apr": 4.06,
+        "wt_max_aug": 15.04,
+        "wt_max_dec": 2.66,
+        "wt_max_feb": 2.36,
+        "wt_max_jan": 2.2,
+        "wt_max_jul": 14.74,
+        "wt_max_jun": 13.09,
+        "wt_max_mar": 2.83,
+        "wt_max_may": 8.88,
+        "wt_max_nov": 3.19,
+        "wt_max_oct": 4.53,
+        "wt_max_sep": 10.23,
+        "wt_mean_apr": 3.48,
+        "wt_mean_aug": 12.8,
+        "wt_mean_dec": 1.44,
+        "wt_mean_feb": 1.49,
+        "wt_mean_jan": 1.59,
+        "wt_mean_jul": 13.92,
+        "wt_mean_jun": 12.31,
+        "wt_mean_mar": 1.96,
+        "wt_mean_may": 7.56,
+        "wt_mean_nov": 1.81,
+        "wt_mean_oct": 3.63,
+        "wt_mean_sep": 8.56,
+        "wt_min_apr": 2.41,
+        "wt_min_aug": 10.43,
+        "wt_min_dec": 0.97,
+        "wt_min_feb": 1.0,
+        "wt_min_jan": 1.1,
+        "wt_min_jul": 10.96,
+        "wt_min_jun": 11.37,
+        "wt_min_mar": 0.91,
+        "wt_min_may": 4.54,
+        "wt_min_nov": 1.07,
+        "wt_min_oct": 2.08,
+        "wt_min_sep": 6.58
+      }
+    },
+    "PGWh": {},
+    "PGWm": {},
+    "historical": {
+      "1990-2021": {
+        "wt_7d_max_temp_doy_mean": 193.12,
+        "wt_7d_max_temp_mean": 13.55,
+        "wt_ann_max_temp_doy_mean": 194.66,
+        "wt_ann_max_temp_mean": 13.95,
+        "wt_cdd_may_sept_mean": 1443.73,
+        "wt_days_gt13_mean": 20.25,
+        "wt_days_gt18_mean": 0.0,
+        "wt_days_gt20_mean": 0.0,
+        "wt_max_apr": 3.9,
+        "wt_max_aug": 13.32,
+        "wt_max_dec": 1.74,
+        "wt_max_feb": 1.69,
+        "wt_max_jan": 1.81,
+        "wt_max_jul": 14.16,
+        "wt_max_jun": 12.39,
+        "wt_max_mar": 2.4,
+        "wt_max_may": 8.18,
+        "wt_max_nov": 2.43,
+        "wt_max_oct": 4.32,
+        "wt_max_sep": 8.44,
+        "wt_mean_apr": 2.9,
+        "wt_mean_aug": 10.87,
+        "wt_mean_dec": 1.18,
+        "wt_mean_feb": 1.29,
+        "wt_mean_jan": 1.31,
+        "wt_mean_jul": 12.61,
+        "wt_mean_jun": 10.74,
+        "wt_mean_mar": 1.55,
+        "wt_mean_may": 6.03,
+        "wt_mean_nov": 1.49,
+        "wt_mean_oct": 2.98,
+        "wt_mean_sep": 6.9,
+        "wt_min_apr": 1.85,
+        "wt_min_aug": 8.1,
+        "wt_min_dec": 0.89,
+        "wt_min_feb": 0.97,
+        "wt_min_jan": 0.89,
+        "wt_min_jul": 11.05,
+        "wt_min_jun": 9.12,
+        "wt_min_mar": 1.05,
+        "wt_min_may": 3.59,
+        "wt_min_nov": 0.89,
+        "wt_min_oct": 1.76,
+        "wt_min_sep": 4.82
+      }
+    }
+  },
+  "gage_id": "15493000",
+  "id": "81014458",
+  "latitude": 64.9033,
+  "longitude": -146.4192,
+  "metadata": {
+    "source": {
+      "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
+    },
+    "variables": {
+      "wt_7d_max_temp_doy_mean": {
+        "description": "Mean (over era years) Julian day of the center of the annual maximum 7-day rolling average. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "day of year"
+      },
+      "wt_7d_max_temp_mean": {
+        "description": "Mean (over era years) of the annual maximum 7-day rolling average stream temperature. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_ann_max_temp_doy_mean": {
+        "description": "Mean (over era years) Julian day of the annual maximum daily stream temperature. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "day of year"
+      },
+      "wt_ann_max_temp_mean": {
+        "description": "Mean (over era years) of the annual maximum daily stream temperature. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_cdd_may_sept_mean": {
+        "description": "Mean (over era years) annual cumulative degree days above 0\udcb0C, May through September. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC days"
+      },
+      "wt_days_gt13_mean": {
+        "description": "Mean annual count of days with stream temperature > 13\udcb0C. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "days/yr"
+      },
+      "wt_days_gt18_mean": {
+        "description": "Mean annual count of days with stream temperature > 18\udcb0C. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "days/yr"
+      },
+      "wt_days_gt20_mean": {
+        "description": "Mean annual count of days with stream temperature > 20\udcb0C. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "days/yr"
+      },
+      "wt_max_apr": {
+        "description": "Maximum monthly mean stream temperature for April across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_aug": {
+        "description": "Maximum monthly mean stream temperature for August across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_dec": {
+        "description": "Maximum monthly mean stream temperature for December across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_feb": {
+        "description": "Maximum monthly mean stream temperature for February across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_jan": {
+        "description": "Maximum monthly mean stream temperature for January across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_jul": {
+        "description": "Maximum monthly mean stream temperature for July across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_jun": {
+        "description": "Maximum monthly mean stream temperature for June across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_mar": {
+        "description": "Maximum monthly mean stream temperature for March across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_may": {
+        "description": "Maximum monthly mean stream temperature for May across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_nov": {
+        "description": "Maximum monthly mean stream temperature for November across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_oct": {
+        "description": "Maximum monthly mean stream temperature for October across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_max_sep": {
+        "description": "Maximum monthly mean stream temperature for September across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_apr": {
+        "description": "Mean of monthly mean stream temperatures for April. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_aug": {
+        "description": "Mean of monthly mean stream temperatures for August. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_dec": {
+        "description": "Mean of monthly mean stream temperatures for December. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_feb": {
+        "description": "Mean of monthly mean stream temperatures for February. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_jan": {
+        "description": "Mean of monthly mean stream temperatures for January. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_jul": {
+        "description": "Mean of monthly mean stream temperatures for July. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_jun": {
+        "description": "Mean of monthly mean stream temperatures for June. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_mar": {
+        "description": "Mean of monthly mean stream temperatures for March. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_may": {
+        "description": "Mean of monthly mean stream temperatures for May. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_nov": {
+        "description": "Mean of monthly mean stream temperatures for November. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_oct": {
+        "description": "Mean of monthly mean stream temperatures for October. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_mean_sep": {
+        "description": "Mean of monthly mean stream temperatures for September. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_apr": {
+        "description": "Minimum monthly mean stream temperature for April across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_aug": {
+        "description": "Minimum monthly mean stream temperature for August across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_dec": {
+        "description": "Minimum monthly mean stream temperature for December across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_feb": {
+        "description": "Minimum monthly mean stream temperature for February across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_jan": {
+        "description": "Minimum monthly mean stream temperature for January across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_jul": {
+        "description": "Minimum monthly mean stream temperature for July across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_jun": {
+        "description": "Minimum monthly mean stream temperature for June across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_mar": {
+        "description": "Minimum monthly mean stream temperature for March across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_may": {
+        "description": "Minimum monthly mean stream temperature for May across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_nov": {
+        "description": "Minimum monthly mean stream temperature for November across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_oct": {
+        "description": "Minimum monthly mean stream temperature for October across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      },
+      "wt_min_sep": {
+        "description": "Minimum monthly mean stream temperature for September across all years in era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
+        "units": "degC"
+      }
+    }
+  },
+  "watershed": "19080306",
+  "watershed_outlet": false
+}

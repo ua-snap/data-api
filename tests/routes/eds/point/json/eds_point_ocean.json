@@ -1,0 +1,20 @@
+{
+  "elevation": {
+    "max": 0,
+    "mean": 0,
+    "min": 0,
+    "res": "1 kilometer",
+    "title": "ASTER Global Digital Elevation Model",
+    "units": "meters difference from sea level"
+  },
+  "freezing_index": {},
+  "heating_degree_days": {},
+  "hydrology": {},
+  "permafrost": {},
+  "precip_frequency": {},
+  "precipitation": {},
+  "snowfall": {},
+  "temperature": {},
+  "thawing_index": {},
+  "wet_days_per_year": {}
+}

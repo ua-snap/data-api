@@ -1,0 +1,695 @@
+{
+  "cd": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": -34.5,
+          "mean": -42.9,
+          "min": -49
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": -23.4,
+          "mean": -40.3,
+          "min": -51.8
+        },
+        "rcp85": {
+          "max": -32.6,
+          "mean": -39.8,
+          "min": -46.9
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": -29.7,
+          "mean": -39.6,
+          "min": -48.4
+        },
+        "rcp85": {
+          "max": -28.2,
+          "mean": -36.8,
+          "min": -44.5
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": -31.6,
+          "mean": -41.4,
+          "min": -50.1
+        },
+        "rcp85": {
+          "max": -29.6,
+          "mean": -39.6,
+          "min": -45.1
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": -28.9,
+          "mean": -40.1,
+          "min": -49.9
+        },
+        "rcp85": {
+          "max": -29.3,
+          "mean": -39.1,
+          "min": -51.1
+        }
+      }
+    }
+  },
+  "cdd": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 73,
+          "mean": 38,
+          "min": 18
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 85,
+          "mean": 44,
+          "min": 21
+        },
+        "rcp85": {
+          "max": 69,
+          "mean": 43,
+          "min": 19
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 80,
+          "mean": 48,
+          "min": 20
+        },
+        "rcp85": {
+          "max": 88,
+          "mean": 44,
+          "min": 23
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 73,
+          "mean": 45,
+          "min": 17
+        },
+        "rcp85": {
+          "max": 99,
+          "mean": 49,
+          "min": 23
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 99,
+          "mean": 46,
+          "min": 22
+        },
+        "rcp85": {
+          "max": 95,
+          "mean": 48,
+          "min": 27
+        }
+      }
+    }
+  },
+  "csdi": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 21,
+          "mean": 7,
+          "min": 0
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 18,
+          "mean": 5,
+          "min": 0
+        },
+        "rcp85": {
+          "max": 10,
+          "mean": 1,
+          "min": 0
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 30,
+          "mean": 4,
+          "min": 0
+        },
+        "rcp85": {
+          "max": 8,
+          "mean": 0,
+          "min": 0
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 21,
+          "mean": 4,
+          "min": 0
+        },
+        "rcp85": {
+          "max": 16,
+          "mean": 3,
+          "min": 0
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 30,
+          "mean": 5,
+          "min": 0
+        },
+        "rcp85": {
+          "max": 21,
+          "mean": 4,
+          "min": 0
+        }
+      }
+    }
+  },
+  "cwd": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 15,
+          "mean": 7,
+          "min": 4
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 22,
+          "mean": 9,
+          "min": 4
+        },
+        "rcp85": {
+          "max": 22,
+          "mean": 8,
+          "min": 4
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 11,
+          "mean": 8,
+          "min": 5
+        },
+        "rcp85": {
+          "max": 22,
+          "mean": 9,
+          "min": 4
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 22,
+          "mean": 8,
+          "min": 4
+        },
+        "rcp85": {
+          "max": 22,
+          "mean": 8,
+          "min": 4
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 22,
+          "mean": 8,
+          "min": 4
+        },
+        "rcp85": {
+          "max": 22,
+          "mean": 9,
+          "min": 4
+        }
+      }
+    }
+  },
+  "dw": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 73,
+          "mean": 44,
+          "min": 15
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 59,
+          "mean": 35,
+          "min": 0
+        },
+        "rcp85": {
+          "max": 47,
+          "mean": 25,
+          "min": 11
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 52,
+          "mean": 26,
+          "min": 4
+        },
+        "rcp85": {
+          "max": 51,
+          "mean": 20,
+          "min": 3
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 58,
+          "mean": 30,
+          "min": 10
+        },
+        "rcp85": {
+          "max": 65,
+          "mean": 30,
+          "min": 4
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 68,
+          "mean": 31,
+          "min": 5
+        },
+        "rcp85": {
+          "max": 55,
+          "mean": 28,
+          "min": 5
+        }
+      }
+    }
+  },
+  "hd": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 30,
+          "mean": 25.9,
+          "min": 22.5
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 31.7,
+          "mean": 27.7,
+          "min": 24
+        },
+        "rcp85": {
+          "max": 33.4,
+          "mean": 28,
+          "min": 23.5
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 36,
+          "mean": 30.3,
+          "min": 26.6
+        },
+        "rcp85": {
+          "max": 35.5,
+          "mean": 32.1,
+          "min": 28.2
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 34.4,
+          "mean": 27.2,
+          "min": 22.9
+        },
+        "rcp85": {
+          "max": 32.5,
+          "mean": 27.3,
+          "min": 23.4
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 32.5,
+          "mean": 28.5,
+          "min": 25.7
+        },
+        "rcp85": {
+          "max": 35.5,
+          "mean": 29.4,
+          "min": 24.3
+        }
+      }
+    }
+  },
+  "r10mm": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 7,
+          "mean": 2,
+          "min": 0
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 37,
+          "mean": 13,
+          "min": 1
+        },
+        "rcp85": {
+          "max": 31,
+          "mean": 15,
+          "min": 7
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 22,
+          "mean": 10,
+          "min": 2
+        },
+        "rcp85": {
+          "max": 34,
+          "mean": 16,
+          "min": 2
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 22,
+          "mean": 12,
+          "min": 2
+        },
+        "rcp85": {
+          "max": 29,
+          "mean": 12,
+          "min": 5
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 28,
+          "mean": 12,
+          "min": 3
+        },
+        "rcp85": {
+          "max": 30,
+          "mean": 14,
+          "min": 2
+        }
+      }
+    }
+  },
+  "rx1day": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 22,
+          "mean": 15,
+          "min": 9
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 33.6,
+          "mean": 22.9,
+          "min": 11.3
+        },
+        "rcp85": {
+          "max": 54.7,
+          "mean": 27.5,
+          "min": 14.2
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 34.2,
+          "mean": 20.1,
+          "min": 11.3
+        },
+        "rcp85": {
+          "max": 42.3,
+          "mean": 25.4,
+          "min": 13.1
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 46.7,
+          "mean": 22.6,
+          "min": 11.6
+        },
+        "rcp85": {
+          "max": 37.2,
+          "mean": 23,
+          "min": 16
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 46.5,
+          "mean": 23.4,
+          "min": 12.9
+        },
+        "rcp85": {
+          "max": 45,
+          "mean": 24.6,
+          "min": 12.6
+        }
+      }
+    }
+  },
+  "rx5day": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 60,
+          "mean": 36.4,
+          "min": 24
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 109.9,
+          "mean": 58.1,
+          "min": 22.6
+        },
+        "rcp85": {
+          "max": 111.6,
+          "mean": 66.5,
+          "min": 39.1
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 108,
+          "mean": 49.8,
+          "min": 22.2
+        },
+        "rcp85": {
+          "max": 98.6,
+          "mean": 63.1,
+          "min": 29.2
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 117.7,
+          "mean": 55.4,
+          "min": 24.8
+        },
+        "rcp85": {
+          "max": 104.6,
+          "mean": 57,
+          "min": 29.5
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 118.7,
+          "mean": 56.6,
+          "min": 31.8
+        },
+        "rcp85": {
+          "max": 101.3,
+          "mean": 58.7,
+          "min": 34.1
+        }
+      }
+    }
+  },
+  "su": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 28,
+          "mean": 9,
+          "min": 0
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 39,
+          "mean": 17,
+          "min": 3
+        },
+        "rcp85": {
+          "max": 38,
+          "mean": 17,
+          "min": 1
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 60,
+          "mean": 32,
+          "min": 13
+        },
+        "rcp85": {
+          "max": 77,
+          "mean": 55,
+          "min": 23
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 33,
+          "mean": 14,
+          "min": 0
+        },
+        "rcp85": {
+          "max": 40,
+          "mean": 15,
+          "min": 0
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 49,
+          "mean": 23,
+          "min": 8
+        },
+        "rcp85": {
+          "max": 78,
+          "mean": 28,
+          "min": 3
+        }
+      }
+    }
+  },
+  "wsdi": {
+    "historical": {
+      "Daymet": {
+        "historical": {
+          "max": 32,
+          "mean": 8,
+          "min": 0
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 101,
+          "mean": 50,
+          "min": 14
+        },
+        "rcp85": {
+          "max": 173,
+          "mean": 69,
+          "min": 6
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 132,
+          "mean": 57,
+          "min": 6
+        },
+        "rcp85": {
+          "max": 191,
+          "mean": 116,
+          "min": 33
+        }
+      }
+    },
+    "midcentury": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": 108,
+          "mean": 43,
+          "min": 0
+        },
+        "rcp85": {
+          "max": 100,
+          "mean": 44,
+          "min": 0
+        }
+      },
+      "NCAR-CCSM4": {
+        "rcp45": {
+          "max": 105,
+          "mean": 48,
+          "min": 14
+        },
+        "rcp85": {
+          "max": 180,
+          "mean": 58,
+          "min": 8
+        }
+      }
+    }
+  }
+}
