@@ -24,5 +24,6 @@ dependencies:
   - pytest
   - pytest-html
   - pytest-timeout
+  - pytest-rerunfailures
   - cftime
   - psycopg2
