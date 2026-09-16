@@ -27,6 +27,7 @@ jobs:
           cache-downloads: true
 
       - name: Run tests with pytest
+        timeout-minutes: 60
         run: |
           mkdir -p test-outputs
           micromamba run -n api-env pytest tests/ -v --tb=short --ignore=tests/routes/landslide/point/test_landslide_point.py --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
