@@ -23,5 +23,6 @@ dependencies:
   - jaro-winkler
   - pytest
   - pytest-html
+  - pytest-timeout
   - cftime
   - psycopg2

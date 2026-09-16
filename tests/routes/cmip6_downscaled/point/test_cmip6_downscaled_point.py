@@ -2,11 +2,20 @@ import csv
 import io
 import json
 
+import pytest
+
 from tests.json_compare import assert_json_allclose
 
 
+@pytest.mark.timeout(600)
 def test_cmip6_downscaled_point_fairbanks(client):
-    """Tests /cmip6_downscaled/point/<lat>/<lon> at Fairbanks, AK."""
+    """Tests /cmip6_downscaled/point/<lat>/<lon> at Fairbanks, AK.
+
+    Unfiltered, this endpoint fetches every variable x model x scenario
+    combination sequentially (a separate describe + getcoverage request per
+    combo), which can legitimately take several minutes -- give it more room
+    than pytest-timeout's default before it's considered hung/failed.
+    """
     response = client.get("/cmip6_downscaled/point/64.8378/-147.7164")
     assert response.status_code == 200
     actual_data = response.get_json()
@@ -23,8 +32,15 @@ def test_cmip6_downscaled_point_fairbanks(client):
     assert_json_allclose(actual_subset, expected_subset)
 
 
+@pytest.mark.timeout(600)
 def test_cmip6_downscaled_point_ocean(client):
-    """Tests /cmip6_downscaled/point/<lat>/<lon> at an ocean point; within the coverage's extent, so real data is expected."""
+    """Tests /cmip6_downscaled/point/<lat>/<lon> at an ocean point; within the coverage's extent, so real data is expected.
+
+    Unfiltered, this endpoint fetches every variable x model x scenario
+    combination sequentially (a separate describe + getcoverage request per
+    combo), which can legitimately take several minutes -- give it more room
+    than pytest-timeout's default before it's considered hung/failed.
+    """
     response = client.get("/cmip6_downscaled/point/66.95/-165")
     assert response.status_code == 200
     actual_data = response.get_json()
@@ -47,8 +63,15 @@ def test_cmip6_downscaled_point_attu(client):
     assert response.status_code == 422
 
 
+@pytest.mark.timeout(600)
 def test_cmip6_downscaled_point_dawson_city(client):
-    """Tests /cmip6_downscaled/point/<lat>/<lon> at Dawson City, Yukon."""
+    """Tests /cmip6_downscaled/point/<lat>/<lon> at Dawson City, Yukon.
+
+    Unfiltered, this endpoint fetches every variable x model x scenario
+    combination sequentially (a separate describe + getcoverage request per
+    combo), which can legitimately take several minutes -- give it more room
+    than pytest-timeout's default before it's considered hung/failed.
+    """
     response = client.get("/cmip6_downscaled/point/64.0625/-139.431")
     assert response.status_code == 200
     actual_data = response.get_json()
