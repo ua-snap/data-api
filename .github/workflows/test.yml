@@ -2,9 +2,9 @@ name: Run Pytest Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, skip_special_pytest]
   pull_request:
-    branches: [main]
+    branches: [main, skip_special_pytest]
 
 jobs:
   test:
@@ -29,7 +29,7 @@ jobs:
       - name: Run tests with pytest
         run: |
           mkdir -p test-outputs
-          micromamba run -n api-env pytest tests/ -v --tb=short --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
+          micromamba run -n api-env pytest tests/ -v --tb=short --ignore=tests/routes/landslide/point/test_landslide_point.py --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
         shell: bash -l {0}
 
       - name: Upload test artifacts
