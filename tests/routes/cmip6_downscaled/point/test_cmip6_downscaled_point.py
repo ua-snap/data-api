@@ -6,6 +6,25 @@ import pytest
 
 from tests.json_compare import assert_json_allclose
 
+# The full unfiltered response nests model -> scenario -> date -> var, with a
+# full daily time series (potentially 80+ years) per model/scenario pair --
+# tens of MB even after keeping only a handful of top-level model keys. Bound
+# every level (not just the top one) so the saved fixture stays well under
+# the 25MB cap while still exercising real multi-level structure and values.
+_N_MODELS = 5
+_N_SCENARIOS = 2
+_N_DATES = 5
+
+
+def _bounded_subset(data):
+    """Deterministic, deeply-bounded slice of a model->scenario->date->var dict."""
+    subset = {}
+    for model in list(data.keys())[:_N_MODELS]:
+        subset[model] = {}
+        for scenario in list(data[model].keys())[:_N_SCENARIOS]:
+            subset[model][scenario] = dict(list(data[model][scenario].items())[:_N_DATES])
+    return subset
+
 
 @pytest.mark.timeout(600)
 def test_cmip6_downscaled_point_fairbanks(client):
@@ -20,11 +39,10 @@ def test_cmip6_downscaled_point_fairbanks(client):
     assert response.status_code == 200
     actual_data = response.get_json()
 
-    # Full payload exceeds the 25MB fixture cap, so only the first 5 top-level
-    # model keys are compared against a saved subset.
+    # Full payload exceeds the 25MB fixture cap, so only a deeply-bounded
+    # subset (see _bounded_subset above) is compared against a saved fixture.
     assert isinstance(actual_data, dict) and actual_data
-    subset_keys = list(actual_data.keys())[:5]
-    actual_subset = {k: actual_data[k] for k in subset_keys}
+    actual_subset = _bounded_subset(actual_data)
 
     with open("tests/routes/cmip6_downscaled/point/json/cmip6_downscaled_point_fairbanks_subset.json") as f:
         expected_subset = json.load(f)
@@ -45,11 +63,10 @@ def test_cmip6_downscaled_point_ocean(client):
     assert response.status_code == 200
     actual_data = response.get_json()
 
-    # Full payload exceeds the 25MB fixture cap, so only the first 5 top-level
-    # model keys are compared against a saved subset.
+    # Full payload exceeds the 25MB fixture cap, so only a deeply-bounded
+    # subset (see _bounded_subset above) is compared against a saved fixture.
     assert isinstance(actual_data, dict) and actual_data
-    subset_keys = list(actual_data.keys())[:5]
-    actual_subset = {k: actual_data[k] for k in subset_keys}
+    actual_subset = _bounded_subset(actual_data)
 
     with open("tests/routes/cmip6_downscaled/point/json/cmip6_downscaled_point_ocean_subset.json") as f:
         expected_subset = json.load(f)
@@ -76,11 +93,10 @@ def test_cmip6_downscaled_point_dawson_city(client):
     assert response.status_code == 200
     actual_data = response.get_json()
 
-    # Full payload exceeds the 25MB fixture cap, so only the first 5 top-level
-    # model keys are compared against a saved subset.
+    # Full payload exceeds the 25MB fixture cap, so only a deeply-bounded
+    # subset (see _bounded_subset above) is compared against a saved fixture.
     assert isinstance(actual_data, dict) and actual_data
-    subset_keys = list(actual_data.keys())[:5]
-    actual_subset = {k: actual_data[k] for k in subset_keys}
+    actual_subset = _bounded_subset(actual_data)
 
     with open("tests/routes/cmip6_downscaled/point/json/cmip6_downscaled_point_dawson_city_subset.json") as f:
         expected_subset = json.load(f)
