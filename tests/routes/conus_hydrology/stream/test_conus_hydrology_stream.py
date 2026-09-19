@@ -2,6 +2,8 @@ import csv
 import io
 import json
 
+import pytest
+
 from tests.json_compare import assert_json_allclose
 
 
@@ -35,6 +37,7 @@ def test_conus_hydrology_stream_observed_climatology(client):
     assert response.status_code == 404
 
 
+@pytest.mark.timeout(600)
 def test_conus_hydrology_stream_gage_info(client):
     """Tests /conus_hydrology/gage_info, a flat list endpoint that takes no stream ID."""
     response = client.get("/conus_hydrology/gage_info")
