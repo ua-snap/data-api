@@ -30,7 +30,7 @@ jobs:
         timeout-minutes: 60
         run: |
           mkdir -p test-outputs
-          micromamba run -n api-env pytest tests/ --tb=long --log-cli-level=INFO --reruns 5 --ignore=tests/routes/landslide/point/test_landslide_point.py --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
+          micromamba run -n api-env pytest tests/ --tb=short --reruns 5 --ignore=tests/routes/landslide/point/test_landslide_point.py --junitxml=test-outputs/test-results.xml --html=test-outputs/report.html --self-contained-html
         shell: bash -l {0}
 
       - name: Upload test artifacts
