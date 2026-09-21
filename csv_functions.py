@@ -9,6 +9,37 @@ from luts import place_type_labels, demographics_order
 from validate_data import place_name_and_type
 from datetime import datetime
 
+# CSV endpoints requested by the Arctic-EDS report download buttons. Baseline
+# scenario/era labels are normalized to "modeled baseline" in these CSVs.
+modeled_baseline_csv_endpoints = [
+    "air_freezing_index_Fdays_all",
+    "air_thawing_index_Fdays_all",
+    "heating_degree_days_Fdays_all",
+    "degree_days_below_zero_Fdays_all",
+    "precipitation_all",
+    "snow",
+    "tas2km",
+]
+
+modeled_baseline_labels = ["historical", "cru_historical", "modeled_baseline"]
+
+
+def relabel_modeled_baseline(csv_dicts):
+    """Replace historical/modeled_baseline field values with "modeled baseline".
+
+    Args:
+        csv_dicts (list): list of dicts to be written out as CSV rows
+
+    Returns:
+        the list of dicts with baseline labels normalized
+    """
+    for csv_dict in csv_dicts:
+        for field, value in csv_dict.items():
+            if isinstance(value, str) and value.lower() in modeled_baseline_labels:
+                csv_dict[field] = "modeled baseline"
+
+    return csv_dicts
+
 
 def create_csv(
     data,
@@ -126,6 +157,9 @@ def create_csv(
 
     else:
         return render_template("500/server_error.html"), 500
+
+    if endpoint in modeled_baseline_csv_endpoints:
+        properties["csv_dicts"] = relabel_modeled_baseline(properties["csv_dicts"])
 
     # Append data-specific metadata to location metadata.
     properties["metadata"] = metadata + properties["metadata"]
