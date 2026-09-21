@@ -2,9 +2,9 @@ name: Run Pytest Tests
 
 on:
   push:
-    branches: [main, skip_special_pytest]
+    branches: [main]
   pull_request:
-    branches: [main, skip_special_pytest]
+    branches: [main]
 
 jobs:
   test:
