@@ -15,10 +15,8 @@ modeled_baseline_csv_endpoints = [
     "air_freezing_index_Fdays_all",
     "air_thawing_index_Fdays_all",
     "heating_degree_days_Fdays_all",
-    "hydrology",
-    "permafrost",
+    "degree_days_below_zero_Fdays_all",
     "precipitation_all",
-    "proj_precip",
     "snow",
     "tas2km",
 ]
