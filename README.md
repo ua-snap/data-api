@@ -87,6 +87,8 @@ The test client is created from the same Flask "app" object that a local develop
 
 Run `pytest` or `pytest -v` from the root directory of this repository.
 
+Most pytests are run automatically through GitHub whenever a commit is added/merged into main, but a handful of tests are excluded due to requiring credentials to run or GitHub Actions resource limitations. Running `pytest` locally from this repo as described above is the only way to run the full suite of pytests.
+
 #### Running a subset of tests
 
 To run all tests in a folder, run the following from the root directory of this repository, for example:
