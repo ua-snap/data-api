@@ -4,7 +4,7 @@
 <p>
   These endpoints provide access to yearly CMIP6 climate indicators and
   era-based summaries of the NCAR 12km climate indicators. The eras for this
-  dataset are historical (1980&ndash;2009), mid&ndash;century (2040&ndash;2069),
+  dataset are historical (1950&ndash;2009), mid&ndash;century (2040&ndash;2069),
   and late&ndash;century (2070&ndash;2099).
 </p>
 
@@ -59,25 +59,28 @@
 
 <pre>
 {
-  "historical": {
-    EC-Earth3-Veg": {
-      "1850": {
-        "dw": 71,
-        "ftc": 23,
-        "rx1day": 9,
-        "su": 0
+  ...
+  "EC-Earth3-Veg": {
+    "historical": {
+      "1950": {
+        "cd": -32.0,
+        "cdd": 8.0,
+        ...
+        "su": 0.0,
+        "wsdi": 0.0,
       },
-      "1851": {
-        "dw": 239,
-        "ftc": 0,
-        "rx1day": 7,
-        "su": 0
+      "1951": {
+        "cd": -51.5,
+        "cdd": 20.0,
+        ...
+        "su": 0.0,
+        "wsdi": 0.0,
       },
       ...
     },
     ...
   },
-...
+  ...
 }
 
 </pre>
@@ -86,13 +89,14 @@
 
 <pre>
 {
-  &lt;scenario&gt;: {
-    &lt;model&gt;: {
+  &lt;model&gt;: {
+    &lt;scenario&gt;: {
       &lt;year&gt;: {
-        "dw": "Deep Winter days" &mdash; Annual number of days with minimum 2 m air temperature below -30 &deg;C,
-        "ftc": "Freeze-Thaw Cycle" &mdash; Annual number of days with a diurnal freeze-thaw cycle, where maximum daily temperatures are above 0 &deg;C and minimum daily temperatures are at or below 0 &deg;C,
-        "rx1day": Maximum 1&ndash;day precipitation,
-        "su": "Summer Days" &mdash; Annual number of days with maximum 2 m air temperature above 25 &deg;C
+        "cd": "Cold day" threshold (&deg;C) &mdash; the lowest observed daily minimum 2 m air temperature such that there are 5 other observations equal to or less than this value",
+        "cdd": "Consecutive dry days" &mdash; number of the most consecutive days with precipitation &lt; 1 mm",
+        ...
+        "su": "Summer Days" &mdash; Annual number of days with maximum 2 m air temperature above 25 &deg;C",
+        "wsdi": "Warm Spell Duration Index" &mdash; Annual count of occurrences of at least 5 consecutive days with daily mean 2 m air temperature above 90th percentile of historical values for the date",
       },
       ...
     },
@@ -164,25 +168,23 @@
           "max": -30.3,
           "mean": -37.6,
           "min": -45.2
+        }
+      }
+    },
+    "longterm": {
+      "MRI-CGCM3": {
+        "rcp45": {
+          "max": -21.9,
+          "mean": -34.0,
+          "min": -42.2
         },
-        longterm": {
-          "MRI-CGCM3": {
-            "rcp45": {
-              "max": -21.9,
-              "mean": -34.0,
-              "min": -42.2
-            },
-            "rcp85": {
-              "max": -27.2,
-              "mean": -33.4,
-              "min": -40.8
-            }
-          },
-          ...
-        },
-        ...
+        "rcp85": {
+          "max": -27.2,
+          "mean": -33.4,
+          "min": -40.8
+        }
       },
-    ...
+      ...
     },
     ...
   },
@@ -247,7 +249,7 @@
 </p>
 
 <p>
-  <span class="has-text-weight-bold">cdsi</span>: Cold Spell Duration Index &mdash; Same as WDSI, but for
+  <span class="has-text-weight-bold">csdi</span>: Cold Spell Duration Index &mdash; Same as WDSI, but for
   daily mean 2 m air temperature below 10th percentile
 </p>
 
