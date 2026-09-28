@@ -20,7 +20,6 @@ from .fire import *
 from .permafrost import *
 from .seaice import *
 from .taspr import *
-from .ecoregions import *
 from .boundary import *
 from .vectordata import *
 from .elevation import *

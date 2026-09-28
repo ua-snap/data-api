@@ -53,7 +53,6 @@ def get_service_categories():
         ("Landslide Risk", "/landslide"),
         ("Permafrost", "/permafrost"),
         # ("Physical and Administrative Boundary Polygons", "/boundary"),
-        # ("Ecoregions", "/ecoregions"),
         ("Sea Ice Concentration", "/seaice"),
         ("Snowfall Equivalent", "/snow"),
         ("Temperature Anomalies", "/temperature_anomalies"),
@@ -77,7 +76,6 @@ def get_geospatial_categories():
     return [
         ("Communities, Places, and Areas of Interest", "/places"),
         ("GeoJSON Polygon Data", "/boundary"),
-        # ("Ecoregions", "/ecoregions"),
     ]
 
 
