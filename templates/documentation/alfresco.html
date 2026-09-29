@@ -3,8 +3,9 @@
 
 <p>
   These endpoints provide access to flammability and vegetation type data products derived from ALFRESCO simulations at
-  a resolution of 1km. Historical data are derived from the CRU TS 4.0 dataset and are summarized across years
-  1950&ndash;1979 and 1980&ndash;2008. Projections were simulated using GFDL-CM3, GISS-E2-R, IPSL-CM5A-LR, MRI-CGCM3,
+  a resolution of 1km. Historical data are derived from the CRU TS 4.0 dataset; flammability historical data are
+  summarized across years 1950&ndash;1979 and 1980&ndash;2008, while vegetation type historical data are summarized
+  as a single 1950&ndash;2008 era. Projections were simulated using GFDL-CM3, GISS-E2-R, IPSL-CM5A-LR, MRI-CGCM3,
   and NCAR-CCSM4 model outputs under the RCP 4.5, RCP 6.0, and RCP 8.5 emissions scenarios. Projections simulating a
   5-model average under RCP 4.5, RCP 6.0, and RCP 8.5 are also available. Projections are provided as summarized means
   of 30-year eras from 2010&ndash;2099.
@@ -117,6 +118,10 @@
 </table>
 
 <h3>Output</h3>
+
+<p>Intersecting area (local) query responses also include <code>huc_id</code> and
+  <code>boundary_url</code> fields identifying the HUC-12 used for the summary, in
+  addition to the era/model/scenario data shown below.</p>
 
 <h4>Flammability</h4>
 

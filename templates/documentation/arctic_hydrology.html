@@ -366,8 +366,8 @@
     <tr>
       <td>Hydrologic statistics</td>
       <td>
-        <a href="/arctic_hydrology/stats/81000004"
-          >/arctic_hydrology/stats/81000004</a
+        <a href="/arctic_hydrology/stats/81000404"
+          >/arctic_hydrology/stats/81000404</a
         >
       </td>
     </tr>
@@ -423,8 +423,8 @@
     <tr>
       <td>Modeled daily streamflow climatologies</td>
       <td>
-        <a href="/arctic_hydrology/modeled_climatology/81000004"
-          >/arctic_hydrology/modeled_climatology/81000004</a
+        <a href="/arctic_hydrology/modeled_climatology/81000404"
+          >/arctic_hydrology/modeled_climatology/81000404</a
         >
       </td>
     </tr>
@@ -474,8 +474,8 @@
     <tr>
       <td>Water temperature statistics</td>
       <td>
-        <a href="/arctic_hydrology/wt_stats/81000004"
-          >/arctic_hydrology/wt_stats/81000004</a
+        <a href="/arctic_hydrology/wt_stats/81000404"
+          >/arctic_hydrology/wt_stats/81000404</a
         >
       </td>
     </tr>
@@ -531,8 +531,8 @@
     <tr>
       <td>Modeled daily water temperature climatologies</td>
       <td>
-        <a href="/arctic_hydrology/wt_modeled_climatology/81000004"
-          >/arctic_hydrology/wt_modeled_climatology/81000004</a
+        <a href="/arctic_hydrology/wt_modeled_climatology/81000404"
+          >/arctic_hydrology/wt_modeled_climatology/81000404</a
         >
       </td>
     </tr>
@@ -573,47 +573,48 @@
   "data": {
     "C2LE2": {
       "2034-2065": {
-        "dh1": 49214.59,
-        "dh15": 23.0,
+        "dh1": 21711.17,
+        "dh15": 23.54,
         ...
-        "th1": 169.46,
-        "tl1": 129.21
+        "th1": 165.31,
+        "tl1": 114.57
       }
     },
     ...
     "historical": {
       "1990-2021": {
-        "dh1": 39168.64,
-        "dh15": 22.75,
+        "dh1": 17044.84,
+        "dh15": 21.25,
         ...
-        "th1": 171.26,
-        "tl1": 134.51
+        "th1": 168.6,
+        "tl1": 118.62
       }
     }
   },
-  "id": "81000004",
-  "latitude": 70.8283,
-  "longitude": -155.4225,
+  "gage_id": "15896000",
+  "id": "81000404",
+  "latitude": 70.2367,
+  "longitude": -148.9767,
   "metadata": {
     "source": {
       "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
     },
     "variables": {
       "dh1": {
-        "description": "Mean annual maximum 1-day average flow.",
+        "description": "Mean annual maximum 1-day average flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "cfs"
       },
       "dh15": {
-        "description": "Median annual average duration of high flow pulses (above 75th percentile).",
+        "description": "Median annual average duration of high flow pulses (above 75th percentile). Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "days_per_year"
       },
       ...
       "th1": {
-        "description": "Median Julian date of annual maximum flow.",
+        "description": "Median Julian date of annual maximum flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "julian_day"
       },
       "tl1": {
-        "description": "Median Julian date of annual minimum flow.",
+        "description": "Median Julian date of annual minimum flow. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "julian_day"
       }
     }
@@ -621,10 +622,10 @@
   "summary": {
     "dh1_delta": {
       "description": "projected change in maximum 1-day flow",
-      "range_high": 32,
-      "range_low": 4,
+      "range_high": 29,
+      "range_low": -3,
       "units": "percent",
-      "value": 32
+      "value": 29
     },
     ...
     "ma99_hist": {
@@ -632,11 +633,11 @@
       "range_high": null,
       "range_low": null,
       "units": "cfs",
-      "value": 4160
+      "value": 2315
     }
   },
-  "watershed": "19060206",
-  "watershed_outlet": true
+  "watershed": "19060401",
+  "watershed_outlet": false
 }
 </pre>
 
@@ -657,6 +658,7 @@
     },
     ...
   },
+  "gage_id": &lt;stream gage ID associated with the segment, or "" if none&gt;,
   "id": &lt;stream ID&gt;,
   "latitude": &lt;latitude of stream segment&gt;,
   "longitude": &lt;longitude of stream segment&gt;,
@@ -697,40 +699,41 @@
       "2034-2065": [
         {
           "doy": 1,
-          "doy_max": 80.02,
-          "doy_mean": 23.776,
-          "doy_min": 0.209,
+          "doy_max": 29.33,
+          "doy_mean": 3.842,
+          "doy_min": 1.428,
           "water_year_index": 93
         },
         {
           "doy": 2,
-          "doy_max": 61.352,
-          "doy_mean": 22.408,
-          "doy_min": 1.247,
+          "doy_max": 29.32,
+          "doy_mean": 3.883,
+          "doy_min": 1.428,
           "water_year_index": 94
         },
         ...
         {
           "doy": 365,
-          "doy_max": 147.04,
-          "doy_mean": 28.096,
-          "doy_min": 14.252,
+          "doy_max": 21.528,
+          "doy_mean": 3.951,
+          "doy_min": 1.429,
           "water_year_index": 91
         },
         {
           "doy": 366,
-          "doy_max": 101.043,
-          "doy_mean": 40.352,
-          "doy_min": 20.524,
+          "doy_max": 28.41,
+          "doy_mean": 6.861,
+          "doy_min": 1.749,
           "water_year_index": 92
         }
       ]
     },
     ...
   },
-  "id": "81000004",
-  "latitude": 70.8283,
-  "longitude": -155.4225,
+  "gage_id": "15896000",
+  "id": "81000404",
+  "latitude": 70.2367,
+  "longitude": -148.9767,
   "metadata": {
     "source": {
       "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
@@ -741,15 +744,15 @@
         "units": "day of year"
       },
       "doy_max": {
-        "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "cfs"
       },
       "doy_mean": {
-        "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "description": "Mean streamflow value (cfs) on the specified day of year, aggregated over all years in the era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "cfs"
       },
       "doy_min": {
-        "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
+        "description": "Minimum streamflow value (cfs) on the specified day of year, aggregated over all years in the era. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "cfs"
       },
       "water_year_index": {
@@ -758,8 +761,8 @@
       }
     }
   },
-  "watershed": "19060206",
-  "watershed_outlet": true
+  "watershed": "19060401",
+  "watershed_outlet": false
 }
 </pre>
 
@@ -784,6 +787,7 @@
     },
     ...
   },
+  "gage_id": &lt;stream gage ID associated with the segment, or "" if none&gt;,
   "id": &lt;stream ID&gt;,
   "latitude": &lt;latitude of stream segment&gt;,
   "longitude": &lt;longitude of stream segment&gt;,
@@ -813,39 +817,40 @@
   "data": {
     "C2LE2": {
       "2034-2065": {
-        "wt_7d_max_temp_doy_mean": 192.47,
-        "wt_7d_max_temp_mean": 13.44,
+        "wt_7d_max_temp_doy_mean": 200.03,
+        "wt_7d_max_temp_mean": 15.58,
         ...
-        "wt_min_sep": 3.05
+        "wt_min_sep": 4.43
       }
     },
     ...
     "historical": {
       "1990-2021": {
-        "wt_7d_max_temp_doy_mean": 196.03,
-        "wt_7d_max_temp_mean": 11.92,
+        "wt_7d_max_temp_doy_mean": 205.25,
+        "wt_7d_max_temp_mean": 13.91,
         ...
-        "wt_min_sep": 2.35
+        "wt_min_sep": 3.4
       }
     }
   },
-  "id": "81000004",
-  "latitude": 70.8292,
-  "longitude": -155.42,
+  "gage_id": "15896000",
+  "id": "81000404",
+  "latitude": 70.2367,
+  "longitude": -148.9767,
   "metadata": {
     "source": {
       "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
     },
     "variables": {
       "wt_7d_max_temp_mean": {
-        "description": "Mean (over era years) of the annual maximum 7-day rolling average stream temperature.",
+        "description": "Mean (over era years) of the annual maximum 7-day rolling average stream temperature. Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "degC"
       },
       ...
     }
   },
-  "watershed": "19060206",
-  "watershed_outlet": true
+  "watershed": "19060401",
+  "watershed_outlet": false
 }
 </pre>
 
@@ -868,6 +873,7 @@
     },
     ...
   },
+  "gage_id": &lt;stream gage ID associated with the segment, or "" if none&gt;,
   "id": &lt;stream ID&gt;,
   "latitude": &lt;latitude of stream segment&gt;,
   "longitude": &lt;longitude of stream segment&gt;,
@@ -899,30 +905,30 @@
       "2034-2065": [
         {
           "doy": 1,
-          "doy_max": 2.52,
-          "doy_mean": 0.552,
+          "doy_max": 3.87,
+          "doy_mean": 1.385,
           "doy_min": 0.1,
           "water_year_index": 93
         },
         {
           "doy": 2,
-          "doy_max": 3.05,
-          "doy_mean": 0.558,
+          "doy_max": 3.34,
+          "doy_mean": 1.085,
           "doy_min": 0.1,
           "water_year_index": 94
         },
         ...
         {
           "doy": 365,
-          "doy_max": 1.02,
-          "doy_mean": 0.224,
+          "doy_max": 0.96,
+          "doy_mean": 0.3,
           "doy_min": 0.1,
           "water_year_index": 91
         },
         {
           "doy": 366,
-          "doy_max": 0.16,
-          "doy_mean": 0.143,
+          "doy_max": 1.41,
+          "doy_mean": 0.387,
           "doy_min": 0.1,
           "water_year_index": 92
         }
@@ -930,9 +936,10 @@
     },
     ...
   },
-  "id": "81000004",
-  "latitude": 70.8292,
-  "longitude": -155.42,
+  "gage_id": "15896000",
+  "id": "81000404",
+  "latitude": 70.2367,
+  "longitude": -148.9767,
   "metadata": {
     "source": {
       "citation": "Dylan Blaskey, Keith Musselman, Andrew Newman, & Yifan Cheng. (2024). Alaskan river discharge, temperature, and climate data for a climate reference (1990-2021) and at mid-century (2034-2065). Arctic Data Center. doi:10.18739/A25M62870."
@@ -943,15 +950,15 @@
         "units": "day of year"
       },
       "doy_max": {
-        "description": "Maximum stream temperature on the specified day of year, aggregated over all years in the era.",
+        "description": "Maximum daily stream temperature for day of year across all years in era Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "degC"
       },
       "doy_mean": {
-        "description": "Mean stream temperature on the specified day of year, aggregated over all years in the era.",
+        "description": "Mean daily stream temperature for day of year across all years in era Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "degC"
       },
       "doy_min": {
-        "description": "Minimum stream temperature on the specified day of year, aggregated over all years in the era.",
+        "description": "Minimum daily stream temperature for day of year across all years in era Values are derived from applying the GCM-projected changes to the historical Blaskey baseline. PGW runs are not included.",
         "units": "degC"
       },
       "water_year_index": {
@@ -960,8 +967,8 @@
       }
     }
   },
-  "watershed": "19060206",
-  "watershed_outlet": true
+  "watershed": "19060401",
+  "watershed_outlet": false
 }
 </pre>
 
@@ -986,6 +993,7 @@
     },
     ...
   },
+  "gage_id": &lt;stream gage ID associated with the segment, or "" if none&gt;,
   "id": &lt;stream ID&gt;,
   "latitude": &lt;latitude of stream segment&gt;,
   "longitude": &lt;longitude of stream segment&gt;,

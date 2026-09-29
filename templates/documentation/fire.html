@@ -88,36 +88,35 @@
     "flamm": 0.0057,
     "title": "Projected relative flammability"
   },
-  "fire_points": {
-    [
-      {
-        "geometry": {
-          "coordinates": [
-            
-          ],
-          "type": "Point"
-        },
-        "geometry_name": "the_geom",
-        "id": "fire_points.10",
-        "properties": {
-          "CAUSE": "Human",
-          "NAME": "Quartz Lake",
-          "OUTDATE": "1717989480000",
-          "acres": 0.3,
-          "active": "0",
-          "discovered": "1716850920000",
-          "updated": "1717989692000"
-        },
-        "type": "Feature"
-      },
-      ...
-    ]
-  },
-  fire_polygons": [
+  "fire_points": [
     {
       "geometry": {
         "coordinates": [
-          
+
+        ],
+        "type": "Point"
+      },
+      "geometry_name": "the_geom",
+      "id": "fire_points.10",
+      "properties": {
+        "CAUSE": "Human",
+        "NAME": "Quartz Lake",
+        "OUTDATE": "1717989480000",
+        "SUMMARY": "Fire reported near Quartz Lake.",
+        "acres": 0.3,
+        "active": "0",
+        "discovered": "1716850920000",
+        "updated": "1717989692000"
+      },
+      "type": "Feature"
+    },
+    ...
+  ],
+  "fire_polygons": [
+    {
+      "geometry": {
+        "coordinates": [
+
         ],
         "type": "MultiPolygon"
       },
@@ -127,6 +126,7 @@
         "CAUSE": "Natural",
         "NAME": "American",
         "OUTDATE": "",
+        "SUMMARY": "Fire size updated to 4,836 acres per GIS update.",
         "acres": 4836.1,
         "active": "1",
         "discovered": "1719372156000",
