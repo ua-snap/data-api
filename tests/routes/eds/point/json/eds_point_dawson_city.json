@@ -8,7 +8,7 @@
     "units": "meters difference from sea level"
   },
   "freezing_index": {
-    "preview": "model,scenario,year,dd\r\ndaymet,modeled_baseline,1980,6074\r\ndaymet,modeled_baseline,1981,4520\r\ndaymet,modeled_baseline,1982,7313\r\ndaymet,modeled_baseline,1983,6704\r\ndaymet,modeled_baseline,1984,6093\r\ninmcm4,rcp85,2095,3608\r\ninmcm4,rcp85,2096,3545\r\ninmcm4,rcp85,2097,2300\r\ninmcm4,rcp85,2098,3943\r\ninmcm4,rcp85,2099,4185\r\n",
+    "preview": "model,scenario,year,dd\r\ndaymet,modeled baseline,1980,6074\r\ndaymet,modeled baseline,1981,4520\r\ndaymet,modeled baseline,1982,7313\r\ndaymet,modeled baseline,1983,6704\r\ndaymet,modeled baseline,1984,6093\r\ninmcm4,rcp85,2095,3608\r\ninmcm4,rcp85,2096,3545\r\ninmcm4,rcp85,2097,2300\r\ninmcm4,rcp85,2098,3943\r\ninmcm4,rcp85,2099,4185\r\n",
     "summary": {
       "2010-2039": {
         "ddmax": 7418,
@@ -33,7 +33,7 @@
     }
   },
   "heating_degree_days": {
-    "preview": "model,scenario,year,dd\r\ndaymet,modeled_baseline,1980,15471\r\ndaymet,modeled_baseline,1981,13928\r\ndaymet,modeled_baseline,1982,16749\r\ndaymet,modeled_baseline,1983,16154\r\ndaymet,modeled_baseline,1984,15631\r\ninmcm4,rcp85,2095,11178\r\ninmcm4,rcp85,2096,11607\r\ninmcm4,rcp85,2097,9803\r\ninmcm4,rcp85,2098,12351\r\ninmcm4,rcp85,2099,12289\r\n",
+    "preview": "model,scenario,year,dd\r\ndaymet,modeled baseline,1980,15471\r\ndaymet,modeled baseline,1981,13928\r\ndaymet,modeled baseline,1982,16749\r\ndaymet,modeled baseline,1983,16154\r\ndaymet,modeled baseline,1984,15631\r\ninmcm4,rcp85,2095,11178\r\ninmcm4,rcp85,2096,11607\r\ninmcm4,rcp85,2097,9803\r\ninmcm4,rcp85,2098,12351\r\ninmcm4,rcp85,2099,12289\r\n",
     "summary": {
       "2010-2039": {
         "ddmax": 16834,
@@ -14487,7 +14487,7 @@
   "precipitation": {},
   "snowfall": {},
   "temperature": {
-    "preview": "model,scenario,month,year,tasmin,tasmean,tasmax\r\nCRU-TS,historical,January,1901,-37,-30.3,-23.7\r\nCRU-TS,historical,January,1902,-33.1,-26.1,-19.2\r\nCRU-TS,historical,January,1903,-38,-31.6,-25.2\r\nCRU-TS,historical,January,1904,-35.3,-29.9,-24.5\r\nCRU-TS,historical,January,1905,-33.5,-28,-22.5\r\nNCAR-CCSM4,rcp85,December,2096,-11.9,-14.3,-6.8\r\nNCAR-CCSM4,rcp85,December,2097,-23.3,-17.1,-15.5\r\nNCAR-CCSM4,rcp85,December,2098,-13.6,-10.8,-7\r\nNCAR-CCSM4,rcp85,December,2099,-16.4,-19.7,-9.1\r\nNCAR-CCSM4,rcp85,December,2100,-18.2,-21.5,-11.9\r\n",
+    "preview": "model,scenario,month,year,tasmin,tasmean,tasmax\r\nCRU-TS,modeled baseline,January,1901,-37,-30.3,-23.7\r\nCRU-TS,modeled baseline,January,1902,-33.1,-26.1,-19.2\r\nCRU-TS,modeled baseline,January,1903,-38,-31.6,-25.2\r\nCRU-TS,modeled baseline,January,1904,-35.3,-29.9,-24.5\r\nCRU-TS,modeled baseline,January,1905,-33.5,-28,-22.5\r\nNCAR-CCSM4,rcp85,December,2096,-11.9,-14.3,-6.8\r\nNCAR-CCSM4,rcp85,December,2097,-23.3,-17.1,-15.5\r\nNCAR-CCSM4,rcp85,December,2098,-13.6,-10.8,-7\r\nNCAR-CCSM4,rcp85,December,2099,-16.4,-19.7,-9.1\r\nNCAR-CCSM4,rcp85,December,2100,-18.2,-21.5,-11.9\r\n",
     "summary": {
       "historical": {
         "CRU-TS": {
@@ -15824,7 +15824,7 @@
     }
   },
   "thawing_index": {
-    "preview": "model,scenario,year,dd\r\ndaymet,modeled_baseline,1980,2683\r\ndaymet,modeled_baseline,1981,2637\r\ndaymet,modeled_baseline,1982,2609\r\ndaymet,modeled_baseline,1983,2608\r\ndaymet,modeled_baseline,1984,2540\r\ninmcm4,rcp85,2095,4656\r\ninmcm4,rcp85,2096,4042\r\ninmcm4,rcp85,2097,4704\r\ninmcm4,rcp85,2098,3649\r\ninmcm4,rcp85,2099,3978\r\n",
+    "preview": "model,scenario,year,dd\r\ndaymet,modeled baseline,1980,2683\r\ndaymet,modeled baseline,1981,2637\r\ndaymet,modeled baseline,1982,2609\r\ndaymet,modeled baseline,1983,2608\r\ndaymet,modeled baseline,1984,2540\r\ninmcm4,rcp85,2095,4656\r\ninmcm4,rcp85,2096,4042\r\ninmcm4,rcp85,2097,4704\r\ninmcm4,rcp85,2098,3649\r\ninmcm4,rcp85,2099,3978\r\n",
     "summary": {
       "2010-2039": {
         "ddmax": 4436,
