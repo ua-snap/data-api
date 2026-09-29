@@ -793,7 +793,6 @@ def cusp_observations_csv(
         "citation",
         "site_id",
         "observation_date",
-        "obs_month",
         "method",
         "method_label",
         "pf_observed",
