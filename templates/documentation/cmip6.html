@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>CMIP6</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}CMIP6{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to monthly data for select CMIP6 variables,
   models, and scenarios. Read more about our CMIP6 subset
@@ -13,14 +15,234 @@
   For more detailed information, see the links to academic references and source
   datasets included at the bottom of this page.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<p>
+  Below is the list of CMIP6 variables that are found in this endpoint. For
+  complete variable definitions, see the official CMIP6 documentation
+  <a href="https://wcrp-cmip.org/cmip-model-and-experiment-documentation/"
+    >here</a
+  >.
+</p>
 
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>clt</code></td>
+      <td>Cloud area fraction</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>evspsbl</code></td>
+      <td>Evaporation, including sublimation and transpiration</td>
+      <td>kg m<sup>-2</sup> s<sup>-1</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>hfls</code></td>
+      <td>Surface upward latent heat flux</td>
+      <td>W m<sup>-2</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>hfss</code></td>
+      <td>Surface upward sensible heat flux</td>
+      <td>W m<sup>-2</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pr</code></td>
+      <td>Precipitation, including both liquid and solid phases</td>
+      <td>kg m<sup>-2</sup> s<sup>-1</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>prsn</code></td>
+      <td>
+        Precipitation as snow, including all forms of water in the solid phase
+      </td>
+      <td>kg m<sup>-2</sup> s<sup>-1</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>psl</code></td>
+      <td>Sea level pressure</td>
+      <td>Pa</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>rlds</code></td>
+      <td>Surface downwelling longwave radiation</td>
+      <td>W m<sup>-2</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>rsds</code></td>
+      <td>Surface downwelling shortwave radiation</td>
+      <td>W m<sup>-2</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>sfcWind</code></td>
+      <td>Surface wind speed</td>
+      <td>m s<sup>-1</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>siconc</code></td>
+      <td>Sea ice concentration</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>snw</code></td>
+      <td>Snow water equivalent</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tas</code></td>
+      <td>Near surface air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmax</code></td>
+      <td>Maximum near surface air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmin</code></td>
+      <td>Minimum near surface air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>ts</code></td>
+      <td>Surface air temperature</td>
+      <td>K</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>uas</code></td>
+      <td>Near-surface eastward wind</td>
+      <td>m s<sup>-1</sup></td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>vas</code></td>
+      <td>Near-surface northward wind</td>
+      <td>m s<sup>-1</sup></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block models %}
+<p>
+  The table below lists the models available through this endpoint, along with
+  the scenarios and <a href="#variables">variables</a>
+  available for each model. See
+  <a href="/cmip6/references">this page</a> for citations for each model.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Variables</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">Ensemble</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td>Equal-weighted mean of all models</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CESM2</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All except uas, vas</td>
+      <td>tasmax and tasmin are not available for the historical scenario</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CNRM-CM6-1-HR</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">E3SM-2-0</td>
+      <td>historical, ssp370</td>
+      <td>All except tasmax, tasmin, uas, vas</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">EC-Earth3-Veg</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-ESM4</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM3-GC31-LL</td>
+      <td>historical, ssp126, ssp245, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM3-GC31-MM</td>
+      <td>historical, ssp126, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">KACE-1-0-G</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All except siconc, snw</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MIROC6</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MPI-ESM1-2-HR</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-ESM2-0</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NorESM2-MM</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All except tasmax, tasmin, uas, vas</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">TaiESM1</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All except tasmax, tasmin, uas, vas</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>CMIP6 monthly data</h4>
 
 <p>
   Query CMIP6 variables for all models and scenarios. These variables are
-  defined <a href="#cmip6-variable-information">below</a>.
+  defined <a href="#variables">above</a>.
 </p>
 
 <table class="endpoints">
@@ -61,9 +283,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h4>Output</h4>
-
+{% block output %}
 <p>Results from point queries will look like this:</p>
 
 <pre>
@@ -130,65 +352,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3 id="cmip6-variable-information">CMIP6 Variable Information</h3>
-
-<p>
-  Below is the list of CMIP6 variables that are found in this endpoint. For
-  complete variable definitions, see the official CMIP6 documentation
-  <a href="https://wcrp-cmip.org/cmip-model-and-experiment-documentation/"
-    >here</a
-  >.
-</p>
-
-<dl>
-  <dt>clt</dt>
-  <dd>Cloud area fraction (%)</dd>
-  <dt>evspsbl</dt>
-  <dd>
-    Evaporation, including sublimation and transpiration (kg m<sup>-2</sup> s<sup>-1</sup>)
-  </dd>
-  <dt>hfls</dt>
-  <dd>Surface upward latent heat flux (W m<sup>-2</sup>)</dd>
-  <dt>hfss</dt>
-  <dd>Surface upward sensible heat flux (W m<sup>-2</sup>)</dd>
-  <dt>pr</dt>
-  <dd>
-    Precipitation, including both liquid and solid phases (kg m<sup>-2</sup> s<sup>-1</sup>)
-  </dd>
-  <dt>prsn</dt>
-  <dd>
-    Precipitation as snow, including all forms of water in the solid phase
-    (kg m<sup>-2</sup> s<sup>-1</sup>)
-  </dd>
-  <dt>psl</dt>
-  <dd>Sea level pressure (Pa)</dd>
-  <dt>rlds</dt>
-  <dd>Surface downwelling longwave radiation (W m<sup>-2</sup>)</dd>
-  <dt>rsds</dt>
-  <dd>Surface downwelling shortwave radiation (W m<sup>-2</sup>)</dd>
-  <dt>sfcWind</dt>
-  <dd>Surface wind speed (m s<sup>-1</sup>)</dd>
-  <dt>siconc</dt>
-  <dd>Sea ice concentration (%)</dd>
-  <dt>snw</dt>
-  <dd>Snow water equivalent (mm)</dd>
-  <dt>tas</dt>
-  <dd>Near surface air temperature (&deg;C)</dd>
-  <dt>tasmax</dt>
-  <dd>Maximum near surface air temperature (&deg;C)</dd>
-  <dt>tasmin</dt>
-  <dd>Minimum near surface air temperature (&deg;C)</dd>
-  <dt>ts</dt>
-  <dd>Surface air temperature (K)</dd>
-  <dt>uas</dt>
-  <dd>Near-surface eastward wind (m s<sup>-1</sup>)</dd>
-  <dt>vas</dt>
-  <dd>Near-surface northward wind (m s<sup>-1</sup>)</dd>
-</dl>
-
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -212,5 +378,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

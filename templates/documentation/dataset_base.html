@@ -1,0 +1,46 @@
+{#
+Shared layout for dataset documentation pages. Pages extend this template
+and fill in the blocks below; the layout supplies the section headings and
+keeps the sections in a consistent order:
+
+title, intro, variables, models, additional_sections, endpoints, output,
+source_data
+
+The variables, models, and output sections (and their headings) are omitted
+when a page leaves the corresponding block empty. Use additional_sections
+for any extra sections (with their own headings) that belong between the
+models and endpoints.
+#}
+{% extends 'base.html' %} {% block content %}
+<h2>{% block title %}{% endblock %}</h2>
+
+{% block intro %}{% endblock %}
+
+{% if self.variables() | trim %}
+<h3 id="variables">Available variables</h3>
+
+{% block variables %}{% endblock %}
+{% endif %}
+
+{% if self.models() | trim %}
+<h3 id="models_table">Climate models</h3>
+
+{% block models %}{% endblock %}
+{% endif %}
+
+{% block additional_sections %}{% endblock %}
+
+<h3>Service endpoints</h3>
+
+{% block endpoints %}{% endblock %}
+
+{% if self.output() | trim %}
+<h3>Output</h3>
+
+{% block output %}{% endblock %}
+{% endif %}
+
+<h3 id="source-data">Source data and references</h3>
+
+{% block source_data %}{% endblock %}
+{% endblock %}

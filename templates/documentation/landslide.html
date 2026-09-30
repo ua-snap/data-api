@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Landslide Risk Data</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Landslide Risk Data{% endblock %}
+
+{% block intro %}
 <p>
   This service endpoint provides access to landslide risk data based on
   precipitation measurements. The system monitors precipitation levels and
@@ -9,9 +11,71 @@
   accumulated precipitation over multiple time periods (24 hours, 2 days, 3
   days), and corresponding risk levels.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<p>
+  Real-time variables are returned at the top level of the response. Forecast
+  variables are returned in <code>forecast_blocks</code>, one block for each of
+  the next 24, 48, and 72 hours.
+</p>
 
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>realtime_antecedent_mm</code></td>
+      <td>Current antecedent rainfall</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>realtime_rainfall_mm</code></td>
+      <td>Current rainfall intensity</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>realtime_risk_level</code></td>
+      <td>Current landslide risk level (higher values indicate greater risk)</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>realtime_threshold_upper</code></td>
+      <td>Upper rainfall threshold for the current risk level</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>antecedent_mm</code></td>
+      <td>Forecasted antecedent rainfall</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>intensity_mm</code></td>
+      <td>Forecasted rainfall intensity</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>risk_level</code></td>
+      <td>
+        Forecasted landslide risk level (higher values indicate greater risk)
+      </td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>risk_threshold_upper</code></td>
+      <td>Upper rainfall threshold for the forecasted risk level</td>
+      <td>mm</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Location query</h4>
 
 <p>
@@ -41,9 +105,9 @@
     </tr>
   </tbody>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <p>Results from landslide risk queries will look like this:</p>
 
 <p>
@@ -146,9 +210,9 @@
   }
 }
 </pre>
+{% endblock %}
 
-<h3>Data Structure and Processing</h3>
-
+{% block source_data %}
 <p>
   The landslide risk data processing and data structure definitions are
   maintained in the
@@ -168,5 +232,4 @@
   The system is designed to update data every 3 hours, with automatic expiration
   of older records to maintain current and relevant risk assessments.
 </p>
-
 {% endblock %}

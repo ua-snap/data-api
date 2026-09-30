@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Flammability and Vegetation Type (ALFRESCO)</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Flammability and Vegetation Type (ALFRESCO){% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to flammability and vegetation type data products derived from ALFRESCO simulations at
   a resolution of 1km. Historical data are derived from the CRU TS 4.0 dataset; flammability historical data are
@@ -22,13 +24,15 @@
     page</a> for more information. Links to academic references and similar datasets are included at the bottom of this
   page.</p>
 </p>
+{% endblock %}
 
-<h3>Datasets</h3>
+{% block variables %}
 <table>
   <thead>
     <tr>
       <th>Dataset</th>
       <th>Description</th>
+      <th>Units</th>
     </tr>
   </thead>
   <tbody>
@@ -39,6 +43,7 @@
         the average number of times a pixel burned across all reps for all years
         of the summary year span. Pixels are 1km x 1km.
       </td>
+      <td>N/A</td>
     </tr>
     <tr>
       <td>Vegetation Type</td>
@@ -48,12 +53,25 @@
         percentage of each vegetation type for a pixel, across all reps for all
         years of the summary year span. Pixels are 1km x 1km.
       </td>
+      <td>%</td>
     </tr>
   </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        Vegetation type results are keyed by vegetation type:
+        <code>barren_lichen_moss</code>, <code>black_spruce</code>,
+        <code>deciduous_forest</code>, <code>graminoid_tundra</code>,
+        <code>shrub_tundra</code>, <code>temperate_rainforest</code>,
+        <code>wetland_tundra</code>, <code>white_spruce</code>, and
+        <code>not_modeled</code>.
+      </td>
+    </tr>
+  </tfoot>
 </table>
+{% endblock %}
 
-<h3>Service endpoints</h3>
-
+{% block endpoints %}
 <h4>Intersecting area query</h4>
 <p>
   Query data derived from 1km ALFRESCO outputs for a point location specified by
@@ -116,9 +134,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <p>Intersecting area (local) query responses also include <code>huc_id</code> and
   <code>boundary_url</code> fields identifying the HUC-12 used for the summary, in
   addition to the era/model/scenario data shown below.</p>
@@ -217,9 +235,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <p>Refer to the <a href="https://github.com/ua-snap/alfresco/blob/main/docs/ALFRESCO_Guide.pdf">ALFRESCO Guide</a> for
   information about how these simulations were performed. For access to the source data used here, or for similar datasets covering longer time spans and fewer models and scenarios, please contact
   <a href="mailto:uaf-snap-data-tools@alaska.edu">uaf-snap-data-tool@alaska.edu</a> and ask about accessing these data.</p>
@@ -250,5 +268,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

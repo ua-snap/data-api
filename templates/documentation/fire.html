@@ -1,7 +1,8 @@
-{% extends 'base.html' %}
-{% block content %}
-<h2>Wildfire Data</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Wildfire Data{% endblock %}
+
+{% block intro %}
 <p>
   This endpoint provides access to near-real-time, historical, and model output relevant to Alaska wildfires from a variety of sources:
   
@@ -16,9 +17,85 @@
 </p>
 
 <p>Links to academic references and source datasets are included at the bottom of this page.</p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<p>
+  Each variable is returned as an object containing the values described below. Objects for <code>cfd</code>,
+  <code>is_snow</code>, <code>lc</code>, and <code>prf</code> also include a <code>title</code> field.
+</p>
 
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>cfd</code></td>
+      <td>Today's fire danger rating: numeric <code>code</code> (1&ndash;5), rating <code>type</code>, and hex
+        <code>color</code> for visualization</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>is_snow</code></td>
+      <td>Today's snow cover: <code>true</code> if the point is covered by snow, otherwise <code>false</code></td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>lc</code></td>
+      <td>Land cover type: numeric <code>code</code>, land cover <code>type</code>, and hex <code>color</code> for
+        visualization</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>hist_fire</code></td>
+      <td>Historical fires (1940&ndash;2021) at the point, keyed by fire name, with the fire year as the value</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>prf</code></td>
+      <td>Projected relative flammability (<code>flamm</code>) summarized across 2000&ndash;2099</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>aqi_6</code></td>
+      <td>6-hour forecast of air quality index (<code>aqi</code>) and PM2.5 concentration (<code>pm25_conc</code>)</td>
+      <td>AQI, &micro;g/m&sup3;</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>aqi_12</code></td>
+      <td>12-hour forecast of air quality index (<code>aqi</code>) and PM2.5 concentration (<code>pm25_conc</code>)</td>
+      <td>AQI, &micro;g/m&sup3;</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>aqi_24</code></td>
+      <td>24-hour forecast of air quality index (<code>aqi</code>) and PM2.5 concentration (<code>pm25_conc</code>)</td>
+      <td>AQI, &micro;g/m&sup3;</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>aqi_48</code></td>
+      <td>48-hour forecast of air quality index (<code>aqi</code>) and PM2.5 concentration (<code>pm25_conc</code>)</td>
+      <td>AQI, &micro;g/m&sup3;</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>fire_points</code></td>
+      <td>Fire point locations within approximately 70 miles of the query point, as GeoJSON features</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>fire_polygons</code></td>
+      <td>Fire perimeter polygons within approximately 70 miles of the query point, as GeoJSON features</td>
+      <td>N/A</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Point query</h4>
 
 <table class="endpoints">
@@ -41,9 +118,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <p>Results from wildfire queries will look like this:</p>
 
 <pre>
@@ -191,9 +268,9 @@
   }
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -241,5 +318,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

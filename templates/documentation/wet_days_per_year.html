@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Wet Days Per Year</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Wet Days Per Year{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to historical and projected number of wet days per year at a resolution of
   20km. Historical data are available for years 1980&ndash;2009 and were derived from the ERA-Interim
@@ -9,9 +11,74 @@
   than or equal to 1.0mm.</p>
 
 <p>Links to academic references and a source dataset are included at the bottom of this page.</p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>wdpy</code></td>
+      <td>Number of wet days per year (days with at least 1.0mm of precipitation)</td>
+      <td>days</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        Min/mean/max summary endpoints return <code>wdpymax</code>,
+        <code>wdpymean</code>, and <code>wdpymin</code>: the maximum, mean, and
+        minimum number of wet days per year across all models and years in the
+        summary period.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}
 
+{% block models %}
+<p>The table below lists the models available through these endpoints, along with the scenarios and years available
+  for each model.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Years</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">ERA-Interim</td>
+      <td>historical</td>
+      <td>1980&ndash;2009</td>
+      <td>Historical baseline derived from the ERA-Interim reanalysis</td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-CM3</td>
+      <td>rcp85</td>
+      <td>2006&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NCAR-CCSM4</td>
+      <td>rcp85</td>
+      <td>2006&ndash;2100</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Min/mean/max summaries (point query)</h4>
 
 <p>Query a complete set of wet days per year composed of the ERA-Interim historical baseline (1980&ndash;2009) and the
@@ -114,9 +181,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Min/mean/max summaries</h4>
 
 <p>Results from wet days per year min/mean/max queries will look like this:</p>
@@ -180,8 +247,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -201,5 +269,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}
