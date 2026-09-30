@@ -4885,7 +4885,7 @@
     }
   },
   "precipitation": {
-    "preview": "model,scenario,year,pr\r\nCRU-TS,historical,1901,1148\r\nCRU-TS,historical,1902,1159\r\nCRU-TS,historical,1903,1132\r\nCRU-TS,historical,1904,1146\r\nCRU-TS,historical,1905,1143\r\nNCAR-CCSM4,rcp85,2096,1250\r\nNCAR-CCSM4,rcp85,2097,1555\r\nNCAR-CCSM4,rcp85,2098,1453\r\nNCAR-CCSM4,rcp85,2099,1385\r\nNCAR-CCSM4,rcp85,2100,1468\r\n",
+    "preview": "model,scenario,year,pr\r\nCRU-TS,modeled baseline,1901,1148\r\nCRU-TS,modeled baseline,1902,1159\r\nCRU-TS,modeled baseline,1903,1132\r\nCRU-TS,modeled baseline,1904,1146\r\nCRU-TS,modeled baseline,1905,1143\r\nNCAR-CCSM4,rcp85,2096,1250\r\nNCAR-CCSM4,rcp85,2097,1555\r\nNCAR-CCSM4,rcp85,2098,1453\r\nNCAR-CCSM4,rcp85,2099,1385\r\nNCAR-CCSM4,rcp85,2100,1468\r\n",
     "summary": {
       "2010-2039": {
         "prmax": 1631,
@@ -4910,7 +4910,7 @@
     }
   },
   "snowfall": {
-    "preview": "model,scenario,decade,SFE\r\nCRU-TS,historical,1910-1919,384\r\nCRU-TS,historical,1920-1929,349\r\nCRU-TS,historical,1930-1939,319\r\nCRU-TS,historical,1940-1949,309\r\nCRU-TS,historical,1950-1959,388\r\nNCAR-CCSM4,rcp85,2050-2059,211\r\nNCAR-CCSM4,rcp85,2060-2069,157\r\nNCAR-CCSM4,rcp85,2070-2079,150\r\nNCAR-CCSM4,rcp85,2080-2089,130\r\nNCAR-CCSM4,rcp85,2090-2099,103\r\n",
+    "preview": "model,scenario,decade,SFE\r\nCRU-TS,modeled baseline,1910-1919,384\r\nCRU-TS,modeled baseline,1920-1929,349\r\nCRU-TS,modeled baseline,1930-1939,319\r\nCRU-TS,modeled baseline,1940-1949,309\r\nCRU-TS,modeled baseline,1950-1959,388\r\nNCAR-CCSM4,rcp85,2050-2059,211\r\nNCAR-CCSM4,rcp85,2060-2069,157\r\nNCAR-CCSM4,rcp85,2070-2079,150\r\nNCAR-CCSM4,rcp85,2080-2089,130\r\nNCAR-CCSM4,rcp85,2090-2099,103\r\n",
     "summary": {
       "historical": {
         "sfemax": 388,
@@ -4925,7 +4925,7 @@
     }
   },
   "temperature": {
-    "preview": "model,scenario,month,year,tasmin,tasmean,tasmax\r\nCRU-TS,historical,January,1901,-5.2,-1.7,2\r\nCRU-TS,historical,January,1902,-6.5,-2.9,0.6\r\nCRU-TS,historical,January,1903,-6.6,-3,0.6\r\nCRU-TS,historical,January,1904,-8,-4.5,-0.9\r\nCRU-TS,historical,January,1905,-4.3,-0.7,2.9\r\nNCAR-CCSM4,rcp85,December,2096,5.8,4.6,7.8\r\nNCAR-CCSM4,rcp85,December,2097,4.2,5.9,6.1\r\nNCAR-CCSM4,rcp85,December,2098,4,3.3,5.1\r\nNCAR-CCSM4,rcp85,December,2099,1.7,6.8,3.8\r\nNCAR-CCSM4,rcp85,December,2100,5.1,5.6,6.9\r\n",
+    "preview": "model,scenario,month,year,tasmin,tasmean,tasmax\r\nCRU-TS,modeled baseline,January,1901,-5.2,-1.7,2\r\nCRU-TS,modeled baseline,January,1902,-6.5,-2.9,0.6\r\nCRU-TS,modeled baseline,January,1903,-6.6,-3,0.6\r\nCRU-TS,modeled baseline,January,1904,-8,-4.5,-0.9\r\nCRU-TS,modeled baseline,January,1905,-4.3,-0.7,2.9\r\nNCAR-CCSM4,rcp85,December,2096,5.8,4.6,7.8\r\nNCAR-CCSM4,rcp85,December,2097,4.2,5.9,6.1\r\nNCAR-CCSM4,rcp85,December,2098,4,3.3,5.1\r\nNCAR-CCSM4,rcp85,December,2099,1.7,6.8,3.8\r\nNCAR-CCSM4,rcp85,December,2100,5.1,5.6,6.9\r\n",
     "summary": {
       "historical": {
         "CRU-TS": {
