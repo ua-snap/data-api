@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Pan-Arctic Sea Ice Concentration</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Pan-Arctic Sea Ice Concentration{% endblock %}
+
+{% block intro %}
 <p>
   This endpoint provides access to monthly pan-Arctic sea ice concentration data
   at a resolution of approximately 17.1km for years 1850&ndash;2025. Data were
@@ -11,9 +13,28 @@
   Links to an academic reference and source dataset are included at the bottom
   of this page.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sea ice concentration</td>
+      <td>Monthly sea ice concentration</td>
+      <td>%</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
 
+{% block endpoints %}
 <h4>Most recent month and year of available data</h4>
 
 <p>
@@ -67,9 +88,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <p>Results from sea ice concentration queries will look like this:</p>
 
 <pre>
@@ -89,9 +110,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -139,5 +160,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

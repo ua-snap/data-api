@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>CMIP6, Downscaled</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}CMIP6, Downscaled{% endblock %}
+
+{% block intro %}
 <p>
   This endpoint provides access to daily CMIP6 data that have been bias-adjusted and downscaled to 4km using <a
     href="/era5wrf">dynamically downscaled ERA5</a>
@@ -9,57 +11,48 @@
     href="https://arcticdatascience.org/item/story-arctic-climate-data-node">here</a>. A 7-model average is also
   available. This dataset spans years 1965&ndash;2100 and its extent covers most of Alaska and parts of western Canada.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
-
-<h4>CMIP6 downscaled daily data</h4>
-
+{% block variables %}
 <p>
-  Query data for provided models, scenarios, and variables. These models, scenarios, and variables are defined <a
-    href="#cmip6-variable-information">below</a>.
+  Below is the list of CMIP6 variables that are found in this endpoint. For
+  complete variable definitions, see the official CMIP6 documentation
+  <a href="https://wcrp-cmip.org/cmip-model-and-experiment-documentation/">here</a>.
 </p>
 
-<table class="endpoints">
+<table>
   <thead>
     <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Values for all models, scenarios, and variables at a given latitude and longitude</td>
-      <td style="white-space: nowrap;">
-        <a href="/cmip6_downscaled/point/65.063/-146.163">/cmip6_downscaled/point/65.063/-146.163</a>
-      </td>
+      <td class="nowrap"><code>pr</code></td>
+      <td>Precipitation, including both liquid and solid phases</td>
+      <td>mm/day</td>
     </tr>
     <tr>
-      <td>Values at a given latitude and longitude for provided model, scenario, and variable</td>
-      <td style="white-space: nowrap;">
-        <a href="/cmip6_downscaled/point/65.063/-146.163?models=7ModelAvg&scenarios=ssp585&vars=tasmax">
-          /cmip6_downscaled/point/65.063/-146.163?models=7ModelAvg&scenarios=ssp585&vars=tasmax</a>
-      </td>
+      <td class="nowrap"><code>tasmax</code></td>
+      <td>Maximum near surface air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmin</code></td>
+      <td>Minimum near surface air temperature</td>
+      <td>&deg;C</td>
     </tr>
   </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">
-        Multiple models can be requested by appending a comma-separated string
-        like <code>?models=&lt;model_1&gt;,&lt;model_2&gt;</code>.<br />
-        Multiple scenarios can be requested by appending a comma-separated
-        string like <code>?scenarios=&lt;scenario_1&gt;,&lt;scenario_2&gt;</code>.<br />
-        Multiple variables can be requested by appending a comma-separated
-        string like <code>?vars=&lt;var_id_1&gt;,&lt;var_id_2&gt;</code>.<br />
-        CSV output is also available by appending <code>?format=csv</code> to
-        the URL.<br />
-        Chaining of multiple arguments is supported (e.g.,
-        <code>?vars=tasmax,tasmin&format=csv</code>).
-      </td>
-    </tr>
-  </tfoot>
 </table>
+{% endblock %}
 
-<h5>Endpoint options</h5>
+{% block models %}
+<p>
+  The table below lists the models available through this endpoint, along with
+  the scenarios and variables available for each model.
+</p>
 
 <table>
   <thead>
@@ -74,7 +67,7 @@
     <td>7ModelAvg</td>
     <td>historical, ssp126, ssp245, ssp370, ssp585</td>
     <td>pr, tasmax, tasmin</td>
-    <td>Equal-weighted mean of GFDL-ESM4, KACE-1-0-G, MIROC6, MPI-ESM1-2-HR, MRI-ESM2-0, NorESM2-MM, and TaiESM1.</td>
+    <td>Equal-weighted mean of GFDL-ESM4, KACE-1-0-G, MIROC6, MPI-ESM1-2-HR, MRI-ESM2-0, NorESM2-MM, and TaiESM1</td>
   </tr>
   <tr>
     <td>CESM2</td>
@@ -98,7 +91,7 @@
     <td>EC-Earth3-Veg</td>
     <td>historical, ssp126, ssp370, ssp585</td>
     <td>pr, tasmax, tasmin</td>
-    <td>ssp126 scenario is only available for the pr variable.</td>
+    <td>ssp126 scenario is only available for the pr variable</td>
   </tr>
   <tr>
     <td>GFDL-ESM4</td>
@@ -113,7 +106,7 @@
     <td></td>
   </tr>
   <tr>
-    <td style="white-space: nowrap;">HadGEM3-GC31-MM</td>
+    <td>HadGEM3-GC31-MM</td>
     <td>historical, ssp126, ssp585</td>
     <td>pr, tasmax, tasmin</td>
     <td></td>
@@ -155,9 +148,59 @@
     <td></td>
   </tr>
 </table>
+{% endblock %}
 
-<h4>Output</h4>
+{% block endpoints %}
+<h4>CMIP6 downscaled daily data</h4>
 
+<p>
+  Query data for provided models, scenarios, and variables. These models, scenarios, and variables are defined in the
+  <a href="#models_table">climate models</a> and
+  <a href="#variables">available variables</a> tables above.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Values for all models, scenarios, and variables at a given latitude and longitude</td>
+      <td style="white-space: nowrap;">
+        <a href="/cmip6_downscaled/point/65.063/-146.163">/cmip6_downscaled/point/65.063/-146.163</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Values at a given latitude and longitude for provided model, scenario, and variable</td>
+      <td style="white-space: nowrap;">
+        <a href="/cmip6_downscaled/point/65.063/-146.163?models=7ModelAvg&scenarios=ssp585&vars=tasmax">
+          /cmip6_downscaled/point/65.063/-146.163?models=7ModelAvg&scenarios=ssp585&vars=tasmax</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Multiple models can be requested by appending a comma-separated string
+        like <code>?models=&lt;model_1&gt;,&lt;model_2&gt;</code>.<br />
+        Multiple scenarios can be requested by appending a comma-separated
+        string like <code>?scenarios=&lt;scenario_1&gt;,&lt;scenario_2&gt;</code>.<br />
+        Multiple variables can be requested by appending a comma-separated
+        string like <code>?vars=&lt;var_id_1&gt;,&lt;var_id_2&gt;</code>.<br />
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL.<br />
+        Chaining of multiple arguments is supported (e.g.,
+        <code>?vars=tasmax,tasmin&format=csv</code>).
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}
+
+{% block output %}
 <p>Results from point queries will look like this:</p>
 
 <pre>
@@ -209,28 +252,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3 id="cmip6-variable-information">CMIP6 Variable Information</h3>
-
-<p>
-  Below is the list of CMIP6 variables that are found in this endpoint. For
-  complete variable definitions, see the official CMIP6 documentation
-  <a href="https://wcrp-cmip.org/cmip-model-and-experiment-documentation/">here</a>.
-</p>
-
-<dl>
-  <dt>pr</dt>
-  <dd>
-    Precipitation, including both liquid and solid phases (mm/day)
-  </dd>
-  <dt>tasmax</dt>
-  <dd>Maximum near surface air temperature (&deg;C)</dd>
-  <dt>tasmin</dt>
-  <dd>Minimum near surface air temperature (&deg;C)</dd>
-</dl>
-
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -255,5 +279,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

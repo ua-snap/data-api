@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Temperature and Precipitation Data</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Temperature and Precipitation Data{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to historical and projected downscaled
   temperature and precipitation data at a resolution of 2km. Temperature and
@@ -17,9 +19,330 @@
   Links to academic references and source datasets are included at the bottom of
   this page.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<p>
+  The variables available differ between endpoints. The tables below list the
+  variables returned by each group of endpoints.
+</p>
 
+<h4>Seasonal averages</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>tas</code></td>
+      <td>Seasonal mean air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pr</code></td>
+      <td>Seasonal total precipitation</td>
+      <td>mm</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        Temperature endpoints return <code>tas</code>, precipitation endpoints
+        return <code>pr</code>, and <code>taspr</code> endpoints return both.
+        Each variable is summarized by its minimum, 1st quartile, median, mean,
+        3rd quartile, maximum, and mean &plusmn; one standard deviation.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Precipitation frequency</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>pf</code></td>
+      <td>
+        Precipitation frequency: expected maximum precipitation for a given
+        return interval and duration
+      </td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pf_lower</code></td>
+      <td>Lower bound of the 95% confidence interval for precipitation frequency</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pf_upper</code></td>
+      <td>Upper bound of the 95% confidence interval for precipitation frequency</td>
+      <td>mm</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Yearly values and January/July temperature</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>tas</code></td>
+      <td>Annual mean air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pr</code></td>
+      <td>Annual total precipitation</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmax</code></td>
+      <td>Maximum January or July air temperature for the year</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmean</code></td>
+      <td>Mean January or July air temperature for the year</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmin</code></td>
+      <td>Minimum January or July air temperature for the year</td>
+      <td>&deg;C</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        With <code>?summarize=mmm</code>, temperature endpoints return
+        <code>tasmax</code>, <code>tasmean</code>, and <code>tasmin</code>, and
+        precipitation endpoints return <code>prmax</code>, <code>prmean</code>,
+        and <code>prmin</code>, summarized across all models, scenarios, and
+        years.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Monthly minimum, mean, and maximum temperature</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>tasmax</code></td>
+      <td>Maximum air temperature for each month and year</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmean</code></td>
+      <td>Mean air temperature for each month and year</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tasmin</code></td>
+      <td>Minimum air temperature for each month and year</td>
+      <td>&deg;C</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block models %}
+<p>
+  The models available differ between endpoints. The tables below list the
+  models available through each group of endpoints, using the model names that
+  appear in the output.
+</p>
+
+<h4>Seasonal averages</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Years</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">CRU-TS40</td>
+      <td>CRU_historical</td>
+      <td>1950&ndash;2009</td>
+      <td>Historical baseline derived from the CRU TS 4.0 dataset</td>
+    </tr>
+    <tr>
+      <td class="nowrap">5modelAvg</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2099</td>
+      <td>5-model average</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CCSM4</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-CGCM3</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2099</td>
+      <td></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="4">
+        Projected data are summarized by decade (2010&ndash;2019 through
+        2090&ndash;2099) and by era (2040&ndash;2069 and 2070&ndash;2099).
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4>Precipitation frequency</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Eras</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">GFDL-CM3</td>
+      <td>2020&ndash;2049, 2050&ndash;2079, 2080&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NCAR-CCSM4</td>
+      <td>2020&ndash;2049, 2050&ndash;2079, 2080&ndash;2099</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Yearly values and January/July temperature</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Years</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">CRU-TS</td>
+      <td>historical</td>
+      <td>1901&ndash;2015</td>
+      <td>Historical baseline derived from the CRU TS 4.0 dataset</td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-CM3</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2007&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">GISS-E2-R</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2007&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">IPSL-CM5A-LR</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2007&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-CGCM3</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2007&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NCAR-CCSM4</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2007&ndash;2100</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Monthly minimum, mean, and maximum temperature</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Years</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">CRU-TS</td>
+      <td>historical</td>
+      <td>1901&ndash;2015</td>
+      <td>Historical baseline derived from the CRU TS 4.0 dataset</td>
+    </tr>
+    <tr>
+      <td class="nowrap">5ModelAvg</td>
+      <td>rcp45, rcp85</td>
+      <td>2006&ndash;2100</td>
+      <td>5-model average</td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-CM3</td>
+      <td>rcp45, rcp85</td>
+      <td>2006&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NCAR-CCSM4</td>
+      <td>rcp45, rcp85</td>
+      <td>2006&ndash;2100</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Seasonal averages (point query)</h4>
 
 <p>
@@ -200,7 +523,7 @@
   </tfoot>
 </table>
 
-<h4>Monthly min, mean, and maximum temperature for each year (point query)</h4>
+<h4>Monthly minimum, mean, and maximum temperature for each year (point query)</h4>
 
 <p>Query temperature min, mean, and max for all months and all years for historical and projected data.
   Valid year ranges are between 1901&ndash;2015 for historical data and 2006&ndash;2100 for projected data.
@@ -283,11 +606,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
-<p>Temperature (tas) values are in °C. Precipitation (pr) values are in mm.</p>
-
+{% block output %}
 <h4>Seasonal averages</h4>
 
 <p>
@@ -500,7 +821,7 @@
 }
 </pre>
 
-<h4>Monthly min, mean, and maximum temperature for each year</h4>
+<h4>Monthly minimum, mean, and maximum temperature for each year</h4>
 
 <p>Results from monthly min, mean, and maximum temperature</p>
 
@@ -686,8 +1007,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
+{% block source_data %}
 <p>
   For more information about precipitation frequency, see the
   <a

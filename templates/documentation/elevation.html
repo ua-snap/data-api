@@ -1,7 +1,8 @@
-{% extends 'base.html' %}
-{% block content %}
-<h2>Elevation Data</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Elevation Data{% endblock %}
+
+{% block intro %}
 <p>
     This service endpoint queries ASTER GDEM elevation data for Alaska and Western Canada. Each query returns three
     values: minimum, maximum, and mean elevations derived from corresponding interpolations used to resample the source
@@ -10,9 +11,46 @@
 </p>
 
 <p>Links to an academic reference and source dataset are included at the bottom of this page.</p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<p>
+    In addition to these variables, results include <code>res</code>, <code>title</code>, and <code>units</code>
+    fields describing the dataset.
+</p>
 
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Units</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="nowrap"><code>max</code></td>
+            <td>Maximum elevation, derived from the maximum 1 km DEM interpolation. For area queries, this is the
+                maximum value within the polygon.</td>
+            <td>m</td>
+        </tr>
+        <tr>
+            <td class="nowrap"><code>mean</code></td>
+            <td>Mean elevation, derived from the average 1 km DEM interpolation. For area queries, this is the mean
+                value within the polygon.</td>
+            <td>m</td>
+        </tr>
+        <tr>
+            <td class="nowrap"><code>min</code></td>
+            <td>Minimum elevation, derived from the minimum 1 km DEM interpolation. For area queries, this is the
+                minimum value within the polygon.</td>
+            <td>m</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Point query</h4>
 
 <p>Query the ASTER Global Digital Elevation Model (DEM) at a single point specified by latitude and longitude.</p>
@@ -65,9 +103,9 @@
         </tr>
     </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <p>Results from point and area queries will look like this:</p>
 
 <pre>
@@ -93,8 +131,9 @@
   "units": &lt;units for elevation values&gt;
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
+{% block source_data %}
 <table>
     <thead>
         <tr>
@@ -114,5 +153,4 @@
         </tr>
     </tbody>
 </table>
-
 {% endblock %}

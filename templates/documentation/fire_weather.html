@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>CMIP6 Fire Weather Indices</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}CMIP6 Fire Weather Indices{% endblock %}
+
+{% block intro %}
 <p>
   This endpoint provides access to fire weather indices derived from
   bias-corrected CMIP6 daily data (for historical and future periods under the
@@ -10,82 +12,106 @@
   The spatial domain is limited to the North American boreal ecoregion, as
   defined by
   <a href="https://doi.org/10.1641/0006-3568(2001)051[0933:TEOTWA]2.0.CO;2">
-    Olson et al. (2001)</a
-  >. Variables are those used in the Canadian Forest Fire Danger Rating System
+    Olson et al. (2001)</a>. Variables are those used in the Canadian Forest Fire Danger Rating System
   (CFFDRS) Canadian Forest Fire Weather Index (FWI) System. Read more about
   CFFDRS and FWI
   <a href="https://cwfis.cfs.nrcan.gc.ca/background/summary/fdr">here</a>.
 </p>
+{% endblock %}
 
-<h3>Available Variables</h3>
-<table class="variable-table">
+{% block variables %}
+<table>
   <thead>
     <tr>
-      <th>Variable</th>
-      <th><code>id</code></th>
+      <th>ID</th>
       <th>Description</th>
+      <th>Units</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Buildup Index</td>
-      <td><code>bui</code></td>
-      <td>
-        Numeric rating of the total amount of fuel available for combustion. It
-        is based on the <code>dmc</code> and the <code>dc</code>.
-      </td>
+      <td class="nowrap"><code>bui</code></td>
+      <td>Buildup Index &mdash; Numeric rating of the total amount of fuel available for combustion. It is based on the <code>dmc</code> and the <code>dc</code>.</td>
+      <td>N/A</td>
     </tr>
     <tr>
-      <td>Drought Code</td>
-      <td><code>dc</code></td>
-      <td>
-        Numeric rating of the average moisture content of deep, compact organic
-        layers. This code is a useful indicator of seasonal drought effects on
-        forest fuels and the amount of smoldering in deep duff layers and large
-        logs.
-      </td>
+      <td class="nowrap"><code>dc</code></td>
+      <td>Drought Code &mdash; Numeric rating of the average moisture content of deep, compact organic layers. This code is a useful indicator of seasonal drought effects on forest fuels and the amount of smoldering in deep duff layers and large logs.</td>
+      <td>N/A</td>
     </tr>
     <tr>
-      <td>Duff Moisture Code</td>
-      <td><code>dmc</code></td>
-      <td>
-        Numeric rating of the average moisture content of loosely compacted
-        organic layers of moderate depth. This code gives an indication of fuel
-        consumption in moderate duff layers and medium-size woody material.
-      </td>
+      <td class="nowrap"><code>dmc</code></td>
+      <td>Duff Moisture Code &mdash; Numeric rating of the average moisture content of loosely compacted organic layers of moderate depth. This code gives an indication of fuel consumption in moderate duff layers and medium-size woody material.</td>
+      <td>N/A</td>
     </tr>
     <tr>
-      <td>Fine Fuel Moisture Code</td>
-      <td><code>ffmc</code></td>
-      <td>
-        Numeric rating of the moisture content of litter and other cured fine
-        fuels. This code is an indicator of the relative ease of ignition and
-        the flammability of fine fuel.
-      </td>
+      <td class="nowrap"><code>ffmc</code></td>
+      <td>Fine Fuel Moisture Code &mdash; Numeric rating of the moisture content of litter and other cured fine fuels. This code is an indicator of the relative ease of ignition and the flammability of fine fuel.</td>
+      <td>N/A</td>
     </tr>
     <tr>
-      <td>Fire Weather Index</td>
-      <td><code>fwi</code></td>
-      <td>
-        Numeric rating of fire intensity. It is based on the
-        <code>isi</code> and the <code>bui</code>, and is used as a general
-        index of fire danger throughout the forested areas of Canada and Alaska.
-      </td>
+      <td class="nowrap"><code>fwi</code></td>
+      <td>Fire Weather Index &mdash; Numeric rating of fire intensity. It is based on the <code>isi</code> and the <code>bui</code>, and is used as a general index of fire danger throughout the forested areas of Canada and Alaska.</td>
+      <td>N/A</td>
     </tr>
     <tr>
-      <td>Initial Spread Index</td>
-      <td><code>isi</code></td>
-      <td>
-        Numeric rating of the expected rate of fire spread. It is based on wind
-        speed and <code>ffmc</code>. Like the rest of the FWI system components,
-        <code>isi</code> does not take fuel type into account. Actual spread
-        rates vary between fuel types at the same <code>isi</code>.
-      </td>
+      <td class="nowrap"><code>isi</code></td>
+      <td>Initial Spread Index &mdash; Numeric rating of the expected rate of fire spread. It is based on wind speed and <code>ffmc</code>. Like the rest of the FWI system components, <code>isi</code> does not take fuel type into account. Actual spread rates vary between fuel types at the same <code>isi</code>.</td>
+      <td>N/A</td>
     </tr>
   </tbody>
 </table>
+{% endblock %}
 
-<h3>Available Operations</h3>
+{% block models %}
+<p>
+  The table below lists the models available through this endpoint. Model
+  names are used as keys in the output. See
+  <a href="/cmip6/references">this page</a> for citations for each CMIP6 model.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Years</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">era5</td>
+      <td>1980&ndash;2020</td>
+      <td>
+        ERA5 reanalysis (historical baseline)
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">CNRM-CM6-1-HR</td>
+      <td>1980&ndash;2099</td>
+      <td>CMIP6 historical and SSP5-8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap">EC-Earth3-Veg</td>
+      <td>1980&ndash;2099</td>
+      <td>CMIP6 historical and SSP5-8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap">MPI-ESM1-2-HR</td>
+      <td>1980&ndash;2099</td>
+      <td>CMIP6 historical and SSP5-8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-ESM2-0</td>
+      <td>1980&ndash;2099</td>
+      <td>CMIP6 historical and SSP5-8.5</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block additional_sections %}
+<h3>Available operations</h3>
 <table class="variable-table">
   <thead>
     <tr>
@@ -117,20 +143,18 @@
         very high, extreme) according to the fire behavior index thresholds.
         (See Table 1 of the
         <a
-          href="https://fire.ak.blm.gov/content/FuelFire/Alaska%20Fire%20Danger%20Operating%20Plan/Alaska_FDOP_FINAL_SIGNED.pdf"
-        >
-          Alaska Interagency Fire Danger Operating Plan</a
-        >
+          href="https://fire.ak.blm.gov/content/FuelFire/Alaska%20Fire%20Danger%20Operating%20Plan/Alaska_FDOP_FINAL_SIGNED.pdf">
+          Alaska Interagency Fire Danger Operating Plan</a>
         for threshold values.) For area queries, daily classifications are based
         on the area-weighted mean for each variable.
       </td>
     </tr>
   </tbody>
 </table>
+{% endblock %}
 
-<h3>Service Endpoints</h3>
-
-<h4>Point Query</h4>
+{% block endpoints %}
+<h4>Point query</h4>
 
 <table class="endpoints">
   <thead>
@@ -147,9 +171,7 @@
       </td>
       <td>
         <a
-          href="/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average"
-          >/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average</a
-        >
+          href="/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average">/fire_weather/point/64.8/-147.5/1980/2010?op=3_day_rolling_average</a>
       </td>
     </tr>
     <tr>
@@ -159,9 +181,7 @@
       </td>
       <td>
         <a
-          href="/fire_weather/point/64.8/-147.5/2030/2050?op=summer_fire_danger_rating_days&vars=bui"
-          >/fire_weather/point/64.8/-147.5/2030/2050?vars=bui&op=summer_fire_danger_rating_days</a
-        >
+          href="/fire_weather/point/64.8/-147.5/2030/2050?op=summer_fire_danger_rating_days&vars=bui">/fire_weather/point/64.8/-147.5/2030/2050?vars=bui&op=summer_fire_danger_rating_days</a>
       </td>
     </tr>
     <tr>
@@ -171,9 +191,7 @@
       </td>
       <td>
         <a
-          href="/fire_weather/point/64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi"
-          >/fire_weather/point/64.8/-147.5/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a
-        >
+          href="/fire_weather/point/64.8/-147.5/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/point/64.8/-147.5/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a>
       </td>
     </tr>
   </tbody>
@@ -197,9 +215,79 @@
   </tfoot>
 </table>
 
-<h4>Point Query Output</h4>
+<h4>Area query</h4>
 
-<h5><i>n</i>-day Rolling Averages</h5>
+<p>
+  Area queries return zonal statistics aggregated over a specified polygon area.
+  Values represent the spatially-weighted average of all 0.25 &#215; 0.25 degree
+  grid cells within the polygon boundary. Learn more about what
+  <a href="/places">types of places</a> are available for area queries.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        CMIP6 Fire Weather Indices area query (select years, all variables,
+        3-day rolling average operation)
+      </td>
+      <td>
+        <a
+          href="/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average">/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        CMIP6 Fire Weather Indices area query (select years, single variable,
+        summer fire danger rating days operation)
+      </td>
+      <td>
+        <a
+          href="/fire_weather/area/19080309/2030/2050?op=summer_fire_danger_rating_days&vars=bui">/fire_weather/area/19080309/2030/2050?vars=bui&op=summer_fire_danger_rating_days</a>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        CMIP6 Fire Weather Indices area query (select years, several variables,
+        7-day rolling average operation)
+      </td>
+      <td>
+        <a
+          href="/fire_weather/area/19080309/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi">/fire_weather/area/19080309/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Only one operation is allowed per request. If no operation is requested,
+        default is <code>3_day_rolling_average</code>.
+        <br />
+        CSV output is available by appending <code>?format=csv</code> to the
+        URL.
+        <br />
+        Multiple variables can be requested using
+        <code>?vars=dc,dmc,ffmc</code>.
+        <br />
+        Chaining parameters is also supported, e.g.
+        <code>?vars=dc,dmc&format=csv</code>.
+        <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}
+
+{% block output %}
+<h4>Point query</h4>
+
+<h5><i>n</i>-day rolling averages</h5>
 
 <p>
   Data are returned as JSON keyed hierarchically by selected year range,
@@ -233,7 +321,7 @@
 }
 </code></pre>
 
-<h5>Count of Summer Fire Danger Rating Days</h5>
+<h5>Count of summer fire danger rating days</h5>
 
 <p>
   Data are returned as JSON keyed hierarchically by selected year range,
@@ -270,82 +358,9 @@
     }
 }</code></pre>
 
-<h4>Area Query</h4>
+<h4>Area query</h4>
 
-<p>
-  Area queries return zonal statistics aggregated over a specified polygon area.
-  Values represent the spatially-weighted average of all 0.25 &#215; 0.25 degree
-  grid cells within the polygon boundary. Learn more about what
-  <a href="/places">types of places</a> are available for area queries.
-</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        CMIP6 Fire Weather Indices area query (select years, all variables,
-        3-day rolling average operation)
-      </td>
-      <td>
-        <a href="/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average"
-          >/fire_weather/area/19080309/1980/2010?op=3_day_rolling_average</a
-        >
-      </td>
-    </tr>
-    <tr>
-      <td>
-        CMIP6 Fire Weather Indices area query (select years, single variable,
-        summer fire danger rating days operation)
-      </td>
-      <td>
-        <a
-          href="/fire_weather/area/19080309/2030/2050?op=summer_fire_danger_rating_days&vars=bui"
-          >/fire_weather/area/19080309/2030/2050?vars=bui&op=summer_fire_danger_rating_days</a
-        >
-      </td>
-    </tr>
-    <tr>
-      <td>
-        CMIP6 Fire Weather Indices area query (select years, several variables,
-        7-day rolling average operation)
-      </td>
-      <td>
-        <a
-          href="/fire_weather/area/19080309/2030/2050?op=7_day_rolling_average&vars=bui,fwi,isi"
-          >/fire_weather/area/19080309/2030/2050?vars=bui,fwi,isi&op=7_day_rolling_average</a
-        >
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">
-        Only one operation is allowed per request. If no operation is requested,
-        default is <code>3_day_rolling_average</code>.
-        <br />
-        CSV output is available by appending <code>?format=csv</code> to the
-        URL.
-        <br />
-        Multiple variables can be requested using
-        <code>?vars=dc,dmc,ffmc</code>.
-        <br />
-        Chaining parameters is also supported, e.g.
-        <code>?vars=dc,dmc&format=csv</code>.
-        <br />
-      </td>
-    </tr>
-  </tfoot>
-</table>
-
-<h4>Area Query Output</h4>
-
-<h5><i>n</i>-day Rolling Averages</h5>
+<h5><i>n</i>-day rolling averages</h5>
 
 <p>
   Data are returned as JSON keyed hierarchically by selected year range,
@@ -379,7 +394,7 @@
 }
 </code></pre>
 
-<h5>Count of Summer Fire Danger Rating Days</h5>
+<h5>Count of summer fire danger rating days</h5>
 
 <p>
   Data are returned as JSON keyed hierarchically by selected year range,
@@ -415,8 +430,9 @@
         }
     }
 }</code></pre>
+{% endblock %}
 
-<h3>References and Data Sources</h3>
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -427,21 +443,15 @@
   <tbody>
     <tr>
       <td>
-        <a
-          href="https://www.sciencebase.gov/catalog/item/67ead89cd34ed02007f8357f"
-          >USGS ScienceBase Record</a
-        >
+        <a href="https://www.sciencebase.gov/catalog/item/67ead89cd34ed02007f8357f">USGS ScienceBase Record</a>
       </td>
       <td>
         Young, A.M., Littell, J., and Rupp, S., 2025, The influence of fire-fuel
         feedbacks on boreal forest fire regimes under future climate change:
         U.S. Geological Survey data release,
-        <a href="https://doi.org/10.5066/P1AAMRUF"
-          >https://doi.org/10.5066/P1AAMRUF</a
-        >.
+        <a href="https://doi.org/10.5066/P1AAMRUF">https://doi.org/10.5066/P1AAMRUF</a>.
       </td>
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

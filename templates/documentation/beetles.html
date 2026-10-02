@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Climate Protection from Spruce Beetles</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Climate Protection from Spruce Beetles{% endblock %}
+
+{% block intro %}
 <p>
   The endpoints here provide access to modeled climate-related protections
   against spruce beetle population at a resolution of approximately 12km.
@@ -18,9 +20,107 @@
   >
   for more information.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>climate-protection</code></td>
+      <td>
+        Level of climate protection from spruce beetles: <code>high</code>,
+        <code>minimal</code>, or <code>none</code>. For area queries, this is
+        the most common protection level within the area of interest.
+      </td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>percent-high-protection</code></td>
+      <td>
+        Percentage of the area of interest with high climate protection (area
+        queries only)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>percent-minimal-protection</code></td>
+      <td>
+        Percentage of the area of interest with minimal climate protection (area
+        queries only)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>percent-no-protection</code></td>
+      <td>
+        Percentage of the area of interest with no climate protection (area
+        queries only)
+      </td>
+      <td>%</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
 
+{% block models %}
+<p>
+  The table below lists the models available through these endpoints, along
+  with the scenarios and eras available for each model. Results for each model,
+  scenario, and era are provided for both low and medium snowpack.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Eras</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">Daymet</td>
+      <td>Historical</td>
+      <td>1988&ndash;2017</td>
+      <td>Historical baseline modeled using the Daymet dataset</td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-ESM2M</td>
+      <td>rcp45, rcp85</td>
+      <td>2010&ndash;2039, 2040&ndash;2069, 2070&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM2-ES</td>
+      <td>rcp45, rcp85</td>
+      <td>2010&ndash;2039, 2040&ndash;2069, 2070&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-CGCM3</td>
+      <td>rcp45, rcp85</td>
+      <td>2010&ndash;2039, 2040&ndash;2069, 2070&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NCAR-CCSM4</td>
+      <td>rcp45, rcp85</td>
+      <td>2010&ndash;2039, 2040&ndash;2069, 2070&ndash;2099</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Point query</h4>
 
 <p>
@@ -83,9 +183,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Point query</h4>
 
 <p>Results from point queries will look like this:</p>
@@ -179,9 +279,9 @@
     &lt;model&gt;: {
       &lt;scenario&gt;: {
         &lt;snowpack&gt;: {
-            &lt;climate-protection&gt;: &lthigh, minimal, or none&gt;,
-            &lt;percent-high-protection&gt;: &ltpercentage of high climate protection pixels in polygon AOI&gt;,
-            &lt;percent-minimal-protection&gt;: &ltpercentage of minimal climate protection pixels in polygon AOI&gt;,
+            &lt;climate-protection&gt;: &lt;high, minimal, or none&gt;,
+            &lt;percent-high-protection&gt;: &lt;percentage of high climate protection pixels in polygon AOI&gt;,
+            &lt;percent-minimal-protection&gt;: &lt;percentage of minimal climate protection pixels in polygon AOI&gt;,
             &lt;percent-no-protection&gt;: &lt;percentage of no climate protection pixels in polygon AOI&gt;
         }
       }
@@ -190,9 +290,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data and academic reference</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>

@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Climate Indicators</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Climate Indicators{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to yearly CMIP6 climate indicators and
   era-based summaries of the NCAR 12km climate indicators. The eras for this
@@ -12,14 +14,240 @@
   For more detailed information, see the links to academic references and source
   datasets included at the bottom of this page.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
 
+{% block variables %}
+<p>Below is the list of climate indicators that are found in these endpoints.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>hd</code></td>
+      <td>&ldquo;Hot day&rdquo; threshold &mdash; the highest observed daily maximum 2 m air temperature such that there are 5 other observations equal to or greater than this value</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>cd</code></td>
+      <td>&ldquo;Cold day&rdquo; threshold &mdash; the lowest observed daily minimum 2 m air temperature such that there are 5 other observations equal to or less than this value</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>rx1day</code></td>
+      <td>Maximum 1&ndash;day precipitation</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>su</code></td>
+      <td>&ldquo;Summer Days&rdquo; &mdash; Annual number of days with maximum 2 m air temperature above 25 &deg;C</td>
+      <td>days</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>dw</code></td>
+      <td>&ldquo;Deep Winter days&rdquo; &mdash; Annual number of days with minimum 2 m air temperature below -30 &deg;C</td>
+      <td>days</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>ftc</code></td>
+      <td>&ldquo;Freeze-thaw days&rdquo; &mdash; Annual number of days with maximum 2 m air temperature above 0 &deg;C and minimum 2 m air temperature at or below 0 &deg;C (CMIP6 only)</td>
+      <td>days</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>wsdi</code></td>
+      <td>Warm Spell Duration Index &mdash; Annual count of occurrences of at least 5 consecutive days with daily mean 2 m air temperature above 90th percentile of historical values for the date</td>
+      <td>count</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>csdi</code></td>
+      <td>Cold Spell Duration Index &mdash; Same as WSDI, but for daily mean 2 m air temperature below 10th percentile</td>
+      <td>count</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>rx5day</code></td>
+      <td>Maximum 5&ndash;day precipitation</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>r10mm</code></td>
+      <td>Number of days with precipitation &gt; 10 mm</td>
+      <td>days</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>cwd</code></td>
+      <td>Consecutive wet days &mdash; number of the most consecutive days with precipitation &gt; 1 mm</td>
+      <td>days</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>cdd</code></td>
+      <td>Consecutive dry days &mdash; number of the most consecutive days with precipitation &lt; 1 mm</td>
+      <td>days</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block models %}
+<h4>CMIP6</h4>
+
+<p>
+  The table below lists the models available through the CMIP6 endpoint, along
+  with the scenarios and indicators available for each model. Historical data
+  cover 1950&ndash;2014 and projected data cover 2015&ndash;2100. See
+  <a href="/cmip6/references">this page</a> for citations for each model.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Indicators</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">Ensemble</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td>Equal-weighted mean of all models</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CESM2</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All except csdi, wsdi</td>
+      <td>
+        Temperature-based indicators (cd, dw, ftc, hd, su) are not available for
+        the historical scenario
+      </td>
+    </tr>
+    <tr>
+      <td class="nowrap">CNRM-CM6-1-HR</td>
+      <td>historical, ssp126, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">E3SM-2-0</td>
+      <td>historical, ssp370</td>
+      <td>All</td>
+      <td>ftc is not available for the ssp370 scenario</td>
+    </tr>
+    <tr>
+      <td class="nowrap">EC-Earth3-Veg</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td>ssp245 data cover 2055&ndash;2100 only</td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-ESM4</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM3-GC31-LL</td>
+      <td>historical, ssp126, ssp245, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM3-GC31-MM</td>
+      <td>historical, ssp126, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">KACE-1-0-G</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MIROC6</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MPI-ESM1-2-HR</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-ESM2-0</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NorESM2-MM</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">TaiESM1</td>
+      <td>historical, ssp126, ssp245, ssp370, ssp585</td>
+      <td>All</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>CMIP5</h4>
+
+<p>
+  The table below lists the models available through the CMIP5 endpoints, along
+  with the scenarios and eras available for each model.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Eras</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">Daymet</td>
+      <td>historical</td>
+      <td>historical</td>
+      <td>Historical baseline</td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-CGCM3</td>
+      <td>rcp45, rcp85</td>
+      <td>midcentury, longterm</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NCAR-CCSM4</td>
+      <td>rcp45, rcp85</td>
+      <td>midcentury, longterm</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>CMIP6 climate indicator variables</h4>
 
 <p>
   Query CMIP6 climate indicator variables for all models and scenarios. These
-  indicators are defined <a href="#climate-indicators-information">below</a>.
+  indicators are defined <a href="#variables">above</a>.
 </p>
 
 <table class="endpoints">
@@ -53,7 +281,58 @@
   </tfoot>
 </table>
 
-<h4>Output</h4>
+<h4>CMIP5 climate indicator variables</h4>
+
+<p>
+  Query min-mean-max climate indicator variables for all models and scenarios.
+  These indicators are defined
+  <a href="#variables">above</a>.
+</p>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        Era-based min-mean-max for all climate indicator variables at a given
+        latitude and longitude.
+      </td>
+      <td>
+        <a href="/indicators/cmip5/point/61.5/-147"
+          >/indicators/cmip5/point/61.5/-147</a
+        >
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Era-based min-mean-max for all climate indicator variables for a
+        specific area
+      </td>
+      <td>
+        <a href="/indicators/cmip5/area/1903040601"
+          >/indicators/cmip5/area/1903040601</a
+        >
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        CSV output is also available by appending <code>?format=csv</code> to
+        the URL. <br />
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}
+
+{% block output %}
+<h4>CMIP6 climate indicator variables</h4>
 
 <p>Results from point and area queries will look like this:</p>
 
@@ -107,55 +386,6 @@
 </pre>
 
 <h4>CMIP5 climate indicator variables</h4>
-
-<p>
-  Query min-mean-max climate indicator variables for all models and scenarios.
-  These indicators are defined
-  <a href="#climate-indicators-information">below</a>.
-</p>
-
-<table class="endpoints">
-  <thead>
-    <tr>
-      <th class="endpoint-label">Endpoint</th>
-      <th class="endpoint-url">Example URL</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        Era-based min-mean-max for all climate indicator variables at a given
-        latitude and longitude.
-      </td>
-      <td>
-        <a href="/indicators/cmip5/point/61.5/-147"
-          >/indicators/cmip5/point/61.5/-147</a
-        >
-      </td>
-    </tr>
-    <tr>
-      <td>
-        Era-based min-mean-max for all climate indicator variables for a
-        specific area
-      </td>
-      <td>
-        <a href="/indicators/cmip5/area/1903040601"
-          >/indicators/cmip5/area/1903040601</a
-        >
-      </td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2">
-        CSV output is also available by appending <code>?format=csv</code> to
-        the URL. <br />
-      </td>
-    </tr>
-  </tfoot>
-</table>
-
-<h4>Output</h4>
 
 <p>Results from point and area queries will look like this:</p>
 
@@ -213,61 +443,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3 id="climate-indicators-information">Climate Indicator Information</h3>
-
-<h4>Below is the list of climate indicators that are found in this endpoint</h4>
-
-<p>
-  <span class="has-text-weight-bold">hd</span>: “Hot day” threshold (degrees C) &mdash; the highest observed daily
-  maximum 2 m air temperature such that there are 5 other observations equal to
-  or greater than this value.
-</p>
-
-<p>
-  <span class="has-text-weight-bold">cd</span>: “Cold day” threshold (degrees C) &mdash; the lowest observed daily
-  minimum 2 m air temperature such that there are 5 other observations equal to
-  or less than this value.
-</p>
-
-<p><span class="has-text-weight-bold">rx1day</span>: Maximum 1&ndash;day precipitation (mm)</p>
-
-<p>
-  <span class="has-text-weight-bold">su</span>: "Summer Days" &mdash; Annual number of days with maximum
-  2 m air temperature above 25 degrees C
-</p>
-
-<p>
-  <span class="has-text-weight-bold">dw</span>: "Deep Winter days" &mdash; Annual number of days with
-  minimum 2 m air temperature below -30 degrees C
-</p>
-
-<p>
-  <span class="has-text-weight-bold">wsdi</span>: Warm Spell Duration Index &mdash; Annual count of
-  occurrences of at least 5 consecutive days with daily mean 2 m air temperature
-  above 90th percentile of historical values for the date
-</p>
-
-<p>
-  <span class="has-text-weight-bold">csdi</span>: Cold Spell Duration Index &mdash; Same as WDSI, but for
-  daily mean 2 m air temperature below 10th percentile
-</p>
-
-<p><span class="has-text-weight-bold">rx5day</span>: Maximum 5&ndash;day precipitation (mm)</p>
-
-<p><span class="has-text-weight-bold">r10mm</span>: Number of days with precipitation > 10 mm</p>
-
-<p>
-  <span class="has-text-weight-bold">cwd</span>: Consecutive wet days &mdash; number of the most
-  consecutive days with precipitation > 1 mm
-</p>
-
-<p>
-  <span class="has-text-weight-bold">cdd</span>: Consecutive dry days &mdash; number of the most
-  consecutive days with precipitation < 1 mm
-</p>
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -301,5 +479,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

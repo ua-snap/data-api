@@ -1,7 +1,8 @@
-{% extends 'base.html' %}
-{% block content %}
-<h2>Demographics</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Demographics{% endblock %}
+
+{% block intro %}
 <p>
   The endpoints here provide access to demographic data derived from the 2020 US Census Demographics and 
   Housing Characteristics File (DHC), the 2019&ndash;2023 US Census American Community Survey (ACS) 5-year dataset,
@@ -9,10 +10,228 @@
    Data is returned for individual Alaskan communities, and also includes contextual data for the state of
     Alaska and the United States.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<p>
+  Below is the list of variables returned by this endpoint. In addition to these
+  variables, each community includes a <code>name</code> field and a
+  <code>comment</code> field describing the data source, if applicable. Every
+  variable except those derived from the 2020 US Census DHC (population, age,
+  and race) is accompanied by <code>&lt;id&gt;_low</code> and
+  <code>&lt;id&gt;_high</code> fields giving the lower and upper bounds of its
+  90% confidence interval. See the <a href="#source-data">source data</a> table
+  below for the dataset each variable is derived from.
+</p>
 
-<h4>Available Places</h4>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>total_population</code></td>
+      <td>Total population of the community</td>
+      <td>people</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_under_18</code></td>
+      <td>Population under age 18</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_under_5</code></td>
+      <td>Population under age 5</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_65_plus</code></td>
+      <td>Population age 65 and older</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_african_american</code></td>
+      <td>Population that is African American</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_amer_indian_ak_native</code></td>
+      <td>Population that is American Indian or Alaska Native</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_asian</code></td>
+      <td>Population that is Asian</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_hawaiian_pacislander</code></td>
+      <td>Population that is Native Hawaiian and Pacific Islander</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_hispanic_latino</code></td>
+      <td>Population that is Hispanic or Latino</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_white</code></td>
+      <td>Population that is White</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_multi</code></td>
+      <td>Population that is two or more races</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_other</code></td>
+      <td>Population that is some other race</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_asthma</code></td>
+      <td>
+        Adults aged &ge;18 years who report being diagnosed with and currently
+        having asthma (crude prevalence rate)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_copd</code></td>
+      <td>
+        Adults aged &ge;18 years who report being diagnosed with chronic
+        obstructive pulmonary disease (COPD), emphysema, or chronic bronchitis
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_diabetes</code></td>
+      <td>
+        Adults aged &ge;18 years who report being diagnosed with diabetes,
+        excluding gestational diabetes (crude prevalence rate)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_hd</code></td>
+      <td>
+        Adults aged &ge;18 years who report being diagnosed with coronary heart
+        disease (crude prevalence rate)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_stroke</code></td>
+      <td>
+        Adults aged &ge;18 years who report having ever been told by a health
+        professional that they have had a stroke (crude prevalence rate)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_mh</code></td>
+      <td>
+        Adults aged &ge;18 years who report &ldquo;frequent mental
+        distress&rdquo; (mental health not good for 14 or more of the past 30
+        days; crude prevalence rate)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_emospt</code></td>
+      <td>
+        Adults aged &ge;18 years who report &ldquo;lack of social and emotional
+        support&rdquo; (sometimes, rarely, or never getting the support needed;
+        crude prevalence rate)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_foodstamps</code></td>
+      <td>
+        Adults aged &ge;18 years who received food stamps in the past 12 months
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_w_disability</code></td>
+      <td>
+        Population with a reported disability (serious difficulty with hearing,
+        vision, cognition, mobility, self-care, or independent living)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_uninsured</code></td>
+      <td>Population without health insurance</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_minority</code></td>
+      <td>
+        Population of racial or ethnic minority status (all groups other than
+        White, non-Hispanic)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_no_bband</code></td>
+      <td>Households with no broadband internet subscription</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_no_hsdiploma</code></td>
+      <td>Adults aged &ge;25 years with no high school diploma</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_below_150pov</code></td>
+      <td>Population living below 150% of the federal poverty threshold</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_crowding</code></td>
+      <td>
+        Households with &ldquo;crowding&rdquo; (more than 1 occupant per room)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_single_parent</code></td>
+      <td>
+        Single parent households (householder with no spouse or partner present
+        and with children of the householder)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_unemployed</code></td>
+      <td>
+        Population aged &ge;16 years in the civilian labor force who are
+        unemployed (jobless, available to work, and actively looked for work in
+        the past 4 weeks)
+      </td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pct_hcost</code></td>
+      <td>
+        Households with &ldquo;housing cost burden&rdquo; (annual income less
+        than $75,000 and spending 30% or more of household income on housing)
+      </td>
+      <td>%</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
+<h4>Available places</h4>
 
 <p>Query a community by ID (US communities only) from the options at <a href="https://earthmaps.io/places/communities">earthmaps.io/places/communities</a>.</p> 
 
@@ -35,9 +254,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Community query</h4>
 
 <p>Results from community queries will look like this:</p>
@@ -196,8 +415,9 @@
     ...
     }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
+{% block source_data %}
 <table>
     <thead>
         <tr>
@@ -303,5 +523,4 @@
         </tr>
     </tbody>
 </table>
-
 {% endblock %}
