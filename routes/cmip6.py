@@ -7,6 +7,9 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import (
+    CSV_ERRORS,
+    DATA_ERRORS,
+    FETCH_ERRORS,
     fetch_data,
     describe_via_wcps,
     get_encoding_from_axis_attributes,
@@ -319,7 +322,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
         )
 
         results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_monthly"))
-    except:
+    except FETCH_ERRORS + DATA_ERRORS:
         return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
@@ -348,7 +351,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                 start_year=start_year,
                 end_year=end_year,
             )
-        except:
+        except CSV_ERRORS:
             return render_template("500/server_error.html"), 500
 
     return results

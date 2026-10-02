@@ -14,6 +14,9 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
+    DATA_ERRORS,
+    FETCH_ERRORS,
+    POLY_AGGREGATION_ERRORS,
     fetch_data,
     fetch_bbox_netcdf_list,
     get_poly,
@@ -479,7 +482,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
 
         try:
             results = package_cmip6_point_data(rasdaman_response)
-        except Exception as exc:
+        except DATA_ERRORS as exc:
             print(exc)
             return render_template("500/server_error.html"), 500
 
@@ -492,7 +495,7 @@ def run_fetch_cmip6_indicators_point_data(lat, lon):
 
         return results
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         return render_template("500/server_error.html"), 500
 
 
@@ -551,7 +554,7 @@ def run_fetch_cmip5_indicators_point_data(lat, lon):
 
     except ValueError:
         return render_template("400/bad_request.html"), 400
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
 
@@ -580,7 +583,7 @@ def get_cmip5_indicators_area_data(var_id):
     try:
         aggr_results = run_aggregate_var_polygon(var_id, "cmip5_indicators")
 
-    except:
+    except POLY_AGGREGATION_ERRORS:
         return render_template("422/invalid_area.html"), 422
 
     if aggr_results in [{}, None, 0]:

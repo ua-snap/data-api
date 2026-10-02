@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import fetch_data, describe_via_wcps
+from fetch_data import DATA_ERRORS, FETCH_ERRORS, fetch_data, describe_via_wcps
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
@@ -154,7 +154,7 @@ def cmip6_downscaled_point(lat, lon):
             )
     except ValueError:
         return render_template("400/bad_request.html"), 400
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

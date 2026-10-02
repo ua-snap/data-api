@@ -11,6 +11,8 @@ import time
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
+    POLY_AGGREGATION_ERRORS,
+    GET_POLY_ERRORS,
     fetch_data,
     describe_via_wcps,
     ymd_to_cftime_value,
@@ -673,7 +675,7 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
 
     try:
         polygon = get_poly(place_id, crs=4326)
-    except:
+    except GET_POLY_ERRORS:
         return render_template("422/invalid_area.html"), 422
 
     # validate that the polygon is completely within the geotiff that represents the footprint of the data coverage
@@ -699,7 +701,7 @@ def run_fetch_fire_weather_area_data(place_id, start_year=None, end_year=None):
         zonal_results = calculate_fwi_zonal_stats(
             polygon, datasets_dict, requested_vars
         )
-    except Exception as exc:
+    except POLY_AGGREGATION_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

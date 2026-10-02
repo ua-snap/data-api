@@ -5,6 +5,8 @@ from flask import Blueprint, render_template, request, jsonify
 
 # local imports
 from fetch_data import (
+    DATA_ERRORS,
+    FETCH_ERRORS,
     fetch_wcs_point_data,
     deepflatten,
     describe_via_wcps,
@@ -215,7 +217,7 @@ def run_point_fetch_all_sfe(lat, lon, summarize=None, preview=None):
                 except KeyError:
                     return render_template("400/bad_request.html"), 400
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

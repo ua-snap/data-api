@@ -1,5 +1,6 @@
 import json
 import pytest
+import psycopg2
 from unittest.mock import Mock
 
 ######################################
@@ -15,7 +16,7 @@ def test_landslide_get_landslide_db_connection_failed(client, monkeypatch):
 
     # Mock get_landslide_db_row to raise an exception
     def mock_get_landslide_db_row(place_name):
-        raise Exception("Database connection failed")
+        raise psycopg2.OperationalError("Database connection failed")
 
     monkeypatch.setattr(
         "routes.landslide.get_landslide_db_row", mock_get_landslide_db_row
@@ -166,7 +167,7 @@ def test_landslide_general_exception_in_processing(client, monkeypatch):
         }
 
     def mock_package_landslide_data(place_id):
-        exc = Exception("Unexpected error during place data processing")
+        exc = ValueError("Unexpected error during place data processing")
         raise exc
 
     monkeypatch.setattr(

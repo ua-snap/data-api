@@ -21,7 +21,14 @@ from generate_urls import (
     generate_wfs_arctic_hydrology_url,
     generate_wfs_arctic_hydrology_stats_url,
 )
-from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
+from fetch_data import (
+    CSV_ERRORS,
+    DATA_ERRORS,
+    FETCH_ERRORS,
+    fetch_data,
+    fetch_layer_data,
+    describe_via_wcps,
+)
 from validate_request import get_axis_encodings
 from postprocessing import (
     prune_nulls_with_max_intensity,
@@ -108,7 +115,7 @@ async def get_features(stream_id):
 
         async with ClientSession() as session:
             layer_data = await fetch_layer_data(url, session)
-    except Exception:
+    except FETCH_ERRORS:
         # WFS/upstream failure - a server-side problem, not a bad request.
         return render_template("502/upstream_unreachable.html"), 502
 
@@ -137,7 +144,7 @@ async def get_stats_features(stream_id):
             return None
         gdf = gpd.GeoDataFrame([f["properties"] for f in features])
         return gdf.replace({None: np.nan})
-    except Exception:
+    except FETCH_ERRORS + (KeyError, TypeError):
         return None
 
 
@@ -633,7 +640,7 @@ def package_metadata(ds, data_dict, source=None, var_context="streamflow"):
         ds_source_dict = ast.literal_eval(ds_source_str)
         citation = ds_source_dict.get("Citation", "")
         data_dict["metadata"]["source"] = {"citation": citation}
-    except Exception:
+    except (KeyError, ValueError, SyntaxError, AttributeError):
         data_dict["metadata"]["source"] = {"citation": ""}
 
     data_dict["metadata"]["variables"] = {}
@@ -782,7 +789,7 @@ def run_get_arctic_hydrology_stats_data(stream_id):
         # package the stats data + metadata into a dictionary for JSON serialization
         try:
             data_dict = package_stats_data(stream_id, ds)
-        except Exception:
+        except DATA_ERRORS:
             return render_template("500/server_error.html"), 500
 
         data_dict = package_metadata(ds, data_dict, source=source)
@@ -800,14 +807,14 @@ def run_get_arctic_hydrology_stats_data(stream_id):
                     lon=str(data_dict["longitude"]),
                     source_metadata=source,
                 )
-            except Exception:
+            except CSV_ERRORS:
                 return render_template("500/server_error.html"), 500
 
         data_dict = populate_feature_stat_attributes_summary(data_dict, stats_gdf)
 
         return jsonify(data_dict)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
 
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
@@ -882,12 +889,12 @@ def run_get_arctic_hydrology_modeled_climatology(stream_id):
                     lon=str(data_dict["longitude"]),
                     source_metadata=source,
                 )
-            except Exception:
+            except CSV_ERRORS:
                 return render_template("500/server_error.html"), 500
 
         return jsonify(data_dict)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -932,7 +939,7 @@ def run_get_arctic_hydrology_wt_stats_data(stream_id):
 
         try:
             data_dict = package_stats_data(stream_id, ds)
-        except Exception:
+        except DATA_ERRORS:
             return render_template("500/server_error.html"), 500
 
         data_dict = package_metadata(ds, data_dict, source=source)
@@ -950,12 +957,12 @@ def run_get_arctic_hydrology_wt_stats_data(stream_id):
                     lon=str(data_dict["longitude"]),
                     source_metadata=source,
                 )
-            except Exception:
+            except CSV_ERRORS:
                 return render_template("500/server_error.html"), 500
 
         return jsonify(data_dict)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -1022,12 +1029,12 @@ def run_get_arctic_hydrology_wt_modeled_climatology(stream_id):
                     lon=str(data_dict["longitude"]),
                     source_metadata=source,
                 )
-            except Exception:
+            except CSV_ERRORS:
                 return render_template("500/server_error.html"), 500
 
         return jsonify(data_dict)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -1403,5 +1410,5 @@ def run_get_arctic_hydrology_hydroviz(stream_id):
 
         return jsonify(response)
 
-    except Exception:
+    except FETCH_ERRORS + DATA_ERRORS:
         return render_template("500/server_error.html"), 500

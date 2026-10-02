@@ -5,7 +5,7 @@ from flask import (
 )
 
 # local imports
-from fetch_data import fetch_data, fetch_geoserver_data
+from fetch_data import DATA_ERRORS, FETCH_ERRORS, fetch_data, fetch_geoserver_data
 from generate_urls import generate_wfs_search_url
 from validate_request import validate_latlon
 from postprocessing import nullify_nodata, postprocess
@@ -156,7 +156,7 @@ def run_fetch_fire(lat, lon):
                 ]
             )
         )
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

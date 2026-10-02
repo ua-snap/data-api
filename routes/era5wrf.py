@@ -7,6 +7,10 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
+    DATA_ERRORS,
+    FETCH_ERRORS,
+    POLY_AGGREGATION_ERRORS,
+    GET_POLY_ERRORS,
     fetch_data,
     describe_via_wcps,
     fetch_bbox_netcdf,
@@ -181,7 +185,7 @@ def era5wrf_point(lat, lon):
 
         return postprocessed
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -302,7 +306,7 @@ def era5wrf_area(place_id):
 
     try:
         polygon = get_poly(place_id, crs=3338)
-    except:
+    except GET_POLY_ERRORS:
         return render_template("422/invalid_area.html"), 422
 
     # extract and validate query parameters (mirror point query logic)
@@ -343,7 +347,7 @@ def era5wrf_area(place_id):
 
         return postprocessed
 
-    except Exception as exc:
+    except POLY_AGGREGATION_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

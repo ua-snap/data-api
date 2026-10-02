@@ -5,6 +5,8 @@ from flask import Blueprint, render_template, request, current_app as app, jsoni
 
 # local imports
 from fetch_data import (
+    DATA_ERRORS,
+    FETCH_ERRORS,
     fetch_wcs_point_data,
     describe_via_wcps,
 )
@@ -383,7 +385,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
         try:
             point_pkg = run_fetch_hydrology_point_data(lat, lon)
             return postprocess(point_pkg, "hydrology")
-        except Exception as exc:
+        except FETCH_ERRORS + DATA_ERRORS as exc:
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
             return render_template("500/server_error.html"), 500
@@ -404,7 +406,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                     )
                 else:
                     return create_csv(point_pkg, "hydrology_mmm", lat=lat, lon=lon)
-            except Exception as exc:
+            except FETCH_ERRORS + DATA_ERRORS as exc:
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
                 return render_template("500/server_error.html"), 500
@@ -412,7 +414,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
         elif "summarize" in request.args or summarize:
             try:
                 return run_fetch_hydrology_point_data_mmm(lat, lon, summarize)
-            except Exception as exc:
+            except FETCH_ERRORS + DATA_ERRORS as exc:
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
                 return render_template("500/server_error.html"), 500
@@ -429,7 +431,7 @@ def run_get_hydrology_point_data(lat, lon, summarize=None, preview=None):
                     return create_csv(
                         point_pkg, "hydrology", place_id=None, lat=lat, lon=lon
                     )
-            except Exception as exc:
+            except FETCH_ERRORS + DATA_ERRORS as exc:
                 if hasattr(exc, "status") and exc.status == 404:
                     return render_template("404/no_data.html"), 404
                 return render_template("500/server_error.html"), 500

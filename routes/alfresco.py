@@ -11,6 +11,7 @@ from flask import (
 from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersection_url
 from fetch_data import (
+    POLY_AGGREGATION_ERRORS,
     fetch_bbox_netcdf_list,
     fetch_data,
     generate_nested_dict,
@@ -279,7 +280,7 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
 
     try:
         poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
-    except:
+    except POLY_AGGREGATION_ERRORS:
         return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:

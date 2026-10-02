@@ -23,7 +23,14 @@ from generate_urls import (
     generate_usgs_gage_daily_streamflow_data_url,
     generate_usgs_gage_metadata_url,
 )
-from fetch_data import fetch_data, fetch_layer_data, describe_via_wcps
+from fetch_data import (
+    CSV_ERRORS,
+    DATA_ERRORS,
+    FETCH_ERRORS,
+    fetch_data,
+    fetch_layer_data,
+    describe_via_wcps,
+)
 from validate_request import get_axis_encodings
 from postprocessing import (
     prune_nulls_with_max_intensity,
@@ -113,7 +120,7 @@ async def get_features(stream_id):
         gdf["geometry"] = gdf["geometry"].make_valid()
 
         return gdf
-    except:
+    except FETCH_ERRORS + (KeyError, AttributeError, ValueError):
         return render_template("400/bad_request.html"), 400
 
 
@@ -139,7 +146,7 @@ async def get_usgs_gage_data(gage_id):
         async with ClientSession() as session:
             gage_metadata = await fetch_layer_data(metadata_url, session)
             gage_data = await fetch_layer_data(data_url, session)
-    except:
+    except FETCH_ERRORS:
         return render_template("400/bad_request.html"), 400
 
     # get metadata from JSON and populate dict
@@ -387,7 +394,7 @@ def package_metadata(ds, data_dict, source=None):
         ds_source_dict = ast.literal_eval(ds_source_str)
         citation = ds_source_dict.get("Citation", "")
         data_dict["metadata"]["source"] = {"citation": citation}
-    except Exception as e:
+    except (KeyError, ValueError, SyntaxError, AttributeError) as e:
         data_dict["metadata"]["source"] = {"citation": ""}
 
     data_dict["metadata"]["variables"] = {}
@@ -922,7 +929,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
                     lon=str(data_dict["longitude"]),
                     source_metadata=source,
                 )
-            except Exception as exc:
+            except CSV_ERRORS as exc:
                 return render_template("500/server_error.html"), 500
 
         # add stats for data sentences to metadata: this is not included in the CSV output, but should be in JSON response
@@ -930,7 +937,7 @@ def run_get_conus_hydrology_stats_data(stream_id):
 
         return jsonify(data_dict)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
 
         print(exc)
 
@@ -1009,12 +1016,12 @@ def run_get_conus_hydrology_modeled_climatology(stream_id):
                     lon=str(data_dict["longitude"]),
                     source_metadata=source,
                 )
-            except Exception as exc:
+            except CSV_ERRORS as exc:
                 return render_template("500/server_error.html"), 500
 
         return jsonify(data_dict)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -1066,12 +1073,12 @@ def run_get_conus_hydrology_gage_data(stream_id):
                     },
                 )
 
-            except Exception as exc:
+            except CSV_ERRORS as exc:
                 return render_template("500/server_error.html"), 500
 
         return jsonify(gage_data_dict)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -1105,7 +1112,7 @@ def run_get_conus_hydrology_gage_info():
             .to_dict()
         )
         return jsonify(result)
-    except Exception as exc:
+    except DATA_ERRORS as exc:
         return render_template("500/server_error.html"), 500
 
 
@@ -1364,5 +1371,5 @@ def fetch_all_hydroviz_route(stream_id):
 
         return jsonify(response)
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         return render_template("500/server_error.html"), 500
