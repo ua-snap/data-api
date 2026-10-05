@@ -7,15 +7,12 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
-    POLY_AGGREGATION_ERRORS,
-    GET_POLY_ERRORS,
     fetch_data,
     describe_via_wcps,
     fetch_bbox_netcdf,
     get_poly,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, POLY_AGGREGATION_ERRORS, GET_POLY_ERRORS
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,

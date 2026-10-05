@@ -11,7 +11,6 @@ from flask import (
 from generate_requests import generate_netcdf_wcs_getcov_str
 from generate_urls import generate_wcs_query_url, generate_wfs_huc12_intersection_url
 from fetch_data import (
-    POLY_AGGREGATION_ERRORS,
     fetch_bbox_netcdf_list,
     fetch_data,
     generate_nested_dict,
@@ -19,6 +18,7 @@ from fetch_data import (
     describe_via_wcps,
     get_all_possible_dimension_combinations,
 )
+from luts import POLY_AGGREGATION_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import get_coverage_encodings, get_coverage_crs_str
 from csv_functions import create_csv

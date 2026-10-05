@@ -19,8 +19,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from collections import defaultdict
 from functools import reduce
-from aiohttp import ClientError, ClientSession
-from rasterio.errors import RasterioError
+from aiohttp import ClientSession
 from flask import current_app as app
 
 from generate_requests import (
@@ -229,34 +228,6 @@ async def fetch_data(urls):
             results = await asyncio.gather(*tasks)
 
     return results
-
-
-# Exceptions raised when a request to a backend data service (Rasdaman,
-# GeoServer, USGS, etc.) fails: connection errors, timeouts, HTTP error statuses,
-# and response bodies that are not valid JSON. HTTP errors are raised as
-# aiohttp.ClientResponseError, whose status attribute route handlers check to
-# return a 404 page when the backend has no data.
-FETCH_ERRORS = (ClientError, asyncio.TimeoutError, json.JSONDecodeError)
-
-# Exceptions raised when returned data is missing values, malformed, or shaped
-# unexpectedly while it is decoded, packaged, or summarized. OSError covers
-# netCDF decoding failures; statistics.StatisticsError is a ValueError.
-DATA_ERRORS = (KeyError, IndexError, TypeError, ValueError, ZeroDivisionError, OSError)
-
-# Exceptions raised by create_csv() when results do not have the structure
-# expected for the requested CSV output.
-CSV_ERRORS = (KeyError, IndexError, TypeError, ValueError)
-
-# Exceptions raised by get_poly() when the polygon cannot be fetched or the
-# polygon ID is unknown. GeoServer returns an empty feature collection for an
-# unknown ID, which geopandas rejects with an AttributeError (ValueError in older
-# geopandas versions).
-GET_POLY_ERRORS = FETCH_ERRORS + (AttributeError, ValueError)
-
-# Exceptions raised when fetching coverage data within a polygon and computing
-# zonal statistics: GET_POLY_ERRORS and DATA_ERRORS, plus rasterio failures while
-# rasterizing the polygon.
-POLY_AGGREGATION_ERRORS = GET_POLY_ERRORS + DATA_ERRORS + (RasterioError,)
 
 
 def get_poly(poly_id, crs=3338):

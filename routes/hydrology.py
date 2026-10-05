@@ -5,11 +5,10 @@ from flask import Blueprint, render_template, request, current_app as app, jsoni
 
 # local imports
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_wcs_point_data,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from validate_request import (
     validate_latlon,
     project_latlon,

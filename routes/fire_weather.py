@@ -11,8 +11,6 @@ import time
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
-    POLY_AGGREGATION_ERRORS,
-    GET_POLY_ERRORS,
     fetch_data,
     describe_via_wcps,
     ymd_to_cftime_value,
@@ -36,7 +34,11 @@ from zonal_stats import (
     calculate_zonal_means_vectorized,
 )
 from csv_functions import create_csv
-from luts import summer_fire_danger_ratings_dict
+from luts import (
+    summer_fire_danger_ratings_dict,
+    POLY_AGGREGATION_ERRORS,
+    GET_POLY_ERRORS,
+)
 
 from . import routes
 

@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request
 # local imports
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
-from fetch_data import DATA_ERRORS, FETCH_ERRORS, fetch_data, describe_via_wcps
+from fetch_data import fetch_data, describe_via_wcps
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
@@ -21,6 +21,8 @@ from luts import (
     all_cmip6_downscaled_vars,
     all_cmip6_downscaled_models,
     all_cmip6_downscaled_scenarios,
+    DATA_ERRORS,
+    FETCH_ERRORS,
 )
 
 from . import routes

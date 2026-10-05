@@ -17,11 +17,10 @@ from validate_request import (
     generate_time_index_from_coverage_metadata,
 )
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_wcs_point_data,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from postprocessing import prune_nulls_with_max_intensity, postprocess
 from csv_functions import create_csv
 

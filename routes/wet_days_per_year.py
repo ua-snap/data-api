@@ -12,12 +12,11 @@ from urllib.parse import quote
 # local imports
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_data,
     generate_wcs_getcov_str,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from validate_request import (
     validate_latlon,
     project_latlon,

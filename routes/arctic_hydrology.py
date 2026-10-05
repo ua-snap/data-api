@@ -22,13 +22,11 @@ from generate_urls import (
     generate_wfs_arctic_hydrology_stats_url,
 )
 from fetch_data import (
-    CSV_ERRORS,
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_data,
     fetch_layer_data,
     describe_via_wcps,
 )
+from luts import CSV_ERRORS, DATA_ERRORS, FETCH_ERRORS
 from validate_request import get_axis_encodings
 from postprocessing import (
     prune_nulls_with_max_intensity,

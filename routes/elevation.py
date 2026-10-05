@@ -8,13 +8,11 @@ import xarray
 from generate_requests import generate_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
-    GET_POLY_ERRORS,
     fetch_geoserver_data,
     fetch_bbox_geotiff_from_gs,
     get_poly,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, GET_POLY_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,

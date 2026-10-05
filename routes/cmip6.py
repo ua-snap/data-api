@@ -7,9 +7,6 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str
 from fetch_data import (
-    CSV_ERRORS,
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_data,
     describe_via_wcps,
     get_encoding_from_axis_attributes,
@@ -18,6 +15,7 @@ from fetch_data import (
     ymd_to_cftime_value,
     cftime_value_to_ymd,
 )
+from luts import CSV_ERRORS, DATA_ERRORS, FETCH_ERRORS
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,

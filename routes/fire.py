@@ -5,12 +5,12 @@ from flask import (
 )
 
 # local imports
-from fetch_data import DATA_ERRORS, FETCH_ERRORS, fetch_data, fetch_geoserver_data
+from fetch_data import fetch_data, fetch_geoserver_data
 from generate_urls import generate_wfs_search_url
 from validate_request import validate_latlon
 from postprocessing import nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status
+from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status, DATA_ERRORS, FETCH_ERRORS
 from . import routes
 
 fire_api = Blueprint("fire_api", __name__)

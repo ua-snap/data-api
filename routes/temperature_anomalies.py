@@ -6,11 +6,8 @@ from flask import (
 )
 
 # local imports
-from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
-    describe_via_wcps,
-)
+from fetch_data import describe_via_wcps
+from luts import DATA_ERRORS, FETCH_ERRORS
 from csv_functions import create_csv
 from validate_request import (
     get_coverage_encodings,

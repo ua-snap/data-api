@@ -8,11 +8,10 @@ from flask import (
 
 # local imports
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_wcs_point_data,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from csv_functions import create_csv
 from validate_request import (
     validate_seaice_latlon,

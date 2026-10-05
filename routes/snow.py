@@ -5,12 +5,11 @@ from flask import Blueprint, render_template, request, jsonify
 
 # local imports
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_wcs_point_data,
     deepflatten,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from validate_request import get_coverage_encodings
 from csv_functions import create_csv
 from validate_request import (

@@ -10,8 +10,6 @@ from flask import Blueprint, render_template, request, jsonify, Response
 from generate_urls import generate_wcs_query_url
 from validate_data import place_name_and_type
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
     fetch_data,
     fetch_geoserver_data,
     fetch_wcs_point_data,
@@ -19,6 +17,7 @@ from fetch_data import (
     deepflatten,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from validate_request import (
     validate_latlon,
     project_latlon,

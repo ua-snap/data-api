@@ -14,9 +14,6 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_wcs_getcov_str, generate_netcdf_wcs_getcov_str
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
-    POLY_AGGREGATION_ERRORS,
     fetch_data,
     fetch_bbox_netcdf_list,
     get_poly,
@@ -29,6 +26,7 @@ from fetch_data import (
     ymd_to_cftime_value,
     cftime_value_to_ymd,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, POLY_AGGREGATION_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,

@@ -11,12 +11,11 @@ from urllib.parse import quote
 
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
     generate_wcs_getcov_str,
     fetch_data,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from validate_request import get_coverage_encodings
 from csv_functions import create_csv
 from validate_request import (

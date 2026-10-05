@@ -7,9 +7,6 @@ from flask import Blueprint, render_template, request
 from generate_urls import generate_wcs_query_url
 from generate_requests import generate_netcdf_wcs_getcov_str
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
-    POLY_AGGREGATION_ERRORS,
     fetch_bbox_netcdf_list,
     fetch_wcs_point_data,
     describe_via_wcps,
@@ -17,6 +14,7 @@ from fetch_data import (
     get_poly,
     get_all_possible_dimension_combinations,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, POLY_AGGREGATION_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from csv_functions import create_csv
 from validate_request import (

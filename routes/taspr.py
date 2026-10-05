@@ -18,9 +18,6 @@ from flask import (
 from generate_requests import generate_wcs_getcov_str, generate_mmm_wcs_getcov_str
 from generate_urls import generate_wcs_query_url
 from fetch_data import (
-    DATA_ERRORS,
-    FETCH_ERRORS,
-    POLY_AGGREGATION_ERRORS,
     fetch_data,
     fetch_wcs_point_data,
     get_from_dict,
@@ -28,6 +25,7 @@ from fetch_data import (
     generate_nested_dict,
     get_all_possible_dimension_combinations,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, POLY_AGGREGATION_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,
