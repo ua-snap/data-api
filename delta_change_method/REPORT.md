@@ -12,7 +12,7 @@
 | Not zero-bounded (temperature, degree days) | `G_future − G_hist` | `Baseline + delta` |
 | Zero-bounded (precipitation, snowfall, wet days) | `G_future / G_hist` | `Baseline × delta`, with a multiplier cap |
 
-The method needs each GCM's own historical run (`G_hist`). Where a coverage doesn't contain it, the method can't be applied without ingesting the GCM historical runs from source. Nothing in this report infers or substitutes `G_hist`.
+The method needs each GCM's own historical run (`G_hist`). This report never infers or substitutes a missing `G_hist`.
 
 All numbers come from 24 test sites across 7 Alaska regions, pulled from the production Rasdaman (`zeus.snap.uaf.edu`) on 2026-10-08. Every "current" value was checked against the live `earthmaps.io/eds/all` response, and all of them reproduce it.
 
@@ -20,81 +20,83 @@ All numbers come from 24 test sites across 7 Alaska regions, pulled from the pro
 
 ## TL;DR
 
-1. **The delta change method is not applied anywhere in the API or the app.** Each plate shows a baseline (CRU-TS, Daymet or ERA-Interim) next to raw GCM-future statistics, and the frontend subtracts one from the other ([evidence](#a-is-the-delta-change-method-applied)). The downscaling used to produce the source data is a separate step, not this method.
-2. **Only the degree-day components can use the method with the data in Rasdaman today** (freezing index, thawing index, heating degree days). Their coverages contain each GCM's 1980–2009 run. The temperature, precipitation, snowfall and wet-day coverages contain **no GCM historical data**; this was checked at every site. Those four components need the GCM historical runs ingested from source first.
-3. **WCPS can do the math server-side.** For the degree days:
-   - Additive and multiplicative (capped) versions each run in one request per point, about 0.2 s, and match a Python implementation exactly.
-   - The cap logic was verified where it actually binds.
-   - Statewide grids take one request each, under 1 s ([Part B](#b-can-wcps-do-it-server-side)).
-4. **For degree days the effect on the displayed numbers is modest.** The GCMs' 1980–2009 runs already sit close to Daymet. Mid-century shifts in the % change the app displays (pp = percentage points):
+| Component | Delta change method today | What's needed |
+|---|---|---|
+| Temperature, precipitation | **Already applied, during data production** (monthly, per model, against each GCM's own 1961–1990 run, added to PRISM 1961–1990). Not reapplied in the API or app, and shouldn't be. | Fix the **baseline mismatch**: the app shows CRU-TS 1901–2015 as "historical", not the 1961–1990 reference the deltas were added to |
+| Freezing index, thawing index, HDD | **Not applied.** The app shows raw GCM futures against Daymet. `G_hist` *is* in Rasdaman. | Apply it (additive). WCPS queries are ready and validated |
+| Wet days | **Not applied.** Raw WRF futures against ERA-Interim. No `G_hist` in Rasdaman. | Ingest WRF GCM historical runs first |
+| Snowfall | Derived product; lineage not established here. No `G_hist` in Rasdaman. | Confirm how the SFE product was built before deciding |
 
-   | Index | Typical shift | Worst site |
-   |---|---|---|
-   | Freezing index | ~3 pp | 8 pp (Kodiak: −58% becomes −50%) |
-   | Thawing index | ~2 pp | 6.8 pp (Utqiagvik: +76% becomes +69%) |
-   | Heating degree days | ~1 pp | 1.8 pp |
-
-   Individual model runs are biased more than the ensemble mean (−16% to +14%), so the min/max ranges the app shows move more than the means.
-5. **The 3× cap never binds for degree days at the annual scale.** It would bind on 0.25% of thawing-index model-years only if that index were treated multiplicatively. Degree days are naturally additive (sums of temperature), so the additive form is used here.
+1. **Temperature and precipitation.** The AR5/CMIP5 2 km data are the dataset described in Walsh et al. (2018), which was produced with exactly the issue's delta method. Because the app compares against a different baseline, the change a user reads is the model delta plus a baseline offset. At mid-century:
+   - Temperature: the displayed annual change **understates the model delta by 0.07–0.30 °C** (median 0.15 °C). By month the offset ranges from −1.3 to +1.1 °C.
+   - Precipitation: the displayed % change is off by **−4.6 to +11.4 pp**. At Bethel the app shows +4%; the model delta is +16%.
+2. **Degree days.** Applying the method shifts the displayed mid-century % change by about 1–3 pp (max 8 pp, freezing index at Kodiak). Min/max ranges move more than means.
+3. **WCPS can do the delta math server-side** wherever `G_hist` exists. Point queries take about 0.2 s and match Python exactly, including a cap that actually binds. Statewide grids take one request each ([Part B](#b-can-wcps-do-it-server-side)).
+4. **Multiplier caps don't bind for any computable component at annual scale.** A 3× cap and a minimum-denominator threshold remain sensible defaults for when precipitation or wet-day deltas are computed from monthly or daily data.
 
 ---
 
 ## A. Is the delta change method applied?
 
-**No.** The evidence is laid out below by data availability, then by code.
+### Temperature and precipitation: yes, during data production
 
-### What each component shows today, and whether G_hist exists
+The EDS temperature (`tas_2km_projected_wcs`) and precipitation (`annual_precip_totals_mm`) coverages come from SNAP's *Projected Monthly … Products – 2 km CMIP5/AR5*. The rasdaman-ingest notebook pulls them from `CKAN_Data/Base/AK_CAN_2km/projected/AR5_CMIP5_models/`. That product is described in [Walsh et al. 2018](https://pubs.usgs.gov/publication/70200456), doi:10.1016/j.envsoft.2018.03.021 ([open manuscript](https://repository.library.noaa.gov/view/noaa/57850)):
 
-`G_hist` availability was checked by querying every GCM slice over the historical years at all 24 sites ([`check_gcm_historical.py`](check_gcm_historical.py), [`data/gcm_historical_availability.csv`](data/gcm_historical_availability.csv)).
+- **Same models:** *"MRI-CGCM3, GISS-E2-R, GFDL-CM3, IPSL-CM5A-LR and NCAR-CCSM4"* (Sec. 4). These are the five GCMs in both coverages.
+- **Same grid and scenarios:** a 2 km grid; RCP 4.5, 6.0 and 8.5.
+- **Same method as the issue:** *"a model's future change ('delta') … is added to the historical mean value … The delta is computed as the model's change from the period of the historical climatology (1961–1990 in the case of the PRISM data) to a future time slice"* (Sec. 3.2). And: *"For every year and calendar month, the downscaling consisted of calculating the 'delta' value for each GCM grid cell … adding these high resolution 'deltas' to the same high resolution climatology"* (Sec. 4).
 
-| EDS component | Coverage | "Historical" shown | "Future" shown | GCM historical values found | Delta change possible today? |
-|---|---|---|---|---|---|
-| Temperature | `tas_2km_historical_wcs` / `tas_2km_projected_wcs` | CRU-TS 4.0 2 km, 1901–2015 | AR5 2 km 5ModelAvg/GFDL/NCAR, 2006–2100 | **None.** The projected coverage starts in 2006; the historical one has no model axis | **No.** Needs GCM historical ingest |
-| Precipitation | `annual_precip_totals_mm` | CRU-TS 4.0 2 km, 1901–2015 | AR5 2 km, 5 GCMs × 3 RCPs | **0 of 60,480** (GCM slices, 1901–2005) | **No.** Needs GCM historical ingest |
-| Snowfall (SFE) | `mean_annual_snowfall_mm` | CRU-TS 3.1, 1910–2009 | AR5, 5 GCMs × 3 RCPs, 2010–2099 | **0 of 4,800** (GCM slices, 1910–2009) | **No.** Needs GCM historical ingest |
-| Wet days per year | `wet_days_per_year` | ERA-Interim WRF 20 km, 1980–2009 | GFDL-CM3 / NCAR-CCSM4 WRF, 2006–2100 | **0 of 1,248** (GCM slices, 1980–2005) | **No.** Needs WRF GCM historical ingest |
-| Freezing index | `air_freezing_index_Fdays` | Daymet, 1980–2009 | NCAR 12 km, 9 GCMs × 2 RCPs | **12,420 of 19,440**¹ | **Yes** |
-| Thawing index | `air_thawing_index_Fdays` | Daymet, 1980–2009 | NCAR 12 km, 9 GCMs × 2 RCPs | **12,420 of 19,440**¹ | **Yes** |
-| Heating degree days | `heating_degree_days_Fdays` | Daymet, 1980–2009 | NCAR 12 km, 9 GCMs × 2 RCPs | **12,420 of 19,440**¹ | **Yes** |
+So every AR5 value in these coverages is already `PRISM_1961–1990 + (G_future − G_hist,1961–1990)`, computed per model and calendar month. **That is why the GCM historical runs aren't in Rasdaman:** they were consumed during downscaling.
+
+Two caveats:
+- The paper produced versions on both the PRISM and CRU TS 3.2 1961–1990 baselines. The SNAP catalog record for the 2 km product ([record](https://catalog.snap.uaf.edu/geonetwork/srv/api/records/ba834996-ad15-4785-9b43-ef2af86a5ad9)) and the Arctic-EDS plate text both point to PRISM. **This hasn't been confirmed from the source files.**
+- The paper doesn't say whether precipitation deltas were differences or ratios. The analysis below doesn't depend on that.
+
+**The problem is the baseline the app displays.** The plates show CRU-TS 4.0 2 km 1901–2015 statistics as "historical" and compute change against them (`Diff.vue`). The change a user reads is therefore:
+
+```
+displayed change = G_fut − CRU_1901–2015
+                 = (G_fut − PRISM_1961–1990)        ← the model delta
+                 + (PRISM_1961–1990 − CRU_1901–2015) ← baseline offset
+```
+
+### Degree days and wet days: no
+
+Data availability was checked by querying every GCM slice over the historical years at all 24 sites ([`check_gcm_historical.py`](check_gcm_historical.py), [`data/gcm_historical_availability.csv`](data/gcm_historical_availability.csv)).
+
+| Component | Coverage | Baseline shown | Future shown | GCM historical values found |
+|---|---|---|---|---|
+| Freezing / thawing index, HDD | `air_*_index_Fdays`, `heating_degree_days_Fdays` (NCAR 12 km) | Daymet 1980–2009 | 9 GCMs × 2 RCPs, raw | **12,420 of 19,440**¹, so the method **can be applied** |
+| Wet days per year | `wet_days_per_year` (WRF 20 km) | ERA-Interim 1980–2009 | GFDL-CM3 / NCAR-CCSM4, raw, 2006–2100 | **0 of 1,248**, so WRF GCM historical runs **must be ingested** first |
+| Snowfall (SFE) | `mean_annual_snowfall_mm` | CRU-TS 3.1 1910–2009 | AR5, 5 GCMs × 3 RCPs | **0 of 4,800** |
+| *(for reference)* Temperature / precipitation | `tas_2km_*` / `annual_precip_totals_mm` | CRU-TS 4.0 1901–2015 | AR5, already delta-downscaled | none, and none needed (see above) |
 
 ¹ Every GCM × RCP track holds 1950–2005 values. The remaining empty cells are the unused `historical` scenario index for GCMs and Ketchikan, which falls outside the NCAR 12 km grid.
 
-The other components (permafrost, hydrology, elevation, precipitation frequency) are model outputs or static layers, not baseline-vs-GCM comparisons, and are out of scope.
+Snowfall is derived from SNAP's 771 m AR5 temperature and precipitation (PRISM 1971–2000 baseline) through a snow-fraction calculation. It's excluded here because neither its lineage nor a valid `G_hist` could be established. Permafrost, hydrology, elevation and precipitation frequency are model outputs or static layers and are out of scope.
 
-### Code evidence (API)
+### Code evidence: the API and app never apply a delta
 
-The summaries are plain min/mean/max statistics over raw coverage values. Nothing references a model's own historical period.
-
-- **Precipitation.** [taspr.py:1442](../routes/taspr.py#L1442) computes the historical statistics from CRU-TS. [taspr.py:1456–1469](../routes/taspr.py#L1456-L1469) then pools every GCM × RCP annual value in each era and takes min/mean/max.
-- **Temperature.** [taspr.py:767–860](../routes/taspr.py#L767) averages the projected `tas_2km` values per era. No historical model run is requested, and none exists in the coverage.
-- **Degree days.** [degree_days.py:534–560](../routes/degree_days.py#L534-L560) takes Daymet 1980–2009 statistics as `modeled_baseline` and pools raw GCM values per era. The GCM 1980–2009 values are in the coverage but are never read.
-- **Snowfall.** [snow.py:85–116](../routes/snow.py#L85-L116) takes CRU decades as historical and pools all GCM decades as projected.
-- **Wet days.** [wet_days_per_year.py:44](../routes/wet_days_per_year.py#L44) splits the coverage by year range: 1980–2009 is ERA-Interim and 2006–2100 is the GCMs.
-- A search across all EDS routes for `delta|anomal|bias|ratio` finds nothing relevant. Delta and anomaly logic exists only in unrelated endpoints (`temperature_anomalies.py`, `arctic_hydrology.py`, `conus_hydrology.py`, `fire_weather.py`).
-
-### Code evidence (Arctic-EDS frontend, `ua-snap/arctic-eds@a25b445`)
-
-- `app/components/Diff.vue` computes `future − past` (abs) or `(future − past) / past` (pct). It is display arithmetic on the API's baseline and future means, not a delta-change adjustment.
-- The degree-day plates use `kind="pct"` and the temperature and precipitation plates use `kind="abs"`. So the "change" a user reads is `GCM_future − Baseline`, which mixes the climate signal with any difference between each GCM's historical run and the baseline.
-
-### Downscaling is not the delta change method
-
-The source datasets were statistically downscaled and bias-adjusted before ingest. That step corrects the GCM fields against observations, but it does not make the app's displayed change equal `G_future − G_hist`. The delta change method is a separate step applied when summarizing for the app, and it needs `G_hist`.
-
-One thing to check: the Arctic-EDS temperature, precipitation and snowfall plates say the data were *"bias corrected via the delta method"*. If the downscaling method was QDM, that wording may need updating so readers don't confuse it with the delta change method.
+- **Precipitation.** [taspr.py:1442](../routes/taspr.py#L1442) computes historical statistics from CRU-TS. [taspr.py:1456–1469](../routes/taspr.py#L1456-L1469) pools every GCM × RCP annual value per era.
+- **Temperature.** [taspr.py:767–860](../routes/taspr.py#L767) averages the projected `tas_2km` values per era.
+- **Degree days.** [degree_days.py:534–560](../routes/degree_days.py#L534-L560) takes Daymet 1980–2009 statistics as `modeled_baseline` and pools raw GCM values. The GCM 1980–2009 values are in the coverage but never read.
+- **Snowfall.** [snow.py:85–116](../routes/snow.py#L85-L116) takes CRU decades as historical and pools all GCM decades.
+- **Wet days.** [wet_days_per_year.py:44](../routes/wet_days_per_year.py#L44) splits the coverage at 1980–2009 (ERA-Interim) and 2006–2100 (GCMs).
+- A search across all EDS routes for `delta|anomal|bias|ratio` finds nothing relevant.
+- **Frontend** (`ua-snap/arctic-eds@a25b445`). `Diff.vue` computes `future − past` (abs: temperature, precipitation) or `(future − past) / past` (pct: degree days) from the API's means.
 
 ---
 
 ## B. Can WCPS do it server-side?
 
-**Yes, wherever `G_hist` is in the coverage.** [`wcps_server_side.py`](wcps_server_side.py) runs the full calculation in Rasdaman at every test site and checks it against the same formula in numpy on the same data ([`data/wcps_validation.csv`](data/wcps_validation.csv)).
+**Yes, wherever `G_hist` is in the coverage** (today, the degree days). [`wcps_server_side.py`](wcps_server_side.py) runs the full calculation in Rasdaman at every test site and checks it against the same formula in numpy on the same data ([`data/wcps_validation.csv`](data/wcps_validation.csv)).
 
 | Index | Formula run in WCPS (mean over 9 GCMs × 2 RCPs, 2040–2069) | Mean time per point | Max \|WCPS − Python\| |
 |---|---|---|---|
 | Freezing / thawing / HDD | additive: `B + (G_fut − G_hist)` | 0.20 s | 0.000 |
 | Freezing / thawing / HDD | multiplicative: `B × min(G_fut / G_hist, 3)` | 0.20 s | 0.000 |
 
-The 3× cap never binds on era means at these sites (the largest is 2.49×), so the cap was also tested with tighter caps that do bind ([`data/wcps_cap_check.csv`](data/wcps_cap_check.csv)). At Utqiagvik's thawing index, WCPS and Python agree exactly:
+The 3× cap never binds on era means here (the largest ratio is 2.49×), so the cap was also tested with tighter caps that do bind ([`data/wcps_cap_check.csv`](data/wcps_cap_check.csv)). At Utqiagvik's thawing index, WCPS and Python agree exactly:
 
 | Cap | Runs clipped | WCPS = Python | Uncapped |
 |---|---|---|---|
@@ -114,44 +116,66 @@ for $c in (air_freezing_index_Fdays) return encode(
 
 For the multiplicative form, the body becomes `min(G_fut / G_hist, 3.0)`. `switch case … return … default return …` and boolean masks also work.
 
-**Statewide grids** take one request each: the 12 km adjustment field `Daymet − ensemble G_hist` took 0.7–0.8 s and 0.6 MB per index ([Fig. 5](#figures)).
+**Statewide grids** take one request each:
 
-### Rasdaman quirks found (relevant to any future WCPS implementation)
+| Grid | Resolution | Time | Size | Figure |
+|---|---|---|---|---|
+| Degree-day adjustment fields | 12 km | 0.7–0.8 s each | 0.6 MB | [Fig. 5](#figures) |
+| Precipitation baseline-offset grid | 2 km | 7–77 s (server caching varies) | 16 MB | [Fig. 9](#figures) |
 
-1. **Mixed-length `avg()` fails.** Combining `avg()` over subsets of different lengths (e.g. 115 years vs 30 years) raises *"axes not compatible"*. Workaround: cast each aggregate, as in `(double)avg(...)`.
+For temperature and precipitation, WCPS can likewise compute baseline offsets or re-anchored values on the fly, since everything they need is in Rasdaman.
+
+### Rasdaman quirks found (relevant to any WCPS implementation)
+
+1. **Mixed-length `avg()` fails.** Combining `avg()` over subsets of different lengths (e.g. 115 vs 30 years) raises *"axes not compatible"*. Workaround: cast each aggregate, as in `(double)avg(...)`.
 2. **`condense` over a `year` iterator mis-indexes.** It sends geo years to the wrong grid index, and over an ANSI date axis it hung for more than 2 minutes. Workaround: write out explicit sums of year slices and send the query by POST.
 3. **`tas_2km_projected_wcs` has an irregular scenario axis.** Its coefficients are `0, 2`, so RCP 8.5 is `scenario(2)` even though the metadata encoding labels it `"1"`.
 4. **GeoTIFF axis order differs by coverage.** The NCAR 12 km coverages come back with X/Y transposed; the AR5 2 km coverages do not.
 
-### What's needed for the other four components
-
-WCPS is not the blocker; the inputs are missing. Each of these needs its GCM historical runs ingested, either as new coverages or as additional slices in the existing ones, covering the same period as the baseline the app shows:
-
-| Component | GCM historical runs to ingest | Baseline the app shows |
-|---|---|---|
-| Temperature | AR5 GCMs, downscaled the same way as the projections | 1901–2015 |
-| Precipitation | AR5 GCMs, downscaled the same way as the projections | 1901–2015 |
-| Snowfall | AR5 GCMs | 1910–2009 |
-| Wet days | WRF-downscaled GFDL-CM3 and NCAR-CCSM4 | 1980–2009 |
-
-After that, the same query pattern applies unchanged.
-
 ---
 
-## C. How big is the difference? (degree days)
+## C. How big is the difference?
 
-### Method
+### C1. Temperature and precipitation: baseline offset ([`ar5_baseline.py`](ar5_baseline.py))
+
+PRISM 1961–1990 isn't in Rasdaman. It is represented by the 1961–1990 mean of the CRU-TS 4.0 2 km historical coverage. That coverage was itself delta-downscaled onto the same PRISM 1961–1990 climatology (CKAN title; Arctic-EDS plate text), so its 1961–1990 mean equals PRISM at every pixel, whether the deltas were differences or ratios.
+
+**Assumption:** this rests on SNAP's description of the CRU product and was not checked against the PRISM grids. If the EDS AR5 coverages are the CRU TS 3.2 variant instead, the reference would differ.
+
+Comparisons match what the app shows:
+
+| Component | Baseline the app shows | Future the app shows |
+|---|---|---|
+| Temperature | CRU 1901–2015 mean | 5ModelAvg RCP 8.5 annual |
+| Precipitation | CRU 1901–2015 mean | 5 GCMs × 3 RCPs pooled, annual totals |
+
+Results at mid-century (2040–2069), 24 sites. The full table is in [`data/ar5_baseline_comparison.csv`](data/ar5_baseline_comparison.csv).
+
+| | Displayed change (vs CRU 1901–2015) | Model delta (vs 1961–1990 reference) | Difference |
+|---|---|---|---|
+| Temperature, annual | +2.6 to +6.2 °C (median +4.2) | +2.7 to +6.5 °C (median +4.3) | **Displayed understates by 0.07–0.30 °C** (largest at Utqiagvik) |
+| Temperature, by month | — | — | **−1.3 to +1.1 °C** ([Fig. 8](#figures)) |
+| Precipitation | +4.4% to +28.2% | +5.5% to +26.8% | **−4.6 to +11.4 pp** (median \|shift\| 2.9 pp) |
+
+How the precipitation offset varies across the state ([Fig. 9](#figures)):
+
+| Area | App baseline vs 1961–1990 | Effect on displayed % change | Example sites |
+|---|---|---|---|
+| Western Alaska / Y-K Delta | wetter | **understated** | Bethel +4.4% → +15.8%; Unalakleet +10.2% → +19.4%; Nome +12.0% → +17.5% |
+| Southeast, Southcentral, eastern Interior | drier | **overstated** | Yakutat +12.3% → +7.7%; Homer +18.9% → +14.3%; Juneau +10.8% → +6.8% |
+
+Because the offset is a constant in each era, it matters proportionally more early in the century. The monthly temperature pattern (February, April and October–November baselines warmer than 1961–1990; January in the west colder) also affects the monthly tables the app shows, more than the annual numbers suggest.
+
+### C2. Degree days: delta change method ([`analyze.py`](analyze.py))
 
 | Term | Definition |
 |---|---|
 | `B` | Daymet 1980–2009 mean (the "modeled baseline" the app shows) |
 | `G_hist` | Each GCM × RCP track's own 1980–2009 mean |
 
-Every future model-year is adjusted as `max(B + (G_year − G_hist), 0)`, then summarized into min/mean/max per era exactly as the API does today. The multiplicative form with 1.5×, 2× and 3× caps was also computed for comparison ([`data/summary_long.csv`](data/summary_long.csv)).
+Every future model-year is adjusted as `max(B + (G_year − G_hist), 0)`, then summarized into min/mean/max per era exactly as the API does today. The multiplicative form with 1.5×, 2× and 3× caps is in [`data/summary_long.csv`](data/summary_long.csv).
 
-### Results: mid-century (2040–2069), 23 sites
-
-The full per-site, per-era table is in [`data/comparison.csv`](data/comparison.csv).
+Results at mid-century (2040–2069), 23 sites. The full per-site, per-era table is in [`data/comparison.csv`](data/comparison.csv).
 
 | Index | Mean value shift, delta − current (median, range) | Median \|shift\| in displayed % change | Max \|shift\| | Where it's largest |
 |---|---|---|---|---|
@@ -159,23 +183,29 @@ The full per-site, per-era table is in [`data/comparison.csv`](data/comparison.c
 | Thawing index | −59 °F·days (−83 to −12), −1.5% | 1.9 pp | 6.8 pp | Utqiagvik (+76% → +69%), Deadhorse |
 | Heating degree days | +148 °F·days (+61 to +330), +1.4% | 1.2 pp | 1.8 pp | Fairly uniform statewide |
 
-Directionally, the GCM ensemble's 1980–2009 runs are:
+The ensemble's 1980–2009 runs sit slightly off Daymet, so the delta method trims the projected change in every case:
 
-| Index | Ensemble 1980–2009 vs Daymet | Effect of the delta method |
+| Index | Ensemble 1980–2009 vs Daymet | Effect |
 |---|---|---|
-| Freezing index | slightly lower (−1% to −8%) | projected freezing-index losses shrink |
-| Heating degree days | slightly lower (−0.6% to −1.8%) | projected HDD losses shrink |
-| Thawing index | slightly higher (+0.4% to +6.8%) | projected thawing-index gains shrink |
+| Freezing index | −1% to −8% | projected losses shrink |
+| Heating degree days | −0.6% to −1.8% | projected losses shrink |
+| Thawing index | +0.4% to +6.8% | projected gains shrink |
 
-The additive shift is the same in every era, so it matters proportionally more early in the century, when the climate signal is smaller.
+The shift is the same in every era. Individual runs are biased more than the ensemble mean ([Fig. 3](#figures)):
 
-**Ranges move more than means** ([Fig. 6](#figures)). Each GCM run gets its own offset, and individual runs are biased by −16% to +8% (freezing index), −4% to +14% (thawing index) and −4% to +2% (HDD) relative to Daymet ([Fig. 3](#figures)). The median shifts in the reported minimum are:
+| Index | Per-run bias vs Daymet |
+|---|---|
+| Freezing index | −16% to +8% |
+| Thawing index | −4% to +14% |
+| Heating degree days | −4% to +2% |
+
+So the min/max the app reports move more than the means ([Fig. 6](#figures)). Median shifts in the reported minimum:
 
 | Index | Median shift in minimum | Notes |
 |---|---|---|
 | Freezing index | 4.3% | Near-zero minimums at southern coastal sites swing from −100% (floored to 0) to +152% (Kodiak: 9 → 23 °F·days) |
-| Thawing index | −2.7% | Range −8.0% to +0.7% |
-| Heating degree days | 2.2% | Range −0.8% to +6.0% |
+| Thawing index | −2.7% | — |
+| Heating degree days | 2.2% | — |
 
 ### Multiplier caps and thresholds
 
@@ -187,39 +217,52 @@ Degree days are sums of temperature, so the additive form fits the issue's rule 
 | Freezing index | 0.6% | 0.05% | 0 |
 | Heating degree days | 0 | 0 | 0 |
 
-Freezing-index ratios reach 0.00 at some sites, where the future freezing index goes to zero. Along the far southern coast and in the Aleutians, the Daymet freezing-index baseline itself approaches zero (masked in Fig. 5). That is the tiny-denominator case the issue describes: a ratio method there would need a threshold, while the additive method does not.
+Along the far southern coast and in the Aleutians, the freezing-index baseline approaches zero. That is the tiny-denominator case the issue describes, and the additive form avoids it.
 
 ---
 
 ## Recommendations
 
-1. **Degree days: apply the delta change method (additive, floor at 0).** All inputs are in Rasdaman, and the WCPS query exists and is validated. The effect on displayed means is modest (≤ 8 pp) and larger on the min/max ranges.
-2. **Temperature, precipitation, snowfall, wet days: ingest GCM historical runs before doing anything.** Until then these plates can't use the method, and we shouldn't approximate `G_hist`. Ingesting the runs is the decision point; the WCPS side is ready.
-3. **Keep a multiplier cap (3×) and a minimum-denominator threshold as defaults** in any shared implementation for zero-bounded variables. They aren't exercised by the degree-day data, but they will matter for precipitation and wet days once those inputs exist, especially at monthly or daily scales.
-4. **Do points in WCPS and precompute grids.** Point queries add about 0.2 s per component, and 12 km statewide fields take under 1 s each.
-5. **Review the plate wording** that says the data are "bias corrected via the delta method", so it isn't read as the delta change method.
+1. **Temperature and precipitation: don't reapply the delta method; align the baseline.** Either show the 1961–1990 reference climatology as the plate's historical baseline, or compute the displayed change against it. Both are possible from Rasdaman today, in Python or WCPS. Before shipping:
+   - Confirm the EDS coverages are the PRISM (not CRU TS 3.2) variant.
+   - Verify that CRU-TS 2 km 1961–1990 equals PRISM 1961–1990 against the PRISM grids.
+
+   The monthly temperature tables are where this matters most (up to ±1.3 °C).
+2. **Degree days: apply the delta change method (additive, floor at 0).** All inputs are in Rasdaman, and the WCPS queries exist and are validated.
+3. **Wet days: ingest the WRF GCM historical runs before applying the method.**
+4. **Snowfall: establish how the SFE product was built** (baseline, deltas, snow-fraction model) before deciding whether it needs anything.
+5. **Shared implementation defaults:** a 3× multiplier cap and a minimum-denominator threshold for zero-bounded variables. Do point queries in WCPS (~0.2 s per component) and precompute statewide grids.
 
 ---
 
 ## Figures
 
-**Fig. 1: Mid-century % change shown in the app, current (blue) vs delta change method (orange).**
+**Fig. 1: Degree days, mid-century % change shown in the app, current (blue) vs delta change method (orange).**
 ![](figures/fig1_change_current_vs_delta.png)
 
-**Fig. 2: Shift in the displayed % change, by site and index.** The same in every era.
+**Fig. 2: Degree days, shift in the displayed % change by site and index.** The same in every era.
 ![](figures/fig2_pp_shift_heatmap.png)
 
-**Fig. 3: Each GCM's 1980–2009 bias against Daymet.** This is what the delta method removes.
+**Fig. 3: Degree days, each GCM's 1980–2009 bias against Daymet.** This is what the delta method removes.
 ![](figures/fig3_gcm_historical_bias.png)
 
-**Fig. 4: How often multiplicative caps would bind if degree days were treated as ratios.**
+**Fig. 4: Degree days, how often multiplicative caps would bind.**
 ![](figures/fig4_ratio_caps.png)
 
-**Fig. 5: Statewide adjustments, each computed server-side in one WCPS request.**
+**Fig. 5: Degree days, statewide adjustment fields, each from one WCPS request.**
 ![](figures/fig5_wcps_statewide_maps.png)
 
-**Fig. 6: Freezing-index min/mean/max as the app reports it, current vs delta.**
+**Fig. 6: Freezing index min/mean/max as the app reports it, current vs delta.**
 ![](figures/fig6_freezing_index_mmm.png)
+
+**Fig. 7: Temperature and precipitation, displayed change vs the model delta (mid-century).**
+![](figures/fig7_ar5_displayed_vs_delta.png)
+
+**Fig. 8: Temperature baseline offset by month.**
+![](figures/fig8_ar5_temperature_monthly_offset.png)
+
+**Fig. 9: Precipitation baseline offset statewide, from one WCPS request.**
+![](figures/fig9_ar5_precipitation_baseline_map.png)
 
 ---
 
@@ -235,8 +278,9 @@ Use the `api-env` conda environment and set `PROJ_DATA` to its `share/proj` dire
 cd delta_change_method
 python fetch_site_data.py        # ~8 min; caches point cubes for all EDS coverages to data/raw/
 python check_gcm_historical.py   # which coverages contain GCM historical runs
-python analyze.py                # degree days: current vs delta summaries -> data/*.csv
-python wcps_server_side.py       # Part B: server-side validation, cap check, statewide GeoTIFFs
+python analyze.py                # degree days: current vs delta change method
+python ar5_baseline.py           # temperature & precipitation: baseline offset
+python wcps_server_side.py       # server-side validation, cap check, statewide GeoTIFFs
 python make_figures.py           # figures/
 ```
 

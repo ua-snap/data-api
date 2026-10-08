@@ -5,10 +5,11 @@ The delta change method needs each GCM's own historical run (G_hist):
     additive        future = B + (G_future - G_hist)
     multiplicative  future = B * min(G_future / G_hist, cap)
 
-where B is the historical baseline the app already shows. Of the EDS coverages, only the
-degree-day coverages (NCAR 12km) contain GCM historical runs (see check_gcm_historical.py),
-so only those components are computed here. Temperature, precipitation, snowfall and
-wet days cannot use the method until GCM historical data are ingested from source.
+where B is the historical baseline the app already shows. The degree-day coverages (NCAR
+12km) are the only EDS coverages that contain GCM historical runs and do not already carry the
+delta method (see check_gcm_historical.py), so only those components are computed here.
+Temperature and precipitation were delta-downscaled during production (see ar5_baseline.py);
+wet days and snowfall have no G_hist in Rasdaman.
 
 Reads the cubes cached by fetch_site_data.py. For each degree-day component, reproduces
 the min/mean/max summary the /eds/all endpoint returns today ("current"), then recomputes

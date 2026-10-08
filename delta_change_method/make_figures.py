@@ -1,7 +1,9 @@
-"""Render the report figures from the analyze.py / wcps_server_side.py outputs.
+"""Render the report figures from the analyze.py, ar5_baseline.py and wcps_server_side.py outputs.
 
-Only the degree-day components are shown: they are the only EDS components whose
-coverages contain the GCM historical runs the delta change method needs.
+Figures 1-6 cover the degree days (the delta change method computed from GCM historical runs).
+Figures 7-9 cover temperature and precipitation, whose AR5 values already carry the delta
+method from downscaling; they show the offset between the app's baseline and the 1961-1990
+reference the deltas were added to.
 
 Usage: python make_figures.py
 """
@@ -249,6 +251,89 @@ def fig_mmm_example(long):
     plt.close(fig)
 
 
+def fig_ar5_changes(sites):
+    """Change the app displays vs the model delta itself, mid-century."""
+    df = pd.read_csv(DATA / "ar5_baseline_comparison.csv")
+    df = df[df.era == "2040-2069"]
+    panels = [
+        ("temperature", "change_displayed", "change_vs_delta_ref", "Temperature (annual)", "change (°C)"),
+        ("precipitation", "pct_change_displayed", "pct_change_vs_delta_ref", "Precipitation (annual total)", "change (%)"),
+    ]
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 7.6), sharey=True)
+    y = np.arange(len(sites))
+    for ax, (c, cur_col, ref_col, title, xlabel) in zip(axes, panels):
+        d = df[df.component == c].set_index("site").reindex(sites)
+        ax.hlines(y, d[cur_col], d[ref_col], color=MUTED, lw=1.5, zorder=1)
+        ax.scatter(d[cur_col], y, s=36, color=CURRENT, zorder=2, edgecolor=SURFACE, lw=1.2,
+                   label="Displayed today (vs CRU-TS 1901–2015)")
+        ax.scatter(d[ref_col], y, s=36, color=DELTA, zorder=3, edgecolor=SURFACE, lw=1.2,
+                   label="Model delta (vs 1961–1990 reference)")
+        ax.axvline(0, color=INK2, lw=0.8)
+        ax.set_title(title, loc="left")
+        ax.set_xlabel(xlabel)
+        ax.grid(axis="y", visible=False)
+        site_axis(ax, sites)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(0.01, 0.95), ncol=2)
+    suptitle(fig, "Temperature & precipitation, mid-century: displayed change vs the model delta")
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    fig.savefig(FIGS / "fig7_ar5_displayed_vs_delta.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_ar5_tas_monthly(sites):
+    m = pd.read_csv(DATA / "ar5_tas_monthly_offset.csv").set_index("site").reindex(sites)
+    fig, ax = plt.subplots(figsize=(8.6, 8.2))
+    lim = 1.5
+    im = ax.imshow(m.values, cmap=DIVERGING, norm=TwoSlopeNorm(0, -lim, lim), aspect="auto")
+    for i in range(m.shape[0]):
+        for j in range(m.shape[1]):
+            v = m.values[i, j]
+            ax.text(j, i, f"{v:+.1f}", ha="center", va="center", fontsize=7.5, color="white" if abs(v) > 0.65 * lim else INK)
+    ax.set_xticks(range(12))
+    ax.set_xticklabels(m.columns)
+    ax.grid(False)
+    site_axis(ax, sites)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    cb = fig.colorbar(im, ax=ax, shrink=0.6, pad=0.02)
+    cb.set_label("°C (+ = displayed change understates the model delta)")
+    cb.outline.set_visible(False)
+    ax.set_title("Temperature baseline offset by month\nCRU-TS 1901–2015 mean − 1961–1990 reference", loc="left")
+    fig.tight_layout()
+    fig.savefig(FIGS / "fig8_ar5_temperature_monthly_offset.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_ar5_precip_map():
+    with rio.open(DATA / "maps" / "precipitation_baseline_ratio.tif") as src:
+        a = src.read(1).astype(float)
+        b = src.bounds
+    a[(a < -9000) | ~np.isfinite(a)] = np.nan  # the 2km AR5 coverage is not transposed
+    xs, ys = zip(*[to_3338(s[2], s[3]) for s in SITES])
+    fig, ax = plt.subplots(figsize=(7.6, 5.8))
+    lim = 15
+    im = ax.imshow(100 * (a - 1), extent=(b.left, b.right, b.bottom, b.top), cmap=DIVERGING,
+                   norm=TwoSlopeNorm(0, -lim, lim), interpolation="nearest")
+    ax.scatter(xs, ys, s=10, color=INK, lw=0)
+    ax.set_xlim(-1.0e6, 1.55e6)
+    ax.set_ylim(0.35e6, 2.45e6)
+    ax.set_aspect("equal")
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.grid(False)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    cb = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.01, extend="both")
+    cb.outline.set_visible(False)
+    cb.set_label("% (CRU-TS 1901–2015 vs 1961–1990 reference)")
+    ax.set_title("Precipitation: app baseline vs the 1961–1990 reference the deltas were added to\n"
+                 "(red = app baseline wetter, so displayed % change is understated; one WCPS request)", loc="left", fontsize=10)
+    fig.tight_layout()
+    fig.savefig(FIGS / "fig9_ar5_precipitation_baseline_map.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     for old in FIGS.glob("*.png"):
         old.unlink()
@@ -262,4 +347,8 @@ if __name__ == "__main__":
     fig_ratios()
     fig_maps()
     fig_mmm_example(long)
+    all_sites = [s[0] for s in SITES]
+    fig_ar5_changes(all_sites)
+    fig_ar5_tas_monthly(all_sites)
+    fig_ar5_precip_map()
     print("figures written to", FIGS)

@@ -181,6 +181,23 @@ def map_baseline(cov):
     return f'for $c in ({cov}) return encode({ysum(0, 0, range(1980, 2010))} / 30.0, "image/tiff")'
 
 
+def T(year):
+    return f'"{year}-01-01T00:00:00.000Z"'
+
+
+def map_precip_baseline_ratio():
+    """Not a delta calculation: the ratio of the app's precip baseline (CRU-TS 1901-2015) to
+    the 1961-1990 mean that stands in for the PRISM climatology the AR5 deltas were added to
+    (see ar5_baseline.py). ~75 s for the 2km grid."""
+    yrs = lambda a, b: "(" + " + ".join(
+        f"$c[model(0),scenario(0),year({T(y)})]" for y in range(a, b + 1)
+    ) + ")"
+    return (
+        "for $c in (annual_precip_totals_mm) return encode("
+        f'({yrs(1901, 2015)} / 115.0) / ({yrs(1961, 1990)} / 30.0), "image/tiff")'
+    )
+
+
 MAP_QUERIES = {
     "freezing_index_adjustment": map_adjustment("air_freezing_index_Fdays"),
     "freezing_index_baseline": map_baseline("air_freezing_index_Fdays"),
@@ -188,11 +205,12 @@ MAP_QUERIES = {
     "thawing_index_baseline": map_baseline("air_thawing_index_Fdays"),
     "heating_degree_days_adjustment": map_adjustment("heating_degree_days_Fdays"),
     "heating_degree_days_baseline": map_baseline("heating_degree_days_Fdays"),
+    "precipitation_baseline_ratio": map_precip_baseline_ratio(),
 }
 
 
 def maps():
-    for stale in MAPS.glob("precipitation_*.tif"):
+    for stale in MAPS.glob("precipitation_factor.tif"):
         stale.unlink()
     timings = []
     for name, query in MAP_QUERIES.items():
