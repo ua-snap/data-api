@@ -1,23 +1,29 @@
 """Part B: can Rasdaman do the delta change math for us via WCPS?
 
-1. Point queries: for every test site, compute the delta-method 2040-2069 mean entirely
-   server-side (one WCPS request per component) and check it against analyze.py.
-2. Map queries: compute statewide delta-method adjustment fields in a single request
-   each and save them as GeoTIFFs for plotting.
+Only the degree-day coverages (NCAR 12km) contain GCM historical runs, so they are the only
+EDS inputs on which the full method can run (see check_gcm_historical.py).
 
-Rasdaman quirks we hit, and the workarounds used here:
-  * Combining avg() reductions over different-length subsets (e.g. 1901-2015 vs
-    1961-1990) fails with "axes not compatible". Casting each aggregate to (double) fixes it.
+1. Point queries: for every test site, compute the delta-method 2040-2069 mean entirely
+   server-side, one WCPS request per component, both additive and multiplicative with a
+   3x cap, and check the results against a Python implementation on the same cubes.
+2. Map queries: compute statewide delta-method adjustment fields in one request each and
+   save them as GeoTIFFs for plotting.
+
+Rasdaman quirks hit during this work, and the workarounds:
+  * Combining avg() reductions over different-length subsets (seen on
+    annual_precip_totals_mm with 1901-2015 vs 1961-1990) fails with "axes not compatible".
+    Casting each aggregate to (double) fixes it, so every aggregate below is cast.
   * condense over a `year` iterator mistranslates geo years into grid indices; explicit
     sums of the year slices work instead (sent via POST since the query gets long).
   * tas_2km_projected_wcs has an irregular scenario axis whose coefficients are 0 and 2,
     so RCP 8.5 is scenario(2) even though the encoding metadata labels it "1".
-  * Map outputs from the NCAR 12km degree-day coverages come back with X/Y transposed
-    (the 2km AR5 precip coverage does not), and -9999 nodata propagates.
+  * Map outputs from the NCAR 12km coverages come back with X/Y transposed (the 2km AR5
+    coverages do not), and -9999 nodata propagates.
 
-Usage: python wcps_server_side.py   (run analyze.py first)
+Usage: python wcps_server_side.py   (run fetch_site_data.py and analyze.py first)
 """
 
+import json
 import time
 from pathlib import Path
 
@@ -30,12 +36,16 @@ from wcps import RAS_BASE_URL, to_3338
 
 HERE = Path(__file__).parent
 DATA = HERE / "data"
+RAW = DATA / "raw"
 MAPS = DATA / "maps"
 MAPS.mkdir(parents=True, exist_ok=True)
 
-
-def T(year):
-    return f'"{year}-01-01T00:00:00.000Z"'
+COVERAGES = {
+    "freezing_index": "air_freezing_index_Fdays",
+    "thawing_index": "air_thawing_index_Fdays",
+    "heating_degree_days": "heating_degree_days_Fdays",
+}
+CAP = 3.0
 
 
 def run(query, timeout=600):
@@ -58,34 +68,16 @@ def run(query, timeout=600):
 # --- point queries -----------------------------------------------------------------
 
 
-def q_temperature(x, y):
-    # B + (G_fut - G_hist), 5ModelAvg RCP 8.5, 2040-2069 (year index 34:63 from 2006)
-    return (
-        "for $h in (tas_2km_historical_wcs), $p in (tas_2km_projected_wcs) return encode("
-        f"(double)avg($h.tas[year(0:114),X({x}),Y({y})])"
-        f" + (double)avg($p.tas[model(0),scenario(2),year(34:63),X({x}),Y({y})])"
-        f" - (double)avg($h.tas[year(60:89),X({x}),Y({y})]),"
-        ' "application/json")'
-    )
-
-
-def q_precipitation(x, y, cap=3.0):
-    # mean over 5 GCMs x 3 RCPs of  B * min(G_fut / G_hist, cap)
-    B = f"(double)avg($c[model(0),scenario(0),year({T(1901)}:{T(2015)}),X({x}),Y({y})])"
-    H = f"(double)avg($c[model(0),scenario(0),year({T(1961)}:{T(1990)}),X({x}),Y({y})])"
-    F = f"(double)avg($c[model($m),scenario($s),year({T(2040)}:{T(2069)}),X({x}),Y({y})])"
-    return (
-        "for $c in (annual_precip_totals_mm) return encode("
-        f"{B} * (condense + over $m model(2:6), $s scenario(1:3) using min({F} / {H}, {cap})) / 15.0,"
-        ' "application/json")'
-    )
-
-
-def q_degree_days(cov, x, y):
-    # mean over 9 GCMs x 2 RCPs of  B + (G_fut - G_hist)
+def _terms(x, y):
     B = f"(double)avg($c[model(0),scenario(0),year(1980:2009),X({x}),Y({y})])"
     F = f"(double)avg($c[model($m),scenario($s),year(2040:2069),X({x}),Y({y})])"
     H = f"(double)avg($c[model($m),scenario($s),year(1980:2009),X({x}),Y({y})])"
+    return B, F, H
+
+
+def q_additive(cov, x, y):
+    """Mean over 9 GCMs x 2 RCPs of  B + (G_fut - G_hist)."""
+    B, F, H = _terms(x, y)
     return (
         f"for $c in ({cov}) return encode("
         f"{B} + (condense + over $m model(1:9), $s scenario(1:2) using {F} - {H}) / 18.0,"
@@ -93,89 +85,115 @@ def q_degree_days(cov, x, y):
     )
 
 
-POINT_QUERIES = {
-    "temperature": q_temperature,
-    "precipitation": q_precipitation,
-    "freezing_index": lambda x, y: q_degree_days("air_freezing_index_Fdays", x, y),
-    "thawing_index": lambda x, y: q_degree_days("air_thawing_index_Fdays", x, y),
-    "heating_degree_days": lambda x, y: q_degree_days("heating_degree_days_Fdays", x, y),
-}
+def q_multiplicative(cov, x, y, cap=CAP):
+    """Mean over 9 GCMs x 2 RCPs of  B * min(G_fut / G_hist, cap)."""
+    B, F, H = _terms(x, y)
+    return (
+        f"for $c in ({cov}) return encode("
+        f"{B} * (condense + over $m model(1:9), $s scenario(1:2) using min({F} / {H}, {cap})) / 18.0,"
+        ' "application/json")'
+    )
 
-# the analyze.py method each server-side result should match
-PYTHON_METHOD = {
-    "temperature": "delta",
-    "precipitation": "delta_cap3x",
-    "freezing_index": "delta",
-    "thawing_index": "delta",
-    "heating_degree_days": "delta",
-}
+
+def python_reference(cube):
+    """Same two formulas in numpy, on the cube cached by fetch_site_data.py."""
+    dd = np.array(cube, dtype=float)
+    B = np.nanmean(dd[0, 0, 30:60])
+    F = np.nanmean(dd[1:, 1:, 90:120], axis=2)  # 2040-2069
+    H = np.nanmean(dd[1:, 1:, 30:60], axis=2)  # 1980-2009
+    return B + np.mean(F - H), B * np.mean(np.minimum(F / H, CAP))
 
 
 def point_validation():
-    long = pd.read_csv(DATA / "summary_long.csv")
-    py = long[(long.era == "2040-2069") & (long.stat == "mean")]
     rows = []
     for name, _, lat, lon in SITES:
         x, y = to_3338(lat, lon)
-        for comp, qfn in POINT_QUERIES.items():
-            r, secs = run(qfn(x, y))
-            server = float(r.text) if r.text.strip() != "null" else np.nan
-            match = py[
-                (py.site == name)
-                & (py.component == comp)
-                & (py.method == PYTHON_METHOD[comp])
-            ]
-            local = match.value.iloc[0] if len(match) else np.nan
-            if server < -9000:  # nodata cell
-                server = np.nan
-            rows.append(
-                dict(site=name, component=comp, wcps=server, python=local, seconds=secs)
-            )
-            print(f"{name:15s} {comp:20s} wcps={server:10.2f} python={local:10.2f} {secs:.2f}s")
+        site = json.loads((RAW / f"{name.replace(' ', '_')}.json").read_text())
+        for comp, cov in COVERAGES.items():
+            ref_add, ref_mult = python_reference(site[cov])
+            for method, qfn, ref in [
+                ("additive", q_additive, ref_add),
+                (f"multiplicative_cap{CAP:g}x", q_multiplicative, ref_mult),
+            ]:
+                r, secs = run(qfn(cov, x, y))
+                text = r.text.strip()
+                server = np.nan if text == "null" else float(text)
+                if server < -9000:  # nodata cell
+                    server = np.nan
+                rows.append(
+                    dict(site=name, component=comp, method=method, wcps=server, python=ref, seconds=secs)
+                )
+                print(f"{name:15s} {comp:20s} {method:22s} wcps={server:10.2f} python={ref:10.2f} {secs:.2f}s")
     df = pd.DataFrame(rows)
     df["abs_diff"] = (df.wcps - df.python).abs()
     df.to_csv(DATA / "wcps_validation.csv", index=False)
     return df
 
 
+def cap_check(site="Utqiagvik", caps=(1.5, 1.3)):
+    """At 3x the cap never binds on era means, so also test caps that do bind."""
+    _, _, lat, lon = next(s for s in SITES if s[0] == site)
+    x, y = to_3338(lat, lon)
+    cov = "air_thawing_index_Fdays"
+    dd = np.array(json.loads((RAW / f"{site}.json").read_text())[cov], dtype=float)
+    B = np.nanmean(dd[0, 0, 30:60])
+    F = np.nanmean(dd[1:, 1:, 90:120], axis=2)
+    H = np.nanmean(dd[1:, 1:, 30:60], axis=2)
+    rows = []
+    for cap in caps:
+        r, _ = run(q_multiplicative(cov, x, y, cap))
+        rows.append(
+            dict(
+                site=site,
+                component="thawing_index",
+                cap=cap,
+                runs_capped=int((F / H > cap).sum()),
+                runs=F.size,
+                wcps=float(r.text),
+                python=B * np.mean(np.minimum(F / H, cap)),
+                uncapped=B * np.mean(F / H),
+            )
+        )
+    df = pd.DataFrame(rows)
+    df.to_csv(DATA / "wcps_cap_check.csv", index=False)
+    print(df.round(2))
+
+
 # --- map queries -------------------------------------------------------------------
 
 
-def ysum(m, s, years, axis_fmt=str):
-    return "(" + " + ".join(
-        f"$c[model({m}),scenario({s}),year({axis_fmt(yr)})]" for yr in years
-    ) + ")"
+def ysum(m, s, years):
+    return "(" + " + ".join(f"$c[model({m}),scenario({s}),year({yr})]" for yr in years) + ")"
 
 
-def map_dd_adjustment(cov):
-    """Delta-method adjustment for degree days: B - mean_ms(G_hist), statewide."""
+def map_adjustment(cov):
+    """Additive delta-method adjustment, B - mean_ms(G_hist), statewide.
+
+    Adding this to the current ensemble-mean future gives the delta-method ensemble mean.
+    """
     yrs = range(1980, 2010)
     B = f"{ysum(0, 0, yrs)} / 30.0"
     H = f"(condense + over $m model(1:9), $s scenario(1:2) using {ysum('$m', '$s', yrs)}) / 540.0"
     return f'for $c in ({cov}) return encode({B} - {H}, "image/tiff")'
 
 
-def map_dd_baseline(cov):
+def map_baseline(cov):
     return f'for $c in ({cov}) return encode({ysum(0, 0, range(1980, 2010))} / 30.0, "image/tiff")'
 
 
-def map_pr_factor():
-    """Delta-method scaling for AR5 precip: B(1901-2015) / G_hist(1961-1990), statewide."""
-    B = f"{ysum(0, 0, range(1901, 2016), T)} / 115.0"
-    H = f"{ysum(0, 0, range(1961, 1991), T)} / 30.0"
-    return f'for $c in (annual_precip_totals_mm) return encode(({B}) / ({H}), "image/tiff")'
-
-
 MAP_QUERIES = {
-    "freezing_index_adjustment": map_dd_adjustment("air_freezing_index_Fdays"),
-    "freezing_index_baseline": map_dd_baseline("air_freezing_index_Fdays"),
-    "thawing_index_adjustment": map_dd_adjustment("air_thawing_index_Fdays"),
-    "thawing_index_baseline": map_dd_baseline("air_thawing_index_Fdays"),
-    "precipitation_factor": map_pr_factor(),
+    "freezing_index_adjustment": map_adjustment("air_freezing_index_Fdays"),
+    "freezing_index_baseline": map_baseline("air_freezing_index_Fdays"),
+    "thawing_index_adjustment": map_adjustment("air_thawing_index_Fdays"),
+    "thawing_index_baseline": map_baseline("air_thawing_index_Fdays"),
+    "heating_degree_days_adjustment": map_adjustment("heating_degree_days_Fdays"),
+    "heating_degree_days_baseline": map_baseline("heating_degree_days_Fdays"),
 }
 
 
 def maps():
+    for stale in MAPS.glob("precipitation_*.tif"):
+        stale.unlink()
     timings = []
     for name, query in MAP_QUERIES.items():
         r, secs = run(query)
@@ -187,6 +205,7 @@ def maps():
 
 if __name__ == "__main__":
     df = point_validation()
-    print("\nmax |wcps - python| by component:")
-    print(df.groupby("component")[["abs_diff", "seconds"]].agg(["max", "mean"]).round(3))
+    print("\nmax |wcps - python| and mean seconds by component and method:")
+    print(df.groupby(["component", "method"]).agg(max_abs_diff=("abs_diff", "max"), mean_s=("seconds", "mean")).round(4))
+    cap_check()
     maps()

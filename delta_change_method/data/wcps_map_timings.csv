@@ -1,6 +1,7 @@
 map,seconds,bytes
-freezing_index_adjustment,0.7722690105438232,569497
-freezing_index_baseline,0.18210506439208984,569497
-thawing_index_adjustment,0.740185022354126,569493
-thawing_index_baseline,0.208420991897583,569493
-precipitation_factor,77.11839008331299,16235103
+freezing_index_adjustment,0.8194642066955566,569497
+freezing_index_baseline,0.32926273345947266,569497
+thawing_index_adjustment,0.7326803207397461,569493
+thawing_index_baseline,0.16990280151367188,569493
+heating_degree_days_adjustment,0.8035428524017334,569459
+heating_degree_days_baseline,0.18865585327148438,569459

@@ -1,0 +1,8 @@
+component,coverage,checked,gcm_historical_values_found,values_checked,delta_change_possible
+temperature,tas_2km_projected_wcs,only years 2006-2100 exist; the historical coverage (tas_2km_historical_wcs) has no model axis,0,0,False
+precipitation,annual_precip_totals_mm,"GCM models, all scenarios, 1901-2005",0,60480,False
+snowfall,mean_annual_snowfall_mm,"GCM models, all scenarios, 1910-2009 decades",0,4800,False
+wet_days_per_year,wet_days_per_year,"GCM models, 1980-2005",0,1248,False
+freezing_index,air_freezing_index_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,True
+thawing_index,air_thawing_index_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,True
+heating_degree_days,heating_degree_days_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,True
