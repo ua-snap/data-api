@@ -10,7 +10,7 @@ from generate_urls import generate_wfs_search_url
 from validate_request import validate_latlon
 from postprocessing import nullify_nodata, postprocess
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
-from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status
+from luts import landcover_names, smokey_bear_names, smokey_bear_styles, snow_status, DATA_ERRORS, FETCH_ERRORS
 from . import routes
 
 fire_api = Blueprint("fire_api", __name__)
@@ -156,7 +156,7 @@ def run_fetch_fire(lat, lon):
                 ]
             )
         )
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

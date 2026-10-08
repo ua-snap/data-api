@@ -10,11 +10,14 @@ import os
 
 from flask import render_template
 from pyproj import Transformer
+from pyproj.exceptions import ProjError
 import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import shape
 from rasterio.crs import CRS
+from rasterio.errors import RasterioError
+from shapely.errors import GEOSException
 
 from config import WEST_BBOX, EAST_BBOX, SEAICE_BBOX
 from fetch_data import all_areas_full
@@ -64,7 +67,7 @@ def check_poly_in_geotiffs(polygon, coverages):
                     return True
                 else:
                     return 404
-        except Exception as e:
+        except (RasterioError, ProjError, GEOSException, IndexError, ValueError) as e:
             print(f"Error processing GeoTIFF {reference_geotiff}: {e}")
             return True
 
@@ -114,7 +117,7 @@ def check_geotiffs(lat, lon, coverages):
                     if 0 <= row < dataset.height and 0 <= col < dataset.width:
                         if dataset.read(1)[row, col] == 1:
                             return True
-        except:
+        except (RasterioError, IndexError, ProjError):
             return True
 
     return 404
@@ -133,7 +136,7 @@ def latlon_is_numeric_and_in_geodetic_range(lat, lon):
     try:
         lat_float = float(lat)
         lon_float = float(lon)
-    except:
+    except (TypeError, ValueError):
         return 400
     lat_in_world = -90 <= lat_float <= 90
     lon_in_world = -180 <= lon_float <= 180
@@ -149,7 +152,7 @@ def validate_latlon(lat, lon, coverages=[]):
     try:
         lat_float = float(lat)
         lon_float = float(lon)
-    except:
+    except (TypeError, ValueError):
         return 400  # HTTP status code
     lat_in_world = -90 <= lat_float <= 90
     lon_in_world = -180 <= lon_float <= 180
@@ -180,7 +183,7 @@ def validate_seaice_latlon(lat, lon, coverages):
     try:
         lat_float = float(lat)
         lon_float = float(lon)
-    except:
+    except (TypeError, ValueError):
         return 400  # HTTP status code
     lat_in_world = -90 <= lat_float <= 90
     lon_in_world = -180 <= lon_float <= 180
@@ -602,7 +605,7 @@ def get_coverage_crs_str(coverage_metadata):
         epsg_code_str = srs_string.split("EPSG/0/")[1]
         # get rasterio CRS object from EPSG code
         crs = CRS.from_epsg(int(epsg_code_str))
-    except:
+    except (AttributeError, IndexError, ValueError):
         raise ValueError(
             "Unexpected coverage metadata: 'srsName' not found or metadata otherwise invalid."
         )

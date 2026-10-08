@@ -11,6 +11,7 @@ from fetch_data import (
     fetch_wcs_point_data,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from csv_functions import create_csv
 from validate_request import (
     validate_seaice_latlon,
@@ -102,7 +103,7 @@ def run_point_fetch_all_seaice(lat, lon):
             return create_csv(data, "seaice", lat=lat, lon=lon)
         # Returns sea ice concentrations across years & months
         return postprocess(package_seaice_data(rasdaman_response), "seaice")
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -124,5 +125,5 @@ def seaice_enddate():
     try:
         valid_date = validate_seaice_timestring(latest_date)
         return {"year": valid_date.year, "month": valid_date.month}
-    except Exception:
+    except (TypeError, ValueError):
         return render_template("500/server_error.html"), 500

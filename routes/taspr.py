@@ -25,6 +25,7 @@ from fetch_data import (
     generate_nested_dict,
     get_all_possible_dimension_combinations,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, POLY_AGGREGATION_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,
@@ -1558,7 +1559,7 @@ def mmm_point_data_endpoint(
         point_pkg = run_fetch_mmm_point_data(
             var_ep, lat, lon, cov_id, start_year, end_year
         )
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -1669,7 +1670,7 @@ def tas_2km_point_data_endpoint(lat, lon):
 
     try:
         point_pkg = asyncio.run(run_fetch_tas_2km_point_data(lat, lon, coverages))
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -1738,7 +1739,7 @@ def point_data_endpoint(lat, lon):
     elif var_ep == "taspr":
         try:
             point_pkg = run_fetch_point_data(lat, lon)
-        except Exception as exc:
+        except FETCH_ERRORS + DATA_ERRORS as exc:
             if hasattr(exc, "status") and exc.status == 404:
                 return render_template("404/no_data.html"), 404
             return render_template("500/server_error.html"), 500
@@ -1791,7 +1792,7 @@ def taspr_area_data_endpoint(var_id):
         else:
             return render_template("400/bad_request.html"), 400
 
-    except:
+    except POLY_AGGREGATION_ERRORS:
         return render_template("422/invalid_area.html"), 422
 
     # validate request args before fetching data
@@ -1846,7 +1847,7 @@ def proj_precip_point(lat, lon):
 
     try:
         point_pkg = run_fetch_proj_precip_point_data(lat, lon, csv)
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

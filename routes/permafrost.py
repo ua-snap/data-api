@@ -17,6 +17,7 @@ from fetch_data import (
     deepflatten,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from validate_request import (
     validate_latlon,
     project_latlon,
@@ -418,7 +419,7 @@ def run_point_fetch_all_permafrost(lat, lon):
 
     try:
         rasdaman_results = asyncio.run(fetch_wcs_point_data(x, y, gipl_1km_coverage_id))
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -532,7 +533,7 @@ async def run_fetch_gipl_1km_point_data(
             end_valid = pd.Timestamp(int(end_year), 1, 1) <= time_index.max()
             chronological = start_year < end_year
             years_valid = start_valid and end_valid and chronological
-        except:
+        except (TypeError, ValueError):
             return render_template("400/bad_request.html"), 400
         if years_valid != True:
             return render_template("400/bad_request.html"), 400
@@ -541,7 +542,7 @@ async def run_fetch_gipl_1km_point_data(
         gipl_1km_point_data = await asyncio.create_task(
             fetch_gipl_1km_point_data(x, y, start_year, end_year, summarize, ncr)
         )
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

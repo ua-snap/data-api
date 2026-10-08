@@ -21,6 +21,8 @@ from luts import (
     all_cmip6_downscaled_vars,
     all_cmip6_downscaled_models,
     all_cmip6_downscaled_scenarios,
+    DATA_ERRORS,
+    FETCH_ERRORS,
 )
 
 from . import routes
@@ -154,7 +156,7 @@ def cmip6_downscaled_point(lat, lon):
             )
     except ValueError:
         return render_template("400/bad_request.html"), 400
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

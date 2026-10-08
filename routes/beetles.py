@@ -14,6 +14,7 @@ from fetch_data import (
     get_poly,
     get_all_possible_dimension_combinations,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, POLY_AGGREGATION_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from csv_functions import create_csv
 from validate_request import (
@@ -272,7 +273,7 @@ def run_point_fetch_all_beetles(lat, lon):
         else:
             return results
 
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
@@ -308,7 +309,7 @@ def beetle_area_data_endpoint(var_id):
 
         return results
 
-    except Exception as exc:
+    except POLY_AGGREGATION_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

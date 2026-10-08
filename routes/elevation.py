@@ -12,6 +12,7 @@ from fetch_data import (
     fetch_bbox_geotiff_from_gs,
     get_poly,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS, GET_POLY_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import (
     validate_latlon,
@@ -75,7 +76,7 @@ def run_fetch_elevation(lat, lon):
         results = asyncio.run(
             fetch_geoserver_data(GS_BASE_URL, "dem", wms_targets, wfs_targets, lat, lon)
         )
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data"), 404
         return render_template("500/server_error.html"), 500
@@ -102,7 +103,7 @@ def run_area_fetch_all_elevation(var_id):
 
     try:
         polygon = get_poly(var_id)
-    except:
+    except GET_POLY_ERRORS:
         return render_template("422/invalid_area.html"), 422
 
     xstr = f"{polygon.total_bounds[0]},{polygon.total_bounds[2]}"

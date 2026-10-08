@@ -15,6 +15,7 @@ from fetch_data import (
     ymd_to_cftime_value,
     cftime_value_to_ymd,
 )
+from luts import CSV_ERRORS, DATA_ERRORS, FETCH_ERRORS
 from validate_request import (
     latlon_is_numeric_and_in_geodetic_range,
     construct_latlon_bbox_from_coverage_bounds,
@@ -319,7 +320,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
         )
 
         results = prune_nulls_with_max_intensity(postprocess(results, "cmip6_monthly"))
-    except:
+    except FETCH_ERRORS + DATA_ERRORS:
         return render_template("500/server_error.html"), 500
 
     if request.args.get("format") == "csv":
@@ -348,7 +349,7 @@ def run_fetch_cmip6_monthly_point_data(lat, lon, start_year=None, end_year=None)
                 start_year=start_year,
                 end_year=end_year,
             )
-        except:
+        except CSV_ERRORS:
             return render_template("500/server_error.html"), 500
 
     return results

@@ -20,6 +20,7 @@ from fetch_data import (
     fetch_wcs_point_data,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from postprocessing import prune_nulls_with_max_intensity, postprocess
 from csv_functions import create_csv
 
@@ -118,7 +119,7 @@ def run_point_fetch_all_landfastice(lat, lon):
         if request.args.get("format") == "csv":
             return create_csv(postprocessed, "landfast_sea_ice", lat=lat, lon=lon)
         return postprocessed
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

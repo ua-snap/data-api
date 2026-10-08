@@ -1,5 +1,6 @@
 from flask import render_template, jsonify, abort
 import logging
+import psycopg2
 from datetime import datetime
 
 from . import routes
@@ -84,7 +85,7 @@ def run_fetch_landslide_data(community_id):
     # Check for errors when fetching landslide data
     try:
         results = get_landslide_db_row(place_name)
-    except Exception as exc:
+    except psycopg2.Error as exc:
         logger.error(f"Error fetching landslide data for {community_id}: {exc}")
         return render_template("502/upstream_unreachable.html"), 502
 
@@ -114,6 +115,6 @@ def run_fetch_landslide_data(community_id):
 
         return jsonify(landslide_data)
 
-    except Exception as exc:
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
         logger.error(f"Error in landslide endpoint for {community_id}: {exc}")
         return render_template("500/server_error.html"), 500

@@ -62,7 +62,7 @@ def get_landslide_db_connection():
             port=5432,
         )
         return connection
-    except Exception as e:
+    except psycopg2.Error as e:
         logger.error(f"Database connection failed: {e}")
         raise
 
@@ -90,7 +90,7 @@ def get_landslide_db_row(place_name):
             cursor.execute(query, (place_name.capitalize(),))
             results = cursor.fetchall()
             return results
-    except Exception as exc:
+    except psycopg2.Error as exc:
         logger.error(f"Database query failed: {exc}")
         raise exc
     finally:

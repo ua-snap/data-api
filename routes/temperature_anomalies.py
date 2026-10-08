@@ -6,9 +6,8 @@ from flask import (
 )
 
 # local imports
-from fetch_data import (
-    describe_via_wcps,
-)
+from fetch_data import describe_via_wcps
+from luts import DATA_ERRORS, FETCH_ERRORS
 from csv_functions import create_csv
 from validate_request import (
     get_coverage_encodings,
@@ -166,7 +165,7 @@ def run_fetch_temperature_anomalies_point_data(lat, lon):
             place_id = request.args.get("community")
             return create_csv(data, "temperature_anomalies", place_id, lat, lon)
         return data
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500

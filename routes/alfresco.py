@@ -18,6 +18,7 @@ from fetch_data import (
     describe_via_wcps,
     get_all_possible_dimension_combinations,
 )
+from luts import POLY_AGGREGATION_ERRORS
 from zonal_stats import interpolate_and_compute_zonal_stats
 from validate_request import get_coverage_encodings, get_coverage_crs_str
 from csv_functions import create_csv
@@ -279,7 +280,7 @@ def run_fetch_alf_area_data(var_ep, var_id, ignore_csv=False):
 
     try:
         poly_pkg = run_aggregate_var_polygon(var_ep, var_id)
-    except:
+    except POLY_AGGREGATION_ERRORS:
         return render_template("422/invalid_area.html"), 422
 
     if (request.args.get("format") == "csv") and not ignore_csv:

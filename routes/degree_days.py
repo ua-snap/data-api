@@ -15,6 +15,7 @@ from fetch_data import (
     fetch_data,
     describe_via_wcps,
 )
+from luts import DATA_ERRORS, FETCH_ERRORS
 from validate_request import get_coverage_encodings
 from csv_functions import create_csv
 from validate_request import (
@@ -418,7 +419,7 @@ def run_fetch_dd_point_data(
         point_data = asyncio.run(
             fetch_dd_point_data(x, y, cov_id_str, start_year, end_year)
         )
-    except Exception as exc:
+    except FETCH_ERRORS + DATA_ERRORS as exc:
         if hasattr(exc, "status") and exc.status == 404:
             return render_template("404/no_data.html"), 404
         return render_template("500/server_error.html"), 500
