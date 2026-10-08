@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Temperature Anomalies</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Temperature Anomalies{% endblock %}
+
+{% block intro %}
 <p>
   This endpoint provides access to historical and projected annual mean surface air temperature anomalies, which are
   the differences in annual mean surface air temperature compared to a 1951&ndash;1980 baseline. Historical temperature
@@ -8,9 +10,131 @@
   (currently in beta). Projected temperature anomalies are provided by multiple CMIP6 models for multiple scenarios at a
   native resolution of 100 km interpolated to 0.25° x 0.25°.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>temperature_anomalies</code></td>
+      <td>Difference in annual mean surface air temperature from the model's 1951&ndash;1980 baseline</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>temperature_baseline</code></td>
+      <td>Model's mean surface air temperature for 1951&ndash;1980</td>
+      <td>&deg;C</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
 
+{% block models %}
+<p>
+  The table below lists the models available through this endpoint, along with the scenarios and years available for
+  each model. See <a href="/cmip6/references">this page</a> for citations for each CMIP6 model.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Years</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">Berkeley-Earth</td>
+      <td>historical</td>
+      <td class="nowrap">1850&ndash;2024</td>
+      <td>Historical observations from Berkeley Earth's global monthly land and ocean dataset</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CESM2</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">CNRM-CM6-1-HR</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">EC-Earth3-Veg</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-ESM4</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM3-GC31-LL</td>
+      <td>ssp126, ssp245, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM3-GC31-MM</td>
+      <td>ssp126, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">KACE-1-0-G</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MIROC6</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MPI-ESM1-2-HR</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-ESM2-0</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NorESM2-MM</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">TaiESM1</td>
+      <td>ssp126, ssp245, ssp370, ssp585</td>
+      <td class="nowrap">2025&ndash;2100</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Point query</h4>
 
 <p>
@@ -42,9 +166,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <p>Results from temperature anomalies queries will look like this:</p>
 
 <pre>
@@ -91,9 +215,9 @@
   },
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -123,5 +247,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

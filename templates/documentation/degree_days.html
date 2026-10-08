@@ -1,9 +1,11 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Degree Days</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Degree Days{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to total annual cumulative degree days for
-  several different degree day thresholds at a spatial resolution of 12 km. 
+  several different degree day thresholds at a spatial resolution of 12 km.
   Units are degree days Fahrenheit (&deg;F⋅days). Modeled baseline data were
   derived from a Daymet dataset and are available for years 1980&ndash;2017.
   Modeled data were derived from bias corrected and downscaled CMIP5 climate
@@ -17,9 +19,123 @@
   Links to an academic reference and source dataset are included at the bottom
   of this page.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<p>
+  Each degree day threshold (below 65&deg;F, below 0&deg;F, above 32&deg;F, and
+  below 32&deg;F) has its own endpoint. Each endpoint returns <code>dd</code>.
+</p>
 
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>dd</code></td>
+      <td>Cumulative annual degree days</td>
+      <td>&deg;F&sdot;days</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        With <code>?summarize=mmm</code>, results include <code>ddmax</code>,
+        <code>ddmean</code>, and <code>ddmin</code>: the maximum, mean, and
+        minimum <code>dd</code> across all models, scenarios, and years.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}
+
+{% block models %}
+<p>
+  The table below lists the models available through these endpoints, along
+  with the scenarios and years available for each model. All models are
+  available for every degree day threshold.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Years</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">daymet</td>
+      <td>modeled_baseline</td>
+      <td>1980&ndash;2017</td>
+      <td>Modeled baseline derived from the Daymet dataset</td>
+    </tr>
+    <tr>
+      <td class="nowrap">ACCESS1-3</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">CanESM2</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">CCSM4</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">CSIRO-Mk3-6-0</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-ESM2M</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">inmcm4</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MIROC5</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MPI-ESM-MR</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-CGCM3</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;2099</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Degree days (point query)</h4>
 
 <p>
@@ -39,33 +155,25 @@
     <tr>
       <td>Degree days below 65&deg;F</td>
       <td>
-        <a href="/degree_days/heating/65.0628/-146.1627"
-          >/degree_days/heating/65.0628/-146.1627</a
-        >
+        <a href="/degree_days/heating/65.0628/-146.1627">/degree_days/heating/65.0628/-146.1627</a>
       </td>
     </tr>
     <tr>
       <td>Degree days below 0&deg;F</td>
       <td>
-        <a href="/degree_days/below_zero/65.0628/-146.1627"
-          >/degree_days/below_zero/65.0628/-146.1627</a
-        >
+        <a href="/degree_days/below_zero/65.0628/-146.1627">/degree_days/below_zero/65.0628/-146.1627</a>
       </td>
     </tr>
     <tr>
       <td>Degree days above 32&deg;F</td>
       <td>
-        <a href="/degree_days/thawing_index/65.0628/-146.1627"
-          >/degree_days/thawing_index/65.0628/-146.1627</a
-        >
+        <a href="/degree_days/thawing_index/65.0628/-146.1627">/degree_days/thawing_index/65.0628/-146.1627</a>
       </td>
     </tr>
     <tr>
       <td>Degree days below 32&deg;F</td>
       <td>
-        <a href="/degree_days/freezing_index/65.0628/-146.1627"
-          >/degree_days/freezing_index/65.0628/-146.1627</a
-        >
+        <a href="/degree_days/freezing_index/65.0628/-146.1627">/degree_days/freezing_index/65.0628/-146.1627</a>
       </td>
     </tr>
   </tbody>
@@ -101,33 +209,28 @@
     <tr>
       <td>Degree days below 65&deg;F within year range</td>
       <td>
-        <a href="/degree_days/heating/65.0628/-146.1627/1990/2080"
-          >/degree_days/heating/65.0628/-146.1627/1990/2080</a
-        >
+        <a href="/degree_days/heating/65.0628/-146.1627/1990/2080">/degree_days/heating/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
     <tr>
       <td>Degree days below 0&deg;F within year range</td>
       <td>
-        <a href="/degree_days/below_zero/65.0628/-146.1627/1990/2080"
-          >/degree_days/below_zero/65.0628/-146.1627/1990/2080</a
-        >
+        <a
+          href="/degree_days/below_zero/65.0628/-146.1627/1990/2080">/degree_days/below_zero/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
     <tr>
       <td>Degree days above 32&deg;F within year range</td>
       <td>
-        <a href="/degree_days/thawing_index/65.0628/-146.1627/1990/2080"
-          >/degree_days/thawing_index/65.0628/-146.1627/1990/2080</a
-        >
+        <a
+          href="/degree_days/thawing_index/65.0628/-146.1627/1990/2080">/degree_days/thawing_index/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
     <tr>
       <td>Degree days below 32&deg;F within year range</td>
       <td>
-        <a href="/degree_days/freezing_index/65.0628/-146.1627/1990/2080"
-          >/degree_days/freezing_index/65.0628/-146.1627/1990/2080</a
-        >
+        <a
+          href="/degree_days/freezing_index/65.0628/-146.1627/1990/2080">/degree_days/freezing_index/65.0628/-146.1627/1990/2080</a>
       </td>
     </tr>
   </tbody>
@@ -142,9 +245,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Degree days for all years (point query)</h4>
 
 <p>Results from yearly degree days queries will look like this:</p>
@@ -211,9 +314,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -225,8 +328,7 @@
     <tr>
       <td>
         <a
-          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/f9831074-cd3f-4c06-8601-687bd2911b7e"
-        >
+          href="https://catalog.snap.uaf.edu/geonetwork/srv/eng/catalog.search#/metadata/f9831074-cd3f-4c06-8601-687bd2911b7e">
           Degree Days: Freezing Index, Thawing Index, Heating Degree Days, and
           Degree Days Below 0° F
         </a>
@@ -240,9 +342,7 @@
       <td>
         Mizukami, N., Newman, A. J., Wood, A. W., Gutmann, E. D., and Hamman, J.
         J. (2022). Boulder, CO: UCAR/NCAR/RAL.
-        <a href="https://doi.org/10.5065/c3kn-2y77"
-          >https://doi.org/10.5065/c3kn-2y77</a
-        >
+        <a href="https://doi.org/10.5065/c3kn-2y77">https://doi.org/10.5065/c3kn-2y77</a>
       </td>
     </tr>
     <tr>
@@ -252,12 +352,9 @@
         M. P., and Arnold, J. R. (2022). New projections of 21st century climate
         and hydrology for Alaska and Hawaiʻi. <i>Climate Services, 27</i>,
         100312.
-        <a href="https://doi.org/10.1016/j.cliser.2022.100312"
-          >https://doi.org/10.1016/j.cliser.2022.100312</a
-        >
+        <a href="https://doi.org/10.1016/j.cliser.2022.100312">https://doi.org/10.1016/j.cliser.2022.100312</a>
       </td>
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

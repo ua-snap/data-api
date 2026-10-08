@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Hydrology</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Hydrology{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to historical and projected modeled decadal
   summaries of hydrologic data for Alaska at a resolution of 12km. These data
@@ -13,9 +15,154 @@
   For more detailed model information, see the links to academic references and
   source datasets included at the bottom of this page.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>evap</code></td>
+      <td>Monthly sum of daily evapotranspiration</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>glacier_melt</code></td>
+      <td>Monthly sum of daily glacier ice melt</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>iwe</code></td>
+      <td>Monthly maximum of daily ice water equivalent</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>pcp</code></td>
+      <td>Monthly sum of daily precipitation</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>runoff</code></td>
+      <td>Monthly sum of daily surface runoff</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>sm1</code></td>
+      <td>Monthly mean of daily soil moisture in layer 1 (0&ndash;2cm depth)</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>sm2</code></td>
+      <td>Monthly mean of daily soil moisture in layer 2 (2&ndash;97cm depth)</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>sm3</code></td>
+      <td>
+        Monthly mean of daily soil moisture in layer 3 (97&ndash;300cm depth)
+      </td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>snow_melt</code></td>
+      <td>Monthly sum of daily snowmelt</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>swe</code></td>
+      <td>Monthly maximum of daily snow water equivalent</td>
+      <td>mm</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tmax</code></td>
+      <td>Monthly mean of daily maximum air temperature at 2m</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>tmin</code></td>
+      <td>Monthly mean of daily minimum air temperature at 2m</td>
+      <td>&deg;C</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
 
+{% block models %}
+<p>
+  The table below lists the models available through these endpoints, along
+  with the scenarios and decades available for each model.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Decades</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">ACCESS1-3</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CanESM2</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CCSM4</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">CSIRO-Mk3-6-0</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-ESM2M</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">HadGEM2-ES</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">inmcm4</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">MIROC5</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">MPI-ESM-MR</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-CGCM3</td>
+      <td>rcp45, rcp85</td>
+      <td>1950&ndash;1959 through 2090&ndash;2099</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>All hydrologic variables (point query)</h4>
 
 <p>
@@ -51,9 +198,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Decadal hydrology variables</h4>
 
 <p>Results from point queries will look like this:</p>
@@ -204,7 +351,7 @@
     &lt;scenario&gt;: {
       &lt;month&gt;: {
         &lt;variable&gt;: {
-          "max": &lt;maxmimum values for variable across all decades&gt;,
+          "max": &lt;maximum values for variable across all decades&gt;,
           "mean": &lt;mean values for variable across all decades&gt;,
           "min": &lt;minimum values for variable across all decades&gt;
         },
@@ -217,9 +364,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -259,5 +406,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

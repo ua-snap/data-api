@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Snowfall Equivalent</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Snowfall Equivalent{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to historical and projected modeled decadal summaries of annual snowfall equivalent
   (SFE) for Alaska at a resolution of 771m. Historical data were derived from the CRU TS 3.1 dataset. Projections were
@@ -16,9 +18,92 @@
 </p>
 
 <p>Links to academic references and source datasets are included at the bottom of this page.</p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
+{% block variables %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>SFE</code></td>
+      <td>Annual total snowfall equivalent</td>
+      <td>mm</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        With <code>?summarize=mmm</code>, results include <code>sfemax</code>,
+        <code>sfemean</code>, and <code>sfemin</code>: the maximum, mean, and
+        minimum <code>SFE</code> across all models, scenarios, and decades in the
+        historical or projected period.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}
 
+{% block models %}
+<p>The table below lists the models available through this endpoint, along with the scenarios and decades available
+  for each model.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Scenarios</th>
+      <th>Decades</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap">CRU-TS</td>
+      <td>historical</td>
+      <td>1910&ndash;1919 through 2000&ndash;2009</td>
+      <td>Historical baseline derived from the CRU TS 3.1 dataset</td>
+    </tr>
+    <tr>
+      <td class="nowrap">GFDL-CM3</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2019 through 2090&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">GISS-E2-R</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2019 through 2090&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">IPSL-CM5A-LR</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2019 through 2090&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">MRI-CGCM3</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2019 through 2090&ndash;2099</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="nowrap">NCAR-CCSM4</td>
+      <td>rcp45, rcp60, rcp85</td>
+      <td>2010&ndash;2019 through 2090&ndash;2099</td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Decadal SFE (point query)</h4>
 
 <p>Query SFE for all models and scenarios for each decade (1910&ndash;1919 through 2090&ndash;2099).</p>
@@ -46,9 +131,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Decadal snowfall equivalent</h4>
 
 <p>Results from decadal SFE queries will look like this:</p>
@@ -112,9 +197,9 @@
   ...
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -138,5 +223,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

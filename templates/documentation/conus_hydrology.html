@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>CONUS Hydrology</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}CONUS Hydrology{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to modeled streamflow statistics and daily
   streamflow climatologies for 56,460 stream network segments in the continental
@@ -10,10 +12,6 @@
   projected climate data. A calibrated historical baseline (the Maurer
   calibration) is available for the 1976&ndash;2005 period.
 </p>
-
-{% include "documentation/conus_models_table.html" %}
-
-{% include "documentation/streamflow_stats_table.html" %}
 
 <!-- TODO: create a way for users to find the stream IDs for streams of interest, and reference it here -->
 <!-- <p>Users can search for stream IDs using the ###TBD###</p> -->
@@ -31,9 +29,173 @@
   <a href="/conus_hydrology/gage_info">/conus_hydrology/gage_info</a> endpoint
   for a list of all stream IDs with gage data.
 </p>
+{% endblock %}
 
-<h3>Service endpoints</h3>
 
+{% block variables %}
+{% include "documentation/streamflow_stats_table.html" %}
+
+<h4 id="climatology_table">Daily streamflow climatologies</h4>
+
+<p>
+  The table below lists the variables returned for each day of year by the
+  modeled and observed daily streamflow climatology endpoints. Modeled values
+  are computed for each model, scenario, and era. Observed values are computed
+  from USGS stream gage data over the 1976&ndash;2005 historical era.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>doy</code></td>
+      <td>Day of year (1&ndash;366); all years are treated as leap years</td>
+      <td class="nowrap">Julian day</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>doy_max</code></td>
+      <td>Maximum streamflow on the day of year across all years in the era</td>
+      <td class="nowrap">cfs</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>doy_mean</code></td>
+      <td>Mean streamflow on the day of year across all years in the era</td>
+      <td class="nowrap">cfs</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>doy_min</code></td>
+      <td>Minimum streamflow on the day of year across all years in the era</td>
+      <td class="nowrap">cfs</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>water_year_index</code></td>
+      <td>
+        Water year day index (1&ndash;366), where the water year starts on
+        October 1 (day of year 275) and ends on September 30 (day of year 274)
+      </td>
+      <td class="nowrap">N/A</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block models %}
+<!-- Climate models derived from the gcm_metadata_dict used in the hydroviz preprocessing pipeline. -->
+<p>
+  Streamflow was modeled using climate inputs from the following 13 CMIP5
+  general circulation models (GCMs). Each model also includes a historical run
+  covering the 1976&ndash;2005 era.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Modeling center</th>
+      <th>Emissions scenarios</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>ACCESS1-0</code></td>
+      <td>
+        Commonwealth Scientific and Industrial Research Organization and Bureau
+        of Meteorology, Australia
+      </td>
+      <td>RCP 4.5, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>BCC-CSM1-1</code></td>
+      <td>Beijing Climate Center, China Meteorological Administration, China</td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>BNU-ESM</code></td>
+      <td>
+        College of Global Change and Earth System Science, Beijing Normal
+        University, China
+      </td>
+      <td>RCP 4.5, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>CCSM4</code></td>
+      <td>National Center for Atmospheric Research, USA</td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>GFDL-ESM2G</code></td>
+      <td>
+        National Oceanic and Atmospheric Administration Geophysical Fluid
+        Dynamics Laboratory, USA
+      </td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>GFDL-ESM2M</code></td>
+      <td>
+        National Oceanic and Atmospheric Administration Geophysical Fluid
+        Dynamics Laboratory, USA
+      </td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>IPSL-CM5A-LR</code></td>
+      <td>Institut Pierre-Simon Laplace, France</td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>IPSL-CM5A-MR</code></td>
+      <td>Institut Pierre-Simon Laplace, France</td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>MIROC5</code></td>
+      <td>
+        Japan Agency for Marine-Earth Science and Technology, Atmospheric and
+        Ocean Research Institute (The University of Tokyo), and National
+        Institute for Environmental Studies, Japan
+      </td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>MIROC-ESM</code></td>
+      <td>
+        Japan Agency for Marine-Earth Science and Technology, Atmospheric and
+        Ocean Research Institute (The University of Tokyo), and National
+        Institute for Environmental Studies, Japan
+      </td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>MIROC-ESM-CHEM</code></td>
+      <td>
+        Japan Agency for Marine-Earth Science and Technology, Atmospheric and
+        Ocean Research Institute (The University of Tokyo), and National
+        Institute for Environmental Studies, Japan
+      </td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>MRI-CGCM3</code></td>
+      <td>Meteorological Research Institute, Japan</td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>NorESM1-M</code></td>
+      <td>Norwegian Climate Centre, Norway</td>
+      <td>RCP 2.6, RCP 4.5, RCP 6.0, RCP 8.5</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Modeled hydrologic statistics by stream ID</h4>
 
 <p>
@@ -174,9 +336,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Modeled hydrologic statistics</h4>
 
 <p>Results from stream ID queries will look like this:</p>
@@ -469,10 +631,6 @@
       "citation": "U.S. Geological Survey, 2026, U.S. Geological Survey National Water Information System database, accessed 2026-01-08, at https://doi.org/10.5066/F7P55KJN. Data download directly accessible at https://api.waterdata.usgs.gov/ogcapi/v0/collections/daily/items?f=json&lang=en-US&limit=50000&properties=time,value,unit_of_measure&skipGeometry=true&sortby=%2Btime&offset=0&datetime=1976-10-01/2005-09-30&monitoring_location_id=USGS-12039500&parameter_code=00060&approval_status=Approved"
     },
     "variables": {
-      "doy": {
-        "description": "Day of year (1-366); all years are treated as leap years for consistency.",
-        "units": "day of year"
-      },
       "doy_max": {
         "description": "Maximum streamflow value (cfs) on the specified day of year, aggregated over all years in the era.",
         "units": "cfs"
@@ -487,7 +645,7 @@
       },
       "water_year_index": {
         "description": "Water year day index (1-366), where the water year starts on October 1 (DOY 275) and ends on September 30 (DOY 274).",
-        "units": "water year day index"
+        "units": "dimensionless"
       }
     }
   },
@@ -541,9 +699,9 @@
   "name": &lt;name of stream gage&gt;
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -599,5 +757,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

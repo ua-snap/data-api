@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>WRF Dynamically Downscaled ERA5 Reanalysis</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}WRF Dynamically Downscaled ERA5 Reanalysis{% endblock %}
+
+{% block intro %}
 <p>
   This endpoint provides access to dynamically downscaled (using the Weather
   Research and Forecasting (WRF) model) ERA5 reanalysis climate data. The
@@ -11,53 +13,90 @@
   neighboring Canada. Data were produced in 2-day runs, each with a 6-hour
   spin-up phase, and spectral nudging enabled.
 </p>
+{% endblock %}
 
-<h3>Available Variables</h3>
-<table class="variable-table">
+{% block variables %}
+<table>
   <thead>
     <tr>
+      <th>ID</th>
       <th>Category</th>
-      <th>Variables</th>
       <th>Description</th>
       <th>Units</th>
     </tr>
   </thead>
   <tbody>
     <tr>
+      <td class="nowrap"><code>t2_max</code></td>
       <td>Temperature</td>
-      <td>t2_max, t2_mean, t2_min</td>
-      <td>Daily maximum, mean, and minimum 2-meter air temperature</td>
-      <td>°C</td>
+      <td>Daily maximum 2 m air temperature</td>
+      <td>&deg;C</td>
     </tr>
     <tr>
+      <td class="nowrap"><code>t2_mean</code></td>
+      <td>Temperature</td>
+      <td>Daily mean 2 m air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>t2_min</code></td>
+      <td>Temperature</td>
+      <td>Daily minimum 2 m air temperature</td>
+      <td>&deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>rh2_max</code></td>
       <td>Humidity</td>
-      <td>rh2_max, rh2_mean, rh2_min</td>
-      <td>Daily maximum, mean, and minimum 2-meter relative humidity</td>
+      <td>Daily maximum 2 m relative humidity</td>
       <td>%</td>
     </tr>
     <tr>
+      <td class="nowrap"><code>rh2_mean</code></td>
+      <td>Humidity</td>
+      <td>Daily mean 2 m relative humidity</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>rh2_min</code></td>
+      <td>Humidity</td>
+      <td>Daily minimum 2 m relative humidity</td>
+      <td>%</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>rainnc_sum</code></td>
       <td>Precipitation</td>
-      <td>rainnc_sum</td>
-      <td>Daily precipitation total</td>
+      <td>Daily total precipitation</td>
       <td>mm</td>
     </tr>
     <tr>
+      <td class="nowrap"><code>wspd10_max</code></td>
       <td>Wind</td>
-      <td>wspd10_max, wspd10_mean, wdir10_mean</td>
-      <td>Daily wind speed (max, mean) and direction (mean) at 10 meters</td>
-      <td>m/s, degrees</td>
+      <td>Daily maximum 10 m wind speed</td>
+      <td>m/s</td>
     </tr>
     <tr>
+      <td class="nowrap"><code>wspd10_mean</code></td>
+      <td>Wind</td>
+      <td>Daily mean 10 m wind speed</td>
+      <td>m/s</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>wdir10_mean</code></td>
+      <td>Wind</td>
+      <td>Daily mean 10 m wind direction</td>
+      <td>&deg;</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>seaice_max</code></td>
       <td>Sea Ice</td>
-      <td>seaice_max</td>
       <td>Daily maximum sea ice concentration</td>
       <td>fraction</td>
     </tr>
   </tbody>
 </table>
+{% endblock %}
 
-<h3>Service endpoints</h3>
-
+{% block endpoints %}
 <h4>Point query</h4>
 
 <table class="endpoints">
@@ -112,35 +151,6 @@
   </tfoot>
 </table>
 
-<h4>Point Query Output</h4>
-
-<p>
-  Data are returned as JSON by default, keyed by date, with each date containing
-  a dictionary of variable names and values. The variable names are the same as
-  the ones listed in the Available Variables section.
-</p>
-<pre><code>{
-  "2012-06-01": {
-    "rh2_mean": 87.3,
-    "t2_mean": 6.6,
-    "wspd10_max": 4.1,
-    ...
-  },
-  "2012-06-02": {
-    "rh2_mean": 79.3,
-    "t2_mean": 7.7,
-    "wspd10_max": 3.8,
-    ...
-  },
-  "2012-06-03": {
-    "rh2_mean": 63.5,
-    "t2_mean": 12.6,
-    "wspd10_max": 3.8,
-    ...
-  },
-  ...
-}</code></pre>
-
 <h4>Area query</h4>
 <p>
   Area queries return zonal statistics (mean values) aggregated over a specified
@@ -191,8 +201,39 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h4>Area Query Output</h4>
+{% block output %}
+<h4>Point query</h4>
+
+<p>
+  Data are returned as JSON by default, keyed by date, with each date containing
+  a dictionary of variable names and values. The variable names are the same as
+  the ones listed in the available variables table above.
+</p>
+<pre><code>{
+  "2012-06-01": {
+    "rh2_mean": 87.3,
+    "t2_mean": 6.6,
+    "wspd10_max": 4.1,
+    ...
+  },
+  "2012-06-02": {
+    "rh2_mean": 79.3,
+    "t2_mean": 7.7,
+    "wspd10_max": 3.8,
+    ...
+  },
+  "2012-06-03": {
+    "rh2_mean": 63.5,
+    "t2_mean": 12.6,
+    "wspd10_max": 3.8,
+    ...
+  },
+  ...
+}</code></pre>
+
+<h4>Area query</h4>
 
 <p>
   Area queries return the same JSON structure as point queries, but values
@@ -222,8 +263,9 @@
   Each value is the mean of all valid grid cells within the polygon boundary for
   that date.
 </p>
+{% endblock %}
 
-<h3>References and Data Sources</h3>
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -252,5 +294,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}

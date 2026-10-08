@@ -1,6 +1,8 @@
-{% extends 'base.html' %} {% block content %}
-<h2>Arctic Hydrology</h2>
+{% extends 'documentation/dataset_base.html' %}
 
+{% block title %}Arctic Hydrology{% endblock %}
+
+{% block intro %}
 <p>
   These endpoints provide access to modeled streamflow statistics, streamflow
   climatologies, water temperature statistics, and water temperature
@@ -21,12 +23,13 @@
   For more detailed model information, see the links to academic references and
   source datasets included at the bottom of this page.
 </p>
+{% endblock %}
 
-{% include "documentation/arctic_models_table.html" %}
 
+{% block variables %}
 {% include "documentation/streamflow_stats_table.html" %}
 
-<h3 id="wt_stats_table">Available Water Temperature Statistics</h3>
+<h4 id="wt_stats_table">Water temperature statistics</h4>
 
 <table>
   <thead>
@@ -38,84 +41,84 @@
   </thead>
   <tbody>
     <tr>
-      <td><code>wt_days_gt13_mean</code></td>
+      <td class="nowrap"><code>wt_days_gt13_mean</code></td>
       <td>Mean annual count of days with stream temperature &gt; 13&deg;C</td>
       <td>days per year</td>
     </tr>
     <tr>
-      <td><code>wt_days_gt18_mean</code></td>
+      <td class="nowrap"><code>wt_days_gt18_mean</code></td>
       <td>Mean annual count of days with stream temperature &gt; 18&deg;C</td>
       <td>days per year</td>
     </tr>
     <tr>
-      <td><code>wt_days_gt20_mean</code></td>
+      <td class="nowrap"><code>wt_days_gt20_mean</code></td>
       <td>Mean annual count of days with stream temperature &gt; 20&deg;C</td>
       <td>days per year</td>
     </tr>
 
     <tr>
-      <td><code>wt_mean_jan</code></td>
+      <td class="nowrap"><code>wt_mean_jan</code></td>
       <td>Mean of monthly mean stream temperatures for January</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_feb</code></td>
+      <td class="nowrap"><code>wt_mean_feb</code></td>
       <td>Mean of monthly mean stream temperatures for February</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_mar</code></td>
+      <td class="nowrap"><code>wt_mean_mar</code></td>
       <td>Mean of monthly mean stream temperatures for March</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_apr</code></td>
+      <td class="nowrap"><code>wt_mean_apr</code></td>
       <td>Mean of monthly mean stream temperatures for April</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_may</code></td>
+      <td class="nowrap"><code>wt_mean_may</code></td>
       <td>Mean of monthly mean stream temperatures for May</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_jun</code></td>
+      <td class="nowrap"><code>wt_mean_jun</code></td>
       <td>Mean of monthly mean stream temperatures for June</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_jul</code></td>
+      <td class="nowrap"><code>wt_mean_jul</code></td>
       <td>Mean of monthly mean stream temperatures for July</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_aug</code></td>
+      <td class="nowrap"><code>wt_mean_aug</code></td>
       <td>Mean of monthly mean stream temperatures for August</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_sep</code></td>
+      <td class="nowrap"><code>wt_mean_sep</code></td>
       <td>Mean of monthly mean stream temperatures for September</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_oct</code></td>
+      <td class="nowrap"><code>wt_mean_oct</code></td>
       <td>Mean of monthly mean stream temperatures for October</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_nov</code></td>
+      <td class="nowrap"><code>wt_mean_nov</code></td>
       <td>Mean of monthly mean stream temperatures for November</td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_mean_dec</code></td>
+      <td class="nowrap"><code>wt_mean_dec</code></td>
       <td>Mean of monthly mean stream temperatures for December</td>
       <td>degrees Celsius</td>
     </tr>
 
     <tr>
-      <td><code>wt_min_jan</code></td>
+      <td class="nowrap"><code>wt_min_jan</code></td>
       <td>
         Minimum monthly mean stream temperature for January across all years in
         era
@@ -123,7 +126,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_feb</code></td>
+      <td class="nowrap"><code>wt_min_feb</code></td>
       <td>
         Minimum monthly mean stream temperature for February across all years in
         era
@@ -131,7 +134,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_mar</code></td>
+      <td class="nowrap"><code>wt_min_mar</code></td>
       <td>
         Minimum monthly mean stream temperature for March across all years in
         era
@@ -139,7 +142,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_apr</code></td>
+      <td class="nowrap"><code>wt_min_apr</code></td>
       <td>
         Minimum monthly mean stream temperature for April across all years in
         era
@@ -147,28 +150,28 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_may</code></td>
+      <td class="nowrap"><code>wt_min_may</code></td>
       <td>
         Minimum monthly mean stream temperature for May across all years in era
       </td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_jun</code></td>
+      <td class="nowrap"><code>wt_min_jun</code></td>
       <td>
         Minimum monthly mean stream temperature for June across all years in era
       </td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_jul</code></td>
+      <td class="nowrap"><code>wt_min_jul</code></td>
       <td>
         Minimum monthly mean stream temperature for July across all years in era
       </td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_aug</code></td>
+      <td class="nowrap"><code>wt_min_aug</code></td>
       <td>
         Minimum monthly mean stream temperature for August across all years in
         era
@@ -176,7 +179,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_sep</code></td>
+      <td class="nowrap"><code>wt_min_sep</code></td>
       <td>
         Minimum monthly mean stream temperature for September across all years
         in era
@@ -184,7 +187,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_oct</code></td>
+      <td class="nowrap"><code>wt_min_oct</code></td>
       <td>
         Minimum monthly mean stream temperature for October across all years in
         era
@@ -192,7 +195,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_nov</code></td>
+      <td class="nowrap"><code>wt_min_nov</code></td>
       <td>
         Minimum monthly mean stream temperature for November across all years in
         era
@@ -200,7 +203,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_min_dec</code></td>
+      <td class="nowrap"><code>wt_min_dec</code></td>
       <td>
         Minimum monthly mean stream temperature for December across all years in
         era
@@ -209,7 +212,7 @@
     </tr>
 
     <tr>
-      <td><code>wt_max_jan</code></td>
+      <td class="nowrap"><code>wt_max_jan</code></td>
       <td>
         Maximum monthly mean stream temperature for January across all years in
         era
@@ -217,7 +220,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_feb</code></td>
+      <td class="nowrap"><code>wt_max_feb</code></td>
       <td>
         Maximum monthly mean stream temperature for February across all years in
         era
@@ -225,7 +228,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_mar</code></td>
+      <td class="nowrap"><code>wt_max_mar</code></td>
       <td>
         Maximum monthly mean stream temperature for March across all years in
         era
@@ -233,7 +236,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_apr</code></td>
+      <td class="nowrap"><code>wt_max_apr</code></td>
       <td>
         Maximum monthly mean stream temperature for April across all years in
         era
@@ -241,28 +244,28 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_may</code></td>
+      <td class="nowrap"><code>wt_max_may</code></td>
       <td>
         Maximum monthly mean stream temperature for May across all years in era
       </td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_jun</code></td>
+      <td class="nowrap"><code>wt_max_jun</code></td>
       <td>
         Maximum monthly mean stream temperature for June across all years in era
       </td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_jul</code></td>
+      <td class="nowrap"><code>wt_max_jul</code></td>
       <td>
         Maximum monthly mean stream temperature for July across all years in era
       </td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_aug</code></td>
+      <td class="nowrap"><code>wt_max_aug</code></td>
       <td>
         Maximum monthly mean stream temperature for August across all years in
         era
@@ -270,7 +273,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_sep</code></td>
+      <td class="nowrap"><code>wt_max_sep</code></td>
       <td>
         Maximum monthly mean stream temperature for September across all years
         in era
@@ -278,7 +281,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_oct</code></td>
+      <td class="nowrap"><code>wt_max_oct</code></td>
       <td>
         Maximum monthly mean stream temperature for October across all years in
         era
@@ -286,7 +289,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_nov</code></td>
+      <td class="nowrap"><code>wt_max_nov</code></td>
       <td>
         Maximum monthly mean stream temperature for November across all years in
         era
@@ -294,7 +297,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_max_dec</code></td>
+      <td class="nowrap"><code>wt_max_dec</code></td>
       <td>
         Maximum monthly mean stream temperature for December across all years in
         era
@@ -303,14 +306,14 @@
     </tr>
 
     <tr>
-      <td><code>wt_ann_max_temp_mean</code></td>
+      <td class="nowrap"><code>wt_ann_max_temp_mean</code></td>
       <td>
         Mean (over era years) of the annual maximum daily stream temperature
       </td>
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_ann_max_temp_doy_mean</code></td>
+      <td class="nowrap"><code>wt_ann_max_temp_doy_mean</code></td>
       <td>
         Mean (over era years) Julian day of the annual maximum daily stream
         temperature
@@ -318,7 +321,7 @@
       <td>Julian day</td>
     </tr>
     <tr>
-      <td><code>wt_7d_max_temp_mean</code></td>
+      <td class="nowrap"><code>wt_7d_max_temp_mean</code></td>
       <td>
         Mean (over era years) of the annual maximum 7-day rolling average stream
         temperature
@@ -326,7 +329,7 @@
       <td>degrees Celsius</td>
     </tr>
     <tr>
-      <td><code>wt_7d_max_temp_doy_mean</code></td>
+      <td class="nowrap"><code>wt_7d_max_temp_doy_mean</code></td>
       <td>
         Mean (over era years) Julian day of the center of the annual maximum
         7-day rolling average
@@ -334,7 +337,7 @@
       <td>Julian day</td>
     </tr>
     <tr>
-      <td><code>wt_cdd_may_sept_mean</code></td>
+      <td class="nowrap"><code>wt_cdd_may_sept_mean</code></td>
       <td>
         Mean (over era years) annual cumulative degree days above 0&deg;C, May
         through September
@@ -344,8 +347,135 @@
   </tbody>
 </table>
 
-<h3>Service endpoints</h3>
+<h4 id="climatology_table">Daily streamflow and water temperature climatologies</h4>
 
+<p>
+  The table below lists the variables returned for each day of year by the
+  modeled daily streamflow and water temperature climatology endpoints. Values
+  are computed for each model, scenario, and era.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Description</th>
+      <th>Units</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>doy</code></td>
+      <td>Day of year (1&ndash;366); all years are treated as leap years</td>
+      <td class="nowrap">Julian day</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>doy_max</code></td>
+      <td>
+        Maximum streamflow or stream temperature on the day of year across all
+        years in the era
+      </td>
+      <td class="nowrap">cfs or &deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>doy_mean</code></td>
+      <td>
+        Mean streamflow or stream temperature on the day of year across all
+        years in the era
+      </td>
+      <td class="nowrap">cfs or &deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>doy_min</code></td>
+      <td>
+        Minimum streamflow or stream temperature on the day of year across all
+        years in the era
+      </td>
+      <td class="nowrap">cfs or &deg;C</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>water_year_index</code></td>
+      <td>
+        Water year day index (1&ndash;366), where the water year starts on
+        October 1 (day of year 275) and ends on September 30 (day of year 274)
+      </td>
+      <td class="nowrap">N/A</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="3">
+        Streamflow climatology values are in cfs. Water temperature climatology
+        values are in &deg;C.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+{% endblock %}
+
+{% block models %}
+<!-- Climate model runs derived from the model axis metadata of the ak_hydro_segments rasdaman coverages. -->
+<p>
+  Streamflow and water temperature were modeled using climate inputs
+  dynamically downscaled from the following six model runs, all produced at the
+  National Center for Atmospheric Research (NCAR). The historical baseline
+  (reported under the <code>historical</code> key, the Blaskey hindcast) was
+  instead produced by dynamically downscaling ERA5 reanalysis data over the
+  same domain for 1990&ndash;2021.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Description</th>
+      <th>Emissions scenario</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="nowrap"><code>C2LE2</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 2</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>C2LE4</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 4</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>C2LE7</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 7</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>C2LE9</code></td>
+      <td>Dynamically downscaled CESM2 Large Ensemble member 9</td>
+      <td>SSP3-7.0</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>PGWh</code></td>
+      <td>
+        High hydroclimate change scenario using the pseudo-global warming (PGW)
+        method, derived from the mean perturbations of the 75th&ndash;100th
+        percentile of SSP2-4.5 CMIP6 models
+      </td>
+      <td>SSP2-4.5 (PGW)</td>
+    </tr>
+    <tr>
+      <td class="nowrap"><code>PGWm</code></td>
+      <td>
+        Median hydroclimate change scenario using the pseudo-global warming
+        (PGW) method, derived from the mean perturbations of the
+        25th&ndash;75th percentile of SSP2-4.5 CMIP6 models
+      </td>
+      <td>SSP2-4.5 (PGW)</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
+
+{% block endpoints %}
 <h4>Modeled hydrologic statistics by stream ID</h4>
 
 <p>
@@ -561,9 +691,9 @@
     </tr>
   </tfoot>
 </table>
+{% endblock %}
 
-<h3>Output</h3>
-
+{% block output %}
 <h4>Modeled hydrologic statistics</h4>
 
 <p>Results from stream ID queries will look like this:</p>
@@ -1013,9 +1143,9 @@
   "watershed_outlet": &lt;true if segment is a watershed outlet&gt;
 }
 </pre>
+{% endblock %}
 
-<h3>Source data</h3>
-
+{% block source_data %}
 <table>
   <thead>
     <tr>
@@ -1094,5 +1224,4 @@
     </tr>
   </tbody>
 </table>
-
 {% endblock %}
