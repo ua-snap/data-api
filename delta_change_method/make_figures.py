@@ -252,31 +252,35 @@ def fig_mmm_example(long):
 
 
 def fig_ar5_changes(sites):
-    """Change the app displays vs the model delta itself, mid-century."""
+    """Change the app displays vs the model delta, against both 1961-1990 references."""
     df = pd.read_csv(DATA / "ar5_baseline_comparison.csv")
-    df = df[df.era == "2040-2069"]
+    df = df[df.era == "2040-2069"].copy()
+    df["change_vs_cru"] = df.future - df.cru_proxy_1961_1990
+    df["pct_change_vs_cru"] = 100 * df.change_vs_cru / df.cru_proxy_1961_1990
     panels = [
-        ("temperature", "change_displayed", "change_vs_delta_ref", "Temperature (annual)", "change (°C)"),
-        ("precipitation", "pct_change_displayed", "pct_change_vs_delta_ref", "Precipitation (annual total)", "change (%)"),
+        ("temperature", "change_displayed", "change_vs_prism", "change_vs_cru", "Temperature (annual)", "change (°C)"),
+        ("precipitation", "pct_change_displayed", "pct_change_vs_prism", "pct_change_vs_cru", "Precipitation (annual total)", "change (%)"),
     ]
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 7.6), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 7.8), sharey=True)
     y = np.arange(len(sites))
-    for ax, (c, cur_col, ref_col, title, xlabel) in zip(axes, panels):
+    for ax, (c, cur_col, prism_col, cru_col, title, xlabel) in zip(axes, panels):
         d = df[df.component == c].set_index("site").reindex(sites)
-        ax.hlines(y, d[cur_col], d[ref_col], color=MUTED, lw=1.5, zorder=1)
+        ax.hlines(y, d[cur_col], d[prism_col], color=MUTED, lw=1.5, zorder=1)
         ax.scatter(d[cur_col], y, s=36, color=CURRENT, zorder=2, edgecolor=SURFACE, lw=1.2,
                    label="Displayed today (vs CRU-TS 1901–2015)")
-        ax.scatter(d[ref_col], y, s=36, color=DELTA, zorder=3, edgecolor=SURFACE, lw=1.2,
-                   label="Model delta (vs 1961–1990 reference)")
+        ax.scatter(d[prism_col], y, s=36, color=DELTA, zorder=3, edgecolor=SURFACE, lw=1.2,
+                   label="Model delta vs PRISM 1961–1990 (downloaded file)")
+        ax.scatter(d[cru_col], y, s=70, facecolor="none", edgecolor=INK, lw=1.1, zorder=4,
+                   label="Model delta vs CRU-TS 2km 1961–1990 (climatology AR5 was built on)")
         ax.axvline(0, color=INK2, lw=0.8)
         ax.set_title(title, loc="left")
         ax.set_xlabel(xlabel)
         ax.grid(axis="y", visible=False)
         site_axis(ax, sites)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(0.01, 0.95), ncol=2)
+    fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(0.01, 0.955), ncol=1)
     suptitle(fig, "Temperature & precipitation, mid-century: displayed change vs the model delta")
-    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    fig.tight_layout(rect=(0, 0, 1, 0.87))
     fig.savefig(FIGS / "fig7_ar5_displayed_vs_delta.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
@@ -299,9 +303,56 @@ def fig_ar5_tas_monthly(sites):
     cb = fig.colorbar(im, ax=ax, shrink=0.6, pad=0.02)
     cb.set_label("°C (+ = displayed change understates the model delta)")
     cb.outline.set_visible(False)
-    ax.set_title("Temperature baseline offset by month\nCRU-TS 1901–2015 mean − 1961–1990 reference", loc="left")
+    ax.set_title("Temperature baseline offset by month\nCRU-TS 1901–2015 mean − PRISM 1961–1990", loc="left")
     fig.tight_layout()
     fig.savefig(FIGS / "fig8_ar5_temperature_monthly_offset.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_prism_verification(sites):
+    """PRISM file vs CRU-TS 2km 1961-1990 at the sites, and which one the AR5 data sit on."""
+    v = pd.read_csv(DATA / "prism_vs_cru_1961_1990.csv")
+    r = pd.read_csv(DATA / "climatology_consistency.csv").set_index("site").reindex(sites)
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5.6), gridspec_kw={"width_ratios": [1, 1, 1.25]})
+
+    ax = axes[0]
+    t = v[(v.variable == "tas") & (v.period != "Annual")]
+    ax.scatter(t.prism, t.cru_2km_1961_1990, s=12, color=CURRENT, alpha=0.7, lw=0)
+    lo, hi = t[["prism", "cru_2km_1961_1990"]].min().min() - 1, t[["prism", "cru_2km_1961_1990"]].max().max() + 1
+    ax.plot([lo, hi], [lo, hi], color=INK2, lw=0.8)
+    for _, row in t.loc[t["diff"].abs().nlargest(3).index].iterrows():
+        ax.annotate(f"{row.site} {row.period}", (row.prism, row.cru_2km_1961_1990), fontsize=8, color=INK2,
+                    xytext=(6, -10), textcoords="offset points")
+    ax.set_xlabel("PRISM 1961–1990 (°C)")
+    ax.set_ylabel("CRU-TS 2km 1961–1990 mean (°C)")
+    ax.set_title("Temperature, monthly (24 sites × 12)", loc="left")
+
+    ax = axes[1]
+    p = v[v.variable == "pr"]
+    ax.scatter(p.prism, p.cru_2km_1961_1990, s=28, color=CURRENT, lw=0)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    lo, hi = 150, 5000
+    ax.plot([lo, hi], [lo, hi], color=INK2, lw=0.8)
+    for _, row in p[p.pct_diff.abs() > 1].iterrows():
+        ax.annotate(row.site, (row.prism, row.cru_2km_1961_1990), fontsize=8, color=INK2,
+                    xytext=(6, -10), textcoords="offset points")
+    ax.set_xlabel("PRISM 1961–1990 (mm, log)")
+    ax.set_ylabel("CRU-TS 2km 1961–1990 mean (mm, log)")
+    ax.set_title("Precipitation, annual", loc="left")
+
+    ax = axes[2]
+    yy = np.arange(len(sites))
+    ax.scatter(r.tas_rough_vs_prism_c, yy, s=36, color=DELTA, edgecolor=SURFACE, lw=1.2, label="AR5 − PRISM file")
+    ax.scatter(r.tas_rough_vs_cru_c, yy, s=36, color=CURRENT, edgecolor=SURFACE, lw=1.2, label="AR5 − CRU-TS 2km 1961–1990")
+    ax.set_xlabel("residual roughness over 15×15 cells (°C)")
+    ax.set_title("Which climatology are the AR5 values built on?\n(smooth residual = the one the deltas were added to)", loc="left", fontsize=10)
+    ax.grid(axis="y", visible=False)
+    site_axis(ax, sites)
+    ax.legend(loc="center right")
+    suptitle(fig, "Checking the 1961–1990 reference against the downloaded PRISM climatology", y=1.02)
+    fig.tight_layout()
+    fig.savefig(FIGS / "fig10_prism_verification.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -326,7 +377,7 @@ def fig_ar5_precip_map():
         s.set_visible(False)
     cb = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.01, extend="both")
     cb.outline.set_visible(False)
-    cb.set_label("% (CRU-TS 1901–2015 vs 1961–1990 reference)")
+    cb.set_label("% (CRU-TS 1901–2015 vs CRU-TS 2km 1961–1990)")
     ax.set_title("Precipitation: app baseline vs the 1961–1990 reference the deltas were added to\n"
                  "(red = app baseline wetter, so displayed % change is understated; one WCPS request)", loc="left", fontsize=10)
     fig.tight_layout()
@@ -351,4 +402,5 @@ if __name__ == "__main__":
     fig_ar5_changes(all_sites)
     fig_ar5_tas_monthly(all_sites)
     fig_ar5_precip_map()
+    fig_prism_verification(all_sites)
     print("figures written to", FIGS)
