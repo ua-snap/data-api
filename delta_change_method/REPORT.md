@@ -198,7 +198,7 @@ Results at mid-century (2040–2069), 24 sites. The full table is in [`data/ar5_
 
 Per-site values for both references are in [`data/ar5_baseline_comparison.csv`](data/ar5_baseline_comparison.csv). Fig. 7 shows them together.
 
-How the precipitation offset varies across the state ([Fig. 9](#figures)):
+How the precipitation offset varies across the state ([Fig. 9](#figures); by site and era in [Fig. 11](#figures)):
 
 | Area | App baseline vs 1961–1990 | Effect on displayed % change | Example sites |
 |---|---|---|---|
@@ -308,6 +308,9 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 
 **Fig. 10: The 1961–1990 reference checked against the downloaded PRISM files.** Left and middle: site values. Right: leftover terrain detail in AR5 minus each candidate climatology (smaller = shared underlying climatology).
 ![](figures/fig10_prism_verification.png)
+
+**Fig. 11: Precipitation baseline offset by site and era** (annual totals, vs the CRU-TS 2 km 1961–1990 mean). There is no monthly CRU-TS 4.0 precipitation in Rasdaman (the app's precip coverage stores annual totals only), so unlike Fig. 8 this is by era rather than by month. The mm offset is the same in every era, but the percentage-point shift grows slightly as projected totals rise.
+![](figures/fig11_ar5_precipitation_offset_by_era.png)
 
 ---
 

@@ -309,6 +309,33 @@ def fig_ar5_tas_monthly(sites):
     plt.close(fig)
 
 
+def fig_ar5_precip_eras(sites):
+    """Annual precip: shift in the displayed % change by site and era (vs CRU-TS 2km 1961-1990 mean)."""
+    df = pd.read_csv(DATA / "ar5_baseline_comparison.csv")
+    m = df[df.component == "precipitation"].pivot(index="site", columns="era", values="pp_shift_cru_2km").reindex(index=sites, columns=ERAS)
+    fig, ax = plt.subplots(figsize=(6.2, 8.2))
+    lim = 12
+    im = ax.imshow(m.values, cmap=DIVERGING, norm=TwoSlopeNorm(0, -lim, lim), aspect="auto")
+    for i in range(m.shape[0]):
+        for j in range(m.shape[1]):
+            v = m.values[i, j]
+            ax.text(j, i, f"{v:+.1f}", ha="center", va="center", fontsize=8.5, color="white" if abs(v) > 0.6 * lim else INK)
+    ax.set_xticks(range(len(ERAS)))
+    ax.set_xticklabels(ERAS)
+    ax.grid(False)
+    site_axis(ax, sites)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    cb = fig.colorbar(im, ax=ax, shrink=0.6, pad=0.03, extend="both")
+    cb.set_label("pp (+ = displayed % change understates the model delta)")
+    cb.outline.set_visible(False)
+    ax.set_title("Precipitation baseline offset by era (annual totals)\n"
+                 "model delta % change − displayed % change", loc="left")
+    fig.tight_layout()
+    fig.savefig(FIGS / "fig11_ar5_precipitation_offset_by_era.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_prism_verification(sites):
     """PRISM file vs CRU-TS 2km 1961-1990 at the sites, and which one shares the AR5 fine-scale pattern."""
     v = pd.read_csv(DATA / "prism_vs_cru_1961_1990.csv")
@@ -403,4 +430,5 @@ if __name__ == "__main__":
     fig_ar5_tas_monthly(all_sites)
     fig_ar5_precip_map()
     fig_prism_verification(all_sites)
+    fig_ar5_precip_eras(all_sites)
     print("figures written to", FIGS)
