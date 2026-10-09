@@ -303,16 +303,16 @@ def fig_ar5_tas_monthly(sites):
     cb = fig.colorbar(im, ax=ax, shrink=0.6, pad=0.02)
     cb.set_label("°C (+ = displayed change understates the model delta)")
     cb.outline.set_visible(False)
-    ax.set_title("Temperature baseline offset by month\nCRU-TS 1901–2015 mean − PRISM 1961–1990", loc="left")
+    ax.set_title("Temperature, by month: CRU-TS 1901–2015 (app baseline)\n− PRISM 1961–1990", loc="left")
     fig.tight_layout()
     fig.savefig(FIGS / "fig8_ar5_temperature_monthly_offset.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
 def fig_ar5_precip_eras(sites):
-    """Annual precip: shift in the displayed % change by site and era (vs CRU-TS 2km 1961-1990 mean)."""
+    """Annual precip: shift in the displayed % change by site and era, CRU-TS 1901-2015 vs PRISM 1961-1990."""
     df = pd.read_csv(DATA / "ar5_baseline_comparison.csv")
-    m = df[df.component == "precipitation"].pivot(index="site", columns="era", values="pp_shift_cru_2km").reindex(index=sites, columns=ERAS)
+    m = df[df.component == "precipitation"].pivot(index="site", columns="era", values="pp_shift").reindex(index=sites, columns=ERAS)
     fig, ax = plt.subplots(figsize=(6.2, 8.2))
     lim = 12
     im = ax.imshow(m.values, cmap=DIVERGING, norm=TwoSlopeNorm(0, -lim, lim), aspect="auto")
@@ -329,43 +329,10 @@ def fig_ar5_precip_eras(sites):
     cb = fig.colorbar(im, ax=ax, shrink=0.6, pad=0.03, extend="both")
     cb.set_label("pp (+ = displayed % change understates the model delta)")
     cb.outline.set_visible(False)
-    ax.set_title("Precipitation baseline offset by era (annual totals)\n"
-                 "model delta % change − displayed % change", loc="left")
+    ax.set_title("Precipitation, by era: CRU-TS 1901–2015 (app baseline)\n"
+                 "vs PRISM 1961–1990, in pp of displayed % change", loc="left")
     fig.tight_layout()
     fig.savefig(FIGS / "fig11_ar5_precipitation_offset_by_era.png", dpi=150, bbox_inches="tight")
-    plt.close(fig)
-
-
-def fig_ar5_tas_map():
-    fp = DATA / "maps" / "temperature_baseline_offset.tif"
-    if not fp.exists():  # produced by wcps_server_side.tas_offset_map() (~1 hour)
-        return
-    with rio.open(fp) as src:
-        a = src.read(1).astype(float)
-        b = src.bounds
-    a[(a < -9000) | ~np.isfinite(a)] = np.nan
-    a = a.T  # tas_2km_historical_wcs comes back with X/Y transposed (rows are X)
-    xs, ys = zip(*[to_3338(s[2], s[3]) for s in SITES])
-    fig, ax = plt.subplots(figsize=(7.6, 5.8))
-    lim = 0.35
-    im = ax.imshow(a, extent=(b.left, b.right, b.bottom, b.top), cmap=DIVERGING,
-                   norm=TwoSlopeNorm(0, -lim, lim), interpolation="nearest")
-    ax.scatter(xs, ys, s=10, color=INK, lw=0)
-    ax.set_xlim(-1.0e6, 1.55e6)
-    ax.set_ylim(0.35e6, 2.45e6)
-    ax.set_aspect("equal")
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.grid(False)
-    for s in ax.spines.values():
-        s.set_visible(False)
-    cb = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.01, extend="both")
-    cb.outline.set_visible(False)
-    cb.set_label("°C (CRU-TS 1901–2015 − CRU-TS 2km 1961–1990)")
-    ax.set_title("Temperature: app baseline vs the CRU-TS 2 km 1961–1990 mean, annual\n"
-                 "(red = app baseline warmer, so displayed change is understated; 12 WCPS requests)", loc="left", fontsize=10)
-    fig.tight_layout()
-    fig.savefig(FIGS / "fig12_ar5_temperature_baseline_map.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -416,15 +383,17 @@ def fig_prism_verification(sites):
     plt.close(fig)
 
 
-def fig_ar5_precip_map():
-    with rio.open(DATA / "maps" / "precipitation_baseline_ratio.tif") as src:
+def _baseline_map(fp, lim, unit_label, title, out):
+    """North-up GeoTIFF from baseline_vs_prism_maps.py -> Alaska map with the test sites."""
+    if not fp.exists():  # produced by baseline_vs_prism_maps.py
+        return
+    with rio.open(fp) as src:
         a = src.read(1).astype(float)
         b = src.bounds
-    a[(a < -9000) | ~np.isfinite(a)] = np.nan  # the 2km AR5 coverage is not transposed
+    a[~np.isfinite(a)] = np.nan
     xs, ys = zip(*[to_3338(s[2], s[3]) for s in SITES])
     fig, ax = plt.subplots(figsize=(7.6, 5.8))
-    lim = 15
-    im = ax.imshow(100 * (a - 1), extent=(b.left, b.right, b.bottom, b.top), cmap=DIVERGING,
+    im = ax.imshow(a, extent=(b.left, b.right, b.bottom, b.top), cmap=DIVERGING,
                    norm=TwoSlopeNorm(0, -lim, lim), interpolation="nearest")
     ax.scatter(xs, ys, s=10, color=INK, lw=0)
     ax.set_xlim(-1.0e6, 1.55e6)
@@ -437,12 +406,31 @@ def fig_ar5_precip_map():
         s.set_visible(False)
     cb = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.01, extend="both")
     cb.outline.set_visible(False)
-    cb.set_label("% (CRU-TS 1901–2015 vs CRU-TS 2km 1961–1990)")
-    ax.set_title("Precipitation: app baseline vs the 1961–1990 reference the deltas were added to\n"
-                 "(red = app baseline wetter, so displayed % change is understated; one WCPS request)", loc="left", fontsize=10)
+    cb.set_label(unit_label)
+    ax.set_title(title, loc="left", fontsize=10)
     fig.tight_layout()
-    fig.savefig(FIGS / "fig9_ar5_precipitation_baseline_map.png", dpi=150, bbox_inches="tight")
+    fig.savefig(FIGS / out, dpi=150, bbox_inches="tight")
     plt.close(fig)
+
+
+def fig_ar5_precip_map():
+    _baseline_map(
+        DATA / "maps" / "precipitation_cru1901_2015_vs_prism_pct.tif", 15,
+        "% (CRU-TS 1901–2015 vs PRISM 1961–1990)",
+        "Precipitation, annual: CRU-TS 1901–2015 (app baseline) vs PRISM 1961–1990\n"
+        "(red = app baseline wetter, so displayed % change is understated)",
+        "fig9_ar5_precipitation_baseline_map.png",
+    )
+
+
+def fig_ar5_tas_map():
+    _baseline_map(
+        DATA / "maps" / "temperature_cru1901_2015_minus_prism.tif", 0.5,
+        "°C (CRU-TS 1901–2015 − PRISM 1961–1990)",
+        "Temperature, annual: CRU-TS 1901–2015 (app baseline) − PRISM 1961–1990\n"
+        "(red = app baseline warmer, so displayed change is understated)",
+        "fig12_ar5_temperature_baseline_map.png",
+    )
 
 
 if __name__ == "__main__":

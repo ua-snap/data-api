@@ -125,8 +125,8 @@ For the multiplicative form, the body becomes `min(G_fut / G_hist, 3.0)`. `switc
 | Grid | Resolution | Time | Size | Figure |
 |---|---|---|---|---|
 | Degree-day adjustment fields | 12 km | 0.7–0.8 s each | 0.6 MB | [Fig. 5](#figures) |
-| Precipitation baseline-offset grid | 2 km | 7–77 s (server caching varies) | 16 MB | [Fig. 9](#figures) |
-| Temperature baseline-offset grid | 2 km | 12 monthly requests, 1.5–4.5 min each (one request for all months exceeded 10 min) | 16 MB each | [Fig. 12](#figures) |
+| CRU-TS 1901–2015 precipitation mean grid | 2 km | 41 s | 16 MB | [Fig. 9](#figures) (PRISM subtracted locally) |
+| CRU-TS 1901–2015 temperature mean grid | 2 km | 24 monthly requests: 12 offsets at 1.5–4.5 min each (one request for all months exceeded 10 min) plus 12 1961–1990 means at ~20–50 s each | 16 MB each | [Fig. 12](#figures) (PRISM subtracted locally) |
 
 For temperature and precipitation, WCPS can likewise compute baseline offsets or re-anchored values on the fly, since everything they need is in Rasdaman.
 
@@ -193,7 +193,7 @@ Results at mid-century (2040–2069), 24 sites. The full table is in [`data/ar5_
 
 | | Displayed change (vs CRU 1901–2015) | Model delta (vs CRU-TS 2 km 1961–1990 mean) | Difference | Same, using the PRISM file |
 |---|---|---|---|---|
-| Temperature, annual | +2.6 to +6.2 °C (median +4.2) | +2.7 to +6.5 °C (median +4.3) | **Displayed understates by 0.07–0.30 °C** (largest at Utqiagvik); understated everywhere statewide ([Fig. 12](#figures)) | −0.38 to +0.31 °C; differs only at Valdez (−0.38 vs +0.15) and Ketchikan (+0.30 vs +0.11) |
+| Temperature, annual | +2.6 to +6.2 °C (median +4.2) | +2.7 to +6.5 °C (median +4.3) | **Displayed understates by 0.07–0.30 °C** (largest at Utqiagvik); and against PRISM understated across 92% of the state ([Fig. 12](#figures)) | −0.38 to +0.31 °C; differs only at Valdez (−0.38 vs +0.15) and Ketchikan (+0.30 vs +0.11) |
 | Temperature, by month | — | — | **About −1.3 to +1.2 °C** | [Fig. 8](#figures) uses the PRISM file: −1.33 to +1.19 °C |
 | Precipitation | +4.4% to +28.2% | +5.5% to +26.8% | **−4.6 to +11.4 pp** (median \|shift\| 2.9 pp) | −6.1 to +11.4 pp; differs at Anaktuvuk Pass, Homer, Nome and Kotzebue (registration) |
 
@@ -204,7 +204,7 @@ How the precipitation offset varies across the state ([Fig. 9](#figures); by sit
 | Area | App baseline vs 1961–1990 | Effect on displayed % change | Example sites |
 |---|---|---|---|
 | Western Alaska / Y-K Delta | wetter | **understated** | Bethel +4.4% → +15.8%; Unalakleet +10.2% → +19.4%; Nome +12.0% → +17.5% |
-| Southeast, Southcentral, eastern Interior | drier | **overstated** | Yakutat +12.3% → +7.7%; Homer +18.9% → +14.3%; Juneau +10.8% → +6.8% |
+| Southeast, Southcentral, eastern Interior | drier | **overstated** | Yakutat +12.3% → +7.7%; Juneau +10.8% → +6.8%; Talkeetna +21.4% → +17.8% |
 
 Because the offset is a constant in each era, it matters proportionally more early in the century. The monthly temperature pattern (February, April and October–November baselines warmer than 1961–1990; January in the west colder) also affects the monthly tables the app shows, more than the annual numbers suggest.
 
@@ -304,16 +304,26 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 **Fig. 8: Temperature baseline offset by month, against the PRISM file.** Valdez and Ketchikan reflect the PRISM-file differences in steep terrain.
 ![](figures/fig8_ar5_temperature_monthly_offset.png)
 
-**Fig. 9: Precipitation baseline offset statewide (vs the CRU-TS 2 km 1961–1990 mean), from one WCPS request.**
+**Fig. 9: Precipitation, annual: CRU-TS 1901–2015 (app baseline) vs PRISM 1961–1990, statewide.**
+
+- **How it was made:** the CRU-TS 1901–2015 mean comes from one WCPS request. The PRISM annual total was nearest-neighbour resampled onto the precip coverage's grid ([`baseline_vs_prism_maps.py`](baseline_vs_prism_maps.py)).
+- **Pattern:** the app baseline is wetter in western Alaska (understated change) and drier in the Southeast, Southcentral and much of the Interior (overstated). Statewide the median is +0.9%; 5th–95th percentile −7.6% to +11.2%.
+- **Speckle along the mountain ranges** is partly real (the downloaded PRISM file differs from the climatology the data were built on there) and partly from resampling onto the warped grid.
+- **Check:** matches the site values exactly at the five sites checked.
 ![](figures/fig9_ar5_precipitation_baseline_map.png)
 
 **Fig. 10: The 1961–1990 reference checked against the downloaded PRISM files.** Left and middle: site values. Right: leftover terrain detail in AR5 minus each candidate climatology (smaller = shared underlying climatology).
 ![](figures/fig10_prism_verification.png)
 
-**Fig. 11: Precipitation baseline offset by site and era** (annual totals, vs the CRU-TS 2 km 1961–1990 mean). There is no monthly CRU-TS 4.0 precipitation in Rasdaman (the app's precip coverage stores annual totals only), so unlike Fig. 8 this is by era rather than by month. The mm offset is the same in every era, but the percentage-point shift grows slightly as projected totals rise.
+**Fig. 11: Precipitation, by site and era: CRU-TS 1901–2015 (app baseline) vs PRISM 1961–1990**, in percentage points of displayed % change (annual totals). Anaktuvuk Pass, Homer, Nome and Kotzebue reflect which 2 km PRISM cell is sampled (see C1); against the CRU-TS 2 km 1961–1990 mean they read −0.7, −4.6, +5.5 and +3.1 pp at mid-century. There is no monthly CRU-TS 4.0 precipitation in Rasdaman (the app's precip coverage stores annual totals only), so unlike Fig. 8 this is by era rather than by month. The mm offset is the same in every era, but the percentage-point shift grows slightly as projected totals rise.
 ![](figures/fig11_ar5_precipitation_offset_by_era.png)
 
-**Fig. 12: Temperature baseline offset statewide, annual** (CRU-TS 1901–2015 mean − CRU-TS 2 km 1961–1990 mean). It is positive everywhere (+0.01 to +0.32 °C), so the displayed annual change is understated across the whole state, most on the North Slope and the Gulf of Alaska coast. It was computed server-side as 12 monthly WCPS requests (~3–4 min each; a single request exceeded 10 minutes) and matches the site values to 0.001 °C.
+**Fig. 12: Temperature, annual: CRU-TS 1901–2015 (app baseline) − PRISM 1961–1990, statewide.**
+
+- **How it was made:** the CRU-TS 1901–2015 mean was built server-side from 24 monthly WCPS requests, then PRISM was subtracted on the identical 2 km grid ([`baseline_vs_prism_maps.py`](baseline_vs_prism_maps.py)).
+- **Pattern:** the app baseline is warmer across 92% of the state (median +0.16 °C; 5th–95th percentile −0.05 to +0.38 °C), so the displayed annual change is understated almost everywhere, most on the North Slope and the Gulf of Alaska coast.
+- **Speckle along the Brooks Range, Alaska Range, Chugach and Southeast mountains** is where the downloaded PRISM file differs from the climatology the AR5 and CRU-TS data were built on (see C1). Against the CRU-TS 2 km 1961–1990 mean instead, the offset is smooth and positive everywhere (+0.01 to +0.32 °C).
+- **Check:** matches the site values to 0.001 °C at the five sites checked.
 ![](figures/fig12_ar5_temperature_baseline_map.png)
 
 ---
@@ -334,7 +344,8 @@ python analyze.py                # degree days: current vs delta change method
 python prism_check.py PRISM_DIR            # PRISM file vs CRU-TS 2 km 1961–1990 mean at the sites
 python climatology_consistency.py PRISM_DIR  # which climatology the AR5 projections share their fine-scale pattern with (~2 min)
 python ar5_baseline.py PRISM_DIR            # temperature & precipitation: baseline offset
-python wcps_server_side.py       # server-side validation, cap check, statewide GeoTIFFs (~1 h, mostly the temperature map)
+python wcps_server_side.py       # server-side validation, cap check, statewide GeoTIFFs (~1.5 h, mostly the temperature grids)
+python baseline_vs_prism_maps.py PRISM_DIR  # CRU-TS 1901–2015 vs PRISM 1961–1990 grids for Figs. 9 and 12
 python make_figures.py           # figures/
 ```
 

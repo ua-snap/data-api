@@ -241,6 +241,57 @@ def tas_offset_map():
         dst.write(annual, 1)
 
 
+def tas_cru_6190_month_query(month):
+    """CRU-TS 2km 1961-1990 mean for one calendar month (30 slices; cheap)."""
+    X, Y = "X(-2173223:1491905)", "Y(316704:2475554)"
+    return (
+        "for $c in (tas_2km_historical_wcs) return encode("
+        f"(condense + over $y year(60:89) using $c.tas[month({month}),year($y),{X},{Y}]) / 30.0,"
+        ' "image/tiff")'
+    )
+
+
+def tas_baseline_map():
+    """App temperature baseline (CRU-TS 1901-2015 annual mean) statewide, rebuilt per month as
+    (1901-2015 minus 1961-1990 offset) + (1961-1990 mean), then averaged over months.
+    Output stays in the transposed orientation the coverage returns."""
+    import rasterio as rio
+
+    tas_offset_map()
+    arrs, profile = [], None
+    for m in range(12):
+        fp = MAPS / f"temperature_cru_1961_1990_m{m + 1:02d}.tif"
+        if not fp.exists():
+            r, secs = run(tas_cru_6190_month_query(m), timeout=1800)
+            fp.write_bytes(r.content)
+            print(f"1961-1990 month {m + 1}: {secs:.0f}s", flush=True)
+        with rio.open(fp) as src:
+            h = src.read(1).astype("float32")
+            profile = src.profile
+        with rio.open(MAPS / f"temperature_baseline_offset_m{m + 1:02d}.tif") as src:
+            off = src.read(1).astype("float32")
+        h[h < -9000] = float("nan")
+        off[off < -9000] = float("nan")
+        arrs.append(h + off)
+    profile.update(dtype="float32", nodata=float("nan"))
+    with rio.open(MAPS / "temperature_cru_1901_2015.tif", "w", **profile) as dst:
+        dst.write(np.nanmean(np.array(arrs), axis=0), 1)
+
+
+def precip_baseline_query():
+    """App precipitation baseline (CRU-TS 1901-2015 mean annual total) statewide."""
+    yrs = "(" + " + ".join(f"$c[model(0),scenario(0),year({T(y)})]" for y in range(1901, 2016)) + ")"
+    return f'for $c in (annual_precip_totals_mm) return encode({yrs} / 115.0, "image/tiff")'
+
+
+def precip_baseline_map():
+    fp = MAPS / "precipitation_cru_1901_2015.tif"
+    if not fp.exists():
+        r, secs = run(precip_baseline_query())
+        fp.write_bytes(r.content)
+        print(f"precip 1901-2015 mean: {secs:.0f}s", flush=True)
+
+
 MAP_QUERIES = {
     "freezing_index_adjustment": map_adjustment("air_freezing_index_Fdays"),
     "freezing_index_baseline": map_baseline("air_freezing_index_Fdays"),
@@ -271,3 +322,5 @@ if __name__ == "__main__":
     cap_check()
     maps()
     tas_offset_map()  # ~1 hour
+    tas_baseline_map()  # + ~10-20 min
+    precip_baseline_map()
