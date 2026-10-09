@@ -19844,6 +19844,13 @@
     "temperature": {
         "preview": "model,scenario,month,year,tasmin,tasmean,tasmax\r\nCRU-TS,historical,January,1901,-25.2,-19.9,-15.4\r\nCRU-TS,historical,January,1902,-23.6,-18.1,-13.4\r\nCRU-TS,historical,January,1903,-29.9,-23,-16.9\r\nCRU-TS,historical,January,1904,-28.4,-22.5,-17.4\r\nCRU-TS,historical,January,1905,-21.2,-16,-11.7\r\nNCAR-CCSM4,rcp85,December,2096,-4.9,-9.1,-0.9\r\nNCAR-CCSM4,rcp85,December,2097,-17.8,-4.9,-10.9\r\nNCAR-CCSM4,rcp85,December,2098,-5.2,-4.2,-0.9\r\nNCAR-CCSM4,rcp85,December,2099,-8.4,-6.8,-3.4\r\nNCAR-CCSM4,rcp85,December,2100,-11.9,-11.1,-7.1\r\n",
         "summary": {
+            "1980-2009": {
+                "Annual": {
+                    "tasmax": -0.5,
+                    "tasmean": -2.3,
+                    "tasmin": -4.4
+                }
+            },
             "historical": {
                 "CRU-TS": {
                     "historical": {

@@ -1400,6 +1400,28 @@ def get_temperature_plate(lat, lon):
 
     temp["summary"] = create_temperature_eds_summary(temp_json)
 
+    # The observed 1980-2009 period, matching the degree days' modeled
+    # baseline, so the client can compare every variable against the same
+    # years: the mean of the annual means, and the lowest and highest.
+    historical = temp_json["historical"]["CRU-TS"]["historical"]
+    annual_means = []
+    for year in range(1980, 2010):
+        values = [
+            float(historical[month][year]["tasmean"])
+            for month in historical
+            if "tasmean" in historical[month].get(year, {})
+        ]
+        if len(values) == 12:
+            annual_means.append(np.mean(values))
+    if annual_means:
+        temp["summary"]["1980-2009"] = {
+            "Annual": {
+                "tasmax": round(max(annual_means), 1),
+                "tasmean": round(np.mean(annual_means), 1),
+                "tasmin": round(min(annual_means), 1),
+            }
+        }
+
     point_pkg = nullify_and_prune(temp_json, "tas2km")
     if point_pkg in [{}, None, 0]:
         return render_template("404/no_data.html"), 404
