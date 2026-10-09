@@ -271,7 +271,7 @@ def fig_ar5_changes(sites):
         ax.scatter(d[prism_col], y, s=36, color=DELTA, zorder=3, edgecolor=SURFACE, lw=1.2,
                    label="Model delta vs PRISM 1961–1990 (downloaded file)")
         ax.scatter(d[cru_col], y, s=70, facecolor="none", edgecolor=INK, lw=1.1, zorder=4,
-                   label="Model delta vs CRU-TS 2km 1961–1990 (climatology AR5 was built on)")
+                   label="Model delta vs CRU-TS 2km 1961–1990 mean (shares AR5's underlying climatology)")
         ax.axvline(0, color=INK2, lw=0.8)
         ax.set_title(title, loc="left")
         ax.set_xlabel(xlabel)
@@ -310,7 +310,7 @@ def fig_ar5_tas_monthly(sites):
 
 
 def fig_prism_verification(sites):
-    """PRISM file vs CRU-TS 2km 1961-1990 at the sites, and which one the AR5 data sit on."""
+    """PRISM file vs CRU-TS 2km 1961-1990 at the sites, and which one shares the AR5 fine-scale pattern."""
     v = pd.read_csv(DATA / "prism_vs_cru_1961_1990.csv")
     r = pd.read_csv(DATA / "climatology_consistency.csv").set_index("site").reindex(sites)
     fig, axes = plt.subplots(1, 3, figsize=(16, 5.6), gridspec_kw={"width_ratios": [1, 1, 1.25]})
@@ -346,7 +346,7 @@ def fig_prism_verification(sites):
     ax.scatter(r.tas_rough_vs_prism_c, yy, s=36, color=DELTA, edgecolor=SURFACE, lw=1.2, label="AR5 − PRISM file")
     ax.scatter(r.tas_rough_vs_cru_c, yy, s=36, color=CURRENT, edgecolor=SURFACE, lw=1.2, label="AR5 − CRU-TS 2km 1961–1990")
     ax.set_xlabel("residual roughness over 15×15 cells (°C)")
-    ax.set_title("Which climatology are the AR5 values built on?\n(smooth residual = the one the deltas were added to)", loc="left", fontsize=10)
+    ax.set_title("Leftover terrain detail: AR5 2006–2035 minus each climatology\n(near zero = same underlying climatology)", loc="left", fontsize=10)
     ax.grid(axis="y", visible=False)
     site_axis(ax, sites)
     ax.legend(loc="center right")

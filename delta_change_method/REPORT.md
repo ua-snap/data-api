@@ -32,7 +32,7 @@ All numbers come from 24 test sites across 7 Alaska regions, pulled from the pro
    - Precipitation: the displayed % change is off by **−4.6 to +11.4 pp**. At Bethel the app shows +4%; the model delta is +16%.
    - **Checked against the actual PRISM 1961–1990 files** ([C1](#c1-temperature-and-precipitation-baseline-offset-ar5_baselinepy)):
      - In most of the state the PRISM file and the CRU-TS 2 km 1961–1990 mean agree, and the numbers above stand.
-     - In steep mountain terrain they differ. A spatial test shows the AR5 values sit exactly on the CRU-TS 2 km 1961–1990 mean, not on the downloaded PRISM file. So the steep-terrain numbers use the CRU-TS mean.
+     - In steep mountain terrain they differ. A spatial test shows the AR5 projections share their fine-scale (terrain-driven) pattern exactly with the CRU-TS 2 km data, but not with the downloaded PRISM file. So the steep-terrain numbers use the CRU-TS 1961–1990 mean.
      - The team should confirm which PRISM release was used.
 2. **Degree days.** Applying the method shifts the displayed mid-century % change by about 1–3 pp (max 8 pp, freezing index at Kodiak). Min/max ranges move more than means.
 3. **WCPS can do the delta math server-side** wherever `G_hist` exists. Point queries take about 0.2 s and match Python exactly, including a cap that actually binds. Statewide grids take one request each ([Part B](#b-can-wcps-do-it-server-side)).
@@ -53,7 +53,7 @@ The EDS temperature (`tas_2km_projected_wcs`) and precipitation (`annual_precip_
 So every AR5 value in these coverages is already `PRISM_1961–1990 + (G_future − G_hist,1961–1990)`, computed per model and calendar month. **That is why the GCM historical runs aren't in Rasdaman:** they were consumed during downscaling.
 
 Two caveats:
-- The paper produced versions on both the PRISM and CRU TS 3.2 1961–1990 baselines. The SNAP catalog record for the 2 km product ([record](https://catalog.snap.uaf.edu/geonetwork/srv/api/records/ba834996-ad15-4785-9b43-ef2af86a5ad9)) and the Arctic-EDS plate text both point to PRISM. The comparison with the PRISM files in [C1](#c1-temperature-and-precipitation-baseline-offset-ar5_baselinepy) supports PRISM: the two agree to within 0.1 °C and 1% across most of the state, which a 0.5° CRU TS 3.2 climatology would not. In steep terrain, though, the data don't sit exactly on the downloaded PRISM file.
+- The paper produced versions on both the PRISM and CRU TS 3.2 1961–1990 baselines. The SNAP catalog record for the 2 km product ([record](https://catalog.snap.uaf.edu/geonetwork/srv/api/records/ba834996-ad15-4785-9b43-ef2af86a5ad9)) and the Arctic-EDS plate text both point to PRISM. The comparison with the PRISM files in [C1](#c1-temperature-and-precipitation-baseline-offset-ar5_baselinepy) supports PRISM: the two agree to within 0.1 °C and 1% across most of the state, which a 0.5° CRU TS 3.2 climatology would not. In steep terrain, though, the AR5 projections' fine-scale pattern doesn't match the downloaded PRISM file.
 - The paper doesn't say whether precipitation deltas were differences or ratios. The analysis below doesn't depend on that.
 
 **The problem is the baseline the app displays.** The plates show CRU-TS 4.0 2 km 1901–2015 statistics as "historical" and compute change against them (`Diff.vue`). The change a user reads is therefore:
@@ -160,9 +160,15 @@ Mostly yes:
 | Temperature | 22 of 24 sites within 0.1 °C annually; monthly median difference 0.04 °C | Valdez (−0.53 °C) and Ketchikan (+0.19 °C), up to 0.79 °C in individual months |
 | Precipitation | 20 of 24 sites within 1% (e.g. Bethel 382.0 vs 382.0 mm; Juneau 2420 vs 2420 mm) | Anaktuvuk Pass, Homer, Nome and Kotzebue (2–6%). Each has an adjacent PRISM cell that matches to within 0.5%, so these are cell-registration artifacts of the warped precip grid |
 
-#### Which one are the AR5 values actually built on? ([`climatology_consistency.py`](climatology_consistency.py), [`data/climatology_consistency.csv`](data/climatology_consistency.csv))
+#### Which climatology do the AR5 projections share their fine-scale pattern with? ([`climatology_consistency.py`](climatology_consistency.py), [`data/climatology_consistency.csv`](data/climatology_consistency.csv))
 
-The GCM deltas were interpolated from ~2.5° grids, so over a 15×15-cell block, `AR5 − reference` (or `AR5 / reference`) should be spatially smooth only for the reference the deltas were actually added to. Residual roughness (std after removing a plane) at all 24 sites:
+This compares spatial patterns, not values. The AR5 projections are several degrees warmer than any historical climatology.
+
+Each AR5 value is `climatology(pixel) + GCM delta(pixel)`, and the GCM delta was interpolated from a ~2.5° model grid, so it varies smoothly over a 15×15-cell (~30 km) block. All terrain-scale detail in the AR5 field comes from the climatology:
+- Subtracting the climatology the AR5 data were actually built on leaves only the smooth delta.
+- Subtracting a different climatology leaves terrain-scale detail behind.
+
+Leftover roughness (std after removing a best-fit plane) of the block-averaged AR5 2006–2035 field minus each candidate, at all 24 sites:
 
 | Residual | vs CRU-TS 2 km 1961–1990 mean | vs downloaded PRISM file |
 |---|---|---|
@@ -170,7 +176,8 @@ The GCM deltas were interpolated from ~2.5° grids, so over a 15×15-cell block,
 | Precipitation (log ratio) | **0.0001–0.0016** at every site | 0.0006–0.080 (part of this is precip-grid registration) |
 
 **Conclusion:**
-- The AR5 values sit exactly on the CRU-TS 2 km 1961–1990 mean everywhere. It equals the downloaded PRISM file in most terrain but not in steep mountains, where the downscaling evidently used a slightly different PRISM release or processing.
+- The AR5 projections and the CRU-TS 2 km historical data share the same underlying high-resolution climatology at every site. It equals the downloaded PRISM file in most terrain but not in steep mountains, where the downscaling evidently used a slightly different PRISM release or processing.
+- **Limit of this test:** the CRU anomalies were also interpolated from a coarse (0.5°) grid, so CRU-TS 2 km averaged over *any* period carries the same terrain pattern. The test shows the two datasets share a base climatology, not that it is the 1961–1990 one. That part rests on the paper (1961–1990 delta reference) and on the CRU-TS 1961–1990 mean matching the PRISM 1961–1990 file to within 0.1 °C and 1% outside steep terrain.
 - **The results below use the CRU-TS 2 km 1961–1990 mean as the reference**, with the PRISM-file results alongside. The two coincide except at the sites noted.
 - Which PRISM release was used, and why the downloaded file differs in the mountains, is a question for the team.
 
@@ -259,7 +266,7 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 
 1. **Temperature and precipitation: don't reapply the delta method; align the baseline.** Either show the 1961–1990 reference climatology as the plate's historical baseline, or compute the displayed change against it. Both are possible from Rasdaman today, in Python or WCPS. Before shipping:
    - Confirm the EDS coverages are the PRISM (not CRU TS 3.2) variant.
-   - ~~Verify that CRU-TS 2 km 1961–1990 equals PRISM 1961–1990 against the PRISM grids.~~ Done. They agree in most terrain, and the AR5 data sit exactly on the CRU-TS 2 km 1961–1990 mean everywhere. Still open: which PRISM release the downscaling used, since the downloaded file differs in steep terrain and its catalog record lists conflicting periods (1961–1990 vs 1971–2000).
+   - ~~Verify that CRU-TS 2 km 1961–1990 equals PRISM 1961–1990 against the PRISM grids.~~ Done. They agree in most terrain, and the AR5 projections share their fine-scale pattern exactly with the CRU-TS 2 km data everywhere. Still open: which PRISM release the downscaling used, since the downloaded file differs in steep terrain and its catalog record lists conflicting periods (1961–1990 vs 1971–2000).
    - If the app shows the 1961–1990 reference as its historical baseline, take it from the CRU-TS 2 km 1961–1990 mean in Rasdaman (or the exact PRISM release used), not the downloaded PRISM file, so it matches the AR5 values pixel for pixel.
 
    The monthly temperature tables are where this matters most (up to ±1.3 °C).
@@ -290,7 +297,7 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 **Fig. 6: Freezing index min/mean/max as the app reports it, current vs delta.**
 ![](figures/fig6_freezing_index_mmm.png)
 
-**Fig. 7: Temperature and precipitation, displayed change vs the model delta (mid-century).** Hollow circles use the CRU-TS 2 km 1961–1990 mean (the field the AR5 values sit on); orange dots use the downloaded PRISM file.
+**Fig. 7: Temperature and precipitation, displayed change vs the model delta (mid-century).** Hollow circles use the CRU-TS 2 km 1961–1990 mean (which shares the AR5 projections' underlying climatology); orange dots use the downloaded PRISM file.
 ![](figures/fig7_ar5_displayed_vs_delta.png)
 
 **Fig. 8: Temperature baseline offset by month, against the PRISM file.** Valdez and Ketchikan reflect the PRISM-file differences in steep terrain.
@@ -299,7 +306,7 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 **Fig. 9: Precipitation baseline offset statewide (vs the CRU-TS 2 km 1961–1990 mean), from one WCPS request.**
 ![](figures/fig9_ar5_precipitation_baseline_map.png)
 
-**Fig. 10: The 1961–1990 reference checked against the downloaded PRISM files.** Left and middle: site values. Right: which climatology the AR5 values are built on.
+**Fig. 10: The 1961–1990 reference checked against the downloaded PRISM files.** Left and middle: site values. Right: leftover terrain detail in AR5 minus each candidate climatology (smaller = shared underlying climatology).
 ![](figures/fig10_prism_verification.png)
 
 ---
@@ -318,7 +325,7 @@ python fetch_site_data.py        # ~8 min; caches point cubes for all EDS covera
 python check_gcm_historical.py   # which coverages contain GCM historical runs
 python analyze.py                # degree days: current vs delta change method
 python prism_check.py PRISM_DIR            # PRISM file vs CRU-TS 2 km 1961–1990 mean at the sites
-python climatology_consistency.py PRISM_DIR  # which climatology the AR5 values sit on (~2 min)
+python climatology_consistency.py PRISM_DIR  # which climatology the AR5 projections share their fine-scale pattern with (~2 min)
 python ar5_baseline.py PRISM_DIR            # temperature & precipitation: baseline offset
 python wcps_server_side.py       # server-side validation, cap check, statewide GeoTIFFs
 python make_figures.py           # figures/

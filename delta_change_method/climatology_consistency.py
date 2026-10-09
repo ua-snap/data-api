@@ -1,9 +1,14 @@
-"""Which 1961-1990 climatology were the AR5 2km values actually built on?
+"""Which candidate climatology do the AR5 2km projections share their fine-scale pattern with?
 
-The AR5 deltas were interpolated from ~2.5° GCM grids, so over a small block of 2km cells
-the field AR5 - climatology (temperature) or AR5 / climatology (precipitation) is smooth
-*if* the climatology is the one the deltas were added to. A different climatology leaves
-terrain-scale noise in the residual.
+This compares spatial patterns, not values. Each AR5 value is climatology + GCM delta, and
+the deltas were interpolated from ~2.5° GCM grids, so over a small block of 2km cells the
+field AR5 - climatology (temperature) or AR5 / climatology (precipitation) is smooth *if*
+the climatology is the one the deltas were added to. A different climatology leaves
+terrain-scale detail in the residual.
+
+Limit: the CRU-TS 2km anomalies are also coarse (0.5°), so CRU-TS 2km averaged over any
+period carries the same terrain pattern. A smooth residual against it shows a shared base
+climatology, not that the base is specifically 1961-1990.
 
 For a 15 x 15 cell block around each site, this measures the "roughness" (standard deviation
 after removing a best-fit plane) of the residual against two candidates:
