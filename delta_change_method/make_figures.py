@@ -267,19 +267,24 @@ def fig_ar5_changes(sites):
         d = df[df.component == c].set_index("site").reindex(sites)
         ax.hlines(y, d[cur_col], d[prism_col], color=MUTED, lw=1.5, zorder=1)
         ax.scatter(d[cur_col], y, s=36, color=CURRENT, zorder=2, edgecolor=SURFACE, lw=1.2,
-                   label="Displayed today (vs CRU-TS 1901–2015)")
+                   label="CRU-TS 1901–2015 baseline (current app)")
         ax.scatter(d[prism_col], y, s=36, color=DELTA, zorder=3, edgecolor=SURFACE, lw=1.2,
-                   label="Model delta vs PRISM 1961–1990 (downloaded file)")
+                   label="PRISM 1961–1990 baseline")
         ax.scatter(d[cru_col], y, s=70, facecolor="none", edgecolor=INK, lw=1.1, zorder=4,
-                   label="Model delta vs CRU-TS 2km 1961–1990 mean (shares AR5's underlying climatology)")
+                   label="CRU-TS 1961–1990 baseline")
         ax.axvline(0, color=INK2, lw=0.8)
         ax.set_title(title, loc="left")
         ax.set_xlabel(xlabel)
         ax.grid(axis="y", visible=False)
         site_axis(ax, sites)
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(0.01, 0.955), ncol=1)
-    suptitle(fig, "Temperature & precipitation, mid-century: displayed change vs the model delta")
+    order = [0, 2, 1]  # match the 2-panel figures: CRU 1901-2015, CRU 1961-1990, then PRISM
+    fig.legend([handles[i] for i in order], [labels[i] for i in order], loc="upper left",
+               bbox_to_anchor=(0.01, 0.955), ncol=1)
+    axes[0].set_yticklabels([f"{s} †" if s in PR_REGISTRATION_SITES else s for s in sites])
+    fig.text(0.01, -0.015, "† Precipitation values against PRISM depend on which 2 km PRISM cell is sampled on the warped "
+             "precipitation grid (an adjacent cell matches CRU-TS 1961–1990 to within 0.5%).", fontsize=8.5, color=INK2)
+    suptitle(fig, "Temperature & precipitation, mid-century: the change the app would display under each baseline")
     fig.tight_layout(rect=(0, 0, 1, 0.87))
     fig.savefig(FIGS / "fig7_ar5_displayed_vs_delta.png", dpi=150, bbox_inches="tight")
     plt.close(fig)

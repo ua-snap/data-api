@@ -301,7 +301,13 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 **Fig. 6: Freezing index min/mean/max as the app reports it, current vs delta.**
 ![](figures/fig6_freezing_index_mmm.png)
 
-**Fig. 7: Temperature and precipitation, displayed change vs the model delta (mid-century).** Hollow circles use the CRU-TS 2 km 1961–1990 mean (which shares the AR5 projections' underlying climatology); orange dots use the downloaded PRISM file.
+**Fig. 7: Temperature and precipitation, mid-century: the change the app would display under each baseline.**
+
+- **Blue:** the current CRU-TS 1901–2015 baseline.
+- **Hollow circles:** the CRU-TS 1961–1990 baseline.
+- **Orange:** the PRISM 1961–1990 baseline.
+
+The two 1961–1990 baselines coincide almost everywhere. They split only at Valdez and Ketchikan (temperature, steep terrain) and at the † precipitation sites, where the PRISM value depends on which 2 km cell is sampled.
 ![](figures/fig7_ar5_displayed_vs_delta.png)
 
 **Figs. 8, 9, 11 and 12 compare the two ways to fix the baseline**, each against PRISM 1961–1990: the app's current CRU-TS 1901–2015 mean (left panel) and the CRU-TS 2 km 1961–1990 mean (right panel), on one colour scale. Using PRISM 1961–1990 itself would be the zero line in every panel.
