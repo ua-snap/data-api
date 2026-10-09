@@ -563,6 +563,26 @@ def get_dd_plate(var_ep, lat, lon):
 
     dd["summary"] = summarized_data
 
+    # The mean of each model and scenario over each projected era, so the
+    # client can show the spread between models rather than between single
+    # years: era>model>scenario: value
+    model_means = {}
+    for era in eras[1:]:
+        era_label = str(era["start"]) + "-" + str(era["end"])
+        model_means[era_label] = {}
+        for model in models:
+            model_means[era_label][model] = {}
+            for scenario in all_data[model].keys():
+                values = [
+                    value["dd"]
+                    for year, value in all_data[model][scenario].items()
+                    if year >= era["start"] and year <= era["end"]
+                ]
+                if values:
+                    model_means[era_label][model][scenario] = round(np.mean(values))
+
+    dd["model_means"] = model_means
+
     preview = run_fetch_dd_point_data(var_ep, lat, lon, preview=True)
     # Checks if error exists from preview CSV request
     if isinstance(preview, tuple):

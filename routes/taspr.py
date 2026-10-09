@@ -1468,7 +1468,41 @@ def get_precipitation_plate(lat, lon):
             "prmax": max(values),
         }
 
+    # The observed 1980-2009 period, matching the degree days' modeled
+    # baseline, so the client can compare every variable against the same
+    # years.
+    baseline_values = [
+        value["pr"]
+        for key, value in all_data["CRU-TS"]["historical"].items()
+        if 1980 <= int(key) <= 2009
+    ]
+    summarized_data["1980-2009"] = {
+        "prmin": min(baseline_values),
+        "prmean": round(np.mean(baseline_values)),
+        "prmax": max(baseline_values),
+    }
+
     pr["summary"] = summarized_data
+
+    # The mean of each model and scenario over each projected era, so the
+    # client can show the spread between models rather than between single
+    # years: era>model>scenario: value
+    model_means = {}
+    for era in eras:
+        era_label = str(era["start"]) + "-" + str(era["end"])
+        model_means[era_label] = {}
+        for model in models:
+            model_means[era_label][model] = {}
+            for scenario in all_data[model].keys():
+                values = [
+                    value["pr"]
+                    for key, value in all_data[model][scenario].items()
+                    if era["start"] <= int(key) <= era["end"]
+                ]
+                if values:
+                    model_means[era_label][model][scenario] = round(np.mean(values))
+
+    pr["model_means"] = model_means
 
     first = mmm_point_data_endpoint("precipitation", lat, lon, None, 1901, 1905, True)
     last = mmm_point_data_endpoint("precipitation", lat, lon, None, 2096, 2100, True)
