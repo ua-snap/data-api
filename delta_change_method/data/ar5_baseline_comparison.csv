@@ -1,4 +1,4 @@
-site,region,component,era,future,baseline_app,prism_1961_1990,cru_proxy_1961_1990,change_displayed,change_vs_prism,baseline_offset,baseline_offset_cru_proxy,pct_change_displayed,pct_change_vs_prism,pp_shift,pp_shift_cru_proxy
+site,region,component,era,future,baseline_app,prism_1961_1990,cru_2km_1961_1990,change_displayed,change_vs_prism,baseline_offset,baseline_offset_cru_2km,pct_change_displayed,pct_change_vs_prism,pp_shift,pp_shift_cru_2km
 Anaktuvuk Pass,North Slope,temperature,2010-2039,-7.355555555555556,-10.009130434782609,-10.241666732355952,-10.178888888888888,2.653574879227053,2.886111176800396,-0.23253629757334338,-0.16975845410627954,,,,
 Anaktuvuk Pass,North Slope,temperature,2040-2069,-5.102222222222223,-10.009130434782609,-10.241666732355952,-10.178888888888888,4.906908212560386,5.139444510133729,-0.23253629757334338,-0.16975845410627954,,,,
 Anaktuvuk Pass,North Slope,temperature,2070-2099,-2.7436111111111114,-10.009130434782609,-10.241666732355952,-10.178888888888888,7.265519323671498,7.498055621244841,-0.23253629757334338,-0.16975845410627954,,,,

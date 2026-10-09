@@ -255,8 +255,8 @@ def fig_ar5_changes(sites):
     """Change the app displays vs the model delta, against both 1961-1990 references."""
     df = pd.read_csv(DATA / "ar5_baseline_comparison.csv")
     df = df[df.era == "2040-2069"].copy()
-    df["change_vs_cru"] = df.future - df.cru_proxy_1961_1990
-    df["pct_change_vs_cru"] = 100 * df.change_vs_cru / df.cru_proxy_1961_1990
+    df["change_vs_cru"] = df.future - df.cru_2km_1961_1990
+    df["pct_change_vs_cru"] = 100 * df.change_vs_cru / df.cru_2km_1961_1990
     panels = [
         ("temperature", "change_displayed", "change_vs_prism", "change_vs_cru", "Temperature (annual)", "change (°C)"),
         ("precipitation", "pct_change_displayed", "pct_change_vs_prism", "pct_change_vs_cru", "Precipitation (annual total)", "change (%)"),
