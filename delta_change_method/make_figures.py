@@ -285,55 +285,113 @@ def fig_ar5_changes(sites):
     plt.close(fig)
 
 
-def fig_ar5_tas_monthly(sites):
-    m = pd.read_csv(DATA / "ar5_tas_monthly_offset.csv").set_index("site").reindex(sites)
-    fig, ax = plt.subplots(figsize=(8.6, 8.2))
-    lim = 1.5
+# --- Temperature & precipitation baseline options, each vs PRISM 1961-1990 -----------------
+# Left panel: the app's current baseline (CRU-TS 1901-2015). Right panel: the CRU-TS 2km
+# 1961-1990 mean. Both are measured against PRISM 1961-1990 on one colour scale.
+
+PANELS = ["CRU-TS 1901–2015 vs PRISM 1961–1990", "CRU-TS 1961–1990 vs PRISM 1961–1990"]
+# sites where the precip comparison depends on which 2km PRISM cell is sampled (prism_check.py)
+PR_REGISTRATION_SITES = {"Anaktuvuk Pass", "Homer", "Nome", "Kotzebue"}
+
+
+def _heatmap(ax, m, lim, fontsize):
     im = ax.imshow(m.values, cmap=DIVERGING, norm=TwoSlopeNorm(0, -lim, lim), aspect="auto")
     for i in range(m.shape[0]):
         for j in range(m.shape[1]):
             v = m.values[i, j]
-            ax.text(j, i, f"{v:+.1f}", ha="center", va="center", fontsize=7.5, color="white" if abs(v) > 0.65 * lim else INK)
-    ax.set_xticks(range(12))
+            ax.text(j, i, f"{v:+.1f}", ha="center", va="center", fontsize=fontsize,
+                    color="white" if abs(v) > 0.65 * lim else INK)
+    ax.set_xticks(range(m.shape[1]))
     ax.set_xticklabels(m.columns)
     ax.grid(False)
-    site_axis(ax, sites)
     for s in ax.spines.values():
         s.set_visible(False)
-    cb = fig.colorbar(im, ax=ax, shrink=0.6, pad=0.02)
-    cb.set_label("°C (+ = displayed change understates the model delta)")
+    return im
+
+
+def fig_ar5_tas_monthly(sites):
+    left = pd.read_csv(DATA / "ar5_tas_monthly_offset.csv").set_index("site").reindex(sites)
+    v = pd.read_csv(DATA / "prism_vs_cru_1961_1990.csv")
+    v = v[(v.variable == "tas") & (v.period != "Annual")]
+    right = v.pivot(index="site", columns="period", values="diff").reindex(index=sites, columns=left.columns)
+    fig, axes = plt.subplots(1, 2, figsize=(16, 8.4), sharey=True)
+    for ax, m, title in zip(axes, [left, right], PANELS):
+        im = _heatmap(ax, m, 1.5, 7.5)
+        site_axis(ax, sites)
+        ax.set_title(title, loc="left")
+    cb = fig.colorbar(im, ax=axes, shrink=0.6, pad=0.015)
+    cb.set_label("°C (baseline − PRISM 1961–1990)")
     cb.outline.set_visible(False)
-    ax.set_title("Temperature, by month: CRU-TS 1901–2015 (app baseline)\n− PRISM 1961–1990", loc="left")
-    fig.tight_layout()
+    suptitle(fig, "Temperature by month: how far each baseline option is from PRISM 1961–1990", y=0.98)
     fig.savefig(FIGS / "fig8_ar5_temperature_monthly_offset.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
 
 
 def fig_ar5_precip_eras(sites):
-    """Annual precip: shift in the displayed % change by site and era, CRU-TS 1901-2015 vs PRISM 1961-1990."""
     df = pd.read_csv(DATA / "ar5_baseline_comparison.csv")
-    m = df[df.component == "precipitation"].pivot(index="site", columns="era", values="pp_shift").reindex(index=sites, columns=ERAS)
-    fig, ax = plt.subplots(figsize=(6.2, 8.2))
-    lim = 12
-    im = ax.imshow(m.values, cmap=DIVERGING, norm=TwoSlopeNorm(0, -lim, lim), aspect="auto")
-    for i in range(m.shape[0]):
-        for j in range(m.shape[1]):
-            v = m.values[i, j]
-            ax.text(j, i, f"{v:+.1f}", ha="center", va="center", fontsize=8.5, color="white" if abs(v) > 0.6 * lim else INK)
-    ax.set_xticks(range(len(ERAS)))
-    ax.set_xticklabels(ERAS)
-    ax.grid(False)
-    site_axis(ax, sites)
-    for s in ax.spines.values():
-        s.set_visible(False)
-    cb = fig.colorbar(im, ax=ax, shrink=0.6, pad=0.03, extend="both")
-    cb.set_label("pp (+ = displayed % change understates the model delta)")
+    df = df[df.component == "precipitation"].copy()
+    # pp by which the displayed % change differs from the model delta measured vs PRISM
+    df["pp_1901_2015"] = df.pct_change_vs_prism - df.pct_change_displayed
+    df["pp_1961_1990"] = df.pct_change_vs_prism - 100 * (df.future - df.cru_2km_1961_1990) / df.cru_2km_1961_1990
+    fig, axes = plt.subplots(1, 2, figsize=(11, 8.8), sharey=True)
+    for ax, col, title in zip(axes, ["pp_1901_2015", "pp_1961_1990"], PANELS):
+        m = df.pivot(index="site", columns="era", values=col).reindex(index=sites, columns=ERAS)
+        im = _heatmap(ax, m, 12, 8.5)
+        site_axis(ax, sites)
+        ax.set_title(title.replace(" vs ", "\nvs "), loc="left")
+    axes[0].set_yticklabels([f"{s} †" if s in PR_REGISTRATION_SITES else s for s in sites])
+    cb = fig.colorbar(im, ax=axes, shrink=0.6, pad=0.02, extend="both")
+    cb.set_label("pp of displayed % change (+ = understates the model delta vs PRISM)")
     cb.outline.set_visible(False)
-    ax.set_title("Precipitation, by era: CRU-TS 1901–2015 (app baseline)\n"
-                 "vs PRISM 1961–1990, in pp of displayed % change", loc="left")
-    fig.tight_layout()
+    suptitle(fig, "Precipitation by era: how far each baseline option is from PRISM 1961–1990", y=0.99)
+    fig.text(0.01, 0.02, "† Value depends on which 2 km PRISM cell is sampled on the warped precipitation grid; "
+             "an adjacent PRISM cell matches CRU-TS 1961–1990 to within 0.5%.", fontsize=8.5, color=INK2)
     fig.savefig(FIGS / "fig11_ar5_precipitation_offset_by_era.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
+
+
+def _two_maps(files, lim, unit, unit_label, heading, out):
+    if not all((DATA / "maps" / f).exists() for f in files):  # produced by baseline_vs_prism_maps.py
+        return
+    xs, ys = zip(*[to_3338(s[2], s[3]) for s in SITES])
+    fig, axes = plt.subplots(1, 2, figsize=(14.5, 5.4), gridspec_kw={"wspace": 0.03})
+    for ax, fp, title in zip(axes, files, PANELS):
+        with rio.open(DATA / "maps" / fp) as src:
+            a = src.read(1).astype(float)
+            b = src.bounds
+        a[~np.isfinite(a)] = np.nan
+        im = ax.imshow(a, extent=(b.left, b.right, b.bottom, b.top), cmap=DIVERGING,
+                       norm=TwoSlopeNorm(0, -lim, lim), interpolation="nearest")
+        ax.scatter(xs, ys, s=8, color=INK, lw=0)
+        ax.set_xlim(-1.0e6, 1.55e6)
+        ax.set_ylim(0.35e6, 2.45e6)
+        ax.set_aspect("equal")
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.grid(False)
+        for s in ax.spines.values():
+            s.set_visible(False)
+        ax.set_title(f"{title}\nmedian |difference| {np.nanmedian(np.abs(a)):.2f} {unit}", loc="left", fontsize=10)
+    cb = fig.colorbar(im, ax=axes, shrink=0.85, pad=0.01, extend="both")
+    cb.set_label(unit_label)
+    cb.outline.set_visible(False)
+    fig.suptitle(heading, x=0.125, ha="left", fontsize=12, fontweight="semibold", color=INK, y=0.97)
+    fig.savefig(FIGS / out, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_ar5_precip_map():
+    _two_maps(["precipitation_cru1901_2015_vs_prism_pct.tif", "precipitation_cru1961_1990_vs_prism_pct.tif"],
+              15, "%", "% (baseline vs PRISM 1961–1990)",
+              "Precipitation, annual: how far each baseline option is from PRISM 1961–1990",
+              "fig9_ar5_precipitation_baseline_map.png")
+
+
+def fig_ar5_tas_map():
+    _two_maps(["temperature_cru1901_2015_minus_prism.tif", "temperature_cru1961_1990_minus_prism.tif"],
+              0.5, "°C", "°C (baseline − PRISM 1961–1990)",
+              "Temperature, annual: how far each baseline option is from PRISM 1961–1990",
+              "fig12_ar5_temperature_baseline_map.png")
 
 
 def fig_prism_verification(sites):
@@ -381,56 +439,6 @@ def fig_prism_verification(sites):
     fig.tight_layout()
     fig.savefig(FIGS / "fig10_prism_verification.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
-
-
-def _baseline_map(fp, lim, unit_label, title, out):
-    """North-up GeoTIFF from baseline_vs_prism_maps.py -> Alaska map with the test sites."""
-    if not fp.exists():  # produced by baseline_vs_prism_maps.py
-        return
-    with rio.open(fp) as src:
-        a = src.read(1).astype(float)
-        b = src.bounds
-    a[~np.isfinite(a)] = np.nan
-    xs, ys = zip(*[to_3338(s[2], s[3]) for s in SITES])
-    fig, ax = plt.subplots(figsize=(7.6, 5.8))
-    im = ax.imshow(a, extent=(b.left, b.right, b.bottom, b.top), cmap=DIVERGING,
-                   norm=TwoSlopeNorm(0, -lim, lim), interpolation="nearest")
-    ax.scatter(xs, ys, s=10, color=INK, lw=0)
-    ax.set_xlim(-1.0e6, 1.55e6)
-    ax.set_ylim(0.35e6, 2.45e6)
-    ax.set_aspect("equal")
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.grid(False)
-    for s in ax.spines.values():
-        s.set_visible(False)
-    cb = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.01, extend="both")
-    cb.outline.set_visible(False)
-    cb.set_label(unit_label)
-    ax.set_title(title, loc="left", fontsize=10)
-    fig.tight_layout()
-    fig.savefig(FIGS / out, dpi=150, bbox_inches="tight")
-    plt.close(fig)
-
-
-def fig_ar5_precip_map():
-    _baseline_map(
-        DATA / "maps" / "precipitation_cru1901_2015_vs_prism_pct.tif", 15,
-        "% (CRU-TS 1901–2015 vs PRISM 1961–1990)",
-        "Precipitation, annual: CRU-TS 1901–2015 (app baseline) vs PRISM 1961–1990\n"
-        "(red = app baseline wetter, so displayed % change is understated)",
-        "fig9_ar5_precipitation_baseline_map.png",
-    )
-
-
-def fig_ar5_tas_map():
-    _baseline_map(
-        DATA / "maps" / "temperature_cru1901_2015_minus_prism.tif", 0.5,
-        "°C (CRU-TS 1901–2015 − PRISM 1961–1990)",
-        "Temperature, annual: CRU-TS 1901–2015 (app baseline) − PRISM 1961–1990\n"
-        "(red = app baseline warmer, so displayed change is understated)",
-        "fig12_ar5_temperature_baseline_map.png",
-    )
 
 
 if __name__ == "__main__":
