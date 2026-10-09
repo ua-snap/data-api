@@ -14,18 +14,24 @@
 
 The method needs each GCM's own historical run (`G_hist`). This report never infers or substitutes a missing `G_hist`.
 
+**Scope:** every section of the Arctic-EDS report, i.e. the 11 components `/eds/all` returns: temperature, precipitation, snowfall, freezing index, thawing index, heating degree days, wet days, permafrost, hydrology, precipitation frequency and elevation. The EDS-specific API routes (`/eds/temperature`, `/eds/permafrost`, `/eds/hydrology`, …) all feed this endpoint. The app's maps page is excluded because it is being deprecated, and so are Rasdaman coverages built for EDS that the app doesn't use.
+
 All numbers come from 24 test sites across 7 Alaska regions, pulled from the production Rasdaman (`zeus.snap.uaf.edu`) on 2026-10-08. Every "current" value was checked against the live `earthmaps.io/eds/all` response, and all of them reproduce it.
 
 ---
 
 ## TL;DR
 
-| Component | Delta change method today | What's needed |
-|---|---|---|
-| Temperature, precipitation | **Already applied, during data production** (monthly, per model, against each GCM's own 1961–1990 run, added to PRISM 1961–1990). Not reapplied in the API or app, and shouldn't be. | Fix the **baseline mismatch**: the app shows CRU-TS 1901–2015 as "historical", not the 1961–1990 reference the deltas were added to |
-| Freezing index, thawing index, HDD | **Not applied.** The app shows raw GCM futures against Daymet. `G_hist` *is* in Rasdaman. | Apply it (additive). WCPS queries are ready and validated |
-| Wet days | **Not applied.** Raw WRF futures against ERA-Interim. No `G_hist` in Rasdaman. | Ingest WRF GCM historical runs first |
-| Snowfall | Derived product; lineage not established here. No `G_hist` in Rasdaman. | Confirm how the SFE product was built before deciding |
+| Component | Change shown in the report? | Delta change method today | `G_hist` in Rasdaman? | Observed baseline in Rasdaman? | What's needed |
+|---|---|---|---|---|---|
+| Temperature, precipitation | Yes (future − baseline) | **Applied in production** (Walsh et al. 2018: each GCM's own 1961–1990 run, added to PRISM 1961–1990) | Not needed (consumed in downscaling) | CRU-TS 4.0 1901–2015 | Fix the **baseline mismatch**: the app's "historical" isn't the 1961–1990 reference the deltas were added to |
+| Freezing index, thawing index, heating degree days | Yes (% change) | **Not applied.** Raw (BCSD) GCM futures vs Daymet | ✓ | Daymet 1980–2009 | Apply it (additive). WCPS queries are ready and validated |
+| Precipitation frequency | No (future values only) | **Applied in production** (each GCM's own WRF historical run, ratio applied to NOAA Atlas 14) | Not needed | ✗ (Atlas 14 not in Rasdaman) | Nothing to fix in the app, since no baseline is displayed |
+| Snowfall | No (CSV preview only) | **Unverified.** Derived from downscaled AR5 inputs whose method isn't documented | ✗ | CRU-TS 3.1 1910–2009 | Establish how the inputs were downscaled |
+| Wet days | No (fetched, not displayed) | **Not applied.** Raw WRF futures vs ERA-Interim | ✗ | ERA-Interim WRF 1980–2009 | Ingest WRF GCM historical runs, if it's ever displayed |
+| Hydrology | No (CSV preview only) | **Not applied.** VIC driven by BCSD GCMs; the API's "historical" era is each GCM's own 1950–2009 run | ✓ | **✗** (no Daymet-driven VIC run) | Ingest a Daymet-forced VIC baseline before an observed anchor is possible |
+| Permafrost | No (future eras only) | **Not applied.** GIPL 2021–2120 only | ✗ | **✗** | No historical data at all; flag only |
+| Elevation | — | Not applicable (static) | — | — | — |
 
 1. **Temperature and precipitation.** The AR5/CMIP5 2 km data are the dataset described in Walsh et al. (2018), which was produced with exactly the issue's delta method. Because the app compares against a different baseline, the change a user reads is the model delta plus a baseline offset. At mid-century:
    - Temperature: the displayed annual change **understates the model delta by 0.07–0.30 °C** (median 0.15 °C). By month the offset ranges from −1.3 to +1.2 °C.
@@ -64,20 +70,45 @@ displayed change = G_fut − CRU_1901–2015
                  + (PRISM_1961–1990 − CRU_1901–2015) ← baseline offset
 ```
 
-### Degree days and wet days: no
+### All other components
 
-Data availability was checked by querying every GCM slice over the historical years at all 24 sites ([`check_gcm_historical.py`](check_gcm_historical.py), [`data/gcm_historical_availability.csv`](data/gcm_historical_availability.csv)).
+Data availability was checked by querying every GCM slice over the historical period at all 24 sites ([`check_gcm_historical.py`](check_gcm_historical.py), [`data/gcm_historical_availability.csv`](data/gcm_historical_availability.csv)). "0 of 0" means the coverage's time axis has no historical period at all.
 
-| Component | Coverage | Baseline shown | Future shown | GCM historical values found |
-|---|---|---|---|---|
-| Freezing / thawing index, HDD | `air_*_index_Fdays`, `heating_degree_days_Fdays` (NCAR 12 km) | Daymet 1980–2009 | 9 GCMs × 2 RCPs, raw | **12,420 of 19,440**¹, so the method **can be applied** |
-| Wet days per year | `wet_days_per_year` (WRF 20 km) | ERA-Interim 1980–2009 | GFDL-CM3 / NCAR-CCSM4, raw, 2006–2100 | **0 of 1,248**, so WRF GCM historical runs **must be ingested** first |
-| Snowfall (SFE) | `mean_annual_snowfall_mm` | CRU-TS 3.1 1910–2009 | AR5, 5 GCMs × 3 RCPs | **0 of 4,800** |
-| *(for reference)* Temperature / precipitation | `tas_2km_*` / `annual_precip_totals_mm` | CRU-TS 4.0 1901–2015 | AR5, already delta-downscaled | none, and none needed (see above) |
+| Component | Coverage | Baseline shown | Future shown | GCM historical values found | Observed baseline in Rasdaman | Status |
+|---|---|---|---|---|---|---|
+| Freezing / thawing index, HDD | `air_*_index_Fdays`, `heating_degree_days_Fdays` (NCAR 12 km) | Daymet 1980–2009 | 9 GCMs × 2 RCPs, raw | **12,420 of 19,440**¹ | Daymet ✓ | **Computable now** |
+| Wet days per year | `wet_days_per_year` (WRF 20 km) | — (not displayed) | GFDL-CM3 / NCAR-CCSM4, raw, 2006–2100 | **0 of 1,248** | ERA-Interim WRF ✓ | Needs WRF GCM historical ingest |
+| Snowfall (SFE) | `mean_annual_snowfall_mm` | — (CSV preview only) | AR5, 5 GCMs × 3 RCPs | **0 of 4,800** | CRU-TS 3.1 ✓ | Unverified lineage |
+| Hydrology | `hydrology` (VIC, 12 km) | — (CSV preview only) | 10 GCMs × 2 RCPs, decadal | **33,120 of 34,560**² | **✗** | No observed baseline |
+| Permafrost | `crrel_gipl_outputs_nc` (GIPL 2.0, 1 km) | — | 3 models × 2 RCPs, 2021–2120 | **0 of 0** | **✗** | No historical data |
+| Precipitation frequency | `dot_precip` (WRF + Atlas 14) | — | GFDL-CM3 / NCAR-CCSM4, RCP 8.5, three eras | **0 of 0** | **✗** | Applied in production |
+| Elevation | ASTER GDEM (via GeoServer) | — | — | — | — | Not applicable |
+| *(for reference)* Temperature / precipitation | `tas_2km_*` / `annual_precip_totals_mm` | CRU-TS 4.0 1901–2015 | AR5, already delta-downscaled | none, and none needed (see above) | CRU-TS ✓ | Applied in production |
 
 ¹ Every GCM × RCP track holds 1950–2005 values. The remaining empty cells are the unused `historical` scenario index for GCMs and Ketchikan, which falls outside the NCAR 12 km grid.
+² All 10 GCMs × 2 RCPs × 12 months × the six 1950–2009 decades, at 23 sites (Ketchikan is outside the 12 km grid).
 
-Snowfall is derived from SNAP's 771 m AR5 temperature and precipitation (PRISM 1971–2000 baseline) through a snow-fraction calculation. It's excluded here because neither its lineage nor a valid `G_hist` could be established. Permafrost, hydrology, elevation and precipitation frequency are model outputs or static layers and are out of scope.
+#### Notes by component
+
+- **Precipitation frequency: delta applied in production, exactly as the issue describes.**
+  - SNAP's DOT&PF project ([final report](https://uaf-snap.org/wp-content/uploads/2021/05/dot-precip_FINAL-REPORT_20210526.pdf); code in [`ua-snap/precip-dot`](https://github.com/ua-snap/precip-dot)) computed annual-maximum precipitation frequencies from WRF runs driven by each GCM's own historical simulation (1979–2005) and its RCP 8.5 future.
+  - `pipeline/deltas.py` divides each GCM's future by **its own** historical run (`proj_ds['pf'] /= hist_ds['pf']`). `pipeline/multiply.py` then multiplies the warped ratios onto NOAA Atlas 14.
+  - **No cap is applied to the ratios.** A later `fudge` step only enforces that values increase with duration and return interval.
+  - The report text also mentions ERA-Interim-driven WRF as "modeled historical" in one place, but the code uses the GCM historical runs.
+  - The app shows only the future values, so no baseline mismatch is displayed. Atlas 14 itself is not in Rasdaman.
+- **Hydrology: model-relative change, no observed anchor.**
+  - The VIC outputs are driven by the BCSD-downscaled NCAR 12 km data. The API's EDS summary ([hydrology.py:41–46](../routes/hydrology.py#L41-L46)) defines its "historical" era as decades 0–5 (1950–2009) of **each GCM's own run**.
+  - So any change derived from it would be each model's own delta. But the coverage holds no observation-forced (Daymet-driven) VIC run to add that delta to, so the issue's method can't be completed.
+  - The report section shows only a CSV preview and download (all decades, 1950–2099), not a baseline comparison.
+- **Permafrost: no historical data.**
+  - GIPL 2.0 outputs (driven by downscaled AR5 climate) start in 2021 ([permafrost.py:676](../routes/permafrost.py#L676) summarizes 2021–2039, 2040–2069 and 2070–2099).
+  - There is no historical GIPL run and no observed ground-temperature baseline in Rasdaman, so the delta change method has nothing to work with. The report shows future-era summaries only.
+- **Snowfall: lineage unverified.**
+  - SFE is built from SNAP's 771 m downscaled AR5 temperature and precipitation using a snow-day-fraction model (McAfee et al. 2014, [doi:10.1002/hyp.9934](https://doi.org/10.1002/hyp.9934); [SNAP catalog record](https://catalog.snap.uaf.edu/geonetwork/srv/api/records/7c0c1a65-794e-4770-aa72-4628d357808e)).
+  - The catalog record doesn't say how those inputs were downscaled or against which baseline, so I haven't classified it as delta-applied.
+  - The report shows a CSV preview of historical and projected decades; the API's summary isn't displayed.
+- **Wet days: fetched but not displayed.** `/eds/all` returns it, but no report section renders it. The only place it appears is the maps page, which is being deprecated.
+- **Elevation:** a static terrain summary, not a climate projection.
 
 ### Code evidence: the API and app never apply a delta
 
@@ -86,14 +117,20 @@ Snowfall is derived from SNAP's 771 m AR5 temperature and precipitation (PRISM 1
 - **Degree days.** [degree_days.py:534–560](../routes/degree_days.py#L534-L560) takes Daymet 1980–2009 statistics as `modeled_baseline` and pools raw GCM values. The GCM 1980–2009 values are in the coverage but never read.
 - **Snowfall.** [snow.py:85–116](../routes/snow.py#L85-L116) takes CRU decades as historical and pools all GCM decades.
 - **Wet days.** [wet_days_per_year.py:44](../routes/wet_days_per_year.py#L44) splits the coverage at 1980–2009 (ERA-Interim) and 2006–2100 (GCMs).
+- **Hydrology.** [hydrology.py:440](../routes/hydrology.py#L440) returns per-model eras, with "historical" from each GCM's own 1950–2009 run ([hydrology.py:41–46](../routes/hydrology.py#L41-L46)). No observed baseline is involved.
+- **Permafrost.** [permafrost.py:676](../routes/permafrost.py#L676) summarizes GIPL future eras only.
+- **Precipitation frequency.** [taspr.py:1816](../routes/taspr.py#L1816) returns the `dot_precip` future values as stored.
 - A search across all EDS routes for `delta|anomal|bias|ratio` finds nothing relevant.
-- **Frontend** (`ua-snap/arctic-eds@a25b445`). `Diff.vue` computes `future − past` (abs: temperature, precipitation) or `(future − past) / past` (pct: degree days) from the API's means.
+- **Frontend** (`ua-snap/arctic-eds@5b07b8f`). `Diff.vue` computes `future − past` (abs: temperature, precipitation) or `(future − past) / past` (pct: degree days) from the API's means. Those five are the only report sections that display a change from baseline:
+  - Snowfall and hydrology show CSV previews.
+  - Permafrost and precipitation frequency show future values only.
+  - Wet days isn't rendered.
 
 ---
 
 ## B. Can WCPS do it server-side?
 
-**Yes, wherever `G_hist` is in the coverage** (today, the degree days). [`wcps_server_side.py`](wcps_server_side.py) runs the full calculation in Rasdaman at every test site and checks it against the same formula in numpy on the same data ([`data/wcps_validation.csv`](data/wcps_validation.csv)).
+**Yes, wherever both `G_hist` and an observed baseline are in Rasdaman** (today, only the degree days; hydrology has `G_hist` but no observed baseline). [`wcps_server_side.py`](wcps_server_side.py) runs the full calculation in Rasdaman at every test site and checks it against the same formula in numpy on the same data ([`data/wcps_validation.csv`](data/wcps_validation.csv)).
 
 | Index | Formula run in WCPS (mean over 9 GCMs × 2 RCPs, 2040–2069) | Mean time per point | Max \|WCPS − Python\| |
 |---|---|---|---|
@@ -275,9 +312,24 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 
    The monthly temperature tables are where the fix matters most (up to ±1.3 °C today).
 2. **Degree days: apply the delta change method (additive, floor at 0).** All inputs are in Rasdaman, and the WCPS queries exist and are validated.
-3. **Wet days: ingest the WRF GCM historical runs before applying the method.**
-4. **Snowfall: establish how the SFE product was built** (baseline, deltas, snow-fraction model) before deciding whether it needs anything.
+3. **Precipitation frequency: no change needed.** The delta method was applied in production against each GCM's own historical run, and the app shows no baseline. If a historical comparison is ever added, it should be NOAA Atlas 14 (the baseline the ratios were applied to), which would need ingesting. Note that the production ratios were uncapped.
+4. **Hydrology, permafrost, wet days, snowfall: flag; no fix possible with current data.**
+   - **Hydrology:** the per-model change is available, but there's no observed anchor. A Daymet-forced VIC baseline would need ingesting before the issue's method can be completed. Nothing is displayed as a change today.
+   - **Permafrost:** GIPL has no historical run and Rasdaman has no observed ground-temperature baseline. The method can't apply; the report shows future values only.
+   - **Wet days:** not displayed. If it is ever added to the report, ingest the WRF GCM historical runs first.
+   - **Snowfall:** establish how the 771 m inputs were downscaled (method and baseline) before deciding. The report shows only a CSV preview today.
 5. **Shared implementation defaults:** a 3× multiplier cap and a minimum-denominator threshold for zero-bounded variables. Do point queries in WCPS (~0.2 s per component) and precompute statewide grids.
+
+### Data that would need ingesting
+
+| To enable | Data | Notes |
+|---|---|---|
+| PRISM-based temperature/precipitation baseline (optional) | PRISM 1961–1990 2 km, the exact release used for the AR5 downscaling | Not needed if the CRU-TS 2 km 1961–1990 mean is used instead |
+| Wet days | WRF 20 km GFDL-CM3 and NCAR-CCSM4 historical runs (1980–2005), as wet-day counts | Only if wet days are added to the report |
+| Hydrology | VIC output forced by Daymet (an observed baseline) | Without it, only model-relative change is possible |
+| Permafrost | A historical GIPL run, or an observed ground-temperature baseline | Neither exists in Rasdaman |
+| Precipitation frequency (optional) | NOAA Atlas 14, Alaska | Only if a historical comparison is ever displayed |
+| Snowfall | Documentation of the 771 m input downscaling, then possibly GCM historical SFE | Decision pending the lineage check |
 
 ---
 
@@ -363,7 +415,7 @@ Use the `api-env` conda environment and set `PROJ_DATA` to its `share/proj` dire
 ```sh
 cd delta_change_method
 python fetch_site_data.py        # ~8 min; caches point cubes for all EDS coverages to data/raw/
-python check_gcm_historical.py   # which coverages contain GCM historical runs
+python check_gcm_historical.py   # per component: GCM historical runs, observed baseline, status
 python analyze.py                # degree days: current vs delta change method
 python prism_check.py PRISM_DIR            # PRISM file vs CRU-TS 2 km 1961–1990 mean at the sites
 python climatology_consistency.py PRISM_DIR  # which climatology the AR5 projections share their fine-scale pattern with (~2 min)

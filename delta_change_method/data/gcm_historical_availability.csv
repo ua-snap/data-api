@@ -1,8 +1,12 @@
-component,coverage,checked,gcm_historical_values_found,values_checked,delta_change_possible
-temperature,tas_2km_projected_wcs,only years 2006-2100 exist; the historical coverage (tas_2km_historical_wcs) has no model axis,0,0,False
-precipitation,annual_precip_totals_mm,"GCM models, all scenarios, 1901-2005",0,60480,False
-snowfall,mean_annual_snowfall_mm,"GCM models, all scenarios, 1910-2009 decades",0,4800,False
-wet_days_per_year,wet_days_per_year,"GCM models, 1980-2005",0,1248,False
-freezing_index,air_freezing_index_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,True
-thawing_index,air_thawing_index_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,True
-heating_degree_days,heating_degree_days_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,True
+component,coverage,checked,gcm_historical_values_found,values_checked,observed_baseline_in_rasdaman,status
+temperature,tas_2km_projected_wcs,projected coverage starts in 2006; tas_2km_historical_wcs has no model axis,0,0,CRU-TS 4.0 2km 1901-2015,applied in production
+precipitation,annual_precip_totals_mm,"GCM models, all scenarios, 1901-2005",0,60480,CRU-TS 4.0 2km 1901-2015,applied in production
+snowfall,mean_annual_snowfall_mm,"GCM models, all scenarios, 1910-2009 decades",0,4800,CRU-TS 3.1 771m 1910-2009,unverified
+freezing_index,air_freezing_index_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,Daymet 1980-2009,computable now
+thawing_index,air_thawing_index_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,Daymet 1980-2009,computable now
+heating_degree_days,heating_degree_days_Fdays,"GCM models, all scenarios, 1980-2009",12420,19440,Daymet 1980-2009,computable now
+wet_days_per_year,wet_days_per_year,"GCM models, 1980-2005",0,1248,ERA-Interim WRF 1980-2009,needs G_hist ingest
+hydrology,hydrology,"all 10 GCMs, both RCPs, all months, decades 1950-2009 (runoff band)",33120,34560,none (no Daymet-driven VIC run),no observed baseline
+permafrost,crrel_gipl_outputs_nc,time axis starts in 2021 (GIPL 2021-2120 only),0,0,none,no observed baseline
+precip_frequency,dot_precip,"era axis holds 2020-2049, 2050-2079, 2080-2099 only",0,0,none (NOAA Atlas 14 not in Rasdaman),applied in production
+elevation,,static terrain layer,0,0,n/a,not applicable
