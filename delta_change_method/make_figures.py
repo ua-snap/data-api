@@ -336,6 +336,39 @@ def fig_ar5_precip_eras(sites):
     plt.close(fig)
 
 
+def fig_ar5_tas_map():
+    fp = DATA / "maps" / "temperature_baseline_offset.tif"
+    if not fp.exists():  # produced by wcps_server_side.tas_offset_map() (~1 hour)
+        return
+    with rio.open(fp) as src:
+        a = src.read(1).astype(float)
+        b = src.bounds
+    a[(a < -9000) | ~np.isfinite(a)] = np.nan
+    a = a.T  # tas_2km_historical_wcs comes back with X/Y transposed (rows are X)
+    xs, ys = zip(*[to_3338(s[2], s[3]) for s in SITES])
+    fig, ax = plt.subplots(figsize=(7.6, 5.8))
+    lim = 0.35
+    im = ax.imshow(a, extent=(b.left, b.right, b.bottom, b.top), cmap=DIVERGING,
+                   norm=TwoSlopeNorm(0, -lim, lim), interpolation="nearest")
+    ax.scatter(xs, ys, s=10, color=INK, lw=0)
+    ax.set_xlim(-1.0e6, 1.55e6)
+    ax.set_ylim(0.35e6, 2.45e6)
+    ax.set_aspect("equal")
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.grid(False)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    cb = fig.colorbar(im, ax=ax, shrink=0.8, pad=0.01, extend="both")
+    cb.outline.set_visible(False)
+    cb.set_label("°C (CRU-TS 1901–2015 − CRU-TS 2km 1961–1990)")
+    ax.set_title("Temperature: app baseline vs the CRU-TS 2 km 1961–1990 mean, annual\n"
+                 "(red = app baseline warmer, so displayed change is understated; 12 WCPS requests)", loc="left", fontsize=10)
+    fig.tight_layout()
+    fig.savefig(FIGS / "fig12_ar5_temperature_baseline_map.png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+
+
 def fig_prism_verification(sites):
     """PRISM file vs CRU-TS 2km 1961-1990 at the sites, and which one shares the AR5 fine-scale pattern."""
     v = pd.read_csv(DATA / "prism_vs_cru_1961_1990.csv")
@@ -431,4 +464,5 @@ if __name__ == "__main__":
     fig_ar5_precip_map()
     fig_prism_verification(all_sites)
     fig_ar5_precip_eras(all_sites)
+    fig_ar5_tas_map()
     print("figures written to", FIGS)

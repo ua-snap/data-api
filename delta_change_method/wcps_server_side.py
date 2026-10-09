@@ -17,8 +17,8 @@ Rasdaman quirks hit during this work, and the workarounds:
     sums of the year slices work instead (sent via POST since the query gets long).
   * tas_2km_projected_wcs has an irregular scenario axis whose coefficients are 0 and 2,
     so RCP 8.5 is scenario(2) even though the encoding metadata labels it "1".
-  * Map outputs from the NCAR 12km coverages come back with X/Y transposed (the 2km AR5
-    coverages do not), and -9999 nodata propagates.
+  * Map outputs from the NCAR 12km coverages and tas_2km_historical_wcs come back with X/Y
+    transposed (annual_precip_totals_mm does not), and -9999 nodata propagates.
 
 Usage: python wcps_server_side.py   (run fetch_site_data.py and analyze.py first)
 """
@@ -198,6 +198,49 @@ def map_precip_baseline_ratio():
     )
 
 
+def tas_offset_month_query(month):
+    """Not a delta calculation: for one calendar month, the app's temperature baseline
+    (CRU-TS 1901-2015 mean) minus the CRU-TS 2km 1961-1990 mean that stands in for the
+    climatology the AR5 deltas were added to (see ar5_baseline.py). Positive = displayed
+    change understates the model delta.
+
+    tas_2km_historical_wcs's year axis is index-based (0 = 1901), so condense over it is safe,
+    unlike the geo-labelled year axes above. The whole-year version in one request exceeded
+    10 minutes, so it is split by month (~5 min each). Clipped to the Alaska extent.
+    """
+    X, Y = "X(-2173223:1491905)", "Y(316704:2475554)"
+    sl = f"$c.tas[month({month}),year($y),{X},{Y}]"
+    return (
+        "for $c in (tas_2km_historical_wcs) return encode("
+        f"(condense + over $y year(0:114) using {sl}) / 115.0"
+        f" - (condense + over $y year(60:89) using {sl}) / 30.0,"
+        ' "image/tiff")'
+    )
+
+
+def tas_offset_map():
+    """Run the 12 monthly queries one at a time (zeus also serves production) and average
+    them into the annual offset. Output comes back with X/Y transposed, like the 12km maps."""
+    import rasterio as rio
+
+    arrs, profile = [], None
+    for m in range(12):
+        fp = MAPS / f"temperature_baseline_offset_m{m + 1:02d}.tif"
+        if not fp.exists():
+            r, secs = run(tas_offset_month_query(m), timeout=1800)
+            fp.write_bytes(r.content)
+            print(f"month {m + 1}: {secs:.0f}s", flush=True)
+        with rio.open(fp) as src:
+            a = src.read(1).astype("float32")
+            profile = src.profile
+        a[a < -9000] = float("nan")
+        arrs.append(a)
+    annual = np.nanmean(np.array(arrs), axis=0)
+    profile.update(dtype="float32", nodata=float("nan"))
+    with rio.open(MAPS / "temperature_baseline_offset.tif", "w", **profile) as dst:
+        dst.write(annual, 1)
+
+
 MAP_QUERIES = {
     "freezing_index_adjustment": map_adjustment("air_freezing_index_Fdays"),
     "freezing_index_baseline": map_baseline("air_freezing_index_Fdays"),
@@ -227,3 +270,4 @@ if __name__ == "__main__":
     print(df.groupby(["component", "method"]).agg(max_abs_diff=("abs_diff", "max"), mean_s=("seconds", "mean")).round(4))
     cap_check()
     maps()
+    tas_offset_map()  # ~1 hour

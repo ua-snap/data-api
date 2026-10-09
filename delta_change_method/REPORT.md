@@ -126,6 +126,7 @@ For the multiplicative form, the body becomes `min(G_fut / G_hist, 3.0)`. `switc
 |---|---|---|---|---|
 | Degree-day adjustment fields | 12 km | 0.7–0.8 s each | 0.6 MB | [Fig. 5](#figures) |
 | Precipitation baseline-offset grid | 2 km | 7–77 s (server caching varies) | 16 MB | [Fig. 9](#figures) |
+| Temperature baseline-offset grid | 2 km | 12 monthly requests, 1.5–4.5 min each (one request for all months exceeded 10 min) | 16 MB each | [Fig. 12](#figures) |
 
 For temperature and precipitation, WCPS can likewise compute baseline offsets or re-anchored values on the fly, since everything they need is in Rasdaman.
 
@@ -134,7 +135,7 @@ For temperature and precipitation, WCPS can likewise compute baseline offsets or
 1. **Mixed-length `avg()` fails.** Combining `avg()` over subsets of different lengths (e.g. 115 vs 30 years) raises *"axes not compatible"*. Workaround: cast each aggregate, as in `(double)avg(...)`.
 2. **`condense` over a `year` iterator mis-indexes.** It sends geo years to the wrong grid index, and over an ANSI date axis it hung for more than 2 minutes. Workaround: write out explicit sums of year slices and send the query by POST.
 3. **`tas_2km_projected_wcs` has an irregular scenario axis.** Its coefficients are `0, 2`, so RCP 8.5 is `scenario(2)` even though the metadata encoding labels it `"1"`.
-4. **GeoTIFF axis order differs by coverage.** The NCAR 12 km coverages come back with X/Y transposed; the AR5 2 km coverages do not.
+4. **GeoTIFF axis order differs by coverage.** The NCAR 12 km coverages and `tas_2km_historical_wcs` come back with X/Y transposed; `annual_precip_totals_mm` does not.
 
 ---
 
@@ -192,7 +193,7 @@ Results at mid-century (2040–2069), 24 sites. The full table is in [`data/ar5_
 
 | | Displayed change (vs CRU 1901–2015) | Model delta (vs CRU-TS 2 km 1961–1990 mean) | Difference | Same, using the PRISM file |
 |---|---|---|---|---|
-| Temperature, annual | +2.6 to +6.2 °C (median +4.2) | +2.7 to +6.5 °C (median +4.3) | **Displayed understates by 0.07–0.30 °C** (largest at Utqiagvik) | −0.38 to +0.31 °C; differs only at Valdez (−0.38 vs +0.15) and Ketchikan (+0.30 vs +0.11) |
+| Temperature, annual | +2.6 to +6.2 °C (median +4.2) | +2.7 to +6.5 °C (median +4.3) | **Displayed understates by 0.07–0.30 °C** (largest at Utqiagvik); understated everywhere statewide ([Fig. 12](#figures)) | −0.38 to +0.31 °C; differs only at Valdez (−0.38 vs +0.15) and Ketchikan (+0.30 vs +0.11) |
 | Temperature, by month | — | — | **About −1.3 to +1.2 °C** | [Fig. 8](#figures) uses the PRISM file: −1.33 to +1.19 °C |
 | Precipitation | +4.4% to +28.2% | +5.5% to +26.8% | **−4.6 to +11.4 pp** (median \|shift\| 2.9 pp) | −6.1 to +11.4 pp; differs at Anaktuvuk Pass, Homer, Nome and Kotzebue (registration) |
 
@@ -312,6 +313,9 @@ Along the far southern coast and in the Aleutians, the freezing-index baseline a
 **Fig. 11: Precipitation baseline offset by site and era** (annual totals, vs the CRU-TS 2 km 1961–1990 mean). There is no monthly CRU-TS 4.0 precipitation in Rasdaman (the app's precip coverage stores annual totals only), so unlike Fig. 8 this is by era rather than by month. The mm offset is the same in every era, but the percentage-point shift grows slightly as projected totals rise.
 ![](figures/fig11_ar5_precipitation_offset_by_era.png)
 
+**Fig. 12: Temperature baseline offset statewide, annual** (CRU-TS 1901–2015 mean − CRU-TS 2 km 1961–1990 mean). It is positive everywhere (+0.01 to +0.32 °C), so the displayed annual change is understated across the whole state, most on the North Slope and the Gulf of Alaska coast. It was computed server-side as 12 monthly WCPS requests (~3–4 min each; a single request exceeded 10 minutes) and matches the site values to 0.001 °C.
+![](figures/fig12_ar5_temperature_baseline_map.png)
+
 ---
 
 ## Side observation (not investigated)
@@ -330,7 +334,7 @@ python analyze.py                # degree days: current vs delta change method
 python prism_check.py PRISM_DIR            # PRISM file vs CRU-TS 2 km 1961–1990 mean at the sites
 python climatology_consistency.py PRISM_DIR  # which climatology the AR5 projections share their fine-scale pattern with (~2 min)
 python ar5_baseline.py PRISM_DIR            # temperature & precipitation: baseline offset
-python wcps_server_side.py       # server-side validation, cap check, statewide GeoTIFFs
+python wcps_server_side.py       # server-side validation, cap check, statewide GeoTIFFs (~1 h, mostly the temperature map)
 python make_figures.py           # figures/
 ```
 
