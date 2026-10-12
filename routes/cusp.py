@@ -111,7 +111,7 @@ QUALITY_FLAG_DEFINITIONS = {
 def request_allows_only_csv_format() -> bool:
     """Return whether the request has no arguments or only ``format=csv``."""
     return not request.args or (
-        set(request.args) == {"format"} and request.args.get("format") == "csv"
+        set(request.args) == {"format"} and request.args.getlist("format") == ["csv"]
     )
 
 
@@ -162,9 +162,10 @@ def cusp_observations_point(lat: str, lon: str):
     The query uses a 0.5 degree by 0.5 degree EPSG:4326 bounding box centered
     on the requested longitude and latitude, and returns every matching record.
     Append ``?format=csv`` for a flat CSV export of the same records.
+    Return the no-data response when the search finds no observations.
     """
     if not request_allows_only_csv_format():
-        return render_template("400/bad_request.html"), 400
+        return render_template("422/invalid_get_parameter.html"), 422
 
     if latlon_is_numeric_and_in_geodetic_range(lat, lon) != True:
         return render_template("400/bad_request.html"), 400
@@ -190,6 +191,9 @@ def cusp_observations_point(lat: str, lon: str):
         logger.error("GeoServer returned an unexpected CUSP response shape")
         return render_template("502/upstream_unreachable.html"), 502
 
+    if not observations["features"]:
+        return render_template("404/no_data.html"), 404
+
     normalize_cusp_observation_dates(observations)
     add_cusp_quality_flag_definitions(observations)
 
@@ -198,8 +202,7 @@ def cusp_observations_point(lat: str, lon: str):
             observations,
             lat,
             lon,
-            CUSP_SEARCH_HALF_BOX_DEGREES,
-            None,
+            half_box_degrees=CUSP_SEARCH_HALF_BOX_DEGREES,
         )
 
     return observations
