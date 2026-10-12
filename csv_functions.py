@@ -775,20 +775,20 @@ def cusp_observations_csv(
     feature_collection: dict[str, object],
     lat: str,
     lon: str,
+    *,
     half_box_degrees: float,
-    record_limit: int | None,
 ) -> Response:
     """Return a flat CSV export of a CUSP WFS FeatureCollection.
 
     GeoServer returns each observation as a GeoJSON feature. CSV does not have
     a geometry type, so the point coordinates are exposed as explicit WGS84
     longitude and latitude columns while all published CUSP attributes remain
-    available as columns.
+    available as columns. The first column, cusp_obs_id, identifies each row.
     """
     fieldnames = [
+        "cusp_obs_id",
         "longitude",
         "latitude",
-        "cusp_obs_id",
         "source",
         "citation",
         "site_id",
@@ -824,27 +824,18 @@ def cusp_observations_csv(
             coordinates = []
         longitude = coordinates[0] if len(coordinates) >= 2 else None
         latitude = coordinates[1] if len(coordinates) >= 2 else None
-        row = {field: properties.get(field) for field in fieldnames[2:]}
+        row = {field: properties.get(field) for field in fieldnames}
         row["quality_flag_descriptions"] = cusp_quality_flag_descriptions(
             properties.get("quality_flags"), quality_flag_definitions
         )
         row.update({"longitude": longitude, "latitude": latitude})
         rows.append(row)
 
-    metadata = csv_metadata(lat=lat, lon=lon)
-    metadata += (
-        "# CUSP observations are individual near-surface permafrost-related "
-        "observations, not a continuous permafrost map.\n"
-    )
+    metadata = f"# Location: {lat} {lon}\n"
     metadata += (
         f"# Search area: a {2 * half_box_degrees:g} degree by "
         f"{2 * half_box_degrees:g} degree WGS84 box centered on the requested point.\n"
     )
-    if record_limit is None:
-        metadata += "# Record limit: none\n"
-    else:
-        metadata += f"# Record limit: {record_limit}\n"
-
     return write_csv(
         {
             "metadata": metadata,
