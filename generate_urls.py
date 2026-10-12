@@ -1,5 +1,7 @@
 """A module to generate query URLs"""
 
+from urllib.parse import urlencode
+
 from config import RAS_BASE_URL, GS_BASE_URL
 from luts import bbox_offset
 
@@ -51,6 +53,40 @@ def generate_wfs_search_url(
     if hucs_pa_only:
         wfs_url += "AND (type='huc' OR type='protected_area')"
     return wfs_url
+
+
+def generate_cusp_observations_url(
+    backend, lat, lon, half_box_degrees=0.25, record_limit=None
+):
+    """Build the GeoServer WFS request for CUSP observations near a point.
+
+    GeoServer's published CUSP layer expects the EPSG:4326 CQL BBOX ordinates
+    in latitude-longitude order, even though the GeoJSON response coordinates
+    are longitude-latitude. The box dimensions and feature cap match the
+    nearby-observations behaviour previously implemented by Explorer. When no
+    record limit is provided, GeoServer returns every observation in the box.
+    """
+    latitude = float(lat)
+    longitude = float(lon)
+    min_lon = longitude - half_box_degrees
+    min_lat = latitude - half_box_degrees
+    max_lon = longitude + half_box_degrees
+    max_lat = latitude + half_box_degrees
+
+    query_parameters = {
+        "service": "WFS",
+        "version": "2.0.0",
+        "request": "GetFeature",
+        "typeNames": "cusp:cusp_observations",
+        "outputFormat": "application/json",
+        "CQL_FILTER": f"BBOX(geom,{min_lat},{min_lon},{max_lat},{max_lon})",
+    }
+
+    if record_limit is not None:
+        query_parameters["count"] = record_limit
+
+    query = urlencode(query_parameters)
+    return f"{backend.rstrip('/')}/wfs?{query}"
 
 
 def generate_wfs_places_url(

@@ -45,6 +45,7 @@ def get_service_categories():
         ("CMIP6, Downscaled", "/cmip6_downscaled"),
         ("Climate Indicators", "/indicators"),
         ("Climate Protection from Spruce Beetles", "/beetles"),
+        ("CUSP Permafrost Observations", "/cusp"),
         ("Degree Days", "/degree_days"),
         ("Digital Elevation Models (DEMs)", "/elevation"),
         ("Flammability and Vegetation Type (ALFRESCO)", "/alfresco"),
@@ -198,7 +199,12 @@ def validate_get_params():
 
 @app.after_request
 def add_cache_control(response):
-    if response.status_code == 200:
+    if request.path.startswith("/cusp/") and response.status_code == 200:
+        # CUSP's GeoServer layer is refreshed from versioned releases. Keep
+        # successful point responses cacheable, but allow a new release to be
+        # visible promptly without a manual cache purge.
+        response.cache_control.max_age = 3600
+    elif response.status_code == 200:
         response.cache_control.max_age = 7776000
     else:
         # Errors are often transient (upstream hiccups), so keep them out of
