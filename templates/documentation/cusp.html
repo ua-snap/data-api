@@ -1,23 +1,18 @@
-{% extends 'documentation/dataset_base.html' %}
-
-{% block title %}CUSP: CommUnity near-Surface Permafrost Observations{% endblock %}
-
-{% block intro %}
+{% extends 'documentation/dataset_base.html' %} {% block title %}CUSP: CommUnity
+near-Surface Permafrost Observations{% endblock %} {% block intro %}
 <p>
-  This endpoint provides access to individual field observations of
-  near-surface permafrost, active-layer thickness, thaw depth, and related
-  measurements compiled by the CUSP data synthesis project. Each record includes an observation location,
-  date, method, and source citation. Coverage depends on where observations
-  were collected.
+  This endpoint provides access to individual field observations of near-surface
+  permafrost, active-layer thickness, thaw depth, and related measurements
+  compiled by the CUSP data synthesis project. Each record includes an
+  observation location, date, method, and source citation. Coverage depends on
+  where observations were collected.
 </p>
 
 <p>
   Links to the dataset documentation and attribution guidance are included in
   the <a href="#source-data">source data and references</a> section below.
 </p>
-{% endblock %}
-
-{% block variables %}
+{% endblock %} {% block variables %}
 <p>
   Below is the list of variables returned for each observation under its
   <code>properties</code> key. Depth values are reported in centimeters below
@@ -61,24 +56,23 @@
 </table>
 
 <p>
-  Null depth values mean the corresponding measurement was not reported or
-  could not be determined. A value of <code>pf_observed: 0</code> normally
-  means permafrost was not observed down to the positive
-  <code>obs_limit_cm</code>; it does not establish absence at greater depths.
-  See the <a href="https://jonschwenk.github.io/cusp/user/data-schema/"
+  Null depth values mean the corresponding measurement was not reported or could
+  not be determined. A value of <code>pf_observed: 0</code> normally means
+  permafrost was not observed down to the positive <code>obs_limit_cm</code>; it
+  does not establish absence at greater depths. See the
+  <a href="https://jonschwenk.github.io/cusp/user/data-schema/"
     >CUSP data schema</a
-  > for the complete definitions and interpretation guidance.
+  >
+  for the complete definitions and interpretation guidance.
 </p>
-{% endblock %}
-
-{% block endpoints %}
+{% endblock %} {% block endpoints %}
 <h4>Point query</h4>
 
 <p>
   Query observations in a 0.5&deg; by 0.5&deg; WGS84 (EPSG:4326) bounding box
   centered on a point specified by latitude and longitude. The box extends
-  0.25&deg; north, south, east, and west of the supplied coordinate. The
-  service returns every matching observation at its recorded location.
+  0.25&deg; north, south, east, and west of the supplied coordinate. The service
+  returns every matching observation at its recorded location.
 </p>
 
 <table class="endpoints">
@@ -133,31 +127,29 @@
       <td><code>format</code></td>
       <td>No</td>
       <td>
-        Set to <code>csv</code> for a flat CSV download. Omit it for GeoJSON;
-        no other query parameters or output formats are supported.
+        Set to <code>csv</code> for a flat CSV download. Omit it for GeoJSON; no
+        other query parameters or output formats are supported.
       </td>
     </tr>
   </tbody>
 </table>
 
 <p>
-  A query with no matching observations returns HTTP 404. This indicates a
-  lack of observation records in the search box. Malformed or out-of-range
+  A query with no matching observations returns HTTP 404. This indicates a lack
+  of observation records in the search box. Malformed or out-of-range
   coordinates return HTTP 400. Unsupported query parameters or values return
   HTTP 422. If the upstream CUSP service cannot be reached or returns an
   unexpected response, the endpoint returns HTTP 502.
 </p>
-{% endblock %}
-
-{% block output %}
+{% endblock %} {% block output %}
 <h4>Point query</h4>
 
 <p>
-  Results are returned as a GeoJSON <code>FeatureCollection</code>. Each
-  feature contains a WGS84 point geometry and observation properties,
-  including human-readable labels and a source-level <code>citation</code>.
-  The top-level <code>quality_flag_definitions</code> lookup describes the
-  quality-flag codes used in the observations.
+  Results are returned as a GeoJSON <code>FeatureCollection</code>. Each feature
+  contains a WGS84 point geometry and observation properties, including
+  human-readable labels and a source-level <code>citation</code>. The top-level
+  <code>quality_flag_definitions</code> lookup describes the quality-flag codes
+  used in the observations.
 </p>
 
 <p>
@@ -273,17 +265,24 @@
     <tr>
       <td><code>numberMatched</code>, <code>numberReturned</code></td>
       <td>integer</td>
-      <td>Counts of matching and returned observations. Every match is returned.</td>
+      <td>
+        Counts of matching and returned observations. Every match is returned.
+      </td>
     </tr>
     <tr>
       <td><code>geometry.coordinates</code></td>
       <td>array</td>
-      <td>Point coordinates in <code>[longitude, latitude]</code> order, WGS84 decimal degrees.</td>
+      <td>
+        Point coordinates in <code>[longitude, latitude]</code> order, WGS84
+        decimal degrees.
+      </td>
     </tr>
     <tr>
       <td><code>cusp_obs_id</code></td>
       <td>string</td>
-      <td>Deterministic opaque identifier for the canonical observation content.</td>
+      <td>
+        Deterministic opaque identifier for the canonical observation content.
+      </td>
     </tr>
     <tr>
       <td><code>source</code></td>
@@ -293,7 +292,10 @@
     <tr>
       <td><code>citation</code></td>
       <td>string</td>
-      <td>Bibliographic citation for the original source represented by the record.</td>
+      <td>
+        Bibliographic citation for the original source represented by the
+        record.
+      </td>
     </tr>
     <tr>
       <td><code>site_id</code></td>
@@ -313,27 +315,48 @@
     <tr>
       <td><code>pf_observed</code>, <code>pf_observed_label</code></td>
       <td>integer, string</td>
-      <td>Permafrost-presence indicator (<code>1</code> or <code>0</code>) and its human-readable label.</td>
+      <td>
+        Permafrost-presence indicator (<code>1</code> or <code>0</code>) and its
+        human-readable label.
+      </td>
     </tr>
     <tr>
-      <td><code>thaw_depth_cm</code>, <code>pf_depth_cm</code>, <code>obs_limit_cm</code></td>
+      <td>
+        <code>thaw_depth_cm</code>, <code>pf_depth_cm</code>,
+        <code>obs_limit_cm</code>
+      </td>
       <td>number or null</td>
-      <td>Thaw depth, depth to permafrost, and observation limit in centimeters; see the available variables table above.</td>
+      <td>
+        Thaw depth, depth to permafrost, and observation limit in centimeters;
+        see the available variables table above.
+      </td>
     </tr>
     <tr>
-      <td><code>has_thaw_depth</code>, <code>has_pf_depth</code>, <code>has_obs_limit</code></td>
+      <td>
+        <code>has_thaw_depth</code>, <code>has_pf_depth</code>,
+        <code>has_obs_limit</code>
+      </td>
       <td>boolean</td>
-      <td>Whether the corresponding depth or observation-limit value is available for that record.</td>
+      <td>
+        Whether the corresponding depth or observation-limit value is available
+        for that record.
+      </td>
     </tr>
     <tr>
       <td><code>quality_flags</code></td>
       <td>string or null</td>
-      <td>Semicolon-delimited CUSP quality-flag codes; blank or null means no current flag applies.</td>
+      <td>
+        Semicolon-delimited CUSP quality-flag codes; blank or null means no
+        current flag applies.
+      </td>
     </tr>
     <tr>
       <td><code>quality_flag_definitions</code></td>
       <td>object</td>
-      <td>Top-level lookup from each CUSP quality-flag code to its category and descriptive text.</td>
+      <td>
+        Top-level lookup from each CUSP quality-flag code to its category and
+        descriptive text.
+      </td>
     </tr>
     <tr>
       <td><code>release_version</code></td>
@@ -346,17 +369,15 @@
 <h4>CSV output</h4>
 
 <p>
-  Append <code>?format=csv</code> to the point URL to download the same
-  returned records in a flat table. The CSV replaces GeoJSON geometry with
+  Append <code>?format=csv</code> to the point URL to download the same returned
+  records in a flat table. The CSV replaces GeoJSON geometry with
   <code>longitude</code> and <code>latitude</code> columns and preserves all
   published observation fields, including <code>citation</code>. A
   <code>quality_flag_descriptions</code> column provides readable definitions
   for each record's flags. Text citations are CSV-escaped when necessary, so
   they can contain commas and URLs without changing the column layout.
 </p>
-{% endblock %}
-
-{% block source_data %}
+{% endblock %} {% block source_data %}
 <table>
   <thead>
     <tr>
@@ -367,21 +388,27 @@
   <tbody>
     <tr>
       <td>
-        <a href="https://jonschwenk.github.io/cusp/getting-started/release-products/"
+        <a
+          href="https://jonschwenk.github.io/cusp/getting-started/release-products/"
           >CUSP release downloads</a
-        > and the
+        >
+        and the
         <a href="https://jonschwenk.github.io/cusp/user/data-schema/"
           >CUSP data schema</a
         >, which describes canonical observation fields, method codes, and
         quality flags.
       </td>
       <td>
-        The <a href="https://github.com/jonschwenk/cusp/blob/main/CITATION.cff"
+        The
+        <a href="https://github.com/jonschwenk/cusp/blob/main/CITATION.cff"
           >CUSP citation</a
-        > and
-        <a href="https://jonschwenk.github.io/cusp/user/data-use-and-attribution/"
+        >
+        and
+        <a
+          href="https://jonschwenk.github.io/cusp/user/data-use-and-attribution/"
           >CUSP data use and attribution guidance</a
-        > describe how to cite CUSP, the release used, and the original data
+        >
+        describe how to cite CUSP, the release used, and the original data
         sources.
       </td>
     </tr>
@@ -390,7 +417,8 @@
       <td>
         <a href="https://doi.org/10.5281/zenodo.22802355"
           >10.5281/zenodo.22802355</a
-        > (concept DOI). Represents all versions and resolves to the latest
+        >
+        (concept DOI). Represents all versions and resolves to the latest
         release.
       </td>
     </tr>
@@ -402,8 +430,8 @@
         represented by that record.
       </td>
       <td>
-        Retain the original-source citations for the observations used, and
-        cite CUSP and the corresponding release according to its attribution
+        Retain the original-source citations for the observations used, and cite
+        CUSP and the corresponding release according to its attribution
         guidance.
       </td>
     </tr>

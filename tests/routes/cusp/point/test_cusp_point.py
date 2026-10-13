@@ -8,7 +8,6 @@ from flask.testing import FlaskClient
 
 from tests.json_compare import assert_json_allclose
 
-
 FIXTURE_DIRECTORY = Path(__file__).parent / "json"
 
 
