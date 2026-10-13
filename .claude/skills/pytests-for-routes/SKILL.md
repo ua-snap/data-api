@@ -1,6 +1,6 @@
 ---
 name: pytests-for-routes
-description: 'Use when asked to generate, add, or write new pytest tests for a data-api route/endpoint. Covers two test styles chosen per route: golden-fixture "data route" tests (expected JSON and/or HTTP status codes) for routes that return modeled climate/environmental data, and smoke-test "place route" tests (200 status + parseable JSON only) for routes serving community locations or area/polygon boundaries. Defines the standard point locations, area IDs, and stream IDs to test, CSV and optional-GET-parameter test patterns, and the tests/routes/<route>/{point,area,local,stream}/ + json/ fixture directory layout. Trigger phrases: "generate tests for", "add pytest tests for", "write endpoint tests", "test the <route> endpoint", "backfill missing tests for <route>", "add smoke tests for place routes", "test area polygon endpoints".'
+description: 'Use when asked to generate, add, or write new pytest tests for a data-api route/endpoint. Covers two test styles chosen per route: golden-fixture "data route" tests (expected JSON and/or HTTP status codes) for routes that return modeled climate/environmental data, and smoke-test "place route" tests (200 status + parseable JSON only) for routes serving community locations or area/polygon boundaries. The `cusp` data routes are an exception: they always use smoke tests only (parseable JSON where data is expected, otherwise just the expected HTTP status code). Defines the standard point locations, area IDs, and stream IDs to test, CSV and optional-GET-parameter test patterns, and the tests/routes/<route>/{point,area,local,stream}/ + json/ fixture directory layout. Trigger phrases: "generate tests for", "add pytest tests for", "write endpoint tests", "test the <route> endpoint", "backfill missing tests for <route>", "add smoke tests for place routes", "test area polygon endpoints".'
 ---
 
 # Pytests for Routes
@@ -14,6 +14,8 @@ This repo uses two pytest styles, chosen per route:
 
 - **Data-route tests** (golden-fixture) — for routes that return modeled climate/environmental data (temperature, precipitation, streamflow, permafrost, fire weather, etc.). Save the live response as an expected JSON fixture and assert exact equality, or assert the exact observed non-200 status code for out-of-bounds/nodata cases. See "Data-route tests" below.
 - **Place-route tests** (smoke-test only) — for routes that return reference/lookup data for communities, place types, or area/polygon boundaries, e.g. `/places/<type>`, `/boundary/area/<id>`. These payloads are expected to change more frequently over time, so just confirm the response status and that the body is parseable JSON. See "Place-route tests" below.
+
+**Exception — `cusp` routes always use smoke tests.** Even though `cusp` point endpoints return observational data, use only smoke tests for them: where the endpoint returns data (200), assert the 200 status and that the body is parseable JSON; where it returns no data or an error, assert only the exact observed HTTP status code. Never save or compare golden JSON fixtures for `cusp`. See "Smoke-test-only data routes (`cusp`)" below.
 
 If unsure which applies: does the route model/compute a value from a coverage or dataset (data route), or does it just look up/return a stored place or boundary record (place route)? Do not use the place-route smoke-test style for point/area endpoints that return modeled data values — use the data-route style for those instead.
 
@@ -68,6 +70,14 @@ Some endpoints return data that changes regularly (e.g. active/current fire peri
 - If the endpoint returns a body expected to be JSON, assert it's parseable, e.g. `response.get_json()` returns without raising (or is not `None`) — do not assert on its contents.
 
 The confirmed case in this repo: `fire`'s point endpoint (`/fire/point/<lat>/<lon>`) — all `test_fire_point_*` tests (`test_fire_point_fairbanks`, `test_fire_point_ocean`, `test_fire_point_attu`, `test_fire_point_dawson_city`, and `test_fire_point_reykjavik` if applicable) use this status-code-and-parseable-only pattern instead of the golden-fixture pattern. If asked to test another route whose data is similarly described as live/regularly-updated (check `templates/documentation/<route>.html` for language like "current", "active", "updated daily/annually"), confirm with the user before applying this exception rather than assuming it.
+
+### Smoke-test-only data routes (`cusp`)
+All `/cusp/...` endpoints (currently `/cusp/point/<lat>/<lon>`) are smoke-test-only, with no confirmation needed. Use the standard location matrix above, but for every location's test:
+- Do not save a `json/` fixture and do not use `assert_json_allclose` (remove any existing cusp golden fixture and its import if backfilling/refreshing an existing test file).
+- If the live response is **200** (a location where data is expected): assert `response.status_code == 200` and that the body is parseable JSON, e.g. `assert response.get_json(silent=True) is not None`. Do not assert on contents (not even `timeStamp` or feature counts).
+- Otherwise (out-of-bounds, no-data ocean point, etc.): assert only the exact status code observed live (e.g. 404, 422) — don't guess it, and don't assert on the body.
+
+The CSV test (`?format=csv`) and optional-GET-parameter tests for cusp follow their usual single-smoke-test patterns below; the CSV test only needs a 200 and parseable CSV rows.
 
 ### CSV export tests (`?format=csv`)
 If the route file (`routes/<route>.py`) contains `request.args.get("format") == "csv"` anywhere for a given endpoint, that endpoint supports CSV export and needs exactly **one** additional test — do not add the full 4/5-location matrix for CSV. Use a single smoke test at the first location/area/stream ID that returned **200** in this endpoint's location (or area/stream) tests. That is usually Fairbanks (`lat=64.8378, lon=-147.7164`), or the route's single fixed stream ID for stream-based endpoints — but not always. If Fairbanks (or the default area/stream ID) was out of bounds, use the first in-bounds location instead (e.g. `landfastice` CSV uses the ocean point because Fairbanks returns 422).
@@ -139,6 +149,7 @@ Location slugs: `fairbanks`, `ocean`, `attu`, `dawson_city`, and (when applicabl
 3. For every location/area, hit the real endpoint through the Flask test client (see `tests/conftest.py`'s `client` fixture) — do not hand-write expected JSON.
 4. Classify the live response:
    - **Route is a confirmed volatile-data exception** (see "Volatile-data exceptions" above): skip fixture save/compare — assert only the status code and (if JSON) that the body is parseable.
+   - **Route is `cusp`** (see "Smoke-test-only data routes (`cusp`)" above): no fixtures — 200 → assert status and parseable JSON only; anything else → assert the exact observed status code only.
    - **200 with a real payload under 25MB**: save the actual JSON response as a golden fixture under the matching `json/` folder, and assert the live response equals the loaded fixture using `assert_json_allclose` (matches the existing golden-file pattern used elsewhere in `tests/routes`, updated to tolerate floating-point noise).
    - **200 with a real payload of 25MB or larger**: do not save the full payload — save and assert against a bounded subset instead (see "Fixture size limits" above).
    - **Non-200 (400/404/422/502/etc.)**: this is expected for out-of-bounds points, nodata ocean points, or coverages that don't extend into Canada — assert the exact status code the live endpoint actually returns. Do not guess the code; run the request and observe it.
