@@ -29,7 +29,7 @@ from . import routes
 from config import GS_BASE_URL, WEST_BBOX, EAST_BBOX
 
 permafrost_api = Blueprint("permafrost_api", __name__)
-gipl_1km_coverage_id = "crrel_gipl_outputs_nc"
+gipl_1km_coverage_id = "crrel_gipl_outputs_nc_wcs"
 
 
 async def get_gipl_metadata():
