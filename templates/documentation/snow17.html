@@ -1,0 +1,308 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Snow-17 (experimental)</h2>
+
+<p>
+  This endpoint runs the <a href="https://github.com/UW-Hydro/tonic/blob/master/tonic/models/snow17/snow17.py">Snow-17</a>
+  snow accumulation and ablation model (Anderson, 1973 &amp; 2006) at a point, forced by the daily
+  <a href="/cmip6_downscaled">CMIP6 downscaled</a> data. Each model/scenario combination that has precipitation,
+  maximum temperature, and minimum temperature is run separately, giving daily snow water equivalent (SWE) and
+  outflow (melt plus rain leaving the snowpack) for 1965&ndash;2100.
+</p>
+
+<p>
+  This is an experimental, uncalibrated model run. The default parameters are from the American River Basin
+  (Shamir &amp; Georgakakos, 2007), not Alaska, and the model is driven by daily mean air temperature (the mean
+  of <code>tasmax</code> and <code>tasmin</code>). Results should be treated as illustrative.
+</p>
+
+<h3>Service endpoints</h3>
+
+<h4>Snow-17 point model run</h4>
+
+<table class="endpoints">
+  <thead>
+    <tr>
+      <th class="endpoint-label">Endpoint</th>
+      <th class="endpoint-url">Example URL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Daily SWE and outflow for all models and scenarios at a given latitude and longitude</td>
+      <td style="white-space: nowrap;">
+        <a href="/snow17/point/64.84/-147.72">/snow17/point/64.84/-147.72</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Daily SWE and outflow for provided models and scenarios</td>
+      <td style="white-space: nowrap;">
+        <a href="/snow17/point/64.84/-147.72?models=GFDL-ESM4&scenarios=historical,ssp585">
+          /snow17/point/64.84/-147.72?models=GFDL-ESM4&scenarios=historical,ssp585</a>
+      </td>
+    </tr>
+    <tr>
+      <td>Water year summaries for all models and scenarios</td>
+      <td style="white-space: nowrap;">
+        <a href="/snow17/point/64.84/-147.72?summary=annual">/snow17/point/64.84/-147.72?summary=annual</a>
+      </td>
+    </tr>
+    <tr>
+      <td>50-year design ground snow load for each model, scenario, and era</td>
+      <td style="white-space: nowrap;">
+        <a href="/snow17/point/64.84/-147.72?summary=design">/snow17/point/64.84/-147.72?summary=design</a>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        Multiple models can be requested by appending a comma-separated string
+        like <code>?models=&lt;model_1&gt;,&lt;model_2&gt;</code>.<br />
+        Multiple scenarios can be requested by appending a comma-separated
+        string like <code>?scenarios=&lt;scenario_1&gt;,&lt;scenario_2&gt;</code>.<br />
+        Water year (October 1&ndash;September 30) summaries are available by appending
+        <code>?summary=annual</code>.<br />
+        50-year design ground snow loads are available by appending <code>?summary=design</code>.<br />
+        The site elevation (meters) can be set with <code>?elevation=&lt;meters&gt;</code>. Otherwise, the
+        1km mean elevation from the <a href="/elevation">ASTER GDEM</a> is used.<br />
+        Any of the model parameters listed <a href="#snow17-parameters">below</a> can be overridden, e.g.,
+        <code>?scf=1.2&mfmax=1.5</code>.
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<h3>Notes</h3>
+
+<ul>
+  <li>
+    Every run starts with no snow on January 1, 1965, so the first winter of the historical run is a spin-up
+    period. Future scenario runs (2015&ndash;2100) start from the model state at the end of the same model's
+    historical run.
+  </li>
+  <li>
+    The 7ModelAvg run is Snow-17 forced by the averaged forcing data, which is not the same as the average of
+    the individual model runs.
+  </li>
+  <li>
+    CESM2 and the EC-Earth3-Veg ssp126 scenario are not available, since they lack temperature data.
+  </li>
+  <li>
+    Water year summaries only include complete water years, so they cover 1966&ndash;2014 for the historical
+    scenario and 2016&ndash;2100 for future scenarios.
+  </li>
+</ul>
+
+<h3 id="design-snow-load">Design snow load</h3>
+
+<p>
+  The design summary estimates the 50-year ground snow load (2% annual exceedance probability) from the
+  annual peak SWE of each water year. Historical runs are summarized for water years 1966&ndash;2014, and
+  future scenarios for 2040&ndash;2069 and 2070&ndash;2099.
+</p>
+
+<ul>
+  <li>
+    A generalized extreme value (GEV) distribution is fit to each era's annual peaks by the method of
+    L-moments (Hosking, 1990). Years with no snow are treated as a mixed distribution: the GEV is fit to the
+    snowy years only, and the 50-year probability is adjusted for the fraction of snow-free years. If at
+    least 98% of years are snow-free, the 50-year load is 0. If fewer than 10 years in an era have snow, no
+    fit is made and the values are null.
+  </li>
+  <li>
+    The load is the weight of the snow water equivalent: 1 mm of SWE is 1 kg/m<sup>2</sup>, or about
+    0.0098 kPa (0.205 lb/ft<sup>2</sup>).
+  </li>
+  <li>
+    This is a <em>ground</em> snow load from an uncalibrated model driven by climate model data. It is
+    intended for comparing eras and scenarios, not for structural design. Building codes such as ASCE 7
+    apply further factors (exposure, thermal, slope, importance) and drift and rain-on-snow loads to get a
+    roof load.
+  </li>
+</ul>
+
+<h3>Output</h3>
+
+<p>Results from daily point queries will look like this:</p>
+
+<pre>
+{
+  "metadata": {
+    "model": "Snow-17",
+    "elevation_m": 160.0,
+    "parameters": { "scf": 1.0, "mfmax": 1.05, ... },
+    ...
+  },
+  "data": {
+    "GFDL-ESM4": {
+      "historical": {
+        "1965-01-01": {
+          "outflow": 0.0,
+          "swe": 0.1
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
+}
+</pre>
+
+<p>Results from water year summary queries (<code>?summary=annual</code>) will look like this:</p>
+
+<pre>
+{
+  "metadata": { ... },
+  "data": {
+    "GFDL-ESM4": {
+      "historical": {
+        "1966": {
+          "peak_swe": 104.2,
+          "peak_swe_date": "1966-03-30",
+          "snow_days": 201,
+          "total_outflow": 268.4
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
+}
+</pre>
+
+<p>Results from design snow load queries (<code>?summary=design</code>) will look like this:</p>
+
+<pre>
+{
+  "metadata": { ... },
+  "data": {
+    "GFDL-ESM4": {
+      "ssp585": {
+        "2040-2069": {
+          "n_years": 30,
+          "n_snow_free_years": 0,
+          "mean_peak_swe_mm": 131.6,
+          "swe_mm": 206.5,
+          "load_kpa": 2.02,
+          "load_psf": 42.3,
+          "gev": {
+            "method": "L-moments",
+            "location": 118.27,
+            "scale": 33.01,
+            "shape": 0.2081
+          }
+        },
+        ...
+      },
+      ...
+    },
+    ...
+  }
+}
+</pre>
+
+<table>
+  <thead>
+    <tr>
+      <th>Output</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>swe</td>
+      <td>Snow water equivalent of the snowpack (mm)</td>
+    </tr>
+    <tr>
+      <td>outflow</td>
+      <td>Water leaving the snowpack, or rain on bare ground (mm/day)</td>
+    </tr>
+    <tr>
+      <td>peak_swe</td>
+      <td>Maximum SWE in the water year (mm)</td>
+    </tr>
+    <tr>
+      <td>peak_swe_date</td>
+      <td>Date of the maximum SWE, or null if there was no snow</td>
+    </tr>
+    <tr>
+      <td>snow_days</td>
+      <td>Number of days in the water year with SWE of at least 1 mm</td>
+    </tr>
+    <tr>
+      <td>total_outflow</td>
+      <td>Total outflow in the water year (mm)</td>
+    </tr>
+    <tr>
+      <td>n_years, n_snow_free_years</td>
+      <td>Number of water years in the era, and how many of them had no snow</td>
+    </tr>
+    <tr>
+      <td>mean_peak_swe_mm</td>
+      <td>Mean annual peak SWE in the era (mm)</td>
+    </tr>
+    <tr>
+      <td>swe_mm, load_kpa, load_psf</td>
+      <td>50-year annual peak SWE (mm) and the equivalent ground snow load (kPa and lb/ft<sup>2</sup>)</td>
+    </tr>
+    <tr>
+      <td>gev</td>
+      <td>Fitted GEV location, scale, and shape (Hosking's sign convention: shape &gt; 0 has a bounded upper tail)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="snow17-parameters">Snow-17 parameters</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>scf</td><td>1.0</td><td>Gauge under-catch snow correction factor</td></tr>
+    <tr><td>rvs</td><td>1</td><td>Rain vs. snow option: 0 = single threshold (pxtemp), 1 = linear transition (pxtemp1 to pxtemp2), 2 = all snow</td></tr>
+    <tr><td>uadj</td><td>0.04</td><td>Average wind function during rain on snow (mm/mb)</td></tr>
+    <tr><td>mbase</td><td>1.0</td><td>Base temperature above which melt occurs (&deg;C)</td></tr>
+    <tr><td>mfmax</td><td>1.05</td><td>Maximum melt factor, June 21 (mm/&deg;C/6hr)</td></tr>
+    <tr><td>mfmin</td><td>0.6</td><td>Minimum melt factor, December 21 (mm/&deg;C/6hr)</td></tr>
+    <tr><td>tipm</td><td>0.1</td><td>Antecedent temperature index parameter (between 0 and 1)</td></tr>
+    <tr><td>nmf</td><td>0.15</td><td>Maximum negative melt factor (mm/&deg;C/6hr)</td></tr>
+    <tr><td>plwhc</td><td>0.04</td><td>Liquid water holding capacity of the snowpack, as a fraction (max 0.4)</td></tr>
+    <tr><td>pxtemp</td><td>1.0</td><td>Rain/snow threshold temperature when rvs=0 (&deg;C)</td></tr>
+    <tr><td>pxtemp1</td><td>-1.0</td><td>Temperature at or below which all precipitation is snow when rvs=1 (&deg;C)</td></tr>
+    <tr><td>pxtemp2</td><td>3.0</td><td>Temperature at or above which all precipitation is rain when rvs=1 (&deg;C)</td></tr>
+  </tbody>
+</table>
+
+<h3>Source data</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <th scope="row">Forcing data</th>
+      <td><a href="/cmip6_downscaled">CMIP6 downscaled daily data</a></td>
+    </tr>
+    <tr>
+      <th scope="row">Model reference</th>
+      <td>
+        Anderson, E. A. (1973), National Weather Service River Forecast System Snow Accumulation and Ablation Model,
+        NOAA Tech. Memo. NWS HYDRO-17, 217 pp., U.S. Dep. of Commer., Silver Spring, Md.<br /><br />
+        Anderson, E. A. (2006), Snow Accumulation and Ablation Model &ndash; SNOW-17, NWSRFS User Documentation.
+      </td>
+    </tr>
+    <tr>
+      <th scope="row">Extreme value reference</th>
+      <td>
+        Hosking, J. R. M. (1990), L-moments: analysis and estimation of distributions using linear combinations
+        of order statistics, Journal of the Royal Statistical Society, Series B, 52(1), 105&ndash;124.
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}

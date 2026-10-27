@@ -56,6 +56,7 @@ def get_service_categories():
         # ("Physical and Administrative Boundary Polygons", "/boundary"),
         ("Sea Ice Concentration", "/seaice"),
         ("Snowfall Equivalent", "/snow"),
+        ("Snow-17 Model (experimental)", "/snow17"),
         ("Temperature Anomalies", "/temperature_anomalies"),
         ("Temperature and Precipitation", "/taspr"),
         ("Wet Days Per Year", "/wet_days_per_year"),
@@ -190,6 +191,24 @@ def validate_get_params():
             ),
             required=False,
         )
+
+        # Snow-17 options. Parameter ranges are validated in the route.
+        summary = fields.Str(
+            validate=validate.OneOf(["annual", "design"]), required=False
+        )
+        elevation = fields.Float(required=False)
+        rvs = fields.Int(validate=validate.OneOf([0, 1, 2]), required=False)
+        scf = fields.Float(required=False)
+        uadj = fields.Float(required=False)
+        mbase = fields.Float(required=False)
+        mfmax = fields.Float(required=False)
+        mfmin = fields.Float(required=False)
+        tipm = fields.Float(required=False)
+        nmf = fields.Float(required=False)
+        plwhc = fields.Float(required=False)
+        pxtemp = fields.Float(required=False)
+        pxtemp1 = fields.Float(required=False)
+        pxtemp2 = fields.Float(required=False)
 
     schema = QueryParamsSchema()
     errors = schema.validate(request.args)
